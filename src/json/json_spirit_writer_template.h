@@ -28,7 +28,7 @@ namespace json_spirit
     template< class String_type >
     String_type non_printable_to_string( unsigned int c )
     {
-        typedef typename String_type::value_type Char_type;
+        // typedef typename String_type::value_type Char_type;
 
         String_type result( 6, '\\' );
 
@@ -146,8 +146,8 @@ namespace json_spirit
 
         void output( const Obj_member_type& member )
         {
-            output( Config_type::get_name( member ) ); space(); 
-            os_ << ':'; space(); 
+            output( Config_type::get_name( member ) ); space();
+            os_ << ':'; space();
             output( Config_type::get_value( member ) );
         }
 
@@ -179,7 +179,7 @@ namespace json_spirit
             os_ << start_char; new_line();
 
             ++indentation_level_;
-            
+
             for( typename T::const_iterator i = t.begin(); i != t.end(); ++i )
             {
                 indent(); output( *i );
@@ -198,13 +198,13 @@ namespace json_spirit
 
             indent(); os_ << end_char;
         }
-        
+
         void indent()
         {
             if( !pretty_ ) return;
 
             for( int i = 0; i < indentation_level_; ++i )
-            { 
+            {
                 os_ << "    ";
             }
         }

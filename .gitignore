@@ -24,3 +24,11 @@ qrc_*.cpp
 build
 
 !src/leveldb/Makefile
+*.aux
+*.log
+*.out
+*.pdf
+*.pyg
+*.synctex.gz
+*.toc
+*.el
