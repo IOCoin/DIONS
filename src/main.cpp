@@ -1005,8 +1005,6 @@ int GetPowHeight(const CBlockIndex* pindex)
     int count = 0;
     int height = pindex->nHeight;
     int maxCheck = height;
-    int index = -1;
-    const CBlockIndex* pindex0 = pindex;
 
     // if(height > FINAL_POW_HEIGHT)
     //     return FINAL_POW_COUNT;
@@ -2217,7 +2215,7 @@ bool CBlock::AcceptBlock()
         return DoS(10, error("AcceptBlock() : prev block not found"));
     CBlockIndex* pindexPrev = (*mi).second;
     int nHeight = pindexPrev->nHeight+1;
-    int nPowHight = GetPowHeight(pindexPrev)+1;
+    int nPowHeight = GetPowHeight(pindexPrev)+1;
 
     if (IsProtocolV2(nHeight) && nVersion < 7)
         return DoS(100, error("AcceptBlock() : reject too old nVersion = %d", nVersion));
