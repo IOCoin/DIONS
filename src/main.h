@@ -54,9 +54,9 @@ static const unsigned int LOCKTIME_THRESHOLD = 500000000; // Tue Nov  5 00:53:20
 
 static const int64_t COIN_YEAR_REWARD = 1 * CENT; // 1% per year
 
-static const uint256 hashGenesisBlock("0x000001faef25dec4fbcf906e6242621df2c183bf232f263d0ba5b101911e4563");
-static const uint256 hashGenesisBlockTestNet("0x0000724595fb3b9609d441cbfb9577615c292abf07d996d3edabc48de843642d");
-static const uint256 hashGenesisMerkleRoot("0x12630d16a97f24b287c8c2594dda5fb98c9e6c70fc61d44191931ea2aa08dc90");
+static const uint256 hashGenesisBlock("0x00000a479c539aecd76bd1ed9df2973f3c341f93d6f9b35a23a038b2ab7bc586");
+static const uint256 hashGenesisBlockTestNet("0x0000cbe2486db1ab55d3700fe9f478587d1764e484f3e55a6ad215be96d8e186");
+static const uint256 hashGenesisMerkleRoot("0x4b4131a2556d34f40f007a6d4aff2abadd5db48d54666667bec11f7b830130ca");
 
 inline bool IsProtocolV2(int nHeight) { return nHeight > 319000; }
 

@@ -2546,19 +2546,19 @@ bool LoadBlockIndex(bool fAllowNew)
 
         // MainNet:
 
-        //CBlock(hash=000001faef25dec4fbcf906e6242621df2c183bf232f263d0ba5b101911e4563, ver=1, hashPrevBlock=0000000000000000000000000000000000000000000000000000000000000000, hashMerkleRoot=12630d16a97f24b287c8c2594dda5fb98c9e6c70fc61d44191931ea2aa08dc90, nTime=1393221600, nBits=1e0fffff, nNonce=164482, vtx=1, vchBlockSig=)
-        //  Coinbase(hash=12630d16a9, nTime=1393221600, ver=1, vin.size=1, vout.size=1, nLockTime=0)
-        //    CTxIn(COutPoint(0000000000, 4294967295), coinbase 00012a24323020466562203230313420426974636f696e2041544d7320636f6d6520746f20555341)
-        //    CTxOut(empty)
-        //  vMerkleTree: 12630d16a9
+        // CBlock(hash=00000a479c539aecd76bd1ed9df2973f3c341f93d6f9b35a23a038b2ab7bc586, ver=1, hashPrevBlock=0000000000000000000000000000000000000000000000000000000000000000, hashMerkleRoot=4b4131a2556d34f40f007a6d4aff2abadd5db48d54666667bec11f7b830130ca, nTime=1404938589, nBits=1e0fffff, nNonce=337146, vtx=1, vchBlockSig=)
+        //   Coinbase(hash=4b4131a255, nTime=1404938589, ver=1, vin.size=1, vout.size=1, nLockTime=0)
+        //     CTxIn(COutPoint(0000000000, 4294967295), coinbase 00012a2c38204a756c792032303134204d742e20476f782043454f2073656c6c696e6720426974636f696e732e636f6d)
+        //     CTxOut(empty)
+        //   vMerkleTree: 4b4131a255
 
         // TestNet:
 
-        //CBlock(hash=0000724595fb3b9609d441cbfb9577615c292abf07d996d3edabc48de843642d, ver=1, hashPrevBlock=0000000000000000000000000000000000000000000000000000000000000000, hashMerkleRoot=12630d16a97f24b287c8c2594dda5fb98c9e6c70fc61d44191931ea2aa08dc90, nTime=1393221600, nBits=1f00ffff, nNonce=216178, vtx=1, vchBlockSig=)
-        //  Coinbase(hash=12630d16a9, nTime=1393221600, ver=1, vin.size=1, vout.size=1, nLockTime=0)
-        //    CTxIn(COutPoint(0000000000, 4294967295), coinbase 00012a24323020466562203230313420426974636f696e2041544d7320636f6d6520746f20555341)
-        //    CTxOut(empty)
-        //  vMerkleTree: 12630d16a9
+        // CBlock(hash=0000cbe2486db1ab55d3700fe9f478587d1764e484f3e55a6ad215be96d8e186, ver=1, hashPrevBlock=0000000000000000000000000000000000000000000000000000000000000000, hashMerkleRoot=4b4131a2556d34f40f007a6d4aff2abadd5db48d54666667bec11f7b830130ca, nTime=1404938589, nBits=1f00ffff, nNonce=353179, vtx=1, vchBlockSig=)
+        //   Coinbase(hash=4b4131a255, nTime=1404938589, ver=1, vin.size=1, vout.size=1, nLockTime=0)
+        //     CTxIn(COutPoint(0000000000, 4294967295), coinbase 00012a2c38204a756c792032303134204d742e20476f782043454f2073656c6c696e6720426974636f696e732e636f6d)
+        //     CTxOut(empty)
+        //   vMerkleTree: 4b4131a255
 
         const char* pszTimestamp = "8 July 2014 Mt. Gox CEO selling Bitcoins.com";
         CTransaction txNew;
@@ -2601,7 +2601,7 @@ bool LoadBlockIndex(bool fAllowNew)
                     ++block.nTime;
                 }
             }
-            printf("Found genesis block:");
+            printf("Found genesis block:\n");
             block.print();
         }
 
