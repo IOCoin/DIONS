@@ -998,6 +998,63 @@ uint256 WantedByOrphan(const CBlock* pblockOrphan)
     return pblockOrphan->hashPrevBlock;
 }
 
+// static int FINAL_POW_HEIGHT = 118986;
+// static int FINAL_POW_COUNT = 24000;
+int GetPowHeight(const CBlockIndex* pindex)
+{
+    int count = 0;
+    int height = pindex->nHeight;
+    int maxCheck = height;
+    int index = -1;
+    const CBlockIndex* pindex0 = pindex;
+
+    // if(height > FINAL_POW_HEIGHT)
+    //     return FINAL_POW_COUNT;
+
+    // if(NUM_OF_POW_CHECKPOINT != 0)
+    // {
+    //     for(int i = 1; i <= NUM_OF_POW_CHECKPOINT; i++)
+    //     {
+    //         if(height > checkpointPoWHeight[NUM_OF_POW_CHECKPOINT - i][0])
+    //         {
+    //             index = NUM_OF_POW_CHECKPOINT - i;
+    //             break;
+    //         }
+    //     }
+    // }
+
+    // if(index != -1)
+    //     maxCheck = height - checkpointPoWHeight[index][0];
+
+    for (int j = 0; j < maxCheck; j++)
+    {
+        if(!pindex->IsProofOfStake())
+        {
+            ++count;
+        }
+        pindex = pindex->pprev;
+    }
+
+    // if(index != -1)
+    // {
+    //     count += checkpointPoWHeight[index][1];
+    // }
+    // else
+    // {
+    ++count;
+    // }
+
+    // printf(">> Height = %d, Count = %d\n", height, count);
+    return count;
+}
+
+
+int GetPosHeight(const CBlockIndex* pindex)
+{
+    int posH = pindex->nHeight - GetPowHeight(pindex);
+    return posH;
+}
+
 static CBigNum GetProofOfStakeLimit(int nHeight)
 {
     if (IsProtocolV2(nHeight))
@@ -2160,13 +2217,14 @@ bool CBlock::AcceptBlock()
         return DoS(10, error("AcceptBlock() : prev block not found"));
     CBlockIndex* pindexPrev = (*mi).second;
     int nHeight = pindexPrev->nHeight+1;
+    int nPowHight = GetPowHeight(pindexPrev)+1;
 
     if (IsProtocolV2(nHeight) && nVersion < 7)
         return DoS(100, error("AcceptBlock() : reject too old nVersion = %d", nVersion));
     else if (!IsProtocolV2(nHeight) && nVersion > 6)
         return DoS(100, error("AcceptBlock() : reject too new nVersion = %d", nVersion));
 
-    if (IsProofOfWork() && nHeight > LAST_POW_BLOCK)
+    if (IsProofOfWork() && nPowHeight > LAST_POW_BLOCK)
         return DoS(100, error("AcceptBlock() : reject proof-of-work at height %d", nHeight));
 
     // Check timestamp
