@@ -58,7 +58,7 @@ static const uint256 hashGenesisBlock("0x00000a479c539aecd76bd1ed9df2973f3c341f9
 static const uint256 hashGenesisBlockTestNet("0x0000cbe2486db1ab55d3700fe9f478587d1764e484f3e55a6ad215be96d8e186");
 static const uint256 hashGenesisMerkleRoot("0x4b4131a2556d34f40f007a6d4aff2abadd5db48d54666667bec11f7b830130ca");
 
-inline bool IsProtocolV2(int nHeight) { return nHeight > 319000; }
+inline bool IsProtocolV2(int nHeight) { return nHeight > 65000; }
 
 inline int64_t PastDrift(int64_t nTime, int nHeight)   { return IsProtocolV2(nHeight) ? nTime      : nTime - 10 * 60; }
 inline int64_t FutureDrift(int64_t nTime, int nHeight) { return IsProtocolV2(nHeight) ? nTime + 15 : nTime + 10 * 60; }
