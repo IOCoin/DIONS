@@ -1,7 +1,17 @@
-
 I/OCoin development tree
 
 I/OCoin is a PoS-based cryptocurrency.
+
+Features:
+* Symbol: I/O
+* 60 second blocktime
+* Dynamic interest 1-8%, based on the percentage of coins staking
+* 16 Million PoW coins
+* 22 Million total coins
+* ???? I/O block reward
+* X11 PoW/PoS
+* P2P Port: 33764
+* RPC Port: 33765
 
 Development process
 ===========================
@@ -28,5 +38,5 @@ after the warning if action is not taken by the author. Pull requests closed
 in this manner will have their corresponding issue labeled 'stagnant'.
 
 Issues with no commits will be given a similar warning, and closed after
-15 days from their last activity. Issues closed in this manner will be 
+15 days from their last activity. Issues closed in this manner will be
 labeled 'stale'.
