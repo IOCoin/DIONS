@@ -5,7 +5,7 @@ INCLUDEPATH += src src/json src/qt
 DEFINES += QT_GUI BOOST_THREAD_USE_LIB BOOST_SPIRIT_THREADSAFE
 CONFIG += no_include_pwd
 CONFIG += thread
-win32
+win32:
 {
     CONFIG += static
 }
@@ -24,7 +24,7 @@ greaterThan(QT_MAJOR_VERSION, 4) {
 # Dependency library locations can be customized with:
 #    BOOST_INCLUDE_PATH, BOOST_LIB_PATH, BDB_INCLUDE_PATH,
 #    BDB_LIB_PATH, OPENSSL_INCLUDE_PATH and OPENSSL_LIB_PATH respectively
-win32
+win32:
 {
     BOOST_LIB_SUFFIX=-mgw49-mt-s-1_55
     BOOST_THREAD_LIB_SUFFIX=-mgw49-mt-s-1_55
