@@ -160,7 +160,6 @@ HEADERS += src/qt/bitcoingui.h \
     src/util.h \
     src/uint256.h \
     src/kernel.h \
-    src/scrypt.h \
     src/pbkdf2.h \
     src/zerocoin/Accumulator.h \
     src/zerocoin/AccumulatorProofOfKnowledge.h \
@@ -292,10 +291,18 @@ SOURCES += src/qt/bitcoin.cpp src/qt/bitcoingui.cpp \
     src/qt/rpcconsole.cpp \
     src/noui.cpp \
     src/kernel.cpp \
-    src/scrypt-arm.S \
-    src/scrypt-x86.S \
-    src/scrypt-x86_64.S \
-    src/scrypt.cpp \
+    src/cubehash.c \
+    src/luffa.c \
+    src/aes_helper.c \
+    src/echo.c \
+    src/shavite.c \
+    src/simd.c \
+    src/blake.c\
+    src/bmw.c\
+    src/groestl.c\
+    src/jh.c\
+    src/keccak.c\
+    src/skein.c \
     src/pbkdf2.cpp \
     src/zerocoin/Accumulator.cpp \
     src/zerocoin/AccumulatorProofOfKnowledge.cpp \
