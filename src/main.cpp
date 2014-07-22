@@ -1115,10 +1115,25 @@ int64_t GetProofOfStakeInterest(int nHeight)
     }
 }
 
+int64_t GetProofOfStakeInterestV2()
+{
+    double weight = GetPoSKernelPS();
+
+    uint64_t rate = MIN_COIN_YEAR_REWARD;
+    if (weight > 16384)
+    {
+        rate = std::max(MIN_COIN_YEAR_REWARD,
+                        std::min(static_cast<int64_t>(MIN_COIN_YEAR_REWARD * log(weight / 16384.0)),
+                                 MAX_COIN_YEAR_REWARD));
+    }
+    return rate;
+}
+
 // miner's coin stake reward based on coin age spent (coin-days)
 int64_t GetProofOfStakeReward(int64_t nCoinAge, int64_t nFees, int nHeight)
 {
-    int64_t interest = GetProofOfStakeInterest(nHeight);
+    //int64_t interest = GetProofOfStakeInterest(nHeight);
+    int64_t interest = GetProofOfStakeInterestV2();
     int64_t nSubsidy = nCoinAge * interest * 33 / (365 * 33 + 8);
 
     if (fDebug && GetBoolArg("-printcreation"))
