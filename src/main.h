@@ -53,7 +53,7 @@ inline bool MoneyRange(int64_t nValue) { return (nValue >= 0 && nValue <= MAX_MO
 static const unsigned int LOCKTIME_THRESHOLD = 500000000; // Tue Nov  5 00:53:20 1985 UTC
 
 static const int64_t MIN_COIN_YEAR_REWARD = 1 * CENT; // 1% per year
-static const int64_t MAX_COIN_YEAR_REWARD = 8 * CENT; // 8% per year
+static const int64_t MAX_COIN_YEAR_REWARD = 3 * CENT; // 3% per year
 
 static const uint256 hashGenesisBlock("0x00000a479c539aecd76bd1ed9df2973f3c341f93d6f9b35a23a038b2ab7bc586");
 static const uint256 hashGenesisBlockTestNet("0x0000cbe2486db1ab55d3700fe9f478587d1764e484f3e55a6ad215be96d8e186");
