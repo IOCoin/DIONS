@@ -2575,6 +2575,34 @@ bool LoadBlockIndex(bool fAllowNew)
         block.nTime    = 1393221600;
         block.nBits    = bnProofOfWorkLimit.GetCompact();
         block.nNonce   = !fTestNet ? 164482 : 216178;
+        // genesis block miner
+        if ((block.hashMerkleRoot != hashGenesisMerkleRoot) ||
+            (block.GetHash() != (!fTestNet ? hashGenesisBlock : hashGenesisBlockTestNet)))
+        {
+            printf("Bad genesis block found. Minting new one.\n Please recompile with the newly found block as the new genesis block.\n");
+
+            uint256 hashTarget = CBigNum().SetCompact(block.nBits).getuint256();
+            uint256 thash;
+
+            while(true)
+            {
+                thash = Hash9(BEGIN(block.nVersion), END(block.nNonce));
+                if (thash <= hashTarget)
+                    break;
+                if ((block.nNonce & 0xFFF) == 0)
+                {
+                    printf("nonce %08X: hash = %s (target = %s)\n", block.nNonce, thash.ToString().c_str(), hashTarget.ToString().c_str());
+                }
+                ++block.nNonce;
+                if (block.nNonce == 0)
+                {
+                    printf("NONCE WRAPPED, incrementing time\n");
+                    ++block.nTime;
+                }
+            }
+            printf("Found genesis block:");
+            block.print();
+        }
 
         //// debug print
         assert(block.hashMerkleRoot == hashGenesisMerkleRoot);
