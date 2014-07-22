@@ -56,6 +56,7 @@ static const int64_t COIN_YEAR_REWARD = 1 * CENT; // 1% per year
 
 static const uint256 hashGenesisBlock("0x000001faef25dec4fbcf906e6242621df2c183bf232f263d0ba5b101911e4563");
 static const uint256 hashGenesisBlockTestNet("0x0000724595fb3b9609d441cbfb9577615c292abf07d996d3edabc48de843642d");
+static const uint256 hashGenesisMerkleRoot("0x12630d16a97f24b287c8c2594dda5fb98c9e6c70fc61d44191931ea2aa08dc90");
 
 inline bool IsProtocolV2(int nHeight) { return nHeight > 319000; }
 
