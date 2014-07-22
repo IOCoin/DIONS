@@ -76,6 +76,17 @@ int64_t nTransactionFee = MIN_TX_FEE;
 int64_t nReserveBalance = 0;
 int64_t nMinimumInputValue = 0;
 
+// static const int NUM_OF_POW_CHECKPOINT = 6;
+// static const int checkpointPoWHeight[NUM_OF_POW_CHECKPOINT][2] =
+// {
+//      { 20000,  8017},
+//      { 40000, 12452},
+//      { 60000, 15611},
+//      { 80000, 18819},
+//      {100001, 21524},
+//      {118900, 23988}
+// };
+
 extern enum Checkpoints::CPMode CheckpointsMode;
 
 //////////////////////////////////////////////////////////////////////////////
@@ -1039,7 +1050,7 @@ int GetPowHeight(const CBlockIndex* pindex)
     // }
     // else
     // {
-    ++count;
+    //     ++count;
     // }
 
     // printf(">> Height = %d, Count = %d\n", height, count);
