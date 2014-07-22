@@ -6,6 +6,7 @@
 #include "main.h"
 #include "bitcoinrpc.h"
 #include "kernel.h"
+#include "util.h"
 
 using namespace json_spirit;
 using namespace std;
@@ -25,23 +26,7 @@ double GetDifficulty(const CBlockIndex* blockindex)
             blockindex = GetLastBlockIndex(pindexBest, false);
     }
 
-    int nShift = (blockindex->nBits >> 24) & 0xff;
-
-    double dDiff =
-        (double)0x0000ffff / (double)(blockindex->nBits & 0x00ffffff);
-
-    while (nShift < 29)
-    {
-        dDiff *= 256.0;
-        nShift++;
-    }
-    while (nShift > 29)
-    {
-        dDiff /= 256.0;
-        nShift--;
-    }
-
-    return dDiff;
+    return nBitsToDifficulty(blockindex->nBits);
 }
 
 double GetPoWMHashPS()
