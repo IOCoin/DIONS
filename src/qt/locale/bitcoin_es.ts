@@ -3,22 +3,22 @@
     <name>AboutDialog</name>
     <message>
         <location filename="../forms/aboutdialog.ui" line="+14"/>
-        <source>About BlackCoin</source>
-        <translation>Acerca de BlackCoin</translation>
+        <source>About I/OCoin</source>
+        <translation>Acerca de I/OCoin</translation>
     </message>
     <message>
         <location line="+39"/>
-        <source>&lt;b&gt;BlackCoin&lt;/b&gt; version</source>
-        <translation>&lt;b&gt;BlackCoin&lt;/b&gt; versión</translation>
+        <source>&lt;b&gt;I/OCoin&lt;/b&gt; version</source>
+        <translation>&lt;b&gt;I/OCoin&lt;/b&gt; versión</translation>
     </message>
     <message>
         <location line="+41"/>
         <source>Copyright © 2009-2014 The Bitcoin developers
 Copyright © 2012-2014 The NovaCoin developers
-Copyright © 2014 The BlackCoin developers</source>
+Copyright © 2014 The I/OCoin developers</source>
         <translation>Copyright © 2009-2014 The Bitcoin developers
 Copyright © 2012-2014 The NovaCoin developers
-Copyright © 2014 The BlackCoin developers</translation>
+Copyright © 2014 The I/OCoin developers</translation>
     </message>
     <message>
         <location line="+15"/>
@@ -68,8 +68,8 @@ Eric Young (eay@cryptsoft.com) y el software UPnP escrito por Thomas Bernard.</t
     </message>
     <message>
         <location line="-46"/>
-        <source>These are your BlackCoin addresses for receiving payments. You may want to give a different one to each sender so you can keep track of who is paying you.</source>
-        <translation>Estas son las direcciones de BlackCoin para recibir pagos. Es posible que desee dar una diferente a cada remitente para que pueda realizar un seguimiento de quien te está pagando.</translation>
+        <source>These are your I/OCoin addresses for receiving payments. You may want to give a different one to each sender so you can keep track of who is paying you.</source>
+        <translation>Estas son las direcciones de I/OCoin para recibir pagos. Es posible que desee dar una diferente a cada remitente para que pueda realizar un seguimiento de quien te está pagando.</translation>
     </message>
     <message>
         <location line="+60"/>
@@ -83,8 +83,8 @@ Eric Young (eay@cryptsoft.com) y el software UPnP escrito por Thomas Bernard.</t
     </message>
     <message>
         <location line="+11"/>
-        <source>Sign a message to prove you own a BlackCoin address</source>
-        <translation>Firmar un mensaje para demostrar que es dueño de su dirección de BlackCoin</translation>
+        <source>Sign a message to prove you own a I/OCoin address</source>
+        <translation>Firmar un mensaje para demostrar que es dueño de su dirección de I/OCoin</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -98,8 +98,8 @@ Eric Young (eay@cryptsoft.com) y el software UPnP escrito por Thomas Bernard.</t
     </message>
     <message>
         <location line="-14"/>
-        <source>Verify a message to ensure it was signed with a specified BlackCoin address</source>
-        <translation>Verifique el mensaje para asegurarse que fue firmado por una dirección específica de BlackCoin</translation>
+        <source>Verify a message to ensure it was signed with a specified I/OCoin address</source>
+        <translation>Verifique el mensaje para asegurarse que fue firmado por una dirección específica de I/OCoin</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -266,8 +266,8 @@ Eric Young (eay@cryptsoft.com) y el software UPnP escrito por Thomas Bernard.</t
     </message>
     <message>
         <location line="-58"/>
-        <source>BlackCoin will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your coins from being stolen by malware infecting your computer.</source>
-        <translation>BlackCoin cerrará para terminar el proceso de encriptación. Recuerde que la encriptación de su monedero no puede proteger completamente que sus monedas sean robadas por malware infectando su computadora.</translation>
+        <source>I/OCoin will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your coins from being stolen by malware infecting your computer.</source>
+        <translation>I/OCoin cerrará para terminar el proceso de encriptación. Recuerde que la encriptación de su monedero no puede proteger completamente que sus monedas sean robadas por malware infectando su computadora.</translation>
     </message>
     <message>
         <location line="+13"/>
@@ -380,8 +380,8 @@ Eric Young (eay@cryptsoft.com) y el software UPnP escrito por Thomas Bernard.</t
     </message>
     <message>
         <location line="+4"/>
-        <source>Show information about BlackCoin</source>
-        <translation>Mostrar información sobre BlackCoin</translation>
+        <source>Show information about I/OCoin</source>
+        <translation>Mostrar información sobre I/OCoin</translation>
     </message>
     <message>
         <location line="+2"/>
@@ -430,13 +430,13 @@ Eric Young (eay@cryptsoft.com) y el software UPnP escrito por Thomas Bernard.</t
     </message>
     <message>
         <location line="-62"/>
-        <source>Send coins to a BlackCoin address</source>
-        <translation>Enviar monedas a una dirección de BlackCoin</translation>
+        <source>Send coins to a I/OCoin address</source>
+        <translation>Enviar monedas a una dirección de I/OCoin</translation>
     </message>
     <message>
         <location line="+45"/>
-        <source>Modify configuration options for BlackCoin</source>
-        <translation>Modificar las opciones de configuración para BlackCoin</translation>
+        <source>Modify configuration options for I/OCoin</source>
+        <translation>Modificar las opciones de configuración para I/OCoin</translation>
     </message>
     <message>
         <location line="+18"/>
@@ -475,8 +475,8 @@ Eric Young (eay@cryptsoft.com) y el software UPnP escrito por Thomas Bernard.</t
     </message>
     <message>
         <location line="-200"/>
-        <source>BlackCoin</source>
-        <translation>BlackCoin</translation>
+        <source>I/OCoin</source>
+        <translation>I/OCoin</translation>
     </message>
     <message>
         <location line="+0"/>
@@ -485,8 +485,8 @@ Eric Young (eay@cryptsoft.com) y el software UPnP escrito por Thomas Bernard.</t
     </message>
     <message>
         <location line="+178"/>
-        <source>&amp;About BlackCoin</source>
-        <translation>Acerca de BlackCoin</translation>
+        <source>&amp;About I/OCoin</source>
+        <translation>Acerca de I/OCoin</translation>
     </message>
     <message>
         <location line="+9"/>
@@ -542,13 +542,13 @@ Eric Young (eay@cryptsoft.com) y el software UPnP escrito por Thomas Bernard.</t
     <message>
         <location line="+0"/>
         <location line="+60"/>
-        <source>BlackCoin client</source>
-        <translation>Cliente BlackCoin</translation>
+        <source>I/OCoin client</source>
+        <translation>Cliente I/OCoin</translation>
     </message>
     <message numerus="yes">
         <location line="+70"/>
-        <source>%n active connection(s) to BlackCoin network</source>
-        <translation><numerusform>%n conexión activa a la red BlackCoin</numerusform><numerusform>%n conexiones activas a la red BlackCoin</numerusform></translation>
+        <source>%n active connection(s) to I/OCoin network</source>
+        <translation><numerusform>%n conexión activa a la red I/OCoin</numerusform><numerusform>%n conexiones activas a la red I/OCoin</numerusform></translation>
     </message>
     <message>
         <location line="+40"/>
@@ -662,8 +662,8 @@ Dirección: %4
     <message>
         <location line="-15"/>
         <location line="+15"/>
-        <source>URI can not be parsed! This can be caused by an invalid BlackCoin address or malformed URI parameters.</source>
-        <translation>URI no se puede analizar! Esto puede ser causado por una dirección de BlackCoin no válida o parámetros de URI malformados.</translation>
+        <source>URI can not be parsed! This can be caused by an invalid I/OCoin address or malformed URI parameters.</source>
+        <translation>URI no se puede analizar! Esto puede ser causado por una dirección de I/OCoin no válida o parámetros de URI malformados.</translation>
     </message>
     <message>
         <location line="+18"/>
@@ -722,8 +722,8 @@ Dirección: %4
     </message>
     <message>
         <location filename="../bitcoin.cpp" line="+109"/>
-        <source>A fatal error occurred. BlackCoin can no longer continue safely and will quit.</source>
-        <translation>Se ha producido un error fatal. BlackCoin ya no puede continuar de forma segura y cerrará.</translation>
+        <source>A fatal error occurred. I/OCoin can no longer continue safely and will quit.</source>
+        <translation>Se ha producido un error fatal. I/OCoin ya no puede continuar de forma segura y cerrará.</translation>
     </message>
 </context>
 <context>
@@ -1056,8 +1056,8 @@ Esto significa que se requiere una cuota de al menos %2.</translation>
     </message>
     <message>
         <location line="-5"/>
-        <source>The entered address &quot;%1&quot; is not a valid BlackCoin address.</source>
-        <translation>La dirección introducida &quot;%1&quot; no es una dirección válida de BlackCoin.</translation>
+        <source>The entered address &quot;%1&quot; is not a valid I/OCoin address.</source>
+        <translation>La dirección introducida &quot;%1&quot; no es una dirección válida de I/OCoin.</translation>
     </message>
     <message>
         <location line="+10"/>
@@ -1075,8 +1075,8 @@ Esto significa que se requiere una cuota de al menos %2.</translation>
     <message>
         <location filename="../guiutil.cpp" line="+420"/>
         <location line="+12"/>
-        <source>BlackCoin-Qt</source>
-        <translation>BlackCoin-Qt</translation>
+        <source>I/OCoin-Qt</source>
+        <translation>I/OCoin-Qt</translation>
     </message>
     <message>
         <location line="-12"/>
@@ -1148,13 +1148,13 @@ Esto significa que se requiere una cuota de al menos %2.</translation>
     </message>
     <message>
         <location line="+31"/>
-        <source>Automatically start BlackCoin after logging in to the system.</source>
-        <translation>Iniciar BlackCoin automáticamente después de entrar en el sistema.</translation>
+        <source>Automatically start I/OCoin after logging in to the system.</source>
+        <translation>Iniciar I/OCoin automáticamente después de entrar en el sistema.</translation>
     </message>
     <message>
         <location line="+3"/>
-        <source>&amp;Start BlackCoin on system login</source>
-        <translation>&amp;Iniciar BlackCoin al inicio del sistema</translation>
+        <source>&amp;Start I/OCoin on system login</source>
+        <translation>&amp;Iniciar I/OCoin al inicio del sistema</translation>
     </message>
     <message>
         <location line="+7"/>
@@ -1173,8 +1173,8 @@ Esto significa que se requiere una cuota de al menos %2.</translation>
     </message>
     <message>
         <location line="+6"/>
-        <source>Automatically open the BlackCoin client port on the router. This only works when your router supports UPnP and it is enabled.</source>
-        <translation>Abrir automáticamente el puerto de cliente BlackCoin en el router. Esto sólo funciona cuando el router es compatible con UPnP y está habilitado.</translation>
+        <source>Automatically open the I/OCoin client port on the router. This only works when your router supports UPnP and it is enabled.</source>
+        <translation>Abrir automáticamente el puerto de cliente I/OCoin en el router. Esto sólo funciona cuando el router es compatible con UPnP y está habilitado.</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -1183,8 +1183,8 @@ Esto significa que se requiere una cuota de al menos %2.</translation>
     </message>
     <message>
         <location line="+7"/>
-        <source>Connect to the BlackCoin network through a SOCKS proxy (e.g. when connecting through Tor).</source>
-        <translation>Conéctese a la red de BlackCoin a través de un SOCKS proxy (e.g. cuando se conecta a través de Tor)</translation>
+        <source>Connect to the I/OCoin network through a SOCKS proxy (e.g. when connecting through Tor).</source>
+        <translation>Conéctese a la red de I/OCoin a través de un SOCKS proxy (e.g. cuando se conecta a través de Tor)</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -1258,8 +1258,8 @@ Esto significa que se requiere una cuota de al menos %2.</translation>
     </message>
     <message>
         <location line="+13"/>
-        <source>The user interface language can be set here. This setting will take effect after restarting BlackCoin.</source>
-        <translation>El idioma del interfaz de usuario se puede configurar aquí. Esta configuración se aplicará después de reiniciar BlackCoin.</translation>
+        <source>The user interface language can be set here. This setting will take effect after restarting I/OCoin.</source>
+        <translation>El idioma del interfaz de usuario se puede configurar aquí. Esta configuración se aplicará después de reiniciar I/OCoin.</translation>
     </message>
     <message>
         <location line="+11"/>
@@ -1273,8 +1273,8 @@ Esto significa que se requiere una cuota de al menos %2.</translation>
     </message>
     <message>
         <location line="+9"/>
-        <source>Whether to show BlackCoin addresses in the transaction list or not.</source>
-        <translation>Tanto para mostrar direcciones de BlackCoin en la lista de transacciones o no.</translation>
+        <source>Whether to show I/OCoin addresses in the transaction list or not.</source>
+        <translation>Tanto para mostrar direcciones de I/OCoin en la lista de transacciones o no.</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -1320,8 +1320,8 @@ Esto significa que se requiere una cuota de al menos %2.</translation>
     <message>
         <location line="-9"/>
         <location line="+9"/>
-        <source>This setting will take effect after restarting BlackCoin.</source>
-        <translation>Esta configuración se aplicará después de reiniciar BlackCoin.</translation>
+        <source>This setting will take effect after restarting I/OCoin.</source>
+        <translation>Esta configuración se aplicará después de reiniciar I/OCoin.</translation>
     </message>
     <message>
         <location line="+29"/>
@@ -1339,8 +1339,8 @@ Esto significa que se requiere una cuota de al menos %2.</translation>
     <message>
         <location line="+33"/>
         <location line="+231"/>
-        <source>The displayed information may be out of date. Your wallet automatically synchronizes with the BlackCoin network after a connection is established, but this process has not completed yet.</source>
-        <translation>La información mostrada puede estar fuera de fecha. Su monedera se sincroniza automáticamente con la red BlackCoin después de que se establece una conexión, pero este proceso no se ha completado todavía.</translation>
+        <source>The displayed information may be out of date. Your wallet automatically synchronizes with the I/OCoin network after a connection is established, but this process has not completed yet.</source>
+        <translation>La información mostrada puede estar fuera de fecha. Su monedera se sincroniza automáticamente con la red I/OCoin después de que se establece una conexión, pero este proceso no se ha completado todavía.</translation>
     </message>
     <message>
         <location line="-160"/>
@@ -1555,8 +1555,8 @@ Esto significa que se requiere una cuota de al menos %2.</translation>
     </message>
     <message>
         <location line="+7"/>
-        <source>Show the BlackCoin-Qt help message to get a list with possible BlackCoin command-line options.</source>
-        <translation>Mostrar el mensaje de ayuda de BlackCoin-Qt para obtener una lista con las posibles opciones de línea de comandos para BlackCoin.</translation>
+        <source>Show the I/OCoin-Qt help message to get a list with possible I/OCoin command-line options.</source>
+        <translation>Mostrar el mensaje de ayuda de I/OCoin-Qt para obtener una lista con las posibles opciones de línea de comandos para I/OCoin.</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -1575,13 +1575,13 @@ Esto significa que se requiere una cuota de al menos %2.</translation>
     </message>
     <message>
         <location line="-104"/>
-        <source>BlackCoin - Debug window</source>
-        <translation>BlackCoin - Ventana de depuración</translation>
+        <source>I/OCoin - Debug window</source>
+        <translation>I/OCoin - Ventana de depuración</translation>
     </message>
     <message>
         <location line="+25"/>
-        <source>BlackCoin Core</source>
-        <translation>Núcleo BlackCoin</translation>
+        <source>I/OCoin Core</source>
+        <translation>Núcleo I/OCoin</translation>
     </message>
     <message>
         <location line="+279"/>
@@ -1590,8 +1590,8 @@ Esto significa que se requiere una cuota de al menos %2.</translation>
     </message>
     <message>
         <location line="+7"/>
-        <source>Open the BlackCoin debug log file from the current data directory. This can take a few seconds for large log files.</source>
-        <translation>Abre el archivo de registro de BlackCoin del directorio de datos actual. Esto puede tardar algunos segundos para archivos grandes.</translation>
+        <source>Open the I/OCoin debug log file from the current data directory. This can take a few seconds for large log files.</source>
+        <translation>Abre el archivo de registro de I/OCoin del directorio de datos actual. Esto puede tardar algunos segundos para archivos grandes.</translation>
     </message>
     <message>
         <location line="+102"/>
@@ -1600,8 +1600,8 @@ Esto significa que se requiere una cuota de al menos %2.</translation>
     </message>
     <message>
         <location filename="../rpcconsole.cpp" line="-33"/>
-        <source>Welcome to the BlackCoin RPC console.</source>
-        <translation>Bienvenido a la consola RPC de BlackCoin</translation>
+        <source>Welcome to the I/OCoin RPC console.</source>
+        <translation>Bienvenido a la consola RPC de I/OCoin</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -1759,8 +1759,8 @@ Esto significa que se requiere una cuota de al menos %2.</translation>
     </message>
     <message>
         <location filename="../sendcoinsdialog.cpp" line="-173"/>
-        <source>Enter a BlackCoin address (e.g. B8gZqgY4r2RoEdqYk3QsAqFckyf9pRHN6i)</source>
-        <translation>Introduce una dirección BlackCoin (p.ej. B8gZqgY4r2RoEdqYk3QsAqFckyf9pRHN6i)</translation>
+        <source>Enter a I/OCoin address (e.g. B8gZqgY4r2RoEdqYk3QsAqFckyf9pRHN6i)</source>
+        <translation>Introduce una dirección I/OCoin (p.ej. B8gZqgY4r2RoEdqYk3QsAqFckyf9pRHN6i)</translation>
     </message>
     <message>
         <location line="+15"/>
@@ -1859,8 +1859,8 @@ Esto significa que se requiere una cuota de al menos %2.</translation>
     </message>
     <message>
         <location line="+251"/>
-        <source>WARNING: Invalid BlackCoin address</source>
-        <translation>ADVERTENCIA: Dirección BlackCoin inválida</translation>
+        <source>WARNING: Invalid I/OCoin address</source>
+        <translation>ADVERTENCIA: Dirección I/OCoin inválida</translation>
     </message>
     <message>
         <location line="+13"/>
@@ -1933,8 +1933,8 @@ Esto significa que se requiere una cuota de al menos %2.</translation>
     </message>
     <message>
         <location filename="../sendcoinsentry.cpp" line="+1"/>
-        <source>Enter a BlackCoin address (e.g. B8gZqgY4r2RoEdqYk3QsAqFckyf9pRHN6i)</source>
-        <translation>Introduce una dirección BlackCoin (p.ej. B8gZqgY4r2RoEdqYk3QsAqFckyf9pRHN6i)</translation>
+        <source>Enter a I/OCoin address (e.g. B8gZqgY4r2RoEdqYk3QsAqFckyf9pRHN6i)</source>
+        <translation>Introduce una dirección I/OCoin (p.ej. B8gZqgY4r2RoEdqYk3QsAqFckyf9pRHN6i)</translation>
     </message>
 </context>
 <context>
@@ -1994,8 +1994,8 @@ Esto significa que se requiere una cuota de al menos %2.</translation>
     </message>
     <message>
         <location line="+21"/>
-        <source>Sign the message to prove you own this BlackCoin address</source>
-        <translation>Firma el mensaje para demostrar que posees esta dirección BlackCoin.</translation>
+        <source>Sign the message to prove you own this I/OCoin address</source>
+        <translation>Firma el mensaje para demostrar que posees esta dirección I/OCoin.</translation>
     </message>
     <message>
         <location line="+17"/>
@@ -2026,8 +2026,8 @@ Esto significa que se requiere una cuota de al menos %2.</translation>
     </message>
     <message>
         <location line="+40"/>
-        <source>Verify the message to ensure it was signed with the specified BlackCoin address</source>
-        <translation>Verifique el mensaje para asegurarse de que se firmó con la dirección BlackCoin especificada.</translation>
+        <source>Verify the message to ensure it was signed with the specified I/OCoin address</source>
+        <translation>Verifique el mensaje para asegurarse de que se firmó con la dirección I/OCoin especificada.</translation>
     </message>
     <message>
         <location line="+17"/>
@@ -2037,8 +2037,8 @@ Esto significa que se requiere una cuota de al menos %2.</translation>
     <message>
         <location filename="../signverifymessagedialog.cpp" line="+27"/>
         <location line="+3"/>
-        <source>Enter a BlackCoin address (e.g. B8gZqgY4r2RoEdqYk3QsAqFckyf9pRHN6i)</source>
-        <translation>Introduce una dirección BlackCoin (p.ej B8gZqgY4r2RoEdqYk3QsAqFckyf9pRHN6i)</translation>
+        <source>Enter a I/OCoin address (e.g. B8gZqgY4r2RoEdqYk3QsAqFckyf9pRHN6i)</source>
+        <translation>Introduce una dirección I/OCoin (p.ej B8gZqgY4r2RoEdqYk3QsAqFckyf9pRHN6i)</translation>
     </message>
     <message>
         <location line="-2"/>
@@ -2047,8 +2047,8 @@ Esto significa que se requiere una cuota de al menos %2.</translation>
     </message>
     <message>
         <location line="+3"/>
-        <source>Enter BlackCoin signature</source>
-        <translation>Introduce la firma BlackCoin</translation>
+        <source>Enter I/OCoin signature</source>
+        <translation>Introduce la firma I/OCoin</translation>
     </message>
     <message>
         <location line="+82"/>
@@ -2618,8 +2618,8 @@ Esto significa que se requiere una cuota de al menos %2.</translation>
     <name>bitcoin-core</name>
     <message>
         <location filename="../bitcoinstrings.cpp" line="+33"/>
-        <source>BlackCoin version</source>
-        <translation>versión BlackCoin</translation>
+        <source>I/OCoin version</source>
+        <translation>versión I/OCoin</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -2628,8 +2628,8 @@ Esto significa que se requiere una cuota de al menos %2.</translation>
     </message>
     <message>
         <location line="+1"/>
-        <source>Send command to -server or blackcoind</source>
-        <translation>Envía un comando a -server o blackcoind</translation>
+        <source>Send command to -server or iocoind</source>
+        <translation>Envía un comando a -server o iocoind</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -2651,13 +2651,13 @@ Esto significa que se requiere una cuota de al menos %2.</translation>
     </message>
     <message>
         <location line="+2"/>
-        <source>Specify configuration file (default: blackcoin.conf)</source>
-        <translation>Especifica un archivo de configuración (por defecto: blackcoin.conf)</translation>
+        <source>Specify configuration file (default: iocoin.conf)</source>
+        <translation>Especifica un archivo de configuración (por defecto: iocoin.conf)</translation>
     </message>
     <message>
         <location line="+1"/>
-        <source>Specify pid file (default: blackcoind.pid)</source>
-        <translation>Especifica un archivo pid (por defecto: blackcoind.pid)</translation>
+        <source>Specify pid file (default: iocoind.pid)</source>
+        <translation>Especifica un archivo pid (por defecto: iocoind.pid)</translation>
     </message>
     <message>
         <location line="+2"/>
@@ -2809,8 +2809,8 @@ Esto significa que se requiere una cuota de al menos %2.</translation>
     </message>
     <message>
         <location line="+61"/>
-        <source>Warning: Please check that your computer&apos;s date and time are correct! If your clock is wrong BlackCoin will not work properly.</source>
-        <translation>Advertencia: Verifique que la fecha y hora del equipo sean correctas! Si su reloj es erróneo BlackCoin no funcionará correctamente.</translation>
+        <source>Warning: Please check that your computer&apos;s date and time are correct! If your clock is wrong I/OCoin will not work properly.</source>
+        <translation>Advertencia: Verifique que la fecha y hora del equipo sean correctas! Si su reloj es erróneo I/OCoin no funcionará correctamente.</translation>
     </message>
     <message>
         <location line="-31"/>
@@ -3000,24 +3000,24 @@ Esto significa que se requiere una cuota de al menos %2.</translation>
         <source>%s, you must set a rpcpassword in the configuration file:
  %s
 It is recommended you use the following random password:
-rpcuser=blackcoinrpc
+rpcuser=iocoinrpc
 rpcpassword=%s
 (you do not need to remember this password)
 The username and password MUST NOT be the same.
 If the file does not exist, create it with owner-readable-only file permissions.
 It is also recommended to set alertnotify so you are notified of problems;
-for example: alertnotify=echo %%s | mail -s &quot;BlackCoin Alert&quot; admin@foo.com
+for example: alertnotify=echo %%s | mail -s &quot;I/OCoin Alert&quot; admin@foo.com
 </source>
         <translation>%s, debe establecer un rpcpassword en el fichero de configuración:
 %s
 Se recomienda utilizar la siguiente contraseña aleatoria:
-rpcuser=blackcoinrpc
+rpcuser=iocoinrpc
 rpcpassword=%s
 (no necesita recordar este password)
 El nombre de usuario y contraseña no debe ser el mismo.
 Si no existe el archivo, créelo con permisos de sólo lectura para el dueño.
 También se recomienda establecer alertnotify para ser notificado de los problemas;
-por ejemplo: alertnotify=echo %%s | mail -s &quot;BlackCoin Alert&quot; admin@foo.com
+por ejemplo: alertnotify=echo %%s | mail -s &quot;I/OCoin Alert&quot; admin@foo.com
 </translation>
     </message>
     <message>
@@ -3149,13 +3149,13 @@ por ejemplo: alertnotify=echo %%s | mail -s &quot;BlackCoin Alert&quot; admin@fo
     </message>
     <message>
         <location line="+1"/>
-        <source>Cannot obtain a lock on data directory %s.  BlackCoin is probably already running.</source>
-        <translation>No se puede obtener un bloqueo en el directorio de datos %s. BlackCoin probablemente ya esté en funcionamiento.</translation>
+        <source>Cannot obtain a lock on data directory %s.  I/OCoin is probably already running.</source>
+        <translation>No se puede obtener un bloqueo en el directorio de datos %s. I/OCoin probablemente ya esté en funcionamiento.</translation>
     </message>
     <message>
         <location line="-98"/>
-        <source>BlackCoin</source>
-        <translation>BlackCoin</translation>
+        <source>I/OCoin</source>
+        <translation>I/OCoin</translation>
     </message>
     <message>
         <location line="+140"/>
@@ -3189,13 +3189,13 @@ por ejemplo: alertnotify=echo %%s | mail -s &quot;BlackCoin Alert&quot; admin@fo
     </message>
     <message>
         <location line="+4"/>
-        <source>Error loading wallet.dat: Wallet requires newer version of BlackCoin</source>
-        <translation>Error cargando wallet.dat: El monedero requiere una nueva versión de BlackCoin</translation>
+        <source>Error loading wallet.dat: Wallet requires newer version of I/OCoin</source>
+        <translation>Error cargando wallet.dat: El monedero requiere una nueva versión de I/OCoin</translation>
     </message>
     <message>
         <location line="+1"/>
-        <source>Wallet needed to be rewritten: restart BlackCoin to complete</source>
-        <translation>El monedero necesita ser reescrito: reinicie BlackCoin para completar</translation>
+        <source>Wallet needed to be rewritten: restart I/OCoin to complete</source>
+        <translation>El monedero necesita ser reescrito: reinicie I/OCoin para completar</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -3264,8 +3264,8 @@ por ejemplo: alertnotify=echo %%s | mail -s &quot;BlackCoin Alert&quot; admin@fo
     </message>
     <message>
         <location line="+122"/>
-        <source>Unable to bind to %s on this computer. BlackCoin is probably already running.</source>
-        <translation>No se puede enlazar a %s en este equipo. BlackCoin probablemente ya esté en funcionamiento.</translation>
+        <source>Unable to bind to %s on this computer. I/OCoin is probably already running.</source>
+        <translation>No se puede enlazar a %s en este equipo. I/OCoin probablemente ya esté en funcionamiento.</translation>
     </message>
     <message>
         <location line="-97"/>
