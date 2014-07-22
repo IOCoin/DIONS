@@ -1295,6 +1295,27 @@ void runCommand(std::string strCommand)
         printf("runCommand error: system(%s) returned %d\n", strCommand.c_str(), nErr);
 }
 
+double nBitsToDifficulty(unsigned int nBits)
+{
+    int nShift = (nBits >> 24) & 0xff;
+
+    double dDiff =
+        (double)0x0000ffff / (double)(nBits & 0x00ffffff);
+
+    while (nShift < 29)
+    {
+        dDiff *= 256.0;
+        nShift++;
+    }
+    while (nShift > 29)
+    {
+        dDiff /= 256.0;
+        nShift--;
+    }
+
+    return dDiff;
+}
+
 void RenameThread(const char* name)
 {
 #if defined(PR_SET_NAME)
