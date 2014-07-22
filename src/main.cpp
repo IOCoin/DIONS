@@ -11,6 +11,7 @@
 #include "init.h"
 #include "ui_interface.h"
 #include "kernel.h"
+#include "bitcoinrpc.h"
 #include "zerocoin/Zerocoin.h"
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/filesystem.hpp>
@@ -1016,10 +1017,54 @@ int64_t GetProofOfWorkReward(int64_t nFees)
     return nSubsidy + nFees;
 }
 
-// miner's coin stake reward based on coin age spent (coin-days)
-int64_t GetProofOfStakeReward(int64_t nCoinAge, int64_t nFees)
+double GetMinDifficulty(bool proofOfStake, int nHeight)
 {
-    int64_t nSubsidy = nCoinAge * COIN_YEAR_REWARD * 33 / (365 * 33 + 8);
+    if (proofOfStake)
+    {
+        return nBitsToDifficulty(GetProofOfStakeLimit(nHeight).GetCompact());
+    }
+    else
+    {
+        return nBitsToDifficulty(bnProofOfWorkLimit.GetCompact());
+    }
+}
+
+int64_t GetProofOfStakeInterest(int nHeight)
+{
+    if (IsProtocolV2(nHeight))
+    {
+        // TODO, determine approximate maximum difficulty
+        return MAX_COIN_YEAR_REWARD / 2;
+    }
+    else
+    {
+        double maxDiff = 4.2; // emperically determined approximate maximum
+        double minDiff = GetMinDifficulty(true, nHeight);
+
+        double diffPoS = GetDifficulty(GetLastBlockIndex(pindexBest, true));
+
+        if (diffPoS > maxDiff)
+        {
+            return MAX_COIN_YEAR_REWARD;
+        }
+        else if (diffPoS < minDiff)
+        {
+            return MIN_COIN_YEAR_REWARD;
+        }
+        else
+        {
+            return MIN_COIN_YEAR_REWARD +
+                MAX_COIN_YEAR_REWARD *
+                ((diffPoS - minDiff) / (maxDiff - minDiff));
+        }
+    }
+}
+
+// miner's coin stake reward based on coin age spent (coin-days)
+int64_t GetProofOfStakeReward(int64_t nCoinAge, int64_t nFees, int nHeight)
+{
+    int64_t interest = GetProofOfStakeInterest(nHeight);
+    int64_t nSubsidy = nCoinAge * interest * 33 / (365 * 33 + 8);
 
     if (fDebug && GetBoolArg("-printcreation"))
         printf("GetProofOfStakeReward(): create=%s nCoinAge=%"PRId64"\n", FormatMoney(nSubsidy).c_str(), nCoinAge);
@@ -1595,7 +1640,7 @@ bool CBlock::ConnectBlock(CTxDB& txdb, CBlockIndex* pindex, bool fJustCheck)
         if (!vtx[1].GetCoinAge(txdb, nCoinAge))
             return error("ConnectBlock() : %s unable to get coin age for coinstake", vtx[1].GetHash().ToString().substr(0,10).c_str());
 
-        int64_t nCalculatedStakeReward = GetProofOfStakeReward(nCoinAge, nFees);
+        int64_t nCalculatedStakeReward = GetProofOfStakeReward(nCoinAge, nFees, pindex->nHeight);
 
         if (nStakeReward > nCalculatedStakeReward)
             return DoS(100, error("ConnectBlock() : coinstake pays too much(actual=%"PRId64" vs calculated=%"PRId64")", nStakeReward, nCalculatedStakeReward));
@@ -2378,7 +2423,7 @@ bool CBlock::SignBlock(CWallet& wallet, int64_t nFees)
     if (nSearchTime > nLastCoinStakeSearchTime)
     {
         int64_t nSearchInterval = IsProtocolV2(nBestHeight+1) ? 1 : nSearchTime - nLastCoinStakeSearchTime;
-        if (wallet.CreateCoinStake(wallet, nBits, nSearchInterval, nFees, txCoinStake, key))
+        if (wallet.CreateCoinStake(wallet, nBits, nSearchInterval, nFees, txCoinStake, key, pindexBest->nHeight+1))
         {
             if (txCoinStake.nTime >= max(pindexBest->GetPastTimeLimit()+1, PastDrift(pindexBest->GetBlockTime(), pindexBest->nHeight+1)))
             {
