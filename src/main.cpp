@@ -2560,9 +2560,9 @@ bool LoadBlockIndex(bool fAllowNew)
         //    CTxOut(empty)
         //  vMerkleTree: 12630d16a9
 
-        const char* pszTimestamp = "20 Feb 2014 Bitcoin ATMs come to USA";
+        const char* pszTimestamp = "8 July 2014 Mt. Gox CEO selling Bitcoins.com";
         CTransaction txNew;
-        txNew.nTime = 1393221600;
+        txNew.nTime = 1404938589;
         txNew.vin.resize(1);
         txNew.vout.resize(1);
         txNew.vin[0].scriptSig = CScript() << 0 << CBigNum(42) << vector<unsigned char>((const unsigned char*)pszTimestamp, (const unsigned char*)pszTimestamp + strlen(pszTimestamp));
@@ -2572,9 +2572,10 @@ bool LoadBlockIndex(bool fAllowNew)
         block.hashPrevBlock = 0;
         block.hashMerkleRoot = block.BuildMerkleTree();
         block.nVersion = 1;
-        block.nTime    = 1393221600;
+        block.nTime    = 1404938589;
         block.nBits    = bnProofOfWorkLimit.GetCompact();
-        block.nNonce   = !fTestNet ? 164482 : 216178;
+        block.nNonce   = !fTestNet ? 164582 : 219178;
+
         // genesis block miner
         if ((block.hashMerkleRoot != hashGenesisMerkleRoot) ||
             (block.GetHash() != (!fTestNet ? hashGenesisBlock : hashGenesisBlockTestNet)))
