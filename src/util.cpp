@@ -985,13 +985,13 @@ void PrintExceptionContinue(std::exception* pex, const char* pszThread)
 boost::filesystem::path GetDefaultDataDir()
 {
     namespace fs = boost::filesystem;
-    // Windows < Vista: C:\Documents and Settings\Username\Application Data\I/OCoin
-    // Windows >= Vista: C:\Users\Username\AppData\Roaming\I/OCoin
-    // Mac: ~/Library/Application Support/I/OCoin
+    // Windows < Vista: C:\Documents and Settings\Username\Application Data\IOCoin
+    // Windows >= Vista: C:\Users\Username\AppData\Roaming\IOCoin
+    // Mac: ~/Library/Application Support/IOCoin
     // Unix: ~/.iocoin
 #ifdef WIN32
     // Windows
-    return GetSpecialFolderPath(CSIDL_APPDATA) / "I/OCoin";
+    return GetSpecialFolderPath(CSIDL_APPDATA) / "IOCoin";
 #else
     fs::path pathRet;
     char* pszHome = getenv("HOME");
@@ -1003,7 +1003,7 @@ boost::filesystem::path GetDefaultDataDir()
     // Mac
     pathRet /= "Library/Application Support";
     fs::create_directory(pathRet);
-    return pathRet / "I/OCoin";
+    return pathRet / "IOCoin";
 #else
     // Unix
     return pathRet / ".iocoin";
