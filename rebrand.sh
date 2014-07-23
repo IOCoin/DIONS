@@ -7,4 +7,5 @@ find . -type f -not -path "./.git/*" -print0 | xargs -0 sed -i 's/iphU6HbZCuDsx1
 find . -type f -not -path "./.git/*" -print0 | xargs -0 sed -i 's|0.00 BC|0.00 I/O|g'
 find . -type f -not -path "./.git/*" -print0 | xargs -0 sed -i 's|0 BC|0 I/O|g'
 find . -type f -not -path "./.git/*" -print0 | xargs -0 sed -i 's|123.456 BC|123.456 I/O|g'
+find src/qt/locale/ -type f -print0 | xargs -0 sed -i 's|510|110|g'
 mv blackcoin-qt.pro iocoin-qt.pro
