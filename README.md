@@ -5,13 +5,15 @@ I/OCoin is a PoS-based cryptocurrency.
 Features:
 * Symbol: I/O
 * 60 second blocktime
-* Dynamic interest 1-8%, based on the percentage of coins staking
+* Dynamic interest 1-3%, based on the percentage of coins staking
 * 16 Million PoW coins
 * 22 Million total coins
-* ???? I/O block reward
+* 1250 I/O block reward, first 30 blocks half (625)
+* 12815 PoW block limit
 * X11 PoW/PoS
 * P2P Port: 33764
 * RPC Port: 33765
+
 
 Development process
 ===========================
