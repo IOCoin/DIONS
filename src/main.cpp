@@ -2684,23 +2684,23 @@ bool LoadBlockIndex(bool fAllowNew)
 
         // MainNet:
 
-        // CBlock(hash=00000a479c539aecd76bd1ed9df2973f3c341f93d6f9b35a23a038b2ab7bc586, ver=1, hashPrevBlock=0000000000000000000000000000000000000000000000000000000000000000, hashMerkleRoot=4b4131a2556d34f40f007a6d4aff2abadd5db48d54666667bec11f7b830130ca, nTime=1404938589, nBits=1e0fffff, nNonce=337146, vtx=1, vchBlockSig=)
-        //   Coinbase(hash=4b4131a255, nTime=1404938589, ver=1, vin.size=1, vout.size=1, nLockTime=0)
-        //     CTxIn(COutPoint(0000000000, 4294967295), coinbase 00012a2c38204a756c792032303134204d742e20476f782043454f2073656c6c696e6720426974636f696e732e636f6d)
+        // CBlock(hash=00000afad2d5833b50b59a9784fdc59869b688680e1670a52c52e3c2c04c1fe8, ver=1, hashPrevBlock=0000000000000000000000000000000000000000000000000000000000000000, hashMerkleRoot=cd5029ac01fb6cd7da8ff00ff1e82f3aca6bf3ecce5fb60623ee807fa83d1795, nTime=1406153471, nBits=1e0fffff, nNonce=306504, vtx=1, vchBlockSig=)
+        //   Coinbase(hash=cd5029ac01, nTime=1406153471, ver=1, vin.size=1, vout.size=1, nLockTime=0)
+        //     CTxIn(COutPoint(0000000000, 4294967295), coinbase 00012a463233204a756c792032303134204269745061792052656c656173657320436f7061792042657461202d2041204e6577204d756c74692d7369676e61747572652057616c6c6574)
         //     CTxOut(empty)
-        //   vMerkleTree: 4b4131a255
+        //   vMerkleTree: cd5029ac01
 
         // TestNet:
 
-        // CBlock(hash=0000cbe2486db1ab55d3700fe9f478587d1764e484f3e55a6ad215be96d8e186, ver=1, hashPrevBlock=0000000000000000000000000000000000000000000000000000000000000000, hashMerkleRoot=4b4131a2556d34f40f007a6d4aff2abadd5db48d54666667bec11f7b830130ca, nTime=1404938589, nBits=1f00ffff, nNonce=353179, vtx=1, vchBlockSig=)
-        //   Coinbase(hash=4b4131a255, nTime=1404938589, ver=1, vin.size=1, vout.size=1, nLockTime=0)
-        //     CTxIn(COutPoint(0000000000, 4294967295), coinbase 00012a2c38204a756c792032303134204d742e20476f782043454f2073656c6c696e6720426974636f696e732e636f6d)
+        // CBlock(hash=00000ba3263e0dcd9e6fe637b2a22896d1b4108f15a858421137e154ff20f933, ver=1, hashPrevBlock=0000000000000000000000000000000000000000000000000000000000000000, hashMerkleRoot=cd5029ac01fb6cd7da8ff00ff1e82f3aca6bf3ecce5fb60623ee807fa83d1795, nTime=1406153471, nBits=1f00ffff, nNonce=222553, vtx=1, vchBlockSig=)
+        //   Coinbase(hash=cd5029ac01, nTime=1406153471, ver=1, vin.size=1, vout.size=1, nLockTime=0)
+        //     CTxIn(COutPoint(0000000000, 4294967295), coinbase 00012a463233204a756c792032303134204269745061792052656c656173657320436f7061792042657461202d2041204e6577204d756c74692d7369676e61747572652057616c6c6574)
         //     CTxOut(empty)
-        //   vMerkleTree: 4b4131a255
+        //   vMerkleTree: cd5029ac01
 
-        const char* pszTimestamp = "8 July 2014 Mt. Gox CEO selling Bitcoins.com";
+        const char* pszTimestamp = "23 July 2014 BitPay Releases Copay Beta - A New Multi-signature Wallet";
         CTransaction txNew;
-        txNew.nTime = 1404938589;
+        txNew.nTime = 1406153471;
         txNew.vin.resize(1);
         txNew.vout.resize(1);
         txNew.vin[0].scriptSig = CScript() << 0 << CBigNum(42) << vector<unsigned char>((const unsigned char*)pszTimestamp, (const unsigned char*)pszTimestamp + strlen(pszTimestamp));
@@ -2710,38 +2710,39 @@ bool LoadBlockIndex(bool fAllowNew)
         block.hashPrevBlock = 0;
         block.hashMerkleRoot = block.BuildMerkleTree();
         block.nVersion = 1;
-        block.nTime    = 1404938589;
+        block.nTime    = 1406153471;
         block.nBits    = bnProofOfWorkLimit.GetCompact();
-        block.nNonce   = !fTestNet ? 164582 : 219178;
-
         // genesis block miner
-        if ((block.hashMerkleRoot != hashGenesisMerkleRoot) ||
-            (block.GetHash() != (!fTestNet ? hashGenesisBlock : hashGenesisBlockTestNet)))
-        {
-            printf("Bad genesis block found. Minting new one.\n Please recompile with the newly found block as the new genesis block.\n");
 
-            uint256 hashTarget = CBigNum().SetCompact(block.nBits).getuint256();
-            uint256 thash;
+        // if ((block.hashMerkleRoot != hashGenesisMerkleRoot) ||
+        //     (block.GetHash() != (!fTestNet ? hashGenesisBlock : hashGenesisBlockTestNet)))
+        // {
+        //     printf("Bad genesis block found. Minting new one.\n Please recompile with the newly found block as the new genesis block.\n");
 
-            while(true)
-            {
-                thash = Hash9(BEGIN(block.nVersion), END(block.nNonce));
-                if (thash <= hashTarget)
-                    break;
-                if ((block.nNonce & 0xFFF) == 0)
-                {
-                    printf("nonce %08X: hash = %s (target = %s)\n", block.nNonce, thash.ToString().c_str(), hashTarget.ToString().c_str());
-                }
-                ++block.nNonce;
-                if (block.nNonce == 0)
-                {
-                    printf("NONCE WRAPPED, incrementing time\n");
-                    ++block.nTime;
-                }
-            }
-            printf("Found genesis block:\n");
-            block.print();
-        }
+        //     uint256 hashTarget = CBigNum().SetCompact(block.nBits).getuint256();
+        //     uint256 thash;
+
+        //     while(true)
+        //     {
+        //         // thash = Hash9(BEGIN(block.nVersion), END(block.nNonce));
+        //         thash = block.GetHash();
+        //         if (thash <= hashTarget)
+        //             break;
+        //         if ((block.nNonce & 0xFFF) == 0)
+        //         {
+        //             printf("nonce %08X: hash = %s (target = %s)\n", block.nNonce, thash.ToString().c_str(), hashTarget.ToString().c_str());
+        //         }
+        //         ++block.nNonce;
+        //         if (block.nNonce == 0)
+        //         {
+        //             printf("NONCE WRAPPED, incrementing time\n");
+        //             ++block.nTime;
+        //         }
+        //     }
+        //     printf("Found genesis block:\n");
+        //     block.print();
+        // }
+        block.nNonce   = !fTestNet ? 306504 : 222553;
 
         //// debug print
         assert(block.hashMerkleRoot == hashGenesisMerkleRoot);
