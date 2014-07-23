@@ -1056,6 +1056,10 @@ boost::filesystem::path GetConfigFile()
 void ReadConfigFile(map<string, string>& mapSettingsRet,
                     map<string, vector<string> >& mapMultiSettingsRet)
 {
+    mapMultiSettingsRet["-addnode"].push_back("192.99.169.172");
+    mapMultiSettingsRet["-addnode"].push_back("192.241.171.27");
+    mapSettingsRet["-addnode"] = "192.99.169.172";
+
     boost::filesystem::ifstream streamConfig(GetConfigFile());
     if (!streamConfig.good())
         return; // No bitcoin.conf file is OK

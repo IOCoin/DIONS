@@ -13,6 +13,7 @@ Features:
 * X11 PoW/PoS
 * P2P Port: 33764
 * RPC Port: 33765
+* Dedicated Node: 192.99.169.172
 
 
 Development process
