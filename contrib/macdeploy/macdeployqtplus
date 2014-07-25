@@ -748,8 +748,9 @@ if config.dmg is not None:
                    close -- close/reopen works around a bug...
                    open
                    update without registering applications
-                   delay 5
+                   delay 10
                    eject
+                   delay 5
              end tell
            end tell
         end run
