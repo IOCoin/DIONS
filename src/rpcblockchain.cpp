@@ -29,8 +29,12 @@ double GetDifficulty(const CBlockIndex* blockindex)
     return nBitsToDifficulty(blockindex->nBits);
 }
 
-double GetPoWMHashPS()
+double GetPoWMHashPS(int nBlocks, int nHeight)
 {
+    if ((nHeight < 0) || (nHeight > pindexBest->nHeight))
+    {
+        nHeight = pindexBest->nHeight;
+    }
     int nPowHeight = GetPowHeight(pindexBest);
     if (nPowHeight >= LAST_POW_BLOCK)
         return 0;
@@ -38,23 +42,31 @@ double GetPoWMHashPS()
     int nPoWInterval = 72;
     int64_t nTargetSpacingWorkMin = 30, nTargetSpacingWork = 30;
 
-    CBlockIndex* pindex = pindexGenesisBlock;
-    CBlockIndex* pindexPrevWork = pindexGenesisBlock;
+    CBlockIndex* pindex = FindBlockByHeight(nHeight);
+    CBlockIndex* pindexPrevWork = FindBlockByHeight(nHeight);
 
-    while (pindex)
+    double currentDifficulty = 0.0;
+    bool first = true;
+
+    while (pindexPrevWork && (nBlocks > 0))
     {
-        if (pindex->IsProofOfWork())
+        if (pindexPrevWork->IsProofOfWork())
         {
+            if (first)
+            {
+                currentDifficulty = GetDifficulty(pindexPrevWork);
+            }
             int64_t nActualSpacingWork = pindex->GetBlockTime() - pindexPrevWork->GetBlockTime();
             nTargetSpacingWork = ((nPoWInterval - 1) * nTargetSpacingWork + nActualSpacingWork + nActualSpacingWork) / (nPoWInterval + 1);
             nTargetSpacingWork = max(nTargetSpacingWork, nTargetSpacingWorkMin);
-            pindexPrevWork = pindex;
+            pindex = pindexPrevWork;
+            --nBlocks;
         }
 
-        pindex = pindex->pnext;
+        pindexPrevWork = pindexPrevWork->pprev;
     }
 
-    return GetDifficulty() * 4294.967296 / nTargetSpacingWork;
+    return currentDifficulty * 4294.967296 / nTargetSpacingWork;
 }
 
 double GetPoSKernelPS(int nHeight)
