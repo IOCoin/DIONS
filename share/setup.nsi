@@ -10,11 +10,11 @@ SetCompressor /SOLID lzma
 !define URL http://iocoin.io
 
 # MUI Symbol Definitions
-!define MUI_ICON "../share/pixmaps/iocoin.ico"
-!define MUI_WELCOMEFINISHPAGE_BITMAP "../share/pixmaps/nsis-wizard.bmp"
+!define MUI_ICON "..\share\pixmaps\iocoin.ico"
+!define MUI_WELCOMEFINISHPAGE_BITMAP "..\share\pixmaps\nsis-wizard.bmp"
 !define MUI_HEADERIMAGE
 !define MUI_HEADERIMAGE_RIGHT
-!define MUI_HEADERIMAGE_BITMAP "../share/pixmaps/nsis-header.bmp"
+!define MUI_HEADERIMAGE_BITMAP "..\share\pixmaps\nsis-header.bmp"
 !define MUI_FINISHPAGE_NOAUTOCLOSE
 !define MUI_STARTMENUPAGE_REGISTRY_ROOT HKLM
 !define MUI_STARTMENUPAGE_REGISTRY_KEY ${REGKEY}
@@ -22,7 +22,7 @@ SetCompressor /SOLID lzma
 !define MUI_STARTMENUPAGE_DEFAULTFOLDER IOCoin
 !define MUI_FINISHPAGE_RUN $INSTDIR\iocoin-qt.exe
 !define MUI_UNICON "${NSISDIR}\Contrib\Graphics\Icons\modern-uninstall.ico"
-!define MUI_UNWELCOMEFINISHPAGE_BITMAP "../share/pixmaps/nsis-wizard.bmp"
+!define MUI_UNWELCOMEFINISHPAGE_BITMAP "..\share\pixmaps\nsis-wizard.bmp"
 !define MUI_UNFINISHPAGE_NOAUTOCLOSE
 
 # Included files
@@ -66,13 +66,13 @@ ShowUninstDetails show
 Section -Main SEC0000
     SetOutPath $INSTDIR
     SetOverwrite on
-    File ../release/iocoin-qt.exe
-    File /oname=license.txt ../COPYING
-    File /oname=readme.txt ../doc/README_windows.txt
+    File ..\release\iocoin-qt.exe
+    File /oname=license.txt ..\COPYING
+    File /oname=readme.txt ..\doc\README_windows.txt
     #SetOutPath $INSTDIR\daemon
-    #File ../src/novacoind.exe
+    #File ..\src\novacoind.exe
     SetOutPath $INSTDIR\src
-    File /r /x *.exe /x *.o ../src\*.*
+    File /r /x *.exe /x *.o ..\src\*.*
     SetOutPath $INSTDIR
     WriteRegStr HKCU "${REGKEY}\Components" Main 1
 

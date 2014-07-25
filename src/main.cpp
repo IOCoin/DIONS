@@ -1137,9 +1137,9 @@ int64_t GetProofOfStakeInterest(int nHeight)
     }
 }
 
-int64_t GetProofOfStakeInterestV2()
+int64_t GetProofOfStakeInterestV2(int nHeight)
 {
-    double weight = GetPoSKernelPS();
+    double weight = GetPoSKernelPS(nHeight);
 
     uint64_t rate = MIN_COIN_YEAR_REWARD;
     if (weight > 16384)
@@ -1155,7 +1155,7 @@ int64_t GetProofOfStakeInterestV2()
 int64_t GetProofOfStakeReward(int64_t nCoinAge, int64_t nFees, int nHeight)
 {
     //int64_t interest = GetProofOfStakeInterest(nHeight);
-    int64_t interest = GetProofOfStakeInterestV2();
+    int64_t interest = GetProofOfStakeInterestV2(nHeight);
     int64_t nSubsidy = nCoinAge * interest * 33 / (365 * 33 + 8);
 
     if (fDebug && GetBoolArg("-printcreation"))
@@ -1702,6 +1702,13 @@ bool CBlock::ConnectBlock(CTxDB& txdb, CBlockIndex* pindex, bool fJustCheck)
 
             int64_t nTxValueIn = tx.GetValueIn(mapInputs);
             int64_t nTxValueOut = tx.GetValueOut();
+
+            if (tx.IsCoinStake())
+            {
+                double nNetworkDriftBuffer = nTxValueOut*.02;
+                nTxValueOut = nTxValueOut - nNetworkDriftBuffer;
+                nStakeReward = nTxValueOut - nTxValueIn;
+            }
             nValueIn += nTxValueIn;
             nValueOut += nTxValueOut;
             if (!tx.IsCoinStake())

@@ -57,7 +57,7 @@ double GetPoWMHashPS()
     return GetDifficulty() * 4294.967296 / nTargetSpacingWork;
 }
 
-double GetPoSKernelPS()
+double GetPoSKernelPS(int nHeight)
 {
     int nPoSInterval = 72;
     double dStakeKernelsTriedAvg = 0;
@@ -65,6 +65,11 @@ double GetPoSKernelPS()
 
     CBlockIndex* pindex = pindexBest;;
     CBlockIndex* pindexPrevStake = NULL;
+
+    while (nHeight > 0 && (pindex->nHeight >= nHeight) && pindex->pprev)
+    {
+        pindex = pindex->pprev;
+    }
 
     while (pindex && nStakesHandled < nPoSInterval)
     {
