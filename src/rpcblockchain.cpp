@@ -7,6 +7,7 @@
 #include "bitcoinrpc.h"
 #include "kernel.h"
 #include "util.h"
+#include <cmath>
 
 using namespace json_spirit;
 using namespace std;
@@ -211,6 +212,75 @@ Value getpowblocksleft(const Array& params, bool fHelp)
     return (powHeight > LAST_POW_BLOCK) ?
         0 : LAST_POW_BLOCK - powHeight;
 }
+
+// TODO: Move somewhere more accessible
+double GetBlocktime(CBlockIndex * block, int blocks,
+                    bool proofOfWork, bool proofOfStake)
+{
+    if (!block || !(block->pprev) || (blocks <= 0)
+        || (!proofOfStake && !proofOfWork))
+    {
+        return 0.0;
+    }
+
+    CBlockIndex * end = block->pprev;
+    int checked = blocks;
+    while (end->pprev && (checked > 0))
+    {
+        if ((proofOfStake && end->IsProofOfStake()) ||
+            (proofOfWork && end->IsProofOfWork()))
+        {
+            --checked;
+        }
+        end = end->pprev;
+    }
+    return abs(block->nTime - end->nTime) / static_cast<double>(blocks);
+}
+
+Value getpowtimeleft(const Array& params, bool fHelp)
+{
+    if (fHelp || params.size() > 2)
+        throw runtime_error(
+            "getpowtimeleft [time-unit] [block]\n"
+            "Returns the number of PoW blocks left for mining in the longest block chain at height `block`, defaults to best height..");
+
+    int nHeight = (params.size() > 1) ? params[1].get_int() : nBestHeight;
+
+    if (nHeight < 0 || nHeight > nBestHeight)
+        throw runtime_error("Block number out of range.");
+
+    int divisor = 1;
+
+    if (params.size() > 0)
+    {
+        std::string timeUnit = params[0].get_str();
+        if (timeUnit == "d" || timeUnit == "days")
+        {
+            divisor = 60 * 60 * 24;
+        }
+        else if (timeUnit == "h" || timeUnit == "hours")
+        {
+            divisor = 60 * 60;
+        }
+        else if (timeUnit == "m" || timeUnit == "minutes")
+        {
+            divisor = 60;
+        }
+        else if (timeUnit == "s" || timeUnit == "seconds")
+        {
+            divisor = 1;
+        }
+        else
+        {
+            throw runtime_error("The time-unit should be one of {d,h,m,s,days,hours,minutes,seconds}.");
+        }
+    }
+    CBlockIndex* block = FindBlockByHeight(nHeight);
+    int powHeight = GetPowHeight(block);
+    int powLeft = (powHeight > LAST_POW_BLOCK) ?
+        0 : LAST_POW_BLOCK - powHeight;
+    double blocktime = GetBlocktime(block, 300, true, false);
+    return (blocktime * powLeft) / divisor;
 }
 
 Value getdifficulty(const Array& params, bool fHelp)
