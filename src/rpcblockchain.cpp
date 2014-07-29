@@ -179,6 +179,21 @@ Value getblockcount(const Array& params, bool fHelp)
     return nBestHeight;
 }
 
+Value getpowblocks(const Array& params, bool fHelp)
+{
+    if (fHelp || params.size() > 1)
+        throw runtime_error(
+            "getpowblocks [block]\n"
+            "Returns the number of PoW blocks mined in the longest block chain at height `block`, defaults to best height.");
+
+    int nHeight = (params.size() > 0) ? params[0].get_int() : nBestHeight;
+    if (nHeight < 0 || nHeight > nBestHeight)
+        throw runtime_error("Block number out of range.");
+
+    CBlockIndex* block = FindBlockByHeight(nHeight);
+    return GetPowHeight(block);
+}
+
 
 Value getdifficulty(const Array& params, bool fHelp)
 {
