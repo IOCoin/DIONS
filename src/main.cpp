@@ -76,16 +76,11 @@ int64_t nTransactionFee = MIN_TX_FEE;
 int64_t nReserveBalance = 0;
 int64_t nMinimumInputValue = 0;
 
-// static const int NUM_OF_POW_CHECKPOINT = 6;
-// static const int checkpointPoWHeight[NUM_OF_POW_CHECKPOINT][2] =
-// {
-//      { 20000,  8017},
-//      { 40000, 12452},
-//      { 60000, 15611},
-//      { 80000, 18819},
-//      {100001, 21524},
-//      {118900, 23988}
-// };
+static const int NUM_OF_POW_CHECKPOINT = 1;
+static const int checkpointPoWHeight[NUM_OF_POW_CHECKPOINT][2] =
+{
+     { 12000,  6390}
+};
 
 extern enum Checkpoints::CPMode CheckpointsMode;
 
@@ -1014,26 +1009,27 @@ uint256 WantedByOrphan(const CBlock* pblockOrphan)
 int GetPowHeight(const CBlockIndex* pindex)
 {
     int count = 0;
+    int index = -1;
     int height = pindex->nHeight;
     int maxCheck = height;
 
     // if(height > FINAL_POW_HEIGHT)
     //     return FINAL_POW_COUNT;
 
-    // if(NUM_OF_POW_CHECKPOINT != 0)
-    // {
-    //     for(int i = 1; i <= NUM_OF_POW_CHECKPOINT; i++)
-    //     {
-    //         if(height > checkpointPoWHeight[NUM_OF_POW_CHECKPOINT - i][0])
-    //         {
-    //             index = NUM_OF_POW_CHECKPOINT - i;
-    //             break;
-    //         }
-    //     }
-    // }
+    if(NUM_OF_POW_CHECKPOINT != 0)
+    {
+        for(int i = 1; i <= NUM_OF_POW_CHECKPOINT; i++)
+        {
+            if(height > checkpointPoWHeight[NUM_OF_POW_CHECKPOINT - i][0])
+            {
+                index = NUM_OF_POW_CHECKPOINT - i;
+                break;
+            }
+        }
+    }
 
-    // if(index != -1)
-    //     maxCheck = height - checkpointPoWHeight[index][0];
+    if(index != -1)
+        maxCheck = height - checkpointPoWHeight[index][0];
 
     for (int j = 0; j < maxCheck; j++)
     {
@@ -1044,10 +1040,10 @@ int GetPowHeight(const CBlockIndex* pindex)
         pindex = pindex->pprev;
     }
 
-    // if(index != -1)
-    // {
-    //     count += checkpointPoWHeight[index][1];
-    // }
+    if(index != -1)
+    {
+        count += checkpointPoWHeight[index][1];
+    }
     // else
     // {
     //     ++count;
