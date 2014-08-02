@@ -234,7 +234,7 @@ double GetBlocktime(CBlockIndex * block, int blocks,
         }
         end = end->pprev;
     }
-    return abs(block->nTime - end->nTime) / static_cast<double>(blocks);
+    return abs(static_cast<double>(block->nTime - end->nTime)) / static_cast<double>(blocks);
 }
 
 Value getpowtimeleft(const Array& params, bool fHelp)
