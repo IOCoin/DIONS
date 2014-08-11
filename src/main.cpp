@@ -1325,7 +1325,7 @@ unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, bool fProofOfS
     else
         {
         if (pindexLast->nHeight < POS_v3_DIFFICULTY_HEIGHT)
-            return GetNextTargetRequiredV2(pindexLast, fProofOfStake, nFees);
+            return GetNextTargetRequiredV2(pindexLast, fProofOfStake);
         else
             return GetNextTargetRequiredV3(pindexLast, fProofOfStake, nFees);
         }
@@ -2330,11 +2330,26 @@ bool CBlock::AcceptBlock()
 
     //we need to know fees to calculate new target
     int64_t nFees = 0;
+    CTxDB txdb("r");
+    map<uint256, CTxIndex> mapQueuedChanges;
     BOOST_FOREACH(CTransaction& tx, vtx)
     {
+        uint256 hashTx = tx.GetHash();
+
+        CTxIndex txindexOld;
+        if (txdb.ReadTxIndex(hashTx, txindexOld)) {
+            BOOST_FOREACH(CDiskTxPos &pos, txindexOld.vSpent)
+                if (pos.IsNull())
+                    return false;
+        }
+
+        MapPrevTx mapInputs;
         if (!tx.IsCoinBase())
         {
             bool fInvalid;
+            if (!tx.FetchInputs(txdb, mapQueuedChanges, true, false, mapInputs, fInvalid))
+                return false;
+
             int64_t nTxValueIn = tx.GetValueIn(mapInputs);
             int64_t nTxValueOut = tx.GetValueOut();
 
