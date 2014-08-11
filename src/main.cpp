@@ -1281,12 +1281,17 @@ static unsigned int GetNextTargetRequiredV2(const CBlockIndex* pindexLast, bool 
     return bnNew.GetCompact();
 }
 
-unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, bool fProofOfStake)
+unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, bool fProofOfStake, int64_t nFees)
 {
     if (pindexLast->nHeight < 24376)
         return GetNextTargetRequiredV1(pindexLast, fProofOfStake);
     else
-        return GetNextTargetRequiredV2(pindexLast, fProofOfStake);
+        {
+        if (pindexLast->nHeight < POS_v3_DIFFICULTY_HEIGHT)
+            return GetNextTargetRequiredV2(pindexLast, fProofOfStake, nFees);
+        else
+            return GetNextTargetRequiredV3(pindexLast, fProofOfStake, nFees);
+        }
 }
 
 bool CheckProofOfWork(uint256 hash, unsigned int nBits)
@@ -2286,8 +2291,25 @@ bool CBlock::AcceptBlock()
     if (IsProofOfStake() && !CheckCoinStakeTimestamp(nHeight, GetBlockTime(), (int64_t)vtx[1].nTime))
         return DoS(50, error("AcceptBlock() : coinstake timestamp violation nTimeBlock=%"PRId64" nTimeTx=%u", GetBlockTime(), vtx[1].nTime));
 
+    //we need to know fees to calculate new target
+    int64_t nFees = 0;
+    BOOST_FOREACH(CTransaction& tx, vtx)
+    {
+        if (!tx.IsCoinBase())
+        {
+            bool fInvalid;
+            int64_t nTxValueIn = tx.GetValueIn(mapInputs);
+            int64_t nTxValueOut = tx.GetValueOut();
+
+            if (!tx.IsCoinStake())
+                nFees += nTxValueIn - nTxValueOut;
+        }
+
+    }
+
+
     // Check proof-of-work or proof-of-stake
-    if (nBits != GetNextTargetRequired(pindexPrev, IsProofOfStake()))
+    if (nBits != GetNextTargetRequired(pindexPrev, IsProofOfStake(), nFees))
         return DoS(100, error("AcceptBlock() : incorrect %s", IsProofOfWork() ? "proof-of-work" : "proof-of-stake"));
 
     // Check timestamp against prev
