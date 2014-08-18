@@ -61,6 +61,8 @@ public:
      */
     QString labelForAddress(const QString &address) const;
 
+    QStringList getReceiveAddresses() const;
+
     /* Look up row index of an address in the model.
        Return -1 if not found.
      */
