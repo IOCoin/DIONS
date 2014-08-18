@@ -784,7 +784,12 @@ void BitcoinGUI::ionsHomeClicked()
 
 void BitcoinGUI::ionsRegisterClicked()
 {
-    ionsPage->findChild<QWebView *>("webView")->load(QUrl("http://127.0.0.1:5000/register"));
+    QJsonArray addresses = QJsonArray::fromStringList(walletModel->getAddressTableModel()->getReceiveAddresses());
+
+    QNetworkRequest netRequest;
+    netRequest.setUrl(QUrl("http://192.99.168.24:5000/register"));
+    netRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded; charset=UTF-8");
+    ionsPage->findChild<QWebView *>("webView")->load(netRequest, QNetworkAccessManager::PostOperation, "addresses="+QJsonDocument(addresses).toJson());
 }
 
 void BitcoinGUI::ionsCheckClicked()

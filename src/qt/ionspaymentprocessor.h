@@ -18,6 +18,8 @@ class IONSPaymentProcessor : public QObject
       void pay(QString address, QString fee);
     Q_INVOKABLE
       void myUsernames();
+    Q_INVOKABLE
+      void Register();
 
   private:
     BitcoinGUI * gui;

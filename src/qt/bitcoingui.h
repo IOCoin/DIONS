@@ -151,6 +151,7 @@ public slots:
     void askFee(qint64 nFeeRequired, bool *payFee);
     void handleURI(QString strURI);
     void ionsMyUsernamesClicked();
+    void ionsRegisterClicked();
 
 private slots:
     /** Switch to overview (home) page */
@@ -177,7 +178,6 @@ private slots:
     void aboutClicked();
 
     void ionsHomeClicked();
-    void ionsRegisterClicked();
     void ionsCheckClicked();
     void ionsPaymentSetup();
 #ifndef Q_OS_MAC

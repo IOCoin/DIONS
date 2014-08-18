@@ -17,3 +17,8 @@ void IONSPaymentProcessor::myUsernames()
 {
     gui->ionsMyUsernamesClicked();
 }
+
+void IONSPaymentProcessor::Register()
+{
+    gui->ionsRegisterClicked();
+}
