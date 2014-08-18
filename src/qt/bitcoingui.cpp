@@ -133,6 +133,8 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
     QPushButton * registerButton = ionsPage->findChild<QPushButton *>("registerButton");
     QPushButton * checkButton = ionsPage->findChild<QPushButton *>("checkButton");
     QPushButton * myUsernamesButton = ionsPage->findChild<QPushButton *>("myUsernamesButton");
+    QPushButton * reloadButton = ionsPage->findChild<QPushButton *>("reloadButton");
+    connect(reloadButton, SIGNAL(clicked()), ionsPage->findChild<QWebView *>("webView"), SLOT(reload()));
 
     ionsFrame = ionsPage->findChild<QWebView *>("webView")->page()->mainFrame();
     ionsProcessor = new IONSPaymentProcessor(this);
