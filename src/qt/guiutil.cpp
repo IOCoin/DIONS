@@ -40,7 +40,7 @@
 #include "shellapi.h"
 #endif
 
-QString ionsURL =  "192.99.168.24:5000";
+QString ionsURL =  "ions.iocoin.io";
 
 namespace GUIUtil {
 
