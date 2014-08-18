@@ -770,7 +770,7 @@ void BitcoinGUI::gotoIONSPage()
     //*>("webView")->load(QUrl("http://192.241.171.27:33333"));
     if (!ionsInit)
     {
-        ionsPage->findChild<QWebView *>("webView")->load(QUrl("http://127.0.0.1:5000/1"));
+        ionsPage->findChild<QWebView *>("webView")->load(QUrl("http://192.99.168.24:5000/1"));
         ionsInit = true;
     }
     centralWidget->setCurrentWidget(ionsPage);
@@ -781,7 +781,7 @@ void BitcoinGUI::gotoIONSPage()
 
 void BitcoinGUI::ionsHomeClicked()
 {
-    ionsPage->findChild<QWebView *>("webView")->load(QUrl("http://127.0.0.1:5000/1"));
+    ionsPage->findChild<QWebView *>("webView")->load(QUrl("http://192.99.168.24:5000/1"));
 }
 
 void BitcoinGUI::ionsRegisterClicked()
@@ -796,7 +796,7 @@ void BitcoinGUI::ionsRegisterClicked()
 
 void BitcoinGUI::ionsCheckClicked()
 {
-    ionsPage->findChild<QWebView *>("webView")->load(QUrl("http://127.0.0.1:5000/check"));
+    ionsPage->findChild<QWebView *>("webView")->load(QUrl("http://192.99.168.24:5000/check"));
 }
 
 void BitcoinGUI::ionsMyUsernamesClicked()
@@ -804,7 +804,7 @@ void BitcoinGUI::ionsMyUsernamesClicked()
     QJsonArray addresses = QJsonArray::fromStringList(walletModel->getAddressTableModel()->getReceiveAddresses());
 
     QNetworkRequest netRequest;
-    netRequest.setUrl(QUrl("http://127.0.0.1:5000/my-usernames"));
+    netRequest.setUrl(QUrl("http://192.99.168.24:5000/my-usernames"));
     netRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json; charset=UTF-8");
     ionsPage->findChild<QWebView *>("webView")->load(netRequest, QNetworkAccessManager::PostOperation, QJsonDocument(addresses).toJson());
 }

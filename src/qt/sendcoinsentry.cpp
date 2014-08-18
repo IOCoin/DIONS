@@ -6,6 +6,9 @@
 #include "walletmodel.h"
 #include "optionsmodel.h"
 #include "addresstablemodel.h"
+#include "ui_ionslookupdialog.h"
+
+#include "ionslookupaddressprocessor.h"
 
 #include <QApplication>
 #include <QClipboard>
@@ -53,6 +56,22 @@ void SendCoinsEntry::on_addressBookButton_clicked()
         ui->payTo->setText(dlg.getReturnValue());
         ui->payAmount->setFocus();
     }
+}
+
+void SendCoinsEntry::on_ionsLookupButton_clicked()
+{
+    QDialog * ions = new QDialog();
+    Ui_IONSLookupDialog dlg;
+    dlg.setupUi(ions);
+
+    ionsFrame = ions->findChild<QWebView *>("webView")->page()->mainFrame();
+    ionsProcessor = new IONSLookupAddressProcessor(ions, this);
+    ionsProcessorSetup();
+    connect(ionsFrame, SIGNAL(javaScriptWindowObjectCleared()), this, SLOT(ionsProcessorSetup()));
+
+    ions->findChild<QWebView *>("webView")->load(QUrl("http://192.99.168.24:5000/address-book/1"));
+
+    ions->exec();
 }
 
 void SendCoinsEntry::on_payTo_textChanged(const QString &address)
@@ -164,6 +183,12 @@ void SendCoinsEntry::setFocus()
     ui->payTo->setFocus();
 }
 
+void SendCoinsEntry::setPaymentAddress(QString address)
+{
+    ui->payTo->setText(address);
+    ui->payAmount->setFocus();
+}
+
 void SendCoinsEntry::updateDisplayUnit()
 {
     if(model && model->getOptionsModel())
@@ -171,4 +196,9 @@ void SendCoinsEntry::updateDisplayUnit()
         // Update payAmount with the current unit
         ui->payAmount->setDisplayUnit(model->getOptionsModel()->getDisplayUnit());
     }
+}
+
+void SendCoinsEntry::ionsProcessorSetup()
+{
+    ionsFrame->addToJavaScriptWindowObject("addressProcessor", ionsProcessor);
 }
