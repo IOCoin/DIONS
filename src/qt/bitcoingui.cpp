@@ -268,7 +268,7 @@ void BitcoinGUI::createActions()
     addressBookAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_5));
     tabGroup->addAction(addressBookAction);
 
-    IONSAction = new QAction(QIcon(":/icons/address-book"), tr("&IONS"), this);
+    IONSAction = new QAction(QIcon(":/icons/bitcoin"), tr("&IONS"), this);
     IONSAction->setToolTip(tr("Get info on your IONS usernames."));
     IONSAction->setCheckable(true);
     IONSAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_6));
