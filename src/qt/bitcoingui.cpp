@@ -766,11 +766,9 @@ void BitcoinGUI::gotoAddressBookPage()
 void BitcoinGUI::gotoIONSPage()
 {
     IONSAction->setChecked(true);
-    //ionsPage->findChild<QWebView
-    //*>("webView")->load(QUrl("http://192.241.171.27:33333"));
     if (!ionsInit)
     {
-        ionsPage->findChild<QWebView *>("webView")->load(QUrl("http://192.99.168.24:5000/1"));
+        ionsPage->findChild<QWebView *>("webView")->load(QUrl("http://ions.iocoin.io/1"));
         ionsInit = true;
     }
     centralWidget->setCurrentWidget(ionsPage);
@@ -781,7 +779,7 @@ void BitcoinGUI::gotoIONSPage()
 
 void BitcoinGUI::ionsHomeClicked()
 {
-    ionsPage->findChild<QWebView *>("webView")->load(QUrl("http://192.99.168.24:5000/1"));
+    ionsPage->findChild<QWebView *>("webView")->load(QUrl("http://ions.iocoin.io/1"));
 }
 
 void BitcoinGUI::ionsRegisterClicked()
@@ -789,14 +787,14 @@ void BitcoinGUI::ionsRegisterClicked()
     QJsonArray addresses = QJsonArray::fromStringList(walletModel->getAddressTableModel()->getReceiveAddresses());
 
     QNetworkRequest netRequest;
-    netRequest.setUrl(QUrl("http://192.99.168.24:5000/register"));
+    netRequest.setUrl(QUrl("http://ions.iocoin.io/register"));
     netRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded; charset=UTF-8");
     ionsPage->findChild<QWebView *>("webView")->load(netRequest, QNetworkAccessManager::PostOperation, "addresses="+QJsonDocument(addresses).toJson());
 }
 
 void BitcoinGUI::ionsCheckClicked()
 {
-    ionsPage->findChild<QWebView *>("webView")->load(QUrl("http://192.99.168.24:5000/check"));
+    ionsPage->findChild<QWebView *>("webView")->load(QUrl("http://ions.iocoin.io/check"));
 }
 
 void BitcoinGUI::ionsMyUsernamesClicked()
@@ -804,7 +802,7 @@ void BitcoinGUI::ionsMyUsernamesClicked()
     QJsonArray addresses = QJsonArray::fromStringList(walletModel->getAddressTableModel()->getReceiveAddresses());
 
     QNetworkRequest netRequest;
-    netRequest.setUrl(QUrl("http://192.99.168.24:5000/my-usernames"));
+    netRequest.setUrl(QUrl("http://ions.iocoin.io/my-usernames"));
     netRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json; charset=UTF-8");
     ionsPage->findChild<QWebView *>("webView")->load(netRequest, QNetworkAccessManager::PostOperation, QJsonDocument(addresses).toJson());
 }

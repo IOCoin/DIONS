@@ -15,7 +15,7 @@ class IONSLookupAddressProcessor : public QObject
 
   public slots:
     Q_INVOKABLE
-      void setAddress(QString address);
+      void setAddress(QString ionsName, QString address);
 
   private:
     QDialog * ionsDialog;

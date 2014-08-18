@@ -8,8 +8,8 @@ IONSLookupAddressProcessor::IONSLookupAddressProcessor(QDialog * ionsDialog, Sen
 {
 }
 
-void IONSLookupAddressProcessor::setAddress(QString address)
+void IONSLookupAddressProcessor::setAddress(QString ionsName, QString address)
 {
-    entry->setPaymentAddress(address);
+    entry->setPaymentAddress(ionsName, address);
     ionsDialog->accept();
 }
