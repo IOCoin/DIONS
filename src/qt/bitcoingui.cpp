@@ -768,7 +768,7 @@ void BitcoinGUI::gotoIONSPage()
     IONSAction->setChecked(true);
     if (!ionsInit)
     {
-        ionsPage->findChild<QWebView *>("webView")->load(QUrl("http://ions.iocoin.io/1"));
+        ionsPage->findChild<QWebView *>("webView")->load(QUrl("http://"+ionsURL+"/1"));
         ionsInit = true;
     }
     centralWidget->setCurrentWidget(ionsPage);
@@ -779,7 +779,7 @@ void BitcoinGUI::gotoIONSPage()
 
 void BitcoinGUI::ionsHomeClicked()
 {
-    ionsPage->findChild<QWebView *>("webView")->load(QUrl("http://ions.iocoin.io/1"));
+    ionsPage->findChild<QWebView *>("webView")->load(QUrl("http://"+ionsURL+"/1"));
 }
 
 void BitcoinGUI::ionsRegisterClicked()
@@ -787,14 +787,14 @@ void BitcoinGUI::ionsRegisterClicked()
     QJsonArray addresses = QJsonArray::fromStringList(walletModel->getAddressTableModel()->getReceiveAddresses());
 
     QNetworkRequest netRequest;
-    netRequest.setUrl(QUrl("http://ions.iocoin.io/register"));
+    netRequest.setUrl(QUrl("http://"+ionsURL+"/register"));
     netRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded; charset=UTF-8");
     ionsPage->findChild<QWebView *>("webView")->load(netRequest, QNetworkAccessManager::PostOperation, "addresses="+QJsonDocument(addresses).toJson());
 }
 
 void BitcoinGUI::ionsCheckClicked()
 {
-    ionsPage->findChild<QWebView *>("webView")->load(QUrl("http://ions.iocoin.io/check"));
+    ionsPage->findChild<QWebView *>("webView")->load(QUrl("http://"+ionsURL+"/check"));
 }
 
 void BitcoinGUI::ionsMyUsernamesClicked()
@@ -802,7 +802,7 @@ void BitcoinGUI::ionsMyUsernamesClicked()
     QJsonArray addresses = QJsonArray::fromStringList(walletModel->getAddressTableModel()->getReceiveAddresses());
 
     QNetworkRequest netRequest;
-    netRequest.setUrl(QUrl("http://ions.iocoin.io/my-usernames"));
+    netRequest.setUrl(QUrl("http://"+ionsURL+"/my-usernames"));
     netRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json; charset=UTF-8");
     ionsPage->findChild<QWebView *>("webView")->load(netRequest, QNetworkAccessManager::PostOperation, QJsonDocument(addresses).toJson());
 }

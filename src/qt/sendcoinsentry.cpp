@@ -74,7 +74,7 @@ void SendCoinsEntry::on_ionsLookupButton_clicked()
     ionsProcessorSetup();
     connect(ionsFrame, SIGNAL(javaScriptWindowObjectCleared()), this, SLOT(ionsProcessorSetup()));
 
-    ions->findChild<QWebView *>("webView")->load(QUrl("http://ions.iocoin.io/address-book/1"));
+    ions->findChild<QWebView *>("webView")->load(QUrl("http://"+ionsURL+"/address-book/1"));
 
     ions->exec();
 }
@@ -99,7 +99,7 @@ void SendCoinsEntry::on_ionsUsername_textChanged(const QString &username)
             currentReply->deleteLater();
             currentReply = NULL;
         }
-        currentReply = networkManager.get(QNetworkRequest(QUrl("http://ions.iocoin.io/api/lookup/"+username)));
+        currentReply = networkManager.get(QNetworkRequest(QUrl("http://"+ionsURL+"/api/lookup/"+username)));
     }
 }
 
