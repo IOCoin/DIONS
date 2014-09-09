@@ -26,6 +26,8 @@
 #include "guiutil.h"
 #include "rpcconsole.h"
 #include "wallet.h"
+#include "ui_ionspage.h"
+#include "ionspaymentprocessor.h"
 
 #ifdef Q_OS_MAC
 #include "macdockiconhandler.h"
@@ -56,12 +58,17 @@
 #include <QDragEnterEvent>
 #include <QUrl>
 #include <QStyle>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QNetworkRequest>
+#include <QWebFrame>
 
 #include <iostream>
 
 extern CWallet* pwalletMain;
 extern int64_t nLastCoinStakeSearchInterval;
 double GetPoSKernelPS(int nHeight = -1);
+
 
 BitcoinGUI::BitcoinGUI(QWidget *parent):
     QMainWindow(parent),
@@ -75,7 +82,8 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
     trayIcon(0),
     notificator(0),
     rpcConsole(0),
-    nWeight(0)
+    nWeight(0),
+    ionsInit(false)
 {
     resize(850, 550);
     setWindowTitle(tr("I/OCoin") + " - " + tr("Wallet"));
@@ -118,12 +126,33 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
 
     signVerifyMessageDialog = new SignVerifyMessageDialog(this);
 
+    ionsPage = new QWidget(this);
+    Ui::IONSPage ions;
+    ions.setupUi(ionsPage);
+    QPushButton * homeButton = ionsPage->findChild<QPushButton *>("homeButton");
+    QPushButton * registerButton = ionsPage->findChild<QPushButton *>("registerButton");
+    QPushButton * checkButton = ionsPage->findChild<QPushButton *>("checkButton");
+    QPushButton * myUsernamesButton = ionsPage->findChild<QPushButton *>("myUsernamesButton");
+    QPushButton * reloadButton = ionsPage->findChild<QPushButton *>("reloadButton");
+    connect(reloadButton, SIGNAL(clicked()), ionsPage->findChild<QWebView *>("webView"), SLOT(reload()));
+
+    ionsFrame = ionsPage->findChild<QWebView *>("webView")->page()->mainFrame();
+    ionsProcessor = new IONSPaymentProcessor(this);
+    ionsPaymentSetup();
+    connect(ionsFrame, SIGNAL(javaScriptWindowObjectCleared()), this, SLOT(ionsPaymentSetup()));
+
+    connect(homeButton, SIGNAL(clicked()), this, SLOT(ionsHomeClicked()));
+    connect(registerButton, SIGNAL(clicked()), this, SLOT(ionsRegisterClicked()));
+    connect(checkButton, SIGNAL(clicked()), this, SLOT(ionsCheckClicked()));
+    connect(myUsernamesButton, SIGNAL(clicked()), this, SLOT(ionsMyUsernamesClicked()));
+
     centralWidget = new QStackedWidget(this);
     centralWidget->addWidget(overviewPage);
     centralWidget->addWidget(transactionsPage);
     centralWidget->addWidget(addressBookPage);
     centralWidget->addWidget(receiveCoinsPage);
     centralWidget->addWidget(sendCoinsPage);
+    centralWidget->addWidget(ionsPage);
     setCentralWidget(centralWidget);
 
     // Create status bar
@@ -241,6 +270,12 @@ void BitcoinGUI::createActions()
     addressBookAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_5));
     tabGroup->addAction(addressBookAction);
 
+    IONSAction = new QAction(QIcon(":/icons/bitcoin"), tr("&IONS"), this);
+    IONSAction->setToolTip(tr("Get info on your IONS usernames."));
+    IONSAction->setCheckable(true);
+    IONSAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_6));
+    tabGroup->addAction(IONSAction);
+
     connect(overviewAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(overviewAction, SIGNAL(triggered()), this, SLOT(gotoOverviewPage()));
     connect(sendCoinsAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
@@ -251,6 +286,8 @@ void BitcoinGUI::createActions()
     connect(historyAction, SIGNAL(triggered()), this, SLOT(gotoHistoryPage()));
     connect(addressBookAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(addressBookAction, SIGNAL(triggered()), this, SLOT(gotoAddressBookPage()));
+    connect(IONSAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
+    connect(IONSAction, SIGNAL(triggered()), this, SLOT(gotoIONSPage()));
 
     quitAction = new QAction(QIcon(":/icons/quit"), tr("E&xit"), this);
     quitAction->setToolTip(tr("Quit application"));
@@ -342,6 +379,7 @@ void BitcoinGUI::createToolBars()
     toolbar->addAction(receiveCoinsAction);
     toolbar->addAction(historyAction);
     toolbar->addAction(addressBookAction);
+    toolbar->addAction(IONSAction);
 
     QToolBar *toolbar2 = addToolBar(tr("Actions toolbar"));
     toolbar2->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
@@ -723,6 +761,55 @@ void BitcoinGUI::gotoAddressBookPage()
     exportAction->setEnabled(true);
     disconnect(exportAction, SIGNAL(triggered()), 0, 0);
     connect(exportAction, SIGNAL(triggered()), addressBookPage, SLOT(exportClicked()));
+}
+
+void BitcoinGUI::gotoIONSPage()
+{
+    IONSAction->setChecked(true);
+    if (!ionsInit)
+    {
+        ionsPage->findChild<QWebView *>("webView")->load(QUrl("http://"+ionsURL+"/1"));
+        ionsInit = true;
+    }
+    centralWidget->setCurrentWidget(ionsPage);
+
+    exportAction->setEnabled(false);
+    disconnect(exportAction, SIGNAL(triggered()), 0, 0);
+}
+
+void BitcoinGUI::ionsHomeClicked()
+{
+    ionsPage->findChild<QWebView *>("webView")->load(QUrl("http://"+ionsURL+"/1"));
+}
+
+void BitcoinGUI::ionsRegisterClicked()
+{
+    QJsonArray addresses = QJsonArray::fromStringList(walletModel->getAddressTableModel()->getReceiveAddresses());
+
+    QNetworkRequest netRequest;
+    netRequest.setUrl(QUrl("http://"+ionsURL+"/register"));
+    netRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded; charset=UTF-8");
+    ionsPage->findChild<QWebView *>("webView")->load(netRequest, QNetworkAccessManager::PostOperation, "addresses="+QJsonDocument(addresses).toJson());
+}
+
+void BitcoinGUI::ionsCheckClicked()
+{
+    ionsPage->findChild<QWebView *>("webView")->load(QUrl("http://"+ionsURL+"/check"));
+}
+
+void BitcoinGUI::ionsMyUsernamesClicked()
+{
+    QJsonArray addresses = QJsonArray::fromStringList(walletModel->getAddressTableModel()->getReceiveAddresses());
+
+    QNetworkRequest netRequest;
+    netRequest.setUrl(QUrl("http://"+ionsURL+"/my-usernames"));
+    netRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json; charset=UTF-8");
+    ionsPage->findChild<QWebView *>("webView")->load(netRequest, QNetworkAccessManager::PostOperation, QJsonDocument(addresses).toJson());
+}
+
+void BitcoinGUI::ionsPaymentSetup()
+{
+    ionsFrame->addToJavaScriptWindowObject("paymentProcessor", ionsProcessor);
 }
 
 void BitcoinGUI::gotoReceiveCoinsPage()

@@ -5,7 +5,7 @@ SetCompressor /SOLID lzma
 
 # General Symbol Definitions
 !define REGKEY "SOFTWARE\$(^Name)"
-!define VERSION 2.0.0.0
+!define VERSION 2.1.0.0
 !define COMPANY "I/OCoin project"
 !define URL http://iocoin.io
 
@@ -66,13 +66,13 @@ ShowUninstDetails show
 Section -Main SEC0000
     SetOutPath $INSTDIR
     SetOverwrite on
-    File ..\release\iocoin-qt.exe
+    File /r "..\release\*"
     File /oname=license.txt ..\COPYING
     File /oname=readme.txt ..\doc\README_windows.txt
     #SetOutPath $INSTDIR\daemon
     #File ..\src\novacoind.exe
     SetOutPath $INSTDIR\src
-    File /r /x *.exe /x *.o ..\src\*.*
+    #File /r /x *.exe /x *.o ..\src\*.*
     SetOutPath $INSTDIR
     WriteRegStr HKCU "${REGKEY}\Components" Main 1
 
@@ -122,6 +122,7 @@ Section /o -un.Main UNSEC0000
     Delete /REBOOTOK $INSTDIR\readme.txt
     #RMDir /r /REBOOTOK $INSTDIR\daemon
     RMDir /r /REBOOTOK $INSTDIR\src
+    RMDir /r /REBOOTOK $INSTDIR
     DeleteRegValue HKCU "${REGKEY}\Components" Main
 SectionEnd
 
