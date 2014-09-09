@@ -2,6 +2,13 @@
 #define SENDCOINSENTRY_H
 
 #include <QFrame>
+#include <QWebFrame>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+
+class SendCoinsEntry;
+
+#include "ionslookupaddressprocessor.h"
 
 namespace Ui {
     class SendCoinsEntry;
@@ -33,6 +40,8 @@ public:
 
     void setFocus();
 
+    void setPaymentAddress(QString ionsName, QString address);
+
 public slots:
     void setRemoveEnabled(bool enabled);
     void clear();
@@ -44,13 +53,21 @@ signals:
 private slots:
     void on_deleteButton_clicked();
     void on_payTo_textChanged(const QString &address);
+    void on_ionsUsername_textChanged(const QString &username);
     void on_addressBookButton_clicked();
+    void on_ionsLookupButton_clicked();
     void on_pasteButton_clicked();
     void updateDisplayUnit();
+    void ionsProcessorSetup();
+    void updateIONSAddress(QNetworkReply* reply);
 
 private:
     Ui::SendCoinsEntry *ui;
     WalletModel *model;
+    QWebFrame * ionsFrame;
+    IONSLookupAddressProcessor * ionsProcessor;
+    QNetworkAccessManager networkManager;
+    QNetworkReply * currentReply;
 };
 
 #endif // SENDCOINSENTRY_H

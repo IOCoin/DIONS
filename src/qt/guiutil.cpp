@@ -40,6 +40,8 @@
 #include "shellapi.h"
 #endif
 
+QString ionsURL =  "ions.iocoin.io";
+
 namespace GUIUtil {
 
 QString dateTimeStr(const QDateTime &date)
@@ -459,4 +461,3 @@ void HelpMessageBox::showOrPrint()
 }
 
 } // namespace GUIUtil
-

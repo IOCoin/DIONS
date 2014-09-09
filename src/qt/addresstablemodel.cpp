@@ -406,6 +406,23 @@ QString AddressTableModel::labelForAddress(const QString &address) const
     return QString();
 }
 
+QStringList AddressTableModel::getReceiveAddresses() const
+{
+    QStringList ret;
+    BOOST_FOREACH(const PAIRTYPE(CBitcoinAddress, string)& item, wallet->mapAddressBook)
+    {
+        const CBitcoinAddress& address = item.first;
+        CTxDestination dest = address.Get();
+        string currentAddress = address.ToString();
+        bool fMine = IsMine(*wallet, dest);
+        if (fMine)
+        {
+            ret.append(QString(currentAddress.c_str()));
+        }
+    }
+    return ret;
+}
+
 int AddressTableModel::lookupAddress(const QString &address) const
 {
     QModelIndexList lst = match(index(0, Address, QModelIndex()),

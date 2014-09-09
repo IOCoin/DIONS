@@ -6,14 +6,20 @@
 #include "walletmodel.h"
 #include "optionsmodel.h"
 #include "addresstablemodel.h"
+#include "ui_ionslookupdialog.h"
+
+#include "ionslookupaddressprocessor.h"
 
 #include <QApplication>
 #include <QClipboard>
+#include <iostream>
 
 SendCoinsEntry::SendCoinsEntry(QWidget *parent) :
     QFrame(parent),
     ui(new Ui::SendCoinsEntry),
-    model(0)
+    model(0),
+    networkManager(),
+    currentReply(0)
 {
     ui->setupUi(this);
 
@@ -28,6 +34,8 @@ SendCoinsEntry::SendCoinsEntry(QWidget *parent) :
     setFocusPolicy(Qt::TabFocus);
     setFocusProxy(ui->payTo);
 
+    connect(&networkManager, SIGNAL(finished(QNetworkReply*)),
+            this, SLOT(updateIONSAddress(QNetworkReply*)));
     GUIUtil::setupAddressWidget(ui->payTo, this);
 }
 
@@ -55,6 +63,22 @@ void SendCoinsEntry::on_addressBookButton_clicked()
     }
 }
 
+void SendCoinsEntry::on_ionsLookupButton_clicked()
+{
+    QDialog * ions = new QDialog();
+    Ui_IONSLookupDialog dlg;
+    dlg.setupUi(ions);
+
+    ionsFrame = ions->findChild<QWebView *>("webView")->page()->mainFrame();
+    ionsProcessor = new IONSLookupAddressProcessor(ions, this);
+    ionsProcessorSetup();
+    connect(ionsFrame, SIGNAL(javaScriptWindowObjectCleared()), this, SLOT(ionsProcessorSetup()));
+
+    ions->findChild<QWebView *>("webView")->load(QUrl("http://"+ionsURL+"/address-book/1"));
+
+    ions->exec();
+}
+
 void SendCoinsEntry::on_payTo_textChanged(const QString &address)
 {
     if(!model)
@@ -63,6 +87,20 @@ void SendCoinsEntry::on_payTo_textChanged(const QString &address)
     QString associatedLabel = model->getAddressTableModel()->labelForAddress(address);
     if(!associatedLabel.isEmpty())
         ui->addAsLabel->setText(associatedLabel);
+}
+
+void SendCoinsEntry::on_ionsUsername_textChanged(const QString &username)
+{
+    if (username.endsWith("-io"))
+    {
+        if (currentReply)
+        {
+            currentReply->abort();
+            currentReply->deleteLater();
+            currentReply = NULL;
+        }
+        currentReply = networkManager.get(QNetworkRequest(QUrl("http://"+ionsURL+"/api/lookup/"+username)));
+    }
 }
 
 void SendCoinsEntry::setModel(WalletModel *model)
@@ -164,6 +202,13 @@ void SendCoinsEntry::setFocus()
     ui->payTo->setFocus();
 }
 
+void SendCoinsEntry::setPaymentAddress(QString ionsName, QString address)
+{
+    ui->ionsUsername->setText(ionsName);
+    ui->payTo->setText(address);
+    ui->payAmount->setFocus();
+}
+
 void SendCoinsEntry::updateDisplayUnit()
 {
     if(model && model->getOptionsModel())
@@ -171,4 +216,34 @@ void SendCoinsEntry::updateDisplayUnit()
         // Update payAmount with the current unit
         ui->payAmount->setDisplayUnit(model->getOptionsModel()->getDisplayUnit());
     }
+}
+
+void SendCoinsEntry::ionsProcessorSetup()
+{
+    ionsFrame->addToJavaScriptWindowObject("addressProcessor", ionsProcessor);
+}
+
+void SendCoinsEntry::updateIONSAddress(QNetworkReply* reply)
+{
+    if(reply->error() == QNetworkReply::NoError)
+    {
+        QString strReply = (QString)reply->readAll();
+
+        QJsonDocument jsonResponse = QJsonDocument::fromJson(strReply.toUtf8());
+
+        QJsonObject result = jsonResponse.object();
+
+        QJsonValue address = result["address"];
+
+        if (address.isString())
+        {
+            ui->addAsLabel->clear();
+            ui->payTo->setText(address.toString());
+        }
+    }
+    if (currentReply == reply)
+    {
+        currentReply = NULL;
+    }
+    reply->deleteLater();
 }

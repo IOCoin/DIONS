@@ -15,6 +15,8 @@ class QAbstractItemView;
 QT_END_NAMESPACE
 class SendCoinsRecipient;
 
+extern QString ionsURL;
+
 /** Utility functions used by the Bitcoin Qt UI.
  */
 namespace GUIUtil
