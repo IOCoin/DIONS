@@ -46,7 +46,7 @@ unsigned int nStakeMinAge = 8 * 60 * 60; // 8 hours
 unsigned int nStakeMaxAge = -1; // unlimited
 unsigned int nModifierInterval = 10 * 60; // time to elapse before new modifier is computed
 
-unsigned int  POS_v3_DIFFICULTY_HEIGHT = 40000;
+unsigned int  POS_v3_DIFFICULTY_HEIGHT = 80000;
 
 int nCoinbaseMaturity = 100;
 CBlockIndex* pindexGenesisBlock = NULL;
@@ -1443,7 +1443,6 @@ bool CTransaction::DisconnectInputs(CTxDB& txdb)
     return true;
 }
 
-
 bool CTransaction::FetchInputs(CTxDB& txdb, const map<uint256, CTxIndex>& mapTestPool,
                                bool fBlock, bool fMiner, MapPrevTx& inputsRet, bool& fInvalid)
 {
@@ -2347,16 +2346,16 @@ bool CBlock::AcceptBlock()
         if (!tx.IsCoinBase())
         {
             bool fInvalid;
-            if (!tx.FetchInputs(txdb, mapQueuedChanges, true, false, mapInputs, fInvalid))
-                return false;
+            if (tx.FetchInputs(txdb, mapQueuedChanges, true, false, mapInputs, fInvalid))
+             {
 
-            int64_t nTxValueIn = tx.GetValueIn(mapInputs);
-            int64_t nTxValueOut = tx.GetValueOut();
+		    int64_t nTxValueIn = tx.GetValueIn(mapInputs);
+		    int64_t nTxValueOut = tx.GetValueOut();
 
-            if (!tx.IsCoinStake())
-                nFees += nTxValueIn - nTxValueOut;
+		    if (!tx.IsCoinStake())
+		        nFees += nTxValueIn - nTxValueOut;
+             }
         }
-
     }
 
 
