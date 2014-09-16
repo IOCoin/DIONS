@@ -1311,6 +1311,7 @@ static unsigned int GetNextTargetRequiredV3(const CBlockIndex* pindexLast, bool 
     if (bnNew <= 0 || bnNew > bnTargetLimit)
         {bnNew = bnTargetLimit;}
     else
+      if (bnNew < bnTargetLimit/4)
         {
             bnMit = bnNew*nFeesMitigation;
             if (bnMit > bnTargetLimit/4)
