@@ -46,7 +46,7 @@ unsigned int nStakeMinAge = 8 * 60 * 60; // 8 hours
 unsigned int nStakeMaxAge = -1; // unlimited
 unsigned int nModifierInterval = 10 * 60; // time to elapse before new modifier is computed
 
-unsigned int  POS_v3_DIFFICULTY_HEIGHT = 80000;
+unsigned int  POS_v3_DIFFICULTY_HEIGHT = 82400;
 
 int nCoinbaseMaturity = 100;
 CBlockIndex* pindexGenesisBlock = NULL;
@@ -1302,16 +1302,22 @@ static unsigned int GetNextTargetRequiredV3(const CBlockIndex* pindexLast, bool 
 
     // ppcoin: target change every block
     // ppcoin: retarget with exponential moving toward target spacing
-    CBigNum bnNew;
+    CBigNum bnNew, bnMit;
     bnNew.SetCompact(pindexPrev->nBits);
     int64_t nFeesMitigation = nFees / ( MIN_TX_FEE * 10) + 1;
     int64_t nInterval = nTargetTimespan / nTargetSpacing;
     bnNew *= ((nInterval - 1) * nTargetSpacing + nActualSpacing + nActualSpacing);
     bnNew /= ((nInterval + 1) * nTargetSpacing);
-    bnNew *= nFeesMitigation;
-
     if (bnNew <= 0 || bnNew > bnTargetLimit)
-        bnNew = bnTargetLimit;
+        {bnNew = bnTargetLimit;}
+    else
+        {
+            bnMit = bnNew*nFeesMitigation;
+            if (bnMit > bnTargetLimit/4)
+                {bnNew=bnTargetLimit/4;}
+            else
+                {bnNew=bnMit;}
+        }
 
     return bnNew.GetCompact();
 }
