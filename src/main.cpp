@@ -46,6 +46,8 @@ unsigned int nStakeMinAge = 8 * 60 * 60; // 8 hours
 unsigned int nStakeMaxAge = -1; // unlimited
 unsigned int nModifierInterval = 10 * 60; // time to elapse before new modifier is computed
 
+unsigned int  POS_v3_DIFFICULTY_HEIGHT = 100000;
+
 int nCoinbaseMaturity = 100;
 CBlockIndex* pindexGenesisBlock = NULL;
 int nBestHeight = -1;
@@ -1156,8 +1158,15 @@ int64_t GetProofOfStakeReward(int64_t nCoinAge, int64_t nFees, int nHeight)
 
     if (fDebug && GetBoolArg("-printcreation"))
         printf("GetProofOfStakeReward(): create=%s nCoinAge=%"PRId64"\n", FormatMoney(nSubsidy).c_str(), nCoinAge);
-
-    return nSubsidy + nFees;
+    if ( nHeight < POS_v3_DIFFICULTY_HEIGHT)
+        {
+            return nSubsidy + nFees;
+        }
+    else
+        {
+            //Remove fees from circulation
+            return nSubsidy;
+        }
 }
 
 static const int64_t nTargetTimespan = 16 * 60;  // 16 mins
@@ -1272,12 +1281,61 @@ static unsigned int GetNextTargetRequiredV2(const CBlockIndex* pindexLast, bool 
     return bnNew.GetCompact();
 }
 
-unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, bool fProofOfStake)
+static unsigned int GetNextTargetRequiredV3(const CBlockIndex* pindexLast, bool fProofOfStake, int64_t nFees)
+{
+    CBigNum bnTargetLimit = fProofOfStake ? GetProofOfStakeLimit(pindexLast->nHeight) : bnProofOfWorkLimit;
+
+    if (pindexLast == NULL)
+        return bnTargetLimit.GetCompact(); // genesis block
+
+    const CBlockIndex* pindexPrev = GetLastBlockIndex(pindexLast, fProofOfStake);
+    if (pindexPrev->pprev == NULL)
+        return bnTargetLimit.GetCompact(); // first block
+    const CBlockIndex* pindexPrevPrev = GetLastBlockIndex(pindexPrev->pprev, fProofOfStake);
+    if (pindexPrevPrev->pprev == NULL)
+        return bnTargetLimit.GetCompact(); // second block
+
+    int64_t nTargetSpacing = GetTargetSpacing(pindexLast->nHeight);
+    int64_t nActualSpacing = pindexPrev->GetBlockTime() - pindexPrevPrev->GetBlockTime();
+    if (nActualSpacing < 0)
+        nActualSpacing = nTargetSpacing;
+
+    // ppcoin: target change every block
+    // ppcoin: retarget with exponential moving toward target spacing
+    CBigNum bnNew, bnMit;
+    bnNew.SetCompact(pindexPrev->nBits);
+    int64_t nFeesMitigation = nFees / ( MIN_TX_FEE * 10) + 1;
+    int64_t nInterval = nTargetTimespan / nTargetSpacing;
+    bnNew *= ((nInterval - 1) * nTargetSpacing + nActualSpacing + nActualSpacing);
+    bnNew /= ((nInterval + 1) * nTargetSpacing);
+    if (bnNew <= 0 || bnNew > bnTargetLimit)
+        {bnNew = bnTargetLimit;}
+    else
+      if (bnNew < bnTargetLimit/4)
+        {
+            bnMit = bnNew*nFeesMitigation;
+            if (bnMit > bnTargetLimit/4)
+                {bnNew=bnTargetLimit/4;}
+            else
+                {bnNew=bnMit;}
+        }
+
+    return bnNew.GetCompact();
+}
+
+
+
+unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, bool fProofOfStake, int64_t nFees)
 {
     if (pindexLast->nHeight < 24376)
         return GetNextTargetRequiredV1(pindexLast, fProofOfStake);
     else
-        return GetNextTargetRequiredV2(pindexLast, fProofOfStake);
+        {
+        if (pindexLast->nHeight < POS_v3_DIFFICULTY_HEIGHT)
+            return GetNextTargetRequiredV2(pindexLast, fProofOfStake);
+        else
+            return GetNextTargetRequiredV3(pindexLast, fProofOfStake, nFees);
+        }
 }
 
 bool CheckProofOfWork(uint256 hash, unsigned int nBits)
@@ -1391,7 +1449,6 @@ bool CTransaction::DisconnectInputs(CTxDB& txdb)
 
     return true;
 }
-
 
 bool CTransaction::FetchInputs(CTxDB& txdb, const map<uint256, CTxIndex>& mapTestPool,
                                bool fBlock, bool fMiner, MapPrevTx& inputsRet, bool& fInvalid)
@@ -2277,8 +2334,40 @@ bool CBlock::AcceptBlock()
     if (IsProofOfStake() && !CheckCoinStakeTimestamp(nHeight, GetBlockTime(), (int64_t)vtx[1].nTime))
         return DoS(50, error("AcceptBlock() : coinstake timestamp violation nTimeBlock=%"PRId64" nTimeTx=%u", GetBlockTime(), vtx[1].nTime));
 
+    //we need to know fees to calculate new target
+    int64_t nFees = 0;
+    CTxDB txdb("r");
+    map<uint256, CTxIndex> mapQueuedChanges;
+    BOOST_FOREACH(CTransaction& tx, vtx)
+    {
+        uint256 hashTx = tx.GetHash();
+
+        CTxIndex txindexOld;
+        if (txdb.ReadTxIndex(hashTx, txindexOld)) {
+            BOOST_FOREACH(CDiskTxPos &pos, txindexOld.vSpent)
+                if (pos.IsNull())
+                    return false;
+        }
+
+        MapPrevTx mapInputs;
+        if (!tx.IsCoinBase())
+        {
+            bool fInvalid;
+            if (tx.FetchInputs(txdb, mapQueuedChanges, true, false, mapInputs, fInvalid))
+             {
+
+		    int64_t nTxValueIn = tx.GetValueIn(mapInputs);
+		    int64_t nTxValueOut = tx.GetValueOut();
+
+		    if (!tx.IsCoinStake())
+		        nFees += nTxValueIn - nTxValueOut;
+             }
+        }
+    }
+
+
     // Check proof-of-work or proof-of-stake
-    if (nBits != GetNextTargetRequired(pindexPrev, IsProofOfStake()))
+    if (nBits != GetNextTargetRequired(pindexPrev, IsProofOfStake(), nFees))
         return DoS(100, error("AcceptBlock() : incorrect %s", IsProofOfWork() ? "proof-of-work" : "proof-of-stake"));
 
     // Check timestamp against prev
