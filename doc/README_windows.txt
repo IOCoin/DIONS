@@ -1,4 +1,4 @@
-I/OCoin 2.1.0.0
+I/OCoin 3.0.0.0
 
 Copyright (c) 2013 NovaCoin Developers
 Copyright (c) 2011-2013 PPCoin Developers
