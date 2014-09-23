@@ -2340,14 +2340,7 @@ bool CBlock::AcceptBlock()
     map<uint256, CTxIndex> mapQueuedChanges;
     BOOST_FOREACH(CTransaction& tx, vtx)
     {
-        uint256 hashTx = tx.GetHash();
-
-        CTxIndex txindexOld;
-        if (txdb.ReadTxIndex(hashTx, txindexOld)) {
-            BOOST_FOREACH(CDiskTxPos &pos, txindexOld.vSpent)
-                if (pos.IsNull())
-                    return false;
-        }
+        
 
         MapPrevTx mapInputs;
         if (!tx.IsCoinBase())
