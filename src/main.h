@@ -51,7 +51,7 @@ static const int64_t MAX_MONEY = 22000000 * COIN;
 inline bool MoneyRange(int64_t nValue) { return (nValue >= 0 && nValue <= MAX_MONEY); }
 /** Threshold for nLockTime: below this value it is interpreted as block number, otherwise as UNIX timestamp. */
 static const unsigned int LOCKTIME_THRESHOLD = 500000000; // Tue Nov  5 00:53:20 1985 UTC
-
+static const unsigned int MAX_TX_INFO_LEN = 140; // Like Twitter
 static const int64_t MIN_COIN_YEAR_REWARD = 1 * CENT; // 1% per year
 static const int64_t MAX_COIN_YEAR_REWARD = 3 * CENT; // 3% per year
 
@@ -442,16 +442,18 @@ typedef std::map<uint256, std::pair<CTxIndex, CTransaction> > MapPrevTx;
 /** The basic transaction that is broadcasted on the network and contained in
  * blocks.  A transaction can contain multiple inputs and outputs.
  */
+
 class CTransaction
 {
 public:
     static const int CURRENT_VERSION=1;
-    int nVersion;
+    static const int VERSION_WITH_INFO=2;
+    int nVersion; 
     unsigned int nTime;
     std::vector<CTxIn> vin;
     std::vector<CTxOut> vout;
     unsigned int nLockTime;
-
+    std::string strTxInfo;
     // Denial-of-service detection:
     mutable int nDoS;
     bool DoS(int nDoSIn, bool fIn) const { nDoS += nDoSIn; return fIn; }
@@ -469,6 +471,8 @@ public:
         READWRITE(vin);
         READWRITE(vout);
         READWRITE(nLockTime);
+        if (this->nVersion >= VERSION_WITH_INFO)
+           {  READWRITE(strTxInfo); }
     )
 
     void SetNull()
@@ -478,6 +482,7 @@ public:
         vin.clear();
         vout.clear();
         nLockTime = 0;
+        strTxInfo.clear();
         nDoS = 0;  // Denial-of-service prevention
     }
 
@@ -631,13 +636,15 @@ public:
     {
         std::string str;
         str += IsCoinBase()? "Coinbase" : (IsCoinStake()? "Coinstake" : "CTransaction");
-        str += strprintf("(hash=%s, nTime=%d, ver=%d, vin.size=%"PRIszu", vout.size=%"PRIszu", nLockTime=%d)\n",
+        str += strprintf("(hash=%s, nTime=%d, ver=%d, vin.size=%"PRIszu", vout.size=%"PRIszu", nLockTime=%d, strTxInfo=%s)\n",
             GetHash().ToString().substr(0,10).c_str(),
             nTime,
             nVersion,
             vin.size(),
             vout.size(),
-            nLockTime);
+            nLockTime,
+            strTxInfo.substr(0,16).c_str());
+
         for (unsigned int i = 0; i < vin.size(); i++)
             str += "    " + vin[i].ToString() + "\n";
         for (unsigned int i = 0; i < vout.size(); i++)
