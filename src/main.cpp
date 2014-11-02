@@ -304,7 +304,7 @@ bool IsStandardTx(const CTransaction& tx)
 {
     if (tx.nVersion > CTransaction::CURRENT_VERSION)
         return false;
-
+   
     // Treat non-final transactions as non-standard to prevent a specific type
     // of double-spend attack, as well as DoS attacks. (if the transaction
     // can't be mined, the attacker isn't expending resources broadcasting it)
@@ -1756,7 +1756,7 @@ bool CBlock::ConnectBlock(CTxDB& txdb, CBlockIndex* pindex, bool fJustCheck)
             int64_t nTxValueIn = tx.GetValueIn(mapInputs);
             int64_t nTxValueOut = tx.GetValueOut();
 
-            if (tx.IsCoinStake())
+            if (tx.IsCoinStake() and pindex->nHeight<150000)
             {
                 double nNetworkDriftBuffer = nTxValueOut*.02;
                 nTxValueOut = nTxValueOut - nNetworkDriftBuffer;
