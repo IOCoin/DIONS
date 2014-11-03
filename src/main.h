@@ -32,6 +32,8 @@ static const int LAST_POW_BLOCK = 12815;
 
 /** The maximum allowed size for a serialized block, in bytes (network rule) */
 static const unsigned int MAX_BLOCK_SIZE = 1000000;
+
+static unsigned int  STAKE_INTEREST_V3 = 155000;
 /** The maximum size for mined blocks */
 static const unsigned int MAX_BLOCK_SIZE_GEN = MAX_BLOCK_SIZE/2;
 /** The maximum size for transactions we're willing to relay/mine **/
@@ -447,7 +449,7 @@ class CTransaction
 {
 public:
     static const int CURRENT_VERSION=1;
-    static const int VERSION_WITH_INFO=2;
+    static const int VERSION_WITH_INFO=3;
     int nVersion; 
     unsigned int nTime;
     std::vector<CTxIn> vin;

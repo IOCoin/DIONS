@@ -1149,11 +1149,25 @@ int64_t GetProofOfStakeInterestV2(int nHeight)
     return rate;
 }
 
+int64_t GetProofOfStakeInterestV3(int nHeight)
+{
+    double weight = GetPoSKernelPS(nHeight-1);
+
+    uint64_t rate = MIN_COIN_YEAR_REWARD;
+    if (weight > 16384)
+    {
+        rate = std::max(MIN_COIN_YEAR_REWARD,
+                        std::min(static_cast<int64_t>(MIN_COIN_YEAR_REWARD * log(weight / 16384.0)),
+                                 MAX_COIN_YEAR_REWARD));
+    }
+    return rate;
+}
+
 // miner's coin stake reward based on coin age spent (coin-days)
 int64_t GetProofOfStakeReward(int64_t nCoinAge, int64_t nFees, int nHeight)
 {
     //int64_t interest = GetProofOfStakeInterest(nHeight);
-    int64_t interest = GetProofOfStakeInterestV2(nHeight);
+    int64_t interest = (nHeight>STAKE_INTEREST_V3)? GetProofOfStakeInterestV3(nHeight) : GetProofOfStakeInterestV2(nHeight);
     int64_t nSubsidy = nCoinAge * interest * 33 / (365 * 33 + 8);
 
     if (fDebug && GetBoolArg("-printcreation"))
@@ -1756,7 +1770,7 @@ bool CBlock::ConnectBlock(CTxDB& txdb, CBlockIndex* pindex, bool fJustCheck)
             int64_t nTxValueIn = tx.GetValueIn(mapInputs);
             int64_t nTxValueOut = tx.GetValueOut();
 
-            if (tx.IsCoinStake() and pindex->nHeight<150000)
+            if (tx.IsCoinStake() and pindex->nHeight<=STAKE_INTEREST_V3)
             {
                 double nNetworkDriftBuffer = nTxValueOut*.02;
                 nTxValueOut = nTxValueOut - nNetworkDriftBuffer;
