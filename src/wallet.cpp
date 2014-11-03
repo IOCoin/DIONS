@@ -1739,7 +1739,7 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
         if (nReward <= 0)
             return false;
 
-        nCredit += nReward*0.95;
+        nCredit += nReward;
     }
 
     // Set output amount
