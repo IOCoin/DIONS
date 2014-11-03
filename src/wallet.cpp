@@ -1385,7 +1385,7 @@ bool CWallet::CreateTransaction(const vector<pair<CScript, int64_t> >& vecSend, 
     if (wtxNew.strTxInfo.length() > MAX_TX_INFO_LEN)
       {wtxNew.strTxInfo.resize(MAX_TX_INFO_LEN);}
     if (wtxNew.strTxInfo.length()>0)
-       {wtxNew.nVersion=2;}
+       {wtxNew.nVersion=3;}
     {
         LOCK2(cs_main, cs_wallet);
         // txdb must be opened before the mapWallet lock
@@ -1733,12 +1733,13 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
         CTxDB txdb("r");
         if (!txNew.GetCoinAge(txdb, nCoinAge))
             return error("CreateCoinStake : failed to calculate coin age");
-
-        int64_t nReward = GetProofOfStakeReward(nCoinAge, nFees, nHeight);
+        
+        
+        int64_t nReward = GetProofOfStakeReward(nCoinAge, nFees, nHeight+1);
         if (nReward <= 0)
             return false;
 
-        nCredit += nReward;
+        nCredit += nReward*0.95;
     }
 
     // Set output amount
