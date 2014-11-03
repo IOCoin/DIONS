@@ -1154,12 +1154,12 @@ int64_t GetProofOfStakeInterestV3(int nHeight)
     double weight = GetPoSKernelPS(nHeight-1);
 
     uint64_t rate = MIN_COIN_YEAR_REWARD;
-    if (weight > 16384)
+    /*if (weight > 16384)
     {
         rate = std::max(MIN_COIN_YEAR_REWARD,
                         std::min(static_cast<int64_t>(MIN_COIN_YEAR_REWARD * log(weight / 16384.0)),
                                  MAX_COIN_YEAR_REWARD));
-    }
+    }*/
     return rate;
 }
 
