@@ -3,9 +3,9 @@ I/OCoin development tree
 I/OCoin is a PoS-based cryptocurrency.
 
 Features:
-* Symbol: I/O
-* 60 second blocktime
-* Dynamic interest 1-3%, based on the percentage of coins staking
+* Symbol: IOC
+* 16 second blocktime
+* Constant interest 2%, based on the percentage of coins staking
 * 16 Million PoW coins
 * 22 Million total coins
 * 1250 I/O block reward, first 30 blocks half (625)
