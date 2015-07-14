@@ -1,6 +1,8 @@
-I/OCoin development tree
+I/O Digital BlockChain Development
 
-I/OCoin is a PoS I/O based cryptocurrency.
+I/O Coin development tree
+
+I/O Coin is a PoS I/O based cryptocurrency.
 
 Features:
 * Symbol: IOC
