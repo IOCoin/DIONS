@@ -22,6 +22,7 @@ bool CBasicKeyStore::AddKey(const CKey& key)
     {
         LOCK(cs_KeyStore);
         mapKeys[key.GetPubKey().GetID()] = make_pair(secret, fCompressed);
+        mapPubKeys[Hash160(key.GetPubKey().Raw())] = key.GetPubKey().Raw();
     }
     return true;
 }

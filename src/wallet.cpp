@@ -99,6 +99,30 @@ bool CWallet::LoadKeyMetadata(const CPubKey &pubkey, const CKeyMetadata &meta)
     return true;
 }
 
+bool CWallet::GetRSAPrivateKeyMetadata(const CPubKey &pubkey, string& rsaPrivKey)
+{
+    AssertLockHeld(cs_wallet); // mapKeyMetadata
+    rsaPrivKey = mapKeyMetadata[pubkey.GetID()].rsaPrivateKey;
+    return (mapKeyMetadata[pubkey.GetID()].rsaPrivateKey != "");
+}
+
+bool CWallet::GetRSAPublicKeyMetadata(const CPubKey &pubkey, string& rsaPubKey)
+{
+    AssertLockHeld(cs_wallet); // mapKeyMetadata
+    rsaPubKey = mapKeyMetadata[pubkey.GetID()].rsaPublicKey;
+    return (mapKeyMetadata[pubkey.GetID()].rsaPublicKey != "");
+}
+
+bool CWallet::SetRSAMetadata(const CPubKey &pubkey)
+{
+    AssertLockHeld(cs_wallet); // mapKeyMetadata
+
+    GenerateRSAKey(mapKeyMetadata[pubkey.GetID()].rsaPrivateKey,
+                   mapKeyMetadata[pubkey.GetID()].rsaPublicKey);
+
+    return true;
+}
+
 bool CWallet::LoadCryptedKey(const CPubKey &vchPubKey, const std::vector<unsigned char> &vchCryptedSecret)
 {
     return CCryptoKeyStore::AddCryptedKey(vchPubKey, vchCryptedSecret);
@@ -597,7 +621,9 @@ bool CWallet::IsMine(const CTxIn &txin) const
             const CWalletTx& prev = (*mi).second;
             if (txin.prevout.n < prev.vout.size())
                 if (IsMine(prev.vout[txin.prevout.n]))
+                {
                     return true;
+                }
         }
     }
     return false;
@@ -1112,10 +1138,10 @@ void CWallet::AvailableCoinsForStaking(vector<COutput>& vCoins, unsigned int nSp
 
             // Filtering by tx timestamp instead of block timestamp may give false positives but never false negatives
             if (pcoin->nTime + nStakeMinAge > nSpendTime)
-                continue;
+              continue;
 
             if (pcoin->GetBlocksToMaturity() > 0)
-                continue;
+              continue;
 
             int nDepth = pcoin->GetDepthInMainChain();
             if (nDepth < 1)
@@ -1123,6 +1149,7 @@ void CWallet::AvailableCoinsForStaking(vector<COutput>& vCoins, unsigned int nSp
 
             for (unsigned int i = 0; i < pcoin->vout.size(); i++)
                 if (!(pcoin->IsSpent(i)) && IsMine(pcoin->vout[i]) && pcoin->vout[i].nValue >= nMinimumInputValue)
+                if (IsMine(pcoin->vout[i]) && pcoin->vout[i].nValue >= nMinimumInputValue)
                     vCoins.push_back(COutput(pcoin, i, nDepth));
         }
     }
@@ -1694,7 +1721,7 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
     }
 
     if (nCredit == 0 || nCredit > nBalance - nReserveBalance)
-        return false;
+      return false;
 
     BOOST_FOREACH(PAIRTYPE(const CWalletTx*, unsigned int) pcoin, setCoins)
     {
@@ -1737,7 +1764,7 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
         
         int64_t nReward = GetProofOfStakeReward(nCoinAge, nFees, nHeight+1);
         if (nReward <= 0)
-            return false;
+          return false;
 
         nCredit += nReward;
     }
@@ -1872,6 +1899,7 @@ string CWallet::SendMoneyToDestination(const CTxDestination& address, int64_t nV
     // Parse Bitcoin address
     CScript scriptPubKey;
     scriptPubKey.SetDestination(address);
+
 
     return SendMoney(scriptPubKey, nValue, wtxNew, fAskFee, strTxInfo);
 }
@@ -2383,6 +2411,15 @@ void CReserveKey::ReturnKey()
     vchPubKey = CPubKey();
 }
 
+vector<unsigned char> CWallet::GetKeyFromKeyPool()
+{
+    int64_t nIndex = 0;
+    CKeyPool keypool;
+    ReserveKeyFromKeyPool(nIndex, keypool);
+    KeepKey(nIndex);
+    return keypool.vchPubKey.Raw();
+}
+
 void CWallet::GetAllReserveKeys(set<CKeyID>& setAddress) const
 {
     setAddress.clear();
@@ -2464,4 +2501,195 @@ void CWallet::GetKeyBirthTimes(std::map<CKeyID, int64_t> &mapKeyBirth) const {
     // Extract block timestamps for those keys
     for (std::map<CKeyID, CBlockIndex*>::const_iterator it = mapKeyFirstBlock.begin(); it != mapKeyFirstBlock.end(); it++)
         mapKeyBirth[it->first] = it->second->nTime - 7200; // block times can be 2h off
+}
+bool
+CWalletTx::GetEncryptedMessageUpdate (int& nOut, vchType& nm, vchType& r, vchType& val, vchType& s) const
+{
+  if (nVersion != CTransaction::DION_TX_VERSION)
+    return false;
+
+  if (!pkTxDecoded)
+    {
+      pkTxDecoded = true;
+
+      std::vector<vchType> vvch;
+      int op;
+      if (DecodeNameTx (*this, op, nPKOut, vvch))
+        switch (op)
+          {
+          case OP_ENCRYPTED_MESSAGE:
+            vchSender = vvch[0];
+            vchRecipient = vvch[1];
+            vchKey = vvch[2];
+            vchSignature = vvch[3];
+            pkTxDecodeSuccess = true;
+            break;
+
+          default:
+            pkTxDecodeSuccess = false;
+            break;
+          }
+      else
+        pkTxDecodeSuccess = false;
+    }
+
+  if (!pkTxDecodeSuccess)
+    return false;
+
+  nOut = nPKOut;
+  nm = vchSender;
+  r = vchRecipient;
+  val = vchKey;
+  s = vchSignature;
+  return true;
+}
+bool
+CWalletTx::GetPublicKeyUpdate (int& nOut, vchType& nm, vchType& val, vchType& s) const
+{
+  if (nVersion != CTransaction::DION_TX_VERSION)
+    return false;
+
+  if (!pkTxDecoded)
+    {
+      pkTxDecoded = true;
+
+      std::vector<vchType> vvch;
+      int op;
+      if (DecodeNameTx (*this, op, nPKOut, vvch))
+        switch (op)
+          {
+          case OP_PUBLIC_KEY:
+            vchSender = vvch[0];
+            vchKey = vvch[1];
+            vchSignature = vvch[2];
+            pkTxDecodeSuccess = true;
+            break;
+
+          default:
+            pkTxDecodeSuccess = false;
+            break;
+          }
+      else
+        pkTxDecodeSuccess = false;
+    }
+
+  if (!pkTxDecodeSuccess)
+    return false;
+
+  nOut = nPKOut;
+  nm = vchSender;
+  val = vchKey;
+  s = vchSignature;
+  return true;
+}
+bool
+CWalletTx::GetMessageUpdate (int& nOut, vchType& nm, vchType& r, vchType& val, vchType& s) const
+{
+  if (nVersion != CTransaction::DION_TX_VERSION)
+    return false;
+
+  if (!pkTxDecoded)
+    {
+      pkTxDecoded = true;
+
+      std::vector<vchType> vvch;
+      int op;
+      if (DecodeNameTx (*this, op, nPKOut, vvch))
+        switch (op)
+          {
+          case OP_MESSAGE:
+            vchSender = vvch[0];
+            vchRecipient = vvch[1];
+            vchKey = vvch[2];
+            vchSignature = vvch[3];
+            pkTxDecodeSuccess = true;
+            break;
+
+          default:
+            pkTxDecodeSuccess = false;
+            break;
+          }
+      else
+        pkTxDecodeSuccess = false;
+    }
+
+  if (!pkTxDecodeSuccess)
+    return false;
+
+  nOut = nPKOut;
+  nm = vchSender;
+  r = vchRecipient;
+  val = vchKey;
+  s = vchSignature;
+  return true;
+}
+
+bool
+CWalletTx::GetNameUpdate (int& nOut, vchType& nm, vchType& val) const
+{
+  if (nVersion != CTransaction::DION_TX_VERSION)
+    return false;
+
+  if (!nameTxDecoded)
+    {
+      nameTxDecoded = true;
+
+      std::vector<vchType> vvch;
+      int op;
+      if (DecodeNameTx (*this, op, nNameOut, vvch))
+        switch (op)
+          {
+          case OP_NAME_FIRSTUPDATE:
+            vchName = vvch[0];
+            vchValue = vvch[2];
+            nameTxDecodeSuccess = true;
+            break;
+
+          case OP_NAME_UPDATE:
+            vchName = vvch[0];
+            vchValue = vvch[1];
+            nameTxDecodeSuccess = true;
+            break;
+
+          case OP_NAME_NEW:
+          default:
+            nameTxDecodeSuccess = false;
+            break;
+          }
+      else
+        nameTxDecodeSuccess = false;
+    }
+
+  if (!nameTxDecodeSuccess)
+    return false;
+
+  nOut = nNameOut;
+  nm = vchName;
+  val = vchValue;
+  return true;
+}
+
+int CMerkleTx::GetDepthInMainChain(int& nHeightRet) const
+{
+    if (hashBlock == 0 || nIndex == -1)
+        return 0;
+
+    // Find the block it claims to be in
+    map<uint256, CBlockIndex*>::iterator mi = mapBlockIndex.find(hashBlock);
+    if (mi == mapBlockIndex.end())
+        return 0;
+    CBlockIndex* pindex = (*mi).second;
+    if (!pindex || !pindex->IsInMainChain())
+        return 0;
+
+    // Make sure the merkle branch connects to this block
+    if (!fMerkleVerified)
+    {
+        if (CBlock::CheckMerkleBranch(GetHash(), vMerkleBranch, nIndex) != pindex->hashMerkleRoot)
+            return 0;
+        fMerkleVerified = true;
+    }
+
+    nHeightRet = pindex->nHeight;
+    return pindexBest->nHeight - pindex->nHeight + 1;
 }

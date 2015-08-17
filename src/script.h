@@ -17,10 +17,16 @@
 #include "keystore.h"
 #include "bignum.h"
 
+using namespace std;
+
 typedef std::vector<unsigned char> valtype;
 
 class CTransaction;
 
+std::string Hash160ToAddress(uint160 hash160);
+extern bool AddressToHash160(const char* psz, uint160& hash160Ret);
+extern bool AddressToHash160(const std::string& str, uint160& hash160Ret);
+extern string Hash160ToAddress(uint160 hash160);
 static const unsigned int MAX_SCRIPT_ELEMENT_SIZE = 520; // bytes
 static const unsigned int MAX_OP_RETURN_RELAY = 40;      // bytes
 
@@ -217,19 +223,19 @@ inline std::string ValueString(const std::vector<unsigned char>& vch)
     if (vch.size() <= 4)
         return strprintf("%d", CBigNum(vch).getint());
     else
-        return HexStr(vch);
+	    return HexStr(vch);
 }
 
 inline std::string StackString(const std::vector<std::vector<unsigned char> >& vStack)
 {
-    std::string str;
-    BOOST_FOREACH(const std::vector<unsigned char>& vch, vStack)
-    {
-        if (!str.empty())
-            str += " ";
-        str += ValueString(vch);
-    }
-    return str;
+	std::string str;
+	BOOST_FOREACH(const std::vector<unsigned char>& vch, vStack)
+	{
+		if (!str.empty())
+			str += " ";
+		str += ValueString(vch);
+	}
+	return str;
 }
 
 
@@ -242,129 +248,129 @@ inline std::string StackString(const std::vector<std::vector<unsigned char> >& v
 /** Serialized script, used inside transaction inputs and outputs */
 class CScript : public std::vector<unsigned char>
 {
-protected:
-    CScript& push_int64(int64_t n)
-    {
-        if (n == -1 || (n >= 1 && n <= 16))
-        {
-            push_back(n + (OP_1 - 1));
-        }
-        else
-        {
-            CBigNum bn(n);
-            *this << bn.getvch();
-        }
-        return *this;
-    }
+	protected:
+		CScript& push_int64(int64_t n)
+		{
+			if (n == -1 || (n >= 1 && n <= 16))
+			{
+				push_back(n + (OP_1 - 1));
+			}
+			else
+			{
+				CBigNum bn(n);
+				*this << bn.getvch();
+			}
+			return *this;
+		}
 
-    CScript& push_uint64(uint64_t n)
-    {
-        if (n >= 1 && n <= 16)
-        {
-            push_back(n + (OP_1 - 1));
-        }
-        else
-        {
-            CBigNum bn(n);
-            *this << bn.getvch();
-        }
-        return *this;
-    }
+		CScript& push_uint64(uint64_t n)
+		{
+			if (n >= 1 && n <= 16)
+			{
+				push_back(n + (OP_1 - 1));
+			}
+			else
+			{
+				CBigNum bn(n);
+				*this << bn.getvch();
+			}
+			return *this;
+		}
 
-public:
-    CScript() { }
-    CScript(const CScript& b) : std::vector<unsigned char>(b.begin(), b.end()) { }
-    CScript(const_iterator pbegin, const_iterator pend) : std::vector<unsigned char>(pbegin, pend) { }
+	public:
+		CScript() { }
+		CScript(const CScript& b) : std::vector<unsigned char>(b.begin(), b.end()) { }
+		CScript(const_iterator pbegin, const_iterator pend) : std::vector<unsigned char>(pbegin, pend) { }
 #ifndef _MSC_VER
-    CScript(const unsigned char* pbegin, const unsigned char* pend) : std::vector<unsigned char>(pbegin, pend) { }
+		CScript(const unsigned char* pbegin, const unsigned char* pend) : std::vector<unsigned char>(pbegin, pend) { }
 #endif
 
-    CScript& operator+=(const CScript& b)
-    {
-        insert(end(), b.begin(), b.end());
-        return *this;
-    }
+		CScript& operator+=(const CScript& b)
+		{
+			insert(end(), b.begin(), b.end());
+			return *this;
+		}
 
-    friend CScript operator+(const CScript& a, const CScript& b)
-    {
-        CScript ret = a;
-        ret += b;
-        return ret;
-    }
-
-
-    //explicit CScript(char b) is not portable.  Use 'signed char' or 'unsigned char'.
-    explicit CScript(signed char b)        { operator<<(b); }
-    explicit CScript(short b)              { operator<<(b); }
-    explicit CScript(int b)                { operator<<(b); }
-    explicit CScript(long b)               { operator<<(b); }
-    explicit CScript(long long b)          { operator<<(b); }
-    explicit CScript(unsigned char b)      { operator<<(b); }
-    explicit CScript(unsigned int b)       { operator<<(b); }
-    explicit CScript(unsigned short b)     { operator<<(b); }
-    explicit CScript(unsigned long b)      { operator<<(b); }
-    explicit CScript(unsigned long long b) { operator<<(b); }
-
-    explicit CScript(opcodetype b)     { operator<<(b); }
-    explicit CScript(const uint256& b) { operator<<(b); }
-    explicit CScript(const CBigNum& b) { operator<<(b); }
-    explicit CScript(const std::vector<unsigned char>& b) { operator<<(b); }
+		friend CScript operator+(const CScript& a, const CScript& b)
+		{
+			CScript ret = a;
+			ret += b;
+			return ret;
+		}
 
 
-    //CScript& operator<<(char b) is not portable.  Use 'signed char' or 'unsigned char'.
-    CScript& operator<<(signed char b)        { return push_int64(b); }
-    CScript& operator<<(short b)              { return push_int64(b); }
-    CScript& operator<<(int b)                { return push_int64(b); }
-    CScript& operator<<(long b)               { return push_int64(b); }
-    CScript& operator<<(long long b)          { return push_int64(b); }
-    CScript& operator<<(unsigned char b)      { return push_uint64(b); }
-    CScript& operator<<(unsigned int b)       { return push_uint64(b); }
-    CScript& operator<<(unsigned short b)     { return push_uint64(b); }
-    CScript& operator<<(unsigned long b)      { return push_uint64(b); }
-    CScript& operator<<(unsigned long long b) { return push_uint64(b); }
+		//explicit CScript(char b) is not portable.  Use 'signed char' or 'unsigned char'.
+		explicit CScript(signed char b)        { operator<<(b); }
+		explicit CScript(short b)              { operator<<(b); }
+		explicit CScript(int b)                { operator<<(b); }
+		explicit CScript(long b)               { operator<<(b); }
+		explicit CScript(long long b)          { operator<<(b); }
+		explicit CScript(unsigned char b)      { operator<<(b); }
+		explicit CScript(unsigned int b)       { operator<<(b); }
+		explicit CScript(unsigned short b)     { operator<<(b); }
+		explicit CScript(unsigned long b)      { operator<<(b); }
+		explicit CScript(unsigned long long b) { operator<<(b); }
 
-    CScript& operator<<(opcodetype opcode)
-    {
-        if (opcode < 0 || opcode > 0xff)
-            throw std::runtime_error("CScript::operator<<() : invalid opcode");
-        insert(end(), (unsigned char)opcode);
-        return *this;
-    }
+		explicit CScript(opcodetype b)     { operator<<(b); }
+		explicit CScript(const uint256& b) { operator<<(b); }
+		explicit CScript(const CBigNum& b) { operator<<(b); }
+		explicit CScript(const std::vector<unsigned char>& b) { operator<<(b); }
 
-    CScript& operator<<(const uint160& b)
-    {
-        insert(end(), sizeof(b));
-        insert(end(), (unsigned char*)&b, (unsigned char*)&b + sizeof(b));
-        return *this;
-    }
 
-    CScript& operator<<(const uint256& b)
-    {
-        insert(end(), sizeof(b));
-        insert(end(), (unsigned char*)&b, (unsigned char*)&b + sizeof(b));
-        return *this;
-    }
+		//CScript& operator<<(char b) is not portable.  Use 'signed char' or 'unsigned char'.
+		CScript& operator<<(signed char b)        { return push_int64(b); }
+		CScript& operator<<(short b)              { return push_int64(b); }
+		CScript& operator<<(int b)                { return push_int64(b); }
+		CScript& operator<<(long b)               { return push_int64(b); }
+		CScript& operator<<(long long b)          { return push_int64(b); }
+		CScript& operator<<(unsigned char b)      { return push_uint64(b); }
+		CScript& operator<<(unsigned int b)       { return push_uint64(b); }
+		CScript& operator<<(unsigned short b)     { return push_uint64(b); }
+		CScript& operator<<(unsigned long b)      { return push_uint64(b); }
+		CScript& operator<<(unsigned long long b) { return push_uint64(b); }
 
-    CScript& operator<<(const CPubKey& key)
-    {
-        std::vector<unsigned char> vchKey = key.Raw();
-        return (*this) << vchKey;
-    }
+		CScript& operator<<(opcodetype opcode)
+		{
+			if (opcode < 0 || opcode > 0xff)
+				throw std::runtime_error("CScript::operator<<() : invalid opcode");
+			insert(end(), (unsigned char)opcode);
+			return *this;
+		}
 
-    CScript& operator<<(const CBigNum& b)
-    {
-        *this << b.getvch();
-        return *this;
-    }
+		CScript& operator<<(const uint160& b)
+		{
+			insert(end(), sizeof(b));
+			insert(end(), (unsigned char*)&b, (unsigned char*)&b + sizeof(b));
+			return *this;
+		}
 
-    CScript& operator<<(const std::vector<unsigned char>& b)
-    {
-        if (b.size() < OP_PUSHDATA1)
-        {
-            insert(end(), (unsigned char)b.size());
-        }
-        else if (b.size() <= 0xff)
-        {
+		CScript& operator<<(const uint256& b)
+		{
+			insert(end(), sizeof(b));
+			insert(end(), (unsigned char*)&b, (unsigned char*)&b + sizeof(b));
+			return *this;
+		}
+
+		CScript& operator<<(const CPubKey& key)
+		{
+			std::vector<unsigned char> vchKey = key.Raw();
+			return (*this) << vchKey;
+		}
+
+		CScript& operator<<(const CBigNum& b)
+		{
+			*this << b.getvch();
+			return *this;
+		}
+
+		CScript& operator<<(const std::vector<unsigned char>& b)
+		{
+			if (b.size() < OP_PUSHDATA1)
+			{
+				insert(end(), (unsigned char)b.size());
+			}
+			else if (b.size() <= 0xff)
+			{
             insert(end(), OP_PUSHDATA1);
             insert(end(), (unsigned char)b.size());
         }
@@ -528,6 +534,35 @@ public:
     // pay-to-script-hash transactions:
     unsigned int GetSigOpCount(const CScript& scriptSig) const;
 
+    uint160 GetBitcoinAddressHash160() const;
+    void SetBitcoinAddress(const std::vector<unsigned char>& vchPubKey)
+    {
+        SetBitcoinAddress(Hash160(vchPubKey));
+    }
+
+    void SetBitcoinAddress(const uint160& hash160)
+    {
+        this->clear();
+        *this << OP_DUP << OP_HASH160 << hash160 << OP_EQUALVERIFY << OP_CHECKSIG;
+    }
+    bool SetBitcoinAddress(const std::string& strAddress)
+    {
+        this->clear();
+        uint160 hash160;
+        if (!AddressToHash160(strAddress, hash160))
+            return false;
+        SetBitcoinAddress(hash160);
+        return true;
+    }
+
+    std::string GetBitcoinAddress() const
+    {
+        uint160 hash160 = GetBitcoinAddressHash160();
+        if (hash160 == 0)
+            return "";
+        return Hash160ToAddress(hash160);
+    }
+
     bool IsPayToScriptHash() const;
 
     // Called by IsStandardTx and P2SH VerifyScript (which makes it consensus-critical).
@@ -567,7 +602,7 @@ public:
                 return str;
             }
             if (0 <= opcode && opcode <= OP_PUSHDATA4)
-                str += fShort? ValueString(vch).substr(0, 10) : ValueString(vch);
+                str += ValueString(vch);
             else
                 str += GetOpName(opcode);
         }
@@ -602,5 +637,7 @@ bool VerifySignature(const CTransaction& txFrom, const CTransaction& txTo, unsig
 // Given two sets of signatures for scriptPubKey, possibly with OP_0 placeholders,
 // combine them intelligently and return the result.
 CScript CombineSignatures(CScript scriptPubKey, const CTransaction& txTo, unsigned int nIn, const CScript& scriptSig1, const CScript& scriptSig2);
+bool ExtractPubKey(const CScript& scriptPubKey, const CKeyStore* pkeystore, std::vector<unsigned char>& vchPubKeyRet);
+bool ExtractHash160(const CScript& scriptPubKey, uint160& hash160Ret);
 
 #endif

@@ -1,15 +1,11 @@
-I/O Digital BlockChain Development
+I/OCoin development tree
 
-I/O Coin development tree
-
-I/O Coin is a PoS I/O based cryptocurrency.
+I/OCoin is a PoS-based cryptocurrency.
 
 Features:
-* Symbol: IOC
-* 16 second blocktime
-* Constant interest 2%, based on the percentage of coins staking
-* POS I/O [Volume Controlled] BlockChain
-* POS 2 [Coin Age Removed]
+* Symbol: I/O
+* 60 second blocktime
+* Dynamic interest 1-3%, based on the percentage of coins staking
 * 16 Million PoW coins
 * 22 Million total coins
 * 1250 I/O block reward, first 30 blocks half (625)
@@ -47,3 +43,6 @@ in this manner will have their corresponding issue labeled 'stagnant'.
 Issues with no commits will be given a similar warning, and closed after
 15 days from their last activity. Issues closed in this manner will be
 labeled 'stale'.
+
+
+===

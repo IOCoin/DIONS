@@ -28,6 +28,8 @@ class CKeyMetadata
 public:
     static const int CURRENT_VERSION=1;
     int nVersion;
+    string rsaPrivateKey;
+    string rsaPublicKey;
     int64_t nCreateTime; // 0 means unknown
 
     CKeyMetadata()
@@ -45,6 +47,8 @@ public:
         READWRITE(this->nVersion);
         nVersion = this->nVersion;
         READWRITE(nCreateTime);
+        READWRITE(this->rsaPrivateKey);
+        READWRITE(this->rsaPublicKey);
     )
 
     void SetNull()
@@ -80,6 +84,18 @@ public:
     {
         nWalletDBUpdated++;
         return Erase(std::make_pair(std::string("tx"), hash));
+    }
+
+    bool UpdateKey(const CPubKey& vchPubKey, const CKeyMetadata &keyMeta)
+    {
+        nWalletDBUpdated++;
+
+        if(!Write(std::make_pair(std::string("keymeta"), vchPubKey), keyMeta, true))
+        {
+            return false;
+        }
+
+      return true;
     }
 
     bool WriteKey(const CPubKey& vchPubKey, const CPrivKey& vchPrivKey, const CKeyMetadata &keyMeta)

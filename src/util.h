@@ -141,6 +141,10 @@ extern bool fNoListen;
 extern bool fLogTimestamps;
 extern bool fReopenDebugLog;
 
+bool EncryptMessage(const std::string& rsaPubKey, const std::string& message, std::string& encryptedMsg);
+bool DecryptMessage(const std::string& rsaPrivKey, const std::string& encrpyted, std::string& decryptedMsg);
+void GenerateRSAKey(std::string& rsaPrivKey, std::string& rsaPubKey);
+
 void RandAddSeed();
 void RandAddSeedPerfmon();
 int ATTR_WARN_PRINTF(1,2) OutputDebugStringF(const char* pszFormat, ...);

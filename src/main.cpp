@@ -33,6 +33,8 @@ CCriticalSection cs_main;
 CTxMemPool mempool;
 unsigned int nTransactionsUpdated = 0;
 
+CHooks* hook;
+
 map<uint256, CBlockIndex*> mapBlockIndex;
 set<pair<COutPoint, unsigned int> > setStakeSeen;
 libzerocoin::Params* ZCParams;
@@ -416,7 +418,18 @@ bool CTransaction::AreInputsStandard(const MapPrevTx& mapInputs) const
         txnouttype whichType;
         // get the scriptPubKey corresponding to this input:
         const CScript& prevScript = prev.scriptPubKey;
-        if (!Solver(prevScript, whichType, vSolutions))
+        
+ /* Try to decode a name script and strip it if it is there.  */
+    int op;
+    std::vector<vchType> vvch;
+    CScript::const_iterator pc = prevScript.begin ();
+    CScript rawScript;
+    if (DecodeNameScript (prevScript, op, vvch, pc))
+        rawScript = CScript(pc, prevScript.end ());
+    else
+        rawScript = prevScript;
+
+        if (!Solver(rawScript, whichType, vSolutions))
             return false;
         int nArgsExpected = ScriptSigArgsExpected(whichType, vSolutions);
         if (nArgsExpected < 0)
@@ -624,8 +637,8 @@ bool AcceptToMemoryPool(CTxMemPool& pool, CTransaction &tx,
         return tx.DoS(100, error("AcceptToMemoryPool : coinstake as individual tx"));
 
     // Rather not work on nonstandard transactions (unless -testnet)
-    if (!fTestNet && !IsStandardTx(tx))
-        return error("AcceptToMemoryPool : nonstandard transaction type");
+    if (!fTestNet && !IsStandardTx(tx) && tx.nVersion != CTransaction::DION_TX_VERSION)
+      return error("AcceptToMemoryPool : nonstandard transaction type");
 
     // is it already in the memory pool?
     uint256 hash = tx.GetHash();
@@ -727,11 +740,14 @@ bool AcceptToMemoryPool(CTxMemPool& pool, CTransaction &tx,
 
         // Check against previous transactions
         // This is done last to help prevent CPU exhaustion denial-of-service attacks.
-        if (!tx.ConnectInputs(txdb, mapInputs, mapUnused, CDiskTxPos(1,1,1), pindexBest, false, false))
+        CDiskTxPos cDiskTxPos = CDiskTxPos(1,1,1);
+        if (!tx.ConnectInputs(txdb, mapInputs, mapUnused, cDiskTxPos, pindexBest, false, false))
         {
             return error("AcceptToMemoryPool : ConnectInputs failed %s", hash.ToString().substr(0,10).c_str());
         }
     }
+
+    hook->AcceptToMemoryPool(tx);
 
     // Store transaction in memory
     {
@@ -771,6 +787,8 @@ bool CTxMemPool::addUnchecked(const uint256& hash, CTransaction &tx)
 
 bool CTxMemPool::remove(const CTransaction &tx, bool fRecursive)
 {
+  hook->RemoveFromMemoryPool(tx);
+
     // Remove transaction from memory pool
     {
         LOCK(cs);
@@ -1577,8 +1595,8 @@ unsigned int CTransaction::GetP2SHSigOpCount(const MapPrevTx& inputs) const
     return nSigOps;
 }
 
-bool CTransaction::ConnectInputs(CTxDB& txdb, MapPrevTx inputs, map<uint256, CTxIndex>& mapTestPool, const CDiskTxPos& posThisTx,
-    const CBlockIndex* pindexBlock, bool fBlock, bool fMiner)
+bool CTransaction::ConnectInputs(CTxDB& txdb, MapPrevTx inputs, map<uint256, CTxIndex>& mapTestPool, CDiskTxPos& posThisTx,
+    CBlockIndex* pindexBlock, bool fBlock, bool fMiner)
 {
     // Take over previous transactions' spent pointers
     // fBlock is true when this is called from AcceptBlock when a new best-block is added to the blockchain
@@ -1586,6 +1604,9 @@ bool CTransaction::ConnectInputs(CTxDB& txdb, MapPrevTx inputs, map<uint256, CTx
     // ... both are false when called from CTransaction::AcceptToMemoryPool
     if (!IsCoinBase())
     {
+        vector<CTransaction> vTxPrev;
+        vector<CTxIndex> vTxindex;
+
         int64_t nValueIn = 0;
         int64_t nFees = 0;
         for (unsigned int i = 0; i < vin.size(); i++)
@@ -1612,6 +1633,8 @@ bool CTransaction::ConnectInputs(CTxDB& txdb, MapPrevTx inputs, map<uint256, CTx
             nValueIn += txPrev.vout[prevout.n].nValue;
             if (!MoneyRange(txPrev.vout[prevout.n].nValue) || !MoneyRange(nValueIn))
                 return DoS(100, error("ConnectInputs() : txin values out of range"));
+            vTxPrev.push_back(txPrev);
+            vTxindex.push_back(txindex);
 
         }
         // The first loop above does all the inexpensive checks.
@@ -1628,7 +1651,7 @@ bool CTransaction::ConnectInputs(CTxDB& txdb, MapPrevTx inputs, map<uint256, CTx
             // This doesn't trigger the DoS code on purpose; if it did, it would make it easier
             // for an attacker to attempt to split the network.
             if (!txindex.vSpent[prevout.n].IsNull())
-                return fMiner ? false : error("ConnectInputs() : %s prev tx already used at %s", GetHash().ToString().substr(0,10).c_str(), txindex.vSpent[prevout.n].ToString().c_str());
+              return fMiner ? false : error("ConnectInputs() : %s prev tx already used at %s", GetHash().ToString().substr(0,10).c_str(), txindex.vSpent[prevout.n].ToString().c_str());
 
             // Skip ECDSA signature verification when connecting blocks (fBlock=true)
             // before the last blockchain checkpoint. This is safe because block merkle hashes are
@@ -1656,6 +1679,10 @@ bool CTransaction::ConnectInputs(CTxDB& txdb, MapPrevTx inputs, map<uint256, CTx
         {
             if (nValueIn < GetValueOut())
                 return DoS(100, error("ConnectInputs() : %s value in < value out", GetHash().ToString().substr(0,10).c_str()));
+
+        if (!hook->ConnectInputs (mapTestPool, *this, vTxPrev, vTxindex,
+                                   pindexBlock, posThisTx, fBlock, fMiner))
+            return false;
 
             // Tally transaction fees
             int64_t nTxFee = nValueIn - GetValueOut();
@@ -2346,7 +2373,7 @@ bool CBlock::AcceptBlock()
 
     // Check coinstake timestamp
     if (IsProofOfStake() && !CheckCoinStakeTimestamp(nHeight, GetBlockTime(), (int64_t)vtx[1].nTime))
-        return DoS(50, error("AcceptBlock() : coinstake timestamp violation nTimeBlock=%"PRId64" nTimeTx=%u", GetBlockTime(), vtx[1].nTime));
+      return DoS(50, error("AcceptBlock() : coinstake timestamp violation nTimeBlock=%"PRId64" nTimeTx=%u", GetBlockTime(), vtx[1].nTime));
 
     //we need to know fees to calculate new target
     int64_t nFees = 0;
@@ -2486,7 +2513,7 @@ bool ProcessBlock(CNode* pfrom, CBlock* pblock)
     // Limited duplicity on stake: prevents block flood attack
     // Duplicate stake allowed only when there is orphan child block
     if (pblock->IsProofOfStake() && setStakeSeen.count(pblock->GetProofOfStake()) && !mapOrphanBlocksByPrev.count(hash) && !Checkpoints::WantedByPendingSyncCheckpoint(hash))
-        return error("ProcessBlock() : duplicate proof-of-stake (%s, %d) for block %s", pblock->GetProofOfStake().first.ToString().c_str(), pblock->GetProofOfStake().second, hash.ToString().c_str());
+      return error("ProcessBlock() : duplicate proof-of-stake (%s, %d) for block %s", pblock->GetProofOfStake().first.ToString().c_str(), pblock->GetProofOfStake().second, hash.ToString().c_str());
 
     CBlockIndex* pcheckpoint = Checkpoints::GetLastSyncCheckpoint();
     if (pcheckpoint && pblock->hashPrevBlock != hashBestChain && !Checkpoints::WantedByPendingSyncCheckpoint(hash))
@@ -2633,6 +2660,8 @@ bool CBlock::SignBlock(CWallet& wallet, int64_t nFees)
                 vtx.insert(vtx.begin() + 1, txCoinStake);
                 hashMerkleRoot = BuildMerkleTree();
 
+                printf("CBlock::SignBlock GetHash().GetHex() %s\n", GetHash().GetHex().c_str());
+                printf("CBlock::SignBlock vchBlockSig.size() %d\n", vchBlockSig.size());
                 // append a signature to our block
                 return key.Sign(GetHash(), vchBlockSig);
             }
@@ -4039,3 +4068,4 @@ bool SendMessages(CNode* pto, bool fSendTrickle)
     }
     return true;
 }
+

@@ -71,7 +71,6 @@ class CWallet : public CCryptoKeyStore
 {
 private:
     bool SelectCoinsForStaking(int64_t nTargetValue, unsigned int nSpendTime, std::set<std::pair<const CWalletTx*,unsigned int> >& setCoinsRet, int64_t& nValueRet) const;
-    bool SelectCoins(int64_t nTargetValue, unsigned int nSpendTime, std::set<std::pair<const CWalletTx*,unsigned int> >& setCoinsRet, int64_t& nValueRet, const CCoinControl *coinControl=NULL) const;
 
     CWalletDB *pwalletdbEncryption;
 
@@ -82,6 +81,7 @@ private:
     int nWalletMaxVersion;
 
 public:
+    bool SelectCoins(int64_t nTargetValue, unsigned int nSpendTime, std::set<std::pair<const CWalletTx*,unsigned int> >& setCoinsRet, int64_t& nValueRet, const CCoinControl *coinControl=NULL) const;
     /// Main wallet lock.
     /// This lock protects all the fields added by CWallet
     ///   except for:
@@ -146,6 +146,9 @@ public:
     // Adds a key to the store, without saving it to disk (used by LoadWallet)
     bool LoadKey(const CKey& key) { return CCryptoKeyStore::AddKey(key); }
     // Load metadata (used by LoadWallet)
+    bool GetRSAPrivateKeyMetadata(const CPubKey &pubkey, string& rsaPrivKey);
+    bool GetRSAPublicKeyMetadata(const CPubKey &pubkey, string& rsaPubKey);
+    bool SetRSAMetadata(const CPubKey &pubkey);
     bool LoadKeyMetadata(const CPubKey &pubkey, const CKeyMetadata &metadata);
 
     bool LoadMinVersion(int nVersion) { AssertLockHeld(cs_wallet); nWalletVersion = nVersion; nWalletMaxVersion = std::max(nWalletMaxVersion, nVersion); return true; }
@@ -208,6 +211,7 @@ public:
     void KeepKey(int64_t nIndex);
     void ReturnKey(int64_t nIndex);
     bool GetKeyFromPool(CPubKey &key, bool fAllowReuse=true);
+    vector<unsigned char> GetKeyFromKeyPool();
     int64_t GetOldestKeyPoolTime();
     void GetAllReserveKeys(std::set<CKeyID>& setAddress) const;
 
@@ -318,6 +322,7 @@ public:
     // get the current wallet format (the oldest client version guaranteed to understand this wallet)
     int GetVersion() { LOCK(cs_wallet); return nWalletVersion; }
 
+
     void FixSpentCoins(int& nMismatchSpent, int64_t& nBalanceInQuestion, bool fCheckOnly = false);
     void DisableTransaction(const CTransaction &tx);
 
@@ -386,9 +391,9 @@ static void WriteOrderPos(const int64_t& nOrderPos, mapValue_t& mapValue)
 class CWalletTx : public CMerkleTx
 {
 private:
-    const CWallet* pwallet;
 
 public:
+    const CWallet* pwallet;
     std::vector<CMerkleTx> vtxPrev;
     mapValue_t mapValue;
     std::vector<std::pair<std::string, std::string> > vOrderForm;
@@ -409,6 +414,25 @@ public:
     mutable int64_t nCreditCached;
     mutable int64_t nAvailableCreditCached;
     mutable int64_t nChangeCached;
+
+    mutable bool nameTxDecoded;
+    mutable bool nameTxDecodeSuccess;
+    mutable int nNameOut;
+    mutable vchType vchName;
+    mutable vchType vchValue;
+
+    mutable bool messageTxDecoded;
+    mutable bool messageTxDecodeSuccess;
+    mutable int nMessageOut;
+    mutable vchType vchMessage;
+
+    mutable bool pkTxDecoded;
+    mutable bool pkTxDecodeSuccess;
+    mutable int nPKOut;
+    mutable vchType vchSender;
+    mutable vchType vchRecipient;
+    mutable vchType vchKey;
+    mutable vchType vchSignature;
 
     CWalletTx()
     {
@@ -699,6 +723,11 @@ public:
 
         return true;
     }
+
+    bool GetEncryptedMessageUpdate (int& nOut, vchType& nm, vchType& r, vchType& val, vchType& s) const;
+    bool GetMessageUpdate (int& nOut, vchType& nm, vchType& r, vchType& val, vchType& s) const;
+    bool GetPublicKeyUpdate (int& nOut, vchType& nm, vchType& val, vchType& s) const;
+    bool GetNameUpdate (int& nOut, vchType& nm, vchType& val) const;
 
     bool WriteToDisk();
 

@@ -10,6 +10,16 @@
 #include "ui_interface.h"
 #include <boost/algorithm/string/join.hpp>
 
+#include <stdio.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <openssl/bio.h>
+#include <openssl/err.h>
+#include <openssl/rsa.h>
+#include <openssl/evp.h>
+#include <openssl/pem.h>
+
 // Work around clang compilation problem in Boost 1.46:
 // /usr/include/boost/program_options/detail/config_file.hpp:163:17: error: call to function 'to_internal' that is neither visible in the template definition nor found by argument-dependent lookup
 // See also: http://stackoverflow.com/questions/10020179/compilation-fail-in-boost-librairies-program-options
@@ -121,10 +131,115 @@ instance_of_cinit;
 
 
 
+bool EncryptMessage(const string& rsaPubKey, const string& message, string& encryptedMsg)
+{
+  const int KEY_LENGTH=2048;
+  char   *err;               // Buffer for any error messages
 
+  const char* pubKeyStr = rsaPubKey.c_str();
 
+  printf("EncryptMessage using public key string %s\n", pubKeyStr);
 
+  const unsigned char* msg = reinterpret_cast<const unsigned char*>(message.c_str());
 
+ 
+  RSA *rsa= NULL;
+  BIO *keybio ;
+  keybio = BIO_new_mem_buf((void*)pubKeyStr, -1);
+  if (keybio==NULL)
+  {
+    printf( "Failed to create key BIO");
+    return false;
+  }
+
+  rsa = PEM_read_bio_RSA_PUBKEY(keybio, &rsa,NULL, NULL);
+
+  unsigned char encrypted[KEY_LENGTH/8] = { };
+
+  printf("RSA_public_encrypt %d, %s\n", message.size()+1,msg);
+  err = (char*)malloc(130);
+  int result = RSA_public_encrypt(message.size(),msg,encrypted,rsa,RSA_PKCS1_OAEP_PADDING);
+  if(result != 0)
+  {
+     ERR_load_crypto_strings();
+     ERR_error_string(ERR_get_error(), err);
+     fprintf(stderr, "Error encrypting message: %s\n", err);
+  }
+  printf("RSA_public_encrypt %d\n", result);
+ 
+  //encryptedMsg = string(reinterpret_cast<const char*>(encrypted)); 
+  encryptedMsg = EncodeBase64(encrypted, result); 
+
+  return true;
+}
+bool DecryptMessage(const string& rsaPrivKey, const string& encrypted, string& decryptedMsg)
+{
+  const char* privKeyStr = rsaPrivKey.c_str();
+  printf("DecryptMessage pKey %s\n", privKeyStr);
+  printf("DecryptMessage encrypted %s\n", encrypted.c_str());
+
+  //const unsigned char* msg = reinterpret_cast<const unsigned char*>(encrypted.c_str());
+  vector<unsigned char> msg  = DecodeBase64(encrypted.c_str());
+ 
+  RSA *rsa= NULL;
+  BIO *keybio ;
+  keybio = BIO_new_mem_buf((unsigned char*)privKeyStr, -1);
+  if (keybio==NULL)
+  {
+    printf( "Failed to create key BIO");
+    return false;
+  }
+
+  rsa = PEM_read_bio_RSAPrivateKey(keybio, &rsa,NULL, NULL);
+
+  unsigned char decrypted[4098] = { };
+
+  //TODO error check
+  int  result = RSA_private_decrypt(msg.size(),&msg[0],decrypted,rsa,RSA_PKCS1_OAEP_PADDING);
+
+  decryptedMsg = string(reinterpret_cast<const char*>(decrypted));
+
+  return true;
+}
+
+void GenerateRSAKey(string& rsaPrivKey, string& rsaPubKey)
+{
+    const int KEY_LENGTH=2048;
+    const int PUB_EXP=3;
+    size_t pri_len;            // Length of private key
+    size_t pub_len;            // Length of public key
+    char   *pri_key;           // Private key
+    char   *pub_key;           // Public key
+
+    // Generate key pair
+    printf("Generating RSA (%d bits) keypair...", KEY_LENGTH);
+    fflush(stdout);
+    RSA *keypair = RSA_generate_key(KEY_LENGTH, PUB_EXP, NULL, NULL);
+
+  // To get the C-string PEM form:
+    BIO *pri = BIO_new(BIO_s_mem());
+    BIO *pub = BIO_new(BIO_s_mem());
+
+    PEM_write_bio_RSAPrivateKey(pri, keypair, NULL, NULL, 0, NULL, NULL);
+    PEM_write_bio_RSA_PUBKEY(pub, keypair);
+
+    pri_len = BIO_pending(pri);
+    pub_len = BIO_pending(pub);
+
+    pri_key = (char*)malloc(pri_len + 1);
+    pub_key = (char*)malloc(pub_len + 1);
+
+    BIO_read(pri, pri_key, pri_len);
+    BIO_read(pub, pub_key, pub_len);
+
+    pri_key[pri_len] = '\0';
+    pub_key[pub_len] = '\0';
+
+    printf("\n%s\n%s\n", pri_key, pub_key);
+
+  rsaPrivKey = string(pri_key);
+  rsaPubKey = string(pub_key);
+}
 
 void RandAddSeed()
 {

@@ -17,7 +17,7 @@ using namespace std;
 using namespace boost;
 using namespace boost::assign;
 using namespace json_spirit;
-
+/*
 void ScriptPubKeyToJSON(const CScript& scriptPubKey, Object& out, bool fIncludeHex)
 {
     txnouttype type;
@@ -41,6 +41,110 @@ void ScriptPubKeyToJSON(const CScript& scriptPubKey, Object& out, bool fIncludeH
     Array a;
     BOOST_FOREACH(const CTxDestination& addr, addresses)
         a.push_back(CBitcoinAddress(addr).ToString());
+    out.push_back(Pair("addresses", a));
+}*/
+void ScriptPubKeyToJSON(const CScript& scriptPubKey, Object& out, bool fIncludeHex)
+{
+    //txnouttype type;
+    //vector<CTxDestination> addresses;
+    string address;
+    int nRequired = 1;
+
+    /* If this is a name transaction, try to strip off the initial
+       script and decode the rest for better results.  */
+    std::string nameAsmPrefix = "";
+    CScript script(scriptPubKey);
+    int op;
+    vector<vector<unsigned char> > vvch;
+    CScript::const_iterator pc = script.begin();
+    if (DecodeNameScript(script, op, vvch, pc))
+    {
+        Object nameOp;
+
+        switch (op)
+        {
+        case OP_PUBLIC_KEY:
+        {
+            assert(vvch.size() == 3);
+            nameOp.push_back(Pair("op", "public_key"));
+            const std::string sender(vvch[0].begin(), vvch[0].end());
+            const std::string key(vvch[1].begin(), vvch[1].end());
+            const std::string signature(vvch[2].begin(), vvch[2].end());
+            nameOp.push_back(Pair("sender", sender));
+            nameOp.push_back(Pair("key", key));
+            nameOp.push_back(Pair("signature", signature));
+            break;
+        }
+
+        case OP_MESSAGE:
+        {
+            assert(vvch.size() == 1);
+            const std::string rand = HexStr(vvch[0].begin(), vvch[0].end());
+            nameOp.push_back(Pair("op", "message"));
+            break;
+        }
+
+        case OP_NAME_NEW:
+        {
+            assert(vvch.size() == 1);
+            const std::string rand = HexStr(vvch[0].begin(), vvch[0].end());
+            nameOp.push_back(Pair("op", "name_new"));
+            nameOp.push_back(Pair("rand", rand));
+            break;
+        }
+
+        case OP_NAME_FIRSTUPDATE:
+        {
+            assert(vvch.size() == 3);
+            const std::string name(vvch[0].begin(), vvch[0].end());
+            const std::string rand = HexStr(vvch[1].begin(), vvch[1].end());
+            const std::string val(vvch[2].begin(), vvch[2].end());
+            nameOp.push_back(Pair("op", "name_firstupdate"));
+            nameOp.push_back(Pair("name", name));
+            nameOp.push_back(Pair("rand", rand));
+            nameOp.push_back(Pair("value", val));
+            break;
+        }
+
+        case OP_NAME_UPDATE:
+        {
+            assert(vvch.size() == 2);
+            const std::string name(vvch[0].begin(), vvch[0].end());
+            const std::string val(vvch[1].begin(), vvch[1].end());
+            nameOp.push_back(Pair("op", "name_update"));
+            nameOp.push_back(Pair("name", name));
+            nameOp.push_back(Pair("value", val));
+            break;
+        }
+
+        default:
+            nameOp.push_back(Pair("op", "unknown"));
+            break;
+        }
+
+        out.push_back(Pair("nameOp", nameOp));
+        nameAsmPrefix = "NAME_OPERATION ";
+        script = CScript(pc, script.end());
+    }
+
+    /* Write out the results.  */
+    out.push_back(Pair("asm", nameAsmPrefix + script.ToString()));
+    if (fIncludeHex)
+        out.push_back(Pair("hex", HexStr(scriptPubKey.begin(), scriptPubKey.end())));
+    out.push_back(Pair("hex", HexStr(scriptPubKey.begin(), scriptPubKey.end())));
+
+    /* Note:  ExtractDestination handles both pubkey hash and pubkey,
+       but the code below prints pubkeyhash as type in both cases.  That
+       is not so big a deal, presumably.  */
+
+    out.push_back(Pair("reqSigs", nRequired));
+    out.push_back(Pair("type", "pubkeyhash" /*GetTxnOutputType(type)*/ ));
+
+    Array a;
+    //BOOST_FOREACH(const CTxDestination& addr, addresses)
+    //    a.push_back(CBitcoinAddress(addr).ToString());
+    a.push_back(address);
+
     out.push_back(Pair("addresses", a));
 }
 

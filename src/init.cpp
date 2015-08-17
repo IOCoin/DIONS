@@ -18,6 +18,8 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <openssl/crypto.h>
 
+#include "main.h"
+
 #ifndef WIN32
 #include <signal.h>
 #endif
@@ -35,7 +37,7 @@ unsigned int nDerivationMethodIndex;
 unsigned int nMinerSleep;
 bool fUseFastIndex;
 enum Checkpoints::CPMode CheckpointsMode;
-
+void rescanfornames(); 
 //////////////////////////////////////////////////////////////////////////////
 //
 // Shutdown
@@ -830,6 +832,7 @@ bool AppInit2()
 
     RegisterWallet(pwalletMain);
 
+
     CBlockIndex *pindexRescan = pindexBest;
     if (GetBoolArg("-rescan"))
         pindexRescan = pindexGenesisBlock;
@@ -891,6 +894,24 @@ bool AppInit2()
     printf("Loaded %i addresses from peers.dat  %"PRId64"ms\n",
            addrman.size(), GetTimeMillis() - nStart);
 
+    hook = InitHook();
+
+    bool needNameRescan = false;
+    {
+      filesystem::path nmindex, nmindex_old;
+      nmindex = filesystem::path (GetDataDir ()) / "nameindex.dat";
+
+      if (!filesystem::exists (nmindex))
+        needNameRescan = true;
+
+      CNameDB dbName("cr+");
+    }
+
+    if(needNameRescan)
+    {
+      rescanfornames();
+    }
+    
     // ********************************************************* Step 11: start node
 
     if (!CheckDiskSpace())

@@ -25,10 +25,14 @@ class CAddress;
 class CInv;
 class CRequestTracker;
 class CNode;
+class CHooks;
 
 class CTxMemPool;
 
+typedef std::vector<unsigned char> vchType;
 static const int LAST_POW_BLOCK = 12815;
+
+extern CHooks* hook;
 
 /** The maximum allowed size for a serialized block, in bytes (network rule) */
 static const unsigned int MAX_BLOCK_SIZE = 1000000;
@@ -235,6 +239,9 @@ public:
     IMPLEMENT_SERIALIZE( READWRITE(FLATDATA(*this)); )
     void SetNull() { hash = 0; n = (unsigned int) -1; }
     bool IsNull() const { return (hash == 0 && n == (unsigned int) -1); }
+
+    unsigned int GetIndex() const { return n; }
+    const char* GetHash() const { return hash.ToString().c_str(); };
 
     friend bool operator<(const COutPoint& a, const COutPoint& b)
     {
@@ -450,6 +457,7 @@ class CTransaction
 public:
     static const int CURRENT_VERSION=1;
     static const int VERSION_WITH_INFO=3;
+    static const int DION_TX_VERSION=5;
     int nVersion; 
     unsigned int nTime;
     std::vector<CTxIn> vin;
@@ -654,6 +662,7 @@ public:
         return str;
     }
 
+
     void print() const
     {
         printf("%s", ToString().c_str());
@@ -690,8 +699,8 @@ public:
         @return Returns true if all checks succeed
      */
     bool ConnectInputs(CTxDB& txdb, MapPrevTx inputs,
-                       std::map<uint256, CTxIndex>& mapTestPool, const CDiskTxPos& posThisTx,
-                       const CBlockIndex* pindexBlock, bool fBlock, bool fMiner);
+                       std::map<uint256, CTxIndex>& mapTestPool, CDiskTxPos& posThisTx,
+                       CBlockIndex* pindexBlock, bool fBlock, bool fMiner);
     bool CheckTransaction() const;
     bool GetCoinAge(CTxDB& txdb, uint64_t& nCoinAge) const;  // ppcoin: get transaction coin age
 
@@ -758,9 +767,20 @@ public:
     // >=1 : this many blocks deep in the main chain
     int GetDepthInMainChain(CBlockIndex* &pindexRet) const;
     int GetDepthInMainChain() const { CBlockIndex *pindexRet; return GetDepthInMainChain(pindexRet); }
+    int GetDepthInMainChain(int& nHeightRet) const;
     bool IsInMainChain() const { CBlockIndex *pindexRet; return GetDepthInMainChainINTERNAL(pindexRet) > 0; }
     int GetBlocksToMaturity() const;
     bool AcceptToMemoryPool();
+
+  inline int
+  GetHeightInMainChain() const
+  {
+    int nHeight;
+    if (GetDepthInMainChain (nHeight) == 0)
+      return -1;
+
+    return nHeight;
+  }
 };
 
 

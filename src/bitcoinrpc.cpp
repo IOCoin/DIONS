@@ -290,6 +290,21 @@ static const CRPCCommand vRPCCommands[] =
     { "decoderawtransaction",   &decoderawtransaction,   false,  false },
     { "decodescript",           &decodescript,           false,  false },
     { "signrawtransaction",     &signrawtransaction,     false,  false },
+    { "message_send_plain",     &message_send_plain,     false,  false },
+    { "message_send",     &message_send,     false,  false },
+    { "new_public_key",     &new_public_key,     false,  false },
+    { "public_key_send",     &public_key_send,     false,  false },
+    { "name_new",     &name_new,     false,  false },
+    { "name_firstupdate",     &name_firstupdate,     false,  false },
+    { "name_update",     &name_update,     false,  false },
+    { "decrypted_message_list",     &decrypted_message_list,     false,  false },
+    { "message_list_plain",     &message_list_plain,     false,  false },
+    { "get_name_record",     &get_name_record,     false,  false },
+    { "name_list",     &name_list,     false,  false },
+    { "public_key_list",     &public_key_list,     false,  false },
+    { "name_rescan",     &name_rescan,     false,  false },
+    { "name_debug",     &name_debug,     false,  false },
+    { "name_debug1",     &name_debug1,     false,  false },
     { "sendrawtransaction",     &sendrawtransaction,     false,  false },
     { "getcheckpoint",          &getcheckpoint,          true,   false },
     { "reservebalance",         &reservebalance,         false,  true},
@@ -1230,6 +1245,7 @@ Array RPCConvertValues(const std::string &strMethod, const std::vector<std::stri
     if (strMethod == "createrawtransaction"   && n > 1) ConvertTo<Object>(params[1]);
     if (strMethod == "signrawtransaction"     && n > 1) ConvertTo<Array>(params[1], true);
     if (strMethod == "signrawtransaction"     && n > 2) ConvertTo<Array>(params[2], true);
+
     if (strMethod == "keypoolrefill"          && n > 0) ConvertTo<int64_t>(params[0]);
 
     return params;

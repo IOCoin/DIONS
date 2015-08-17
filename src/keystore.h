@@ -18,10 +18,12 @@ protected:
     mutable CCriticalSection cs_KeyStore;
 
 public:
+    std::map<uint160, std::vector<unsigned char> > mapPubKeys;
     virtual ~CKeyStore() {}
 
     // Add a key to the store.
     virtual bool AddKey(const CKey& key) =0;
+    mutable CCriticalSection cs_mapKeys;
 
     // Check whether a key corresponding to a given address is present in the store.
     virtual bool HaveKey(const CKeyID &address) const =0;
@@ -130,6 +132,7 @@ public:
     {
         return fUseCrypto;
     }
+
 
     bool IsLocked() const
     {

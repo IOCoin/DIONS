@@ -13,6 +13,8 @@
 
 #include <db_cxx.h>
 
+#include "txdb-leveldb.h"
+
 class CAddress;
 class CAddrMan;
 class CBlockLocator;
@@ -23,6 +25,8 @@ class COutPoint;
 class CTxIndex;
 class CWallet;
 class CWalletTx;
+class CNameIndex;
+
 
 extern unsigned int nWalletDBUpdated;
 
@@ -319,5 +323,67 @@ public:
     bool Write(const CAddrMan& addr);
     bool Read(CAddrMan& addr);
 };
+
+class CNameDB : public CDB
+{
+public:
+    CNameDB(const char* pszMode="r+") : CDB("nameindex.dat", pszMode) { }
+
+    bool WriteName(const vchType& name, const std::vector<CNameIndex>& vtxPos)
+    {
+        return Write(make_pair(std::string("namei"), name), vtxPos);
+    }
+
+    bool ReadName(const vchType& name, std::vector<CNameIndex>& vtxPos)
+    {
+        return Read(make_pair(std::string("namei"), name), vtxPos);
+    }
+
+    bool ExistsName(const vchType& name)
+    {
+        return Exists(make_pair(std::string("namei"), name));
+    }
+
+    bool EraseName(const vchType& name)
+    {
+        return Erase(make_pair(std::string("namei"), name));
+    }
+
+    bool ScanNames(
+            const vchType& vchName,
+            int nMax,
+            std::vector<std::pair<vchType, CNameIndex> >& nameScan);
+
+    bool test();
+
+    bool ReconstructNameIndex();
+};
+class CNameIndex
+{
+public:
+    CDiskTxPos txPos;
+    unsigned int nHeight;
+    std::vector<unsigned char> vValue;
+
+    CNameIndex()
+    {
+    }
+
+    CNameIndex(CDiskTxPos txPosIn, unsigned int nHeightIn, std::vector<unsigned char> vValueIn)
+    {
+        txPos = txPosIn;
+        nHeight = nHeightIn;
+        vValue = vValueIn;
+    }
+
+    IMPLEMENT_SERIALIZE
+    (
+        READWRITE(txPos);
+        READWRITE(nHeight);
+        READWRITE(vValue);
+    )
+};
+
+
 
 #endif // BITCOIN_DB_H

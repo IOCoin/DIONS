@@ -17,6 +17,7 @@ using namespace boost;
 #include "main.h"
 #include "sync.h"
 #include "util.h"
+#include "dions.h"
 
 bool CheckSig(vector<unsigned char> vchSig, vector<unsigned char> vchPubKey, CScript scriptCode, const CTransaction& txTo, unsigned int nIn, int nHashType);
 
@@ -1285,6 +1286,64 @@ bool CheckSig(vector<unsigned char> vchSig, vector<unsigned char> vchPubKey, CSc
 
 
 
+bool Solver(const CScript& scriptPubKey, vector<pair<opcodetype, valtype> >& vSolutionRet)
+{
+    // Templates
+    static vector<CScript> vTemplates;
+    if (vTemplates.empty())
+    {
+        // Standard tx, sender provides pubkey, receiver adds signature
+        vTemplates.push_back(CScript() << OP_PUBKEY << OP_CHECKSIG);
+
+        // Bitcoin address tx, sender provides hash of pubkey, receiver provides signature and pubkey
+        vTemplates.push_back(CScript() << OP_DUP << OP_HASH160 << OP_PUBKEYHASH << OP_EQUALVERIFY << OP_CHECKSIG);
+    }
+
+    // Scan templates
+    const CScript& script1 = scriptPubKey;
+    BOOST_FOREACH(const CScript& script2, vTemplates)
+    {
+        vSolutionRet.clear();
+        opcodetype opcode1, opcode2;
+        vector<unsigned char> vch1, vch2;
+
+        // Compare
+        CScript::const_iterator pc1 = script1.begin();
+        CScript::const_iterator pc2 = script2.begin();
+        for(;;)
+        {
+            if (pc1 == script1.end() && pc2 == script2.end())
+            {
+                // Found a match
+                reverse(vSolutionRet.begin(), vSolutionRet.end());
+                return true;
+            }
+            if (!script1.GetOp(pc1, opcode1, vch1))
+                break;
+            if (!script2.GetOp(pc2, opcode2, vch2))
+                break;
+            if (opcode2 == OP_PUBKEY)
+            {
+                if (vch1.size() < 33 || vch1.size() > 120)
+                    break;
+                vSolutionRet.push_back(make_pair(opcode2, vch1));
+            }
+            else if (opcode2 == OP_PUBKEYHASH)
+            {
+                if (vch1.size() != sizeof(uint160))
+                    break;
+                vSolutionRet.push_back(make_pair(opcode2, vch1));
+            }
+            else if (opcode1 != opcode2 || vch1 != vch2)
+            {
+                break;
+            }
+        }
+    }
+
+    vSolutionRet.clear();
+    return false;
+}
 
 //
 // Return public keys or hashes from scriptPubKey, for 'standard' transaction types.
@@ -1346,6 +1405,7 @@ bool Solver(const CScript& scriptPubKey, txnouttype& typeRet, vector<vector<unsi
                     if (m < 1 || n < 1 || m > n || vSolutionsRet.size()-2 != n)
                         return false;
                 }
+
                 return true;
             }
             if (!script1.GetOp(pc1, opcode1, vch1))
@@ -1558,9 +1618,19 @@ bool IsMine(const CKeyStore &keystore, const CTxDestination &dest)
 
 bool IsMine(const CKeyStore &keystore, const CScript& scriptPubKey)
 {
+    /* Try to decode a name script and strip it if it is there.  */
+    int op;
+    std::vector<vchType> vvch;
+    CScript::const_iterator pc = scriptPubKey.begin ();
+    CScript rawScript;
+    if (DecodeNameScript (scriptPubKey, op, vvch, pc))
+        rawScript = CScript(pc, scriptPubKey.end ());
+    else
+        rawScript = scriptPubKey;
+
     vector<valtype> vSolutions;
     txnouttype whichType;
-    if (!Solver(scriptPubKey, whichType, vSolutions))
+    if (!Solver(rawScript, whichType, vSolutions))
         return false;
 
     CKeyID keyID;
@@ -1735,12 +1805,22 @@ bool SignSignature(const CKeyStore &keystore, const CScript& fromPubKey, CTransa
     assert(nIn < txTo.vin.size());
     CTxIn& txin = txTo.vin[nIn];
 
+ /* Try to decode a name script and strip it if it is there.  */
+    int op;
+    std::vector<vchType> vvch;
+    CScript::const_iterator pc = fromPubKey.begin ();
+    CScript rawScript;
+    if (DecodeNameScript (fromPubKey, op, vvch, pc))
+        rawScript = CScript(pc, fromPubKey.end ());
+    else
+        rawScript = fromPubKey;
+
     // Leave out the signature from the hash, since a signature can't sign itself.
     // The checksig op will also drop the signatures from its hash.
     uint256 hash = SignatureHash(fromPubKey, txTo, nIn, nHashType);
 
     txnouttype whichType;
-    if (!Solver(keystore, fromPubKey, hash, nHashType, txin.scriptSig, whichType))
+    if (!Solver(keystore, rawScript, hash, nHashType, txin.scriptSig, whichType))
         return false;
 
     if (whichType == TX_SCRIPTHASH)
@@ -2035,4 +2115,87 @@ void CScript::SetMultisig(int nRequired, const std::vector<CKey>& keys)
     BOOST_FOREACH(const CKey& key, keys)
         *this << key.GetPubKey();
     *this << EncodeOP_N(keys.size()) << OP_CHECKMULTISIG;
+}
+bool ExtractPubKey(const CScript& scriptPubKey, const CKeyStore* keystore, vector<unsigned char>& vchPubKeyRet)
+{
+    vchPubKeyRet.clear();
+
+    vector<pair<opcodetype, valtype> > vSolution;
+    if (!Solver(scriptPubKey, vSolution))
+        return false;
+
+    if (keystore)
+    {
+        // Use keystore to convert hash160 to pubkey; only return keys that belong to us
+        ENTER_CRITICAL_SECTION(keystore->cs_mapKeys)
+        {
+            BOOST_FOREACH(PAIRTYPE(opcodetype, valtype)& item, vSolution)
+            {
+                valtype vchPubKey;
+                if (item.first == OP_PUBKEY)
+                {
+                    vchPubKey = item.second;
+                }
+                else if (item.first == OP_PUBKEYHASH)
+                {
+                    map<uint160, valtype>::const_iterator mi = keystore->mapPubKeys.find(uint160(item.second));
+                    if (mi == keystore->mapPubKeys.end())
+                        continue;
+                    vchPubKey = (*mi).second;
+                }
+                else
+                    continue;
+                if (keystore->HaveKey(CKeyID(uint160(vchPubKey))))
+                {
+                    vchPubKeyRet = vchPubKey;
+                    return true;
+                }
+            }
+        }
+        LEAVE_CRITICAL_SECTION(keystore->cs_mapKeys)
+    }
+    else
+    {
+        // No keystore - return pubkey only
+        BOOST_FOREACH(PAIRTYPE(opcodetype, valtype)& item, vSolution)
+        {
+            if (item.first == OP_PUBKEY)
+            {
+                vchPubKeyRet = item.second;
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+
+bool ExtractHash160(const CScript& scriptPubKey, uint160& hash160Ret)
+{
+    hash160Ret = 0;
+
+    vector<pair<opcodetype, valtype> > vSolution;
+    if (!Solver(scriptPubKey, vSolution))
+        return false;
+
+    BOOST_FOREACH(PAIRTYPE(opcodetype, valtype)& item, vSolution)
+    {
+        if (item.first == OP_PUBKEYHASH)
+        {
+            hash160Ret = uint160(item.second);
+            return true;
+        }
+    }
+    return false;
+}
+
+uint160 CScript::GetBitcoinAddressHash160() const
+{
+    uint160 hash160;
+    if (ExtractHash160(*this, hash160))
+        return hash160;
+    vector<unsigned char> vch;
+    if (ExtractPubKey(*this, NULL, vch))
+        return Hash160(vch);
+    return 0;
 }

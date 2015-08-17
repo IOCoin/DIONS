@@ -20,7 +20,8 @@
 #include "bignum.h"
 #include "key.h"
 #include "script.h"
-
+#include "main.h"
+#include "dions.h"
 static const char* pszBase58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 
 // Encode a byte sequence as a base58-encoded string
@@ -457,4 +458,30 @@ public:
     }
 };
 
+inline bool AddressToHash160(const char* psz, uint160& hash160Ret)
+{
+    std::vector<unsigned char> vch;
+    if (!DecodeBase58Check(psz, vch))
+        return false;
+    if (vch.empty())
+        return false;
+    unsigned char nVersion = vch[0];
+    if (vch.size() != sizeof(hash160Ret) + 1)
+        return false;
+    memcpy(&hash160Ret, &vch[1], sizeof(hash160Ret));
+    return (nVersion == GetAddressVersion());
+}
+
+inline bool AddressToHash160(const std::string& str, uint160& hash160Ret)
+{
+    return AddressToHash160(str.c_str(), hash160Ret);
+}
+
+inline std::string Hash160ToAddress(uint160 hash160)
+{
+    // add 1-byte version number to the front
+    std::vector<unsigned char> vch(1, GetAddressVersion());
+    vch.insert(vch.end(), UBEGIN(hash160), UEND(hash160));
+    return EncodeBase58Check(vch);
+}
 #endif

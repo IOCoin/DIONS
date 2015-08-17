@@ -339,9 +339,9 @@ template<typename Stream, typename K, typename Pred, typename A> void Unserializ
 // Thanks to Boost serialization for this idea.
 //
 template<typename T>
-inline unsigned int GetSerializeSize(const T& a, long nType, int nVersion)
+inline unsigned int GetSerializeSize(const T& a)
 {
-    return a.GetSerializeSize((int)nType, nVersion);
+    return a.GetSerializeSize();
 }
 
 template<typename Stream, typename T>
@@ -410,6 +410,12 @@ template<typename T, typename A>
 inline unsigned int GetSerializeSize(const std::vector<T, A>& v, int nType, int nVersion)
 {
     return GetSerializeSize_impl(v, nType, nVersion, boost::is_fundamental<T>());
+}
+
+template<typename T>
+inline unsigned int GetSerializeSize(const T& a, long nType, int nVersion=1)
+{
+    return a.GetSerializeSize((int)nType, nVersion);
 }
 
 

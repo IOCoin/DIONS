@@ -220,5 +220,20 @@ extern json_spirit::Value getblockhash(const json_spirit::Array& params, bool fH
 extern json_spirit::Value getblock(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value getblockbynumber(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value getcheckpoint(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value new_public_key(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value public_key_send(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value message_send_plain(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value message_send(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value name_new(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value name_firstupdate(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value name_update(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value get_name_record(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value name_list(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value decrypted_message_list(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value message_list_plain(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value public_key_list(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value name_rescan(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value name_debug(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value name_debug1(const json_spirit::Array& params, bool fHelp);
 
 #endif
