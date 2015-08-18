@@ -235,5 +235,6 @@ extern json_spirit::Value public_key_list(const json_spirit::Array& params, bool
 extern json_spirit::Value name_rescan(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value name_debug(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value name_debug1(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value getnumblocksofpeers(const json_spirit::Array& params, bool fHelp);
 
 #endif
