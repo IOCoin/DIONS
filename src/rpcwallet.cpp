@@ -1787,7 +1787,7 @@ Value makekeypair(const Array& params, bool fHelp)
     string strPrefix = "";
     if (params.size() > 0)
         strPrefix = params[0].get_str();
- 
+
     CKey key;
     key.MakeNewKey(false);
 
@@ -1796,4 +1796,20 @@ Value makekeypair(const Array& params, bool fHelp)
     result.push_back(Pair("PrivateKey", HexStr<CPrivKey::iterator>(vchPrivKey.begin(), vchPrivKey.end())));
     result.push_back(Pair("PublicKey", HexStr(key.GetPubKey().Raw())));
     return result;
+}
+
+Value getencryptionstatus(const Array& params, bool fHelp)
+{
+    if (fHelp || params.size() > 0)
+        throw runtime_error(
+            "getencryptionstatus\n"
+            "Returns \"unencrypted\", \"locked\", or \"unlocked\".");
+
+    if (!pwalletMain->IsCrypted())
+        return "unencrypted";
+
+    if (pwalletMain->IsLocked())
+        return "locked";
+
+    return "unlocked";
 }

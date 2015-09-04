@@ -314,6 +314,7 @@ static const CRPCCommand vRPCCommands[] =
     { "makekeypair",            &makekeypair,            false,  true},
     { "sendalert",              &sendalert,              false,  false},
     { "getnumblocksofpeers",    &getnumblocksofpeers,    true,   false},
+    { "getencryptionstatus",    &getencryptionstatus,    true,   false},
 };
 
 CRPCTable::CRPCTable()
