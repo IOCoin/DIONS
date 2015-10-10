@@ -32,7 +32,6 @@ class CHooks;
 
 unsigned char GetAddressVersion();
 
-
 std::vector<unsigned char> vchFromString(const std::string &str);
 string stringFromVch(const vector<unsigned char> &vch);
 int IndexOfNameOutput(const CTransaction& tx);
@@ -41,27 +40,31 @@ bool DecodeMessageTx(const CTransaction& tx, int& op, int& nOut, std::vector<std
 bool DecodeNameTx(const CTransaction& tx, int& op, int& nOut, std::vector<std::vector<unsigned char> >& vvch);
 bool DecodeNameScript(const CScript& script, int& op, std::vector<std::vector<unsigned char> > &vvch, CScript::const_iterator& pc);
 bool DecodeNameScript(const CScript& script, int& op, std::vector<std::vector<unsigned char> > &vvch);
+
 /* Handle the name operation part of the RPC call createrawtransaction.  */
 class CHooks
 {
 public:
-   virtual bool ConnectInputs(std::map<uint256, CTxIndex>& mapTestPool,
-          const CTransaction& tx,
-          std::vector<CTransaction>& vTxPrev,
-          std::vector<CTxIndex>& vTxindex,
-          CBlockIndex* pindexBlock,
-          CDiskTxPos& txPos,
-          bool fBlock,
-          bool fMiner) = 0;
+    virtual bool ConnectInputs(
+      std::map<uint256, CTxIndex>& mapTestPool,
+      const CTransaction& tx,
+      std::vector<CTransaction>& vTxPrev,
+      std::vector<CTxIndex>& vTxindex,
+      CBlockIndex* pindexBlock,
+      CDiskTxPos& txPos,
+      bool fBlock,
+      bool fMiner
+    ) = 0;
+
     virtual bool AcceptToMemoryPool(const CTransaction& tx) = 0;
     virtual void RemoveFromMemoryPool(const CTransaction& tx) = 0;
 
     /* These are for display and wallet management purposes.  Not for use to decide
      * whether to spend a coin. */
-     virtual bool IsMine(const CTransaction& tx) = 0;
-     virtual bool IsMine(const CTransaction& tx, const CTxOut& txout, bool ignore_name_new = false) = 0;
+    virtual bool IsMine(const CTransaction& tx) = 0;
+    virtual bool IsMine(const CTransaction& tx, const CTxOut& txout, bool ignore_name_new = false) = 0;
 };
 
 extern CHooks* InitHook();
 
-#endif 
+#endif

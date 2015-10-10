@@ -1138,10 +1138,10 @@ void CWallet::AvailableCoinsForStaking(vector<COutput>& vCoins, unsigned int nSp
 
             // Filtering by tx timestamp instead of block timestamp may give false positives but never false negatives
             if (pcoin->nTime + nStakeMinAge > nSpendTime)
-              continue;
+                continue;
 
             if (pcoin->GetBlocksToMaturity() > 0)
-              continue;
+                continue;
 
             int nDepth = pcoin->GetDepthInMainChain();
             if (nDepth < 1)
@@ -1149,8 +1149,8 @@ void CWallet::AvailableCoinsForStaking(vector<COutput>& vCoins, unsigned int nSp
 
             for (unsigned int i = 0; i < pcoin->vout.size(); i++)
                 if (!(pcoin->IsSpent(i)) && IsMine(pcoin->vout[i]) && pcoin->vout[i].nValue >= nMinimumInputValue)
-                if (IsMine(pcoin->vout[i]) && pcoin->vout[i].nValue >= nMinimumInputValue)
-                    vCoins.push_back(COutput(pcoin, i, nDepth));
+                    if (IsMine(pcoin->vout[i]) && pcoin->vout[i].nValue >= nMinimumInputValue)
+                        vCoins.push_back(COutput(pcoin, i, nDepth));
         }
     }
 }
@@ -1721,7 +1721,7 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
     }
 
     if (nCredit == 0 || nCredit > nBalance - nReserveBalance)
-      return false;
+        return false;
 
     BOOST_FOREACH(PAIRTYPE(const CWalletTx*, unsigned int) pcoin, setCoins)
     {
@@ -1760,11 +1760,11 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
         CTxDB txdb("r");
         if (!txNew.GetCoinAge(txdb, nCoinAge))
             return error("CreateCoinStake : failed to calculate coin age");
-        
-        
+
+
         int64_t nReward = GetProofOfStakeReward(nCoinAge, nFees, nHeight+1);
         if (nReward <= 0)
-          return false;
+            return false;
 
         nCredit += nReward;
     }
@@ -2502,171 +2502,178 @@ void CWallet::GetKeyBirthTimes(std::map<CKeyID, int64_t> &mapKeyBirth) const {
     for (std::map<CKeyID, CBlockIndex*>::const_iterator it = mapKeyFirstBlock.begin(); it != mapKeyFirstBlock.end(); it++)
         mapKeyBirth[it->first] = it->second->nTime - 7200; // block times can be 2h off
 }
-bool
-CWalletTx::GetEncryptedMessageUpdate (int& nOut, vchType& nm, vchType& r, vchType& val, vchType& s) const
+
+bool CWalletTx::GetEncryptedMessageUpdate (int& nOut, vchType& nm, vchType& r, vchType& val, vchType& s) const
 {
-  if (nVersion != CTransaction::DION_TX_VERSION)
-    return false;
+    if (nVersion != CTransaction::DION_TX_VERSION)
+        return false;
 
-  if (!pkTxDecoded)
+    if (!pkTxDecoded)
     {
-      pkTxDecoded = true;
+        pkTxDecoded = true;
 
-      std::vector<vchType> vvch;
-      int op;
-      if (DecodeNameTx (*this, op, nPKOut, vvch))
-        switch (op)
-          {
-          case OP_ENCRYPTED_MESSAGE:
-            vchSender = vvch[0];
-            vchRecipient = vvch[1];
-            vchKey = vvch[2];
-            vchSignature = vvch[3];
-            pkTxDecodeSuccess = true;
-            break;
+        std::vector<vchType> vvch;
+        int op;
+        if (DecodeNameTx (*this, op, nPKOut, vvch))
+        {
+            switch (op)
+            {
+            case OP_ENCRYPTED_MESSAGE:
+                vchSender = vvch[0];
+                vchRecipient = vvch[1];
+                vchKey = vvch[2];
+                vchSignature = vvch[3];
+                pkTxDecodeSuccess = true;
+                break;
 
-          default:
+            default:
+                pkTxDecodeSuccess = false;
+                break;
+            }
+        }
+        else
             pkTxDecodeSuccess = false;
-            break;
-          }
-      else
-        pkTxDecodeSuccess = false;
     }
 
-  if (!pkTxDecodeSuccess)
-    return false;
+    if (!pkTxDecodeSuccess)
+        return false;
 
-  nOut = nPKOut;
-  nm = vchSender;
-  r = vchRecipient;
-  val = vchKey;
-  s = vchSignature;
-  return true;
+    nOut = nPKOut;
+    nm = vchSender;
+    r = vchRecipient;
+    val = vchKey;
+    s = vchSignature;
+    return true;
 }
-bool
-CWalletTx::GetPublicKeyUpdate (int& nOut, vchType& nm, vchType& val, vchType& s) const
+
+bool CWalletTx::GetPublicKeyUpdate (int& nOut, vchType& nm, vchType& val, vchType& s) const
 {
-  if (nVersion != CTransaction::DION_TX_VERSION)
-    return false;
+    if (nVersion != CTransaction::DION_TX_VERSION)
+        return false;
 
-  if (!pkTxDecoded)
+    if (!pkTxDecoded)
     {
-      pkTxDecoded = true;
+        pkTxDecoded = true;
 
-      std::vector<vchType> vvch;
-      int op;
-      if (DecodeNameTx (*this, op, nPKOut, vvch))
-        switch (op)
-          {
-          case OP_PUBLIC_KEY:
-            vchSender = vvch[0];
-            vchKey = vvch[1];
-            vchSignature = vvch[2];
-            pkTxDecodeSuccess = true;
-            break;
+        std::vector<vchType> vvch;
+        int op;
+        if (DecodeNameTx (*this, op, nPKOut, vvch))
+        {
+            switch (op)
+            {
+            case OP_PUBLIC_KEY:
+                vchSender = vvch[0];
+                vchKey = vvch[1];
+                vchSignature = vvch[2];
+                pkTxDecodeSuccess = true;
+                break;
 
-          default:
+            default:
+                pkTxDecodeSuccess = false;
+                break;
+            }
+        }
+        else
             pkTxDecodeSuccess = false;
-            break;
-          }
-      else
-        pkTxDecodeSuccess = false;
     }
 
-  if (!pkTxDecodeSuccess)
-    return false;
+    if (!pkTxDecodeSuccess)
+        return false;
 
-  nOut = nPKOut;
-  nm = vchSender;
-  val = vchKey;
-  s = vchSignature;
-  return true;
+    nOut = nPKOut;
+    nm = vchSender;
+    val = vchKey;
+    s = vchSignature;
+    return true;
 }
-bool
-CWalletTx::GetMessageUpdate (int& nOut, vchType& nm, vchType& r, vchType& val, vchType& s) const
+
+bool CWalletTx::GetMessageUpdate (int& nOut, vchType& nm, vchType& r, vchType& val, vchType& s) const
 {
-  if (nVersion != CTransaction::DION_TX_VERSION)
-    return false;
+    if (nVersion != CTransaction::DION_TX_VERSION)
+        return false;
 
-  if (!pkTxDecoded)
+    if (!pkTxDecoded)
     {
-      pkTxDecoded = true;
+        pkTxDecoded = true;
 
-      std::vector<vchType> vvch;
-      int op;
-      if (DecodeNameTx (*this, op, nPKOut, vvch))
-        switch (op)
-          {
-          case OP_MESSAGE:
-            vchSender = vvch[0];
-            vchRecipient = vvch[1];
-            vchKey = vvch[2];
-            vchSignature = vvch[3];
-            pkTxDecodeSuccess = true;
-            break;
+        std::vector<vchType> vvch;
+        int op;
+        if (DecodeNameTx (*this, op, nPKOut, vvch))
+        {
+            switch (op)
+            {
+            case OP_MESSAGE:
+                vchSender = vvch[0];
+                vchRecipient = vvch[1];
+                vchKey = vvch[2];
+                vchSignature = vvch[3];
+                pkTxDecodeSuccess = true;
+                break;
 
-          default:
+            default:
+                pkTxDecodeSuccess = false;
+                break;
+            }
+        }
+        else
             pkTxDecodeSuccess = false;
-            break;
-          }
-      else
-        pkTxDecodeSuccess = false;
     }
 
-  if (!pkTxDecodeSuccess)
-    return false;
+    if (!pkTxDecodeSuccess)
+        return false;
 
-  nOut = nPKOut;
-  nm = vchSender;
-  r = vchRecipient;
-  val = vchKey;
-  s = vchSignature;
-  return true;
+    nOut = nPKOut;
+    nm = vchSender;
+    r = vchRecipient;
+    val = vchKey;
+    s = vchSignature;
+    return true;
 }
 
-bool
-CWalletTx::GetNameUpdate (int& nOut, vchType& nm, vchType& val) const
+bool CWalletTx::GetNameUpdate (int& nOut, vchType& nm, vchType& val) const
 {
-  if (nVersion != CTransaction::DION_TX_VERSION)
-    return false;
+    if (nVersion != CTransaction::DION_TX_VERSION)
+        return false;
 
-  if (!nameTxDecoded)
+    if (!nameTxDecoded)
     {
-      nameTxDecoded = true;
+        nameTxDecoded = true;
 
-      std::vector<vchType> vvch;
-      int op;
-      if (DecodeNameTx (*this, op, nNameOut, vvch))
-        switch (op)
-          {
-          case OP_NAME_FIRSTUPDATE:
-            vchName = vvch[0];
-            vchValue = vvch[2];
-            nameTxDecodeSuccess = true;
-            break;
+        std::vector<vchType> vvch;
+        int op;
+        if (DecodeNameTx (*this, op, nNameOut, vvch))
+        {
+            switch (op)
+            {
+            case OP_NAME_FIRSTUPDATE:
+                vchName = vvch[0];
+                vchValue = vvch[2];
+                nameTxDecodeSuccess = true;
+                break;
 
-          case OP_NAME_UPDATE:
-            vchName = vvch[0];
-            vchValue = vvch[1];
-            nameTxDecodeSuccess = true;
-            break;
+            case OP_NAME_UPDATE:
+                vchName = vvch[0];
+                vchValue = vvch[1];
+                nameTxDecodeSuccess = true;
+                break;
 
-          case OP_NAME_NEW:
-          default:
-            nameTxDecodeSuccess = false;
-            break;
-          }
-      else
+            case OP_NAME_NEW:
+            default:
+                nameTxDecodeSuccess = false;
+                break;
+            }
+        }
+        else
         nameTxDecodeSuccess = false;
     }
 
-  if (!nameTxDecodeSuccess)
-    return false;
+    if (!nameTxDecodeSuccess)
+        return false;
 
-  nOut = nNameOut;
-  nm = vchName;
-  val = vchValue;
-  return true;
+    nOut = nNameOut;
+    nm = vchName;
+    val = vchValue;
+    return true;
 }
 
 int CMerkleTx::GetDepthInMainChain(int& nHeightRet) const

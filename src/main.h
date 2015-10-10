@@ -458,7 +458,7 @@ public:
     static const int CURRENT_VERSION=1;
     static const int VERSION_WITH_INFO=3;
     static const int DION_TX_VERSION=5;
-    int nVersion; 
+    int nVersion;
     unsigned int nTime;
     std::vector<CTxIn> vin;
     std::vector<CTxOut> vout;
@@ -772,15 +772,14 @@ public:
     int GetBlocksToMaturity() const;
     bool AcceptToMemoryPool();
 
-  inline int
-  GetHeightInMainChain() const
-  {
-    int nHeight;
-    if (GetDepthInMainChain (nHeight) == 0)
-      return -1;
+    inline int GetHeightInMainChain() const
+    {
+        int nHeight;
+        if (GetDepthInMainChain(nHeight) == 0)
+            return -1;
 
-    return nHeight;
-  }
+        return nHeight;
+    }
 };
 
 

@@ -37,7 +37,7 @@ unsigned int nDerivationMethodIndex;
 unsigned int nMinerSleep;
 bool fUseFastIndex;
 enum Checkpoints::CPMode CheckpointsMode;
-void rescanfornames(); 
+void rescanfornames();
 //////////////////////////////////////////////////////////////////////////////
 //
 // Shutdown
@@ -898,20 +898,18 @@ bool AppInit2()
 
     bool needNameRescan = false;
     {
-      filesystem::path nmindex, nmindex_old;
-      nmindex = filesystem::path (GetDataDir ()) / "nameindex.dat";
+        filesystem::path nmindex, nmindex_old;
+        nmindex = filesystem::path (GetDataDir()) / "nameindex.dat";
 
-      if (!filesystem::exists (nmindex))
-        needNameRescan = true;
+        if (!filesystem::exists (nmindex))
+            needNameRescan = true;
 
-      CNameDB dbName("cr+");
+        CNameDB dbName("cr+");
     }
 
-    if(needNameRescan)
-    {
-      rescanfornames();
-    }
-    
+    if (needNameRescan)
+        rescanfornames();
+
     // ********************************************************* Step 11: start node
 
     if (!CheckDiskSpace())

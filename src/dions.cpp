@@ -43,8 +43,8 @@ extern Value sendtoaddress(const Array& params, bool fHelp);
 
 class CDionsHooks : public CHooks
 {
-  public:
-          virtual bool ConnectInputs( map<uint256, CTxIndex>& mapTestPool,
+public:
+    virtual bool ConnectInputs( map<uint256, CTxIndex>& mapTestPool,
            const CTransaction& tx,
            vector<CTransaction>& vTxPrev,
            vector<CTxIndex>& vTxindex,
@@ -52,82 +52,91 @@ class CDionsHooks : public CHooks
            CDiskTxPos& txPos,
            bool fBlock,
            bool fMiner);
-      virtual bool AcceptToMemoryPool(const CTransaction& tx);
-      virtual void RemoveFromMemoryPool(const CTransaction& tx);
-     virtual bool IsMine(const CTransaction& tx);
-     virtual bool IsMine(const CTransaction& tx, const CTxOut& txout, bool ignore_name_new = false);
+    virtual bool AcceptToMemoryPool(const CTransaction& tx);
+    virtual void RemoveFromMemoryPool(const CTransaction& tx);
+    virtual bool IsMine(const CTransaction& tx);
+    virtual bool IsMine(const CTransaction& tx, const CTxOut& txout, bool ignore_name_new = false);
 };
-vchType
-vchFromValue (const Value& value)
+
+vchType vchFromValue (const Value& value)
 {
-  const std::string str = value.get_str ();
-  return vchFromString (str);
+    const std::string str = value.get_str ();
+    return vchFromString (str);
 }
 
-vchType
-vchFromString (const std::string& str)
+vchType vchFromString (const std::string& str)
 {
-  const unsigned char* strbeg;
-  strbeg = reinterpret_cast<const unsigned char*> (str.c_str ());
-  return vchType(strbeg, strbeg + str.size ());
+    const unsigned char* strbeg;
+    strbeg = reinterpret_cast<const unsigned char*> (str.c_str ());
+    return vchType(strbeg, strbeg + str.size ());
 }
 
-string stringFromVch(const vector<unsigned char> &vch) 
+string stringFromVch(const vector<unsigned char> &vch)
 {
-  string res;
-  vector<unsigned char>::const_iterator vi = vch.begin();
-  while (vi != vch.end()) {
-    res += (char)(*vi);
-    vi++;
-  }
-  return res;
+    string res;
+    vector<unsigned char>::const_iterator vi = vch.begin();
+    while (vi != vch.end()) {
+      res += (char)(*vi);
+      vi++;
+    }
+    return res;
 }
-int GetExpirationDepth(int nHeight) 
-{
-  return 210000;
-}
-// For display purposes, pass the name height.
-int GetDisplayExpirationDepth() 
+
+int GetExpirationDepth(int nHeight)
 {
     return 210000;
 }
+
+// For display purposes, pass the name height.
+int GetDisplayExpirationDepth()
+{
+    return 210000;
+}
+
 int GetTxPosHeight(CNameIndex& txPos)
 {
     return txPos.nHeight;
 }
+
 int GetTxPosHeight(CDiskTxPos& txPos)
 {
     // Read block header
     CBlock block;
     if (!block.ReadFromDisk(txPos.nFile, txPos.nBlockPos, false))
         return 0;
+
     // Find the block in the index
     map<uint256, CBlockIndex*>::iterator mi = mapBlockIndex.find(block.GetHash());
     if (mi == mapBlockIndex.end())
         return 0;
+
     CBlockIndex* pindex = (*mi).second;
     if (!pindex || !pindex->IsInMainChain())
         return 0;
+
     return pindex->nHeight;
 }
-int
-GetNameHeight(vector<unsigned char> vchName)
-{
-  vector<CNameIndex> vtxPos;
-  CNameDB nameDb("r");
-  if (nameDb.ExistsName (vchName))
-    {
-      if (!nameDb.ReadName (vchName, vtxPos))
-        return error("GetNameHeight() : failed to read from name DB");
-      if (vtxPos.empty ())
-        return -1;
 
-      CNameIndex& txPos = vtxPos.back ();
-      return GetTxPosHeight (txPos);
+int GetNameHeight(vector<unsigned char> vchName)
+{
+    vector<CNameIndex> vtxPos;
+    CNameDB nameDb("r");
+
+    if (nameDb.ExistsName (vchName))
+    {
+        if (!nameDb.ReadName (vchName, vtxPos))
+            return error("GetNameHeight() : failed to read from name DB");
+
+        if (vtxPos.empty ())
+            return -1;
+
+        CNameIndex& txPos = vtxPos.back ();
+        return GetTxPosHeight (txPos);
     }
 
-  return -1;
+    return -1;
 }
+
 CScript RemoveNameScriptPrefix(const CScript& scriptIn)
 {
     int op;
@@ -136,17 +145,22 @@ CScript RemoveNameScriptPrefix(const CScript& scriptIn)
 
     if (!DecodeNameScript(scriptIn, op, vvch,  pc))
         throw runtime_error("RemoveNameScriptPrefix() : could not decode name script");
+
     return CScript(pc, scriptIn.end());
 }
+
 bool IsMyName(const CTransaction& tx, const CTxOut& txout)
 {
     const CScript& scriptPubKey = RemoveNameScriptPrefix(txout.scriptPubKey);
     CScript scriptSig;
     txnouttype whichType;
+
     if (!Solver(*pwalletMain, scriptPubKey, 0, 0, scriptSig, whichType))
         return false;
+
     return true;
 }
+
 bool CreateTransactionWithInputTx(const vector<pair<CScript, int64_t> >& vecSend, const CWalletTx& wtxIn, int nTxOut, CWalletTx& wtxNew, CReserveKey& reservekey, int64_t& nFeeRet)
 {
     int64_t nValue = 0;
@@ -156,6 +170,7 @@ bool CreateTransactionWithInputTx(const vector<pair<CScript, int64_t> >& vecSend
             return false;
         nValue += s.second;
     }
+
     if (vecSend.empty() || nValue < 0)
         return false;
 
@@ -220,7 +235,7 @@ bool CreateTransactionWithInputTx(const vector<pair<CScript, int64_t> >& vecSend
                     {
                       return false;
                     }
-                   
+
                     // -------------- Fill a vout to ourself, using same address type as the payment
                     // Now sending always to hash160 (GetBitcoinAddressHash160 will return hash160, even if pubkey is used)
                     CScript scriptChange;
@@ -274,6 +289,7 @@ bool CreateTransactionWithInputTx(const vector<pair<CScript, int64_t> >& vecSend
     printf("CreateTransactionWithInputTx succeeded:\n%s", wtxNew.ToString().c_str());
     return true;
 }
+
 string SendMoneyWithInputTx(const CScript& scriptPubKey, int64_t nValue, const CWalletTx& wtxIn, CWalletTx& wtxNew, bool fAskFee)
 {
     int nTxOut = IndexOfNameOutput(wtxIn);
@@ -303,33 +319,42 @@ string SendMoneyWithInputTx(const CScript& scriptPubKey, int64_t nValue, const C
 
     return "";
 }
+
 bool GetValueOfTxPos(CNameIndex& txPos, vector<unsigned char>& vchValue, uint256& hash, int& nHeight)
 {
     nHeight = GetTxPosHeight(txPos);
     vchValue = txPos.vValue;
     CTransaction tx;
+
     if (!tx.ReadFromDisk(txPos.txPos))
         return error("GetValueOfTxPos() : could not read tx from disk");
+
     hash = tx.GetHash();
     return true;
 }
+
 bool GetValueOfTxPos(CDiskTxPos& txPos, vector<unsigned char>& vchValue, uint256& hash, int& nHeight)
 {
     nHeight = GetTxPosHeight(txPos);
     CTransaction tx;
+
     if (!tx.ReadFromDisk(txPos))
         return error("GetValueOfTxPos() : could not read tx from disk");
+
     if (!GetValueOfNameTx(tx, vchValue))
         return error("GetValueOfTxPos() : could not decode value from tx");
+
     hash = tx.GetHash();
     return true;
 }
+
 bool GetTxOfName(CNameDB& dbName, const vector<unsigned char> &vchName, CTransaction& tx)
 {
     //vector<CDiskTxPos> vtxPos;
     vector<CNameIndex> vtxPos;
     if (!dbName.ReadName(vchName, vtxPos) || vtxPos.empty())
         return false;
+
     //CDiskTxPos& txPos = vtxPos.back();
     CNameIndex& txPos = vtxPos.back();
     //int nHeight = GetTxPosHeight(txPos);
@@ -345,18 +370,22 @@ bool GetTxOfName(CNameDB& dbName, const vector<unsigned char> &vchName, CTransac
         return error("GetTxOfName() : could not read tx from disk");
     return true;
 }
+
 bool GetNameAddress(const CTransaction& tx, std::string& strAddress)
 {
     int op;
     int nOut;
     vector<vector<unsigned char> > vvch;
+
     if (!DecodeNameTx(tx, op, nOut, vvch))
         return false;
+
     const CTxOut& txout = tx.vout[nOut];
     const CScript& scriptPubKey = RemoveNameScriptPrefix(txout.scriptPubKey);
     strAddress = scriptPubKey.GetBitcoinAddress();
     return true;
 }
+
 bool GetNameAddress(const CDiskTxPos& txPos, std::string& strAddress)
 {
     CTransaction tx;
@@ -365,6 +394,7 @@ bool GetNameAddress(const CDiskTxPos& txPos, std::string& strAddress)
 
     return GetNameAddress(tx, strAddress);
 }
+
 Value public_key_list(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() > 1)
@@ -382,36 +412,35 @@ Value public_key_list(const Array& params, bool fHelp)
 
     ENTER_CRITICAL_SECTION(cs_main)
     {
-      ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
-      {
-        BOOST_FOREACH(PAIRTYPE(const uint256, CWalletTx)& item,
-                      pwalletMain->mapWallet)
-          {
-            const CWalletTx& tx = item.second;
+        ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
+        {
+            BOOST_FOREACH(PAIRTYPE(const uint256, CWalletTx)& item,
+                          pwalletMain->mapWallet)
+            {
+                const CWalletTx& tx = item.second;
 
-            vchType vchSender, vchKey, vchSig;
-            int nOut;
-            if (!tx.GetPublicKeyUpdate (nOut, vchSender, vchKey, vchSig))
-              continue;
+                vchType vchSender, vchKey, vchSig;
+                int nOut;
+                if (!tx.GetPublicKeyUpdate (nOut, vchSender, vchKey, vchSig))
+                  continue;
 
-            const int nHeight = tx.GetHeightInMainChain ();
-            if (nHeight == -1)
-              continue;
-            assert (nHeight >= 0);
+                const int nHeight = tx.GetHeightInMainChain ();
+                if (nHeight == -1)
+                  continue;
+                assert (nHeight >= 0);
 
-            Object oName;
-            oName.push_back(Pair("sender", stringFromVch(vchSender)));
-            oName.push_back(Pair("key", stringFromVch(vchKey)));
-            oName.push_back(Pair("signature", stringFromVch(vchSig)));
+                Object oName;
+                oName.push_back(Pair("sender", stringFromVch(vchSender)));
+                oName.push_back(Pair("key", stringFromVch(vchKey)));
+                oName.push_back(Pair("signature", stringFromVch(vchSig)));
 
-            vNamesI[vchSender] = nHeight;
-            vNamesO[vchSender] = oName;
+                vNamesI[vchSender] = nHeight;
+                vNamesO[vchSender] = oName;
+            }
         }
-      }
-      LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+        LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
     }
     LEAVE_CRITICAL_SECTION(cs_main)
-    
 
     Array oRes;
     BOOST_FOREACH(const PAIRTYPE(vector<unsigned char>, Object)& item, vNamesO)
@@ -419,6 +448,7 @@ Value public_key_list(const Array& params, bool fHelp)
 
     return oRes;
 }
+
 Value decrypted_message_list(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() > 1)
@@ -429,65 +459,66 @@ Value decrypted_message_list(const Array& params, bool fHelp)
 
     vchType vchNameUniq;
     if (params.size () == 1)
-      vchNameUniq = vchFromValue (params[0]);
+        vchNameUniq = vchFromValue (params[0]);
 
     std::map<vchType, int> vNamesI;
     std::map<vchType, Object> vNamesO;
 
     ENTER_CRITICAL_SECTION(cs_main)
     {
-      ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
-      {
-        BOOST_FOREACH(PAIRTYPE(const uint256, CWalletTx)& item,
-                      pwalletMain->mapWallet)
+        ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
         {
-            const CWalletTx& tx = item.second;
-
-            vchType vchSender, vchRecipient, vchEncryptedMessage, vchSig;
-            int nOut;
-            if (!tx.GetEncryptedMessageUpdate (nOut, vchSender, vchRecipient, vchEncryptedMessage, vchSig))
-              continue;
-
-            const int nHeight = tx.GetHeightInMainChain ();
-            if (nHeight == -1)
-              continue;
-            assert (nHeight >= 0);
-
-            Object oName;
-            oName.push_back(Pair("sender", stringFromVch(vchSender)));
-            oName.push_back(Pair("recipient", stringFromVch(vchRecipient)));
-            oName.push_back(Pair("encrypted message", stringFromVch(vchEncryptedMessage)));
-            string rsaPrivKey;
-  CBitcoinAddress r(stringFromVch(vchRecipient));
-  if (!r.IsValid())
-    throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
-
-  CKeyID keyID;
-  if (!r.GetKeyID(keyID))
-    throw JSONRPCError(RPC_TYPE_ERROR, "Address does not refer to key");
-
-  CKey key;
-  if (!pwalletMain->GetKey(keyID, key))
-    throw JSONRPCError(RPC_WALLET_ERROR, "Private key not available");
-
-  CPubKey pubKey = key.GetPubKey();
-            if(pwalletMain->GetRSAPrivateKeyMetadata(pubKey, rsaPrivKey) == false)
+            BOOST_FOREACH(PAIRTYPE(const uint256, CWalletTx)& item,
+                          pwalletMain->mapWallet)
             {
-              printf("rsaPrivKey %s\n", rsaPrivKey.c_str());
-            }
-            string decrypted;
-            DecryptMessage(rsaPrivKey, stringFromVch(vchEncryptedMessage), decrypted);
-            oName.push_back(Pair("plain text", decrypted));
-            oName.push_back(Pair("signature", stringFromVch(vchSig)));
+                const CWalletTx& tx = item.second;
 
-            vNamesI[vchSender] = nHeight;
-            vNamesO[vchSender] = oName;
+                vchType vchSender, vchRecipient, vchEncryptedMessage, vchSig;
+                int nOut;
+                if (!tx.GetEncryptedMessageUpdate (nOut, vchSender, vchRecipient, vchEncryptedMessage, vchSig))
+                    continue;
+
+                const int nHeight = tx.GetHeightInMainChain ();
+                if (nHeight == -1)
+                    continue;
+
+                assert (nHeight >= 0);
+
+                Object oName;
+                oName.push_back(Pair("sender", stringFromVch(vchSender)));
+                oName.push_back(Pair("recipient", stringFromVch(vchRecipient)));
+                oName.push_back(Pair("encrypted message", stringFromVch(vchEncryptedMessage)));
+                string rsaPrivKey;
+                CBitcoinAddress r(stringFromVch(vchRecipient));
+                if (!r.IsValid())
+                  throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
+
+                CKeyID keyID;
+                if (!r.GetKeyID(keyID))
+                  throw JSONRPCError(RPC_TYPE_ERROR, "Address does not refer to key");
+
+                CKey key;
+                if (!pwalletMain->GetKey(keyID, key))
+                  throw JSONRPCError(RPC_WALLET_ERROR, "Private key not available");
+
+                CPubKey pubKey = key.GetPubKey();
+                if(pwalletMain->GetRSAPrivateKeyMetadata(pubKey, rsaPrivKey) == false)
+                {
+                  printf("rsaPrivKey %s\n", rsaPrivKey.c_str());
+                }
+
+                string decrypted;
+                DecryptMessage(rsaPrivKey, stringFromVch(vchEncryptedMessage), decrypted);
+                oName.push_back(Pair("plain text", decrypted));
+                oName.push_back(Pair("signature", stringFromVch(vchSig)));
+
+                vNamesI[vchSender] = nHeight;
+                vNamesO[vchSender] = oName;
+            }
         }
-      }
-      LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+        LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
     }
     LEAVE_CRITICAL_SECTION(cs_main)
-    
 
     Array oRes;
     BOOST_FOREACH(const PAIRTYPE(vector<unsigned char>, Object)& item, vNamesO)
@@ -495,6 +526,7 @@ Value decrypted_message_list(const Array& params, bool fHelp)
 
     return oRes;
 }
+
 Value message_list_plain(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() > 1)
@@ -505,44 +537,44 @@ Value message_list_plain(const Array& params, bool fHelp)
 
     vchType vchNameUniq;
     if (params.size () == 1)
-      vchNameUniq = vchFromValue (params[0]);
+        vchNameUniq = vchFromValue (params[0]);
 
     std::map<vchType, int> vNamesI;
     std::map<vchType, Object> vNamesO;
 
     ENTER_CRITICAL_SECTION(cs_main)
     {
-      ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
-      {
-        BOOST_FOREACH(PAIRTYPE(const uint256, CWalletTx)& item,
-                      pwalletMain->mapWallet)
+        ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
         {
-            const CWalletTx& tx = item.second;
+            BOOST_FOREACH(PAIRTYPE(const uint256, CWalletTx)& item,
+                          pwalletMain->mapWallet)
+            {
+                const CWalletTx& tx = item.second;
 
-            vchType vchSender, vchRecipient, vchMessage, vchSig;
-            int nOut;
-            if (!tx.GetMessageUpdate (nOut, vchSender, vchRecipient, vchMessage, vchSig))
-              continue;
+                vchType vchSender, vchRecipient, vchMessage, vchSig;
+                int nOut;
+                if (!tx.GetMessageUpdate (nOut, vchSender, vchRecipient, vchMessage, vchSig))
+                  continue;
 
-            const int nHeight = tx.GetHeightInMainChain ();
-            if (nHeight == -1)
-              continue;
-            assert (nHeight >= 0);
+                const int nHeight = tx.GetHeightInMainChain ();
+                if (nHeight == -1)
+                  continue;
+                assert (nHeight >= 0);
 
-            Object oName;
-            oName.push_back(Pair("sender", stringFromVch(vchSender)));
-            oName.push_back(Pair("recipient", stringFromVch(vchRecipient)));
-            oName.push_back(Pair("message", stringFromVch(vchMessage)));
-            oName.push_back(Pair("signature", stringFromVch(vchSig)));
+                Object oName;
+                oName.push_back(Pair("sender", stringFromVch(vchSender)));
+                oName.push_back(Pair("recipient", stringFromVch(vchRecipient)));
+                oName.push_back(Pair("message", stringFromVch(vchMessage)));
+                oName.push_back(Pair("signature", stringFromVch(vchSig)));
 
-            vNamesI[vchSender] = nHeight;
-            vNamesO[vchSender] = oName;
+                vNamesI[vchSender] = nHeight;
+                vNamesO[vchSender] = oName;
+            }
         }
-      }
-      LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+        LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
     }
     LEAVE_CRITICAL_SECTION(cs_main)
-    
+
 
     Array oRes;
     BOOST_FOREACH(const PAIRTYPE(vector<unsigned char>, Object)& item, vNamesO)
@@ -550,6 +582,7 @@ Value message_list_plain(const Array& params, bool fHelp)
 
     return oRes;
 }
+
 Value get_name_record(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() > 1)
@@ -567,56 +600,56 @@ Value get_name_record(const Array& params, bool fHelp)
 
     ENTER_CRITICAL_SECTION(cs_main)
     {
-      ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
-      {
-        BOOST_FOREACH(PAIRTYPE(const uint256, CWalletTx)& item,
-                      pwalletMain->mapWallet)
-          {
-            const CWalletTx& tx = item.second;
-
-            vchType vchName, vchValue;
-            int nOut;
-            if (!tx.GetNameUpdate (nOut, vchName, vchValue))
-              continue;
-
-            if(!vchNameUniq.empty () && vchNameUniq != vchName)
-              continue;
-
-            const int nHeight = tx.GetHeightInMainChain ();
-            if (nHeight == -1)
-              continue;
-            assert (nHeight >= 0);
-
-            // get last active name only
-            if (vNamesI.find (vchName) != vNamesI.end ()
-                && vNamesI[vchName] > nHeight)
-              continue;
-
-            if(vchNameUniq == vchName)
+        ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
+        {
+            BOOST_FOREACH(PAIRTYPE(const uint256, CWalletTx)& item,
+                          pwalletMain->mapWallet)
             {
-              Object oName;
-              oName.push_back(Pair("name", stringFromVch(vchName)));
-              oName.push_back(Pair("value", stringFromVch(vchValue)));
-              if (!hook->IsMine (tx))
-                  oName.push_back(Pair("transferred", 1));
-              string strAddress = "";
-              GetNameAddress(tx, strAddress);
-              oName.push_back(Pair("address", strAddress));
+                const CWalletTx& tx = item.second;
 
-              const int expiresIn = nHeight + GetDisplayExpirationDepth() - pindexBest->nHeight;
-              oName.push_back (Pair("expires_in", expiresIn));
-              if (expiresIn <= 0)
-                oName.push_back (Pair("expired", 1));
+                vchType vchName, vchValue;
+                int nOut;
+                if (!tx.GetNameUpdate (nOut, vchName, vchValue))
+                    continue;
 
-              vNamesI[vchName] = nHeight;
-              vNamesO[vchName] = oName;
+                if(!vchNameUniq.empty () && vchNameUniq != vchName)
+                    continue;
+
+                const int nHeight = tx.GetHeightInMainChain ();
+                if (nHeight == -1)
+                    continue;
+                assert (nHeight >= 0);
+
+                // get last active name only
+                if (vNamesI.find (vchName) != vNamesI.end ()
+                    && vNamesI[vchName] > nHeight)
+                    continue;
+
+                if(vchNameUniq == vchName)
+                {
+                    Object oName;
+                    oName.push_back(Pair("name", stringFromVch(vchName)));
+                    oName.push_back(Pair("value", stringFromVch(vchValue)));
+                    if (!hook->IsMine (tx))
+                        oName.push_back(Pair("transferred", 1));
+                    string strAddress = "";
+                    GetNameAddress(tx, strAddress);
+                    oName.push_back(Pair("address", strAddress));
+
+                    const int expiresIn = nHeight + GetDisplayExpirationDepth() - pindexBest->nHeight;
+                    oName.push_back (Pair("expires_in", expiresIn));
+                    if (expiresIn <= 0)
+                      oName.push_back (Pair("expired", 1));
+
+                    vNamesI[vchName] = nHeight;
+                    vNamesO[vchName] = oName;
+                }
             }
         }
-      }
-      LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+        LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
     }
     LEAVE_CRITICAL_SECTION(cs_main)
-    
+
 
     Array oRes;
     BOOST_FOREACH(const PAIRTYPE(vector<unsigned char>, Object)& item, vNamesO)
@@ -624,6 +657,7 @@ Value get_name_record(const Array& params, bool fHelp)
 
     return oRes;
 }
+
 Value name_list(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() > 1)
@@ -634,60 +668,60 @@ Value name_list(const Array& params, bool fHelp)
 
     vchType vchNameUniq;
     if (params.size () == 1)
-      vchNameUniq = vchFromValue (params[0]);
+        vchNameUniq = vchFromValue (params[0]);
 
     std::map<vchType, int> vNamesI;
     std::map<vchType, Object> vNamesO;
 
     ENTER_CRITICAL_SECTION(cs_main)
     {
-      ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
-      {
-        BOOST_FOREACH(PAIRTYPE(const uint256, CWalletTx)& item,
-                      pwalletMain->mapWallet)
-          {
-            const CWalletTx& tx = item.second;
+        ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
+        {
+            BOOST_FOREACH(PAIRTYPE(const uint256, CWalletTx)& item,
+                          pwalletMain->mapWallet)
+            {
+                const CWalletTx& tx = item.second;
 
-            vchType vchName, vchValue;
-            int nOut;
-            if (!tx.GetNameUpdate (nOut, vchName, vchValue))
-              continue;
+                vchType vchName, vchValue;
+                int nOut;
+                if (!tx.GetNameUpdate (nOut, vchName, vchValue))
+                  continue;
 
-            if(!vchNameUniq.empty () && vchNameUniq != vchName)
-              continue;
+                if(!vchNameUniq.empty () && vchNameUniq != vchName)
+                  continue;
 
-            const int nHeight = tx.GetHeightInMainChain ();
-            if (nHeight == -1)
-              continue;
-            assert (nHeight >= 0);
+                const int nHeight = tx.GetHeightInMainChain ();
+                if (nHeight == -1)
+                  continue;
+                assert (nHeight >= 0);
 
-            // get last active name only
-            if (vNamesI.find (vchName) != vNamesI.end ()
-                && vNamesI[vchName] > nHeight)
-              continue;
+                // get last active name only
+                if (vNamesI.find (vchName) != vNamesI.end ()
+                    && vNamesI[vchName] > nHeight)
+                  continue;
 
-            Object oName;
-            oName.push_back(Pair("name", stringFromVch(vchName)));
-            oName.push_back(Pair("value", stringFromVch(vchValue)));
-            if (!hook->IsMine (tx))
-                oName.push_back(Pair("transferred", 1));
-            string strAddress = "";
-            GetNameAddress(tx, strAddress);
-            oName.push_back(Pair("address", strAddress));
+                Object oName;
+                oName.push_back(Pair("name", stringFromVch(vchName)));
+                oName.push_back(Pair("value", stringFromVch(vchValue)));
+                if (!hook->IsMine (tx))
+                    oName.push_back(Pair("transferred", 1));
+                string strAddress = "";
+                GetNameAddress(tx, strAddress);
+                oName.push_back(Pair("address", strAddress));
 
-            const int expiresIn = nHeight + GetDisplayExpirationDepth() - pindexBest->nHeight;
-            oName.push_back (Pair("expires_in", expiresIn));
-            if (expiresIn <= 0)
-              oName.push_back (Pair("expired", 1));
+                const int expiresIn = nHeight + GetDisplayExpirationDepth() - pindexBest->nHeight;
+                oName.push_back (Pair("expires_in", expiresIn));
+                if (expiresIn <= 0)
+                  oName.push_back (Pair("expired", 1));
 
-            vNamesI[vchName] = nHeight;
-            vNamesO[vchName] = oName;
+                vNamesI[vchName] = nHeight;
+                vNamesO[vchName] = oName;
+            }
         }
-      }
-      LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+        LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
     }
     LEAVE_CRITICAL_SECTION(cs_main)
-    
+
 
     Array oRes;
     BOOST_FOREACH(const PAIRTYPE(vector<unsigned char>, Object)& item, vNamesO)
@@ -695,6 +729,7 @@ Value name_list(const Array& params, bool fHelp)
 
     return oRes;
 }
+
 Value name_debug(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() < 0)
@@ -725,6 +760,7 @@ Value name_debug(const Array& params, bool fHelp)
     printf("----------------------------\n");
     return true;
 }
+
 Value name_debug1(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() < 1)
@@ -776,12 +812,12 @@ Value name_firstupdate(const Array& params, bool fHelp)
 
     vchType vchValue;
     if (params.size () == 3)
-      vchValue = vchFromValue (params[2]);
+        vchValue = vchFromValue (params[2]);
     else
-      vchValue = vchFromValue (params[3]);
+        vchValue = vchFromValue (params[3]);
 
     if (vchValue.size () > UI_MAX_VALUE_LENGTH)
-      throw JSONRPCError(RPC_INVALID_PARAMETER, "the value is too long");
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "the value is too long");
 
     CWalletTx wtx;
     wtx.nVersion = CTransaction::DION_TX_VERSION;
@@ -893,6 +929,7 @@ Value name_firstupdate(const Array& params, bool fHelp)
 
     return wtx.GetHash().GetHex();
 }
+
 Value name_update(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() < 2 || params.size() > 3)
@@ -904,7 +941,7 @@ Value name_update(const Array& params, bool fHelp)
     const vchType vchValue = vchFromValue (params[1]);
 
     if (vchValue.size () > UI_MAX_VALUE_LENGTH)
-      throw JSONRPCError(RPC_INVALID_PARAMETER, "the value is too long");
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "the value is too long");
 
     CWalletTx wtx;
     wtx.nVersion = CTransaction::DION_TX_VERSION;
@@ -931,40 +968,40 @@ Value name_update(const Array& params, bool fHelp)
 
     ENTER_CRITICAL_SECTION(cs_main)
     {
-      ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
-      {
-          if (mapNamePending.count(vchName) && mapNamePending[vchName].size())
-          {
-              error("name_update() : there are %d pending operations on that name, including %s",
-                      mapNamePending[vchName].size(),
-                      mapNamePending[vchName].begin()->GetHex().c_str());
-              throw runtime_error("there are pending operations on that name");
-          }
+        ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
+        {
+            if (mapNamePending.count(vchName) && mapNamePending[vchName].size())
+            {
+                error("name_update() : there are %d pending operations on that name, including %s",
+                        mapNamePending[vchName].size(),
+                        mapNamePending[vchName].begin()->GetHex().c_str());
+                throw runtime_error("there are pending operations on that name");
+            }
 
-          EnsureWalletIsUnlocked();
+            EnsureWalletIsUnlocked();
 
-          CNameDB dbName("r");
-          CTransaction tx;
-          if (!GetTxOfName(dbName, vchName, tx))
-          {
-              throw runtime_error("could not find a coin with this name");
-          }
+            CNameDB dbName("r");
+            CTransaction tx;
+            if (!GetTxOfName(dbName, vchName, tx))
+            {
+                throw runtime_error("could not find a coin with this name");
+            }
 
-          uint256 wtxInHash = tx.GetHash();
+            uint256 wtxInHash = tx.GetHash();
 
-          if (!pwalletMain->mapWallet.count(wtxInHash))
-          {
-              error("name_update() : this coin is not in your wallet %s",
-                      wtxInHash.GetHex().c_str());
-              throw runtime_error("this coin is not in your wallet");
-          }
+            if (!pwalletMain->mapWallet.count(wtxInHash))
+            {
+                error("name_update() : this coin is not in your wallet %s",
+                        wtxInHash.GetHex().c_str());
+                throw runtime_error("this coin is not in your wallet");
+            }
 
-          CWalletTx& wtxIn = pwalletMain->mapWallet[wtxInHash];
-          string strError = SendMoneyWithInputTx(scriptPubKey, MIN_AMOUNT, wtxIn, wtx, false);
-          if (strError != "")
-            throw JSONRPCError(RPC_WALLET_ERROR, strError);
-      }
-      LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+            CWalletTx& wtxIn = pwalletMain->mapWallet[wtxInHash];
+            string strError = SendMoneyWithInputTx(scriptPubKey, MIN_AMOUNT, wtxIn, wtx, false);
+            if (strError != "")
+                throw JSONRPCError(RPC_WALLET_ERROR, strError);
+        }
+        LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
     }
     LEAVE_CRITICAL_SECTION(cs_main)
     return wtx.GetHash().GetHex();
@@ -977,47 +1014,47 @@ Value new_public_key(const Array& params, bool fHelp)
                 "new_public_key <public_address>"
                 + HelpRequiringPassphrase());
 
-  //Generate the signature
-  EnsureWalletIsUnlocked();
+    //Generate the signature
+    EnsureWalletIsUnlocked();
 
-  CWalletDB walletdb(pwalletMain->strWalletFile, "r+");
+    CWalletDB walletdb(pwalletMain->strWalletFile, "r+");
 
-  string strSenderAddress = params[0].get_str();
+    string strSenderAddress = params[0].get_str();
 
-  CBitcoinAddress addr(strSenderAddress);
-  if (!addr.IsValid())
-    throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
+    CBitcoinAddress addr(strSenderAddress);
+    if (!addr.IsValid())
+        throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
 
-  CKeyID keyID;
-  if (!addr.GetKeyID(keyID))
-    throw JSONRPCError(RPC_TYPE_ERROR, "Address does not refer to key");
+    CKeyID keyID;
+    if (!addr.GetKeyID(keyID))
+        throw JSONRPCError(RPC_TYPE_ERROR, "Address does not refer to key");
 
-  CKey key;
-  if (!pwalletMain->GetKey(keyID, key))
-    throw JSONRPCError(RPC_WALLET_ERROR, "Private key not available");
+    CKey key;
+    if (!pwalletMain->GetKey(keyID, key))
+        throw JSONRPCError(RPC_WALLET_ERROR, "Private key not available");
 
-  CPubKey pubKey = key.GetPubKey();
+    CPubKey pubKey = key.GetPubKey();
 
-  string testKey;
+    string testKey;
 
-  if (!pwalletMain->SetRSAMetadata(pubKey))
-    throw JSONRPCError(RPC_TYPE_ERROR, "Failed to load meta data for key");
+    if (!pwalletMain->SetRSAMetadata(pubKey))
+        throw JSONRPCError(RPC_TYPE_ERROR, "Failed to load meta data for key");
 
-  if (!walletdb.UpdateKey(pubKey, pwalletMain->mapKeyMetadata[pubKey.GetID()]))
-    throw JSONRPCError(RPC_TYPE_ERROR, "Failed to write meta data for key");
+    if (!walletdb.UpdateKey(pubKey, pwalletMain->mapKeyMetadata[pubKey.GetID()]))
+        throw JSONRPCError(RPC_TYPE_ERROR, "Failed to write meta data for key");
 
-  if (!pwalletMain->GetRSAPublicKeyMetadata(pubKey, testKey))
-    throw JSONRPCError(RPC_TYPE_ERROR, "Failed to load meta data for key");
+    if (!pwalletMain->GetRSAPublicKeyMetadata(pubKey, testKey))
+        throw JSONRPCError(RPC_TYPE_ERROR, "Failed to load meta data for key");
 
-  string pKey;
-  if (!pwalletMain->GetRSAPrivateKeyMetadata(pubKey, pKey))
-    throw JSONRPCError(RPC_TYPE_ERROR, "Failed to load meta data for key");
-  
-  vector<Value> res;
-  res.push_back(strSenderAddress);
-  res.push_back(pKey);
-  res.push_back(testKey);
-  return res;
+    string pKey;
+    if (!pwalletMain->GetRSAPrivateKeyMetadata(pubKey, pKey))
+        throw JSONRPCError(RPC_TYPE_ERROR, "Failed to load meta data for key");
+
+    vector<Value> res;
+    res.push_back(strSenderAddress);
+    res.push_back(pKey);
+    res.push_back(testKey);
+    return res;
 }
 
 Value public_key_send(const Array& params, bool fHelp)
@@ -1088,24 +1125,23 @@ Value public_key_send(const Array& params, bool fHelp)
     {
         EnsureWalletIsUnlocked();
 
-       string strError = pwalletMain->SendMoney(scriptPubKey, MIN_AMOUNT, wtx, false);
+        string strError = pwalletMain->SendMoney(scriptPubKey, MIN_AMOUNT, wtx, false);
 
-       printf("  scriptPubKey %s\n", scriptPubKey.ToString().c_str());
+        printf("  scriptPubKey %s\n", scriptPubKey.ToString().c_str());
         if (strError != "")
-          throw JSONRPCError(RPC_WALLET_ERROR, strError);
+            throw JSONRPCError(RPC_WALLET_ERROR, strError);
         //mapMyImportedKeys[vchName] = wtx.GetHash();
     }
     LEAVE_CRITICAL_SECTION(cs_main)
 
     printf("public_key_send : tx=%s\n", wtx.GetHash().GetHex().c_str());
 
-
     vector<Value> res;
     res.push_back(wtx.GetHash().GetHex());
     res.push_back(sigBase64);
     return res;
-
 }
+
 Value message_send_plain(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() > 3)
@@ -1164,8 +1200,8 @@ Value message_send_plain(const Array& params, bool fHelp)
     //    vector<unsigned char> vchPubKey = pwalletMain->GetKeyFromKeyPool();
     //    scriptPubKeyOrig.SetBitcoinAddress(vchPubKey);
     //}
-   
-    vchType vchMessage = vchFromString(strMessage); 
+
+    vchType vchMessage = vchFromString(strMessage);
     scriptPubKey << OP_MESSAGE << vchFromString(strSenderAddress) << vchFromString(strRecipientAddress) << vchMessage << vchFromString(sigBase64) << OP_2DROP << OP_2DROP;
     scriptPubKey += scriptPubKeyOrig;
 
@@ -1173,23 +1209,22 @@ Value message_send_plain(const Array& params, bool fHelp)
     {
         EnsureWalletIsUnlocked();
 
-       string strError = pwalletMain->SendMoney(scriptPubKey, MIN_AMOUNT, wtx, false);
+        string strError = pwalletMain->SendMoney(scriptPubKey, MIN_AMOUNT, wtx, false);
 
-       printf("  scriptPubKey %s\n", scriptPubKey.ToString().c_str());
+        printf("  scriptPubKey %s\n", scriptPubKey.ToString().c_str());
         if (strError != "")
-          throw JSONRPCError(RPC_WALLET_ERROR, strError);
+            throw JSONRPCError(RPC_WALLET_ERROR, strError);
         mapMyMessages[vchMessage] = wtx.GetHash();
     }
     LEAVE_CRITICAL_SECTION(cs_main)
 
     printf("name_new : name=%s, tx=%s\n", stringFromVch(vchMessage).c_str(), wtx.GetHash().GetHex().c_str());
 
-
     vector<Value> res;
     res.push_back(wtx.GetHash().GetHex());
     return res;
-
 }
+
 Value message_send(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() > 3)
@@ -1224,46 +1259,44 @@ Value message_send(const Array& params, bool fHelp)
     //Get the recipient's imported public rsa key
     bool found=false;
     vchType recipientAddress = vchFromString(strRecipientAddress);
-    vchType publicKeyVch; 
+    vchType publicKeyVch;
     ENTER_CRITICAL_SECTION(cs_main)
     {
-      ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
-      {
-        BOOST_FOREACH(PAIRTYPE(const uint256, CWalletTx)& item,
-                      pwalletMain->mapWallet)
-          {
-            const CWalletTx& tx = item.second;
-
-            vchType vchSender, vchKey, vchSig;
-            int nOut;
-            if (!tx.GetPublicKeyUpdate (nOut, vchSender, vchKey, vchSig))
-              continue;
-
-            const int nHeight = tx.GetHeightInMainChain ();
-            if (nHeight == -1)
-              continue;
-            assert (nHeight >= 0);
-
-            Object oName;
-            oName.push_back(Pair("sender", stringFromVch(vchSender)));
-            oName.push_back(Pair("key", stringFromVch(vchKey)));
-            oName.push_back(Pair("signature", stringFromVch(vchSig)));
-            if(recipientAddress == vchSender)
+        ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
+        {
+            BOOST_FOREACH(PAIRTYPE(const uint256, CWalletTx)& item,
+                          pwalletMain->mapWallet)
             {
-              publicKeyVch = vchKey;
-              found=true;
-              break;
+                const CWalletTx& tx = item.second;
+
+                vchType vchSender, vchKey, vchSig;
+                int nOut;
+                if (!tx.GetPublicKeyUpdate (nOut, vchSender, vchKey, vchSig))
+                    continue;
+
+                const int nHeight = tx.GetHeightInMainChain ();
+                if (nHeight == -1)
+                    continue;
+                assert (nHeight >= 0);
+
+                Object oName;
+                oName.push_back(Pair("sender", stringFromVch(vchSender)));
+                oName.push_back(Pair("key", stringFromVch(vchKey)));
+                oName.push_back(Pair("signature", stringFromVch(vchSig)));
+                if(recipientAddress == vchSender)
+                {
+                    publicKeyVch = vchKey;
+                    found=true;
+                    break;
+                }
             }
         }
-      }
-      LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+        LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
     }
     LEAVE_CRITICAL_SECTION(cs_main)
 
-    if(found == false)
-    {
-      throw JSONRPCError(RPC_TYPE_ERROR, "No public key for recipient");
-    }
+    if(!found)
+        throw JSONRPCError(RPC_TYPE_ERROR, "No public key for recipient");
 
     //Encrypt the message using the public key
     string encrypted;
@@ -1297,8 +1330,8 @@ Value message_send(const Array& params, bool fHelp)
     //    vector<unsigned char> vchPubKey = pwalletMain->GetKeyFromKeyPool();
     //    scriptPubKeyOrig.SetBitcoinAddress(vchPubKey);
     //}
-   
-    vchType vchEncryptedMessage = vchFromString(encrypted); 
+
+    vchType vchEncryptedMessage = vchFromString(encrypted);
     scriptPubKey << OP_ENCRYPTED_MESSAGE << vchFromString(strSenderAddress) << vchFromString(strRecipientAddress) << vchEncryptedMessage << vchFromString(sigBase64) << OP_2DROP << OP_2DROP;
     scriptPubKey += scriptPubKeyOrig;
 
@@ -1306,23 +1339,22 @@ Value message_send(const Array& params, bool fHelp)
     {
         EnsureWalletIsUnlocked();
 
-       string strError = pwalletMain->SendMoney(scriptPubKey, MIN_AMOUNT, wtx, false);
+        string strError = pwalletMain->SendMoney(scriptPubKey, MIN_AMOUNT, wtx, false);
 
-       printf("  scriptPubKey %s\n", scriptPubKey.ToString().c_str());
+        printf("  scriptPubKey %s\n", scriptPubKey.ToString().c_str());
         if (strError != "")
-          throw JSONRPCError(RPC_WALLET_ERROR, strError);
+            throw JSONRPCError(RPC_WALLET_ERROR, strError);
         mapMyMessages[vchEncryptedMessage] = wtx.GetHash();
     }
     LEAVE_CRITICAL_SECTION(cs_main)
 
     printf("name_new : name=%s, tx=%s\n", stringFromVch(vchEncryptedMessage).c_str(), wtx.GetHash().GetHex().c_str());
 
-
     vector<Value> res;
     res.push_back(wtx.GetHash().GetHex());
     return res;
-
 }
+
 Value name_new(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() != 1)
@@ -1352,32 +1384,33 @@ Value name_new(const Array& params, bool fHelp)
     {
         EnsureWalletIsUnlocked();
 
-       string strError = pwalletMain->SendMoney(scriptPubKey, MIN_AMOUNT, wtx, false);
+        string strError = pwalletMain->SendMoney(scriptPubKey, MIN_AMOUNT, wtx, false);
 
-       printf("  scriptPubKey %s\n", scriptPubKey.ToString().c_str());
+        printf("  scriptPubKey %s\n", scriptPubKey.ToString().c_str());
         if (strError != "")
-          throw JSONRPCError(RPC_WALLET_ERROR, strError);
+            throw JSONRPCError(RPC_WALLET_ERROR, strError);
         mapMyNames[vchName] = wtx.GetHash();
     }
     LEAVE_CRITICAL_SECTION(cs_main)
 
     printf("name_new : name=%s, rand=%s, tx=%s\n", stringFromVch(vchName).c_str(), HexStr(vchRand).c_str(), wtx.GetHash().GetHex().c_str());
 
-
     vector<Value> res;
     res.push_back(wtx.GetHash().GetHex());
     res.push_back(HexStr(vchRand));
     return res;
 }
+
 void rescanfornames()
 {
-  printf("Scanning blockchain for names to create fast index...\n");
+    printf("Scanning blockchain for names to create fast index...\n");
 
-  /* The database should already be created although empty.  */
+    /* The database should already be created although empty.  */
 
-  CNameDB dbName("r+");
-  dbName.ReconstructNameIndex();
+    CNameDB dbName("r+");
+    dbName.ReconstructNameIndex();
 }
+
 bool CheckNameTxPos(const vector<CNameIndex> &vtxPos, const CDiskTxPos& txPos)
 {
     if (vtxPos.empty())
@@ -1385,6 +1418,7 @@ bool CheckNameTxPos(const vector<CNameIndex> &vtxPos, const CDiskTxPos& txPos)
 
     return vtxPos.back().txPos == txPos;
 }
+
 bool CNameDB::ReconstructNameIndex()
 {
     CTxDB txdb("r");
@@ -1447,15 +1481,18 @@ bool CNameDB::ReconstructNameIndex()
     }
     LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
 }
+
 CHooks* InitHook()
 {
     return new CDionsHooks();
 }
+
 bool DecodeNameScript(const CScript& script, int& op, vector<vector<unsigned char> > &vvch)
 {
   CScript::const_iterator pc = script.begin();
   return DecodeNameScript(script, op, vvch, pc);
 }
+
 bool DecodeNameScript(const CScript& script, int& op, vector<vector<unsigned char> > &vvch, CScript::const_iterator& pc)
 {
     opcodetype opcode;
@@ -1495,64 +1532,67 @@ bool DecodeNameScript(const CScript& script, int& op, vector<vector<unsigned cha
         return true;
     return error("invalid number of arguments for name op");
 }
+
 bool DecodeMessageTx(const CTransaction& tx, int& op, int& nOut, vector<vector<unsigned char> >& vvch )
 {
     bool found = false;
 
-        for (int i = 0; i < tx.vout.size(); i++)
+    for (int i = 0; i < tx.vout.size(); i++)
+    {
+        const CTxOut& out = tx.vout[i];
+
+        vector<vector<unsigned char> > vvchRead;
+
+        if (DecodeNameScript(out.scriptPubKey, op, vvchRead))
         {
-            const CTxOut& out = tx.vout[i];
-
-            vector<vector<unsigned char> > vvchRead;
-
-            if (DecodeNameScript(out.scriptPubKey, op, vvchRead))
+            // If more than one name op, fail
+            if (found)
             {
-                // If more than one name op, fail
-                if (found)
-                {
-                    vvch.clear();
-                    return false;
-                }
-                nOut = i;
-                found = true;
-                vvch = vvchRead;
+                vvch.clear();
+                return false;
             }
+            nOut = i;
+            found = true;
+            vvch = vvchRead;
         }
+    }
 
-        if (!found)
-            vvch.clear();
+    if (!found)
+        vvch.clear();
 
     return found;
 }
+
 bool DecodeNameTx(const CTransaction& tx, int& op, int& nOut, vector<vector<unsigned char> >& vvch )
 {
     bool found = false;
 
-        for (int i = 0; i < tx.vout.size(); i++)
+    for (int i = 0; i < tx.vout.size(); i++)
+    {
+        const CTxOut& out = tx.vout[i];
+
+        vector<vector<unsigned char> > vvchRead;
+
+        if (DecodeNameScript(out.scriptPubKey, op, vvchRead))
         {
-            const CTxOut& out = tx.vout[i];
-
-            vector<vector<unsigned char> > vvchRead;
-
-            if (DecodeNameScript(out.scriptPubKey, op, vvchRead))
+            // If more than one name op, fail
+            if (found)
             {
-                // If more than one name op, fail
-                if (found)
-                {
-                    vvch.clear();
-                    return false;
-                }
-                nOut = i;
-                found = true;
-                vvch = vvchRead;
+                vvch.clear();
+                return false;
             }
+            nOut = i;
+            found = true;
+            vvch = vvchRead;
         }
+    }
 
-        if (!found)
-            vvch.clear();
+    if (!found)
+        vvch.clear();
 
     return found;
 }
+
 bool GetValueOfNameTx(const CTransaction& tx, vector<unsigned char>& value)
 {
     vector<vector<unsigned char> > vvch;
@@ -1565,18 +1605,19 @@ bool GetValueOfNameTx(const CTransaction& tx, vector<unsigned char>& value)
 
     switch (op)
     {
-        case OP_NAME_NEW:
-            return false;
-        case OP_NAME_FIRSTUPDATE:
-            value = vvch[2];
-            return true;
-        case OP_NAME_UPDATE:
-            value = vvch[1];
-            return true;
-        default:
-            return false;
+    case OP_NAME_NEW:
+        return false;
+    case OP_NAME_FIRSTUPDATE:
+        value = vvch[2];
+        return true;
+    case OP_NAME_UPDATE:
+        value = vvch[1];
+        return true;
+    default:
+        return false;
     }
 }
+
 int IndexOfNameOutput(const CTransaction& tx)
 {
     vector<vector<unsigned char> > vvch;
@@ -1590,6 +1631,7 @@ int IndexOfNameOutput(const CTransaction& tx)
         throw runtime_error("IndexOfNameOutput() : name output not found");
     return nOut;
 }
+
 bool CDionsHooks::IsMine(const CTransaction& tx)
 {
     if (tx.nVersion != CTransaction::DION_TX_VERSION)
@@ -1617,6 +1659,7 @@ bool CDionsHooks::IsMine(const CTransaction& tx)
     }
     return false;
 }
+
 bool CDionsHooks::IsMine(const CTransaction& tx, const CTxOut& txout, bool ignore_name_new /* = false*/)
 {
     if (tx.nVersion != CTransaction::DION_TX_VERSION)
@@ -1641,8 +1684,7 @@ bool CDionsHooks::IsMine(const CTransaction& tx, const CTxOut& txout, bool ignor
     return false;
 }
 
-bool
-CDionsHooks::AcceptToMemoryPool(const CTransaction& tx)
+bool CDionsHooks::AcceptToMemoryPool(const CTransaction& tx)
 {
     if (tx.nVersion != CTransaction::DION_TX_VERSION)
         return true;
@@ -1663,24 +1705,25 @@ CDionsHooks::AcceptToMemoryPool(const CTransaction& tx)
                     tx.GetHash ().ToString ().c_str ());
 
     if (op == OP_NAME_NEW)
-      {
+    {
         const vchType& hash = vvch[0];
         if (setNewHashes.count (hash) > 0)
           return error ("AcceptToMemoryPool: duplicate name_new hash in tx %s",
                         tx.GetHash ().ToString ().c_str ());
         setNewHashes.insert (hash);
-      }
+    }
     else
     {
-      ENTER_CRITICAL_SECTION(cs_main)
-      {
-        mapNamePending[vvch[0]].insert (tx.GetHash ());
-      }
-      LEAVE_CRITICAL_SECTION(cs_main)
+        ENTER_CRITICAL_SECTION(cs_main)
+        {
+            mapNamePending[vvch[0]].insert (tx.GetHash ());
+        }
+        LEAVE_CRITICAL_SECTION(cs_main)
     }
 
     return true;
 }
+
 void CDionsHooks::RemoveFromMemoryPool(const CTransaction& tx)
 {
     if (tx.nVersion != CTransaction::DION_TX_VERSION)
@@ -1716,9 +1759,9 @@ int CheckTransactionAtRelativeDepth(CBlockIndex* pindexBlock, CTxIndex& txindex,
             return pindexBlock->nHeight - pindex->nHeight;
     return -1;
 }
-bool
-CDionsHooks::ConnectInputs (map<uint256, CTxIndex>& mapTestPool,
-                               const CTransaction& tx,
+
+bool CDionsHooks::ConnectInputs (map<uint256, CTxIndex>& mapTestPool,
+                              const CTransaction& tx,
                                vector<CTransaction>& vTxPrev,
                                vector<CTxIndex>& vTxindex,
                                CBlockIndex* pindexBlock, CDiskTxPos& txPos,
@@ -1734,18 +1777,18 @@ CDionsHooks::ConnectInputs (map<uint256, CTxIndex>& mapTestPool,
     // Strict check - bug disallowed
     for (int i = 0; i < tx.vin.size(); i++)
     {
-      const CTxOut& out = vTxPrev[i].vout[tx.vin[i].prevout.n];
-      std::vector<vchType> vvchPrevArgsRead;
+        const CTxOut& out = vTxPrev[i].vout[tx.vin[i].prevout.n];
+        std::vector<vchType> vvchPrevArgsRead;
 
-      if (DecodeNameScript(out.scriptPubKey, prevOp, vvchPrevArgsRead))
-      {
-        if (found)
-          return error("ConnectInputHook() : multiple previous name transactions");
-        found = true;
-        nInput = i;
+        if (DecodeNameScript(out.scriptPubKey, prevOp, vvchPrevArgsRead))
+        {
+            if (found)
+                return error("ConnectInputHook() : multiple previous name transactions");
+            found = true;
+            nInput = i;
 
-        vvchPrevArgs = vvchPrevArgsRead;
-      }
+          vvchPrevArgs = vvchPrevArgsRead;
+        }
     }
     if (tx.nVersion != CTransaction::DION_TX_VERSION)
     {
@@ -1788,11 +1831,11 @@ CDionsHooks::ConnectInputs (map<uint256, CTxIndex>& mapTestPool,
        miners (generating new blocks) and checks for inclusion into the mempool
        enforce the fee, even before the fork point.  */
     if (tx.vout[nOut].nValue < MIN_AMOUNT)
-      {
+    {
         if (!fBlock )
-          return error ("ConnectInputsHook: not enough locked amount");
+            return error ("ConnectInputsHook: not enough locked amount");
         printf ("WARNING: not enough locked amount, ignoring for now\n");
-      }
+    }
 
     // HACK: The following two checks are redundant after hard-fork at block 150000, because it is performed
     // in CheckTransaction. However, before that, we do not know height during CheckTransaction
@@ -1802,215 +1845,214 @@ CDionsHooks::ConnectInputs (map<uint256, CTxIndex>& mapTestPool,
 
     switch (op)
     {
-        case OP_PUBLIC_KEY:
+    case OP_PUBLIC_KEY:
+        printf("OP_PUBLIC_KEY");
+        const std::string sender(vvchArgs[0].begin(), vvchArgs[0].end());
+        const std::string pkey(vvchArgs[1].begin(), vvchArgs[1].end());
+        const std::string sig(stringFromVch(vvchArgs[2]));
+        printf("sender : %s\n", sender.c_str());
+        printf("key : %s\n", pkey.c_str());
+        printf("signature : %s\n", sig.c_str());
+
+        CBitcoinAddress addr(sender);
+
+        if (!addr.IsValid())
+            throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
+
+        CKeyID keyID;
+        if (!addr.GetKeyID(keyID))
+            throw JSONRPCError(RPC_TYPE_ERROR, "Address does not refer to key");
+
+        bool fInvalid = false;
+        vector<unsigned char> vchSig = DecodeBase64(sig.c_str(), &fInvalid);
+
+        if (fInvalid)
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Malformed base64 encoding");
+
+        CDataStream ss(SER_GETHASH, 0);
+        ss << pkey;
+
+        CKey key;
+        if (!key.SetCompactSignature(Hash(ss.begin(), ss.end()), vchSig))
+            return false;
+
+        if(key.GetPubKey().GetID() != keyID)
+            return error("public key tx verification failed");
+
+        break;
+
+    case OP_ENCRYPTED_MESSAGE:
+        printf("OP_ENCRYPTED_MESSAGE");
+        const std::string sender(vvchArgs[0].begin(), vvchArgs[0].end());
+        const std::string recipient(vvchArgs[1].begin(), vvchArgs[1].end());
+        const std::string encrypted(vvchArgs[2].begin(), vvchArgs[2].end());
+        const std::string sig(stringFromVch(vvchArgs[3]));
+        printf("sender : %s\n", sender.c_str());
+        printf("recipient: %s\n", recipient.c_str());
+        printf("encrypted message : %s\n", encrypted.c_str());
+        printf("signature : %s\n", sig.c_str());
+
+        CBitcoinAddress addr(sender);
+
+        if (!addr.IsValid())
+            throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
+
+        CKeyID keyID;
+        if (!addr.GetKeyID(keyID))
+            throw JSONRPCError(RPC_TYPE_ERROR, "Address does not refer to key");
+
+        bool fInvalid = false;
+        vector<unsigned char> vchSig = DecodeBase64(sig.c_str(), &fInvalid);
+
+        if (fInvalid)
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Malformed base64 encoding");
+
+        CDataStream ss(SER_GETHASH, 0);
+        ss << encrypted;
+
+        CKey key;
+        if (!key.SetCompactSignature(Hash(ss.begin(), ss.end()), vchSig))
+            return false;
+
+        if(key.GetPubKey().GetID() != keyID)
+            return error("encrypted message tx verification failed");
+
+        break;
+
+    case OP_MESSAGE:
+        printf("OP_MESSAGE");
+        const std::string sender(vvchArgs[0].begin(), vvchArgs[0].end());
+        const std::string recipient(vvchArgs[1].begin(), vvchArgs[1].end());
+        const std::string message(vvchArgs[2].begin(), vvchArgs[2].end());
+        const std::string sig(stringFromVch(vvchArgs[3]));
+        printf("sender : %s\n", sender.c_str());
+        printf("recipient: %s\n", recipient.c_str());
+        printf("message : %s\n", message.c_str());
+        printf("signature : %s\n", sig.c_str());
+
+        CBitcoinAddress addr(sender);
+
+        if (!addr.IsValid())
+            throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
+
+        CKeyID keyID;
+        if (!addr.GetKeyID(keyID))
+            throw JSONRPCError(RPC_TYPE_ERROR, "Address does not refer to key");
+
+        bool fInvalid = false;
+        vector<unsigned char> vchSig = DecodeBase64(sig.c_str(), &fInvalid);
+
+        if (fInvalid)
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Malformed base64 encoding");
+
+        CDataStream ss(SER_GETHASH, 0);
+        ss << message;
+
+        CKey key;
+        if (!key.SetCompactSignature(Hash(ss.begin(), ss.end()), vchSig))
+            return false;
+
+        if (key.GetPubKey().GetID() != keyID)
+            return error("encrypted message tx verification failed");
+
+        break;
+
+    case OP_NAME_NEW:
+        if (found)
+            return error("ConnectInputsHook() : name_new tx pointing to previous dions tx");
+
+        // HACK: The following check is redundant after hard-fork at block 150000, because it is performed
+        // in CheckTransaction. However, before that, we do not know height during CheckTransaction
+        // and cannot apply the right set of rules
+        if (vvchArgs[0].size() != 20)
+            return error("name_new tx with incorrect hash length");
+
+        break;
+
+    case OP_NAME_FIRSTUPDATE:
+        if (!found || prevOp != OP_NAME_NEW)
+            return error("ConnectInputsHook() : name_firstupdate tx without previous name_new tx");
+
+        // HACK: The following two checks are redundant after hard-fork at block 150000, because it is performed
+        // in CheckTransaction. However, before that, we do not know height during CheckTransaction
+        // and cannot apply the right set of rules
+        if (vvchArgs[1].size() > 20)
+            return error("name_firstupdate tx with rand too big");
+        if (vvchArgs[2].size() > MAX_VALUE_LENGTH)
+            return error("name_firstupdate tx with value too long");
+
         {
-           printf("OP_PUBLIC_KEY");
-           const std::string sender(vvchArgs[0].begin(), vvchArgs[0].end());
-           const std::string pkey(vvchArgs[1].begin(), vvchArgs[1].end());
-           const std::string sig(stringFromVch(vvchArgs[2]));
-           printf("sender : %s\n", sender.c_str());
-           printf("key : %s\n", pkey.c_str());
-           printf("signature : %s\n", sig.c_str());
-    
-           CBitcoinAddress addr(sender);
-    
-           if (!addr.IsValid())
-             throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
-
-           CKeyID keyID;
-           if (!addr.GetKeyID(keyID))
-               throw JSONRPCError(RPC_TYPE_ERROR, "Address does not refer to key");
-
-           bool fInvalid = false;
-          vector<unsigned char> vchSig = DecodeBase64(sig.c_str(), &fInvalid);
-           
-           if (fInvalid)
-               throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Malformed base64 encoding");
-
-           CDataStream ss(SER_GETHASH, 0);
-           ss << pkey;
-
-           CKey key;
-           if (!key.SetCompactSignature(Hash(ss.begin(), ss.end()), vchSig))
-               return false;
-
-           if(key.GetPubKey().GetID() != keyID)
-           {
-                return error("public key tx verification failed");
-           }
+            // Check hash
+            const vchType& vchHash = vvchPrevArgs[0];
+            const vchType& vchName = vvchArgs[0];
+            const vchType& vchRand = vvchArgs[1];
+            vchType vchToHash(vchRand);
+            vchToHash.insert(vchToHash.end(), vchName.begin(), vchName.end());
+            uint160 hash = Hash160(vchToHash);
+            if (uint160(vchHash) != hash)
+            {
+                    return error("ConnectInputsHook() : name_firstupdate hash mismatch");
+            }
         }
-            break;
-        case OP_ENCRYPTED_MESSAGE:
+
+        nPrevHeight = GetNameHeight (vvchArgs[0]);
+        if (nPrevHeight >= 0 && pindexBlock->nHeight - nPrevHeight < GetExpirationDepth(pindexBlock->nHeight))
+            return error("ConnectInputsHook() : name_firstupdate on an unexpired name");
+
+        nDepth = CheckTransactionAtRelativeDepth(pindexBlock, vTxindex[nInput], MIN_FIRSTUPDATE_DEPTH);
+        // Do not accept if in chain and not mature
+        if ((fBlock || fMiner) && nDepth >= 0 && nDepth < MIN_FIRSTUPDATE_DEPTH)
+            return false;
+
+        // Do not mine if previous name_new is not visible.  This is if
+        // name_new expired or not yet in a block
+        if (fMiner)
         {
-           printf("OP_ENCRYPTED_MESSAGE");
-           const std::string sender(vvchArgs[0].begin(), vvchArgs[0].end());
-           const std::string recipient(vvchArgs[1].begin(), vvchArgs[1].end());
-           const std::string encrypted(vvchArgs[2].begin(), vvchArgs[2].end());
-           const std::string sig(stringFromVch(vvchArgs[3]));
-           printf("sender : %s\n", sender.c_str());
-           printf("recipient: %s\n", recipient.c_str());
-           printf("encrypted message : %s\n", encrypted.c_str());
-           printf("signature : %s\n", sig.c_str());
-    
-           CBitcoinAddress addr(sender);
-    
-           if (!addr.IsValid())
-             throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
-
-           CKeyID keyID;
-           if (!addr.GetKeyID(keyID))
-               throw JSONRPCError(RPC_TYPE_ERROR, "Address does not refer to key");
-
-           bool fInvalid = false;
-          vector<unsigned char> vchSig = DecodeBase64(sig.c_str(), &fInvalid);
-           
-           if (fInvalid)
-               throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Malformed base64 encoding");
-
-           CDataStream ss(SER_GETHASH, 0);
-           ss << encrypted;
-
-           CKey key;
-           if (!key.SetCompactSignature(Hash(ss.begin(), ss.end()), vchSig))
-               return false;
-
-           if(key.GetPubKey().GetID() != keyID)
-           {
-                return error("encrypted message tx verification failed");
-           }
-        }
-            break;
-        case OP_MESSAGE:
-        {
-           printf("OP_MESSAGE");
-           const std::string sender(vvchArgs[0].begin(), vvchArgs[0].end());
-           const std::string recipient(vvchArgs[1].begin(), vvchArgs[1].end());
-           const std::string message(vvchArgs[2].begin(), vvchArgs[2].end());
-           const std::string sig(stringFromVch(vvchArgs[3]));
-           printf("sender : %s\n", sender.c_str());
-           printf("recipient: %s\n", recipient.c_str());
-           printf("message : %s\n", message.c_str());
-           printf("signature : %s\n", sig.c_str());
-    
-           CBitcoinAddress addr(sender);
-    
-           if (!addr.IsValid())
-             throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
-
-           CKeyID keyID;
-           if (!addr.GetKeyID(keyID))
-               throw JSONRPCError(RPC_TYPE_ERROR, "Address does not refer to key");
-
-           bool fInvalid = false;
-          vector<unsigned char> vchSig = DecodeBase64(sig.c_str(), &fInvalid);
-           
-           if (fInvalid)
-               throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Malformed base64 encoding");
-
-           CDataStream ss(SER_GETHASH, 0);
-           ss << message;
-
-           CKey key;
-           if (!key.SetCompactSignature(Hash(ss.begin(), ss.end()), vchSig))
-               return false;
-
-           if(key.GetPubKey().GetID() != keyID)
-           {
-                return error("encrypted message tx verification failed");
-           }
-        }
-            break;
-        case OP_NAME_NEW:
-            if (found)
-                return error("ConnectInputsHook() : name_new tx pointing to previous dions tx");
-
-            // HACK: The following check is redundant after hard-fork at block 150000, because it is performed
-            // in CheckTransaction. However, before that, we do not know height during CheckTransaction
-            // and cannot apply the right set of rules
-            if (vvchArgs[0].size() != 20)
-                return error("name_new tx with incorrect hash length");
-
-            break;
-        case OP_NAME_FIRSTUPDATE:
-            if (!found || prevOp != OP_NAME_NEW)
-                return error("ConnectInputsHook() : name_firstupdate tx without previous name_new tx");
-
-            // HACK: The following two checks are redundant after hard-fork at block 150000, because it is performed
-            // in CheckTransaction. However, before that, we do not know height during CheckTransaction
-            // and cannot apply the right set of rules
-            if (vvchArgs[1].size() > 20)
-                return error("name_firstupdate tx with rand too big");
-            if (vvchArgs[2].size() > MAX_VALUE_LENGTH)
-                return error("name_firstupdate tx with value too long");
-
-            {
-                // Check hash
-                const vchType& vchHash = vvchPrevArgs[0];
-                const vchType& vchName = vvchArgs[0];
-                const vchType& vchRand = vvchArgs[1];
-                vchType vchToHash(vchRand);
-                vchToHash.insert(vchToHash.end(), vchName.begin(), vchName.end());
-                uint160 hash = Hash160(vchToHash);
-                if (uint160(vchHash) != hash)
-                {
-                        return error("ConnectInputsHook() : name_firstupdate hash mismatch");
-                }
-            }
-
-            nPrevHeight = GetNameHeight (vvchArgs[0]);
-            if (nPrevHeight >= 0 && pindexBlock->nHeight - nPrevHeight < GetExpirationDepth(pindexBlock->nHeight))
-                return error("ConnectInputsHook() : name_firstupdate on an unexpired name");
-            nDepth = CheckTransactionAtRelativeDepth(pindexBlock, vTxindex[nInput], MIN_FIRSTUPDATE_DEPTH);
-            // Do not accept if in chain and not mature
-            if ((fBlock || fMiner) && nDepth >= 0 && nDepth < MIN_FIRSTUPDATE_DEPTH)
-                return false;
-
-            // Do not mine if previous name_new is not visible.  This is if
-            // name_new expired or not yet in a block
-            if (fMiner)
-            {
-                // TODO CPU intensive
-                nDepth = CheckTransactionAtRelativeDepth(pindexBlock, vTxindex[nInput], GetExpirationDepth(pindexBlock->nHeight));
-                if (nDepth == -1)
-                    return error("ConnectInputsHook() : name_firstupdate cannot be mined if name_new is not already in chain and unexpired");
-                // Check that no other pending txs on this name are already in the block to be mined
-                set<uint256>& setPending = mapNamePending[vvchArgs[0]];
-                BOOST_FOREACH(const PAIRTYPE(uint256, CTxIndex)& s, mapTestPool)
-                {
-                    if (setPending.count(s.first))
-                    {
-                        printf("ConnectInputsHook() : will not mine %s because it clashes with %s",
-                                tx.GetHash().GetHex().c_str(),
-                                s.first.GetHex().c_str());
-                        return false;
-                    }
-                }
-            }
-            break;
-        case OP_NAME_UPDATE:
-            if (!found || (prevOp != OP_NAME_FIRSTUPDATE && prevOp != OP_NAME_UPDATE))
-                return error("name_update tx without previous update tx");
-
-            // HACK: The following check is redundant after hard-fork at block 150000, because it is performed
-            // in CheckTransaction. However, before that, we do not know height during CheckTransaction
-            // and cannot apply the right set of rules
-            if (vvchArgs[1].size() > MAX_VALUE_LENGTH)
-                return error("name_update tx with value too long");
-
-            // Check name
-            if (vvchPrevArgs[0] != vvchArgs[0])
-            {
-                    return error("ConnectInputsHook() : name_update name mismatch");
-            }
-
             // TODO CPU intensive
             nDepth = CheckTransactionAtRelativeDepth(pindexBlock, vTxindex[nInput], GetExpirationDepth(pindexBlock->nHeight));
-            if ((fBlock || fMiner) && nDepth < 0)
-                return error("ConnectInputsHook() : name_update on an expired name, or there is a pending transaction on the name");
-            break;
-        default:
-            return error("ConnectInputsHook() : name transaction has unknown op");
+            if (nDepth == -1)
+                return error("ConnectInputsHook() : name_firstupdate cannot be mined if name_new is not already in chain and unexpired");
+            // Check that no other pending txs on this name are already in the block to be mined
+            set<uint256>& setPending = mapNamePending[vvchArgs[0]];
+            BOOST_FOREACH(const PAIRTYPE(uint256, CTxIndex)& s, mapTestPool)
+            {
+                if (setPending.count(s.first))
+                {
+                    printf("ConnectInputsHook() : will not mine %s because it clashes with %s",
+                            tx.GetHash().GetHex().c_str(),
+                            s.first.GetHex().c_str());
+                    return false;
+                }
+            }
+        }
+        break;
+
+    case OP_NAME_UPDATE:
+        if (!found || (prevOp != OP_NAME_FIRSTUPDATE && prevOp != OP_NAME_UPDATE))
+            return error("name_update tx without previous update tx");
+
+        // HACK: The following check is redundant after hard-fork at block 150000, because it is performed
+        // in CheckTransaction. However, before that, we do not know height during CheckTransaction
+        // and cannot apply the right set of rules
+        if (vvchArgs[1].size() > MAX_VALUE_LENGTH)
+            return error("name_update tx with value too long");
+
+        // Check name
+        if (vvchPrevArgs[0] != vvchArgs[0])
+        {
+                return error("ConnectInputsHook() : name_update name mismatch");
+        }
+
+        // TODO CPU intensive
+        nDepth = CheckTransactionAtRelativeDepth(pindexBlock, vTxindex[nInput], GetExpirationDepth(pindexBlock->nHeight));
+        if ((fBlock || fMiner) && nDepth < 0)
+            return error("ConnectInputsHook() : name_update on an expired name, or there is a pending transaction on the name");
+        break;
+
+    default:
+        return error("ConnectInputsHook() : name transaction has unknown op");
     }
+
     if (!fBlock && op == OP_NAME_UPDATE)
     {
         vector<CNameIndex> vtxPos;
@@ -2021,6 +2063,7 @@ CDionsHooks::ConnectInputs (map<uint256, CTxIndex>& mapTestPool,
         if (!CheckNameTxPos(vtxPos, vTxindex[nInput].pos))
             return error("ConnectInputsHook() : Name bug workaround: tx %s rejected, since previous tx (%s) is not in the name DB\n", tx.GetHash().ToString().c_str(), vTxPrev[nInput].GetHash().ToString().c_str());
     }
+
     if (fBlock)
     {
         if (op == OP_NAME_FIRSTUPDATE || op == OP_NAME_UPDATE)
@@ -2030,6 +2073,7 @@ CDionsHooks::ConnectInputs (map<uint256, CTxIndex>& mapTestPool,
             if (nameDb.ExistsName (vvchArgs[0])
                 && !nameDb.ReadName (vvchArgs[0], vtxPos))
               return error("ConnectInputsHook() : failed to read from name DB");
+
             if (op == OP_NAME_UPDATE && !CheckNameTxPos(vtxPos, vTxindex[nInput].pos))
             {
                 printf("ConnectInputsHook() : Name bug workaround: tx %s rejected, since previous tx (%s) is not in the name DB\n", tx.GetHash().ToString().c_str(), vTxPrev[nInput].GetHash().ToString().c_str());
@@ -2045,7 +2089,7 @@ CDionsHooks::ConnectInputs (map<uint256, CTxIndex>& mapTestPool,
             txPos2.txPos = txPos;
             vtxPos.push_back(txPos2); // fin add
             if (!nameDb.WriteName (vvchArgs[0], vtxPos))
-            return error("ConnectInputsHook() : failed to write to name DB");
+              return error("ConnectInputsHook() : failed to write to name DB");
         }
 
         if (op != OP_NAME_NEW)
@@ -2055,7 +2099,6 @@ CDionsHooks::ConnectInputs (map<uint256, CTxIndex>& mapTestPool,
                 std::map<std::vector<unsigned char>, std::set<uint256> >::iterator mi = mapNamePending.find(vvchArgs[0]);
                 if (mi != mapNamePending.end())
                     mi->second.erase(tx.GetHash());
-
             }
             LEAVE_CRITICAL_SECTION(cs_main)
          }
@@ -2063,6 +2106,7 @@ CDionsHooks::ConnectInputs (map<uint256, CTxIndex>& mapTestPool,
 
     return true;
 }
+
 unsigned char GetAddressVersion() { return ((unsigned char)(fTestNet ? 111 : 103)); }
 
 Value name_rescan(const Array& params, bool fHelp)
@@ -2073,8 +2117,7 @@ Value name_rescan(const Array& params, bool fHelp)
                 "rescan for names"
                 );
 
-  rescanfornames();
-    
+    rescanfornames();
 
     Array oRes;
     return oRes;

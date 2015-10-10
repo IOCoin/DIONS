@@ -307,14 +307,14 @@ static const CRPCCommand vRPCCommands[] =
     { "name_debug1",            &name_debug1,            false,  false },
     { "sendrawtransaction",     &sendrawtransaction,     false,  false },
     { "getcheckpoint",          &getcheckpoint,          true,   false },
-    { "reservebalance",         &reservebalance,         false,  true},
-    { "checkwallet",            &checkwallet,            false,  true},
-    { "repairwallet",           &repairwallet,           false,  true},
-    { "resendtx",               &resendtx,               false,  true},
-    { "makekeypair",            &makekeypair,            false,  true},
-    { "sendalert",              &sendalert,              false,  false},
-    { "getnumblocksofpeers",    &getnumblocksofpeers,    true,   false},
-    { "getencryptionstatus",    &getencryptionstatus,    true,   false},
+    { "reservebalance",         &reservebalance,         false,  true },
+    { "checkwallet",            &checkwallet,            false,  true },
+    { "repairwallet",           &repairwallet,           false,  true },
+    { "resendtx",               &resendtx,               false,  true },
+    { "makekeypair",            &makekeypair,            false,  true },
+    { "sendalert",              &sendalert,              false,  false },
+    { "getnumblocksofpeers",    &getnumblocksofpeers,    true,   false },
+    { "getencryptionstatus",    &getencryptionstatus,    true,   false },
 };
 
 CRPCTable::CRPCTable()

@@ -248,36 +248,36 @@ inline std::string StackString(const std::vector<std::vector<unsigned char> >& v
 /** Serialized script, used inside transaction inputs and outputs */
 class CScript : public std::vector<unsigned char>
 {
-	protected:
+protected:
 		CScript& push_int64(int64_t n)
 		{
-			if (n == -1 || (n >= 1 && n <= 16))
-			{
-				push_back(n + (OP_1 - 1));
-			}
-			else
-			{
-				CBigNum bn(n);
-				*this << bn.getvch();
-			}
-			return *this;
+  			if (n == -1 || (n >= 1 && n <= 16))
+  			{
+  				  push_back(n + (OP_1 - 1));
+  			}
+  			else
+  			{
+    				CBigNum bn(n);
+    				*this << bn.getvch();
+  			}
+  			return *this;
 		}
 
 		CScript& push_uint64(uint64_t n)
 		{
-			if (n >= 1 && n <= 16)
-			{
-				push_back(n + (OP_1 - 1));
-			}
-			else
-			{
-				CBigNum bn(n);
-				*this << bn.getvch();
-			}
-			return *this;
+  			if (n >= 1 && n <= 16)
+  			{
+  				  push_back(n + (OP_1 - 1));
+  			}
+  			else
+  			{
+    				CBigNum bn(n);
+    				*this << bn.getvch();
+  			}
+  			return *this;
 		}
 
-	public:
+public:
 		CScript() { }
 		CScript(const CScript& b) : std::vector<unsigned char>(b.begin(), b.end()) { }
 		CScript(const_iterator pbegin, const_iterator pend) : std::vector<unsigned char>(pbegin, pend) { }
@@ -287,15 +287,15 @@ class CScript : public std::vector<unsigned char>
 
 		CScript& operator+=(const CScript& b)
 		{
-			insert(end(), b.begin(), b.end());
-			return *this;
+  			insert(end(), b.begin(), b.end());
+  			return *this;
 		}
 
 		friend CScript operator+(const CScript& a, const CScript& b)
 		{
-			CScript ret = a;
-			ret += b;
-			return ret;
+  			CScript ret = a;
+  			ret += b;
+  			return ret;
 		}
 
 
@@ -331,46 +331,46 @@ class CScript : public std::vector<unsigned char>
 
 		CScript& operator<<(opcodetype opcode)
 		{
-			if (opcode < 0 || opcode > 0xff)
-				throw std::runtime_error("CScript::operator<<() : invalid opcode");
-			insert(end(), (unsigned char)opcode);
-			return *this;
+  			if (opcode < 0 || opcode > 0xff)
+  				  throw std::runtime_error("CScript::operator<<() : invalid opcode");
+  			insert(end(), (unsigned char)opcode);
+  			return *this;
 		}
 
 		CScript& operator<<(const uint160& b)
 		{
-			insert(end(), sizeof(b));
-			insert(end(), (unsigned char*)&b, (unsigned char*)&b + sizeof(b));
-			return *this;
+  			insert(end(), sizeof(b));
+  			insert(end(), (unsigned char*)&b, (unsigned char*)&b + sizeof(b));
+  			return *this;
 		}
 
 		CScript& operator<<(const uint256& b)
 		{
-			insert(end(), sizeof(b));
-			insert(end(), (unsigned char*)&b, (unsigned char*)&b + sizeof(b));
-			return *this;
+  			insert(end(), sizeof(b));
+  			insert(end(), (unsigned char*)&b, (unsigned char*)&b + sizeof(b));
+  			return *this;
 		}
 
 		CScript& operator<<(const CPubKey& key)
 		{
-			std::vector<unsigned char> vchKey = key.Raw();
-			return (*this) << vchKey;
+  			std::vector<unsigned char> vchKey = key.Raw();
+  			return (*this) << vchKey;
 		}
 
 		CScript& operator<<(const CBigNum& b)
 		{
-			*this << b.getvch();
-			return *this;
+  			*this << b.getvch();
+  			return *this;
 		}
 
 		CScript& operator<<(const std::vector<unsigned char>& b)
 		{
-			if (b.size() < OP_PUSHDATA1)
-			{
-				insert(end(), (unsigned char)b.size());
-			}
-			else if (b.size() <= 0xff)
-			{
+  			if (b.size() < OP_PUSHDATA1)
+  			{
+  				  insert(end(), (unsigned char)b.size());
+  			}
+  			else if (b.size() <= 0xff)
+  			{
             insert(end(), OP_PUSHDATA1);
             insert(end(), (unsigned char)b.size());
         }

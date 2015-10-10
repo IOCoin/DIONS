@@ -306,7 +306,7 @@ bool IsStandardTx(const CTransaction& tx)
 {
     if (tx.nVersion > CTransaction::CURRENT_VERSION)
         return false;
-   
+
     // Treat non-final transactions as non-standard to prevent a specific type
     // of double-spend attack, as well as DoS attacks. (if the transaction
     // can't be mined, the attacker isn't expending resources broadcasting it)
@@ -418,16 +418,16 @@ bool CTransaction::AreInputsStandard(const MapPrevTx& mapInputs) const
         txnouttype whichType;
         // get the scriptPubKey corresponding to this input:
         const CScript& prevScript = prev.scriptPubKey;
-        
- /* Try to decode a name script and strip it if it is there.  */
-    int op;
-    std::vector<vchType> vvch;
-    CScript::const_iterator pc = prevScript.begin ();
-    CScript rawScript;
-    if (DecodeNameScript (prevScript, op, vvch, pc))
-        rawScript = CScript(pc, prevScript.end ());
-    else
-        rawScript = prevScript;
+
+        /* Try to decode a name script and strip it if it is there.  */
+        int op;
+        std::vector<vchType> vvch;
+        CScript::const_iterator pc = prevScript.begin ();
+        CScript rawScript;
+        if (DecodeNameScript (prevScript, op, vvch, pc))
+            rawScript = CScript(pc, prevScript.end ());
+        else
+            rawScript = prevScript;
 
         if (!Solver(rawScript, whichType, vSolutions))
             return false;
@@ -787,7 +787,7 @@ bool CTxMemPool::addUnchecked(const uint256& hash, CTransaction &tx)
 
 bool CTxMemPool::remove(const CTransaction &tx, bool fRecursive)
 {
-  hook->RemoveFromMemoryPool(tx);
+    hook->RemoveFromMemoryPool(tx);
 
     // Remove transaction from memory pool
     {
@@ -1651,7 +1651,7 @@ bool CTransaction::ConnectInputs(CTxDB& txdb, MapPrevTx inputs, map<uint256, CTx
             // This doesn't trigger the DoS code on purpose; if it did, it would make it easier
             // for an attacker to attempt to split the network.
             if (!txindex.vSpent[prevout.n].IsNull())
-              return fMiner ? false : error("ConnectInputs() : %s prev tx already used at %s", GetHash().ToString().substr(0,10).c_str(), txindex.vSpent[prevout.n].ToString().c_str());
+                return fMiner ? false : error("ConnectInputs() : %s prev tx already used at %s", GetHash().ToString().substr(0,10).c_str(), txindex.vSpent[prevout.n].ToString().c_str());
 
             // Skip ECDSA signature verification when connecting blocks (fBlock=true)
             // before the last blockchain checkpoint. This is safe because block merkle hashes are
@@ -1797,7 +1797,7 @@ bool CBlock::ConnectBlock(CTxDB& txdb, CBlockIndex* pindex, bool fJustCheck)
             int64_t nTxValueIn = tx.GetValueIn(mapInputs);
             int64_t nTxValueOut = tx.GetValueOut();
 
-            if (tx.IsCoinStake() and pindex->nHeight<=STAKE_INTEREST_V3)
+            if (tx.IsCoinStake() && pindex->nHeight<=STAKE_INTEREST_V3)
             {
                 double nNetworkDriftBuffer = nTxValueOut*.02;
                 nTxValueOut = nTxValueOut - nNetworkDriftBuffer;
@@ -2373,7 +2373,7 @@ bool CBlock::AcceptBlock()
 
     // Check coinstake timestamp
     if (IsProofOfStake() && !CheckCoinStakeTimestamp(nHeight, GetBlockTime(), (int64_t)vtx[1].nTime))
-      return DoS(50, error("AcceptBlock() : coinstake timestamp violation nTimeBlock=%"PRId64" nTimeTx=%u", GetBlockTime(), vtx[1].nTime));
+        return DoS(50, error("AcceptBlock() : coinstake timestamp violation nTimeBlock=%"PRId64" nTimeTx=%u", GetBlockTime(), vtx[1].nTime));
 
     //we need to know fees to calculate new target
     int64_t nFees = 0;
@@ -2381,7 +2381,7 @@ bool CBlock::AcceptBlock()
     map<uint256, CTxIndex> mapQueuedChanges;
     BOOST_FOREACH(CTransaction& tx, vtx)
     {
-        
+
 
         MapPrevTx mapInputs;
         if (!tx.IsCoinBase())
@@ -2513,7 +2513,7 @@ bool ProcessBlock(CNode* pfrom, CBlock* pblock)
     // Limited duplicity on stake: prevents block flood attack
     // Duplicate stake allowed only when there is orphan child block
     if (pblock->IsProofOfStake() && setStakeSeen.count(pblock->GetProofOfStake()) && !mapOrphanBlocksByPrev.count(hash) && !Checkpoints::WantedByPendingSyncCheckpoint(hash))
-      return error("ProcessBlock() : duplicate proof-of-stake (%s, %d) for block %s", pblock->GetProofOfStake().first.ToString().c_str(), pblock->GetProofOfStake().second, hash.ToString().c_str());
+        return error("ProcessBlock() : duplicate proof-of-stake (%s, %d) for block %s", pblock->GetProofOfStake().first.ToString().c_str(), pblock->GetProofOfStake().second, hash.ToString().c_str());
 
     CBlockIndex* pcheckpoint = Checkpoints::GetLastSyncCheckpoint();
     if (pcheckpoint && pblock->hashPrevBlock != hashBestChain && !Checkpoints::WantedByPendingSyncCheckpoint(hash))
@@ -4068,4 +4068,3 @@ bool SendMessages(CNode* pto, bool fSendTrickle)
     }
     return true;
 }
-
