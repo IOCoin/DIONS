@@ -5,14 +5,14 @@
 USE_UPNP:=1
 
 INCLUDEPATHS= \
- -I"C:\deps\boost_1_50_0" \
- -I"C:\deps\db-5.3.28.NC\build_unix" \
- -I"C:\deps\openssl-1.0.2d\include"
+ -I"..\deps\boost_1_50_0" \
+ -I"..\deps\db-5.3.28.NC\build_unix" \
+ -I"..\deps\openssl-1.0.2d\include"
 
 LIBPATHS= \
- -L"C:\deps\boost_1_50_0\stage\lib" \
- -L"C:\deps\db-5.3.28.NC\build_unix" \
- -L"C:\deps\openssl-1.0.2d"
+ -L"..\deps\boost_1_50_0\stage\lib" \
+ -L"..\deps\db-5.3.28.NC\build_unix" \
+ -L"..\deps\openssl-1.0.2d"
 
 LIBS= \
  -l boost_system-mgw49-mt-s-1_50 \
@@ -35,8 +35,8 @@ ifndef USE_UPNP
 	override USE_UPNP = -
 endif
 ifneq (${USE_UPNP}, -)
- INCLUDEPATHS += -I"C:\deps"
- LIBPATHS += -L"C:\deps\miniupnpc"
+ INCLUDEPATHS += -I"..\deps"
+ LIBPATHS += -L"..\deps\miniupnpc"
  LIBS += -l miniupnpc -l iphlpapi
  DEFS += -DMINIUPNP_STATICLIB -DUSE_UPNP=$(USE_UPNP)
 endif
