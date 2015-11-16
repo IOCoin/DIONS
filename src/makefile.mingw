@@ -5,21 +5,21 @@
 USE_UPNP:=1
 
 INCLUDEPATHS= \
- -I"..\deps\boost_1_50_0" \
+ -I"..\deps\boost_1_59_0" \
  -I"..\deps\db-5.3.28.NC\build_unix" \
  -I"..\deps\openssl-1.0.2d\include"
 
 LIBPATHS= \
- -L"..\deps\boost_1_50_0\stage\lib" \
+ -L"..\deps\boost_1_59_0\stage\lib" \
  -L"..\deps\db-5.3.28.NC\build_unix" \
  -L"..\deps\openssl-1.0.2d"
 
 LIBS= \
- -l boost_system-mgw49-mt-s-1_50 \
- -l boost_filesystem-mgw49-mt-s-1_50 \
- -l boost_program_options-mgw49-mt-s-1_50 \
- -l boost_thread-mgw49-mt-s-1_50 \
- -l boost_chrono-mgw49-mt-s-1_50 \
+ -l boost_system-mgw52-mt-s-1_59 \
+ -l boost_filesystem-mgw52-mt-s-1_59 \
+ -l boost_program_options-mgw52-mt-s-1_59 \
+ -l boost_thread-mgw52-mt-s-1_59 \
+ -l boost_chrono-mgw52-mt-s-1_59 \
  -l db_cxx \
  -l ssl \
  -l crypto

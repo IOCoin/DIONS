@@ -1845,7 +1845,7 @@ bool CDionsHooks::ConnectInputs (map<uint256, CTxIndex>& mapTestPool,
 
     switch (op)
     {
-    case OP_PUBLIC_KEY:
+    case OP_PUBLIC_KEY: {
         printf("OP_PUBLIC_KEY");
         const std::string sender(vvchArgs[0].begin(), vvchArgs[0].end());
         const std::string pkey(vvchArgs[1].begin(), vvchArgs[1].end());
@@ -1878,10 +1878,9 @@ bool CDionsHooks::ConnectInputs (map<uint256, CTxIndex>& mapTestPool,
 
         if(key.GetPubKey().GetID() != keyID)
             return error("public key tx verification failed");
+    } break;
 
-        break;
-
-    case OP_ENCRYPTED_MESSAGE:
+    case OP_ENCRYPTED_MESSAGE: {
         printf("OP_ENCRYPTED_MESSAGE");
         const std::string sender(vvchArgs[0].begin(), vvchArgs[0].end());
         const std::string recipient(vvchArgs[1].begin(), vvchArgs[1].end());
@@ -1916,10 +1915,9 @@ bool CDionsHooks::ConnectInputs (map<uint256, CTxIndex>& mapTestPool,
 
         if(key.GetPubKey().GetID() != keyID)
             return error("encrypted message tx verification failed");
+    } break;
 
-        break;
-
-    case OP_MESSAGE:
+    case OP_MESSAGE: {
         printf("OP_MESSAGE");
         const std::string sender(vvchArgs[0].begin(), vvchArgs[0].end());
         const std::string recipient(vvchArgs[1].begin(), vvchArgs[1].end());
@@ -1954,10 +1952,9 @@ bool CDionsHooks::ConnectInputs (map<uint256, CTxIndex>& mapTestPool,
 
         if (key.GetPubKey().GetID() != keyID)
             return error("encrypted message tx verification failed");
+    } break;
 
-        break;
-
-    case OP_NAME_NEW:
+    case OP_NAME_NEW: {
         if (found)
             return error("ConnectInputsHook() : name_new tx pointing to previous dions tx");
 
@@ -1966,10 +1963,9 @@ bool CDionsHooks::ConnectInputs (map<uint256, CTxIndex>& mapTestPool,
         // and cannot apply the right set of rules
         if (vvchArgs[0].size() != 20)
             return error("name_new tx with incorrect hash length");
+    } break;
 
-        break;
-
-    case OP_NAME_FIRSTUPDATE:
+    case OP_NAME_FIRSTUPDATE: {
         if (!found || prevOp != OP_NAME_NEW)
             return error("ConnectInputsHook() : name_firstupdate tx without previous name_new tx");
 
@@ -2025,9 +2021,9 @@ bool CDionsHooks::ConnectInputs (map<uint256, CTxIndex>& mapTestPool,
                 }
             }
         }
-        break;
+    } break;
 
-    case OP_NAME_UPDATE:
+    case OP_NAME_UPDATE: {
         if (!found || (prevOp != OP_NAME_FIRSTUPDATE && prevOp != OP_NAME_UPDATE))
             return error("name_update tx without previous update tx");
 
@@ -2047,7 +2043,7 @@ bool CDionsHooks::ConnectInputs (map<uint256, CTxIndex>& mapTestPool,
         nDepth = CheckTransactionAtRelativeDepth(pindexBlock, vTxindex[nInput], GetExpirationDepth(pindexBlock->nHeight));
         if ((fBlock || fMiner) && nDepth < 0)
             return error("ConnectInputsHook() : name_update on an expired name, or there is a pending transaction on the name");
-        break;
+    } break;
 
     default:
         return error("ConnectInputsHook() : name transaction has unknown op");
