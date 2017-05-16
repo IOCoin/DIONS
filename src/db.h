@@ -13,7 +13,7 @@
 
 #include <db_cxx.h>
 
-#include "txdb-leveldb.h"
+//#include "txdb-leveldb.h"
 
 class CAddress;
 class CAddrMan;
@@ -25,7 +25,7 @@ class COutPoint;
 class CTxIndex;
 class CWallet;
 class CWalletTx;
-class CNameIndex;
+class AliasIndex;
 
 
 extern unsigned int nWalletDBUpdated;
@@ -57,7 +57,7 @@ public:
 
     /*
      * Verify that database file strFile is OK. If it is not,
-     * call the callback to try to recover.
+
      * This must be called BEFORE strFile is opened.
      * Returns true if strFile is OK.
      */
@@ -111,7 +111,7 @@ private:
     CDB(const CDB&);
     void operator=(const CDB&);
 
-protected:
+public:
     template<typename K, typename T>
     bool Read(const K& key, T& value)
     {
@@ -150,11 +150,14 @@ protected:
     template<typename K, typename T>
     bool Write(const K& key, const T& value, bool fOverwrite=true)
     {
+      printf("db.h Write 1\n");
         if (!pdb)
             return false;
+      printf("db.h Write 2\n");
         if (fReadOnly)
             assert(!"Write called on database in read-only mode");
 
+      printf("db.h Write 3\n");
         // Key
         CDataStream ssKey(SER_DISK, CLIENT_VERSION);
         ssKey.reserve(1000);
@@ -324,56 +327,57 @@ public:
     bool Read(CAddrMan& addr);
 };
 
-class CNameDB : public CDB
+class LocatorNodeDB : public CDB
 {
 public:
-    CNameDB(const char* pszMode="r+") : CDB("nameindex.dat", pszMode) { }
+    LocatorNodeDB(const char* pszMode="r+") : CDB("aliascache.dat", pszMode) { }
 
-    bool WriteName(const vchType& name, const std::vector<CNameIndex>& vtxPos)
+    bool lPut(const vchType& alias, const std::vector<AliasIndex>& vtxPos)
     {
-        return Write(make_pair(std::string("namei"), name), vtxPos);
+        return Write(make_pair(std::string("alias_"), alias), vtxPos, true);
     }
 
-    bool ReadName(const vchType& name, std::vector<CNameIndex>& vtxPos)
+    bool lGet(const vchType& alias, std::vector<AliasIndex>& vtxPos)
     {
-        return Read(make_pair(std::string("namei"), name), vtxPos);
+        return Read(make_pair(std::string("alias_"), alias), vtxPos);
     }
 
-    bool ExistsName(const vchType& name)
+    bool lKey(const vchType& alias)
     {
-        return Exists(make_pair(std::string("namei"), name));
+        return Exists(make_pair(std::string("alias_"), alias));
     }
 
-    bool EraseName(const vchType& name)
+    bool EraseName(const vchType& alias)
     {
-        return Erase(make_pair(std::string("namei"), name));
+        return Erase(make_pair(std::string("alias_"), alias));
     }
 
-    bool ScanNames(
-            const vchType& vchName,
+    bool AliasScan(
+            const vchType& vchAlias,
             int nMax,
-            std::vector<std::pair<vchType, CNameIndex> >& nameScan);
+            std::vector<std::pair<vchType, AliasIndex> >& aliasScan);
 
     bool test();
 
-    bool ReconstructNameIndex();
 };
-class CNameIndex
+class AliasIndex
 {
 public:
     CDiskTxPos txPos;
     unsigned int nHeight;
     std::vector<unsigned char> vValue;
+    std::string vAddress;
 
-    CNameIndex()
+    AliasIndex()
     {
     }
 
-    CNameIndex(CDiskTxPos txPosIn, unsigned int nHeightIn, std::vector<unsigned char> vValueIn)
+    AliasIndex(CDiskTxPos txPosIn, unsigned int nHeightIn, std::vector<unsigned char> vValueIn, std::string vAddressIn)
     {
         txPos = txPosIn;
         nHeight = nHeightIn;
         vValue = vValueIn;
+        vAddress = vAddressIn;
     }
 
     IMPLEMENT_SERIALIZE
@@ -381,6 +385,7 @@ public:
         READWRITE(txPos);
         READWRITE(nHeight);
         READWRITE(vValue);
+        READWRITE(vAddress);
     )
 };
 

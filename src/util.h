@@ -35,6 +35,8 @@
 #include <stdint.h>
 #include <inttypes.h>
 
+#include "constants.h"
+
 static const int64_t COIN = 100000000;
 static const int64_t CENT = 1000000;
 
@@ -141,9 +143,12 @@ extern bool fNoListen;
 extern bool fLogTimestamps;
 extern bool fReopenDebugLog;
 
+bool EncryptMessageAES(const std::string& message, std::string& encryptedMsg, std::vector<unsigned char>& key, std::string& iv128Base64);
+bool DecryptMessageAES(const std::string& encryptedMsg, std::string& message, std::vector<unsigned char>& key, std::string& iv128Base64);
 bool EncryptMessage(const std::string& rsaPubKey, const std::string& message, std::string& encryptedMsg);
 bool DecryptMessage(const std::string& rsaPrivKey, const std::string& encrpyted, std::string& decryptedMsg);
 void GenerateRSAKey(std::string& rsaPrivKey, std::string& rsaPubKey);
+void GenerateAESKey(vchType& rsaPubKey);
 
 void RandAddSeed();
 void RandAddSeedPerfmon();
@@ -635,10 +640,28 @@ inline void ExitThread(size_t nExitCode)
 
 void RenameThread(const char* name);
 
+inline std::string stripSpacesAndQuotes(std::string s)
+{
+  const char *pcc_Char2Cut = " '\"";
+  s.erase(s.find_last_not_of(pcc_Char2Cut)+1);
+  s.erase( 0, s.find_first_not_of(pcc_Char2Cut));
+  return s;
+}
+
+inline bool isOnlyWhiteSpace(const std::string& str) {
+   bool e1 = str.find_first_not_of (' ') == str.npos;
+   bool e2 = str == "";
+   bool e3 = str.size() == 0;
+
+   return (e1 || e2 || e3);
+}
+
 inline uint32_t ByteReverse(uint32_t value)
 {
     value = ((value & 0xFF00FF00) >> 8) | ((value & 0x00FF00FF) << 8);
     return (value<<16) | (value>>16);
 }
+
+int atod(const std::string&, std::string&);
 
 #endif

@@ -14,6 +14,7 @@
 
 #include <list>
 
+
 class CWallet;
 class CBlock;
 class CBlockIndex;
@@ -25,17 +26,17 @@ class CAddress;
 class CInv;
 class CRequestTracker;
 class CNode;
-class CHooks;
 
 class CTxMemPool;
 
-typedef std::vector<unsigned char> vchType;
+//typedef std::vector<unsigned char> vchType;
+#include "constants.h"
+
 static const int LAST_POW_BLOCK = 12815;
 
-extern CHooks* hook;
 
 /** The maximum allowed size for a serialized block, in bytes (network rule) */
-static const unsigned int MAX_BLOCK_SIZE = 1000000;
+static const unsigned int MAX_BLOCK_SIZE = 2.0 * 1024 * 1024;
 
 static unsigned int  STAKE_INTEREST_V3 = 150000;
 /** The maximum size for mined blocks */
@@ -62,8 +63,8 @@ static const int64_t MIN_COIN_YEAR_REWARD = 1 * CENT; // 1% per year
 static const int64_t MAX_COIN_YEAR_REWARD = 3 * CENT; // 3% per year
 
 static const uint256 hashGenesisBlock("0x00000afad2d5833b50b59a9784fdc59869b688680e1670a52c52e3c2c04c1fe8");
-static const uint256 hashGenesisBlockTestNet("0x00000ba3263e0dcd9e6fe637b2a22896d1b4108f15a858421137e154ff20f933");
-static const uint256 hashGenesisMerkleRoot("0xcd5029ac01fb6cd7da8ff00ff1e82f3aca6bf3ecce5fb60623ee807fa83d1795");
+static const uint256 hashGenesisBlockTestNet("0x0048a8d9aa1162fb1128b81f69ff643bb803aa25d99140f4649c0d6ed66edf0c");
+static const uint256 hashGenesisMerkleRoot("0x49c1c4f222aa6ca1c879d9b9c6e91a10d0cf779d26e75efbb457c8774e1f521a");
 
 inline bool IsProtocolV2(int nHeight) { return nHeight > 65000; }
 
@@ -458,7 +459,7 @@ public:
     static const int CURRENT_VERSION=1;
     static const int VERSION_WITH_INFO=3;
     static const int DION_TX_VERSION=5;
-    int nVersion;
+    int nVersion; 
     unsigned int nTime;
     std::vector<CTxIn> vin;
     std::vector<CTxOut> vout;
@@ -772,14 +773,15 @@ public:
     int GetBlocksToMaturity() const;
     bool AcceptToMemoryPool();
 
-    inline int GetHeightInMainChain() const
-    {
-        int nHeight;
-        if (GetDepthInMainChain(nHeight) == 0)
-            return -1;
+  inline int
+  GetHeightInMainChain() const
+  {
+    int nHeight;
+    if (GetDepthInMainChain (nHeight) == 0)
+      return -1;
 
-        return nHeight;
-    }
+    return nHeight;
+  }
 };
 
 

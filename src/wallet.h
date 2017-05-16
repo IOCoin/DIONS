@@ -131,7 +131,6 @@ public:
     CPubKey vchDefaultKey;
     int64_t nTimeFirstKey;
 
-    // check whether we are allowed to upgrade (or already support) to the named feature
     bool CanSupportFeature(enum WalletFeature wf) { AssertLockHeld(cs_wallet); return nWalletMaxVersion >= wf; }
 
     void AvailableCoinsForStaking(std::vector<COutput>& vCoins, unsigned int nSpendTime) const;
@@ -146,9 +145,13 @@ public:
     // Adds a key to the store, without saving it to disk (used by LoadWallet)
     bool LoadKey(const CKey& key) { return CCryptoKeyStore::AddKey(key); }
     // Load metadata (used by LoadWallet)
-    bool GetRSAPrivateKeyMetadata(const CPubKey &pubkey, string& rsaPrivKey);
-    bool GetRSAPublicKeyMetadata(const CPubKey &pubkey, string& rsaPubKey);
+    bool envCP0(const CPubKey &pubkey, string& rsaPrivKey);
+    bool envCP1(const CPubKey &pubkey, string& rsaPubKey);
+    bool GetAESMetadata(const CPubKey &pubkey, string& aesPlainBase64);
+    bool SetAESMetadata(const CPubKey &pubkey, string& aes256KeyBase64);
     bool SetRSAMetadata(const CPubKey &pubkey);
+    bool GetRandomKeyMetadata(const CPubKey& pubkey, vchType &r, string& r_);
+    bool SetRandomKeyMetadata(const CPubKey& pubkey, const vchType &r);
     bool LoadKeyMetadata(const CPubKey &pubkey, const CKeyMetadata &metadata);
 
     bool LoadMinVersion(int nVersion) { AssertLockHeld(cs_wallet); nWalletVersion = nVersion; nWalletMaxVersion = std::max(nWalletMaxVersion, nVersion); return true; }
@@ -228,7 +231,16 @@ public:
     {
         if (!MoneyRange(txout.nValue))
             throw std::runtime_error("CWallet::GetCredit() : value out of range");
-        return (IsMine(txout) ? txout.nValue : 0);
+
+        int op;
+        vector< vector<unsigned char> > tmp;
+        if(aliasScript(txout.scriptPubKey, op, tmp))
+          return 0;
+
+        if(IsMine(txout))
+          return txout.nValue;
+
+        return 0;
     }
     bool IsChange(const CTxOut& txout) const;
     int64_t GetChange(const CTxOut& txout) const
@@ -240,8 +252,14 @@ public:
     bool IsMine(const CTransaction& tx) const
     {
         BOOST_FOREACH(const CTxOut& txout, tx.vout)
+        {
             if (IsMine(txout) && txout.nValue >= nMinimumInputValue)
                 return true;
+        }
+       
+        if(IsMinePost(tx))
+          return true; 
+
         return false;
     }
     bool IsFromMe(const CTransaction& tx) const
@@ -285,7 +303,7 @@ public:
 
     DBErrors LoadWallet(bool& fFirstRunRet);
 
-    bool SetAddressBookName(const CTxDestination& address, const std::string& strName);
+    bool SetAddressBookName(const CTxDestination& address, const std::string& aliasStr);
 
     bool DelAddressBookName(const CTxDestination& address);
 
@@ -415,11 +433,12 @@ public:
     mutable int64_t nAvailableCreditCached;
     mutable int64_t nChangeCached;
 
-    mutable bool nameTxDecoded;
-    mutable bool nameTxDecodeSuccess;
-    mutable int nNameOut;
-    mutable vchType vchName;
+    mutable bool aliasTxDecoded;
+    mutable bool aliasTxDecodeSuccess;
+    mutable int nAliasOut;
+    mutable vchType vchAlias;
     mutable vchType vchValue;
+    mutable int     op__;
 
     mutable bool messageTxDecoded;
     mutable bool messageTxDecodeSuccess;
@@ -432,6 +451,8 @@ public:
     mutable vchType vchSender;
     mutable vchType vchRecipient;
     mutable vchType vchKey;
+    mutable vchType vchAESKeyEncrypted;
+    mutable vchType iv128Base64Vch;
     mutable vchType vchSignature;
 
     CWalletTx()
@@ -724,10 +745,10 @@ public:
         return true;
     }
 
-    bool GetEncryptedMessageUpdate (int& nOut, vchType& nm, vchType& r, vchType& val, vchType& s) const;
+    bool GetEncryptedMessageUpdate(int& nOut, vchType& nm, vchType& r, vchType& val, vchType& iv, vchType& s) const;
     bool GetMessageUpdate (int& nOut, vchType& nm, vchType& r, vchType& val, vchType& s) const;
-    bool GetPublicKeyUpdate (int& nOut, vchType& nm, vchType& val, vchType& s) const;
-    bool GetNameUpdate (int& nOut, vchType& nm, vchType& val) const;
+    bool GetPublicKeyUpdate (int& nOut, vchType& nm, vchType& r, vchType& val, vchType& aes, vchType& s) const;
+    bool aliasSet (int& op_ret, int& nOut, vchType& nm, vchType& val) const;
 
     bool WriteToDisk();
 

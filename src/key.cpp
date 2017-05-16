@@ -360,6 +360,8 @@ bool CKey::Sign(uint256 hash, std::vector<unsigned char>& vchSig)
     nSize = i2d_ECDSA_SIG(sig, &pos);
     ECDSA_SIG_free(sig);
     vchSig.resize(nSize); // Shrink to fit actual size
+
+    printf("CKey::Sign return true\n");
     return true;
 }
 

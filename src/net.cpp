@@ -35,8 +35,10 @@ void ThreadOpenAddedConnections2(void* parg);
 void ThreadMapPort2(void* parg);
 #endif
 void ThreadDNSAddressSeed2(void* parg);
+void ThreadDNSAddressSeed__(void* parg);
 bool OpenNetworkConnection(const CAddress& addrConnect, CSemaphoreGrant *grantOutbound = NULL, const char *strDest = NULL, bool fOneShot = false);
 
+extern string strDNSSeedNode;
 
 struct LocalServiceInfo {
     int nScore;
@@ -1037,7 +1039,7 @@ void ThreadSocketHandler2(void* parg)
             //
             if (pnode->vSendMsg.empty())
                 pnode->nLastSendEmpty = GetTime();
-            if (GetTime() - pnode->nTimeConnected > 60)
+            if (false && GetTime() - pnode->nTimeConnected > 60)
             {
                 if (pnode->nLastRecv == 0 || pnode->nLastSend == 0)
                 {
@@ -1112,7 +1114,7 @@ void ThreadMapPort2(void* parg)
 #else
     /* miniupnpc 1.6 */
     int error = 0;
-    devlist = upnpDiscover(2000, multicastif, minissdpdpath, 0, 0, 2, &error);
+    devlist = upnpDiscover(2000, multicastif, minissdpdpath, 0, 0, &error);
 #endif
 
     struct UPNPUrls urls;
@@ -1242,7 +1244,11 @@ void ThreadDNSAddressSeed(void* parg)
     try
     {
         vnThreadsRunning[THREAD_DNSSEED]++;
-        ThreadDNSAddressSeed2(parg);
+        if(strDNSSeedNode == "defualt")
+          ThreadDNSAddressSeed2(parg);
+        else
+          ThreadDNSAddressSeed__(parg);
+
         vnThreadsRunning[THREAD_DNSSEED]--;
     }
     catch (std::exception& e) {
@@ -1287,6 +1293,44 @@ void ThreadDNSAddressSeed2(void* parg)
     }
 
     printf("%d addresses found from DNS seeds\n", found);
+}
+
+void ThreadDNSAddressSeed__(void* parg)
+{
+    printf("ThreadDNSAddressSeed__ started\n");
+    int found = 0;
+
+    //if (!fTestNet)
+    {
+        printf("Loading addresses from DNS seeds (could take a while)\n");
+
+        //for (unsigned int seed_idx = 0; seed_idx < ARRAYLEN(strDNSSeed); seed_idx++) 
+       {
+            if (HaveNameProxy()) {
+                //AddOneShot(strDNSSeed[seed_idx][1]);
+                AddOneShot(strDNSSeedNode);
+            } else {
+                vector<CNetAddr> vaddr;
+                vector<CAddress> vAdd;
+                //if (LookupHost(strDNSSeed[seed_idx][1], vaddr))
+                if (LookupHost(strDNSSeedNode.c_str(), vaddr))
+                {
+                    BOOST_FOREACH(CNetAddr& ip, vaddr)
+                    {
+                        int nOneDay = 24*3600;
+                        CAddress addr = CAddress(CService(ip, GetDefaultPort()));
+                        addr.nTime = GetTime() - 3*nOneDay - GetRand(4*nOneDay); // use a random age between 3 and 7 days old
+                        vAdd.push_back(addr);
+                        found++;
+                    }
+                }
+                //addrman.Add(vAdd, CNetAddr(strDNSSeed[seed_idx][0], true));
+                addrman.Add(vAdd, CNetAddr(strDNSSeedNode, true));
+            }
+        }
+    }
+
+    printf("__ %d addresses found from DNS seeds\n", found);
 }
 
 

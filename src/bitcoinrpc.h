@@ -138,11 +138,12 @@ extern void EnsureWalletIsUnlocked();
 // Utilities: convert hex-encoded Values
 // (throws error if not hex).
 //
-extern uint256 ParseHashV(const json_spirit::Value& v, std::string strName);
+extern uint256 ParseHashV(const json_spirit::Value& v, std::string aliasStr);
 extern uint256 ParseHashO(const json_spirit::Object& o, std::string strKey);
-extern std::vector<unsigned char> ParseHexV(const json_spirit::Value& v, std::string strName);
+extern std::vector<unsigned char> ParseHexV(const json_spirit::Value& v, std::string aliasStr);
 extern std::vector<unsigned char> ParseHexO(const json_spirit::Object& o, std::string strKey);
 
+extern json_spirit::Value getnumblocksofpeers(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value getconnectioncount(const json_spirit::Array& params, bool fHelp); // in rpcnet.cpp
 extern json_spirit::Value getpeerinfo(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value dumpwallet(const json_spirit::Array& params, bool fHelp);
@@ -166,6 +167,8 @@ extern json_spirit::Value setaccount(const json_spirit::Array& params, bool fHel
 extern json_spirit::Value getaccount(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value getaddressesbyaccount(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value sendtoaddress(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value sendtodion(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value addresstodion(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value signmessage(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value verifymessage(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value getreceivedbyaddress(const json_spirit::Array& params, bool fHelp);
@@ -179,6 +182,7 @@ extern json_spirit::Value addredeemscript(const json_spirit::Array& params, bool
 extern json_spirit::Value listreceivedbyaddress(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value listreceivedbyaccount(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value listtransactions(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value listtransactions__(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value listaddressgroupings(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value listaccounts(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value listsinceblock(const json_spirit::Array& params, bool fHelp);
@@ -188,7 +192,9 @@ extern json_spirit::Value keypoolrefill(const json_spirit::Array& params, bool f
 extern json_spirit::Value walletpassphrase(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value walletpassphrasechange(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value walletlock(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value walletlockstatus(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value encryptwallet(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value getencryptionstatus(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value validateaddress(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value getinfo(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value reservebalance(const json_spirit::Array& params, bool fHelp);
@@ -220,22 +226,30 @@ extern json_spirit::Value getblockhash(const json_spirit::Array& params, bool fH
 extern json_spirit::Value getblock(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value getblockbynumber(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value getcheckpoint(const json_spirit::Array& params, bool fHelp);
-extern json_spirit::Value new_public_key(const json_spirit::Array& params, bool fHelp);
-extern json_spirit::Value public_key_send(const json_spirit::Array& params, bool fHelp);
-extern json_spirit::Value message_send_plain(const json_spirit::Array& params, bool fHelp);
-extern json_spirit::Value message_send(const json_spirit::Array& params, bool fHelp);
-extern json_spirit::Value name_new(const json_spirit::Array& params, bool fHelp);
-extern json_spirit::Value name_firstupdate(const json_spirit::Array& params, bool fHelp);
-extern json_spirit::Value name_update(const json_spirit::Array& params, bool fHelp);
-extern json_spirit::Value get_name_record(const json_spirit::Array& params, bool fHelp);
-extern json_spirit::Value name_list(const json_spirit::Array& params, bool fHelp);
-extern json_spirit::Value decrypted_message_list(const json_spirit::Array& params, bool fHelp);
-extern json_spirit::Value message_list_plain(const json_spirit::Array& params, bool fHelp);
-extern json_spirit::Value public_key_list(const json_spirit::Array& params, bool fHelp);
-extern json_spirit::Value name_rescan(const json_spirit::Array& params, bool fHelp);
-extern json_spirit::Value name_debug(const json_spirit::Array& params, bool fHelp);
-extern json_spirit::Value name_debug1(const json_spirit::Array& params, bool fHelp);
-extern json_spirit::Value getnumblocksofpeers(const json_spirit::Array& params, bool fHelp);
-extern json_spirit::Value getencryptionstatus(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value newPlublicKey(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value sendPublicKey(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value sendSymmetric(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value sendPlainMessage(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value sendMessage(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value registerAlias(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value registerAliasGenerate(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value transferAlias(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value transferEncryptedAlias(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value decryptAlias(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value updateAlias(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value updateEncryptedAlias(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value transferAlias(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value transferEncryptedAlias(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value getNodeRecord(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value aliasList(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value aliasList__(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value decryptedMessageList(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value plainTextMessageList(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value publicKeys(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value publicKeyExports(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value myRSAKeys(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value node_rescan(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value nodeDebug(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value nodeDebug1(const json_spirit::Array& params, bool fHelp);
 
 #endif

@@ -19,10 +19,10 @@ extern bool fWalletUnlockStakingOnly;
 // CWalletDB
 //
 
-bool CWalletDB::WriteName(const string& strAddress, const string& strName)
+bool CWalletDB::WriteName(const string& strAddress, const string& aliasStr)
 {
     nWalletDBUpdated++;
-    return Write(make_pair(string("name"), strAddress), strName);
+    return Write(make_pair(string("name"), strAddress), aliasStr);
 }
 
 bool CWalletDB::EraseName(const string& strAddress)

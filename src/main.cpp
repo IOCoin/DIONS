@@ -17,10 +17,11 @@
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 
-
+using namespace json_spirit;
 using namespace std;
 using namespace boost;
 
+#include "dions.h"
 //
 // Global state
 //
@@ -33,7 +34,6 @@ CCriticalSection cs_main;
 CTxMemPool mempool;
 unsigned int nTransactionsUpdated = 0;
 
-CHooks* hook;
 
 map<uint256, CBlockIndex*> mapBlockIndex;
 set<pair<COutPoint, unsigned int> > setStakeSeen;
@@ -42,7 +42,7 @@ libzerocoin::Params* ZCParams;
 CBigNum bnProofOfWorkLimit(~uint256(0) >> 20); // "standard" scrypt target limit for proof of work, results with 0,000244140625 proof-of-work difficulty
 CBigNum bnProofOfStakeLimit(~uint256(0) >> 20);
 CBigNum bnProofOfStakeLimitV2(~uint256(0) >> 48);
-CBigNum bnProofOfWorkLimitTestNet(~uint256(0) >> 16);
+CBigNum bnProofOfWorkLimitTestNet(~uint256(0) >> 8);
 
 unsigned int nStakeMinAge = 8 * 60 * 60; // 8 hours
 unsigned int nStakeMaxAge = -1; // unlimited
@@ -306,7 +306,7 @@ bool IsStandardTx(const CTransaction& tx)
 {
     if (tx.nVersion > CTransaction::CURRENT_VERSION)
         return false;
-
+   
     // Treat non-final transactions as non-standard to prevent a specific type
     // of double-spend attack, as well as DoS attacks. (if the transaction
     // can't be mined, the attacker isn't expending resources broadcasting it)
@@ -418,16 +418,15 @@ bool CTransaction::AreInputsStandard(const MapPrevTx& mapInputs) const
         txnouttype whichType;
         // get the scriptPubKey corresponding to this input:
         const CScript& prevScript = prev.scriptPubKey;
-
-        /* Try to decode a name script and strip it if it is there.  */
-        int op;
-        std::vector<vchType> vvch;
-        CScript::const_iterator pc = prevScript.begin ();
-        CScript rawScript;
-        if (DecodeNameScript (prevScript, op, vvch, pc))
-            rawScript = CScript(pc, prevScript.end ());
-        else
-            rawScript = prevScript;
+        
+    int op;
+    std::vector<vchType> vvch;
+    CScript::const_iterator pc = prevScript.begin ();
+    CScript rawScript;
+    if (aliasScript (prevScript, op, vvch, pc))
+        rawScript = CScript(pc, prevScript.end ());
+    else
+        rawScript = prevScript;
 
         if (!Solver(rawScript, whichType, vSolutions))
             return false;
@@ -747,7 +746,7 @@ bool AcceptToMemoryPool(CTxMemPool& pool, CTransaction &tx,
         }
     }
 
-    hook->AcceptToMemoryPool(tx);
+    AcceptToMemoryPoolPost(tx);
 
     // Store transaction in memory
     {
@@ -787,7 +786,7 @@ bool CTxMemPool::addUnchecked(const uint256& hash, CTransaction &tx)
 
 bool CTxMemPool::remove(const CTransaction &tx, bool fRecursive)
 {
-    hook->RemoveFromMemoryPool(tx);
+  RemoveFromMemoryPoolPost(tx);
 
     // Remove transaction from memory pool
     {
@@ -1064,12 +1063,6 @@ int GetPowHeight(const CBlockIndex* pindex)
     {
         count += checkpointPoWHeight[index][1];
     }
-    // else
-    // {
-    //     ++count;
-    // }
-
-    // printf(">> Height = %d, Count = %d\n", height, count);
     return count;
 }
 
@@ -1215,6 +1208,7 @@ unsigned int ComputeMaxBits(CBigNum bnTargetLimit, unsigned int nBase, int64_t n
     {
         // Maximum 200% adjustment per day...
         bnResult *= 2;
+        //nTime -= 60;
         nTime -= 24 * 60 * 60;
     }
     if (bnResult > bnTargetLimit)
@@ -1651,7 +1645,7 @@ bool CTransaction::ConnectInputs(CTxDB& txdb, MapPrevTx inputs, map<uint256, CTx
             // This doesn't trigger the DoS code on purpose; if it did, it would make it easier
             // for an attacker to attempt to split the network.
             if (!txindex.vSpent[prevout.n].IsNull())
-                return fMiner ? false : error("ConnectInputs() : %s prev tx already used at %s", GetHash().ToString().substr(0,10).c_str(), txindex.vSpent[prevout.n].ToString().c_str());
+              return fMiner ? false : error("ConnectInputs() : %s prev tx already used at %s", GetHash().ToString().substr(0,10).c_str(), txindex.vSpent[prevout.n].ToString().c_str());
 
             // Skip ECDSA signature verification when connecting blocks (fBlock=true)
             // before the last blockchain checkpoint. This is safe because block merkle hashes are
@@ -1680,7 +1674,7 @@ bool CTransaction::ConnectInputs(CTxDB& txdb, MapPrevTx inputs, map<uint256, CTx
             if (nValueIn < GetValueOut())
                 return DoS(100, error("ConnectInputs() : %s value in < value out", GetHash().ToString().substr(0,10).c_str()));
 
-        if (!hook->ConnectInputs (mapTestPool, *this, vTxPrev, vTxindex,
+        if (!ConnectInputsPost (mapTestPool, *this, vTxPrev, vTxindex,
                                    pindexBlock, posThisTx, fBlock, fMiner))
             return false;
 
@@ -1797,7 +1791,7 @@ bool CBlock::ConnectBlock(CTxDB& txdb, CBlockIndex* pindex, bool fJustCheck)
             int64_t nTxValueIn = tx.GetValueIn(mapInputs);
             int64_t nTxValueOut = tx.GetValueOut();
 
-            if (tx.IsCoinStake() && pindex->nHeight<=STAKE_INTEREST_V3)
+            if (tx.IsCoinStake() and pindex->nHeight<=STAKE_INTEREST_V3)
             {
                 double nNetworkDriftBuffer = nTxValueOut*.02;
                 nTxValueOut = nTxValueOut - nNetworkDriftBuffer;
@@ -2373,7 +2367,7 @@ bool CBlock::AcceptBlock()
 
     // Check coinstake timestamp
     if (IsProofOfStake() && !CheckCoinStakeTimestamp(nHeight, GetBlockTime(), (int64_t)vtx[1].nTime))
-        return DoS(50, error("AcceptBlock() : coinstake timestamp violation nTimeBlock=%"PRId64" nTimeTx=%u", GetBlockTime(), vtx[1].nTime));
+      return DoS(50, error("AcceptBlock() : coinstake timestamp violation nTimeBlock=%"PRId64" nTimeTx=%u", GetBlockTime(), vtx[1].nTime));
 
     //we need to know fees to calculate new target
     int64_t nFees = 0;
@@ -2381,7 +2375,7 @@ bool CBlock::AcceptBlock()
     map<uint256, CTxIndex> mapQueuedChanges;
     BOOST_FOREACH(CTransaction& tx, vtx)
     {
-
+        
 
         MapPrevTx mapInputs;
         if (!tx.IsCoinBase())
@@ -2513,7 +2507,7 @@ bool ProcessBlock(CNode* pfrom, CBlock* pblock)
     // Limited duplicity on stake: prevents block flood attack
     // Duplicate stake allowed only when there is orphan child block
     if (pblock->IsProofOfStake() && setStakeSeen.count(pblock->GetProofOfStake()) && !mapOrphanBlocksByPrev.count(hash) && !Checkpoints::WantedByPendingSyncCheckpoint(hash))
-        return error("ProcessBlock() : duplicate proof-of-stake (%s, %d) for block %s", pblock->GetProofOfStake().first.ToString().c_str(), pblock->GetProofOfStake().second, hash.ToString().c_str());
+      return error("ProcessBlock() : duplicate proof-of-stake (%s, %d) for block %s", pblock->GetProofOfStake().first.ToString().c_str(), pblock->GetProofOfStake().second, hash.ToString().c_str());
 
     CBlockIndex* pcheckpoint = Checkpoints::GetLastSyncCheckpoint();
     if (pcheckpoint && pblock->hashPrevBlock != hashBestChain && !Checkpoints::WantedByPendingSyncCheckpoint(hash))
@@ -2661,13 +2655,15 @@ bool CBlock::SignBlock(CWallet& wallet, int64_t nFees)
                 hashMerkleRoot = BuildMerkleTree();
 
                 printf("CBlock::SignBlock GetHash().GetHex() %s\n", GetHash().GetHex().c_str());
-                printf("CBlock::SignBlock vchBlockSig.size() %d\n", vchBlockSig.size());
+                printf("CBlock::SignBlock vchBlockSig.size() %lu\n", vchBlockSig.size());
                 // append a signature to our block
                 return key.Sign(GetHash(), vchBlockSig);
             }
         }
+        printf("updating nLastCoinStakeSearchInterval\n");
         nLastCoinStakeSearchInterval = nSearchTime - nLastCoinStakeSearchTime;
         nLastCoinStakeSearchTime = nSearchTime;
+        printf("nLastCoinStakeSearchInterval %"PRId64"\n" , nLastCoinStakeSearchInterval);
     }
 
     return false;
@@ -2782,6 +2778,7 @@ bool LoadBlockIndex(bool fAllowNew)
         bnProofOfWorkLimit = bnProofOfWorkLimitTestNet; // 16 bits PoW target limit for testnet
         nStakeMinAge = 1 * 60 * 60; // test net min age is 1 hour
         nCoinbaseMaturity = 10; // test maturity is 10 blocks
+        //nModifierInterval=1;
     }
     else
     {
@@ -2826,7 +2823,8 @@ bool LoadBlockIndex(bool fAllowNew)
         //     CTxOut(empty)
         //   vMerkleTree: cd5029ac01
 
-        const char* pszTimestamp = "23 July 2014 BitPay Releases Copay Beta - A New Multi-signature Wallet";
+        //const char* pszTimestamp = "23 July 2014 BitPay Releases Copay Beta - A New Multi-signature Wallet";
+        const char* pszTimestamp = ">>>>>> October 4 2016 - testnet launched <<<<<<<<";
         CTransaction txNew;
         txNew.nTime = 1406153471;
         txNew.vin.resize(1);
@@ -2840,37 +2838,37 @@ bool LoadBlockIndex(bool fAllowNew)
         block.nVersion = 1;
         block.nTime    = 1406153471;
         block.nBits    = bnProofOfWorkLimit.GetCompact();
+        block.nNonce   = !fTestNet ? 306504 : 222584;
         // genesis block miner
 
-        // if ((block.hashMerkleRoot != hashGenesisMerkleRoot) ||
-        //     (block.GetHash() != (!fTestNet ? hashGenesisBlock : hashGenesisBlockTestNet)))
-        // {
-        //     printf("Bad genesis block found. Minting new one.\n Please recompile with the newly found block as the new genesis block.\n");
+         if ((block.hashMerkleRoot != hashGenesisMerkleRoot) ||
+           (block.GetHash() != (!fTestNet ? hashGenesisBlock : hashGenesisBlockTestNet)))
+         {
+             printf("Bad genesis block found. Minting new one.\n Please recompile with the newly found block as the new genesis block.\n");
 
-        //     uint256 hashTarget = CBigNum().SetCompact(block.nBits).getuint256();
-        //     uint256 thash;
+             uint256 hashTarget = CBigNum().SetCompact(block.nBits).getuint256();
+             uint256 thash;
 
-        //     while(true)
-        //     {
-        //         // thash = Hash9(BEGIN(block.nVersion), END(block.nNonce));
-        //         thash = block.GetHash();
-        //         if (thash <= hashTarget)
-        //             break;
-        //         if ((block.nNonce & 0xFFF) == 0)
-        //         {
-        //             printf("nonce %08X: hash = %s (target = %s)\n", block.nNonce, thash.ToString().c_str(), hashTarget.ToString().c_str());
-        //         }
-        //         ++block.nNonce;
-        //         if (block.nNonce == 0)
-        //         {
-        //             printf("NONCE WRAPPED, incrementing time\n");
-        //             ++block.nTime;
-        //         }
-        //     }
-        //     printf("Found genesis block:\n");
-        //     block.print();
-        // }
-        block.nNonce   = !fTestNet ? 306504 : 222553;
+             while(true)
+             {
+                 // thash = Hash9(BEGIN(block.nVersion), END(block.nNonce));
+                 thash = block.GetHash();
+                 if (thash <= hashTarget)
+                     break;
+                 if ((block.nNonce & 0xFFF) == 0)
+                 {
+                     printf("nonce %08X: hash = %s (target = %s)\n", block.nNonce, thash.ToString().c_str(), hashTarget.ToString().c_str());
+                 }
+                 ++block.nNonce;
+                 if (block.nNonce == 0)
+                 {
+                     printf("NONCE WRAPPED, incrementing time\n");
+                     ++block.nTime;
+                 }
+             }
+             printf("Found genesis block:\n");
+             block.print();
+         }
 
         //// debug print
         assert(block.hashMerkleRoot == hashGenesisMerkleRoot);
@@ -4067,4 +4065,12 @@ bool SendMessages(CNode* pto, bool fSendTrickle)
 
     }
     return true;
+}
+
+Value getnumblocksofpeers(const Array& params, bool fHelp)
+{
+  if(fHelp || params.size() != 0)
+    throw runtime_error("getnumblocksofpeers return maximum number of blocks that other nodes claim to have");
+
+  return (int)std::max(cPeerBlockCounts.median(), Checkpoints::GetTotalBlocksEstimate());
 }

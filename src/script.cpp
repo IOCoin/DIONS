@@ -332,7 +332,8 @@ bool EvalScript(vector<vector<unsigned char> >& stack, const CScript& script, co
     valtype vchPushValue;
     vector<bool> vfExec;
     vector<valtype> altstack;
-    if (script.size() > 10000)
+    //if (script.size() > 10000)
+    if (script.size() > 100000)
         return false;
     int nOpCount = 0;
 
@@ -1618,12 +1619,11 @@ bool IsMine(const CKeyStore &keystore, const CTxDestination &dest)
 
 bool IsMine(const CKeyStore &keystore, const CScript& scriptPubKey)
 {
-    /* Try to decode a name script and strip it if it is there.  */
     int op;
     std::vector<vchType> vvch;
     CScript::const_iterator pc = scriptPubKey.begin ();
     CScript rawScript;
-    if (DecodeNameScript (scriptPubKey, op, vvch, pc))
+    if (aliasScript (scriptPubKey, op, vvch, pc))
         rawScript = CScript(pc, scriptPubKey.end ());
     else
         rawScript = scriptPubKey;
@@ -1767,32 +1767,53 @@ bool VerifyScript(const CScript& scriptSig, const CScript& scriptPubKey, const C
 {
     vector<vector<unsigned char> > stack, stackCopy;
     if (!EvalScript(stack, scriptSig, txTo, nIn, nHashType))
+    {
+      printf("VerifyScript 1\n");
         return false;
+     }
 
     stackCopy = stack;
 
     if (!EvalScript(stack, scriptPubKey, txTo, nIn, nHashType))
+    {
+      printf("VerifyScript 2\n");
         return false;
+   } 
     if (stack.empty())
+    {
+      printf("VerifyScript 3\n");
         return false;
+    }
 
     if (CastToBool(stack.back()) == false)
+    {
+      printf("VerifyScript 4\n");
         return false;
+    }
 
     // Additional validation for spend-to-script-hash transactions:
     if (scriptPubKey.IsPayToScriptHash())
     {
         if (!scriptSig.IsPushOnly()) // scriptSig must be literals-only
+        {
+      printf("VerifyScript 5\n");
             return false;            // or validation fails
+        }
 
         const valtype& pubKeySerialized = stackCopy.back();
         CScript pubKey2(pubKeySerialized.begin(), pubKeySerialized.end());
         popstack(stackCopy);
 
         if (!EvalScript(stackCopy, pubKey2, txTo, nIn, nHashType))
+        {
+      printf("VerifyScript 6\n");
             return false;
+         }
         if (stackCopy.empty())
+         {
+      printf("VerifyScript 7\n");
             return false;
+        } 
         return CastToBool(stackCopy.back());
     }
 
@@ -1805,12 +1826,11 @@ bool SignSignature(const CKeyStore &keystore, const CScript& fromPubKey, CTransa
     assert(nIn < txTo.vin.size());
     CTxIn& txin = txTo.vin[nIn];
 
- /* Try to decode a name script and strip it if it is there.  */
     int op;
     std::vector<vchType> vvch;
     CScript::const_iterator pc = fromPubKey.begin ();
     CScript rawScript;
-    if (DecodeNameScript (fromPubKey, op, vvch, pc))
+    if (aliasScript (fromPubKey, op, vvch, pc))
         rawScript = CScript(pc, fromPubKey.end ());
     else
         rawScript = fromPubKey;
@@ -1821,7 +1841,10 @@ bool SignSignature(const CKeyStore &keystore, const CScript& fromPubKey, CTransa
 
     txnouttype whichType;
     if (!Solver(keystore, rawScript, hash, nHashType, txin.scriptSig, whichType))
+   { 
+     printf("SignSignature, Solver return false\n");
         return false;
+   }
 
     if (whichType == TX_SCRIPTHASH)
     {
@@ -1838,7 +1861,11 @@ bool SignSignature(const CKeyStore &keystore, const CScript& fromPubKey, CTransa
             Solver(keystore, subscript, hash2, nHashType, txin.scriptSig, subType) && subType != TX_SCRIPTHASH;
         // Append serialized subscript whether or not it is completely signed:
         txin.scriptSig << static_cast<valtype>(subscript);
-        if (!fSolved) return false;
+        if (!fSolved) 
+        {
+     printf("SignSignature, fSolved return false\n");
+          return false;
+        }
     }
 
     // Test solution

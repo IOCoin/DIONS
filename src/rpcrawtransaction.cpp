@@ -50,29 +50,27 @@ void ScriptPubKeyToJSON(const CScript& scriptPubKey, Object& out, bool fIncludeH
     string address;
     int nRequired = 1;
 
-    /* If this is a name transaction, try to strip off the initial
-       script and decode the rest for better results.  */
-    std::string nameAsmPrefix = "";
+    std::string aliasPrefix = "";
     CScript script(scriptPubKey);
     int op;
     vector<vector<unsigned char> > vvch;
     CScript::const_iterator pc = script.begin();
-    if (DecodeNameScript(script, op, vvch, pc))
+    if (aliasScript(script, op, vvch, pc))
     {
-        Object nameOp;
+        Object aliasOperation;
 
         switch (op)
         {
         case OP_PUBLIC_KEY:
         {
             assert(vvch.size() == 3);
-            nameOp.push_back(Pair("op", "public_key"));
+            aliasOperation.push_back(Pair("op", "public_key"));
             const std::string sender(vvch[0].begin(), vvch[0].end());
             const std::string key(vvch[1].begin(), vvch[1].end());
             const std::string signature(vvch[2].begin(), vvch[2].end());
-            nameOp.push_back(Pair("sender", sender));
-            nameOp.push_back(Pair("key", key));
-            nameOp.push_back(Pair("signature", signature));
+            aliasOperation.push_back(Pair("sender", sender));
+            aliasOperation.push_back(Pair("key", key));
+            aliasOperation.push_back(Pair("signature", signature));
             break;
         }
 
@@ -80,55 +78,55 @@ void ScriptPubKeyToJSON(const CScript& scriptPubKey, Object& out, bool fIncludeH
         {
             assert(vvch.size() == 1);
             const std::string rand = HexStr(vvch[0].begin(), vvch[0].end());
-            nameOp.push_back(Pair("op", "message"));
+            aliasOperation.push_back(Pair("op", "message"));
             break;
         }
 
-        case OP_NAME_NEW:
+        case OP_ALIAS_ENCRYPTED:
         {
             assert(vvch.size() == 1);
             const std::string rand = HexStr(vvch[0].begin(), vvch[0].end());
-            nameOp.push_back(Pair("op", "name_new"));
-            nameOp.push_back(Pair("rand", rand));
+            aliasOperation.push_back(Pair("op", "node_split"));
+            aliasOperation.push_back(Pair("rand", rand));
             break;
         }
 
-        case OP_NAME_FIRSTUPDATE:
+        case OP_ALIAS_SET:
         {
             assert(vvch.size() == 3);
-            const std::string name(vvch[0].begin(), vvch[0].end());
+            const std::string alias(vvch[0].begin(), vvch[0].end());
             const std::string rand = HexStr(vvch[1].begin(), vvch[1].end());
             const std::string val(vvch[2].begin(), vvch[2].end());
-            nameOp.push_back(Pair("op", "name_firstupdate"));
-            nameOp.push_back(Pair("name", name));
-            nameOp.push_back(Pair("rand", rand));
-            nameOp.push_back(Pair("value", val));
+            aliasOperation.push_back(Pair("op", "node_open"));
+            aliasOperation.push_back(Pair("alias", alias));
+            aliasOperation.push_back(Pair("rand", rand));
+            aliasOperation.push_back(Pair("value", val));
             break;
         }
 
-        case OP_NAME_UPDATE:
+        case OP_ALIAS_RELAY:
         {
             assert(vvch.size() == 2);
-            const std::string name(vvch[0].begin(), vvch[0].end());
+            const std::string alias(vvch[0].begin(), vvch[0].end());
             const std::string val(vvch[1].begin(), vvch[1].end());
-            nameOp.push_back(Pair("op", "name_update"));
-            nameOp.push_back(Pair("name", name));
-            nameOp.push_back(Pair("value", val));
+            aliasOperation.push_back(Pair("op", "node_relay"));
+            aliasOperation.push_back(Pair("alias", alias));
+            aliasOperation.push_back(Pair("value", val));
             break;
         }
 
         default:
-            nameOp.push_back(Pair("op", "unknown"));
+            aliasOperation.push_back(Pair("op", "unknown"));
             break;
         }
 
-        out.push_back(Pair("nameOp", nameOp));
-        nameAsmPrefix = "NAME_OPERATION ";
+        out.push_back(Pair("aliasOperation", aliasOperation));
+        aliasPrefix = "ALIAS_OP";
         script = CScript(pc, script.end());
     }
 
     /* Write out the results.  */
-    out.push_back(Pair("asm", nameAsmPrefix + script.ToString()));
+    out.push_back(Pair("asm", aliasPrefix + script.ToString()));
     if (fIncludeHex)
         out.push_back(Pair("hex", HexStr(scriptPubKey.begin(), scriptPubKey.end())));
     out.push_back(Pair("hex", HexStr(scriptPubKey.begin(), scriptPubKey.end())));
@@ -370,9 +368,32 @@ Value createrawtransaction(const Array& params, bool fHelp)
     set<CBitcoinAddress> setAddress;
     BOOST_FOREACH(const Pair& s, sendTo)
     {
-        CBitcoinAddress address(s.name_);
-        if (!address.IsValid())
-            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, string("Invalid I/OCoin address: ")+s.name_);
+      CBitcoinAddress address(s.name_);
+      if(!address.IsValid())
+      {
+        vector<AliasIndex> vtxPos;
+        LocatorNodeDB ln1Db("r");
+        string aliasStr = s.name_;
+        std::transform(aliasStr.begin(), aliasStr.end(), aliasStr.begin(), ::tolower);
+        vchType vchAlias = vchFromString(aliasStr);
+        if (ln1Db.lKey (vchAlias))
+        {
+          if (!ln1Db.lGet (vchAlias, vtxPos))
+            return error("aliasHeight() : failed to read from alias DB");
+          if (vtxPos.empty ())
+            return -1;
+
+          AliasIndex& txPos = vtxPos.back ();
+          address.SetString(txPos.vAddress); 
+        }
+        else
+        {
+          throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid I/OCoin address or unknown alias");
+        }
+      }
+        //CBitcoinAddress address(s.name_);
+        //if (!address.IsValid())
+        //    throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, string("Invalid I/OCoin address: ")+s.name_);
 
         if (setAddress.count(address))
             throw JSONRPCError(RPC_INVALID_PARAMETER, string("Invalid parameter, duplicated address: ")+s.name_);
@@ -380,6 +401,8 @@ Value createrawtransaction(const Array& params, bool fHelp)
 
         CScript scriptPubKey;
         scriptPubKey.SetDestination(address.Get());
+        double dAmount = (s.value_).get_real();
+        printf(">>> s.value_ %f\n", dAmount);
         int64_t nAmount = AmountFromValue(s.value_);
 
         CTxOut out(nAmount, scriptPubKey);

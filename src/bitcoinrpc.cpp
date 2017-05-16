@@ -114,13 +114,13 @@ Value ValueFromAmount(int64_t amount)
 // Utilities: convert hex-encoded Values
 // (throws error if not hex).
 //
-uint256 ParseHashV(const Value& v, string strName)
+uint256 ParseHashV(const Value& v, string aliasStr)
 {
     string strHex;
     if (v.type() == str_type)
         strHex = v.get_str();
     if (!IsHex(strHex)) // Note: IsHex("") is false
-        throw JSONRPCError(RPC_INVALID_PARAMETER, strName+" must be hexadecimal string (not '"+strHex+"')");
+        throw JSONRPCError(RPC_INVALID_PARAMETER, aliasStr+" must be hexadecimal string (not '"+strHex+"')");
     uint256 result;
     result.SetHex(strHex);
     return result;
@@ -131,13 +131,13 @@ uint256 ParseHashO(const Object& o, string strKey)
     return ParseHashV(find_value(o, strKey), strKey);
 }
 
-vector<unsigned char> ParseHexV(const Value& v, string strName)
+vector<unsigned char> ParseHexV(const Value& v, string aliasStr)
 {
     string strHex;
     if (v.type() == str_type)
         strHex = v.get_str();
     if (!IsHex(strHex))
-        throw JSONRPCError(RPC_INVALID_PARAMETER, strName+" must be hexadecimal string (not '"+strHex+"')");
+        throw JSONRPCError(RPC_INVALID_PARAMETER, aliasStr+" must be hexadecimal string (not '"+strHex+"')");
     return ParseHex(strHex);
 }
 
@@ -232,6 +232,7 @@ static const CRPCCommand vRPCCommands[] =
     { "getpowblocksleft",       &getpowblocksleft,       true,   false },
     { "getpowtimeleft",         &getpowtimeleft,         true,   false },
     { "getconnectioncount",     &getconnectioncount,     true,   false },
+    { "getnumblocksofpeers",    &getnumblocksofpeers,    true,   false },
     { "getpeerinfo",            &getpeerinfo,            true,   false },
     { "getdifficulty",          &getdifficulty,          true,   false },
     { "getnetworkmhashps",      &getnetworkmhashps,      true,   false },
@@ -246,6 +247,8 @@ static const CRPCCommand vRPCCommands[] =
     { "getaccount",             &getaccount,             false,  false },
     { "getaddressesbyaccount",  &getaddressesbyaccount,  true,   false },
     { "sendtoaddress",          &sendtoaddress,          false,  false },
+    { "sendtodion",             &sendtodion,          false,  false },
+    { "addresstodion",             &addresstodion,    false,  false },
     { "getreceivedbyaddress",   &getreceivedbyaddress,   false,  false },
     { "getreceivedbyaccount",   &getreceivedbyaccount,   false,  false },
     { "listreceivedbyaddress",  &listreceivedbyaddress,  false,  false },
@@ -255,7 +258,9 @@ static const CRPCCommand vRPCCommands[] =
     { "walletpassphrase",       &walletpassphrase,       true,   false },
     { "walletpassphrasechange", &walletpassphrasechange, false,  false },
     { "walletlock",             &walletlock,             true,   false },
+    { "walletlockstatus",       &walletlockstatus,       true,   false },
     { "encryptwallet",          &encryptwallet,          false,  false },
+    { "getencryptionstatus",    &getencryptionstatus,    true,  false },
     { "validateaddress",        &validateaddress,        true,   false },
     { "validatepubkey",         &validatepubkey,         true,   false },
     { "getbalance",             &getbalance,             false,  false },
@@ -270,6 +275,7 @@ static const CRPCCommand vRPCCommands[] =
     { "getblockhash",           &getblockhash,           false,  false },
     { "gettransaction",         &gettransaction,         false,  false },
     { "listtransactions",       &listtransactions,       false,  false },
+    { "listtransactions__",       &listtransactions__,       false,  false },
     { "listaddressgroupings",   &listaddressgroupings,   false,  false },
     { "signmessage",            &signmessage,            false,  false },
     { "verifymessage",          &verifymessage,          false,  false },
@@ -290,31 +296,36 @@ static const CRPCCommand vRPCCommands[] =
     { "decoderawtransaction",   &decoderawtransaction,   false,  false },
     { "decodescript",           &decodescript,           false,  false },
     { "signrawtransaction",     &signrawtransaction,     false,  false },
-    { "message_send_plain",     &message_send_plain,     false,  false },
-    { "message_send",           &message_send,           false,  false },
-    { "new_public_key",         &new_public_key,         false,  false },
-    { "public_key_send",        &public_key_send,        false,  false },
-    { "name_new",               &name_new,               false,  false },
-    { "name_firstupdate",       &name_firstupdate,       false,  false },
-    { "name_update",            &name_update,            false,  false },
-    { "decrypted_message_list", &decrypted_message_list, false,  false },
-    { "message_list_plain",     &message_list_plain,     false,  false },
-    { "get_name_record",        &get_name_record,        false,  false },
-    { "name_list",              &name_list,              false,  false },
-    { "public_key_list",        &public_key_list,        false,  false },
-    { "name_rescan",            &name_rescan,            false,  false },
-    { "name_debug",             &name_debug,             false,  false },
-    { "name_debug1",            &name_debug1,            false,  false },
+    { "sendPlainMessage",     &sendPlainMessage,     false,  false },
+    { "sendMessage",     &sendMessage,     false,  false },
+    { "newPlublicKey",     &newPlublicKey,     false,  false },
+    { "sendPublicKey",     &sendPublicKey,     false,  false },
+    { "sendSymmetric",     &sendSymmetric,     false,  false },
+    { "registerAlias",     &registerAlias,     false,  false },
+    { "registerAliasGenerate",     &registerAliasGenerate,     false,  false },
+    { "decryptAlias",     &decryptAlias,     false,  false },
+    { "transferAlias",     &transferAlias,     false,  false },
+    { "updateEncryptedAlias",     &updateEncryptedAlias,     false,  false },
+    { "transferAlias",     &transferAlias,     false,  false },
+    { "transferEncryptedAlias",     &transferEncryptedAlias,     false,  false },
+    { "decryptedMessageList",     &decryptedMessageList,     false,  false },
+    { "plainTextMessageList",     &plainTextMessageList,     false,  false },
+    { "getNodeRecord",     &getNodeRecord,     false,  false },
+    { "aliasList",     &aliasList,     false,  false },
+    { "aliasList__",     &aliasList__,     false,  false },
+    { "publicKeys",     &publicKeys,     false,  false },
+    { "publicKeyExports",     &publicKeyExports,     false,  false },
+    { "myRSAKeys",     &myRSAKeys,     false,  false },
+    { "nodeDebug",     &nodeDebug,     false,  false },
+    { "nodeDebug1",     &nodeDebug1,     false,  false },
     { "sendrawtransaction",     &sendrawtransaction,     false,  false },
     { "getcheckpoint",          &getcheckpoint,          true,   false },
-    { "reservebalance",         &reservebalance,         false,  true },
-    { "checkwallet",            &checkwallet,            false,  true },
-    { "repairwallet",           &repairwallet,           false,  true },
-    { "resendtx",               &resendtx,               false,  true },
-    { "makekeypair",            &makekeypair,            false,  true },
-    { "sendalert",              &sendalert,              false,  false },
-    { "getnumblocksofpeers",    &getnumblocksofpeers,    true,   false },
-    { "getencryptionstatus",    &getencryptionstatus,    true,   false },
+    { "reservebalance",         &reservebalance,         false,  true},
+    { "checkwallet",            &checkwallet,            false,  true},
+    { "repairwallet",           &repairwallet,           false,  true},
+    { "resendtx",               &resendtx,               false,  true},
+    { "makekeypair",            &makekeypair,            false,  true},
+    { "sendalert",              &sendalert,              false,  false},
 };
 
 CRPCTable::CRPCTable()
@@ -1197,6 +1208,7 @@ Array RPCConvertValues(const std::string &strMethod, const std::vector<std::stri
     //
     if (strMethod == "stop"                   && n > 0) ConvertTo<bool>(params[0]);
     if (strMethod == "sendtoaddress"          && n > 1) ConvertTo<double>(params[1]);
+    if (strMethod == "sendtodion"             && n > 1) ConvertTo<double>(params[1]);
     if (strMethod == "settxfee"               && n > 0) ConvertTo<double>(params[0]);
     if (strMethod == "getreceivedbyaddress"   && n > 1) ConvertTo<int64_t>(params[1]);
     if (strMethod == "getreceivedbyaccount"   && n > 1) ConvertTo<int64_t>(params[1]);
@@ -1235,8 +1247,7 @@ Array RPCConvertValues(const std::string &strMethod, const std::vector<std::stri
 
     if (strMethod == "sendmany"               && n > 1) ConvertTo<Object>(params[1]);
     if (strMethod == "sendmany"               && n > 2) ConvertTo<int64_t>(params[2]);
-    if (strMethod == "reservebalance"         && n > 0) ConvertTo<bool>(params[0]);
-    if (strMethod == "reservebalance"         && n > 1) ConvertTo<double>(params[1]);
+    if (strMethod == "reservebalance"         && n > 0) ConvertTo<double>(params[0]);
     if (strMethod == "addmultisigaddress"     && n > 0) ConvertTo<int64_t>(params[0]);
     if (strMethod == "addmultisigaddress"     && n > 1) ConvertTo<Array>(params[1]);
     if (strMethod == "listunspent"            && n > 0) ConvertTo<int64_t>(params[0]);

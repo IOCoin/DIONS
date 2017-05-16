@@ -35,9 +35,9 @@ bool fEnforceCanonical;
 unsigned int nNodeLifespan;
 unsigned int nDerivationMethodIndex;
 unsigned int nMinerSleep;
+string strDNSSeedNode;
 bool fUseFastIndex;
 enum Checkpoints::CPMode CheckpointsMode;
-void rescanfornames();
 //////////////////////////////////////////////////////////////////////////////
 //
 // Shutdown
@@ -84,7 +84,6 @@ void Shutdown(void* parg)
     {
         fShutdown = true;
         nTransactionsUpdated++;
-//        CTxDB().Close();
         bitdb.Flush(false);
         StopNode();
         bitdb.Flush(true);
@@ -386,8 +385,11 @@ bool AppInit2()
     fUseFastIndex = GetBoolArg("-fastindex", true);
     nMinerSleep = GetArg("-minersleep", 500);
 
+
     CheckpointsMode = Checkpoints::STRICT;
     std::string strCpMode = GetArg("-cppolicy", "strict");
+
+    strDNSSeedNode = GetArg("-dnsseednode", "default");
 
     if(strCpMode == "strict")
         CheckpointsMode = Checkpoints::STRICT;
@@ -894,23 +896,13 @@ bool AppInit2()
     printf("Loaded %i addresses from peers.dat  %"PRId64"ms\n",
            addrman.size(), GetTimeMillis() - nStart);
 
-    hook = InitHook();
 
-    bool needNameRescan = false;
     {
-        filesystem::path nmindex, nmindex_old;
-        nmindex = filesystem::path (GetDataDir()) / "nameindex.dat";
+      filesystem::path aliascache;
+      aliascache = filesystem::path(GetDataDir())/"aliascache.dat";
 
-        if (!filesystem::exists (nmindex))
-            needNameRescan = true;
-
-        CNameDB dbName("cr+");
+      LocatorNodeDB aliasCacheDB("cr+");
     }
-
-    if (needNameRescan)
-        rescanfornames();
-
-    // ********************************************************* Step 11: start node
 
     if (!CheckDiskSpace())
         return false;

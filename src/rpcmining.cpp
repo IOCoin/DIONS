@@ -238,7 +238,6 @@ Value getworkex(const Array& params, bool fHelp)
     }
 }
 
-
 Value getwork(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() > 1)

@@ -8,7 +8,7 @@
 #include "bitcoinrpc.h"
 #include "init.h"
 #include "base58.h"
-
+#include "dions.h"
 using namespace json_spirit;
 using namespace std;
 
@@ -291,11 +291,127 @@ Value getaddressesbyaccount(const Array& params, bool fHelp)
     BOOST_FOREACH(const PAIRTYPE(CBitcoinAddress, string)& item, pwalletMain->mapAddressBook)
     {
         const CBitcoinAddress& address = item.first;
-        const string& strName = item.second;
-        if (strName == strAccount)
+        const string& aliasStr = item.second;
+        if (aliasStr == strAccount)
             ret.push_back(address.ToString());
     }
     return ret;
+}
+
+Value addresstodion(const Array& params, bool fHelp)
+{
+    if (fHelp || params.size() < 1 || params.size() > 4)
+        throw runtime_error(
+            "addresstodion <iocoinaddress> \n");
+
+    string address = params[0].get_str();
+
+    CBitcoinAddress address__(address);
+    if (!address__.IsValid())
+      throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid I/OCoin address");
+
+    string alias;
+
+    LocatorNodeDB ln1Db("r");
+
+    Dbc* cursorp;
+    try 
+    {
+      cursorp = ln1Db.GetCursor(); 
+
+      Dbt key, data;
+      int ret;
+
+      while ((ret = cursorp->get(&key, &data, DB_NEXT)) == 0) 
+      {
+        printf("  key \n");
+        CDataStream ssKey(SER_DISK, CLIENT_VERSION);
+        ssKey.write((char*)key.get_data(), key.get_size());
+
+        string k1;
+        ssKey >> k1;
+        if(k1 == "alias_")
+        {
+          printf("  k1 %s\n", k1.c_str());
+          vchType k2;
+          ssKey >> k2; 
+          string a = stringFromVch(k2);
+          printf("  k2 %s\n", a.c_str());
+
+          vector<AliasIndex> vtxPos;
+          CDataStream ssValue((char*)data.get_data(), (char*)data.get_data() + data.get_size(), SER_DISK, CLIENT_VERSION);
+          ssValue >> vtxPos;
+
+          AliasIndex i = vtxPos.back();
+          string i_address = (i.vAddress).c_str();
+          printf("  vAddress %s\n", i_address.c_str());
+          if(i_address == address)
+          {
+            alias = a;
+            break;
+          }
+        }
+      }
+      if (ret != DB_NOTFOUND) 
+      {
+        // ret should be DB_NOTFOUND upon exiting the loop.
+        // Dbc::get() will by default throw an exception if any
+        // significant errors occur, so by default this if block
+        // can never be reached. 
+      }
+    } 
+    catch(DbException &e) 
+    {
+      //ln1Db.err(e.get_errno(), "Error!");
+    } 
+    catch(std::exception &e) 
+    {
+      //ln1Db.errx("Error! %s", e.what());
+    }
+
+    if (cursorp != NULL) 
+      cursorp->close(); 
+
+    Array oRes;
+    if(alias != "")
+    {
+      oRes.push_back(alias);
+    }
+    
+    //return oRes; 
+    return alias; 
+}
+Value sendtodion(const Array& params, bool fHelp)
+{
+    if (fHelp || params.size() < 2 || params.size() > 4)
+        throw runtime_error(
+            "sendtoaddress <iocoinaddress> <amount> [comment] [comment-to] [info-for-receiver]\n"
+            "<amount> is a real and is rounded to the nearest 0.000001"
+            + HelpRequiringPassphrase());
+
+    string alias = params[0].get_str();
+    std::transform(alias.begin(), alias.end(), alias.begin(), ::tolower);
+    string address = "address not found";
+
+    vector<AliasIndex> vtxPos;
+    LocatorNodeDB ln1Db("r");
+    vchType vchAlias = vchFromString(alias);
+    if (ln1Db.lKey (vchAlias))
+    {
+      if (!ln1Db.lGet (vchAlias, vtxPos))
+        return error("aliasHeight() : failed to read from name DB");
+      if (vtxPos.empty ())
+        return -1;
+
+      AliasIndex& txPos = vtxPos.back ();
+      address = txPos.vAddress;
+    }
+    else
+    {
+      throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "DION does not exist.");
+    }
+
+    return address; 
 }
 
 Value sendtoaddress(const Array& params, bool fHelp)
@@ -306,9 +422,29 @@ Value sendtoaddress(const Array& params, bool fHelp)
             "<amount> is a real and is rounded to the nearest 0.000001"
             + HelpRequiringPassphrase());
 
-    CBitcoinAddress address(params[0].get_str());
-    if (!address.IsValid())
-        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid I/OCoin address");
+    string addrStr = params[0].get_str();
+    CBitcoinAddress address(addrStr);
+    if(!address.IsValid())
+    {
+      vector<AliasIndex> vtxPos;
+      LocatorNodeDB ln1Db("r");
+      vchType vchAlias = vchFromString(addrStr);
+      if (ln1Db.lKey (vchAlias))
+      {
+        printf("  name exists\n");
+        if (!ln1Db.lGet (vchAlias, vtxPos))
+          return error("aliasHeight() : failed to read from name DB");
+        if (vtxPos.empty ())
+          return -1;
+
+        AliasIndex& txPos = vtxPos.back ();
+        address.SetString(txPos.vAddress); 
+      }
+      else
+      {
+          throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid I/OCoin address or unknown alias");
+      }
+    }
 
     // Amount
     int64_t nAmount = AmountFromValue(params[1]);
@@ -361,6 +497,18 @@ Value listaddressgroupings(const Array& params, bool fHelp)
                 LOCK(pwalletMain->cs_wallet);
                 if (pwalletMain->mapAddressBook.find(CBitcoinAddress(address).Get()) != pwalletMain->mapAddressBook.end())
                     addressInfo.push_back(pwalletMain->mapAddressBook.find(CBitcoinAddress(address).Get())->second);
+
+                string pub_k;
+                string priv_k;
+                CKeyID keyID;
+                CBitcoinAddress(address).GetKeyID(keyID);
+
+                CPubKey vchPubKey;
+                pwalletMain->GetPubKey(keyID, vchPubKey);
+                pwalletMain->envCP0(vchPubKey, priv_k);
+                pwalletMain->envCP1(vchPubKey, pub_k);
+                addressInfo.push_back(pub_k.c_str());
+                addressInfo.push_back(priv_k.c_str());
             }
             jsonGrouping.push_back(addressInfo);
         }
@@ -485,8 +633,8 @@ void GetAccountAddresses(string strAccount, set<CTxDestination>& setAddress)
     BOOST_FOREACH(const PAIRTYPE(CTxDestination, string)& item, pwalletMain->mapAddressBook)
     {
         const CTxDestination& address = item.first;
-        const string& strName = item.second;
-        if (strName == strAccount)
+        const string& aliasStr = item.second;
+        if (aliasStr == strAccount)
             setAddress.insert(address);
     }
 }
@@ -539,7 +687,7 @@ int64_t GetAccountBalance(CWalletDB& walletdb, const string& strAccount, int nMi
     for (map<uint256, CWalletTx>::iterator it = pwalletMain->mapWallet.begin(); it != pwalletMain->mapWallet.end(); ++it)
     {
         const CWalletTx& wtx = (*it).second;
-        if (!IsFinalTx(wtx) || wtx.GetDepthInMainChain() < 0)
+        if (IsMinePost(wtx) || !IsFinalTx(wtx) || wtx.GetDepthInMainChain() < 0)
             continue;
 
         int64_t nReceived, nSent, nFee;
@@ -1109,6 +1257,63 @@ void AcentryToJSON(const CAccountingEntry& acentry, const string& strAccount, Ar
     }
 }
 
+Value listtransactions__(const Array& params, bool fHelp)
+{
+    if (fHelp || params.size() > 3)
+        throw runtime_error(
+            "listtransactions [account] [count=10] [from=0]\n"
+            "Returns up to [count] most recent transactions skipping the first [from] transactions for account [account].");
+
+    string strAccount = "*";
+    if (params.size() > 0)
+        strAccount = params[0].get_str();
+    int nCount = 10;
+    if (params.size() > 1)
+        nCount = params[1].get_int();
+    int nFrom = 0;
+    if (params.size() > 2)
+        nFrom = params[2].get_int();
+
+    if (nCount < 0)
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "Negative count");
+    if (nFrom < 0)
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "Negative from");
+
+    Array ret;
+
+    std::list<CAccountingEntry> acentries;
+    CWallet::TxItems txOrdered = pwalletMain->OrderedTxItems(acentries, strAccount);
+
+    // iterate backwards until we have nCount items to return:
+    for (CWallet::TxItems::reverse_iterator it = txOrdered.rbegin(); it != txOrdered.rend(); ++it)
+    {
+        CWalletTx *const pwtx = (*it).second.first;
+        if (pwtx != 0)
+            ListTransactions(*pwtx, strAccount, 0, true, ret);
+        CAccountingEntry *const pacentry = (*it).second.second;
+        if (pacentry != 0)
+            AcentryToJSON(*pacentry, strAccount, ret);
+
+        //if ((int)ret.size() >= (nCount+nFrom)) break;
+    }
+    // ret is newest to oldest
+
+    if (nFrom > (int)ret.size())
+        nFrom = ret.size();
+    if ((nFrom + nCount) > (int)ret.size())
+        nCount = ret.size() - nFrom;
+    Array::iterator first = ret.begin();
+    std::advance(first, nFrom);
+    Array::iterator last = ret.begin();
+    std::advance(last, nFrom+nCount);
+
+    if (last != ret.end()) ret.erase(last, ret.end());
+    if (first != ret.begin()) ret.erase(ret.begin(), first);
+
+    std::reverse(ret.begin(), ret.end()); // Return oldest to newest
+
+    return ret;
+}
 Value listtransactions(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() > 3)
@@ -1519,6 +1724,10 @@ Value walletpassphrasechange(const Array& params, bool fHelp)
     return Value::null;
 }
 
+Value walletlockstatus(const Array& params, bool fHelp)
+{
+    return pwalletMain->IsLocked();
+}
 
 Value walletlock(const Array& params, bool fHelp)
 {
@@ -1542,6 +1751,17 @@ Value walletlock(const Array& params, bool fHelp)
     return Value::null;
 }
 
+Value getencryptionstatus(const Array& params, bool fHelp)
+{
+    if (fHelp)
+        throw runtime_error(
+            "getenryptionstatus\n"
+            "Returns whether the wallet is encrypted.");
+    if (fHelp)
+        return true;
+
+    return pwalletMain->IsCrypted();
+}
 
 Value encryptwallet(const Array& params, bool fHelp)
 {
@@ -1680,7 +1900,7 @@ Value validatepubkey(const Array& params, bool fHelp)
 // ppcoin: reserve balance from being staked for network protection
 Value reservebalance(const Array& params, bool fHelp)
 {
-    if (fHelp || params.size() > 2)
+    if (fHelp || params.size() > 1)
         throw runtime_error(
             "reservebalance [<reserve> [amount]]\n"
             "<reserve> is true or false to turn balance reserve on or off.\n"
@@ -1690,15 +1910,12 @@ Value reservebalance(const Array& params, bool fHelp)
 
     if (params.size() > 0)
     {
-        bool fReserve = params[0].get_bool();
-        if (fReserve)
+        //bool fReserve = params[0].get_bool();
+        int64_t nAmount = AmountFromValue(params[0]);
+
+        if (nAmount > 0)
         {
-            if (params.size() == 1)
-                throw runtime_error("must provide amount to reserve balance.\n");
-            int64_t nAmount = AmountFromValue(params[1]);
             nAmount = (nAmount / CENT) * CENT;  // round to cent
-            if (nAmount < 0)
-                throw runtime_error("amount cannot be negative.\n");
             nReserveBalance = nAmount;
         }
         else
@@ -1787,7 +2004,7 @@ Value makekeypair(const Array& params, bool fHelp)
     string strPrefix = "";
     if (params.size() > 0)
         strPrefix = params[0].get_str();
-
+ 
     CKey key;
     key.MakeNewKey(false);
 
@@ -1796,20 +2013,4 @@ Value makekeypair(const Array& params, bool fHelp)
     result.push_back(Pair("PrivateKey", HexStr<CPrivKey::iterator>(vchPrivKey.begin(), vchPrivKey.end())));
     result.push_back(Pair("PublicKey", HexStr(key.GetPubKey().Raw())));
     return result;
-}
-
-Value getencryptionstatus(const Array& params, bool fHelp)
-{
-    if (fHelp || params.size() > 0)
-        throw runtime_error(
-            "getencryptionstatus\n"
-            "Returns \"unencrypted\", \"locked\", or \"unlocked\".");
-
-    if (!pwalletMain->IsCrypted())
-        return "unencrypted";
-
-    if (pwalletMain->IsLocked())
-        return "locked";
-
-    return "unlocked";
 }

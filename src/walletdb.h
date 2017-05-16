@@ -30,6 +30,9 @@ public:
     int nVersion;
     string rsaPrivateKey;
     string rsaPublicKey;
+    string aes256KeyBase64;
+    vchType random;
+    string r;
     int64_t nCreateTime; // 0 means unknown
 
     CKeyMetadata()
@@ -49,6 +52,9 @@ public:
         READWRITE(nCreateTime);
         READWRITE(this->rsaPrivateKey);
         READWRITE(this->rsaPublicKey);
+        READWRITE(this->aes256KeyBase64);
+        READWRITE(this->random);
+        READWRITE(this->r);
     )
 
     void SetNull()
@@ -70,7 +76,7 @@ private:
     CWalletDB(const CWalletDB&);
     void operator=(const CWalletDB&);
 public:
-    bool WriteName(const std::string& strAddress, const std::string& strName);
+    bool WriteName(const std::string& strAddress, const std::string& aliasStr);
 
     bool EraseName(const std::string& strAddress);
 

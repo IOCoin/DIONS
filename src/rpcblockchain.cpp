@@ -180,16 +180,6 @@ Value getblockcount(const Array& params, bool fHelp)
     return nBestHeight;
 }
 
-Value getnumblocksofpeers(const Array& params, bool fHelp)
-{
-    if (fHelp || params.size() != 0)
-        throw runtime_error(
-            "getnumblocksofpeers\n"
-            "Returns the number of blocks known to peers in the longest block chain.");
-
-    return GetNumBlocksOfPeers();
-}
-
 Value getpowblocks(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() > 1)

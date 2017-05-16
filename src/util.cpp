@@ -1,8 +1,3 @@
-// Copyright (c) 2009-2010 Satoshi Nakamoto
-// Copyright (c) 2009-2012 The Bitcoin developers
-// Distributed under the MIT/X11 software license, see the accompanying
-// file COPYING or http://www.opensource.org/licenses/mit-license.php.
-
 #include "util.h"
 #include "sync.h"
 #include "strlcpy.h"
@@ -19,11 +14,15 @@
 #include <openssl/rsa.h>
 #include <openssl/evp.h>
 #include <openssl/pem.h>
+#include <openssl/conf.h>
 
-// Work around clang compilation problem in Boost 1.46:
-// /usr/include/boost/program_options/detail/config_file.hpp:163:17: error: call to function 'to_internal' that is neither visible in the template definition nor found by argument-dependent lookup
-// See also: http://stackoverflow.com/questions/10020179/compilation-fail-in-boost-librairies-program-options
-//           http://clang.debian.net/status.php?version=3.0&key=CANNOT_FIND_FUNCTION
+#include "constants.h"
+#include "base58.h"
+#include "db.h"
+
+
+
+
 namespace boost {
     namespace program_options {
         std::string to_internal(const std::string&);
@@ -57,9 +56,9 @@ namespace boost {
 #define _WIN32_IE 0x0501
 #define WIN32_LEAN_AND_MEAN 1
 #ifndef NOMINMAX
-#define NOMINMAX
+#define NOMINMAX 
 #endif
-#include <io.h> /* for _commit */
+#include <io.h>
 #include "shlobj.h"
 #elif defined(__linux__)
 # include <sys/prctl.h>
@@ -85,7 +84,8 @@ bool fLogTimestamps = false;
 CMedianFilter<int64_t> vTimeOffsets(200,0);
 bool fReopenDebugLog = false;
 
-// Init OpenSSL library multithreading support
+
+
 static CCriticalSection** ppmutexOpenSSL;
 void locking_callback(int mode, int i, const char* file, int line)
 {
@@ -98,29 +98,29 @@ void locking_callback(int mode, int i, const char* file, int line)
 
 LockedPageManager LockedPageManager::instance;
 
-// Init
+
 class CInit
 {
 public:
     CInit()
     {
-        // Init OpenSSL library multithreading support
+
         ppmutexOpenSSL = (CCriticalSection**)OPENSSL_malloc(CRYPTO_num_locks() * sizeof(CCriticalSection*));
         for (int i = 0; i < CRYPTO_num_locks(); i++)
             ppmutexOpenSSL[i] = new CCriticalSection();
         CRYPTO_set_locking_callback(locking_callback);
 
 #ifdef WIN32
-        // Seed random number generator with screen scrape and other hardware sources
+
         RAND_screen();
 #endif
 
-        // Seed random number generator with performance counter
+
         RandAddSeed();
     }
     ~CInit()
     {
-        // Shutdown OpenSSL library multithreading support
+
         CRYPTO_set_locking_callback(NULL);
         for (int i = 0; i < CRYPTO_num_locks(); i++)
             delete ppmutexOpenSSL[i];
@@ -129,95 +129,237 @@ public:
 }
 instance_of_cinit;
 
+void handleErrors(void)
+{
+  ERR_print_errors_fp(stderr);
+  abort();
+}
 
+int encrypt(unsigned char *plaintext, int plaintext_len, unsigned char *key,
+  unsigned char *iv, unsigned char *ciphertext)
+{
+  EVP_CIPHER_CTX *ctx;
+
+  int len;
+
+  int ciphertext_len;
+
+  if(!(ctx = EVP_CIPHER_CTX_new())) handleErrors();
+
+  if(1 != EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv))
+    handleErrors();
+
+  if(1 != EVP_EncryptUpdate(ctx, ciphertext, &len, plaintext, plaintext_len))
+    handleErrors();
+  ciphertext_len = len;
+
+  if(1 != EVP_EncryptFinal_ex(ctx, ciphertext + len, &len)) handleErrors();
+  ciphertext_len += len;
+
+  EVP_CIPHER_CTX_free(ctx);
+
+  return ciphertext_len;
+}
+
+int decrypt(unsigned char* ciphertext, int ciphertext_len, unsigned char* key,
+  unsigned char *iv, unsigned char *plaintext)
+{
+  EVP_CIPHER_CTX *ctx;
+
+  int len;
+
+  int plaintext_len;
+
+  if(!(ctx = EVP_CIPHER_CTX_new())) handleErrors();
+
+  if(1 != EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv))
+    handleErrors();
+
+  if(1 != EVP_DecryptUpdate(ctx, plaintext, &len, ciphertext, ciphertext_len))
+    handleErrors();
+  plaintext_len = len;
+
+  if(1 != EVP_DecryptFinal_ex(ctx, plaintext + len, &len)) handleErrors();
+  plaintext_len += len;
+
+  EVP_CIPHER_CTX_free(ctx);
+
+  return plaintext_len;
+}
+
+bool EncryptMessageAES(const string& message, string& encryptedMsg, vector<unsigned char>& key, string& iv128Base64)
+{
+#ifdef WIN32
+  srand(time(NULL));
+#else
+  srandom(time(NULL));
+#endif
+
+  int LEN=16;
+  vector<unsigned char> iv128;
+  for(int i=0; i<LEN; i++)
+  {
+    iv128.push_back((unsigned char)(rand() % 255 + 1));
+  }
+
+  unsigned char* key256_array = &key[0];
+  unsigned char* iv128_array = &iv128[0];
+
+  const char* m = message.c_str();
+  unsigned char* msg = (unsigned char*)m;
+
+  ERR_load_crypto_strings();
+  OpenSSL_add_all_algorithms();
+
+
+  unsigned char encrypted_msg[4096];
+
+  int encrypted_msg_len = encrypt(msg,
+                                  strlen((char*)msg),
+                                  key256_array,
+                                  iv128_array,
+                                  encrypted_msg);
+
+  printf("encrypted_msg length %d\n", encrypted_msg_len);
+
+  encryptedMsg = EncodeBase64(encrypted_msg, encrypted_msg_len);
+
+  iv128Base64 = EncodeBase64(&iv128[0], 16);
+
+  return true;
+}
+
+bool DecryptMessageAES(const string& encryptedMsg, string& message, vector<unsigned char>& key, string& iv128Base64)
+{
+
+  string tmp = EncodeBase64(&key[0], key.size());
+  printf("DecryptMessageAES\n");
+  printf("  key >>>%s<<<\n", tmp.c_str());
+  printf("  iv  >>>%s<<<\n", iv128Base64.c_str());
+  printf("  msg >>>%s<<<\n", encryptedMsg.c_str());
+
+  ERR_load_crypto_strings();
+  OpenSSL_add_all_algorithms();
+
+
+  unsigned char plain[4096];
+
+  vector<unsigned char> msg__ = DecodeBase64(encryptedMsg.c_str());
+
+  vector<unsigned char> iv128RawVector = DecodeBase64(iv128Base64.c_str());
+  int decryptedtext_len = decrypt(&msg__[0],
+                                  msg__.size(),
+                                  &key[0],
+                                  &iv128RawVector[0],
+                                  plain);
+
+  plain[decryptedtext_len] = '\0';
+
+  message = (const char*)plain;
+  return true;
+}
 
 bool EncryptMessage(const string& rsaPubKey, const string& message, string& encryptedMsg)
 {
-    const int KEY_LENGTH=2048;
-    char   *err;               // Buffer for any error messages
+  const int KEY_LENGTH=4096;
+  char *err;
 
-    const char* pubKeyStr = rsaPubKey.c_str();
+  const char* pubKeyStr = rsaPubKey.c_str();
 
-    printf("EncryptMessage using public key string %s\n", pubKeyStr);
+  printf("EncryptMessage using public key string %s\n", pubKeyStr);
 
-    const unsigned char* msg = reinterpret_cast<const unsigned char*>(message.c_str());
+  const unsigned char* msg = reinterpret_cast<const unsigned char*>(message.c_str());
 
 
-    RSA *rsa= NULL;
-    BIO *keybio ;
-    keybio = BIO_new_mem_buf((void*)pubKeyStr, -1);
-    if (keybio==NULL)
-    {
-        printf( "Failed to create key BIO");
-        return false;
-    }
+  RSA *rsa= NULL;
+  BIO *keybio ;
+  keybio = BIO_new_mem_buf((void*)pubKeyStr, -1);
+  if (keybio==NULL)
+  {
+    printf( "Failed to create key BIO");
+    return false;
+  }
 
-    rsa = PEM_read_bio_RSA_PUBKEY(keybio, &rsa,NULL, NULL);
+  rsa = PEM_read_bio_RSA_PUBKEY(keybio, &rsa,NULL, NULL);
 
-    unsigned char encrypted[KEY_LENGTH/8] = { };
+  unsigned char encrypted[KEY_LENGTH/8] = { };
 
-    printf("RSA_public_encrypt %d, %s\n", message.size()+1,msg);
-    err = (char*)malloc(130);
-    int result = RSA_public_encrypt(message.size(),msg,encrypted,rsa,RSA_PKCS1_OAEP_PADDING);
-    if(result != 0)
-    {
-       ERR_load_crypto_strings();
-       ERR_error_string(ERR_get_error(), err);
-       fprintf(stderr, "Error encrypting message: %s\n", err);
-    }
-    printf("RSA_public_encrypt %d\n", result);
+  printf("RSA_public_encrypt %lu, %s\n", message.size()+1,msg);
+  err = (char*)malloc(130);
+  int result = RSA_public_encrypt(message.size(),msg,encrypted,rsa,RSA_PKCS1_OAEP_PADDING);
+  if(result != 0)
+  {
+     ERR_load_crypto_strings();
+     ERR_error_string(ERR_get_error(), err);
+     fprintf(stderr, "Error encrypting message: %s\n", err);
+  }
+  printf("RSA_public_encrypt %d\n", result);
 
-    //encryptedMsg = string(reinterpret_cast<const char*>(encrypted));
-    encryptedMsg = EncodeBase64(encrypted, result);
 
-    return true;
+  encryptedMsg = EncodeBase64(encrypted, result);
+
+  return true;
 }
-
 bool DecryptMessage(const string& rsaPrivKey, const string& encrypted, string& decryptedMsg)
 {
-    const char* privKeyStr = rsaPrivKey.c_str();
-    printf("DecryptMessage pKey %s\n", privKeyStr);
-    printf("DecryptMessage encrypted %s\n", encrypted.c_str());
+  const char* privKeyStr = rsaPrivKey.c_str();
+  printf("DecryptMessage pKey %s\n", privKeyStr);
+  printf("DecryptMessage encrypted %s\n", encrypted.c_str());
 
-    //const unsigned char* msg = reinterpret_cast<const unsigned char*>(encrypted.c_str());
-    vector<unsigned char> msg  = DecodeBase64(encrypted.c_str());
 
-    RSA *rsa= NULL;
-    BIO *keybio ;
-    keybio = BIO_new_mem_buf((unsigned char*)privKeyStr, -1);
-    if (keybio==NULL)
-    {
-        printf( "Failed to create key BIO");
-        return false;
-    }
+  vector<unsigned char> msg = DecodeBase64(encrypted.c_str());
 
-    rsa = PEM_read_bio_RSAPrivateKey(keybio, &rsa,NULL, NULL);
+  RSA *rsa= NULL;
+  BIO *keybio ;
+  keybio = BIO_new_mem_buf((unsigned char*)privKeyStr, -1);
+  if (keybio==NULL)
+  {
+    printf( "Failed to create key BIO");
+    return false;
+  }
 
-    unsigned char decrypted[4098] = { };
+  rsa = PEM_read_bio_RSAPrivateKey(keybio, &rsa,NULL, NULL);
 
-    //TODO error check
-    int  result = RSA_private_decrypt(msg.size(),&msg[0],decrypted,rsa,RSA_PKCS1_OAEP_PADDING);
+  unsigned char decrypted[4098] = { };
 
-    decryptedMsg = string(reinterpret_cast<const char*>(decrypted));
+  int r = RSA_private_decrypt(msg.size(),&msg[0],decrypted,rsa,RSA_PKCS1_OAEP_PADDING);
+  if(r == -1)
+    return false;
 
-    return true;
+  decryptedMsg = string(reinterpret_cast<const char*>(decrypted));
+
+  return true;
+}
+
+void GenerateAESKey(vchType& aesKey)
+{
+  #ifdef WIN32
+    srand(time(NULL));
+  #else
+    srandom(time(NULL));
+  #endif
+  int LEN=32;
+  for(int i=0; i<LEN; i++)
+  {
+    aesKey.push_back((unsigned char)(rand() % 255 + 1));
+  }
 }
 
 void GenerateRSAKey(string& rsaPrivKey, string& rsaPubKey)
 {
-    const int KEY_LENGTH=2048;
+    const int KEY_LENGTH=4096;
     const int PUB_EXP=3;
-    size_t pri_len;            // Length of private key
-    size_t pub_len;            // Length of public key
-    char   *pri_key;           // Private key
-    char   *pub_key;           // Public key
+    size_t pri_len;
+    size_t pub_len;
+    char *pri_key;
+    char *pub_key;
 
-    // Generate key pair
+
     printf("Generating RSA (%d bits) keypair...", KEY_LENGTH);
     fflush(stdout);
     RSA *keypair = RSA_generate_key(KEY_LENGTH, PUB_EXP, NULL, NULL);
 
-  // To get the C-string PEM form:
+
     BIO *pri = BIO_new(BIO_s_mem());
     BIO *pub = BIO_new(BIO_s_mem());
 
@@ -238,13 +380,13 @@ void GenerateRSAKey(string& rsaPrivKey, string& rsaPubKey)
 
     printf("\n%s\n%s\n", pri_key, pub_key);
 
-    rsaPrivKey = string(pri_key);
-    rsaPubKey = string(pub_key);
+  rsaPrivKey = string(pri_key);
+  rsaPubKey = string(pub_key);
 }
 
 void RandAddSeed()
 {
-    // Seed with CPU performance counter
+
     int64_t nCounter = GetPerformanceCounter();
     RAND_add(&nCounter, sizeof(nCounter), 1.5);
     memset(&nCounter, 0, sizeof(nCounter));
@@ -254,15 +396,15 @@ void RandAddSeedPerfmon()
 {
     RandAddSeed();
 
-    // This can take up to 2 seconds, so only do it every 10 minutes
+
     static int64_t nLastPerfmon;
     if (GetTime() < nLastPerfmon + 10 * 60)
         return;
     nLastPerfmon = GetTime();
 
 #ifdef WIN32
-    // Don't need this on Linux, OpenSSL automatically uses /dev/urandom
-    // Seed with the entire set of perfmon data
+
+
     unsigned char pdata[250000];
     memset(pdata, 0, sizeof(pdata));
     unsigned long nSize = sizeof(pdata);
@@ -282,8 +424,8 @@ uint64_t GetRand(uint64_t nMax)
     if (nMax == 0)
         return 0;
 
-    // The range of the random source must be a multiple of the modulus
-    // to give every possible output value an equal possibility
+
+
     uint64_t nRange = (std::numeric_limits<uint64_t>::max() / nMax) * nMax;
     uint64_t nRand = 0;
     do
@@ -315,7 +457,7 @@ inline int OutputDebugStringF(const char* pszFormat, ...)
     int ret = 0;
     if (fPrintToConsole)
     {
-        // print to console
+
         va_list arg_ptr;
         va_start(arg_ptr, pszFormat);
         ret = vprintf(pszFormat, arg_ptr);
@@ -323,36 +465,36 @@ inline int OutputDebugStringF(const char* pszFormat, ...)
     }
     else if (!fPrintToDebugger)
     {
-        // print to debug.log
+
         static FILE* fileout = NULL;
 
         if (!fileout)
         {
             boost::filesystem::path pathDebug = GetDataDir() / "debug.log";
             fileout = fopen(pathDebug.string().c_str(), "a");
-            if (fileout) setbuf(fileout, NULL); // unbuffered
+            if (fileout) setbuf(fileout, NULL);
         }
         if (fileout)
         {
             static bool fStartedNewLine = true;
 
-            // This routine may be called by global destructors during shutdown.
-            // Since the order of destruction of static/global objects is undefined,
-            // allocate mutexDebugLog on the heap the first time this routine
-            // is called to avoid crashes during shutdown.
+
+
+
+
             static boost::mutex* mutexDebugLog = NULL;
             if (mutexDebugLog == NULL) mutexDebugLog = new boost::mutex();
             boost::mutex::scoped_lock scoped_lock(*mutexDebugLog);
 
-            // reopen the log file, if requested
+
             if (fReopenDebugLog) {
                 fReopenDebugLog = false;
                 boost::filesystem::path pathDebug = GetDataDir() / "debug.log";
                 if (freopen(pathDebug.string().c_str(),"a",fileout) != NULL)
-                    setbuf(fileout, NULL); // unbuffered
+                    setbuf(fileout, NULL);
             }
 
-            // Debug print useful for profiling
+
             if (fLogTimestamps && fStartedNewLine)
                 fprintf(fileout, "%s ", DateTimeStrFormat("%x %H:%M:%S", GetTime()).c_str());
             if (pszFormat[strlen(pszFormat) - 1] == '\n')
@@ -372,7 +514,7 @@ inline int OutputDebugStringF(const char* pszFormat, ...)
     {
         static CCriticalSection cs_OutputDebugStringF;
 
-        // accumulate and output a line at a time
+
         {
             LOCK(cs_OutputDebugStringF);
             static std::string buffer;
@@ -477,14 +619,14 @@ void ParseString(const string& str, char c, vector<string>& v)
 
 string FormatMoney(int64_t n, bool fPlus)
 {
-    // Note: not using straight sprintf here because we do NOT want
-    // localized number formatting.
+
+
     int64_t n_abs = (n > 0 ? n : -n);
     int64_t quotient = n_abs/COIN;
     int64_t remainder = n_abs%COIN;
     string str = strprintf("%"PRId64".%08"PRId64, quotient, remainder);
 
-    // Right-trim excess zeros before the decimal point:
+
     int nTrim = 0;
     for (int i = str.size()-1; (str[i] == '0' && isdigit(str[i-2])); --i)
         ++nTrim;
@@ -533,7 +675,7 @@ bool ParseMoney(const char* pszIn, int64_t& nRet)
     for (; *p; p++)
         if (!isspace(*p))
             return false;
-    if (strWhole.size() > 10) // guard against 63 bit overflow
+    if (strWhole.size() > 10)
         return false;
     if (nUnits < 0 || nUnits > COIN)
         return false;
@@ -575,7 +717,7 @@ bool IsHex(const string& str)
 
 vector<unsigned char> ParseHex(const char* psz)
 {
-    // convert hex dump to vector
+
     vector<unsigned char> vch;
     while (true)
     {
@@ -601,7 +743,7 @@ vector<unsigned char> ParseHex(const string& str)
 
 static void InterpretNegativeSetting(string name, map<string, string>& mapSettingsRet)
 {
-    // interpret -nofoo as -foo=0 (and -nofoo=0 as -foo=1) as long as -foo not set
+
     if (name.find("-no") == 0)
     {
         std::string positive("-");
@@ -640,12 +782,12 @@ void ParseParameters(int argc, const char* const argv[])
         mapMultiArgs[psz].push_back(pszValue);
     }
 
-    // New 0.6 features:
+
     BOOST_FOREACH(const PAIRTYPE(string,string)& entry, mapArgs)
     {
         string name = entry.first;
 
-        //  interpret --foo as -foo (as long as both are not set)
+
         if (name.find("--") == 0)
         {
             std::string singleDash(name.begin()+1, name.end());
@@ -654,7 +796,7 @@ void ParseParameters(int argc, const char* const argv[])
             name = singleDash;
         }
 
-        // interpret -nofoo as -foo=0 (and -nofoo=0 as -foo=1) as long as -foo not set
+
         InterpretNegativeSetting(name, mapArgs);
     }
 }
@@ -716,19 +858,19 @@ string EncodeBase64(const unsigned char* pch, size_t len)
         int enc = *(pch++);
         switch (mode)
         {
-            case 0: // we have no bits
+            case 0:
                 strRet += pbase64[enc >> 2];
                 left = (enc & 3) << 4;
                 mode = 1;
                 break;
 
-            case 1: // we have two bits
+            case 1:
                 strRet += pbase64[left | (enc >> 4)];
                 left = (enc & 15) << 2;
                 mode = 2;
                 break;
 
-            case 2: // we have four bits
+            case 2:
                 strRet += pbase64[left | (enc >> 6)];
                 strRet += pbase64[enc & 63];
                 mode = 0;
@@ -759,7 +901,7 @@ vector<unsigned char> DecodeBase64(const char* p, bool* pfInvalid)
         -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
         -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
         -1, -1, -1, 62, -1, -1, -1, 63, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, -1, -1,
-        -1, -1, -1, -1, -1,  0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14,
+        -1, -1, -1, -1, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
         15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, -1, -1, -1, -1, -1, -1, 26, 27, 28,
         29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48,
         49, 50, 51, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
@@ -787,24 +929,24 @@ vector<unsigned char> DecodeBase64(const char* p, bool* pfInvalid)
          p++;
          switch (mode)
          {
-             case 0: // we have no bits and get 6
+             case 0:
                  left = dec;
                  mode = 1;
                  break;
 
-              case 1: // we have 6 bits and keep 4
+              case 1:
                   vchRet.push_back((left<<2) | (dec>>4));
                   left = dec & 15;
                   mode = 2;
                   break;
 
-             case 2: // we have 4 bits and get 6, we keep 2
+             case 2:
                  vchRet.push_back((left<<4) | (dec>>2));
                  left = dec & 3;
                  mode = 3;
                  break;
 
-             case 3: // we have 2 bits and get 6
+             case 3:
                  vchRet.push_back((left<<6) | dec);
                  mode = 0;
                  break;
@@ -814,19 +956,19 @@ vector<unsigned char> DecodeBase64(const char* p, bool* pfInvalid)
     if (pfInvalid)
         switch (mode)
         {
-            case 0: // 4n base64 characters processed: ok
+            case 0:
                 break;
 
-            case 1: // 4n+1 base64 character processed: impossible
+            case 1:
                 *pfInvalid = true;
                 break;
 
-            case 2: // 4n+2 base64 characters processed: require '=='
+            case 2:
                 if (left || p[0] != '=' || p[1] != '=' || decode64_table[(unsigned char)p[2]] != -1)
                     *pfInvalid = true;
                 break;
 
-            case 3: // 4n+3 base64 characters processed: require '='
+            case 3:
                 if (left || p[0] != '=' || decode64_table[(unsigned char)p[1]] != -1)
                     *pfInvalid = true;
                 break;
@@ -856,33 +998,33 @@ string EncodeBase32(const unsigned char* pch, size_t len)
         int enc = *(pch++);
         switch (mode)
         {
-            case 0: // we have no bits
+            case 0:
                 strRet += pbase32[enc >> 3];
                 left = (enc & 7) << 2;
                 mode = 1;
                 break;
 
-            case 1: // we have three bits
+            case 1:
                 strRet += pbase32[left | (enc >> 6)];
                 strRet += pbase32[(enc >> 1) & 31];
                 left = (enc & 1) << 4;
                 mode = 2;
                 break;
 
-            case 2: // we have one bit
+            case 2:
                 strRet += pbase32[left | (enc >> 4)];
                 left = (enc & 15) << 1;
                 mode = 3;
                 break;
 
-            case 3: // we have four bits
+            case 3:
                 strRet += pbase32[left | (enc >> 7)];
                 strRet += pbase32[(enc >> 2) & 31];
                 left = (enc & 3) << 3;
                 mode = 4;
                 break;
 
-            case 4: // we have two bits
+            case 4:
                 strRet += pbase32[left | (enc >> 5)];
                 strRet += pbase32[enc & 31];
                 mode = 0;
@@ -912,9 +1054,9 @@ vector<unsigned char> DecodeBase32(const char* p, bool* pfInvalid)
         -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
         -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
         -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 26, 27, 28, 29, 30, 31, -1, -1, -1, -1,
-        -1, -1, -1, -1, -1,  0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14,
-        15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, -1, -1, -1, -1, -1, -1,  0,  1,  2,
-         3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22,
+        -1, -1, -1, -1, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
+        15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, -1, -1, -1, -1, -1, -1, 0, 1, 2,
+         3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22,
         23, 24, 25, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
         -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
         -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
@@ -940,46 +1082,46 @@ vector<unsigned char> DecodeBase32(const char* p, bool* pfInvalid)
          p++;
          switch (mode)
          {
-             case 0: // we have no bits and get 5
+             case 0:
                  left = dec;
                  mode = 1;
                  break;
 
-              case 1: // we have 5 bits and keep 2
+              case 1:
                   vchRet.push_back((left<<3) | (dec>>2));
                   left = dec & 3;
                   mode = 2;
                   break;
 
-             case 2: // we have 2 bits and keep 7
+             case 2:
                  left = left << 5 | dec;
                  mode = 3;
                  break;
 
-             case 3: // we have 7 bits and keep 4
+             case 3:
                  vchRet.push_back((left<<1) | (dec>>4));
                  left = dec & 15;
                  mode = 4;
                  break;
 
-             case 4: // we have 4 bits, and keep 1
+             case 4:
                  vchRet.push_back((left<<4) | (dec>>1));
                  left = dec & 1;
                  mode = 5;
                  break;
 
-             case 5: // we have 1 bit, and keep 6
+             case 5:
                  left = left << 5 | dec;
                  mode = 6;
                  break;
 
-             case 6: // we have 6 bits, and keep 3
+             case 6:
                  vchRet.push_back((left<<2) | (dec>>3));
                  left = dec & 7;
                  mode = 7;
                  break;
 
-             case 7: // we have 3 bits, and keep 0
+             case 7:
                  vchRet.push_back((left<<5) | dec);
                  mode = 0;
                  break;
@@ -989,31 +1131,31 @@ vector<unsigned char> DecodeBase32(const char* p, bool* pfInvalid)
     if (pfInvalid)
         switch (mode)
         {
-            case 0: // 8n base32 characters processed: ok
+            case 0:
                 break;
 
-            case 1: // 8n+1 base32 characters processed: impossible
-            case 3: //   +3
-            case 6: //   +6
+            case 1:
+            case 3:
+            case 6:
                 *pfInvalid = true;
                 break;
 
-            case 2: // 8n+2 base32 characters processed: require '======'
+            case 2:
                 if (left || p[0] != '=' || p[1] != '=' || p[2] != '=' || p[3] != '=' || p[4] != '=' || p[5] != '=' || decode32_table[(unsigned char)p[6]] != -1)
                     *pfInvalid = true;
                 break;
 
-            case 4: // 8n+4 base32 characters processed: require '===='
+            case 4:
                 if (left || p[0] != '=' || p[1] != '=' || p[2] != '=' || p[3] != '=' || decode32_table[(unsigned char)p[4]] != -1)
                     *pfInvalid = true;
                 break;
 
-            case 5: // 8n+5 base32 characters processed: require '==='
+            case 5:
                 if (left || p[0] != '=' || p[1] != '=' || p[2] != '=' || decode32_table[(unsigned char)p[3]] != -1)
                     *pfInvalid = true;
                 break;
 
-            case 7: // 8n+7 base32 characters processed: require '='
+            case 7:
                 if (left || p[0] != '=' || decode32_table[(unsigned char)p[1]] != -1)
                     *pfInvalid = true;
                 break;
@@ -1057,14 +1199,7 @@ bool WildcardMatch(const string& str, const string& mask)
 {
     return WildcardMatch(str.c_str(), mask.c_str());
 }
-
-
-
-
-
-
-
-
+# 1211 "util.cpp"
 static std::string FormatException(std::exception* pex, const char* pszThread)
 {
 #ifdef WIN32
@@ -1101,12 +1236,12 @@ void PrintExceptionContinue(std::exception* pex, const char* pszThread)
 boost::filesystem::path GetDefaultDataDir()
 {
     namespace fs = boost::filesystem;
-    // Windows < Vista: C:\Documents and Settings\Username\Application Data\IOCoin
-    // Windows >= Vista: C:\Users\Username\AppData\Roaming\IOCoin
-    // Mac: ~/Library/Application Support/IOCoin
-    // Unix: ~/.iocoin
+
+
+
+
 #ifdef WIN32
-    // Windows
+
     return GetSpecialFolderPath(CSIDL_APPDATA) / "IOCoin";
 #else
     fs::path pathRet;
@@ -1116,12 +1251,12 @@ boost::filesystem::path GetDefaultDataDir()
     else
         pathRet = fs::path(pszHome);
 #ifdef MAC_OSX
-    // Mac
+
     pathRet /= "Library/Application Support";
     fs::create_directory(pathRet);
     return pathRet / "IOCoin";
 #else
-    // Unix
+
     return pathRet / ".iocoin";
 #endif
 #endif
@@ -1137,8 +1272,8 @@ const boost::filesystem::path &GetDataDir(bool fNetSpecific)
 
     fs::path &path = pathCached[fNetSpecific];
 
-    // This can be called during exceptions by printf, so we cache the
-    // value so we don't have to do memory allocations after that.
+
+
     if (cachedPath[fNetSpecific])
         return path;
 
@@ -1178,19 +1313,19 @@ void ReadConfigFile(map<string, string>& mapSettingsRet,
 
     boost::filesystem::ifstream streamConfig(GetConfigFile());
     if (!streamConfig.good())
-        return; // No bitcoin.conf file is OK
+        return;
 
     set<string> setOptions;
     setOptions.insert("*");
 
     for (boost::program_options::detail::config_file_iterator it(streamConfig, setOptions), end; it != end; ++it)
     {
-        // Don't overwrite existing settings so command line settings override bitcoin.conf
+
         string strKey = string("-") + it->string_key;
         if (mapSettingsRet.count(strKey) == 0)
         {
             mapSettingsRet[strKey] = it->value[0];
-            // interpret nofoo=1 as foo=0 (and nofoo=0 as foo=1) as long as foo not set)
+
             InterpretNegativeSetting(strKey, mapSettingsRet);
         }
         mapMultiSettingsRet[strKey].push_back(it->value[0]);
@@ -1224,12 +1359,12 @@ bool RenameOver(boost::filesystem::path src, boost::filesystem::path dest)
 #else
     int rc = std::rename(src.string().c_str(), dest.string().c_str());
     return (rc == 0);
-#endif /* WIN32 */
+#endif
 }
 
 void FileCommit(FILE *fileout)
 {
-    fflush(fileout);                // harmless if redundantly called
+    fflush(fileout);
 #ifdef WIN32
     _commit(_fileno(fileout));
 #else
@@ -1239,12 +1374,12 @@ void FileCommit(FILE *fileout)
 
 void ShrinkDebugFile()
 {
-    // Scroll debug.log if it's getting too big
+
     boost::filesystem::path pathLog = GetDataDir() / "debug.log";
     FILE* file = fopen(pathLog.string().c_str(), "r");
     if (file && boost::filesystem::file_size(pathLog) > 10 * 1000000)
     {
-        // Restart the file with some of the end
+
         char pch[200000];
         fseek(file, -sizeof(pch), SEEK_END);
         int nBytes = fread(pch, 1, sizeof(pch), file);
@@ -1258,15 +1393,8 @@ void ShrinkDebugFile()
         }
     }
 }
-
-//
-// "Never go to sea with two chronometers; take one or three."
-// Our three time sources are:
-//  - System clock
-//  - Median of other nodes clocks
-//  - The user (asking the user to fix the system clock if the first two disagree)
-//
-static int64_t nMockTime = 0;  // For unit testing
+# 1412 "util.cpp"
+static int64_t nMockTime = 0;
 
 int64_t GetTime()
 {
@@ -1296,19 +1424,19 @@ void AddTimeData(const CNetAddr& ip, int64_t nTime)
 {
     int64_t nOffsetSample = nTime - GetTime();
 
-    // Ignore duplicates
+
     static set<CNetAddr> setKnown;
     if (!setKnown.insert(ip).second)
         return;
 
-    // Add data
+
     vTimeOffsets.input(nOffsetSample);
     printf("Added time data, samples %d, offset %+"PRId64" (%+"PRId64" minutes)\n", vTimeOffsets.size(), nOffsetSample, nOffsetSample/60);
     if (vTimeOffsets.size() >= 5 && vTimeOffsets.size() % 2 == 1)
     {
         int64_t nMedian = vTimeOffsets.median();
         std::vector<int64_t> vSorted = vTimeOffsets.sorted();
-        // Only let other nodes change our time by so much
+
         if (abs64(nMedian) < 70 * 60)
         {
             nTimeOffset = nMedian;
@@ -1320,7 +1448,7 @@ void AddTimeData(const CNetAddr& ip, int64_t nTime)
             static bool fDone;
             if (!fDone)
             {
-                // If nobody has a time different than ours but within 5 minutes of ours, give a warning
+
                 bool fMatch = false;
                 BOOST_FOREACH(int64_t nOffset, vSorted)
                     if (nOffset != 0 && abs64(nOffset) < 5 * 60)
@@ -1349,7 +1477,7 @@ uint32_t insecure_rand_Rz = 11;
 uint32_t insecure_rand_Rw = 11;
 void seed_insecure_rand(bool fDeterministic)
 {
-    //The seed values have some unlikely fixed points which we avoid.
+
     if(fDeterministic)
     {
         insecure_rand_Rz = insecure_rand_Rw = 11;
@@ -1379,7 +1507,7 @@ string FormatFullVersion()
     return CLIENT_BUILD;
 }
 
-// Format the subversion field according to BIP 14 spec (https://en.bitcoin.it/wiki/BIP_0014)
+
 std::string FormatSubVersion(const std::string& name, int nClientVersion, const std::vector<std::string>& comments)
 {
     std::ostringstream ss;
@@ -1439,20 +1567,20 @@ double nBitsToDifficulty(unsigned int nBits)
 void RenameThread(const char* name)
 {
 #if defined(PR_SET_NAME)
-    // Only the first 15 characters are used (16 - NUL terminator)
+
     ::prctl(PR_SET_NAME, name, 0, 0, 0);
 #elif 0 && (defined(__FreeBSD__) || defined(__OpenBSD__))
-    // TODO: This is currently disabled because it needs to be verified to work
-    //       on FreeBSD or OpenBSD first. When verified the '0 &&' part can be
-    //       removed.
+
+
+
     pthread_set_name_np(pthread_self(), name);
 
-// This is XCode 10.6-and-later; bring back if we drop 10.5 support:
-// #elif defined(MAC_OSX)
-//    pthread_setname_np(name);
+
+
+
 
 #else
-    // Prevent warnings for unused parameters...
+
     (void)name;
 #endif
 }
@@ -1461,10 +1589,76 @@ bool NewThread(void(*pfn)(void*), void* parg)
 {
     try
     {
-        boost::thread(pfn, parg); // thread detaches when out of scope
+        boost::thread(pfn, parg);
     } catch(boost::thread_resource_error &e) {
         printf("Error creating thread: %s\n", e.what());
         return false;
     }
     return true;
+}
+
+int atod(const std::string& addr, std::string& d)
+{
+    printf("atod %s\n", addr.c_str());
+    CBitcoinAddress address__(addr);
+    if (!address__.IsValid())
+      return -2;
+
+    LocatorNodeDB ln1Db("r");
+
+    Dbc* cursorp;
+    try 
+    {
+      cursorp = ln1Db.GetCursor(); 
+
+      Dbt key, data;
+      int ret;
+
+      while ((ret = cursorp->get(&key, &data, DB_NEXT)) == 0) 
+      {
+        printf("  key \n");
+        CDataStream ssKey(SER_DISK, CLIENT_VERSION);
+        ssKey.write((char*)key.get_data(), key.get_size());
+
+        string k1;
+        ssKey >> k1;
+        if(k1 == "alias_")
+        {
+          printf("  k1 %s\n", k1.c_str());
+          vchType k2;
+          ssKey >> k2; 
+          string a = stringFromVch(k2);
+          printf("  k2 %s\n", a.c_str());
+
+          vector<AliasIndex> vtxPos;
+          CDataStream ssValue((char*)data.get_data(), (char*)data.get_data() + data.get_size(), SER_DISK, CLIENT_VERSION);
+          ssValue >> vtxPos;
+
+          AliasIndex i = vtxPos.back();
+          string i_address = (i.vAddress).c_str();
+          printf("  vAddress %s\n", i_address.c_str());
+          if(i_address == addr)
+          {
+            d = a;
+            break;
+          }
+        }
+      }
+    } 
+    catch(DbException &e) 
+    {
+      //ln1Db.err(e.get_errno(), "Error!");
+    } 
+    catch(std::exception &e) 
+    {
+      //ln1Db.errx("Error! %s", e.what());
+    }
+
+    if (cursorp != NULL) 
+      cursorp->close(); 
+
+    if(d == "")
+      return -1;
+
+    return 0; 
 }
