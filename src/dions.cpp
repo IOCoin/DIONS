@@ -1,3 +1,7 @@
+// Copyright (c) 2017 IODigital foundation developers 
+//
+//
+
 #include "db.h"
 #include "txdb-leveldb.h"
 #include "keystore.h"

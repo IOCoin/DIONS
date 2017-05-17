@@ -1,3 +1,4 @@
+// Copyright (c) 2017 IODigital foundation developers 
 #ifndef DIONS_H
 #define DIONS_H 
 
