@@ -1,11 +1,11 @@
-I/OCoin development tree
+I/O Coin development tree for DIONS Blockchain Upgrade
 
-I/OCoin is a PoS-based cryptocurrency.
+I/O Coin is a PoS-based cryptocurrency.
 
 Features:
-* Symbol: I/O
+* Symbol: IOC
 * 60 second blocktime
-* Dynamic interest 1-3%, based on the percentage of coins staking
+* Dinamic interest 1-2%, based on the percentage of coins staking
 * 16 Million PoW coins
 * 22 Million total coins
 * 1250 I/O block reward, first 30 blocks half (625)
@@ -16,7 +16,7 @@ Features:
 * Dedicated Node: 192.99.169.172
 * Enhanced API allowing registration of aliases and associated data,
   aliases may be kept encrypted or public. Aliases, encrypted or public may
-  sent and received.
+  send and receive.
 * New API includes a messaging layer for encrypted communications in addition
   to plain text messaging. Encryption uses AES 256 encryption together with RSA
   encryption (4096).
@@ -35,7 +35,7 @@ or are controversial.
 
 The master branch is regularly built and tested, but is not guaranteed
 to be completely stable. Tags are regularly created to indicate new
-stable release versions of I/OCoin.
+stable release versions of I/O Coin.
 
 Feature branches are created when there are major new features being
 worked on by several people.
