@@ -305,6 +305,7 @@ static const CRPCCommand vRPCCommands[] =
     { "registerAliasGenerate",     &registerAliasGenerate,     false,  false },
     { "decryptAlias",     &decryptAlias,     false,  false },
     { "transferAlias",     &transferAlias,     false,  false },
+    { "updateAlias",     &updateAlias,     false,  false },
     { "updateEncryptedAlias",     &updateEncryptedAlias,     false,  false },
     { "transferAlias",     &transferAlias,     false,  false },
     { "transferEncryptedAlias",     &transferEncryptedAlias,     false,  false },
