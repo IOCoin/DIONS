@@ -7,7 +7,7 @@
 
 static const int64_t MIN_AMOUNT = CENT;
 
-static const int MAX_LOCATOR_LENGTH = 255;
+static const int MAX_LOCATOR_LENGTH = 684;
 
 static const int MAX_XUNIT_LENGTH = 1024 * 1024;
 static const int OP_ALIAS_INVALID = 0x00;

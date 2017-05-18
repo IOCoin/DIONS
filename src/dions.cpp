@@ -2666,7 +2666,6 @@ Value registerAliasGenerate(const Array& params, bool fHelp)
     CKeyID keyID;
     keyAddress.GetKeyID(keyID);
     pwalletMain->SetAddressBookName(keyID, "");
-  string testKey;
 
   CWalletDB walletdb(pwalletMain->strWalletFile, "r+");
   if(!pwalletMain->SetRSAMetadata(vchPubKey))
@@ -3267,6 +3266,7 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
           return error("ConnectInputsPost: not enough locked amount");
       }
 
+    printf("LOC %d\n", vvchArgs[0].size());
     if(vvchArgs[0].size() > MAX_LOCATOR_LENGTH)
         return error("alias transaction with alias too long");
 
