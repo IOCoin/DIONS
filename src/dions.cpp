@@ -3228,7 +3228,7 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
     if(tx.nVersion != CTransaction::DION_TX_VERSION)
     {
 
-        bool foundOuts = false;
+        bool found= false;
         for(int i = 0; i < tx.vout.size(); i++)
         {
             const CTxOut& out = tx.vout[i];
@@ -3237,7 +3237,7 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
             int opRead;
 
             if(aliasScript(out.scriptPubKey, opRead, vvchRead))
-                foundOuts = true;
+                found=true;
         }
 
         if(found)
