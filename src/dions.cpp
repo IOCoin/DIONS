@@ -2,7 +2,6 @@
 //
 //
 
-
 #include "db.h"
 #include "txdb-leveldb.h"
 #include "keystore.h"
