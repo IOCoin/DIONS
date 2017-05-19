@@ -314,6 +314,7 @@ static const CRPCCommand vRPCCommands[] =
     { "transferEncryptedAlias",     &transferEncryptedAlias,     false,  false },
     { "decryptedMessageList",     &decryptedMessageList,     false,  false },
     { "plainTextMessageList",     &plainTextMessageList,     false,  false },
+    { "aliasOut",     &aliasOut,     false,  false },
     { "getNodeRecord",     &getNodeRecord,     false,  false },
     { "aliasList",     &aliasList,     false,  false },
     { "aliasList__",     &aliasList__,     false,  false },

@@ -737,6 +737,19 @@ Value plainTextMessageList(const Array& params, bool fHelp)
 
     return oRes;
 }
+
+Value aliasOut(const Array& params, bool fHelp)
+{
+    if(fHelp || params.size() != 2)
+        throw runtime_error(
+                "aliasOut [<node opt>]\n"
+                );
+
+    Array oRes;
+
+    return oRes;
+}
+
 Value getNodeRecord(const Array& params, bool fHelp)
 {
     if(fHelp || params.size() > 1)
@@ -2955,7 +2968,7 @@ Value registerAliasGenerate(const Array& params, bool fHelp)
   CScript scriptPubKey;
   vchType vchEncryptedAlias = vchFromString(encrypted);
   string tmp = stringFromVch(vchEncryptedAlias);
-  vchType vchValue = vchFromString("Q1JFQVRFRA==");
+  vchType vchValue = vchFromString("");
 
   CDataStream ss(SER_GETHASH, 0);
   ss << encrypted;
@@ -3083,7 +3096,7 @@ Value registerAlias(const Array& params, bool fHelp)
     vchType vchEncryptedAlias = vchFromString(encrypted);
     string tmp = stringFromVch(vchEncryptedAlias);
 
-    vchType vchValue = vchFromString("Q1JFQVRFRA==");
+    vchType vchValue = vchFromString("");
 
     CDataStream ss(SER_GETHASH, 0);
     ss << encrypted;
