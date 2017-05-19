@@ -43,6 +43,7 @@ LIBS += \
  -lboost_thread-mt \
  -lssl \
  -lcrypto \
+ -lboost_iostreams \
  -lz
 endif
 

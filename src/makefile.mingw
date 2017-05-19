@@ -21,6 +21,8 @@ LIBS= \
  -l boost_thread-mgw44-mt-1_53 \
  -l boost_chrono-mgw44-mt-1_53 \
  -l db_cxx \
+ -l boost_iostreams \
+ -l z \
  -l ssl \
  -l crypto
 

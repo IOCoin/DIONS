@@ -42,6 +42,7 @@ endif
 
 LIBS+= \
  -Wl,-B$(LMODE2) \
+   -l boost_iostreams \
    -l z \
    -l dl \
    -l pthread

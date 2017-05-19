@@ -18,9 +18,22 @@
 #include "json/json_spirit_utils.h"
 #include <boost/xpressive/xpressive_dynamic.hpp>
 #include <boost/filesystem.hpp>
-
+#include <stdlib.h>
+#include <stdio.h>
+#include <fstream>
+#include <iostream>
+#include <sstream>
+#include <boost/iostreams/filtering_streambuf.hpp>
+#include <boost/iostreams/filtering_stream.hpp>
+#include <boost/iostreams/copy.hpp>
+#include <boost/iostreams/filter/zlib.hpp>
+#include <boost/filesystem.hpp>
+#include <boost/iostreams/stream.hpp>
+#include <boost/iostreams/filter/gzip.hpp>
+#include <boost/iostreams/device/file_descriptor.hpp>
 using namespace std;
 using namespace json_spirit;
+using namespace boost::iostreams;
 
 namespace fs = boost::filesystem;
 
@@ -2051,27 +2064,24 @@ Value updateAliasFile(const Array& params, bool fHelp)
 
     std::transform(locatorStr.begin(), locatorStr.end(), locatorStr.begin(), ::tolower);
     const vchType vchAlias = vchFromValue(locatorStr);
-
-    fs::path p = params[1].get_str();
+    const char* locatorFile = (params[1].get_str()).c_str();
+    fs::path p = locatorFile;
     if(!fs::exists(p))
-      throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "File does not exist");
+      throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Locator file does not exist");
 
-    std::ifstream is(p, std::ios_base::in);
-    boost::iostreams::filtering_streambuf<boost::iostreams::input> in;
-    in.push(boost::iostreams::gzip_compressor());
-    in.push(is);
+    ifstream file(locatorFile, ios_base::in | ios_base::binary);
+    filtering_streambuf<input> in;
+    in.push(gzip_compressor());
+    in.push(file);
 
-    string data__;
-    std::ofstream os(data__, std::ios_base::out);
-    boost::iostreams::copy(in, os);
+    stringstream ss;
+    boost::iostreams::copy(in, ss);
 
-     std::ifstream ifs("myfile.txt");
-     std::string content( (std::istreambuf_iterator<char>(ifs) ),
-                       (std::istreambuf_iterator<char>()    ) );
-
-    
-
-    const vchType vchValue = vchFromValue(params[1]);
+    string s = ss.str();
+    if(s.size() > MAX_XUNIT_LENGTH) 
+      throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Locator file too large");
+   
+    const vchType vchValue = vchFromValue(s);
 
     string valueStr = stringFromVch(vchValue);
 
