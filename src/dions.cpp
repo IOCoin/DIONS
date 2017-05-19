@@ -812,9 +812,9 @@ Value aliasOut(const Array& params, bool fHelp)
           {
             value = stringFromVch(vchValue);
             found=true;
-            LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
-            LEAVE_CRITICAL_SECTION(cs_main)
-            break;
+            //LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+            //LEAVE_CRITICAL_SECTION(cs_main)
+            //break;
           }
         }
         else
@@ -832,9 +832,9 @@ Value aliasOut(const Array& params, bool fHelp)
           {
             value = stringFromVch(vchValue);
             found = true;
-            LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
-            LEAVE_CRITICAL_SECTION(cs_main)
-            break;
+            //LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+            //LEAVE_CRITICAL_SECTION(cs_main)
+            //break;
           }
         }
       }
