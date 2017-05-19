@@ -801,6 +801,11 @@ Value aliasOut(const Array& params, bool fHelp)
           {
             continue;
           }
+        if(mapAliasVchInt.find(vchFromString(decrypted)) != mapAliasVchInt.end() && mapAliasVchInt[vchFromString(decrypted)] > nHeight)
+        {
+          continue;
+        }
+          mapAliasVchInt[vchFromString(decrypted)] = nHeight;
 
           DecryptMessage(rsaPrivKey, stringFromVch(vchAlias), decrypted);
           if(k1 != decrypted) 
@@ -822,6 +827,7 @@ Value aliasOut(const Array& params, bool fHelp)
           {
             continue;
           }
+          mapAliasVchInt[vchAlias] = nHeight;
 
           if(k1 != stringFromVch(vchAlias)) 
           {
