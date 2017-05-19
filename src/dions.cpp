@@ -740,14 +740,121 @@ Value plainTextMessageList(const Array& params, bool fHelp)
 
 Value aliasOut(const Array& params, bool fHelp)
 {
-    if(fHelp || params.size() != 2)
-        throw runtime_error(
-                "aliasOut [<node opt>]\n"
-                );
+  if(fHelp || params.size() != 2)
+      throw runtime_error(
+              "aliasOut [<node opt>]\n"
+              );
 
-    Array oRes;
+  string k1;
+  vchType vchNodeLocator;
+  k1 =(params[0]).get_str();
+  vchNodeLocator = vchFromValue(params[0]);
+  const char* out__ = (params[1].get_str()).c_str();
 
-    return oRes;
+  std::map<vchType, int> mapAliasVchInt;
+  std::map<vchType, Object> aliasMapVchObj;
+
+  string value;
+  bool found=false;
+  ENTER_CRITICAL_SECTION(cs_main)
+  {
+    ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    {
+      BOOST_FOREACH(PAIRTYPE(const uint256, CWalletTx)& item,
+                  pwalletMain->mapWallet)
+      {
+        const CWalletTx& tx = item.second;
+
+        vchType vchAlias, vchValue;
+        int nOut;
+        int op__=-1;
+        if(!tx.aliasSet(op__, nOut, vchAlias, vchValue))
+          continue;
+
+        const int nHeight = tx.GetHeightInMainChain();
+        if(nHeight == -1)
+          continue;
+        assert(nHeight >= 0);
+
+        string decrypted = "";
+
+        string strAddress = "";
+        aliasAddress(tx, strAddress);
+        if(op__ == OP_ALIAS_ENCRYPTED)
+        {
+          string rsaPrivKey;
+          CBitcoinAddress r(strAddress);
+          if(!r.IsValid())
+            throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
+
+          CKeyID keyID;
+          if(!r.GetKeyID(keyID))
+            throw JSONRPCError(RPC_TYPE_ERROR, "Address does not refer to key");
+
+          CKey key;
+          if(!pwalletMain->GetKey(keyID, key))
+          {
+            continue;
+          }
+
+          CPubKey pubKey = key.GetPubKey();
+          if(pwalletMain->envCP0(pubKey, rsaPrivKey) == false)
+          {
+            continue;
+          }
+
+          DecryptMessage(rsaPrivKey, stringFromVch(vchAlias), decrypted);
+          if(k1 != decrypted) 
+          {
+            continue;
+          }
+          else
+          {
+            value = stringFromVch(vchValue);
+            found=true;
+            LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+            LEAVE_CRITICAL_SECTION(cs_main)
+            break;
+          }
+        }
+        else
+        {
+          if(mapAliasVchInt.find(vchAlias) != mapAliasVchInt.end() && mapAliasVchInt[vchAlias] > nHeight)
+          {
+            continue;
+          }
+
+          if(k1 != stringFromVch(vchAlias)) 
+          {
+            continue;
+          }
+          else
+          {
+            value = stringFromVch(vchValue);
+            found = true;
+            LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+            LEAVE_CRITICAL_SECTION(cs_main)
+            break;
+          }
+        }
+      }
+    }
+    LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+  }
+  LEAVE_CRITICAL_SECTION(cs_main)
+
+  if(found == true)
+  {
+    stringstream is(value, ios_base::in | ios_base::binary);   
+    filtering_streambuf<input> in__;
+    in__.push(gzip_decompressor());
+    in__.push(is);
+    ofstream file__(out__, ios_base::out | ios_base::binary);
+    boost::iostreams::copy(in__, file__);
+    return true;
+  }
+
+  return false;
 }
 
 Value getNodeRecord(const Array& params, bool fHelp)
