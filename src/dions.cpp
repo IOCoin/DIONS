@@ -17,9 +17,12 @@
 #include "json/json_spirit_writer_template.h"
 #include "json/json_spirit_utils.h"
 #include <boost/xpressive/xpressive_dynamic.hpp>
+#include <boost/filesystem.hpp>
 
 using namespace std;
 using namespace json_spirit;
+
+namespace fs = boost::filesystem;
 
 extern Object JSONRPCError(int code, const string& message);
 template<typename T> void ConvertTo(Value& value, bool fAllowNull=false);
@@ -1358,6 +1361,137 @@ Value nodeDebug1(const Array& params, bool fHelp)
     return true;
 }
 
+Value updateEncryptedAliasFile(const Array& params, bool fHelp)
+{
+    if(fHelp || params.size() != 3)
+        throw runtime_error(
+                "updateEncryptedAlias <alias> <value> <address>"
+                + HelpRequiringPassphrase());
+
+    const vchType vchAlias = vchFromString(params[0].get_str());
+    vchType vchValue = vchFromString(params[1].get_str());
+
+    CWalletTx wtx;
+    wtx.nVersion = CTransaction::DION_TX_VERSION;
+
+    ENTER_CRITICAL_SECTION(cs_main)
+    {
+        if(mapState.count(vchAlias) && mapState[vchAlias].size())
+        {
+            error("updateEncryptedAlias() : there are %lu pending operations on that alias, including %s",
+                    mapState[vchAlias].size(),
+                    mapState[vchAlias].begin()->GetHex().c_str());
+    LEAVE_CRITICAL_SECTION(cs_main)
+            throw runtime_error("there are pending operations on that alias");
+        }
+    }
+    LEAVE_CRITICAL_SECTION(cs_main)
+
+    string ownerAddrStr;
+    {
+        LocatorNodeDB aliasCacheDB("r");
+        CTransaction tx;
+        if(aliasTx(aliasCacheDB, vchAlias, tx))
+        {
+            error("updateEncryptedAlias() : this alias is already active with tx %s",
+                    tx.GetHash().GetHex().c_str());
+            throw runtime_error("this alias is already active");
+        }
+    }
+
+
+
+    ENTER_CRITICAL_SECTION(cs_main)
+    {
+        EnsureWalletIsUnlocked();
+
+        uint256 wtxInHash;
+        if(!searchAliasEncrypted(stringFromVch(vchAlias), wtxInHash))
+        {
+    LEAVE_CRITICAL_SECTION(cs_main)
+          throw runtime_error("could not find a coin with this alias, try specifying the registerAlias transaction id");
+        }
+
+
+        if(!pwalletMain->mapWallet.count(wtxInHash))
+        {
+    LEAVE_CRITICAL_SECTION(cs_main)
+            throw runtime_error("previous transaction is not in the wallet");
+        }
+
+        CScript scriptPubKeyOrig;
+
+        CScript scriptPubKey;
+
+
+        CWalletTx& wtxIn = pwalletMain->mapWallet[wtxInHash];
+        bool found = false;
+        BOOST_FOREACH(CTxOut& out, wtxIn.vout)
+        {
+            vector<vector<unsigned char> > vvch;
+            int op;
+            if(aliasScript(out.scriptPubKey, op, vvch)) {
+                if(op != OP_ALIAS_ENCRYPTED)
+                  throw runtime_error("previous transaction was not an OP_ALIAS_ENCRYPTED");
+
+              string encrypted = stringFromVch(vvch[0]);
+              uint160 hash = uint160(vvch[3]);
+              string value = stringFromVch(vchValue);
+
+              CDataStream ss(SER_GETHASH, 0);
+              ss << encrypted;
+              ss << hash.ToString();
+              ss << value;
+              ss << string("0");
+
+              CScript script;
+              script.SetBitcoinAddress(stringFromVch(vvch[2]));
+
+              CBitcoinAddress ownerAddr = script.GetBitcoinAddress();
+              if(!ownerAddr.IsValid())
+                throw JSONRPCError(RPC_TYPE_ERROR, "Invalid owner address");
+
+              CKeyID keyID;
+              if(!ownerAddr.GetKeyID(keyID))
+                throw JSONRPCError(RPC_TYPE_ERROR, "ownerAddr does not refer to key");
+
+
+              CKey key;
+              if(!pwalletMain->GetKey(keyID, key))
+                throw JSONRPCError(RPC_WALLET_ERROR, "Private key not available");
+
+              CPubKey vchPubKey;
+              pwalletMain->GetPubKey(keyID, vchPubKey);
+
+              vector<unsigned char> vchSig;
+              if(!key.SignCompact(Hash(ss.begin(), ss.end()), vchSig))
+                  throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Sign failed");
+
+              string sigBase64 = EncodeBase64(&vchSig[0], vchSig.size());
+
+              scriptPubKey << OP_ALIAS_ENCRYPTED << vvch[0] << vchFromString(sigBase64) << vvch[2] << vvch[3] << vchValue << vchFromString("0") << OP_2DROP << OP_2DROP << OP_2DROP << OP_DROP;
+              scriptPubKeyOrig.SetBitcoinAddress(stringFromVch(vvch[2]));
+              scriptPubKey += scriptPubKeyOrig;
+              found = true;
+            }
+        }
+
+        if(!found)
+        {
+            throw runtime_error("previous tx on this alias is not a alias tx");
+        }
+
+        string strError = txRelay(scriptPubKey, MIN_AMOUNT, wtxIn, wtx, false);
+        if(strError != "")
+        {
+    LEAVE_CRITICAL_SECTION(cs_main)
+            throw JSONRPCError(RPC_WALLET_ERROR, strError);
+        }
+    }
+    LEAVE_CRITICAL_SECTION(cs_main)
+
+    return wtx.GetHash().GetHex();
+}
 Value updateEncryptedAlias(const Array& params, bool fHelp)
 {
     if(fHelp || params.size() != 3)
@@ -1894,6 +2028,113 @@ Value transferAlias(const Array& params, bool fHelp)
 
           string locatorStr = stringFromVch(vchAlias);
           string dataStr = stringFromVch(vchValue);
+          string strError = txRelay(scriptPubKey, MIN_AMOUNT, wtxIn, wtx, false);
+          if(strError != "")
+          {
+    LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    LEAVE_CRITICAL_SECTION(cs_main)
+            throw JSONRPCError(RPC_WALLET_ERROR, strError);
+         }
+      }
+      LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    }
+    LEAVE_CRITICAL_SECTION(cs_main)
+    return wtx.GetHash().GetHex();
+}
+Value updateAliasFile(const Array& params, bool fHelp)
+{
+    if(fHelp || params.size() < 2 || params.size() > 3)
+        throw runtime_error(
+                "updateAlias <alias> <value> [<toaddress>]\nUpdate and possibly transfer a alias"
+                + HelpRequiringPassphrase());
+    string locatorStr = params[0].get_str();
+
+    std::transform(locatorStr.begin(), locatorStr.end(), locatorStr.begin(), ::tolower);
+    const vchType vchAlias = vchFromValue(locatorStr);
+
+    fs::path p = params[1].get_str();
+    if(!fs::exists(p))
+      throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "File does not exist");
+
+    std::ifstream is(p, std::ios_base::in);
+    boost::iostreams::filtering_streambuf<boost::iostreams::input> in;
+    in.push(boost::iostreams::gzip_compressor());
+    in.push(is);
+
+    string data__;
+    std::ofstream os(data__, std::ios_base::out);
+    boost::iostreams::copy(in, os);
+
+     std::ifstream ifs("myfile.txt");
+     std::string content( (std::istreambuf_iterator<char>(ifs) ),
+                       (std::istreambuf_iterator<char>()    ) );
+
+    
+
+    const vchType vchValue = vchFromValue(params[1]);
+
+    string valueStr = stringFromVch(vchValue);
+
+    CWalletTx wtx;
+    wtx.nVersion = CTransaction::DION_TX_VERSION;
+    CScript scriptPubKeyOrig;
+
+    if(params.size() == 3)
+    {
+        string strAddress = params[2].get_str();
+        uint160 hash160;
+        bool isValid = AddressToHash160(strAddress, hash160);
+        if(!isValid)
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid dions address");
+        scriptPubKeyOrig.SetBitcoinAddress(strAddress);
+    }
+    else
+    {
+        vector<unsigned char> vchPubKey = pwalletMain->GetKeyFromKeyPool();
+        scriptPubKeyOrig.SetBitcoinAddress(vchPubKey);
+    }
+
+    CScript scriptPubKey;
+    scriptPubKey << OP_ALIAS_RELAY << vchAlias << vchValue << OP_2DROP << OP_DROP;
+    scriptPubKey += scriptPubKeyOrig;
+
+    ENTER_CRITICAL_SECTION(cs_main)
+    {
+      ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
+      {
+          if(mapState.count(vchAlias) && mapState[vchAlias].size())
+          {
+              error("updateAlias() : there are %lu pending operations on that alias, including %s",
+                      mapState[vchAlias].size(),
+                      mapState[vchAlias].begin()->GetHex().c_str());
+    LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    LEAVE_CRITICAL_SECTION(cs_main)
+              throw runtime_error("there are pending operations on that alias");
+          }
+
+          EnsureWalletIsUnlocked();
+
+          LocatorNodeDB aliasCacheDB("r");
+          CTransaction tx;
+          if(!aliasTx(aliasCacheDB, vchAlias, tx))
+          {
+              LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+              LEAVE_CRITICAL_SECTION(cs_main)
+              throw runtime_error("could not find a coin with this alias");
+          }
+
+          uint256 wtxInHash = tx.GetHash();
+
+          if(!pwalletMain->mapWallet.count(wtxInHash))
+          {
+              error("updateAlias() : this coin is not in your wallet %s",
+                      wtxInHash.GetHex().c_str());
+    LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    LEAVE_CRITICAL_SECTION(cs_main)
+              throw runtime_error("this coin is not in your wallet");
+          }
+
+          CWalletTx& wtxIn = pwalletMain->mapWallet[wtxInHash];
           string strError = txRelay(scriptPubKey, MIN_AMOUNT, wtxIn, wtx, false);
           if(strError != "")
           {
