@@ -251,6 +251,9 @@ bool txPost(const vector<pair<CScript, int64_t> >& vecSend, const CWalletTx& wtx
         LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
     }
     LEAVE_CRITICAL_SECTION(cs_main)
+
+    printf(">>> nFeeRet %"PRIszu"\n", nFeeRet);
+
     return true;
 }
 string txRelay(const CScript& scriptPubKey, int64_t nValue, const CWalletTx& wtxIn, CWalletTx& wtxNew, bool fAskFee)
@@ -2263,10 +2266,10 @@ Value updateAliasFile(const Array& params, bool fHelp)
 
           if(!pwalletMain->mapWallet.count(wtxInHash))
           {
-              error("updateAlias() : this coin is not in your wallet %s",
-                      wtxInHash.GetHex().c_str());
-    LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
-    LEAVE_CRITICAL_SECTION(cs_main)
+            error("updateAlias() : this coin is not in your wallet %s",
+                    wtxInHash.GetHex().c_str());
+            LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+            LEAVE_CRITICAL_SECTION(cs_main)
               throw runtime_error("this coin is not in your wallet");
           }
 
@@ -2274,8 +2277,8 @@ Value updateAliasFile(const Array& params, bool fHelp)
           string strError = txRelay(scriptPubKey, MIN_AMOUNT, wtxIn, wtx, false);
           if(strError != "")
           {
-    LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
-    LEAVE_CRITICAL_SECTION(cs_main)
+            LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+            LEAVE_CRITICAL_SECTION(cs_main)
             throw JSONRPCError(RPC_WALLET_ERROR, strError);
          }
       }
