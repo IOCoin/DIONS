@@ -9,7 +9,6 @@
 #include "dions.h"
 
 #include "bitcoinrpc.h"
-
 #include "main.h"
 
 #include "json/json_spirit_reader_template.h"
