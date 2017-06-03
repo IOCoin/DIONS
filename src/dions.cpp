@@ -2239,7 +2239,7 @@ Value updateAliasFile(const Array& params, bool fHelp)
 {
     if(fHelp || params.size() < 2 || params.size() > 3)
         throw runtime_error(
-                "updateAlias <alias> <value> [<toaddress>]\nUpdate and possibly transfer a alias"
+                "updateAlias <alias> <value> [<toaddress>]\update or transfer"
                 + HelpRequiringPassphrase());
     string locatorStr = params[0].get_str();
 
