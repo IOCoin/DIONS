@@ -299,7 +299,7 @@ static const CRPCCommand vRPCCommands[] =
     { "signrawtransaction",     &signrawtransaction,     false,  false },
     { "sendPlainMessage",     &sendPlainMessage,     false,  false },
     { "sendMessage",     &sendMessage,     false,  false },
-    { "newPlublicKey",     &newPlublicKey,     false,  false },
+    { "publicKey",     &publicKey,     false,  false },
     { "sendPublicKey",     &sendPublicKey,     false,  false },
     { "sendSymmetric",     &sendSymmetric,     false,  false },
     { "registerAlias",     &registerAlias,     false,  false },

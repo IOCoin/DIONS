@@ -1649,7 +1649,6 @@ Value updateEncryptedAliasFile(const Array& params, bool fHelp)
               if(!ownerAddr.GetKeyID(keyID))
                 throw JSONRPCError(RPC_TYPE_ERROR, "ownerAddr does not refer to key");
 
-
               CKey key;
               if(!pwalletMain->GetKey(keyID, key))
                 throw JSONRPCError(RPC_WALLET_ERROR, "Private key not available");
@@ -2239,7 +2238,7 @@ Value updateAliasFile(const Array& params, bool fHelp)
 {
     if(fHelp || params.size() < 2 || params.size() > 3)
         throw runtime_error(
-                "updateAlias <alias> <value> [<toaddress>]\update or transfer"
+                "updateAlias <alias> <value> [<toaddress>] update or transfer"
                 + HelpRequiringPassphrase());
     string locatorStr = params[0].get_str();
 
@@ -2447,7 +2446,7 @@ Value updateAlias(const Array& params, bool fHelp)
 }
 
 
-Value newPlublicKey(const Array& params, bool fHelp)
+Value publicKey(const Array& params, bool fHelp)
 {
     if(fHelp || params.size() != 1)
         throw runtime_error(
