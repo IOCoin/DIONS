@@ -2009,8 +2009,7 @@ Value transferEncryptedAlias(const Array& params, bool fHelp)
         throw JSONRPCError(RPC_TYPE_ERROR, "ownerAddr does not refer to key");
 
     CPubKey vchRecipientPubKey;
-    if(!pwalletMain->GetPubKey(rkeyID, vchRecipientPubKey))
-      throw JSONRPCError(RPC_TYPE_ERROR, "no recipient pub key");
+    pwalletMain->GetPubKey(rkeyID, vchRecipientPubKey);
 
     vchType v1 = vchRecipientPubKey.Raw();
     string v1Str = stringFromVch(v1);
@@ -2725,9 +2724,6 @@ Value sendPublicKey(const Array& params, bool fHelp)
     const vchType vchRecipient = vchFromValue(strRecipientAddress);
     vector<unsigned char> vchSig;
     CDataStream ss(SER_GETHASH, 0);
-    if(!key.SignCompact(Hash(ss.begin(), ss.end()), vchSig))
-        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Sign failed");
-    string sigBase64 = EncodeBase64(&vchSig[0], vchSig.size());
 
     CWalletTx wtx;
     wtx.nVersion = CTransaction::DION_TX_VERSION;
@@ -2744,11 +2740,11 @@ Value sendPublicKey(const Array& params, bool fHelp)
     vchType recipientAESKeyVch;
     vchType aes256Key;
 
+    string sigBase64;
     string encrypted;
     if(getImportedPubKey(myAddress, strRecipientAddress, recipientPubKeyVch, recipientAESKeyVch))
     {
       GenerateAESKey(aes256Key);
-
 
       string aesKeyStr = EncodeBase64(&aes256Key[0], aes256Key.size());
 
@@ -2763,6 +2759,9 @@ Value sendPublicKey(const Array& params, bool fHelp)
         throw JSONRPCError(RPC_TYPE_ERROR, "Failed to write meta data for key");
 
       ss <<(rsaPubKeyStr + encrypted);
+      if(!key.SignCompact(Hash(ss.begin(), ss.end()), vchSig))
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Sign failed");
+      sigBase64 = EncodeBase64(&vchSig[0], vchSig.size());
       scriptPubKey << OP_PUBLIC_KEY << vchSender << vchRecipient << vchKey
                    << vchFromString(encrypted)
                    << vchFromString(sigBase64)
@@ -2771,15 +2770,17 @@ Value sendPublicKey(const Array& params, bool fHelp)
     else
     {
       ss << rsaPubKeyStr + "I";
+      if(!key.SignCompact(Hash(ss.begin(), ss.end()), vchSig))
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Sign failed");
+      sigBase64 = EncodeBase64(&vchSig[0], vchSig.size());
       scriptPubKey << OP_PUBLIC_KEY << vchSender << vchRecipient << vchKey
                    << vchFromString("I")
                    << vchFromString(sigBase64)
                    << OP_2DROP << OP_2DROP << OP_2DROP;
-    } 
+    }
 
 
     scriptPubKeyOrig.SetBitcoinAddress(strRecipientAddress);
-
 
     scriptPubKey += scriptPubKeyOrig;
 
@@ -3704,7 +3705,6 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
     CScript s1 = tx.vout[nOut].scriptPubKey;
     const CScript& s1_ = aliasStrip(s1);
     string a1 = s1_.GetBitcoinAddress();
-    
 
     int nPrevHeight;
     int nDepth;
