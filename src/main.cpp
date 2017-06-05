@@ -1175,15 +1175,8 @@ int64_t GetProofOfStakeReward(int64_t nCoinAge, int64_t nFees, int nHeight)
 
     if (fDebug && GetBoolArg("-printcreation"))
         printf("GetProofOfStakeReward(): create=%s nCoinAge=%"PRId64"\n", FormatMoney(nSubsidy).c_str(), nCoinAge);
-    if ( nHeight < POS_v3_DIFFICULTY_HEIGHT)
-        {
-            return nSubsidy + nFees;
-        }
-    else
-        {
-            //Remove fees from circulation
-            return nSubsidy;
-        }
+
+    return nSubsidy + nFees;
 }
 
 static const int64_t nTargetTimespan = 16 * 60;  // 16 mins
