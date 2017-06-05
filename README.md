@@ -1,5 +1,4 @@
-I/O Coin - DIONS 
-(Decentralized Input Output Name Server Blockchain Upgrade)
+I/O Coin - DIONS (Decentralized Input Output Name Server)
 ===========================
 
 
