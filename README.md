@@ -1,19 +1,19 @@
-I/O Coin development tree for DIONS Blockchain Upgrade
+I/O Coin development tree for DIONS / Decentralized Input Output Name Server Blockchain Upgrade
 
-I/O Coin is a PoS-based cryptocurrency.
+I/O Coin (IOC) is a POS I/O-based Blockchain.
 
 Features:
 * Symbol: IOC
 * 60 second blocktime
 * Dinamic interest 1-2%, based on the percentage of coins staking
-* 16 Million PoW coins
+* 16 Million POW coins
 * 22 Million total coins
 * 1250 I/O block reward, first 30 blocks half (625)
 * 12815 PoW block limit
 * X11 PoW/PoS
 * P2P Port: 33764
 * RPC Port: 33765
-* Dedicated Node: 192.99.169.172
+* Dedicated Node: 178.62.109.73
 * Enhanced API allowing registration of aliases and associated data,
   aliases may be kept encrypted or public. Aliases, encrypted or public may
   send and receive.
