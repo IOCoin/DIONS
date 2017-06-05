@@ -1,16 +1,17 @@
 I/O Coin development tree for DIONS / Decentralized Input Output Name Server Blockchain Upgrade
 
-I/O Coin (IOC) is a POS I/O-based Blockchain.
+I/O Coin is a POS-based Blockchain.
 
 Features:
 * Symbol: IOC
-* 60 second blocktime
-* Dinamic interest 1-2%, based on the percentage of coins staking
 * 16 Million POW coins
 * 22 Million total coins
+* 60 second blocktime
+* Dinamic interest 1-2%, based on the percentage of coins staking
+* Rewards .01 IOC per transaction
+* 2014 Fair Launch via X11 PoW/PoS
 * 1250 I/O block reward, first 30 blocks half (625)
 * 12815 PoW block limit
-* X11 PoW/PoS
 * P2P Port: 33764
 * RPC Port: 33765
 * Dedicated Node: 178.62.109.73
