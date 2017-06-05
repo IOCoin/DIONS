@@ -1,10 +1,9 @@
-I/O Coin development tree for DIONS 
+I/O Coin / DIONS (Decentralized Input Output Name Server Blockchain Upgrade)
 ===========================
-(Decentralized Input Output Name Server Blockchain Upgrade)
 
 
 I/O Coin is a POS-Based Blockchain.
-===========================
+
 
 Features:
 * Symbol: IOC
