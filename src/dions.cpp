@@ -1286,21 +1286,19 @@ Value aliasList__(const Array& params, bool fHelp)
         }
         else
         {
-        if(mapAliasVchInt.find(vchAlias) != mapAliasVchInt.end() && mapAliasVchInt[vchAlias] > nHeight)
-        {
-          continue;
-        }
+          if(mapAliasVchInt.find(vchAlias) != mapAliasVchInt.end() && mapAliasVchInt[vchAlias] > nHeight)
+          {
+            continue;
+          }
           aliasObj.push_back(Pair("alias", stringFromVch(vchAlias)));
           aliasObj.push_back(Pair("encrypted", "false"));
           mapAliasVchInt[vchAlias] = nHeight;
         }
 
-
         if(!IsMinePost(tx))
           aliasObj.push_back(Pair("transferred", 1));
         aliasObj.push_back(Pair("address", strAddress));
         aliasObj.push_back(Pair("nHeigt", nHeight));
-
 
         CBitcoinAddress keyAddress(strAddress);
         CKeyID keyID;
@@ -2171,7 +2169,6 @@ Value transferAlias(const Array& params, bool fHelp)
 
     scriptPubKey << OP_ALIAS_RELAY << vchAlias ;
 
-
     ENTER_CRITICAL_SECTION(cs_main)
     {
       ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
@@ -2192,11 +2189,10 @@ Value transferAlias(const Array& params, bool fHelp)
           CTransaction tx;
           if(!aliasTx(aliasCacheDB, vchAlias, tx))
           {
-    LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
-    LEAVE_CRITICAL_SECTION(cs_main)
-              throw runtime_error("could not find a coin with this alias");
+            LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+            LEAVE_CRITICAL_SECTION(cs_main)
+            throw runtime_error("could not find a coin with this alias");
           }
-
 
           uint256 wtxInHash = tx.GetHash();
 
@@ -2204,8 +2200,8 @@ Value transferAlias(const Array& params, bool fHelp)
           {
               error("updateEncryptedAlias() : this coin is not in your wallet %s",
                       wtxInHash.GetHex().c_str());
-    LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
-    LEAVE_CRITICAL_SECTION(cs_main)
+              LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+              LEAVE_CRITICAL_SECTION(cs_main)
               throw runtime_error("this coin is not in your wallet");
           }
 
@@ -2223,8 +2219,8 @@ Value transferAlias(const Array& params, bool fHelp)
           string strError = txRelay(scriptPubKey, MIN_AMOUNT, wtxIn, wtx, false);
           if(strError != "")
           {
-    LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
-    LEAVE_CRITICAL_SECTION(cs_main)
+            LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+            LEAVE_CRITICAL_SECTION(cs_main)
             throw JSONRPCError(RPC_WALLET_ERROR, strError);
          }
       }
@@ -3474,9 +3470,7 @@ bool IsMinePost(const CTransaction& tx)
     int op;
     int nOut;
 
-    bool good = aliasTx(tx, op, nOut, vvch);
-
-    if(!good)
+    if(!aliasTx(tx, op, nOut, vvch))
     {
         error("IsMinePost() : no output out script in alias tx %s\n", tx.ToString().c_str());
         return false;
@@ -3485,7 +3479,7 @@ bool IsMinePost(const CTransaction& tx)
     const CTxOut& txout = tx.vout[nOut];
     if(IsLocator(tx, txout))
     {
-        return true;
+      return true;
     }
     return false;
 }
@@ -3560,7 +3554,6 @@ bool IsMinePost(const CTransaction& tx, const CTxOut& txout, bool ignore_registe
 
     if(IsLocator(tx, txout))
     {
-
         return true;
     }
     return false;

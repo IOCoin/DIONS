@@ -423,7 +423,7 @@ bool CTransaction::AreInputsStandard(const MapPrevTx& mapInputs) const
     std::vector<vchType> vvch;
     CScript::const_iterator pc = prevScript.begin ();
     CScript rawScript;
-    if (aliasScript (prevScript, op, vvch, pc))
+    if (aliasScript(prevScript, op, vvch, pc))
         rawScript = CScript(pc, prevScript.end ());
     else
         rawScript = prevScript;
