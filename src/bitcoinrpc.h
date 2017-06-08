@@ -245,6 +245,8 @@ extern json_spirit::Value transferAlias(const json_spirit::Array& params, bool f
 extern json_spirit::Value transferEncryptedAlias(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value aliasOut(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value getNodeRecord(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value nodeRetrieve(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value nodeValidate(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value aliasList(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value aliasList__(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value decryptedMessageList(const json_spirit::Array& params, bool fHelp);

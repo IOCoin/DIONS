@@ -316,6 +316,8 @@ static const CRPCCommand vRPCCommands[] =
     { "plainTextMessageList",     &plainTextMessageList,     false,  false },
     { "aliasOut",     &aliasOut,     false,  false },
     { "getNodeRecord",     &getNodeRecord,     false,  false },
+    { "nodeRetrieve",     &nodeRetrieve,     false,  false },
+    { "nodeValidate",     &nodeValidate,     false,  false },
     { "aliasList",     &aliasList,     false,  false },
     { "aliasList__",     &aliasList__,     false,  false },
     { "publicKeys",     &publicKeys,     false,  false },

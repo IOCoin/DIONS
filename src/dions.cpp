@@ -917,6 +917,272 @@ Value aliasOut(const Array& params, bool fHelp)
   return false;
 }
 
+Value nodeValidate(const Array& params, bool fHelp)
+{
+    if(fHelp || params.size() > 1)
+        throw runtime_error(
+                "nodeValidate [<node opt>]\n"
+                );
+
+    string k1;
+    vchType vchNodeLocator;
+    if(params.size() == 1)
+    {
+      k1 =(params[0]).get_str();
+      vchNodeLocator = vchFromValue(params[0]);
+    }
+
+    Array oRes;
+    ENTER_CRITICAL_SECTION(cs_main)
+    {
+      ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
+      {
+        BOOST_FOREACH(PAIRTYPE(const uint256, CWalletTx)& item,
+                      pwalletMain->mapWallet)
+          {
+            const CWalletTx& tx = item.second;
+
+            vchType vchAlias, vchValue;
+            int nOut;
+            int op__=-1;
+        if(!tx.aliasSet(op__, nOut, vchAlias, vchValue))
+          continue;
+
+        Object aliasObj;
+
+
+        const int nHeight = tx.GetHeightInMainChain();
+        if(nHeight == -1)
+          continue;
+        assert(nHeight >= 0);
+
+        string decrypted = "";
+        string value = stringFromVch(vchValue);
+
+        string strAddress = "";
+        aliasAddress(tx, strAddress);
+        if(op__ == OP_ALIAS_ENCRYPTED)
+        {
+          string rsaPrivKey;
+          CBitcoinAddress r(strAddress);
+          if(!r.IsValid())
+            throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
+
+          CKeyID keyID;
+          if(!r.GetKeyID(keyID))
+            throw JSONRPCError(RPC_TYPE_ERROR, "Address does not refer to key");
+
+          CKey key;
+          if(!pwalletMain->GetKey(keyID, key))
+          {
+            aliasObj.push_back(Pair("alias", stringFromVch(vchAlias)));
+          }
+          else
+          {
+            CPubKey pubKey = key.GetPubKey();
+            if(pwalletMain->envCP0(pubKey, rsaPrivKey) == false)
+            {
+              continue;
+            }
+
+            DecryptMessage(rsaPrivKey, stringFromVch(vchAlias), decrypted);
+
+            aliasObj.push_back(Pair("alias", decrypted));
+          }
+
+          aliasObj.push_back(Pair("encrypted", "true"));
+        }
+        else
+        {
+          if(k1 != stringFromVch(vchAlias)) continue;
+
+          aliasObj.push_back(Pair("alias", stringFromVch(vchAlias)));
+          aliasObj.push_back(Pair("encrypted", "false"));
+        }
+
+        aliasObj.push_back(Pair("value", value));
+
+        if(!IsMinePost(tx))
+          aliasObj.push_back(Pair("transferred", 1));
+        aliasObj.push_back(Pair("address", strAddress));
+        aliasObj.push_back(Pair("nHeigt", nHeight));
+
+
+        CBitcoinAddress keyAddress(strAddress);
+        CKeyID keyID;
+        keyAddress.GetKeyID(keyID);
+        CPubKey vchPubKey;
+        pwalletMain->GetPubKey(keyID, vchPubKey);
+        vchType vchRand;
+
+        const int expiresIn = nHeight + GetDisplayExpirationDepth() - pindexBest->nHeight;
+        aliasObj.push_back(Pair("expires_in", expiresIn));
+        if(expiresIn <= 0)
+          aliasObj.push_back(Pair("expired", 1));
+
+        if(mapState.count(vchAlias) && mapState[vchAlias].size())
+        {
+            aliasObj.push_back(Pair("status", "pending_update"));
+        }
+
+        if(decrypted != "")
+        {
+          vchType d1 = vchFromString(decrypted);
+          if(mapState.count(d1) && mapState[d1].size())
+          {
+              aliasObj.push_back(Pair("status", "pending_update"));
+          }
+
+        }
+        oRes.push_back(aliasObj);
+      }
+      }
+      LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    }
+    LEAVE_CRITICAL_SECTION(cs_main)
+
+
+    //Array oRes;
+    //BOOST_FOREACH(const PAIRTYPE(vector<unsigned char>, Object)& item, aliasMapVchObj)
+    //    oRes.push_back(item.second);
+
+    return oRes;
+}
+
+Value nodeRetrieve(const Array& params, bool fHelp)
+{
+    if(fHelp || params.size() > 1)
+        throw runtime_error(
+                "nodeRetrieve [<node opt>]\n"
+                );
+
+    string k1;
+    vchType vchNodeLocator;
+    if(params.size() == 1)
+    {
+      k1 =(params[0]).get_str();
+      vchNodeLocator = vchFromValue(params[0]);
+    }
+
+    Array oRes;
+    ENTER_CRITICAL_SECTION(cs_main)
+    {
+      ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
+      {
+        BOOST_FOREACH(PAIRTYPE(const uint256, CWalletTx)& item,
+                      pwalletMain->mapWallet)
+          {
+            const CWalletTx& tx = item.second;
+
+            vchType vchAlias, vchValue;
+            int nOut;
+            int op__=-1;
+        if(!tx.aliasSet(op__, nOut, vchAlias, vchValue))
+          continue;
+
+        Object aliasObj;
+
+
+        const int nHeight = tx.GetHeightInMainChain();
+        if(nHeight == -1)
+          continue;
+        assert(nHeight >= 0);
+
+        string decrypted = "";
+        string value = stringFromVch(vchValue);
+
+        string strAddress = "";
+        aliasAddress(tx, strAddress);
+        if(op__ == OP_ALIAS_ENCRYPTED)
+        {
+          string rsaPrivKey;
+          CBitcoinAddress r(strAddress);
+          if(!r.IsValid())
+            throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
+
+          CKeyID keyID;
+          if(!r.GetKeyID(keyID))
+            throw JSONRPCError(RPC_TYPE_ERROR, "Address does not refer to key");
+
+          CKey key;
+          if(!pwalletMain->GetKey(keyID, key))
+          {
+            continue;
+          }
+
+          CPubKey pubKey = key.GetPubKey();
+          if(pwalletMain->envCP0(pubKey, rsaPrivKey) == false)
+          {
+            continue;
+          }
+
+          DecryptMessage(rsaPrivKey, stringFromVch(vchAlias), decrypted);
+          if(k1 != decrypted) 
+          {
+            continue;
+          }
+
+          aliasObj.push_back(Pair("alias", decrypted));
+
+          aliasObj.push_back(Pair("encrypted", "true"));
+        }
+        else
+        {
+          if(k1 != stringFromVch(vchAlias)) continue;
+
+          aliasObj.push_back(Pair("alias", stringFromVch(vchAlias)));
+          aliasObj.push_back(Pair("encrypted", "false"));
+        }
+
+        aliasObj.push_back(Pair("value", value));
+
+        if(!IsMinePost(tx))
+          aliasObj.push_back(Pair("transferred", 1));
+        aliasObj.push_back(Pair("address", strAddress));
+        aliasObj.push_back(Pair("nHeigt", nHeight));
+
+
+        CBitcoinAddress keyAddress(strAddress);
+        CKeyID keyID;
+        keyAddress.GetKeyID(keyID);
+        CPubKey vchPubKey;
+        pwalletMain->GetPubKey(keyID, vchPubKey);
+        vchType vchRand;
+
+        const int expiresIn = nHeight + GetDisplayExpirationDepth() - pindexBest->nHeight;
+        aliasObj.push_back(Pair("expires_in", expiresIn));
+        if(expiresIn <= 0)
+          aliasObj.push_back(Pair("expired", 1));
+
+        if(mapState.count(vchAlias) && mapState[vchAlias].size())
+        {
+            aliasObj.push_back(Pair("status", "pending_update"));
+        }
+
+        if(decrypted != "")
+        {
+          vchType d1 = vchFromString(decrypted);
+          if(mapState.count(d1) && mapState[d1].size())
+          {
+              aliasObj.push_back(Pair("status", "pending_update"));
+          }
+
+        }
+        oRes.push_back(aliasObj);
+      }
+      }
+      LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    }
+    LEAVE_CRITICAL_SECTION(cs_main)
+
+
+    //Array oRes;
+    //BOOST_FOREACH(const PAIRTYPE(vector<unsigned char>, Object)& item, aliasMapVchObj)
+    //    oRes.push_back(item.second);
+
+    return oRes;
+}
+
 Value getNodeRecord(const Array& params, bool fHelp)
 {
     if(fHelp || params.size() > 1)
@@ -1114,7 +1380,9 @@ bool searchAliasEncrypted2(string alias, uint256& wtxInHash)
 
           CKey key;
           if(!pwalletMain->GetKey(keyID, key))
-            throw JSONRPCError(RPC_WALLET_ERROR, "Private key not available");
+          {
+            continue;
+          }
 
           CPubKey pubKey = key.GetPubKey();
           if(pwalletMain->envCP0(pubKey, rsaPrivKey) == false)
@@ -2011,12 +2279,10 @@ Value transferEncryptedAlias(const Array& params, bool fHelp)
 
     vchType v1 = vchRecipientPubKey.Raw();
     string v1Str = stringFromVch(v1);
-      
 
     CBitcoinAddress tmp;
     tmp.Set(rkeyID);
     string a=(tmp).ToString();
-
 
     string locatorStr = stringFromVch(vchAlias);
 
@@ -2041,7 +2307,7 @@ Value transferEncryptedAlias(const Array& params, bool fHelp)
       if(!searchAliasEncrypted(stringFromVch(vchAlias), wtxInHash))
       {
         LEAVE_CRITICAL_SECTION(cs_main)
-        throw runtime_error("could not find a coin with this alias, try specifying the registerAlias transaction id");
+        throw runtime_error("could not find this alias");
       }
 
       ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
@@ -2082,7 +2348,7 @@ Value transferEncryptedAlias(const Array& params, bool fHelp)
             int op;
             if(aliasScript(out.scriptPubKey, op, vvch)) {
                 if(op != OP_ALIAS_ENCRYPTED)
-                  throw runtime_error("previous transaction was not an OP_ALIAS_ENCRYPTED");
+                  throw runtime_error("previous transaction was not OP_ALIAS_ENCRYPTED");
 
                  uint160 hash = uint160(vvch[3]);
 
@@ -2114,7 +2380,6 @@ Value transferEncryptedAlias(const Array& params, bool fHelp)
                 string sigBase64 = EncodeBase64(&vchSig[0], vchSig.size());
               scriptPubKey << OP_ALIAS_ENCRYPTED << vchFromString(encryptedAliasForRecipient) << vchFromString(sigBase64) << rVch << vvch[3] << vvch[4] << vchFromString(encryptedRandForRecipient) << OP_2DROP << OP_2DROP << OP_2DROP << OP_DROP;
 
-
               scriptPubKey += scriptPubKeyOrig;
               found = true;
               break;
@@ -2123,15 +2388,15 @@ Value transferEncryptedAlias(const Array& params, bool fHelp)
 
           if(!found)
           {
-            throw runtime_error("previous tx on this alias is not a alias tx");
+            throw runtime_error("previous tx type is not alias");
           }
 
           string strError = txRelay(scriptPubKey, MIN_AMOUNT, wtxIn, wtx, false);
 
           if(strError != "")
           {
-    LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
-    LEAVE_CRITICAL_SECTION(cs_main)
+            LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+            LEAVE_CRITICAL_SECTION(cs_main)
             throw JSONRPCError(RPC_WALLET_ERROR, strError);
          }
       }
