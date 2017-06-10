@@ -1636,7 +1636,7 @@ Value aliasList(const Array& params, bool fHelp)
         BOOST_FOREACH(PAIRTYPE(const uint256, CWalletTx)& item,
                       pwalletMain->mapWallet)
           {
-            const CWalletTx& tx = item.second;
+            CWalletTx& tx = item.second;
 
             vchType vchAlias, vchValue;
             int nOut;
@@ -1671,23 +1671,59 @@ Value aliasList(const Array& params, bool fHelp)
             throw JSONRPCError(RPC_TYPE_ERROR, "Address does not refer to key");
 
           CKey key;
-          if(!pwalletMain->GetKey(keyID, key))
+          if(pwalletMain->GetKey(keyID, key))
           {
-            continue;
+            CPubKey pubKey = key.GetPubKey();
+            if(pwalletMain->envCP0(pubKey, rsaPrivKey) == true)
+            {
+              DecryptMessage(rsaPrivKey, stringFromVch(vchAlias), decrypted);
+              aliasObj.push_back(Pair("alias", decrypted));
+            }
+          }
+          else
+          {
+            for(int i=0; i < tx.vin.size(); i++)
+            {
+              COutPoint prevout = tx.vin[i].prevout;
+              CWalletTx& txPrev = pwalletMain->mapWallet[prevout.hash];
+
+              CTxOut& out = txPrev.vout[tx.vin[i].prevout.n];
+
+              std::vector<vchType> vvchPrevArgsRead;
+              int prevOp;
+              if(aliasScript(out.scriptPubKey, prevOp, vvchPrevArgsRead))
+              {
+                string a__ = "";
+                aliasAddress(txPrev, a__);
+
+                CBitcoinAddress r0(a__);
+                if(!r0.IsValid())
+                  throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
+
+                CKeyID keyID_0;
+                if(!r0.GetKeyID(keyID_0))
+                  throw JSONRPCError(RPC_TYPE_ERROR, "Address does not refer to key");
+
+                CKey key0;
+                if(pwalletMain->GetKey(keyID_0, key0))
+                {
+                  CPubKey pubKey = key0.GetPubKey();
+                  if(pwalletMain->envCP0(pubKey, rsaPrivKey) == true)
+                  {
+                    DecryptMessage(rsaPrivKey, stringFromVch(vvchPrevArgsRead[0]), decrypted);
+                    aliasObj.push_back(Pair("alias", decrypted));
+                  }
+                }
+
+                break;     
+              }
+            }
           }
 
-          CPubKey pubKey = key.GetPubKey();
-          if(pwalletMain->envCP0(pubKey, rsaPrivKey) == false)
-          {
-            continue;
-          }
-
-          DecryptMessage(rsaPrivKey, stringFromVch(vchAlias), decrypted);
           if(mapAliasVchInt.find(vchFromString(decrypted)) != mapAliasVchInt.end() && mapAliasVchInt[vchFromString(decrypted)] > nHeight)
           {
             continue;
           }
-          aliasObj.push_back(Pair("alias", decrypted));
 
           aliasObj.push_back(Pair("encrypted", "true"));
           mapAliasVchInt[vchFromString(decrypted)] = nHeight;
@@ -3589,9 +3625,7 @@ bool aliasScript(const CScript& script, int& op, vector<vector<unsigned char> > 
 {
 
   CScript::const_iterator pc = script.begin();
-  bool r = aliasScript(script, op, vvch, pc);
-
-  return r;
+  return aliasScript(script, op, vvch, pc);
 }
 bool aliasScript(const CScript& script, int& op, vector<vector<unsigned char> > &vvch, CScript::const_iterator& pc)
 {

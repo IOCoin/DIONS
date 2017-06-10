@@ -1,0 +1,23 @@
+/bin/sh ../share/genbuild.sh obj/build.h
+g++ -c -ggdb  -pthread -Wall -Wextra -Wno-ignored-qualifiers -Wformat -Wformat-security -Wno-unused-parameter -g -DBOOST_SPIRIT_THREADSAFE -I/home/debian/DIONS/src -I/home/debian/DIONS/src/obj -DUSE_UPNP=0 -I/home/debian/DIONS/src/leveldb/include -I/home/debian/DIONS/src/leveldb/helpers -DHAVE_BUILD_INFO -fno-stack-protector -fstack-protector-all -Wstack-protector -D_FORTIFY_SOURCE=2  -MMD -MF obj/dions.d -o obj/dions.o dions.cpp
+dions.cpp: In function ‘json_spirit::Value aliasList(const Array&, bool)’:
+dions.cpp:1685:28: warning: comparison between signed and unsigned integer expressions [-Wsign-compare]
+             for(int i=0; i < tx.vin.size(); i++)
+                            ^
+dions.cpp: In function ‘bool ConnectInputsPost(std::map<uint256, CTxIndex>&, const CTransaction&, std::vector<CTransaction>&, std::vector<CTxIndex>&, CBlockIndex*, CDiskTxPos&, bool, bool)’:
+dions.cpp:2657:22: warning: comparison between signed and unsigned integer expressions [-Wsign-compare]
+ 
+                      ^
+dions.cpp:2676:26: warning: comparison between signed and unsigned integer expressions [-Wsign-compare]
+     scriptPubKey << OP_ALIAS_RELAY << vchAlias << vchValue << OP_2DROP << OP_DROP;
+                          ^
+dions.cpp:2713:42: warning: format ‘%d’ expects argument of type ‘int’, but argument 2 has type ‘std::vector<unsigned char>::size_type {aka long unsigned int}’ [-Wformat=]
+ 
+                                          ^
+In file included from db.h:8:0,
+                 from dions.cpp:4:
+main.h: At global scope:
+main.h:41:22: warning: ‘STAKE_INTEREST_V3’ defined but not used [-Wunused-variable]
+ static unsigned int  STAKE_INTEREST_V3 = 150000;
+                      ^
+g++ -ggdb  -pthread -Wall -Wextra -Wno-ignored-qualifiers -Wformat -Wformat-security -Wno-unused-parameter -g -DBOOST_SPIRIT_THREADSAFE -I/home/debian/DIONS/src -I/home/debian/DIONS/src/obj -DUSE_UPNP=0 -I/home/debian/DIONS/src/leveldb/include -I/home/debian/DIONS/src/leveldb/helpers -DHAVE_BUILD_INFO -fno-stack-protector -fstack-protector-all -Wstack-protector -D_FORTIFY_SOURCE=2  -o iocoind obj/alert.o obj/version.o obj/checkpoints.o obj/netbase.o obj/addrman.o obj/crypter.o obj/key.o obj/db.o obj/init.o obj/irc.o obj/keystore.o obj/miner.o obj/main.o obj/net.o obj/protocol.o obj/bitcoinrpc.o obj/rpcdump.o obj/rpcnet.o obj/rpcmining.o obj/rpcwallet.o obj/rpcblockchain.o obj/rpcrawtransaction.o obj/script.o obj/sync.o obj/util.o obj/wallet.o obj/walletdb.o obj/dions.o obj/noui.o obj/cubehash.o obj/luffa.o obj/aes_helper.o obj/echo.o obj/shavite.o obj/simd.o obj/blake.o obj/bmw.o obj/groestl.o obj/jh.o obj/keccak.o obj/skein.o obj/kernel.o obj/pbkdf2.o obj/zerocoin/Accumulator.o obj/zerocoin/AccumulatorProofOfKnowledge.o obj/zerocoin/Coin.o obj/zerocoin/CoinSpend.o obj/zerocoin/Commitment.o obj/zerocoin/ParamGeneration.o obj/zerocoin/Params.o obj/zerocoin/SerialNumberSignatureOfKnowledge.o obj/zerocoin/SpendMetaData.o obj/zerocoin/ZeroTest.o obj/txdb-leveldb.o -Wl,-z,relro -Wl,-z,now   -Wl,-Bdynamic -l boost_system -l boost_filesystem -l boost_program_options -l boost_thread -l db_cxx -l ssl -l crypto -l miniupnpc -Wl,-Bdynamic -l boost_iostreams -l z -l dl -l pthread /home/debian/DIONS/src/leveldb/libleveldb.a /home/debian/DIONS/src/leveldb/libmemenv.a
