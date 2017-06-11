@@ -27,6 +27,7 @@ keys
 !src/leveldb/Makefile
 *.aux
 *.log
+log
 *.out
 *.pdf
 *.pyg
