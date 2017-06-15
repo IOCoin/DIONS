@@ -41,6 +41,7 @@ template<typename T> void ConvertTo(Value& value, bool fAllowNull=false);
 std::map<vchType, uint256> mapMyMessages;
 std::map<vchType, uint256> mapLocator;
 std::map<vchType, set<uint256> > mapState;
+std::map<vchType, set<uint256> > k1Export;
 std::set<vchType> setNewHashes;
 
 #ifdef GUI
@@ -509,6 +510,7 @@ Value publicKeyExports(const Array& params, bool fHelp)
 
     return oRes;
 }
+
 Value publicKeys(const Array& params, bool fHelp)
 {
     if(fHelp || params.size() > 1)
@@ -532,12 +534,12 @@ Value publicKeys(const Array& params, bool fHelp)
           {
             const CWalletTx& tx = item.second;
 
-            vchType vchSender, vchRecipient, vchKey, vchAes, vchSig;
+            vchType vchS, vchR, vchKey, vchAes, vchSig;
             int nOut;
-            if(!tx.GetPublicKeyUpdate(nOut, vchSender, vchRecipient, vchKey, vchAes, vchSig))
+            if(!tx.GetPublicKeyUpdate(nOut, vchS, vchR, vchKey, vchAes, vchSig))
               continue;
 
-            string keySenderAddr = stringFromVch(vchSender);
+            string keySenderAddr = stringFromVch(vchS);
             CBitcoinAddress r(keySenderAddr);
             CKeyID keyID;
             r.GetKeyID(keyID);
@@ -553,16 +555,25 @@ Value publicKeys(const Array& params, bool fHelp)
               continue;
             assert(nHeight >= 0);
 
-            string recipient = stringFromVch(vchRecipient);
+            string recipient = stringFromVch(vchR);
 
             Object aliasObj;
-            aliasObj.push_back(Pair("sender", stringFromVch(vchSender)));
+            aliasObj.push_back(Pair("sender", stringFromVch(vchS)));
             aliasObj.push_back(Pair("recipient", recipient));
             if(imported)
               aliasObj.push_back(Pair("status", "imported"));
             else
               aliasObj.push_back(Pair("status", "exported"));
 
+            vchType k;
+            k.reserve(vchS.size() + vchR.size());
+            k.insert(k.end(), vchR.begin(), vchR.end());
+            k.insert(k.end(), vchS.begin(), vchS.end());
+            if(k1Export.count(k) && k1Export[k].size())
+            {
+              aliasObj.push_back(Pair("pending", "true"));
+            }
+            
             aliasObj.push_back(Pair("confirmed", "false"));
 
             aliasObj.push_back(Pair("key", stringFromVch(vchKey)));
@@ -1931,8 +1942,6 @@ Value updateEncryptedAliasFile(const Array& params, bool fHelp)
         }
     }
 
-
-
     ENTER_CRITICAL_SECTION(cs_main)
     {
         EnsureWalletIsUnlocked();
@@ -2060,8 +2069,6 @@ Value updateEncryptedAlias(const Array& params, bool fHelp)
             throw runtime_error("this alias is already active");
         }
     }
-
-
 
     ENTER_CRITICAL_SECTION(cs_main)
     {
@@ -3659,7 +3666,6 @@ bool aliasTxPos(const vector<AliasIndex> &vtxPos, const CDiskTxPos& txPos)
 }
 bool aliasScript(const CScript& script, int& op, vector<vector<unsigned char> > &vvch)
 {
-
   CScript::const_iterator pc = script.begin();
   return aliasScript(script, op, vvch, pc);
 }
@@ -3733,7 +3739,6 @@ bool DecodeMessageTx(const CTransaction& tx, int& op, int& nOut, vector<vector<u
 bool aliasTx(const CTransaction& tx, int& op, int& nOut, vector<vector<unsigned char> >& vvch )
 {
     bool found = false;
-
         for(unsigned int i = 0; i < tx.vout.size(); i++)
         {
             const CTxOut& out = tx.vout[i];
@@ -3789,9 +3794,7 @@ int aliasOutIndex(const CTransaction& tx)
     int op;
     int nOut;
 
-    bool good = aliasTx(tx, op, nOut, vvch);
-
-    if(!good)
+    if(!aliasTx(tx, op, nOut, vvch))
         throw runtime_error("aliasOutIndex() : alias output not found");
     return nOut;
 }
@@ -3909,13 +3912,9 @@ AcceptToMemoryPoolPost(const CTransaction& tx)
     int op;
     int nOut;
 
-    bool good = aliasTx(tx, op, nOut, vvch);
-
-    if(!good)
+    if(!aliasTx(tx, op, nOut, vvch))
       return error("AcceptToMemoryPoolPost: no output out script in alias tx %s",
                     tx.GetHash().ToString().c_str());
-
-
 
     if(op == OP_ALIAS_ENCRYPTED)
       {
@@ -3959,6 +3958,21 @@ void RemoveFromMemoryPoolPost(const CTransaction& tx)
         {
             std::map<std::vector<unsigned char>, std::set<uint256> >::iterator mi = mapState.find(vvch[0]);
             if(mi != mapState.end())
+                mi->second.erase(tx.GetHash());
+        }
+        LEAVE_CRITICAL_SECTION(cs_main)
+    }
+
+    if(op == OP_PUBLIC_KEY)
+    {
+        vchType k;
+        k.reserve(vvch[0].size() + vvch[1].size());
+        k.insert(k.end(), vvch[0].begin(), vvch[0].end());
+        k.insert(k.end(), vvch[1].begin(), vvch[1].end());
+        ENTER_CRITICAL_SECTION(cs_main)
+        {
+            std::map<std::vector<unsigned char>, std::set<uint256> >::iterator mi = k1Export.find(k);
+            if(mi != k1Export.end())
                 mi->second.erase(tx.GetHash());
         }
         LEAVE_CRITICAL_SECTION(cs_main)
@@ -4026,8 +4040,7 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
     int op;
     int nOut;
 
-    bool good = aliasTx(tx, op, nOut, vvchArgs);
-    if(!good)
+    if(!aliasTx(tx, op, nOut, vvchArgs))
         return error("ConnectInputsPost() : could not decode a dions tx");
 
     CScript s1 = tx.vout[nOut].scriptPubKey;
@@ -4083,6 +4096,21 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
            {
                 return error("public key plus aes key tx verification failed");
            }
+
+             vchType k1Base;
+             k1Base.reserve(vvchArgs[0].size() + vvchArgs[1].size());
+             k1Base.insert(k1Base.end(), vvchArgs[0].begin(), vvchArgs[0].end());
+             k1Base.insert(k1Base.end(), vvchArgs[1].begin(), vvchArgs[1].end());
+             std::map<std::vector<unsigned char>, std::set<uint256> >::iterator mi = k1Export.find(k1Base);
+             if(mi == k1Export.end())
+             {
+               ENTER_CRITICAL_SECTION(cs_main)
+               {
+                 printf("KEY INSERTED\n");
+                 k1Export[k1Base].insert(tx.GetHash());
+               }
+               LEAVE_CRITICAL_SECTION(cs_main)
+             }
         }
             break;
         case OP_ENCRYPTED_MESSAGE:
@@ -4158,7 +4186,6 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
             break;
         case OP_ALIAS_ENCRYPTED:
         {
-
             if(vvchArgs[3].size() != 20)
               return error("registerAlias tx with incorrect hash length");
             CScript script;
@@ -4283,7 +4310,6 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
 
             if(fMiner)
             {
-
                 nDepth = CheckTransactionAtRelativeDepth(pindexBlock, vTxindex[nInput], GetExpirationDepth(pindexBlock->nHeight));
                 if(nDepth == -1)
                     return error("ConnectInputsPost() : decryptAlias cannot be mined if registerAlias is not already in chain and unexpired");
