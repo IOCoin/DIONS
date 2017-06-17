@@ -559,6 +559,11 @@ Value publicKeys(const Array& params, bool fHelp)
 
             Object aliasObj;
             aliasObj.push_back(Pair("sender", stringFromVch(vchS)));
+
+            string a;
+            if(atod(stringFromVch(vchS), a) == 0)
+              aliasObj.push_back(Pair("alias", a));
+            
             aliasObj.push_back(Pair("recipient", recipient));
             if(imported)
               aliasObj.push_back(Pair("status", "imported"));
@@ -580,8 +585,6 @@ Value publicKeys(const Array& params, bool fHelp)
             aliasObj.push_back(Pair("aes256_encrypted", stringFromVch(vchAes)));
             aliasObj.push_back(Pair("signature", stringFromVch(vchSig)));
             oRes.push_back(aliasObj);
-
-
         }
       }
       LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
