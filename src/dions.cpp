@@ -560,9 +560,6 @@ Value publicKeys(const Array& params, bool fHelp)
             Object aliasObj;
             aliasObj.push_back(Pair("sender", stringFromVch(vchS)));
 
-            string a;
-            if(atod(stringFromVch(vchS), a) == 0)
-              aliasObj.push_back(Pair("alias", a));
             
             aliasObj.push_back(Pair("recipient", recipient));
             if(imported)
@@ -584,6 +581,9 @@ Value publicKeys(const Array& params, bool fHelp)
             aliasObj.push_back(Pair("key", stringFromVch(vchKey)));
             aliasObj.push_back(Pair("aes256_encrypted", stringFromVch(vchAes)));
             aliasObj.push_back(Pair("signature", stringFromVch(vchSig)));
+            string a;
+            if(atod(stringFromVch(vchS), a) == 0)
+              aliasObj.push_back(Pair("alias", a));
             oRes.push_back(aliasObj);
         }
       }
