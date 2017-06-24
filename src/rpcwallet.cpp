@@ -1832,6 +1832,26 @@ public:
     }
 };
 
+Value validateLocator(const Array& params, bool fHelp)
+{
+    if (fHelp || params.size() != 1)
+        throw runtime_error(
+            "validateLocator <locator>\n"
+            "Return information about <locator>.");
+
+    CBitcoinAddress address;
+    int r = checkAddress(params[0].get_str(), address);
+
+    Object ret;
+    if(r == 0)
+    {
+      ret.push_back(Pair("isvalid", true));
+    }
+    else
+      ret.push_back(Pair("isvalid", false));
+    return ret;
+}
+
 Value validateaddress(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() != 1)

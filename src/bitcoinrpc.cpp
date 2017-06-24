@@ -262,6 +262,7 @@ static const CRPCCommand vRPCCommands[] =
     { "encryptwallet",          &encryptwallet,          false,  false },
     { "getencryptionstatus",    &getencryptionstatus,    true,  false },
     { "validateaddress",        &validateaddress,        true,   false },
+    { "validateLocator",        &validateLocator,        true,   false },
     { "validatepubkey",         &validatepubkey,         true,   false },
     { "getbalance",             &getbalance,             false,  false },
     { "move",                   &movecmd,                false,  false },

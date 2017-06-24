@@ -56,7 +56,6 @@ extern Value sendtoaddress(const Array& params, bool fHelp);
 
 bool getImportedPubKey(string senderAddress, string recipientAddress, vchType& recipientPubKeyVch, vchType& aesKeyBase64EncryptedVch);
 bool getImportedPubKey(string recipientAddress, vchType& recipientPubKeyVch);
-int checkAddress(string addr, CBitcoinAddress& a);
 
 
 
@@ -2344,16 +2343,34 @@ Value transferEncryptedAlias(const Array& params, bool fHelp)
     if(!pwalletMain->GetRandomKeyMetadata(localkey.GetPubKey(), vchRand, r_))
         throw JSONRPCError(RPC_WALLET_ERROR, "no random key available for address");
 
-    const string recipientAddrStr=(params[2]).get_str();
+    string recipientAddrStr=(params[2]).get_str();
+    CBitcoinAddress address(recipientAddrStr);
+    if(!address.IsValid())
+    {
+      vector<AliasIndex> vtxPos;
+      LocatorNodeDB ln1Db("r");
+      vchType vchAlias = vchFromString(recipientAddrStr);
+      if (ln1Db.lKey (vchAlias))
+      {
+        printf("  name exists\n");
+        if (!ln1Db.lGet (vchAlias, vtxPos))
+          return error("aliasHeight() : failed to read from name DB");
+        if (vtxPos.empty ())
+          return -1;
 
-    CBitcoinAddress recipientAddr(recipientAddrStr);
-    if(!recipientAddr.IsValid())
-        throw JSONRPCError(RPC_TYPE_ERROR, "Invalid owner address");
+        AliasIndex& txPos = vtxPos.back ();
+        address.SetString(txPos.vAddress); 
+      }
+      else
+      {
+          throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid I/OCoin address or unknown alias");
+      }
+    }
 
-    vchType rVch = vchFromString(recipientAddrStr);
+    vchType rVch = vchFromString(address.ToString());
 
     CKeyID rkeyID;
-    if(!recipientAddr.GetKeyID(rkeyID))
+    if(!address.GetKeyID(rkeyID))
         throw JSONRPCError(RPC_TYPE_ERROR, "ownerAddr does not refer to key");
 
     CPubKey vchRecipientPubKey;
@@ -2370,7 +2387,7 @@ Value transferEncryptedAlias(const Array& params, bool fHelp)
 
     vchType recipientPubKeyVch;
 
-    if(!getImportedPubKey(recipientAddrStr, recipientPubKeyVch))
+    if(!getImportedPubKey(address.ToString(), recipientPubKeyVch))
     {
       throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "transferEncryptedAlias no RSA key for recipient");
     }
@@ -2379,7 +2396,7 @@ Value transferEncryptedAlias(const Array& params, bool fHelp)
     wtx.nVersion = CTransaction::DION_TX_VERSION;
     CScript scriptPubKeyOrig;
 
-    scriptPubKeyOrig.SetBitcoinAddress(recipientAddrStr);
+    scriptPubKeyOrig.SetBitcoinAddress(address.ToString());
 
     CScript scriptPubKey;
 
