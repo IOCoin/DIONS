@@ -433,8 +433,6 @@ public:
     mutable int64_t nAvailableCreditCached;
     mutable int64_t nChangeCached;
 
-    mutable bool aliasTxDecoded;
-    mutable bool aliasTxDecodeSuccess;
     mutable int nAliasOut;
     mutable vchType vchAlias;
     mutable vchType vchValue;

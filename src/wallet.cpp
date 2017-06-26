@@ -2740,57 +2740,48 @@ return true;
 }
 
 bool
-CWalletTx::aliasSet (int& op_ret, int& nOut, vchType& nm, vchType& val) const
+CWalletTx::aliasSet(int& op_ret, int& nOut, vchType& nm, vchType& val) const
 {
-printf("Entered aliasSet \n");
-if (nVersion != CTransaction::DION_TX_VERSION)
-  return false;
+  if (nVersion != CTransaction::DION_TX_VERSION)
+    return false;
 
-printf("aliasSet DION \n");
-
+  bool s = false;
+  std::vector<vchType> vvch;
+  int op;
+  if (aliasTx (*this, op, nAliasOut, vvch))
   {
-    aliasTxDecoded = true;
-
-    std::vector<vchType> vvch;
-    int op;
-    if (aliasTx (*this, op, nAliasOut, vvch))
+    switch (op)
     {
-      switch (op)
-	{
-	case OP_ALIAS_SET:
-	  vchAlias = vvch[0];
-	  vchValue = vvch[4];
-	  aliasTxDecodeSuccess = true;
-	  break;
+      case OP_ALIAS_SET:
+        vchAlias = vvch[0];
+        vchValue = vvch[4];
+        s = true;
+        break;
 
-	case OP_ALIAS_RELAY:
-	  vchAlias = vvch[0];
-	  vchValue = vvch[1];
-	  aliasTxDecodeSuccess = true;
-	  break;
+      case OP_ALIAS_RELAY:
+        vchAlias = vvch[0];
+        vchValue = vvch[1];
+        s = true;
+        break;
 
-	case OP_ALIAS_ENCRYPTED:
-	  vchAlias = vvch[0];
-	  vchValue = vvch[4];
-	  op__ = op;
-	  aliasTxDecodeSuccess = true;
-	  break;
-	}
+      case OP_ALIAS_ENCRYPTED:
+       vchAlias = vvch[0];
+       vchValue = vvch[4];
+       op__ = op;
+       s = true;
+       break;
     }
-    else
-      aliasTxDecodeSuccess = false;
-    
   }
+    
+  if(!s)
+    return false;
 
-if (!aliasTxDecodeSuccess)
-  return false;
+  nOut = nAliasOut;
+  nm = vchAlias;
+  val = vchValue;
+  op_ret = op__;
 
-nOut = nAliasOut;
-nm = vchAlias;
-val = vchValue;
-op_ret = op__;
-
-return true;
+  return true;
 }
 
 int CMerkleTx::GetDepthInMainChain(int& nHeightRet) const
