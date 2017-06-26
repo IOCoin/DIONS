@@ -437,6 +437,7 @@ public:
     mutable vchType vchAlias;
     mutable vchType vchValue;
     mutable int     op__;
+    mutable bool    s__;
 
     mutable bool messageTxDecoded;
     mutable bool messageTxDecodeSuccess;
