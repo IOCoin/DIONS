@@ -56,6 +56,7 @@ extern Value sendtoaddress(const Array& params, bool fHelp);
 
 bool getImportedPubKey(string senderAddress, string recipientAddress, vchType& recipientPubKeyVch, vchType& aesKeyBase64EncryptedVch);
 bool getImportedPubKey(string recipientAddress, vchType& recipientPubKeyVch);
+bool internalReference__(string recipientAddress, vchType& recipientPubKeyVch);
 
 
 
@@ -2389,7 +2390,8 @@ Value transferEncryptedAlias(const Array& params, bool fHelp)
 
     if(!getImportedPubKey(address.ToString(), recipientPubKeyVch))
     {
-      throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "transferEncryptedAlias no RSA key for recipient");
+      if(!internalReference__(address.ToString(), recipientPubKeyVch))
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "transferEncryptedAlias no RSA key for recipient");
     }
 
     CWalletTx wtx;
@@ -2941,6 +2943,37 @@ Value sendSymmetric(const Array& params, bool fHelp)
     res.push_back(sigBase64);
     return res;
 
+}
+bool internalReference__(string ref__, vchType& recipientPubKeyVch)
+{
+  bool s__=false;
+  ENTER_CRITICAL_SECTION(cs_main)
+  {
+    ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    {
+      CBitcoinAddress a(ref__) ;
+      CKeyID keyID;
+      if(a.GetKeyID(keyID))
+      {
+        CKey key;
+        if(pwalletMain->GetKey(keyID, key))
+        {
+          CPubKey pubKey = key.GetPubKey();
+
+          string r1__;
+          if(pwalletMain->envCP1(pubKey, r1__))
+          {
+            recipientPubKeyVch = vchFromString(r1__);
+            s__=true;
+          }
+        }
+      }
+    }
+    LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+  }
+  LEAVE_CRITICAL_SECTION(cs_main)
+
+  return s__;
 }
 bool getImportedPubKey(string foreignAddr, vchType& recipientPubKeyVch)
 {
