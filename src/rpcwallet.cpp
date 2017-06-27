@@ -1846,9 +1846,15 @@ Value validateLocator(const Array& params, bool fHelp)
     if(r == 0)
     {
       ret.push_back(Pair("isvalid", true));
+      CTxDestination dest = address.Get();
+      bool mine = IsMine(*pwalletMain, dest);
+      ret.push_back(Pair("ismine", mine));
     }
     else
       ret.push_back(Pair("isvalid", false));
+
+
+
     return ret;
 }
 
