@@ -1464,7 +1464,7 @@ bool searchAliasEncrypted(string alias, uint256& wtxInHash)
 
           CKey key;
           if(!pwalletMain->GetKey(keyID, key))
-            throw JSONRPCError(RPC_WALLET_ERROR, "Private key not available");
+            throw JSONRPCError(RPC_WALLET_ERROR, "sae : Private key not available");
 
           CPubKey pubKey = key.GetPubKey();
           if(pwalletMain->envCP0(pubKey, rsaPrivKey) == false)
@@ -2187,7 +2187,7 @@ Value decryptAlias(const Array& params, bool fHelp)
 
     CKey key;
     if(!pwalletMain->GetKey(keyID, key))
-        throw JSONRPCError(RPC_WALLET_ERROR, "Private key not available");
+        throw JSONRPCError(RPC_WALLET_ERROR, "1 Private key not available");
 
     CPubKey vchPubKey;
     pwalletMain->GetPubKey(keyID, vchPubKey);
@@ -2235,7 +2235,7 @@ Value decryptAlias(const Array& params, bool fHelp)
         EnsureWalletIsUnlocked();
 
         uint256 wtxInHash;
-        if(!searchAliasEncrypted(stringFromVch(vchAlias), wtxInHash))
+        if(!searchAliasEncrypted2(stringFromVch(vchAlias), wtxInHash))
         {
     LEAVE_CRITICAL_SECTION(cs_main)
           throw runtime_error("could not find a coin with this alias, try specifying the registerAlias transaction id");
@@ -2280,7 +2280,7 @@ Value decryptAlias(const Array& params, bool fHelp)
 
                 CKey key;
                 if(!pwalletMain->GetKey(keyID, key))
-                  throw JSONRPCError(RPC_WALLET_ERROR, "Private key not available");
+                  throw JSONRPCError(RPC_WALLET_ERROR, "2 Private key not available");
 
                 CPubKey vchPubKey;
                 pwalletMain->GetPubKey(keyID, vchPubKey);
