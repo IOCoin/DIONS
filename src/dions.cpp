@@ -1080,10 +1080,12 @@ Value validateLocator(const Array& params, bool fHelp)
       bool mine = IsMine(*pwalletMain, dest);
       ret.push_back(Pair("ismine", mine));
       vchType rConvert__;
-      if(!getImportedPubKey(address.ToString(), rConvert__) || !internalReference__(address.ToString(), rConvert__))
+      if(getImportedPubKey(address.ToString(), rConvert__) || internalReference__(address.ToString(), rConvert__))
       {
         ret.push_back(Pair("k__status", true));
       }
+      else
+        ret.push_back(Pair("k__status", false));
     }
     else
       ret.push_back(Pair("isvalid", false));
