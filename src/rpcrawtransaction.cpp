@@ -84,8 +84,8 @@ void ScriptPubKeyToJSON(const CScript& scriptPubKey, Object& out, bool fIncludeH
 
         case OP_ALIAS_ENCRYPTED:
         {
-            assert(vvch.size() == 1);
-            const std::string rand = HexStr(vvch[0].begin(), vvch[0].end());
+            assert(vvch.size() == 6);
+            const std::string rand = stringFromVch(vvch[0]);
             aliasOperation.push_back(Pair("op", "node_split"));
             aliasOperation.push_back(Pair("rand", rand));
             break;

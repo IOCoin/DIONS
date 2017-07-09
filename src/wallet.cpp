@@ -1190,12 +1190,7 @@ void CWallet::AvailableCoins(vector<COutput>& vCoins, bool fOnlyConfirmed, const
 	      (!coinControl || !coinControl->HasSelected() || coinControl->IsSelected((*it).first, i)))
 	      {
     
-      int op;
-    vector<vector<unsigned char> > tmp;
-      if(!aliasScript(pcoin->vout[i].scriptPubKey, op, tmp))
-      {
         vCoins.push_back(COutput(pcoin, i, nDepth));
-      }
 	      }
 	  }
 
@@ -1497,6 +1492,137 @@ bool CWallet::SelectCoinsForStaking(int64_t nTargetValue, unsigned int nSpendTim
   return true;
 }
 
+bool CWallet::CreateTransaction__(const vector<pair<CScript, int64_t> >& vecSend, CWalletTx& wtxNew, CReserveKey& reservekey, int64_t& nFeeRet, std::string strTxInfo, const CCoinControl* coinControl)
+{
+  int64_t nValue = 0;
+  BOOST_FOREACH (const PAIRTYPE(CScript, int64_t)& s, vecSend)
+  {
+      if (nValue < 0)
+	  return false;
+      nValue += s.second;
+  }
+  if (vecSend.empty() || nValue < 0)
+      return false;
+
+  wtxNew.BindWallet(this);
+  wtxNew.strTxInfo = strTxInfo;
+  if (wtxNew.strTxInfo.length() > MAX_TX_INFO_LEN)
+    {wtxNew.strTxInfo.resize(MAX_TX_INFO_LEN);}
+  if (wtxNew.strTxInfo.length()>0)
+     {wtxNew.nVersion=3;}
+  {
+      LOCK2(cs_main, cs_wallet);
+      // txdb must be opened before the mapWallet lock
+      CTxDB txdb("r");
+      {
+	  //nFeeRet = nTransactionFee;
+	  nFeeRet = CENT;
+	  while (true)
+	  {
+	      wtxNew.vin.clear();
+	      wtxNew.vout.clear();
+	      wtxNew.fFromMe = true;
+
+	      int64_t nTotalValue = nValue + nFeeRet;
+	      double dPriority = 0;
+	      // vouts to the payees
+	      BOOST_FOREACH (const PAIRTYPE(CScript, int64_t)& s, vecSend)
+		  wtxNew.vout.push_back(CTxOut(s.second, s.first));
+
+	      // Choose coins to use
+	      set<pair<const CWalletTx*,unsigned int> > setCoins;
+	      int64_t nValueIn = 0;
+	      if (!SelectCoins(nTotalValue, wtxNew.nTime, setCoins, nValueIn, coinControl))
+		  return false;
+	      BOOST_FOREACH(PAIRTYPE(const CWalletTx*, unsigned int) pcoin, setCoins)
+	      {
+		  int64_t nCredit = pcoin.first->vout[pcoin.second].nValue;
+		  dPriority += (double)nCredit * pcoin.first->GetDepthInMainChain();
+	      }
+
+	      int64_t nChange = nValueIn - nValue - nFeeRet;
+	      // if sub-cent change is required, the fee must be raised to at least MIN_TX_FEE
+	      // or until nChange becomes zero
+	      // NOTE: this depends on the exact behaviour of GetMinFee
+	      if (nFeeRet < MIN_TX_FEE && nChange > 0 && nChange < CENT)
+	      {
+		  int64_t nMoveToFee = min(nChange, MIN_TX_FEE - nFeeRet);
+		  nChange -= nMoveToFee;
+		  nFeeRet += nMoveToFee;
+	      }
+
+	      if (nChange > 0)
+	      {
+		  // Fill a vout to ourself
+		  // TODO: pass in scriptChange instead of reservekey so
+		  // change transaction isn't always pay-to-bitcoin-address
+		  CScript scriptChange;
+
+		  // coin control: send change to custom address
+		  if (coinControl && !boost::get<CNoDestination>(&coinControl->destChange))
+		      scriptChange.SetDestination(coinControl->destChange);
+
+		  // no coin control: send change to newly generated address
+		  else
+		  {
+		      // Note: We use a new key here to keep it from being obvious which side is the change.
+		      //  The drawback is that by not reusing a previous key, the change may be lost if a
+		      //  backup is restored, if the backup doesn't have the new private key for the change.
+		      //  If we reused the old key, it would be possible to add code to look for and
+		      //  rediscover unknown transactions that were written with keys of ours to recover
+		      //  post-backup change.
+
+		      // Reserve a new key pair from key pool
+		      CPubKey vchPubKey;
+		      assert(reservekey.GetReservedKey(vchPubKey)); // should never fail, as we just unlocked
+
+		      scriptChange.SetDestination(vchPubKey.GetID());
+		  }
+
+		  // Insert change txn at random position:
+		  vector<CTxOut>::iterator position = wtxNew.vout.begin()+GetRandInt(wtxNew.vout.size());
+		  wtxNew.vout.insert(position, CTxOut(nChange, scriptChange));
+	      }
+	      else
+		  reservekey.ReturnKey();
+
+	      // Fill vin
+	      BOOST_FOREACH(const PAIRTYPE(const CWalletTx*,unsigned int)& coin, setCoins)
+		  wtxNew.vin.push_back(CTxIn(coin.first->GetHash(),coin.second));
+
+	      // Sign
+	      int nIn = 0;
+	      BOOST_FOREACH(const PAIRTYPE(const CWalletTx*,unsigned int)& coin, setCoins)
+		  if (!SignSignature(*this, *coin.first, wtxNew, nIn++))
+		      return false;
+
+	      // Limit size
+	      unsigned int nBytes = ::GetSerializeSize(*(CTransaction*)&wtxNew, SER_NETWORK, PROTOCOL_VERSION);
+	      if (nBytes >= MAX_STANDARD_TX_SIZE)
+		  return false;
+	      dPriority /= nBytes;
+
+	      // Check that enough fee is included
+	      int64_t nPayFee = nTransactionFee * (1 + (int64_t)nBytes / 1000);
+	      int64_t nMinFee = wtxNew.GetMinFee(1, GMF_SEND, nBytes);
+
+	      if (nFeeRet < max(nPayFee, nMinFee))
+	      {
+		  nFeeRet = max(nPayFee, nMinFee);
+		  continue;
+	      }
+
+	      // Fill vtxPrev by copying from previous transactions vtxPrev
+	      wtxNew.AddSupportingTransactions(txdb);
+	      wtxNew.fTimeReceivedIsTxTime = true;
+
+	      break;
+	  }
+      }
+  }
+  return true;
+}
+
 bool CWallet::CreateTransaction(const vector<pair<CScript, int64_t> >& vecSend, CWalletTx& wtxNew, CReserveKey& reservekey, int64_t& nFeeRet, std::string strTxInfo, const CCoinControl* coinControl)
 {
   int64_t nValue = 0;
@@ -1625,6 +1751,13 @@ bool CWallet::CreateTransaction(const vector<pair<CScript, int64_t> >& vecSend, 
       }
   }
   return true;
+}
+
+bool CWallet::CreateTransaction__(CScript scriptPubKey, int64_t nValue, CWalletTx& wtxNew, CReserveKey& reservekey, int64_t& nFeeRet, std::string strTxInfo, const CCoinControl* coinControl)
+{
+  vector< pair<CScript, int64_t> > vecSend;
+  vecSend.push_back(make_pair(scriptPubKey, nValue));
+  return CreateTransaction__(vecSend, wtxNew, reservekey, nFeeRet, strTxInfo, coinControl);
 }
 
 bool CWallet::CreateTransaction(CScript scriptPubKey, int64_t nValue, CWalletTx& wtxNew, CReserveKey& reservekey, int64_t& nFeeRet, std::string strTxInfo, const CCoinControl* coinControl)
@@ -1901,6 +2034,54 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
   return true;
 }
 
+bool CWallet::CommitTransaction__(CWalletTx& wtxNew, CReserveKey& reservekey)
+{
+  {
+      LOCK2(cs_main, cs_wallet);
+      printf("Entered CWallet::CommitTransaction\n");
+      printf("CommitTransaction:\n%s", wtxNew.ToString().c_str());
+      {
+	  // This is only to keep the database open to defeat the auto-flush for the
+	  // duration of this scope.  This is the only place where this optimization
+	  // maybe makes sense; please don't do it anywhere else.
+	  CWalletDB* pwalletdb = fFileBacked ? new CWalletDB(strWalletFile,"r") : NULL;
+
+	  // Take key pair from key pool so it won't be used again
+	  reservekey.KeepKey();
+
+	  // Add tx to wallet, because if it has change it's also ours,
+	  // otherwise just for transaction history.
+	  AddToWallet(wtxNew);
+
+	  // Mark old coins as spent
+	  set<CWalletTx*> setCoins;
+	  BOOST_FOREACH(const CTxIn& txin, wtxNew.vin)
+	  {
+	      CWalletTx &coin = mapWallet[txin.prevout.hash];
+	      coin.BindWallet(this);
+	      coin.MarkSpent(txin.prevout.n);
+	      coin.WriteToDisk();
+	      NotifyTransactionChanged(this, coin.GetHash(), CT_UPDATED);
+	  }
+
+	  if (fFileBacked)
+	      delete pwalletdb;
+      }
+
+      // Track how many getdata requests our transaction gets
+      mapRequestCount[wtxNew.GetHash()] = 0;
+
+      // Broadcast
+      if (!wtxNew.AcceptToMemoryPool())
+      {
+	  // This must not fail. The transaction has already been signed and recorded.
+	  printf("CommitTransaction() : Error: Transaction not valid\n");
+	  return false;
+      }
+      wtxNew.RelayWalletTransaction();
+  }
+  return true;
+}
 
 // Call after CreateTransaction unless you want to abort
 bool CWallet::CommitTransaction(CWalletTx& wtxNew, CReserveKey& reservekey)
@@ -1953,6 +2134,43 @@ bool CWallet::CommitTransaction(CWalletTx& wtxNew, CReserveKey& reservekey)
 }
 
 
+string CWallet::SendMoney__(CScript scriptPubKey, int64_t nValue, CWalletTx& wtxNew, bool fAskFee, std::string strTxInfo)
+{
+  CReserveKey reservekey(this);
+  int64_t nFeeRequired;
+
+  if (IsLocked())
+  {
+      string strError = _("Error: Wallet locked, unable to create transaction  ");
+      printf("SendMoney() : %s", strError.c_str());
+      return strError;
+  }
+  if (fWalletUnlockStakingOnly)
+  {
+      string strError = _("Error: Wallet unlocked for staking only, unable to create transaction.");
+      printf("SendMoney() : %s", strError.c_str());
+      return strError;
+  }
+  if (!CreateTransaction__(scriptPubKey, MIN_TX_FEE, wtxNew, reservekey, nFeeRequired, strTxInfo))
+  {
+      string strError;
+      //if (nValue + nFeeRequired > GetBalance())
+      if (MIN_TX_FEE + nFeeRequired > GetBalance())
+	  strError = strprintf(_("Error: This transaction requires a transaction fee of at least %s because of its amount, complexity, or use of recently received funds  "), FormatMoney(nFeeRequired).c_str());
+      else
+	  strError = _("Error: Transaction creation failed  ");
+      printf("SendMoney() : %s", strError.c_str());
+      return strError;
+  }
+
+  if (fAskFee && !uiInterface.ThreadSafeAskFee(nFeeRequired, _("Sending...")))
+      return "ABORTED";
+
+  if (!CommitTransaction__(wtxNew, reservekey))
+      return _("Error: The transaction was rejected.  This might happen if some of the coins in your wallet were already spent, such as if you used a copy of wallet.dat and coins were spent in the copy but not marked as spent here.");
+
+  return "";
+}
 
 
 string CWallet::SendMoney(CScript scriptPubKey, int64_t nValue, CWalletTx& wtxNew, bool fAskFee, std::string strTxInfo)

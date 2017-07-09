@@ -165,87 +165,83 @@ bool txPost(const vector<pair<CScript, int64_t> >& vecSend, const CWalletTx& wtx
         CTxDB txdb("r");
         ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
         {
-            nFeeRet = nTransactionFee;
-            for(;;)
+          nFeeRet = CENT;
+          wtxNew.vin.clear();
+          wtxNew.vout.clear();
+          wtxNew.fFromMe = true;
+
+          int64_t nTotalValue = nValue + nFeeRet;
+          BOOST_FOREACH(const PAIRTYPE(CScript, int64_t)& s, vecSend)
+            wtxNew.vout.push_back(CTxOut(s.second, s.first));
+
+          int64_t nWtxinCredit = wtxIn.vout[nTxOut].nValue;
+
+          set<pair<const CWalletTx*, unsigned int> > setCoins;
+          int64_t nValueIn = 0;
+          if(nTotalValue - nWtxinCredit > 0)
+          {
+            if(!pwalletMain->SelectCoins(nTotalValue - nWtxinCredit, wtxNew.nTime, setCoins, nValueIn))
             {
-                wtxNew.vin.clear();
-                wtxNew.vout.clear();
-                wtxNew.fFromMe = true;
-
-                int64_t nTotalValue = nValue + nFeeRet;
-                BOOST_FOREACH(const PAIRTYPE(CScript, int64_t)& s, vecSend)
-                    wtxNew.vout.push_back(CTxOut(s.second, s.first));
-
-                int64_t nWtxinCredit = wtxIn.vout[nTxOut].nValue;
-
-                set<pair<const CWalletTx*, unsigned int> > setCoins;
-                int64_t nValueIn = 0;
-                if(nTotalValue - nWtxinCredit > 0)
-                {
-                    if(!pwalletMain->SelectCoins(nTotalValue - nWtxinCredit, wtxNew.nTime, setCoins, nValueIn))
-                    {
-        		LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
-        		LEAVE_CRITICAL_SECTION(cs_main)
-                        return false;
-                    }
-                }
-
-
-                vector<pair<const CWalletTx*, unsigned int> >
-                    vecCoins(setCoins.begin(), setCoins.end());
-
-                vecCoins.insert(vecCoins.begin(), make_pair(&wtxIn, nTxOut));
-
-                nValueIn += nWtxinCredit;
-
-                int64_t nChange = nValueIn - nTotalValue;
-                if(nChange >= CENT)
-                {
-                    CPubKey pubkey;
-                    if(!reservekey.GetReservedKey(pubkey))
-                    {
-                      return false;
-                    }
-
-                    CScript scriptChange;
-                    scriptChange.SetDestination(pubkey.GetID());
-
-                    vector<CTxOut>::iterator position = wtxNew.vout.begin()+GetRandInt(wtxNew.vout.size());
-                    wtxNew.vout.insert(position, CTxOut(nChange, scriptChange));
-                }
-                else
-                    reservekey.ReturnKey();
-
-                BOOST_FOREACH(PAIRTYPE(const CWalletTx*, unsigned int)& coin, vecCoins)
-                {
-                    wtxNew.vin.push_back(CTxIn(coin.first->GetHash(), coin.second));
-                }
-
-                int nIn = 0;
-                BOOST_FOREACH(PAIRTYPE(const CWalletTx*, unsigned int)& coin, vecCoins)
-                {
-                    if(!SignSignature(*pwalletMain, *coin.first, wtxNew, nIn++))
-                        return false;
-                }
-
-                unsigned int nBytes = ::GetSerializeSize(*(CTransaction*)&wtxNew, SER_NETWORK);
-                if(nBytes >= MAX_BLOCK_SIZE)
-                    return false;
-
-                int64_t nPayFee = nTransactionFee *(1 +(int64_t)nBytes / 1000);
-                int64_t nMinFee = wtxNew.GetMinFee(1, GMF_SEND, nBytes);
-
-                if(nFeeRet < max(nPayFee, nMinFee))
-                {
-                    nFeeRet = max(nPayFee, nMinFee);
-                    continue;
-                }
-
-                wtxNew.AddSupportingTransactions(txdb);
-                wtxNew.fTimeReceivedIsTxTime = true;
-
-                break;
+              LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+              LEAVE_CRITICAL_SECTION(cs_main)
+              return false;
             }
+          }
+
+
+          vector<pair<const CWalletTx*, unsigned int> >
+            vecCoins(setCoins.begin(), setCoins.end());
+
+          vecCoins.insert(vecCoins.begin(), make_pair(&wtxIn, nTxOut));
+
+          nValueIn += nWtxinCredit;
+
+          int64_t nChange = nValueIn - nTotalValue;
+          if(nChange >= CENT)
+          {
+            CPubKey pubkey;
+            if(!reservekey.GetReservedKey(pubkey))
+            {
+              LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+              LEAVE_CRITICAL_SECTION(cs_main)
+              return false;
+            }
+
+            CScript scriptChange;
+            scriptChange.SetDestination(pubkey.GetID());
+
+            vector<CTxOut>::iterator position = wtxNew.vout.begin()+GetRandInt(wtxNew.vout.size());
+            wtxNew.vout.insert(position, CTxOut(nChange, scriptChange));
+          }
+          else
+            reservekey.ReturnKey();
+
+          BOOST_FOREACH(PAIRTYPE(const CWalletTx*, unsigned int)& coin, vecCoins)
+          {
+            wtxNew.vin.push_back(CTxIn(coin.first->GetHash(), coin.second));
+          }
+
+          int nIn = 0;
+          BOOST_FOREACH(PAIRTYPE(const CWalletTx*, unsigned int)& coin, vecCoins)
+          {
+            if(!SignSignature(*pwalletMain, *coin.first, wtxNew, nIn++))
+              return false;
+          }
+
+          unsigned int nBytes = ::GetSerializeSize(*(CTransaction*)&wtxNew, SER_NETWORK);
+          if(nBytes >= MAX_BLOCK_SIZE)
+            return false;
+
+          int64_t nPayFee = CENT * (1 +(int64_t)nBytes / 1024);
+          int64_t nMinFee = CENT; 
+
+          if(nFeeRet < max(nPayFee, nMinFee))
+          {
+            nFeeRet = max(nPayFee, nMinFee);
+          }
+
+          wtxNew.AddSupportingTransactions(txdb);
+          wtxNew.fTimeReceivedIsTxTime = true;
         }
         LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
     }
@@ -2056,7 +2052,7 @@ Value updateEncryptedAliasFile(const Array& params, bool fHelp)
             throw runtime_error("previous tx on this alias is not a alias tx");
         }
 
-        string strError = txRelay(scriptPubKey, MIN_AMOUNT, wtxIn, wtx, false);
+        string strError = txRelay(scriptPubKey, CTRL__, wtxIn, wtx, false);
         if(strError != "")
         {
     LEAVE_CRITICAL_SECTION(cs_main)
@@ -2185,7 +2181,7 @@ Value updateEncryptedAlias(const Array& params, bool fHelp)
             throw runtime_error("previous tx on this alias is not a alias tx");
         }
 
-        string strError = txRelay(scriptPubKey, MIN_AMOUNT, wtxIn, wtx, false);
+        string strError = txRelay(scriptPubKey, CTRL__, wtxIn, wtx, false);
         if(strError != "")
         {
     LEAVE_CRITICAL_SECTION(cs_main)
@@ -2336,7 +2332,7 @@ Value decryptAlias(const Array& params, bool fHelp)
             throw runtime_error("previous tx on this alias is not a alias tx");
         }
 
-        string strError = txRelay(scriptPubKey, MIN_AMOUNT, wtxIn, wtx, false);
+        string strError = txRelay(scriptPubKey, CTRL__, wtxIn, wtx, false);
         if(strError != "")
         {
     LEAVE_CRITICAL_SECTION(cs_main)
@@ -2524,7 +2520,7 @@ Value transferEncryptedAlias(const Array& params, bool fHelp)
             throw runtime_error("previous tx type is not alias");
           }
 
-          string strError = txRelay(scriptPubKey, MIN_AMOUNT, wtxIn, wtx, false);
+          string strError = txRelay(scriptPubKey, CTRL__, wtxIn, wtx, false);
 
           if(strError != "")
           {
@@ -2614,7 +2610,7 @@ Value transferAlias(const Array& params, bool fHelp)
 
           string locatorStr = stringFromVch(vchAlias);
           string dataStr = stringFromVch(vchValue);
-          string strError = txRelay(scriptPubKey, MIN_AMOUNT, wtxIn, wtx, false);
+          string strError = txRelay(scriptPubKey, CTRL__, wtxIn, wtx, false);
           if(strError != "")
           {
             LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
@@ -2727,7 +2723,7 @@ Value updateAliasFile(const Array& params, bool fHelp)
 
           CWalletTx& wtxIn = pwalletMain->mapWallet[wtxInHash];
           scriptPubKey += scriptPubKeyOrig;
-          string strError = txRelay(scriptPubKey, MIN_AMOUNT, wtxIn, wtx, false);
+          string strError = txRelay(scriptPubKey, CTRL__, wtxIn, wtx, false);
           if(strError != "")
           {
             LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
@@ -2824,7 +2820,7 @@ Value updateAlias(const Array& params, bool fHelp)
 
         CWalletTx& wtxIn = pwalletMain->mapWallet[wtxInHash];
         scriptPubKey += scriptPubKeyOrig;
-        string strError = txRelay(scriptPubKey, MIN_AMOUNT, wtxIn, wtx, false);
+        string strError = txRelay(scriptPubKey, CTRL__, wtxIn, wtx, false);
         if(strError != "")
         {
           LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
@@ -2957,7 +2953,7 @@ Value sendSymmetric(const Array& params, bool fHelp)
     {
         EnsureWalletIsUnlocked();
 
-       string strError = pwalletMain->SendMoney(scriptPubKey, MIN_AMOUNT, wtx, false);
+       string strError = pwalletMain->SendMoney(scriptPubKey, CTRL__, wtx, false);
 
         if(strError != "")
         {
@@ -3213,7 +3209,7 @@ Value sendPublicKey(const Array& params, bool fHelp)
     {
         EnsureWalletIsUnlocked();
 
-       string strError = pwalletMain->SendMoney(scriptPubKey, MIN_AMOUNT, wtx, false);
+       string strError = pwalletMain->SendMoney(scriptPubKey, CTRL__, wtx, false);
 
         if(strError != "")
         {
@@ -3293,7 +3289,7 @@ Value sendPlainMessage(const Array& params, bool fHelp)
     {
         EnsureWalletIsUnlocked();
 
-       string strError = pwalletMain->SendMoney(scriptPubKey, MIN_AMOUNT, wtx, false);
+       string strError = pwalletMain->SendMoney(scriptPubKey, CTRL__, wtx, false);
 
         if(strError != "")
           throw JSONRPCError(RPC_WALLET_ERROR, strError);
@@ -3413,7 +3409,7 @@ Value sendMessage(const Array& params, bool fHelp)
     {
         EnsureWalletIsUnlocked();
 
-       string strError = pwalletMain->SendMoney(scriptPubKey, MIN_AMOUNT, wtx, false);
+       string strError = pwalletMain->SendMoney(scriptPubKey, CTRL__, wtx, false);
 
         if(strError != "")
         {
@@ -3599,7 +3595,7 @@ Value registerAliasGenerate(const Array& params, bool fHelp)
     {
         EnsureWalletIsUnlocked();
 
-       string strError = pwalletMain->SendMoney(scriptPubKey, MIN_AMOUNT, wtx, false);
+       string strError = pwalletMain->SendMoney__(scriptPubKey, CTRL__, wtx, false);
 
         if(strError != "")
         {
@@ -3726,7 +3722,7 @@ Value registerAlias(const Array& params, bool fHelp)
     {
         EnsureWalletIsUnlocked();
 
-       string strError = pwalletMain->SendMoney(scriptPubKey, MIN_AMOUNT, wtx, false);
+       string strError = pwalletMain->SendMoney(scriptPubKey, CTRL__, wtx, false);
 
         if(strError != "")
         {
@@ -4135,11 +4131,11 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
     int nPrevHeight;
     int nDepth;
 
-    if(tx.vout[nOut].nValue < MIN_AMOUNT)
-      {
-        if(!fBlock )
-          return error("ConnectInputsPost: not enough locked amount");
-      }
+    if(tx.vout[nOut].nValue < MIN_TX_FEE)
+    {
+      if(!fBlock )
+        return error("ConnectInputsPost: not enough locked amount");
+    }
 
     printf("LOC %d\n", vvchArgs[0].size());
     if(vvchArgs[0].size() > MAX_LOCATOR_LENGTH)

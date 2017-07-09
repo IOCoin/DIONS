@@ -5,7 +5,7 @@
 #include "json/json_spirit.h"
 
 
-static const int64_t MIN_AMOUNT = CENT;
+static const int64_t CTRL__ = 10000;
 
 static const int MAX_LOCATOR_LENGTH = 684;
 

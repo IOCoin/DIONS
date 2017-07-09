@@ -688,7 +688,7 @@ int64_t GetAccountBalance(CWalletDB& walletdb, const string& strAccount, int nMi
     for (map<uint256, CWalletTx>::iterator it = pwalletMain->mapWallet.begin(); it != pwalletMain->mapWallet.end(); ++it)
     {
         const CWalletTx& wtx = (*it).second;
-        if (IsMinePost(wtx) || !IsFinalTx(wtx) || wtx.GetDepthInMainChain() < 0)
+        if (!IsFinalTx(wtx) || wtx.GetDepthInMainChain() < 0)
             continue;
 
         int64_t nReceived, nSent, nFee;
@@ -1188,7 +1188,10 @@ void ListTransactions(const CWalletTx& wtx, const string& strAccount, int nMinDe
             Object entry;
             entry.push_back(Pair("account", strSentAccount));
             MaybePushAddress(entry, s.first);
-            entry.push_back(Pair("category", "send"));
+            if(wtx.nVersion == CTransaction::DION_TX_VERSION)
+              entry.push_back(Pair("category", "send__"));
+            else
+              entry.push_back(Pair("category", "send"));
             entry.push_back(Pair("amount", ValueFromAmount(-s.second)));
             entry.push_back(Pair("fee", ValueFromAmount(-nFee)));
             if (fLong)
@@ -1222,6 +1225,9 @@ void ListTransactions(const CWalletTx& wtx, const string& strAccount, int nMinDe
                 }
                 else
                 {
+                  if(wtx.nVersion == CTransaction::DION_TX_VERSION)
+                    entry.push_back(Pair("category", "receive__"));
+                  else
                     entry.push_back(Pair("category", "receive"));
                 }
                 if (!wtx.IsCoinStake())
