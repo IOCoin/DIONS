@@ -21,6 +21,8 @@ static unsigned int GetStakeSplitAge() { return IsProtocolV2(nBestHeight) ? (10 
 static int64_t GetStakeCombineThreshold() { return IsProtocolV2(nBestHeight) ? (50 * COIN) : (1000 * COIN); }
 
 bool isAliasTx(const CWalletTx* tx);
+extern CScript aliasStrip(const CScript& scriptIn);
+extern bool aliasScript(const CScript& script, int& op, vector<vector<unsigned char> > &vvch);
 //////////////////////////////////////////////////////////////////////////////
 //
 // mapWallet
@@ -796,7 +798,20 @@ void CWalletTx::GetAmounts(list<pair<CTxDestination, int64_t> >& listReceived,
 
       // In either case, we need to get the destination address
       CTxDestination address;
-      if (!ExtractDestination(txout.scriptPubKey, address))
+      
+      std::vector<vchType> vvchPrevArgsRead;
+      int prevOp;
+      if(aliasScript(txout.scriptPubKey, prevOp, vvchPrevArgsRead))
+      {
+        const CScript& s1_ = aliasStrip(txout.scriptPubKey);
+        if (!ExtractDestination(s1_, address))
+        {
+	  printf("CWalletTx::GetAmounts: Unknown transaction type found, txid %s\n",
+		 this->GetHash().ToString().c_str());
+	  address = CNoDestination();
+        }
+      }
+      else if (!ExtractDestination(txout.scriptPubKey, address))
       {
 	  printf("CWalletTx::GetAmounts: Unknown transaction type found, txid %s\n",
 		 this->GetHash().ToString().c_str());
