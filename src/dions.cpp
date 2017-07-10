@@ -166,82 +166,88 @@ bool txPost(const vector<pair<CScript, int64_t> >& vecSend, const CWalletTx& wtx
         ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
         {
           nFeeRet = CENT;
-          wtxNew.vin.clear();
-          wtxNew.vout.clear();
-          wtxNew.fFromMe = true;
-
-          int64_t nTotalValue = nValue + nFeeRet;
-          BOOST_FOREACH(const PAIRTYPE(CScript, int64_t)& s, vecSend)
-            wtxNew.vout.push_back(CTxOut(s.second, s.first));
-
-          int64_t nWtxinCredit = wtxIn.vout[nTxOut].nValue;
-
-          set<pair<const CWalletTx*, unsigned int> > setCoins;
-          int64_t nValueIn = 0;
-          if(nTotalValue - nWtxinCredit > 0)
+          for(;;)
           {
-            if(!pwalletMain->SelectCoins(nTotalValue - nWtxinCredit, wtxNew.nTime, setCoins, nValueIn))
+            wtxNew.vin.clear();
+            wtxNew.vout.clear();
+            wtxNew.fFromMe = true;
+
+            int64_t nTotalValue = nValue + nFeeRet;
+            BOOST_FOREACH(const PAIRTYPE(CScript, int64_t)& s, vecSend)
+              wtxNew.vout.push_back(CTxOut(s.second, s.first));
+
+            int64_t nWtxinCredit = wtxIn.vout[nTxOut].nValue;
+
+            set<pair<const CWalletTx*, unsigned int> > setCoins;
+            int64_t nValueIn = 0;
+            if(nTotalValue - nWtxinCredit > 0)
             {
-              LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
-              LEAVE_CRITICAL_SECTION(cs_main)
-              return false;
-            }
-          }
-
-
-          vector<pair<const CWalletTx*, unsigned int> >
-            vecCoins(setCoins.begin(), setCoins.end());
-
-          vecCoins.insert(vecCoins.begin(), make_pair(&wtxIn, nTxOut));
-
-          nValueIn += nWtxinCredit;
-
-          int64_t nChange = nValueIn - nTotalValue;
-          if(nChange >= CENT)
-          {
-            CPubKey pubkey;
-            if(!reservekey.GetReservedKey(pubkey))
-            {
-              LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
-              LEAVE_CRITICAL_SECTION(cs_main)
-              return false;
+              if(!pwalletMain->SelectCoins(nTotalValue - nWtxinCredit, wtxNew.nTime, setCoins, nValueIn))
+              {
+                LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+                LEAVE_CRITICAL_SECTION(cs_main)
+                return false;
+              }
             }
 
-            CScript scriptChange;
-            scriptChange.SetDestination(pubkey.GetID());
 
-            vector<CTxOut>::iterator position = wtxNew.vout.begin()+GetRandInt(wtxNew.vout.size());
-            wtxNew.vout.insert(position, CTxOut(nChange, scriptChange));
-          }
-          else
-            reservekey.ReturnKey();
+            vector<pair<const CWalletTx*, unsigned int> >
+              vecCoins(setCoins.begin(), setCoins.end());
 
-          BOOST_FOREACH(PAIRTYPE(const CWalletTx*, unsigned int)& coin, vecCoins)
-          {
-            wtxNew.vin.push_back(CTxIn(coin.first->GetHash(), coin.second));
-          }
+            vecCoins.insert(vecCoins.begin(), make_pair(&wtxIn, nTxOut));
 
-          int nIn = 0;
-          BOOST_FOREACH(PAIRTYPE(const CWalletTx*, unsigned int)& coin, vecCoins)
-          {
-            if(!SignSignature(*pwalletMain, *coin.first, wtxNew, nIn++))
+            nValueIn += nWtxinCredit;
+
+            int64_t nChange = nValueIn - nTotalValue;
+            if(nChange >= CENT)
+            {
+              CPubKey pubkey;
+              if(!reservekey.GetReservedKey(pubkey))
+              {
+                LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+                LEAVE_CRITICAL_SECTION(cs_main)
+                return false;
+              }
+
+              CScript scriptChange;
+              scriptChange.SetDestination(pubkey.GetID());
+
+              vector<CTxOut>::iterator position = wtxNew.vout.begin()+GetRandInt(wtxNew.vout.size());
+              wtxNew.vout.insert(position, CTxOut(nChange, scriptChange));
+            }
+            else
+              reservekey.ReturnKey();
+  
+            BOOST_FOREACH(PAIRTYPE(const CWalletTx*, unsigned int)& coin, vecCoins)
+            {
+              wtxNew.vin.push_back(CTxIn(coin.first->GetHash(), coin.second));
+            }
+
+            int nIn = 0;
+            BOOST_FOREACH(PAIRTYPE(const CWalletTx*, unsigned int)& coin, vecCoins)
+            {
+              if(!SignSignature(*pwalletMain, *coin.first, wtxNew, nIn++))
+                return false;
+            }
+
+            unsigned int nBytes = ::GetSerializeSize(*(CTransaction*)&wtxNew, SER_NETWORK);
+
+            if(nBytes >= MAX_BLOCK_SIZE)
               return false;
+
+            int64_t nPayFee = CENT * (1 +(int64_t)nBytes / 1024);
+            int64_t nMinFee = CENT; 
+
+            if(nFeeRet < max(nPayFee, nMinFee))
+            {
+              nFeeRet = max(nPayFee, nMinFee);
+              continue;
+            }
+
+            wtxNew.AddSupportingTransactions(txdb);
+            wtxNew.fTimeReceivedIsTxTime = true;
+            break;
           }
-
-          unsigned int nBytes = ::GetSerializeSize(*(CTransaction*)&wtxNew, SER_NETWORK);
-          if(nBytes >= MAX_BLOCK_SIZE)
-            return false;
-
-          int64_t nPayFee = CENT * (1 +(int64_t)nBytes / 1024);
-          int64_t nMinFee = CENT; 
-
-          if(nFeeRet < max(nPayFee, nMinFee))
-          {
-            nFeeRet = max(nPayFee, nMinFee);
-          }
-
-          wtxNew.AddSupportingTransactions(txdb);
-          wtxNew.fTimeReceivedIsTxTime = true;
         }
         LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
     }
