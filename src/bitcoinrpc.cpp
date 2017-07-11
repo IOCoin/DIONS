@@ -313,6 +313,7 @@ static const CRPCCommand vRPCCommands[] =
     { "updateEncryptedAliasFile",     &updateEncryptedAliasFile,     false,  false },
     { "transferAlias",     &transferAlias,     false,  false },
     { "transferEncryptedAlias",     &transferEncryptedAlias,     false,  false },
+    { "transientStatus__",     &transientStatus__,     false,  false },
     { "decryptedMessageList",     &decryptedMessageList,     false,  false },
     { "plainTextMessageList",     &plainTextMessageList,     false,  false },
     { "aliasOut",     &aliasOut,     false,  false },

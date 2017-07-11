@@ -257,6 +257,24 @@ bool txPost(const vector<pair<CScript, int64_t> >& vecSend, const CWalletTx& wtx
 
     return true;
 }
+bool txRelayPre__(const CScript& scriptPubKey, const CWalletTx& wtxIn, CWalletTx& wtxNew, int64_t& t, string e)
+{
+    int nTxOut = aliasOutIndex(wtxIn);
+    CReserveKey reservekey(pwalletMain);
+    vector< pair<CScript, int64_t> > vecSend;
+    vecSend.push_back(make_pair(scriptPubKey, CTRL__));
+
+    if(!txPost(vecSend, wtxIn, nTxOut, wtxNew, reservekey, t))
+    {
+        if(CTRL__ + t > pwalletMain->GetBalance())
+            e = strprintf(_("Error: This transaction requires a transaction fee of at least %s because of its amount, complexity, or use of recently received funds "), FormatMoney(t).c_str());
+        else
+            e = _("Error: Transaction creation failed  ");
+        return false;
+    }
+
+    return true;
+}
 string txRelay(const CScript& scriptPubKey, int64_t nValue, const CWalletTx& wtxIn, CWalletTx& wtxNew, bool fAskFee)
 {
     int nTxOut = aliasOutIndex(wtxIn);
@@ -2628,6 +2646,128 @@ Value transferAlias(const Array& params, bool fHelp)
     }
     LEAVE_CRITICAL_SECTION(cs_main)
     return wtx.GetHash().GetHex();
+}
+Value transientStatus__(const Array& params, bool fHelp)
+{
+    if(fHelp || params.size() < 2 || params.size() > 3)
+        throw runtime_error(
+                "transientStatus__ <locator> <file>"
+                + HelpRequiringPassphrase());
+    Object ret;
+    string locatorStr = params[0].get_str();
+
+    std::transform(locatorStr.begin(), locatorStr.end(), locatorStr.begin(), ::tolower);
+    const vchType vchAlias = vchFromValue(locatorStr);
+    const char* locatorFile = (params[1].get_str()).c_str();
+    fs::path p = locatorFile;
+    if(!fs::exists(p))
+    {
+      ret.push_back(Pair("error", "Locator file does not exist"));
+      return ret;
+    }
+
+    ifstream file(locatorFile, ios_base::in | ios_base::binary);
+    filtering_streambuf<input> in;
+    in.push(gzip_compressor());
+    in.push(file);
+
+    stringstream ss;
+    boost::iostreams::copy(in, ss);
+
+    string s = ss.str();
+    if(s.size() > MAX_XUNIT_LENGTH) 
+    {
+      ret.push_back(Pair("error", "Locator file compressed size too large"));
+      return ret;
+    }
+   
+    const vchType vchValue = vchFromValue(s);
+
+    string valueStr = stringFromVch(vchValue);
+
+    CWalletTx wtx;
+    wtx.nVersion = CTransaction::DION_TX_VERSION;
+    CScript scriptPubKeyOrig;
+
+    CScript scriptPubKey;
+    scriptPubKey << OP_ALIAS_RELAY << vchAlias << vchValue << OP_2DROP << OP_DROP;
+
+    ENTER_CRITICAL_SECTION(cs_main)
+    {
+      ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
+      {
+          if(mapState.count(vchAlias) && mapState[vchAlias].size())
+          {
+            LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+            LEAVE_CRITICAL_SECTION(cs_main)
+            ret.push_back(Pair("error", "pending ops on that alias"));
+            return ret;
+          }
+
+          EnsureWalletIsUnlocked();
+
+          LocatorNodeDB aliasCacheDB("r");
+          CTransaction tx;
+          if(!aliasTx(aliasCacheDB, vchAlias, tx))
+          {
+            LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+            LEAVE_CRITICAL_SECTION(cs_main)
+            ret.push_back(Pair("error", "could not find that alias"));
+            return ret;
+          }
+
+          if(params.size() == 2)
+          {
+            string strAddress = "";
+            aliasAddress(tx, strAddress);
+            if(strAddress == "")
+            {
+              ret.push_back(Pair("error", "no associated address"));
+              return ret;
+            }
+
+            uint160 hash160;
+            bool isValid = AddressToHash160(strAddress, hash160);
+            if(!isValid)
+            {
+              ret.push_back(Pair("error", "invalid dions address"));
+              return ret;
+            }
+
+            scriptPubKeyOrig.SetBitcoinAddress(strAddress);
+          }
+    
+          uint256 wtxInHash = tx.GetHash();
+
+          if(!pwalletMain->mapWallet.count(wtxInHash))
+          {
+            error("updateAlias() : this coin is not in your wallet %s",
+                    wtxInHash.GetHex().c_str());
+            LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+            LEAVE_CRITICAL_SECTION(cs_main)
+              throw runtime_error("this coin is not in your wallet");
+          }
+
+          CWalletTx& wtxIn = pwalletMain->mapWallet[wtxInHash];
+          scriptPubKey += scriptPubKeyOrig;
+          int64_t t;
+          string strError;
+          bool s = txRelayPre__(scriptPubKey, wtxIn, wtx, t, strError);
+          if(!s)
+          {
+            LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+            LEAVE_CRITICAL_SECTION(cs_main)
+            throw JSONRPCError(RPC_WALLET_ERROR, strError);
+         }
+        ret.push_back(Pair("status", "ok"));
+        ret.push_back(Pair("fee", t));
+      }
+      LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    }
+    LEAVE_CRITICAL_SECTION(cs_main)
+
+
+    return ret;
 }
 Value updateAliasFile(const Array& params, bool fHelp)
 {
