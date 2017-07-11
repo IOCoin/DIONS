@@ -2765,7 +2765,7 @@ Value transientStatus__(const Array& params, bool fHelp)
             ret.push_back(Pair("message", strError));
          }
         ret.push_back(Pair("status", "ok"));
-        ret.push_back(Pair("fee", t));
+        ret.push_back(Pair("fee", ValueFromAmount(t)));
       }
       LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
     }
