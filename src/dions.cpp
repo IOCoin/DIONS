@@ -2662,7 +2662,8 @@ Value transientStatus__(const Array& params, bool fHelp)
     fs::path p = locatorFile;
     if(!fs::exists(p))
     {
-      ret.push_back(Pair("error", "Locator file does not exist"));
+      ret.push_back(Pair("status", "error"));
+      ret.push_back(Pair("message", "Locator file does not exist"));
       return ret;
     }
 
@@ -2677,7 +2678,8 @@ Value transientStatus__(const Array& params, bool fHelp)
     string s = ss.str();
     if(s.size() > MAX_XUNIT_LENGTH) 
     {
-      ret.push_back(Pair("error", "Locator file compressed size too large"));
+      ret.push_back(Pair("status", "error"));
+      ret.push_back(Pair("message", "Locator file compressed size too large"));
       return ret;
     }
    
@@ -2700,7 +2702,8 @@ Value transientStatus__(const Array& params, bool fHelp)
           {
             LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
             LEAVE_CRITICAL_SECTION(cs_main)
-            ret.push_back(Pair("error", "pending ops on that alias"));
+            ret.push_back(Pair("status", "error"));
+            ret.push_back(Pair("message", "pending ops on that alias"));
             return ret;
           }
 
@@ -2712,7 +2715,8 @@ Value transientStatus__(const Array& params, bool fHelp)
           {
             LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
             LEAVE_CRITICAL_SECTION(cs_main)
-            ret.push_back(Pair("error", "could not find that alias"));
+            ret.push_back(Pair("status", "error"));
+            ret.push_back(Pair("message", "could not find that alias"));
             return ret;
           }
 
@@ -2722,7 +2726,8 @@ Value transientStatus__(const Array& params, bool fHelp)
             aliasAddress(tx, strAddress);
             if(strAddress == "")
             {
-              ret.push_back(Pair("error", "no associated address"));
+              ret.push_back(Pair("status", "error"));
+              ret.push_back(Pair("message", "no associated address"));
               return ret;
             }
 
@@ -2730,7 +2735,8 @@ Value transientStatus__(const Array& params, bool fHelp)
             bool isValid = AddressToHash160(strAddress, hash160);
             if(!isValid)
             {
-              ret.push_back(Pair("error", "invalid dions address"));
+              ret.push_back(Pair("status", "error"));
+              ret.push_back(Pair("message", "invalid dions address"));
               return ret;
             }
 
@@ -2741,11 +2747,9 @@ Value transientStatus__(const Array& params, bool fHelp)
 
           if(!pwalletMain->mapWallet.count(wtxInHash))
           {
-            error("updateAlias() : this coin is not in your wallet %s",
-                    wtxInHash.GetHex().c_str());
-            LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
-            LEAVE_CRITICAL_SECTION(cs_main)
-              throw runtime_error("this coin is not in your wallet");
+              ret.push_back(Pair("status", "error"));
+              ret.push_back(Pair("message", "coin is not in your wallet"));
+              return ret;
           }
 
           CWalletTx& wtxIn = pwalletMain->mapWallet[wtxInHash];
@@ -2757,7 +2761,8 @@ Value transientStatus__(const Array& params, bool fHelp)
           {
             LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
             LEAVE_CRITICAL_SECTION(cs_main)
-            throw JSONRPCError(RPC_WALLET_ERROR, strError);
+            ret.push_back(Pair("status", "error"));
+            ret.push_back(Pair("message", strError));
          }
         ret.push_back(Pair("status", "ok"));
         ret.push_back(Pair("fee", t));
@@ -2765,7 +2770,6 @@ Value transientStatus__(const Array& params, bool fHelp)
       LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
     }
     LEAVE_CRITICAL_SECTION(cs_main)
-
 
     return ret;
 }
