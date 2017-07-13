@@ -227,13 +227,21 @@ bool txPost(const vector<pair<CScript, int64_t> >& vecSend, const CWalletTx& wtx
             BOOST_FOREACH(PAIRTYPE(const CWalletTx*, unsigned int)& coin, vecCoins)
             {
               if(!SignSignature(*pwalletMain, *coin.first, wtxNew, nIn++))
+              {
+                LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+                LEAVE_CRITICAL_SECTION(cs_main)
                 return false;
+              }
             }
 
             unsigned int nBytes = ::GetSerializeSize(*(CTransaction*)&wtxNew, SER_NETWORK);
 
             if(nBytes >= MAX_BLOCK_SIZE)
+            {
+                LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+                LEAVE_CRITICAL_SECTION(cs_main)
               return false;
+            }
 
             int64_t nPayFee = CENT * (1 +(int64_t)nBytes / 1024);
             int64_t nMinFee = CENT; 
@@ -257,7 +265,7 @@ bool txPost(const vector<pair<CScript, int64_t> >& vecSend, const CWalletTx& wtx
 
     return true;
 }
-bool txRelayPre__(const CScript& scriptPubKey, const CWalletTx& wtxIn, CWalletTx& wtxNew, int64_t& t, string e)
+bool txRelayPre__(const CScript& scriptPubKey, const CWalletTx& wtxIn, CWalletTx& wtxNew, int64_t& t, string& e)
 {
     int nTxOut = aliasOutIndex(wtxIn);
     CReserveKey reservekey(pwalletMain);
