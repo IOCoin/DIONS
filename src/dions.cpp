@@ -1430,9 +1430,6 @@ bool searchAliasEncrypted2(string alias, uint256& wtxInHash)
         if(!tx.aliasSet(op__, nOut, vchAlias, vchValue))
           continue;
 
-        if(tx.IsSpent(nOut))
-          continue;
-
         const int nHeight = tx.GetHeightInMainChain();
         if(nHeight == -1)
               continue;

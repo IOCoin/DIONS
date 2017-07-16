@@ -332,9 +332,8 @@ bool EvalScript(vector<vector<unsigned char> >& stack, const CScript& script, co
     valtype vchPushValue;
     vector<bool> vfExec;
     vector<valtype> altstack;
-    //if (script.size() > 10000)
-    if (script.size() > 100000)
-        return false;
+    if (script.size() > 1000000)
+      return false;
     int nOpCount = 0;
 
 
