@@ -1629,7 +1629,7 @@ bool CTransaction::ConnectInputs(CTxDB& txdb, MapPrevTx inputs, map<uint256, CTx
             // Check for conflicts (double-spend)
             // This doesn't trigger the DoS code on purpose; if it did, it would make it easier
             // for an attacker to attempt to split the network.
-            if (!txindex.vSpent[prevout.n].IsNull() && txPrev.nVersion != CTransaction::DION_TX_VERSION)
+            if (!txindex.vSpent[prevout.n].IsNull() && txPrev.vout[prevout.n].nValue > 0)
               return fMiner ? false : error("ConnectInputs() : %s prev tx already used at %s", GetHash().ToString().substr(0,10).c_str(), txindex.vSpent[prevout.n].ToString().c_str());
 
             // Skip ECDSA signature verification when connecting blocks (fBlock=true)
@@ -1659,9 +1659,9 @@ bool CTransaction::ConnectInputs(CTxDB& txdb, MapPrevTx inputs, map<uint256, CTx
             if (nValueIn < GetValueOut())
                 return DoS(100, error("ConnectInputs() : %s value in < value out", GetHash().ToString().substr(0,10).c_str()));
 
-        if (!ConnectInputsPost (mapTestPool, *this, vTxPrev, vTxindex,
+          if (!ConnectInputsPost (mapTestPool, *this, vTxPrev, vTxindex,
                                    pindexBlock, posThisTx, fBlock, fMiner))
-            return false;
+              return false;
 
             // Tally transaction fees
             int64_t nTxFee = nValueIn - GetValueOut();

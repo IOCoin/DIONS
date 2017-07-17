@@ -176,7 +176,7 @@ bool txPost(const vector<pair<CScript, int64_t> >& vecSend, const CWalletTx& wtx
             BOOST_FOREACH(const PAIRTYPE(CScript, int64_t)& s, vecSend)
               wtxNew.vout.push_back(CTxOut(s.second, s.first));
 
-            int64_t nWtxinCredit = wtxIn.vout[nTxOut].nValue;
+            int64_t nWtxinCredit = 0;
 
             set<pair<const CWalletTx*, unsigned int> > setCoins;
             int64_t nValueIn = 0;
@@ -194,7 +194,7 @@ bool txPost(const vector<pair<CScript, int64_t> >& vecSend, const CWalletTx& wtx
             vector<pair<const CWalletTx*, unsigned int> >
               vecCoins(setCoins.begin(), setCoins.end());
 
-            vecCoins.insert(vecCoins.begin(), make_pair(&wtxIn, nTxOut));
+              vecCoins.insert(vecCoins.begin(), make_pair(&wtxIn, nTxOut));
 
             nValueIn += nWtxinCredit;
 
@@ -913,9 +913,6 @@ Value aliasOut(const Array& params, bool fHelp)
           {
             value = stringFromVch(vchValue);
             found=true;
-            //LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
-            //LEAVE_CRITICAL_SECTION(cs_main)
-            //break;
           }
         }
         else
@@ -934,9 +931,6 @@ Value aliasOut(const Array& params, bool fHelp)
           {
             value = stringFromVch(vchValue);
             found = true;
-            //LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
-            //LEAVE_CRITICAL_SECTION(cs_main)
-            //break;
           }
         }
       }
@@ -2364,7 +2358,8 @@ Value updateEncryptedAlias(const Array& params, bool fHelp)
         {
             vector<vector<unsigned char> > vvch;
             int op;
-            if(aliasScript(out.scriptPubKey, op, vvch)) {
+            if(aliasScript(out.scriptPubKey, op, vvch)) 
+            {
                 if(op != OP_ALIAS_ENCRYPTED)
                   throw runtime_error("previous transaction was not an OP_ALIAS_ENCRYPTED");
 
@@ -4447,6 +4442,7 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
       {
         if(found)
           return error("ConnectInputsPost() : multiple previous alias transactions");
+
         found = true;
         nInput = i;
 
@@ -4486,12 +4482,6 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
 
     int nPrevHeight;
     int nDepth;
-
-    if(tx.vout[nOut].nValue < MIN_TX_FEE)
-    {
-      if(!fBlock )
-        return error("ConnectInputsPost: not enough locked amount");
-    }
 
     printf("LOC %d\n", vvchArgs[0].size());
     if(vvchArgs[0].size() > MAX_LOCATOR_LENGTH)
@@ -4697,7 +4687,10 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
         case OP_ALIAS_SET:
         {
             if(!found || prevOp != OP_ALIAS_ENCRYPTED)
+            {
+              printf("  OP_ALIAS_ENCRYPTED %d\n", prevOp);
                 return error("ConnectInputsPost() : decryptAlias tx without previous registerAlias tx");
+            }
 
             CScript script;
             if(vvchPrevArgs.size() != 0)

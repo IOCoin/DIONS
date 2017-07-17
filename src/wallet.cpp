@@ -1201,7 +1201,7 @@ void CWallet::AvailableCoins(vector<COutput>& vCoins, bool fOnlyConfirmed, const
 
 	  for (unsigned int i = 0; i < pcoin->vout.size(); i++)
 	  {
-	      if (!(pcoin->IsSpent(i)) && IsMine(pcoin->vout[i]) && pcoin->vout[i].nValue >= nMinimumInputValue &&
+	      if (!(pcoin->IsSpent(i)) && IsMine(pcoin->vout[i]) && pcoin->vout[i].nValue > nMinimumInputValue &&
 	      (!coinControl || !coinControl->HasSelected() || coinControl->IsSelected((*it).first, i)))
 	      {
     
@@ -1242,7 +1242,7 @@ void CWallet::AvailableCoinsForStaking(vector<COutput>& vCoins, unsigned int nSp
 
 	  for (unsigned int i = 0; i < pcoin->vout.size(); i++)
 	  {
-	      if (!(pcoin->IsSpent(i)) && IsMine(pcoin->vout[i]) && pcoin->vout[i].nValue >= nMinimumInputValue)
+	      if (!(pcoin->IsSpent(i)) && IsMine(pcoin->vout[i]) && pcoin->vout[i].nValue > nMinimumInputValue)
 	      {
 		  vCoins.push_back(COutput(pcoin, i, nDepth));
 	      }
@@ -2166,11 +2166,10 @@ string CWallet::SendMoney__(CScript scriptPubKey, int64_t nValue, CWalletTx& wtx
       printf("SendMoney() : %s", strError.c_str());
       return strError;
   }
-  if (!CreateTransaction__(scriptPubKey, MIN_TX_FEE, wtxNew, reservekey, nFeeRequired, strTxInfo))
+  if (!CreateTransaction__(scriptPubKey, nValue, wtxNew, reservekey, nFeeRequired, strTxInfo))
   {
       string strError;
-      //if (nValue + nFeeRequired > GetBalance())
-      if (MIN_TX_FEE + nFeeRequired > GetBalance())
+      if (nValue + nFeeRequired > GetBalance())
 	  strError = strprintf(_("Error: This transaction requires a transaction fee of at least %s because of its amount, complexity, or use of recently received funds  "), FormatMoney(nFeeRequired).c_str());
       else
 	  strError = _("Error: Transaction creation failed  ");

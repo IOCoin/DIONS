@@ -252,7 +252,7 @@ public:
     {
         BOOST_FOREACH(const CTxOut& txout, tx.vout)
         {
-            if (IsMine(txout) && txout.nValue >= nMinimumInputValue)
+            if (IsMine(txout) && txout.nValue > nMinimumInputValue)
                 return true;
         }
        
@@ -590,8 +590,17 @@ public:
 
     void MarkSpent(unsigned int nOut)
     {
+
         if (nOut >= vout.size())
             throw std::runtime_error("CWalletTx::MarkSpent() : nOut out of range");
+        if(this->nVersion == CTransaction::DION_TX_VERSION)
+        {
+          if(this->vout[nOut].nValue == 0)
+          {
+            return;
+          }
+        }
+
         vfSpent.resize(vout.size());
         if (!vfSpent[nOut])
         {
