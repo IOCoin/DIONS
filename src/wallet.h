@@ -593,14 +593,6 @@ public:
 
         if (nOut >= vout.size())
             throw std::runtime_error("CWalletTx::MarkSpent() : nOut out of range");
-        if(this->nVersion == CTransaction::DION_TX_VERSION)
-        {
-          if(this->vout[nOut].nValue == 0)
-          {
-            return;
-          }
-        }
-
         vfSpent.resize(vout.size());
         if (!vfSpent[nOut])
         {
