@@ -58,14 +58,11 @@ bool getImportedPubKey(string senderAddress, string recipientAddress, vchType& r
 bool getImportedPubKey(string recipientAddress, vchType& recipientPubKeyVch);
 bool internalReference__(string recipientAddress, vchType& recipientPubKeyVch);
 
-
-
 vchType vchFromValue(const Value& value)
 {
   const std::string str = value.get_str();
   return vchFromString(str);
 }
-
 
 vchType vchFromString(const std::string& str)
 {
@@ -3307,7 +3304,7 @@ Value sendSymmetric(const Array& params, bool fHelp)
     {
         EnsureWalletIsUnlocked();
 
-       string strError = pwalletMain->SendMoney(scriptPubKey, CTRL__, wtx, false);
+       string strError = pwalletMain->SendMoney__(scriptPubKey, CTRL__, wtx, false);
 
         if(strError != "")
         {
@@ -3563,7 +3560,7 @@ Value sendPublicKey(const Array& params, bool fHelp)
     {
         EnsureWalletIsUnlocked();
 
-       string strError = pwalletMain->SendMoney(scriptPubKey, CTRL__, wtx, false);
+       string strError = pwalletMain->SendMoney__(scriptPubKey, CTRL__, wtx, false);
 
         if(strError != "")
         {
@@ -3643,7 +3640,7 @@ Value sendPlainMessage(const Array& params, bool fHelp)
     {
         EnsureWalletIsUnlocked();
 
-       string strError = pwalletMain->SendMoney(scriptPubKey, CTRL__, wtx, false);
+       string strError = pwalletMain->SendMoney__(scriptPubKey, CTRL__, wtx, false);
 
         if(strError != "")
           throw JSONRPCError(RPC_WALLET_ERROR, strError);
@@ -3763,7 +3760,7 @@ Value sendMessage(const Array& params, bool fHelp)
     {
         EnsureWalletIsUnlocked();
 
-       string strError = pwalletMain->SendMoney(scriptPubKey, CTRL__, wtx, false);
+       string strError = pwalletMain->SendMoney__(scriptPubKey, CTRL__, wtx, false);
 
         if(strError != "")
         {
@@ -4076,7 +4073,7 @@ Value registerAlias(const Array& params, bool fHelp)
     {
         EnsureWalletIsUnlocked();
 
-       string strError = pwalletMain->SendMoney(scriptPubKey, CTRL__, wtx, false);
+       string strError = pwalletMain->SendMoney__(scriptPubKey, CTRL__, wtx, false);
 
         if(strError != "")
         {

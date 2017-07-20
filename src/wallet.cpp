@@ -1530,7 +1530,6 @@ bool CWallet::CreateTransaction__(const vector<pair<CScript, int64_t> >& vecSend
       // txdb must be opened before the mapWallet lock
       CTxDB txdb("r");
       {
-	  //nFeeRet = nTransactionFee;
 	  nFeeRet = CENT;
 	  while (true)
 	  {
