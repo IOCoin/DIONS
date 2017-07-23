@@ -2782,11 +2782,31 @@ Value transferAlias(const Array& params, bool fHelp)
     CScript scriptPubKeyOrig;
 
     string strAddress = params[1].get_str();
-    uint160 hash160;
-    bool isValid = AddressToHash160(strAddress, hash160);
-    if(!isValid)
-      throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid dions address");
-    scriptPubKeyOrig.SetBitcoinAddress(strAddress);
+    CBitcoinAddress address(strAddress);
+    if(!address.IsValid())
+    {
+      vector<AliasIndex> vtxPos;
+      LocatorNodeDB ln1Db("r");
+      vchType vchAlias = vchFromString(strAddress);
+      if (ln1Db.lKey (vchAlias))
+      {
+        printf("  name exists\n");
+        if (!ln1Db.lGet (vchAlias, vtxPos))
+          return error("aliasHeight() : failed to read from name DB");
+        if (vtxPos.empty ())
+          return -1;
+
+        AliasIndex& txPos = vtxPos.back ();
+        address.SetString(txPos.vAddress); 
+      }
+      else
+      {
+          throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid I/OCoin address or unknown alias");
+      }
+    }
+
+
+    scriptPubKeyOrig.SetBitcoinAddress(address.ToString());
 
     CScript scriptPubKey;
 
