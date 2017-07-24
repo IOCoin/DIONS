@@ -1511,7 +1511,9 @@ bool searchAliasEncrypted(string alias, uint256& wtxInHash)
 
           CKeyID keyID;
           if(!r.GetKeyID(keyID))
-            throw JSONRPCError(RPC_TYPE_ERROR, "Address does not refer to key");
+          {
+            continue;
+          }
 
           CKey key;
           if(!pwalletMain->GetKey(keyID, key))
