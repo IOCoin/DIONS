@@ -682,8 +682,9 @@ Value decryptedMessageList(const Array& params, bool fHelp)
             vchType vchSender, vchRecipient, vchEncryptedMessage, ivVch, vchSig;
             int nOut;
             if(!tx.GetEncryptedMessageUpdate(nOut, vchSender, vchRecipient, vchEncryptedMessage, ivVch, vchSig))
+            {
               continue;
-
+            }
 
             const int nHeight = tx.GetHeightInMainChain();
 
@@ -708,7 +709,6 @@ Value decryptedMessageList(const Array& params, bool fHelp)
             aliasObj.push_back(Pair("time", t));
 
 
-
             string rsaPrivKey;
             string recipient = stringFromVch(vchRecipient);
 
@@ -720,12 +720,17 @@ Value decryptedMessageList(const Array& params, bool fHelp)
               LEAVE_CRITICAL_SECTION(cs_main)
               throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
             }
+            
 
             CKeyID keyID;
             if(!r.GetKeyID(keyID))
               throw JSONRPCError(RPC_TYPE_ERROR, "Address does not refer to key");
             CKey key;
-            pwalletMain->GetKey(keyID, key);
+            if(!pwalletMain->GetKey(keyID, key))
+            {
+              continue;
+            }
+
             CPubKey pubKey = key.GetPubKey();
 
             string aesBase64Plain;
