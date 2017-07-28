@@ -1627,6 +1627,7 @@ bool IsMine(const CKeyStore &keystore, const CScript& scriptPubKey)
     else
         rawScript = scriptPubKey;
 
+
     vector<valtype> vSolutions;
     txnouttype whichType;
     if (!Solver(rawScript, whichType, vSolutions))

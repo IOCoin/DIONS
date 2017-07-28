@@ -10,6 +10,7 @@
 #include <boost/signals2/signal.hpp>
 
 class CScript;
+class CBitcoinAddress;
 
 /** A virtual base class for key stores */
 class CKeyStore
@@ -156,6 +157,7 @@ public:
             LOCK(cs_KeyStore);
             if (!IsCrypted())
                 return CBasicKeyStore::HaveKey(address);
+
             return mapCryptedKeys.count(address) > 0;
         }
         return false;
