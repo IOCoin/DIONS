@@ -23,6 +23,7 @@ void EnsureWalletIsUnlocked();
 
 namespace bt = boost::posix_time;
 
+extern int checkAddress(string addr, CBitcoinAddress& a);
 // Extended DecodeDumpTime implementation, see this page for details:
 // http://stackoverflow.com/questions/3786201/parsing-of-date-time-from-string-boost
 const std::locale formats[] = {
@@ -252,8 +253,11 @@ Value dumpprivkey(const Array& params, bool fHelp)
 
     string strAddress = params[0].get_str();
     CBitcoinAddress address;
-    if (!address.SetString(strAddress))
-        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid I/OCoin address");
+    if(checkAddress(strAddress, address) != 0)
+    {
+      throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Failed to resolve locator");
+    }
+
     if (fWalletUnlockStakingOnly)
         throw JSONRPCError(RPC_WALLET_UNLOCK_NEEDED, "Wallet is unlocked for staking only.");
     CKeyID keyID;
