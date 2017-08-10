@@ -3885,13 +3885,21 @@ Value registerAliasGenerate(const Array& params, bool fHelp)
       throw JSONRPCError(RPC_WALLET_ERROR, err);
     }
 
+    vector<Value> res;
     LocatorNodeDB aliasCacheDB("r");
     CTransaction tx;
     if(aliasTx(aliasCacheDB, vchFromString(locatorStr), tx))
     {
-      string err = "Attempt to register alias : " + locatorStr + ", this alias is already active with tx " + tx.GetHash().GetHex();
+      if(IsMinePost(tx))
+      {
+        string err = "Attempt to register alias : " + locatorStr + ", this alias is already active with tx " + tx.GetHash().GetHex();
 
-      throw JSONRPCError(RPC_WALLET_ERROR, err);
+        throw JSONRPCError(RPC_WALLET_ERROR, err);
+      }
+      else
+      {
+        res.push_back("commit");
+      }
     }
 
     const uint64_t rand = GetRand((uint64_t)-1);
@@ -3984,7 +3992,6 @@ Value registerAliasGenerate(const Array& params, bool fHelp)
     }
     LEAVE_CRITICAL_SECTION(cs_main)
 
-    vector<Value> res;
     res.push_back(wtx.GetHash().GetHex());
     return res;
 }
