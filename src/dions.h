@@ -39,7 +39,7 @@ std::vector<unsigned char> vchFromString(const std::string &str);
 string stringFromVch(const vector<unsigned char> &vch);
 int aliasOutIndex(const CTransaction& tx);
 bool aliasTxValue(const CTransaction& tx, std::vector<unsigned char>& value);
-bool DecodeMessageTx(const CTransaction& tx, int& op, int& nOut, std::vector<std::vector<unsigned char> >& vvch);
+bool mTx(const CTransaction& tx, int& op, int& nOut, std::vector<std::vector<unsigned char> >& vvch);
 bool aliasTx(const CTransaction& tx, int& op, int& nOut, std::vector<std::vector<unsigned char> >& vvch);
 bool aliasScript(const CScript& script, int& op, std::vector<std::vector<unsigned char> > &vvch, CScript::const_iterator& pc);
 bool aliasScript(const CScript& script, int& op, std::vector<std::vector<unsigned char> > &vvch);

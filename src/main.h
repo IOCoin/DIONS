@@ -36,7 +36,7 @@ static const int LAST_POW_BLOCK = 12815;
 
 
 /** The maximum allowed size for a serialized block, in bytes (network rule) */
-static const unsigned int MAX_BLOCK_SIZE = 2.0 * 1024 * 1024;
+static const unsigned int MAX_BLOCK_SIZE = 4.0 * 1024 * 1024;
 
 static unsigned int  STAKE_INTEREST_V3 = 150000;
 /** The maximum size for mined blocks */

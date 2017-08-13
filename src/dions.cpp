@@ -81,13 +81,9 @@ string stringFromVch(const vector<unsigned char> &vch)
   }
   return res;
 }
-int GetExpirationDepth(int nHeight)
+int scaleMonitor()
 {
   return 210000;
-}
-int GetDisplayExpirationDepth()
-{
-    return 210000;
 }
 int GetTxPosHeight(AliasIndex& txPos)
 {
@@ -298,34 +294,29 @@ string txRelay(const CScript& scriptPubKey, int64_t nValue, const CWalletTx& wtx
         return strError;
     }
 
-#ifdef GUI
-    if(fAskFee && !uiInterface.ThreadSafeAskFee(nFeeRequired))
-        return "ABORTED";
-#endif
-
     if(!pwalletMain->CommitTransaction(wtxNew, reservekey))
         return _("Error: The transaction was rejected.  This might happen if some of the coins in your wallet were already spent, such as if you used a copy of wallet.dat and coins were spent in the copy but not marked as spent here.");
 
     return "";
 }
-bool GetValueOfTxPos(AliasIndex& txPos, vector<unsigned char>& vchValue, uint256& hash, int& nHeight)
+bool txTrace(AliasIndex& txPos, vector<unsigned char>& vchValue, uint256& hash, int& nHeight)
 {
     nHeight = GetTxPosHeight(txPos);
     vchValue = txPos.vValue;
     CTransaction tx;
     if(!tx.ReadFromDisk(txPos.txPos))
-        return error("GetValueOfTxPos() : could not read tx from disk");
+        return error("txTrace() : could not read tx from disk");
     hash = tx.GetHash();
     return true;
 }
-bool GetValueOfTxPos(CDiskTxPos& txPos, vector<unsigned char>& vchValue, uint256& hash, int& nHeight)
+bool txTrace(CDiskTxPos& txPos, vector<unsigned char>& vchValue, uint256& hash, int& nHeight)
 {
     nHeight = GetTxPosHeight(txPos);
     CTransaction tx;
     if(!tx.ReadFromDisk(txPos))
-        return error("GetValueOfTxPos() : could not read tx from disk");
+        return error("txTrace() : could not read tx from disk");
     if(!aliasTxValue(tx, vchValue))
-        return error("GetValueOfTxPos() : could not decode value from tx");
+        return error("txTrace() : could not decode value from tx");
     hash = tx.GetHash();
     return true;
 }
@@ -339,7 +330,7 @@ bool aliasTx(LocatorNodeDB& aliasCacheDB, const vector<unsigned char> &vchAlias,
     AliasIndex& txPos = vtxPos.back();
 
     int nHeight = txPos.nHeight;
-    if(nHeight + GetExpirationDepth(pindexBest->nHeight) < pindexBest->nHeight)
+    if(nHeight + scaleMonitor() < pindexBest->nHeight)
     {
         string alias = stringFromVch(vchAlias);
         return false;
@@ -1053,7 +1044,7 @@ Value nodeValidate(const Array& params, bool fHelp)
         pwalletMain->GetPubKey(keyID, vchPubKey);
         vchType vchRand;
 
-        const int expiresIn = nHeight + GetDisplayExpirationDepth() - pindexBest->nHeight;
+        const int expiresIn = nHeight + scaleMonitor() - pindexBest->nHeight;
         aliasObj.push_back(Pair("expires_in", expiresIn));
         if(expiresIn <= 0)
           aliasObj.push_back(Pair("expired", 1));
@@ -1079,10 +1070,6 @@ Value nodeValidate(const Array& params, bool fHelp)
     }
     LEAVE_CRITICAL_SECTION(cs_main)
 
-
-    //Array oRes;
-    //BOOST_FOREACH(const PAIRTYPE(vector<unsigned char>, Object)& item, aliasMapVchObj)
-    //    oRes.push_back(item.second);
 
     return oRes;
 }
@@ -1219,7 +1206,7 @@ Value nodeRetrieve(const Array& params, bool fHelp)
         pwalletMain->GetPubKey(keyID, vchPubKey);
         vchType vchRand;
 
-        const int expiresIn = nHeight + GetDisplayExpirationDepth() - pindexBest->nHeight;
+        const int expiresIn = nHeight + scaleMonitor() - pindexBest->nHeight;
         aliasObj.push_back(Pair("expires_in", expiresIn));
         if(expiresIn <= 0)
           aliasObj.push_back(Pair("expired", 1));
@@ -1367,7 +1354,7 @@ Value getNodeRecord(const Array& params, bool fHelp)
         pwalletMain->GetPubKey(keyID, vchPubKey);
         vchType vchRand;
 
-        const int expiresIn = nHeight + GetDisplayExpirationDepth() - pindexBest->nHeight;
+        const int expiresIn = nHeight + scaleMonitor() - pindexBest->nHeight;
         aliasObj.push_back(Pair("expires_in", expiresIn));
         if(expiresIn <= 0)
           aliasObj.push_back(Pair("expired", 1));
@@ -1683,7 +1670,7 @@ Value aliasList__(const Array& params, bool fHelp)
         pwalletMain->GetPubKey(keyID, vchPubKey);
         vchType vchRand;
 
-        const int expiresIn = nHeight + GetDisplayExpirationDepth() - pindexBest->nHeight;
+        const int expiresIn = nHeight + scaleMonitor() - pindexBest->nHeight;
         aliasObj.push_back(Pair("expires_in", expiresIn));
         if(expiresIn <= 0)
           aliasObj.push_back(Pair("expired", 1));
@@ -1863,7 +1850,7 @@ Value aliasList(const Array& params, bool fHelp)
         pwalletMain->GetPubKey(keyID, vchPubKey);
         vchType vchRand;
 
-        const int expiresIn = nHeight + GetDisplayExpirationDepth() - pindexBest->nHeight;
+        const int expiresIn = nHeight + scaleMonitor() - pindexBest->nHeight;
         aliasObj.push_back(Pair("expires_in", expiresIn));
         if(expiresIn <= 0)
           aliasObj.push_back(Pair("expired", 1));
@@ -4763,7 +4750,7 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
             }
 
             nPrevHeight = aliasHeight(vvchArgs[0]);
-            if(nPrevHeight >= 0 && pindexBlock->nHeight - nPrevHeight < GetExpirationDepth(pindexBlock->nHeight))
+            if(nPrevHeight >= 0 && pindexBlock->nHeight - nPrevHeight < scaleMonitor())
                 return error("ConnectInputsPost() : decryptAlias on an unexpired alias");
             nDepth = CheckTransactionAtRelativeDepth(pindexBlock, vTxindex[nInput], MIN_SET_DEPTH);
 
@@ -4774,7 +4761,7 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
 
             if(fMiner)
             {
-                nDepth = CheckTransactionAtRelativeDepth(pindexBlock, vTxindex[nInput], GetExpirationDepth(pindexBlock->nHeight));
+                nDepth = CheckTransactionAtRelativeDepth(pindexBlock, vTxindex[nInput], scaleMonitor());
                 if(nDepth == -1)
                     return error("ConnectInputsPost() : decryptAlias cannot be mined if registerAlias is not already in chain and unexpired");
 
@@ -4801,7 +4788,7 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
                     return error("ConnectInputsPost() : updateAlias alias mismatch");
             }
 
-            nDepth = CheckTransactionAtRelativeDepth(pindexBlock, vTxindex[nInput], GetExpirationDepth(pindexBlock->nHeight));
+            nDepth = CheckTransactionAtRelativeDepth(pindexBlock, vTxindex[nInput], scaleMonitor());
             if((fBlock || fMiner) && nDepth < 0)
                 return error("ConnectInputsPost() : updateAlias on an expired alias, or there is a pending transaction on the alias");
             break;
@@ -4844,7 +4831,7 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
             vector<unsigned char> vchValue;
             int nHeight;
             uint256 hash;
-            GetValueOfTxPos(txPos, vchValue, hash, nHeight);
+            txTrace(txPos, vchValue, hash, nHeight);
             AliasIndex txPos2;
             txPos2.nHeight = pindexBlock->nHeight;
             txPos2.vValue = vchValue;
