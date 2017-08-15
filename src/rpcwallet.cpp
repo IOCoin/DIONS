@@ -589,6 +589,65 @@ Value verifymessage(const Array& params, bool fHelp)
     return (key.GetPubKey().GetID() == keyID);
 }
 
+Value xtu_url(const Array& params, bool fHelp)
+{
+    if (fHelp || params.size() < 1 || params.size() > 2)
+        throw runtime_error(
+            "xtu eval <url>\n"
+            "return xtu eval url");
+
+    string url = params[0].get_str();
+    std::transform(url.begin(), url.end(), url.begin(), ::tolower);
+    string target = "state-0";
+
+    vector<AliasIndex> vtxPos;
+    LocatorNodeDB ln1Db("r");
+    vchType vchURL = vchFromString(url);
+    if (ln1Db.lKey(vchURL))
+    {
+      if (!ln1Db.lGet(vchURL, vtxPos))
+        return error("failed to read from DB");
+      if (vtxPos.empty ())
+        return -1;
+
+      AliasIndex& txPos = vtxPos.back();
+      target = txPos.vAddress;
+    }
+    else
+    {
+      throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "does not exist.");
+    }
+
+    CBitcoinAddress address = CBitcoinAddress(target);
+
+    CScript scriptPubKey;
+    if (!address.IsValid())
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid I/OCoin address");
+    scriptPubKey.SetDestination(address.Get());
+    if (!IsMine(*pwalletMain,scriptPubKey))
+        return (double)0.0;
+
+    // Minimum confirmations
+    int nMinDepth = 1;
+    if (params.size() > 1)
+        nMinDepth = params[1].get_int();
+
+    // Tally
+    int64_t nAmount = 0;
+    for (map<uint256, CWalletTx>::iterator it = pwalletMain->mapWallet.begin(); it != pwalletMain->mapWallet.end(); ++it)
+    {
+        const CWalletTx& wtx = (*it).second;
+        if (wtx.IsCoinBase() || wtx.IsCoinStake() || !IsFinalTx(wtx))
+            continue;
+
+        BOOST_FOREACH(const CTxOut& txout, wtx.vout)
+            if (txout.scriptPubKey == scriptPubKey)
+                if (wtx.GetDepthInMainChain() >= nMinDepth)
+                    nAmount += txout.nValue;
+    }
+
+    return  ValueFromAmount(nAmount);
+}
 
 Value getreceivedbyaddress(const Array& params, bool fHelp)
 {
