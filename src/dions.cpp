@@ -36,6 +36,7 @@ using namespace boost::iostreams;
 namespace fs = boost::filesystem;
 
 extern Object JSONRPCError(int code, const string& message);
+extern Value xtu_url__(const string& url);
 template<typename T> void ConvertTo(Value& value, bool fAllowNull=false);
 
 std::map<vchType, uint256> mapMyMessages;
@@ -1653,8 +1654,11 @@ Value aliasList__(const Array& params, bool fHelp)
           {
             continue;
           }
-          aliasObj.push_back(Pair("alias", stringFromVch(vchAlias)));
+          string s = stringFromVch(vchAlias);
+          aliasObj.push_back(Pair("alias", s));
           aliasObj.push_back(Pair("encrypted", "false"));
+          Value v = xtu_url__(s); 
+          aliasObj.push_back(Pair("xtu", v.get_real()));
           mapAliasVchInt[vchAlias] = nHeight;
         }
 
