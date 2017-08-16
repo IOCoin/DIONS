@@ -3,6 +3,15 @@
 
 #include "bbuffer.h"
 
+class RLWE__CTRL__ 
+{
+  template<int N>
+  void operator()() 
+  {
+    return N;
+  }
+};
+
 class ReactorRelay
 {
   virtual void burstBufferCRC() = 0;
