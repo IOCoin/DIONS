@@ -1,7 +1,7 @@
 #ifndef INTERFACE_CRYPTH
 #define INTERFACE_CRYPTH
 
-#include "bbuffer.hpp"
+#include "bbuffer.h"
 
 class InterfaceCrypt
 {
@@ -12,7 +12,7 @@ class InterfaceCrypt
     virtual void   open() = 0;
     virtual void   close() = 0;
     virtual string alias() = 0;
-    virtual string ctrl() = 0;
+    virtual string ctrl__() = 0;
 };
 
 #endif
