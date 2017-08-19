@@ -141,11 +141,11 @@ bool CWallet::SetRandomKeyMetadata(const CPubKey& pubkey, const vchType &r)
     return true;
 }
 
-bool CWallet::aes_(const CPubKey &pubkey, string& aesPlainBase64)
+bool CWallet::aes_(const CPubKey& pubkey, string& f, string& aesPlainBase64)
 {
     AssertLockHeld(cs_wallet); // mapKeyMetadata
 
-    aesPlainBase64 = mapKeyMetadata[pubkey.GetID()].aes256KeyBase64;
+    aesPlainBase64 = mapKeyMetadata[pubkey.GetID()].m[f];
     
     if(aesPlainBase64 != "")
       return true;
@@ -153,11 +153,11 @@ bool CWallet::aes_(const CPubKey &pubkey, string& aesPlainBase64)
     return false;
 }
 
-bool CWallet::aes(const CPubKey &pubkey, string& aes256KeyBase64)
+bool CWallet::aes(const CPubKey &pubkey, string& f, string& aes256KeyBase64)
 {
     AssertLockHeld(cs_wallet); // mapKeyMetadata
 
-    mapKeyMetadata[pubkey.GetID()].aes256KeyBase64 = aes256KeyBase64;
+    mapKeyMetadata[pubkey.GetID()].m[f] = aes256KeyBase64;
 
     return true;
 }

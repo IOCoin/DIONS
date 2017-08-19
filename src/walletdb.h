@@ -26,11 +26,12 @@ enum DBErrors
 class CKeyMetadata
 {
 public:
+    typedef std::map<string, string> CMap;
     static const int CURRENT_VERSION=1;
     int nVersion;
     string rsaPrivateKey;
     string rsaPublicKey;
-    string aes256KeyBase64;
+    CMap m;
     vchType random;
     string r;
     int64_t nCreateTime; // 0 means unknown
@@ -52,7 +53,7 @@ public:
         READWRITE(nCreateTime);
         READWRITE(this->rsaPrivateKey);
         READWRITE(this->rsaPublicKey);
-        READWRITE(this->aes256KeyBase64);
+        READWRITE(this->m);
         READWRITE(this->random);
         READWRITE(this->r);
     )

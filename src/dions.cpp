@@ -405,10 +405,6 @@ Value myRSAKeys(const Array& params, bool fHelp)
     if(found == false)
       continue;
 
-    string aesPlainBase64;
-    pwalletMain->aes_(pubKey, aesPlainBase64);
-    oAddressInfo.push_back(Pair("AES_256_plain", aesPlainBase64));
-
     jsonAddressRSAList.push_back(oAddressInfo);
 
   }
@@ -457,10 +453,6 @@ Value myRSAKeys__(const Array& params, bool fHelp)
     bool found = pwalletMain->envCP0(pubKey, rsaPrivKey);
     if(found == false)
       continue;
-
-    string aesPlainBase64;
-    pwalletMain->aes_(pubKey, aesPlainBase64);
-    oAddressInfo.push_back(Pair("AES_256_plain", aesPlainBase64));
 
     jsonAddressRSAList.push_back(oAddressInfo);
 
@@ -681,16 +673,16 @@ Value decryptedMessageList(const Array& params, bool fHelp)
             const int nHeight = tx.GetHeightInMainChain();
 
             string myAddr;
-            string foreignAddr;
+            string fKey;
             if(isMyAddress(stringFromVch(vchSender)))
             {
               myAddr = stringFromVch(vchSender);
-              foreignAddr = stringFromVch(vchRecipient);
+              fKey = stringFromVch(vchRecipient);
             }
             else
             {
               myAddr = stringFromVch(vchRecipient);
-              foreignAddr = stringFromVch(vchSender);
+              fKey = stringFromVch(vchSender);
             }
 
             Object aliasObj;
@@ -712,7 +704,6 @@ Value decryptedMessageList(const Array& params, bool fHelp)
               LEAVE_CRITICAL_SECTION(cs_main)
               throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
             }
-            
 
             CKeyID keyID;
             if(!r.GetKeyID(keyID))
@@ -727,7 +718,7 @@ Value decryptedMessageList(const Array& params, bool fHelp)
 
             string aesBase64Plain;
             vector<unsigned char> aesRawVector;
-            if(pwalletMain->aes_(pubKey, aesBase64Plain))
+            if(pwalletMain->aes_(pubKey, fKey, aesBase64Plain))
             {
               bool fInvalid = false;
               aesRawVector = DecodeBase64(aesBase64Plain.c_str(), &fInvalid);
@@ -736,7 +727,7 @@ Value decryptedMessageList(const Array& params, bool fHelp)
             {
               vchType aesKeyBase64EncryptedVch;
               vchType pub_key = pubKey.Raw();
-              if(getImportedPubKey(myAddr, foreignAddr, pub_key, aesKeyBase64EncryptedVch))
+              if(getImportedPubKey(myAddr, fKey, pub_key, aesKeyBase64EncryptedVch))
               {
                 string aesKeyBase64Encrypted = stringFromVch(aesKeyBase64EncryptedVch);
 
@@ -3297,7 +3288,7 @@ Value sendSymmetric(const Array& params, bool fHelp)
     EnsureWalletIsUnlocked();
 
     string myAddress = params[0].get_str();
-    string strRecipientAddress = params[1].get_str();
+    string f = params[1].get_str();
 
     CBitcoinAddress addr;
     int r = checkAddress(myAddress, addr);
@@ -3313,11 +3304,11 @@ Value sendSymmetric(const Array& params, bool fHelp)
         throw JSONRPCError(RPC_WALLET_ERROR, "Private key not available");
 
     CBitcoinAddress aRecipient;
-    r = checkAddress(strRecipientAddress, aRecipient);
+    r = checkAddress(f, aRecipient);
     if(r < 0)
         throw JSONRPCError(RPC_TYPE_ERROR, "Invalid recipient address");
 
-    strRecipientAddress = aRecipient.ToString();
+    f = aRecipient.ToString();
 
     string rsaPubKeyStr = "";
     if(!pwalletMain->envCP1(key.GetPubKey(), rsaPubKeyStr))
@@ -3331,7 +3322,7 @@ Value sendSymmetric(const Array& params, bool fHelp)
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Sign failed");
 
     const vchType vchSender = vchFromValue(myAddress);
-    const vchType vchRecipient = vchFromValue(strRecipientAddress);
+    const vchType vchRecipient = vchFromValue(f);
 
     CWalletTx wtx;
     wtx.nVersion = CTransaction::DION_TX_VERSION;
@@ -3341,10 +3332,10 @@ Value sendSymmetric(const Array& params, bool fHelp)
 
 
         uint160 hash160;
-        bool isValid = AddressToHash160(strRecipientAddress, hash160);
+        bool isValid = AddressToHash160(f, hash160);
         if(!isValid)
             throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid dions address");
-        scriptPubKeyOrig.SetBitcoinAddress(strRecipientAddress);
+        scriptPubKeyOrig.SetBitcoinAddress(f);
 
     const vchType vchKey = vchFromValue(rsaPubKeyStr);
     string sigBase64 = EncodeBase64(&vchSig[0], vchSig.size());
@@ -3406,7 +3397,7 @@ bool internalReference__(string ref__, vchType& recipientPubKeyVch)
 
   return s__;
 }
-bool getImportedPubKey(string foreignAddr, vchType& recipientPubKeyVch)
+bool getImportedPubKey(string fKey, vchType& recipientPubKeyVch)
 {
   ENTER_CRITICAL_SECTION(cs_main)
   {
@@ -3423,7 +3414,7 @@ bool getImportedPubKey(string foreignAddr, vchType& recipientPubKeyVch)
           continue;
 
         string senderAddr = stringFromVch(vchSender);
-        if(senderAddr == foreignAddr)
+        if(senderAddr == fKey)
         {
           recipientPubKeyVch = vchKey;
     LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
@@ -3439,7 +3430,7 @@ bool getImportedPubKey(string foreignAddr, vchType& recipientPubKeyVch)
   return false;
 }
 
-bool getImportedPubKey(string myAddress, string foreignAddr, vchType& recipientPubKeyVch, vchType& aesKeyBase64EncryptedVch)
+bool getImportedPubKey(string myAddress, string fKey, vchType& recipientPubKeyVch, vchType& aesKeyBase64EncryptedVch)
 {
   ENTER_CRITICAL_SECTION(cs_main)
   {
@@ -3508,13 +3499,13 @@ Value sendPublicKey(const Array& params, bool fHelp)
 {
     if(fHelp || params.size() != 2)
         throw runtime_error(
-                "sendPublicKey <sender> <recipient>"
+                "sendPublicKey <addr> <addr>"
                 + HelpRequiringPassphrase());
 
     EnsureWalletIsUnlocked();
 
     string myAddress = params[0].get_str();
-    string strRecipientAddress = params[1].get_str();
+    string f = params[1].get_str();
 
     CBitcoinAddress addr;
     int r = checkAddress(myAddress, addr);
@@ -3522,11 +3513,11 @@ Value sendPublicKey(const Array& params, bool fHelp)
         throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
 
     CBitcoinAddress aRecipient;
-    r = checkAddress(strRecipientAddress, aRecipient);
+    r = checkAddress(f, aRecipient);
     if(r < 0)
         throw JSONRPCError(RPC_TYPE_ERROR, "Invalid recipient address");
 
-    strRecipientAddress = aRecipient.ToString();
+    f = aRecipient.ToString();
 
     CKeyID keyID;
     if(!addr.GetKeyID(keyID))
@@ -3545,7 +3536,7 @@ Value sendPublicKey(const Array& params, bool fHelp)
 
     const vchType vchKey = vchFromValue(rsaPubKeyStr);
     const vchType vchSender = vchFromValue(myAddress);
-    const vchType vchRecipient = vchFromValue(strRecipientAddress);
+    const vchType vchRecipient = vchFromValue(f);
     vector<unsigned char> vchSig;
     CDataStream ss(SER_GETHASH, 0);
 
@@ -3556,7 +3547,7 @@ Value sendPublicKey(const Array& params, bool fHelp)
     CScript scriptPubKey;
 
     uint160 hash160;
-    bool isValid = AddressToHash160(strRecipientAddress, hash160);
+    bool isValid = AddressToHash160(f, hash160);
     if(!isValid)
       throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid dions address");
 
@@ -3566,7 +3557,7 @@ Value sendPublicKey(const Array& params, bool fHelp)
 
     string sigBase64;
     string encrypted;
-    if(getImportedPubKey(myAddress, strRecipientAddress, recipientPubKeyVch, recipientAESKeyVch))
+    if(getImportedPubKey(myAddress, f, recipientPubKeyVch, recipientAESKeyVch))
     {
       GenerateAESKey(aes256Key);
 
@@ -3576,7 +3567,7 @@ Value sendPublicKey(const Array& params, bool fHelp)
       EncryptMessage(publicKeyStr, aesKeyStr, encrypted);
 
       CWalletDB walletdb(pwalletMain->strWalletFile, "r+");
-      if(!pwalletMain->aes(vchPubKey, aesKeyStr))
+      if(!pwalletMain->aes(vchPubKey, f, aesKeyStr))
         throw JSONRPCError(RPC_TYPE_ERROR, "Failed to set meta data for key");
 
       if(!walletdb.UpdateKey(vchPubKey, pwalletMain->mapKeyMetadata[vchPubKey.GetID()]))
@@ -3604,7 +3595,7 @@ Value sendPublicKey(const Array& params, bool fHelp)
     }
 
 
-    scriptPubKeyOrig.SetBitcoinAddress(strRecipientAddress);
+    scriptPubKeyOrig.SetBitcoinAddress(f);
 
     scriptPubKey += scriptPubKeyOrig;
 
@@ -3640,7 +3631,7 @@ Value sendPlainMessage(const Array& params, bool fHelp)
 
     const string myAddress = params[0].get_str();
     const string strMessage = params[1].get_str();
-    const string strRecipientAddress = params[2].get_str();
+    const string f = params[2].get_str();
 
     CBitcoinAddress senderAddr(myAddress);
     if(!senderAddr.IsValid())
@@ -3654,7 +3645,7 @@ Value sendPlainMessage(const Array& params, bool fHelp)
     if(!pwalletMain->GetKey(keyID, key))
         throw JSONRPCError(RPC_WALLET_ERROR, "Private key not available");
 
-    CBitcoinAddress recipientAddr(strRecipientAddress);
+    CBitcoinAddress recipientAddr(f);
     if(!recipientAddr.IsValid())
         throw JSONRPCError(RPC_TYPE_ERROR, "Invalid recipient address");
 
@@ -3679,13 +3670,13 @@ Value sendPlainMessage(const Array& params, bool fHelp)
 
 
         uint160 hash160;
-        bool isValid = AddressToHash160(strRecipientAddress, hash160);
+        bool isValid = AddressToHash160(f, hash160);
         if(!isValid)
             throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid dions address");
-        scriptPubKeyOrig.SetBitcoinAddress(strRecipientAddress);
+        scriptPubKeyOrig.SetBitcoinAddress(f);
 
     vchType vchMessage = vchFromString(strMessage);
-    scriptPubKey << OP_MESSAGE << vchFromString(myAddress) << vchFromString(strRecipientAddress) << vchMessage << vchFromString(sigBase64) << OP_2DROP << OP_2DROP;
+    scriptPubKey << OP_MESSAGE << vchFromString(myAddress) << vchFromString(f) << vchMessage << vchFromString(sigBase64) << OP_2DROP << OP_2DROP;
     scriptPubKey += scriptPubKeyOrig;
 
     ENTER_CRITICAL_SECTION(cs_main)
@@ -3711,14 +3702,14 @@ Value sendMessage(const Array& params, bool fHelp)
 {
     if(fHelp || params.size() > 3)
         throw runtime_error(
-                "sendMessage <sender_address> <message> <recipient_address>"
+                "sendMessage <addr> <message> <addr>"
                 + HelpRequiringPassphrase());
 
     string myAddress = params[0].get_str();
     string strMessage = params[1].get_str();
-    string strRecipientAddress = params[2].get_str();
+    string f = params[2].get_str();
 
-    CBitcoinAddress recipientAddr(strRecipientAddress);
+    CBitcoinAddress recipientAddr(f);
     if(!recipientAddr.IsValid())
         throw JSONRPCError(RPC_TYPE_ERROR, "Invalid recipient address");
 
@@ -3726,14 +3717,13 @@ Value sendMessage(const Array& params, bool fHelp)
     if(!recipientAddr.GetKeyID(rkeyID))
         throw JSONRPCError(RPC_TYPE_ERROR, "recipientAddr does not refer to key");
 
-    vchType recipientAddressVch = vchFromString(strRecipientAddress);
+    vchType recipientAddressVch = vchFromString(f);
     vchType recipientPubKeyVch;
     vector<unsigned char> aesRawVector;
 
     CKey key;
     if(params.size() == 3)
     {
-
       CBitcoinAddress senderAddr(myAddress);
       if(!senderAddr.IsValid())
         throw JSONRPCError(RPC_TYPE_ERROR, "Invalid sender address");
@@ -3749,7 +3739,7 @@ Value sendMessage(const Array& params, bool fHelp)
       pwalletMain->GetPubKey(keyID, vchPubKey);
 
       string aesBase64Plain;
-      if(pwalletMain->aes_(vchPubKey, aesBase64Plain))
+      if(pwalletMain->aes_(vchPubKey, f, aesBase64Plain))
       {
         bool fInvalid = false;
         aesRawVector = DecodeBase64(aesBase64Plain.c_str(), &fInvalid);
@@ -3758,14 +3748,12 @@ Value sendMessage(const Array& params, bool fHelp)
       else
       {
         vchType aesKeyBase64EncryptedVch;
-        if(getImportedPubKey(myAddress, strRecipientAddress, recipientPubKeyVch, aesKeyBase64EncryptedVch))
+        if(getImportedPubKey(myAddress, f, recipientPubKeyVch, aesKeyBase64EncryptedVch))
         {
           string aesKeyBase64Encrypted = stringFromVch(aesKeyBase64EncryptedVch);
-
           string privRSAKey;
           if(!pwalletMain->envCP0(vchPubKey, privRSAKey))
             throw JSONRPCError(RPC_TYPE_ERROR, "Failed to retrieve private RSA key");
-
           string decryptedAESKeyBase64;
           DecryptMessage(privRSAKey, aesKeyBase64Encrypted, decryptedAESKeyBase64);
           bool fInvalid = false;
@@ -3798,14 +3786,14 @@ Value sendMessage(const Array& params, bool fHelp)
     CScript scriptPubKey;
 
     uint160 hash160;
-    bool isValid = AddressToHash160(strRecipientAddress, hash160);
+    bool isValid = AddressToHash160(f, hash160);
     if(!isValid)
       throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid dions address");
-    scriptPubKeyOrig.SetBitcoinAddress(strRecipientAddress);
+    scriptPubKeyOrig.SetBitcoinAddress(f);
 
     vchType vchEncryptedMessage = vchFromString(encrypted);
     vchType iv128Base64Vch = vchFromString(iv128Base64);
-    scriptPubKey << OP_ENCRYPTED_MESSAGE << vchFromString(myAddress) << vchFromString(strRecipientAddress) << vchEncryptedMessage << iv128Base64Vch << vchFromString(sigBase64) << OP_2DROP << OP_2DROP << OP_DROP;
+    scriptPubKey << OP_ENCRYPTED_MESSAGE << vchFromString(myAddress) << vchFromString(f) << vchEncryptedMessage << iv128Base64Vch << vchFromString(sigBase64) << OP_2DROP << OP_2DROP << OP_DROP;
     scriptPubKey += scriptPubKeyOrig;
 
     ENTER_CRITICAL_SECTION(cs_main)
