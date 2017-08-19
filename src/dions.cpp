@@ -406,7 +406,7 @@ Value myRSAKeys(const Array& params, bool fHelp)
       continue;
 
     string aesPlainBase64;
-    pwalletMain->GetAESMetadata(pubKey, aesPlainBase64);
+    pwalletMain->aes_(pubKey, aesPlainBase64);
     oAddressInfo.push_back(Pair("AES_256_plain", aesPlainBase64));
 
     jsonAddressRSAList.push_back(oAddressInfo);
@@ -459,7 +459,7 @@ Value myRSAKeys__(const Array& params, bool fHelp)
       continue;
 
     string aesPlainBase64;
-    pwalletMain->GetAESMetadata(pubKey, aesPlainBase64);
+    pwalletMain->aes_(pubKey, aesPlainBase64);
     oAddressInfo.push_back(Pair("AES_256_plain", aesPlainBase64));
 
     jsonAddressRSAList.push_back(oAddressInfo);
@@ -727,7 +727,7 @@ Value decryptedMessageList(const Array& params, bool fHelp)
 
             string aesBase64Plain;
             vector<unsigned char> aesRawVector;
-            if(pwalletMain->GetAESMetadata(pubKey, aesBase64Plain))
+            if(pwalletMain->aes_(pubKey, aesBase64Plain))
             {
               bool fInvalid = false;
               aesRawVector = DecodeBase64(aesBase64Plain.c_str(), &fInvalid);
@@ -2765,7 +2765,7 @@ Value transferAlias(const Array& params, bool fHelp)
 {
     if(fHelp || params.size() != 2)
         throw runtime_error(
-          "transferAlias <alias> <toaddress> transfer a alias to a new address"
+          "transferAlias <alias> <toaddress>"
           + HelpRequiringPassphrase());
 
     vchType vchAlias = vchFromValue(params[0]);
@@ -2868,6 +2868,40 @@ Value transferAlias(const Array& params, bool fHelp)
       LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
     }
     LEAVE_CRITICAL_SECTION(cs_main)
+    return wtx.GetHash().GetHex();
+}
+Value uC(const Array& params, bool fHelp)
+{
+    if(fHelp || params.size() == 2)
+        throw runtime_error(
+                "uC <url> <value>"
+                + HelpRequiringPassphrase());
+    string locatorStr = params[0].get_str();
+
+    std::transform(locatorStr.begin(), locatorStr.end(), locatorStr.begin(), ::tolower);
+    const vchType vchAlias = vchFromValue(locatorStr);
+    const char* locatorFile = (params[1].get_str()).c_str();
+    fs::path p = locatorFile;
+    if(!fs::exists(p))
+      throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Locator file does not exist");
+
+    ifstream file(locatorFile, ios_base::in | ios_base::binary);
+    filtering_streambuf<input> in;
+    in.push(gzip_compressor());
+    in.push(file);
+
+    stringstream ss;
+    boost::iostreams::copy(in, ss);
+
+    string s = ss.str();
+    if(s.size() > MAX_XUNIT_LENGTH) 
+      throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Locator file too large");
+   
+    const vchType vchValue = vchFromValue(s);
+
+
+    CWalletTx wtx;
+    wtx.nVersion = CTransaction::DION_TX_VERSION;
     return wtx.GetHash().GetHex();
 }
 Value transientStatus__(const Array& params, bool fHelp)
@@ -3542,7 +3576,7 @@ Value sendPublicKey(const Array& params, bool fHelp)
       EncryptMessage(publicKeyStr, aesKeyStr, encrypted);
 
       CWalletDB walletdb(pwalletMain->strWalletFile, "r+");
-      if(!pwalletMain->SetAESMetadata(vchPubKey, aesKeyStr))
+      if(!pwalletMain->aes(vchPubKey, aesKeyStr))
         throw JSONRPCError(RPC_TYPE_ERROR, "Failed to set meta data for key");
 
       if(!walletdb.UpdateKey(vchPubKey, pwalletMain->mapKeyMetadata[vchPubKey.GetID()]))
@@ -3715,7 +3749,7 @@ Value sendMessage(const Array& params, bool fHelp)
       pwalletMain->GetPubKey(keyID, vchPubKey);
 
       string aesBase64Plain;
-      if(pwalletMain->GetAESMetadata(vchPubKey, aesBase64Plain))
+      if(pwalletMain->aes_(vchPubKey, aesBase64Plain))
       {
         bool fInvalid = false;
         aesRawVector = DecodeBase64(aesBase64Plain.c_str(), &fInvalid);

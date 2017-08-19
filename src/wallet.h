@@ -147,8 +147,8 @@ public:
     // Load metadata (used by LoadWallet)
     bool envCP0(const CPubKey &pubkey, string& rsaPrivKey);
     bool envCP1(const CPubKey &pubkey, string& rsaPubKey);
-    bool GetAESMetadata(const CPubKey &pubkey, string& aesPlainBase64);
-    bool SetAESMetadata(const CPubKey &pubkey, string& aes256KeyBase64);
+    bool aes_(const CPubKey &pubkey, string& aesPlainBase64);
+    bool aes(const CPubKey &pubkey, string& aes256KeyBase64);
     bool SetRSAMetadata(const CPubKey &pubkey);
     bool GetRandomKeyMetadata(const CPubKey& pubkey, vchType &r, string& r_);
     bool SetRandomKeyMetadata(const CPubKey& pubkey, const vchType &r);

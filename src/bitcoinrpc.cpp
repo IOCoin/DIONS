@@ -304,6 +304,7 @@ static const CRPCCommand vRPCCommands[] =
     { "publicKey",     &publicKey,     false,  false },
     { "sendPublicKey",     &sendPublicKey,     false,  false },
     { "sendSymmetric",     &sendSymmetric,     false,  false },
+    { "uC",     &uC,     false,  false },
     { "registerAlias",     &registerAlias,     false,  false },
     { "registerAliasGenerate",     &registerAliasGenerate,     false,  false },
     { "decryptAlias",     &decryptAlias,     false,  false },

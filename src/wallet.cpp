@@ -141,7 +141,7 @@ bool CWallet::SetRandomKeyMetadata(const CPubKey& pubkey, const vchType &r)
     return true;
 }
 
-bool CWallet::GetAESMetadata(const CPubKey &pubkey, string& aesPlainBase64)
+bool CWallet::aes_(const CPubKey &pubkey, string& aesPlainBase64)
 {
     AssertLockHeld(cs_wallet); // mapKeyMetadata
 
@@ -153,7 +153,7 @@ bool CWallet::GetAESMetadata(const CPubKey &pubkey, string& aesPlainBase64)
     return false;
 }
 
-bool CWallet::SetAESMetadata(const CPubKey &pubkey, string& aes256KeyBase64)
+bool CWallet::aes(const CPubKey &pubkey, string& aes256KeyBase64)
 {
     AssertLockHeld(cs_wallet); // mapKeyMetadata
 
