@@ -2100,7 +2100,7 @@ Value transientStatus__C(const Array& params, bool fHelp)
 
               string sigBase64 = EncodeBase64(&vchSig[0], vchSig.size());
 
-              scriptPubKey << OP_ALIAS_ENCRYPTED << vvch[0] << vchFromString(sigBase64) << vvch[2] << vvch[3] << vchValue << vchFromString("0") << OP_2DROP << OP_2DROP << OP_2DROP << OP_DROP;
+              scriptPubKey << OP_ALIAS_ENCRYPTED << vvch[0] << vchFromString(sigBase64) << vvch[2] << vvch[3] << vchValue << vchFromString("0") << vchFromString("_") << OP_2DROP << OP_2DROP << OP_2DROP << OP_2DROP;
               scriptPubKeyOrig.SetBitcoinAddress(stringFromVch(vvch[2]));
               scriptPubKey += scriptPubKeyOrig;
               found = true;
@@ -2257,7 +2257,7 @@ Value updateEncryptedAliasFile(const Array& params, bool fHelp)
 
               string sigBase64 = EncodeBase64(&vchSig[0], vchSig.size());
 
-              scriptPubKey << OP_ALIAS_ENCRYPTED << vvch[0] << vchFromString(sigBase64) << vvch[2] << vvch[3] << vchValue << vchFromString("0") << OP_2DROP << OP_2DROP << OP_2DROP << OP_DROP;
+              scriptPubKey << OP_ALIAS_ENCRYPTED << vvch[0] << vchFromString(sigBase64) << vvch[2] << vvch[3] << vchValue << vchFromString("0") << vchFromString("_") << OP_2DROP << OP_2DROP << OP_2DROP << OP_2DROP;
               scriptPubKeyOrig.SetBitcoinAddress(stringFromVch(vvch[2]));
               scriptPubKey += scriptPubKeyOrig;
               found = true;
@@ -2387,7 +2387,7 @@ Value updateEncryptedAlias(const Array& params, bool fHelp)
 
               string sigBase64 = EncodeBase64(&vchSig[0], vchSig.size());
 
-              scriptPubKey << OP_ALIAS_ENCRYPTED << vvch[0] << vchFromString(sigBase64) << vvch[2] << vvch[3] << vchValue << vchFromString("0") << OP_2DROP << OP_2DROP << OP_2DROP << OP_DROP;
+              scriptPubKey << OP_ALIAS_ENCRYPTED << vvch[0] << vchFromString(sigBase64) << vvch[2] << vvch[3] << vchValue << vchFromString("0") << vchFromString("_") << OP_2DROP << OP_2DROP << OP_2DROP << OP_2DROP;
               scriptPubKeyOrig.SetBitcoinAddress(stringFromVch(vvch[2]));
               scriptPubKey += scriptPubKeyOrig;
               found = true;
@@ -2693,7 +2693,8 @@ Value transferEncryptedAlias(const Array& params, bool fHelp)
         {
             vector<vector<unsigned char> > vvch;
             int op;
-            if(aliasScript(out.scriptPubKey, op, vvch)) {
+            if(aliasScript(out.scriptPubKey, op, vvch)) 
+            {
                 if(op != OP_ALIAS_ENCRYPTED)
                   throw runtime_error("previous transaction was not OP_ALIAS_ENCRYPTED");
 
@@ -2725,7 +2726,7 @@ Value transferEncryptedAlias(const Array& params, bool fHelp)
                   throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Sign failed");
 
                 string sigBase64 = EncodeBase64(&vchSig[0], vchSig.size());
-              scriptPubKey << OP_ALIAS_ENCRYPTED << vchFromString(encryptedAliasForRecipient) << vchFromString(sigBase64) << rVch << vvch[3] << vvch[4] << vchFromString(encryptedRandForRecipient) << OP_2DROP << OP_2DROP << OP_2DROP << OP_DROP;
+              scriptPubKey << OP_ALIAS_ENCRYPTED << vchFromString(encryptedAliasForRecipient) << vchFromString(sigBase64) << rVch << vvch[3] << vvch[4] << vchFromString(encryptedRandForRecipient) << vchFromString("_") << OP_2DROP << OP_2DROP << OP_2DROP << OP_2DROP;
 
               scriptPubKey += scriptPubKeyOrig;
               found = true;
@@ -3987,7 +3988,7 @@ Value registerAliasGenerate(const Array& params, bool fHelp)
 
     string sigBase64 = EncodeBase64(&vchSig[0], vchSig.size());
 
-    scriptPubKey << OP_ALIAS_ENCRYPTED << vchEncryptedAlias << vchFromString(sigBase64) << vchFromString(keyAddress.ToString()) << hash << vchValue << vchFromString("0") << OP_2DROP << OP_2DROP << OP_2DROP << OP_DROP;
+    scriptPubKey << OP_ALIAS_ENCRYPTED << vchEncryptedAlias << vchFromString(sigBase64) << vchFromString(keyAddress.ToString()) << hash << vchValue << vchFromString("0") << vchFromString("_") << OP_2DROP << OP_2DROP << OP_2DROP << OP_2DROP;
     scriptPubKey += scriptPubKeyOrig;
 
     ENTER_CRITICAL_SECTION(cs_main)
@@ -4113,7 +4114,7 @@ Value registerAlias(const Array& params, bool fHelp)
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Sign failed");
 
     string sigBase64 = EncodeBase64(&vchSig[0], vchSig.size());
-    scriptPubKey << OP_ALIAS_ENCRYPTED << vchEncryptedAlias << vchFromString(sigBase64) << vchFromString(strAddress) << hash << vchValue << vchFromString("0") << OP_2DROP << OP_2DROP << OP_2DROP << OP_DROP;
+    scriptPubKey << OP_ALIAS_ENCRYPTED << vchEncryptedAlias << vchFromString(sigBase64) << vchFromString(strAddress) << hash << vchValue << vchFromString("0") << vchFromString("_") << OP_2DROP << OP_2DROP << OP_2DROP << OP_2DROP;
     scriptPubKey += scriptPubKeyOrig;
 
     ENTER_CRITICAL_SECTION(cs_main)
@@ -4178,7 +4179,7 @@ bool aliasScript(const CScript& script, int& op, vector<vector<unsigned char> > 
 
     pc--;
 
-    if((op == OP_ALIAS_ENCRYPTED && vvch.size() == 6) ||
+    if((op == OP_ALIAS_ENCRYPTED && vvch.size() == 7) ||
        (op == OP_ALIAS_SET && vvch.size() == 5) ||
            (op == OP_MESSAGE) ||
            (op == OP_ENCRYPTED_MESSAGE) ||
