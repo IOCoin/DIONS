@@ -18,6 +18,7 @@
 #include "util.h"
 #include "walletdb.h"
 
+
 extern bool fWalletUnlockStakingOnly;
 extern bool fConfChange;
 class CAccountingEntry;
@@ -91,10 +92,9 @@ public:
 
     bool fFileBacked;
     std::string strWalletFile;
-
     std::set<int64_t> setKeyPool;
     std::map<CKeyID, CKeyMetadata> mapKeyMetadata;
-
+    std::map<vchType, Relay> lCache;
 
     typedef std::map<unsigned int, CMasterKey> MasterKeyMap;
     MasterKeyMap mapMasterKeys;

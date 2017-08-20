@@ -8,6 +8,8 @@
 #include "db.h"
 #include "base58.h"
 
+#include "relay.h"
+
 class CKeyPool;
 class CAccount;
 class CAccountingEntry;
@@ -101,6 +103,18 @@ public:
         nWalletDBUpdated++;
 
         if(!Write(std::make_pair(std::string("keymeta"), vchPubKey), keyMeta, true))
+        {
+            return false;
+        }
+
+      return true;
+    }
+
+    bool UpdateKey(const vchType& k, const Relay& r)
+    {
+        nWalletDBUpdated++;
+
+        if(!Write(std::make_pair(std::string("relay"), k), r, true))
         {
             return false;
         }

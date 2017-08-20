@@ -3,6 +3,8 @@
 
 #include "bbuffer.h"
 
+using namespace::std;
+
 class InterfaceCrypt
 {
   public:
@@ -12,7 +14,7 @@ class InterfaceCrypt
     virtual void   open() = 0;
     virtual void   close() = 0;
     virtual string alias() = 0;
-    virtual string ctrl__() = 0;
+    virtual string ctrl_() = 0;
 };
 
 #endif
