@@ -27,6 +27,7 @@ class CKeyMetadata
 {
 public:
     typedef std::map<string, string> CMap;
+    typedef std::map<long, long> Sentinel;
     static const int CURRENT_VERSION=1;
     int nVersion;
     string rsaPrivateKey;
@@ -34,6 +35,7 @@ public:
     CMap m;
     vchType random;
     string r;
+    Sentinel rlweIndex;
     int64_t nCreateTime; // 0 means unknown
 
     CKeyMetadata()
@@ -55,6 +57,7 @@ public:
         READWRITE(this->rsaPublicKey);
         READWRITE(this->m);
         READWRITE(this->random);
+        READWRITE(this->rlweIndex);
         READWRITE(this->r);
     )
 
