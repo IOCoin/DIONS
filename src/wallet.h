@@ -151,6 +151,8 @@ public:
     bool aes(const CPubKey &pubkey, string& f, string& aes256KeyBase64);
     bool SetRSAMetadata(const CPubKey &pubkey);
     bool GetRandomKeyMetadata(const CPubKey& pubkey, vchType &r, string& r_);
+    bool relay(const vchType &k, Relay& r);
+    Relay relay(const vchType &k);
     bool SetRandomKeyMetadata(const CPubKey& pubkey, const vchType &r);
     bool LoadKeyMetadata(const CPubKey &pubkey, const CKeyMetadata &metadata);
 

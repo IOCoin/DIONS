@@ -6,6 +6,10 @@
 class Relay : InterfaceCrypt
 {
   public:
+    Relay()
+    {
+    }
+
     Relay(string& s) 
     {
       this->r_ = s;

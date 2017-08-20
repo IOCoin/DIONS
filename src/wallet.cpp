@@ -206,6 +206,14 @@ bool CWallet::LoadCScript(const CScript& redeemScript)
 
     return CCryptoKeyStore::AddCScript(redeemScript);
 }
+bool CWallet::relay(const vchType& k, Relay& r)
+{
+    AssertLockHeld(cs_wallet);
+
+    lCache[k] = r;
+
+    return true;
+}
 
 bool CWallet::Unlock(const SecureString& strWalletPassphrase)
 {
@@ -274,6 +282,13 @@ bool CWallet::ChangeWalletPassphrase(const SecureString& strOldWalletPassphrase,
     }
 
     return false;
+}
+
+Relay CWallet::relay(const vchType& k)
+{
+    AssertLockHeld(cs_wallet);
+
+    return lCache[k];
 }
 
 void CWallet::SetBestChain(const CBlockLocator& loc)
