@@ -15,6 +15,7 @@ class InterfaceCrypt
     virtual void   close() = 0;
     virtual string alias() = 0;
     virtual string ctrl_() = 0;
+    virtual void   ctrl(string& c) = 0;
 };
 
 #endif

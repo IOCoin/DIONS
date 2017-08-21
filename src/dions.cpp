@@ -2877,7 +2877,25 @@ Value uC(const Array& params, bool fHelp)
     if(!fs::exists(p))
       throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Locator file does not exist");
 
+    vchType l = vchFromString(locatorStr);
+    Relay r;
+    if(pwalletMain->relay_(l, r))
+    {
+      string ctrl_ = r.ctrl_();
+    }
+    else
+    {
+      pwalletMain->relay(l, r);
+
+      CWalletDB walletdb(pwalletMain->strWalletFile, "r+");
+  
+      if(!walletdb.UpdateKey(l, pwalletMain->lCache[l]))
+        throw JSONRPCError(RPC_TYPE_ERROR, "Failed to write data for key");
+    }
+
     ifstream file(locatorFile, ios_base::in | ios_base::binary);
+      pwalletMain->relay(l, r);
+
     filtering_streambuf<input> in;
     in.push(gzip_compressor());
     in.push(file);

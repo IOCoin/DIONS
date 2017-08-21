@@ -151,8 +151,8 @@ public:
     bool aes(const CPubKey &pubkey, string& f, string& aes256KeyBase64);
     bool SetRSAMetadata(const CPubKey &pubkey);
     bool GetRandomKeyMetadata(const CPubKey& pubkey, vchType &r, string& r_);
+    bool relay_(const vchType &k, Relay& r);
     bool relay(const vchType &k, Relay& r);
-    Relay relay(const vchType &k);
     bool SetRandomKeyMetadata(const CPubKey& pubkey, const vchType &r);
     bool LoadKeyMetadata(const CPubKey &pubkey, const CKeyMetadata &metadata);
 
@@ -166,6 +166,7 @@ public:
     bool LoadCScript(const CScript& redeemScript);
 
     bool Unlock(const SecureString& strWalletPassphrase);
+    bool LoadRelay(const vchType& k, const Relay& r);
     bool ChangeWalletPassphrase(const SecureString& strOldWalletPassphrase, const SecureString& strNewWalletPassphrase);
     bool EncryptWallet(const SecureString& strWalletPassphrase);
 

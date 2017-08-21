@@ -25,11 +25,13 @@ class Relay : InterfaceCrypt
     inline virtual void open() {}
     inline virtual void close() {}
     inline virtual string alias() { return ""; }
-    inline virtual string ctrl_() { return this->locator_; }
+    inline virtual string ctrl_() { return this->r_; }
+    inline virtual void ctrl(string& c) { this->r_ = c; }
 
     IMPLEMENT_SERIALIZE
     (
         READWRITE(this->r_);
+        READWRITE(this->locator_);
     )
 
   private:

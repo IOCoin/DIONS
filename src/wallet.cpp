@@ -104,6 +104,13 @@ bool CWallet::LoadKeyMetadata(const CPubKey &pubkey, const CKeyMetadata &meta)
     return true;
 }
 
+bool CWallet::LoadRelay(const vchType& k, const Relay& r)
+{
+    AssertLockHeld(cs_wallet); // mapKeyMetadata
+    lCache[k] = r;
+    return true;
+}
+
 bool CWallet::envCP0(const CPubKey &pubkey, string& rsaPrivKey)
 {
    printf("CWallet::envCP0 1\n");
@@ -284,11 +291,12 @@ bool CWallet::ChangeWalletPassphrase(const SecureString& strOldWalletPassphrase,
     return false;
 }
 
-Relay CWallet::relay(const vchType& k)
+bool CWallet::relay_(const vchType& k, Relay& r)
 {
     AssertLockHeld(cs_wallet);
 
-    return lCache[k];
+    r = lCache[k];
+    return true;
 }
 
 void CWallet::SetBestChain(const CBlockLocator& loc)

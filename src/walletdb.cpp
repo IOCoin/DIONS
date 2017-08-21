@@ -375,6 +375,15 @@ ReadKeyValue(CWallet* pwallet, CDataStream& ssKey, CDataStream& ssValue,
                 (keyMeta.nCreateTime < pwallet->nTimeFirstKey))
                 pwallet->nTimeFirstKey = keyMeta.nCreateTime;
         }
+        else if (strType == "relay")
+        {
+            vchType k;
+            ssKey >> k;
+            Relay r;
+            ssValue >> r;
+
+            pwallet->LoadRelay(k, r);
+        }
         else if (strType == "defaultkey")
         {
             ssValue >> pwallet->vchDefaultKey;
