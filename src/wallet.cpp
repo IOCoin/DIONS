@@ -295,8 +295,13 @@ bool CWallet::relay_(const vchType& k, Relay& r)
 {
     AssertLockHeld(cs_wallet);
 
-    r = lCache[k];
-    return true;
+    if(lCache.count(k))
+    {
+      r = lCache[k];
+      return true;
+    }
+    
+    return false;
 }
 
 void CWallet::SetBestChain(const CBlockLocator& loc)

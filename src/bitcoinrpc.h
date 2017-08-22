@@ -245,6 +245,7 @@ extern json_spirit::Value updateAliasFile(const json_spirit::Array& params, bool
 extern json_spirit::Value transientStatus__(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value transientStatus__C(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value updateEncryptedAlias(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value validate(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value updateEncryptedAliasFile(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value transferAlias(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value transferEncryptedAlias(const json_spirit::Array& params, bool fHelp);
