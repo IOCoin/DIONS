@@ -10,10 +10,12 @@
 #include "ui_interface.h"
 #include "base58.h"
 #include "kernel.h"
+#include "reference.h"
 #include "coincontrol.h"
 #include <boost/algorithm/string/replace.hpp>
 
 #include "main.h"
+
 
 using namespace std;
 
@@ -2997,6 +2999,42 @@ val = vchKey;
 s = vchSignature;
 return true;
 }
+bool
+CWalletTx::aliasSet(int& op_ret, int& nOut, vector< vector<unsigned char> >& vv) const
+{
+  if (nVersion != CTransaction::DION_TX_VERSION)
+    return false;
+
+  s__ = false;
+  std::vector<vchType> vvch;
+  int op;
+  if(aliasTx(*this, op, nAliasOut, vvch))
+  {
+    switch(op)
+    {
+      case OP_ALIAS_SET:
+        vv = vvch;
+        s__ = true;
+        break;
+
+      case OP_ALIAS_RELAY:
+        vv = vvch;
+        s__ = true;
+        break;
+
+      case OP_ALIAS_ENCRYPTED:
+       vv = vvch;
+       op__ = op;
+       s__ = true;
+       break;
+    }
+  }
+    
+  nOut = nAliasOut;
+  op_ret = op__;
+
+  return s__;
+}
 
 bool
 CWalletTx::aliasSet(int& op_ret, int& nOut, vchType& nm, vchType& val) const
@@ -3036,6 +3074,51 @@ CWalletTx::aliasSet(int& op_ret, int& nOut, vchType& nm, vchType& val) const
   nm = vchAlias;
   val = vchValue;
   op_ret = op__;
+
+  return s__;
+}
+bool
+CWalletTx::aliasStream(int& r, int& p, vchType& v1, vchType& v2, vchType& vchS, vchType& inV3) const
+{
+  if (nVersion != CTransaction::DION_TX_VERSION)
+    return false;
+
+  s__ = false;
+  std::vector<vchType> vvch;
+  int op;
+  if(aliasTx(*this, op, nAliasOut, vvch))
+  {
+    switch(op)
+    {
+      case OP_ALIAS_SET:
+        vchAlias = vvch[0];
+        vchValue = vvch[4];
+        s__ = false;
+        break;
+
+      case OP_ALIAS_RELAY:
+        vchAlias = vvch[0];
+        vchValue = vvch[1];
+        s__ = false;
+        break;
+
+      case OP_ALIAS_ENCRYPTED:
+       vchAlias = vvch[0];
+       vchValue = vvch[4];
+       op__ = op;
+
+       Reference ref(vvch[5]);
+       if(ref())
+         s__ = true;
+       break;
+    }
+  }
+    
+  p = nAliasOut;
+  v1 = vchAlias;
+  v2 = vchValue;
+  inV3 = vvch[6];
+  r = op__;
 
   return s__;
 }

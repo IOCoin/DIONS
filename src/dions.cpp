@@ -10,7 +10,7 @@
 
 #include "bitcoinrpc.h"
 #include "main.h"
-
+#include "state.h"
 #include "json/json_spirit_reader_template.h"
 #include "json/json_spirit_writer_template.h"
 #include "json/json_spirit_utils.h"
@@ -80,6 +80,29 @@ string stringFromVch(const vector<unsigned char> &vch)
     vi++;
   }
   return res;
+}
+bool channel(string l, string f, string k)
+{
+  vchType rVch;
+  vchType alphaVch;
+  if(!getImportedPubKey(l, f, rVch, alphaVch))
+  {
+    CKeyID keyID;
+    CBitcoinAddress keyAddress(l);
+    keyAddress.GetKeyID(keyID);
+    CPubKey vchPubKey;
+    pwalletMain->GetPubKey(keyID, vchPubKey);
+    if(pwalletMain->aes_(vchPubKey, f, k))
+    {
+      return true;
+    }
+
+    return false;
+  }
+
+  k = stringFromVch(alphaVch);
+
+  return true;
 }
 int scaleMonitor()
 {
@@ -1949,7 +1972,7 @@ Value validate(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() != 2)
       throw runtime_error(
-              "validate [<node opt>]\n"
+              "aliasOut [<node opt>]\n"
               );
 
   string k1;
@@ -1961,7 +1984,7 @@ Value validate(const Array& params, bool fHelp)
   std::map<vchType, int> mapAliasVchInt;
   std::map<vchType, Object> aliasMapVchObj;
 
-  string value;
+  vector< vector<unsigned char> > vvch;
   bool found=false;
   ENTER_CRITICAL_SECTION(cs_main)
   {
@@ -1972,10 +1995,13 @@ Value validate(const Array& params, bool fHelp)
       {
         const CWalletTx& tx = item.second;
 
-        vchType vchAlias, vchValue;
+        vector< vector<unsigned char> > vv;
         int nOut;
         int op__=-1;
-        if(!tx.aliasSet(op__, nOut, vchAlias, vchValue))
+        if(!tx.aliasSet(op__, nOut, vv))
+          continue;
+
+        if(op__ != OP_ALIAS_ENCRYPTED)
           continue;
 
         const int nHeight = tx.GetHeightInMainChain();
@@ -1989,7 +2015,6 @@ Value validate(const Array& params, bool fHelp)
         aliasAddress(tx, strAddress);
         if(op__ == OP_ALIAS_ENCRYPTED)
         {
-          string rsaPrivKey;
           CBitcoinAddress r(strAddress);
           if(!r.IsValid())
             throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
@@ -2005,6 +2030,7 @@ Value validate(const Array& params, bool fHelp)
           }
 
           CPubKey pubKey = key.GetPubKey();
+          string rsaPrivKey;
           if(pwalletMain->envCP0(pubKey, rsaPrivKey) == false)
           {
             continue;
@@ -2015,33 +2041,15 @@ Value validate(const Array& params, bool fHelp)
         }
           mapAliasVchInt[vchFromString(decrypted)] = nHeight;
 
-          DecryptMessage(rsaPrivKey, stringFromVch(vchAlias), decrypted);
+          DecryptMessage(rsaPrivKey, stringFromVch(vv[0]), decrypted);
           if(k1 != decrypted) 
           {
             continue;
           }
           else
           {
-            value = stringFromVch(vchValue);
+            vvch = vv;
             found=true;
-          }
-        }
-        else
-        {
-          if(mapAliasVchInt.find(vchAlias) != mapAliasVchInt.end() && mapAliasVchInt[vchAlias] > nHeight)
-          {
-            continue;
-          }
-          mapAliasVchInt[vchAlias] = nHeight;
-
-          if(k1 != stringFromVch(vchAlias)) 
-          {
-            continue;
-          }
-          else
-          {
-            value = stringFromVch(vchValue);
-            found = true;
           }
         }
       }
@@ -2050,8 +2058,56 @@ Value validate(const Array& params, bool fHelp)
   }
   LEAVE_CRITICAL_SECTION(cs_main)
 
+
   if(found == true)
   {
+    string value;
+    string iv128 = stringFromVch(vvch[6]);
+    State hydr(stringFromVch(vvch[7]));
+    if(hydr() == State::ATOMIC)
+    {
+      Relay r;
+      if(pwalletMain->relay_(vchNodeLocator, r))
+      {
+        string ctrl_ = r.ctrl_();
+        bool fInvalid = false;
+        vector<unsigned char> aesRawVector = DecodeBase64(ctrl_.c_str(), &fInvalid);
+        string decrypted;
+        DecryptMessageAES(stringFromVch(vvch[4]),
+          decrypted,
+          aesRawVector,
+          iv128);
+
+        value = decrypted;
+      }
+    }
+    else if(hydr() == State::GROUND)
+    {
+      value = stringFromVch(vvch[4]);
+    }
+    else
+    {
+      string aesKeyStr;
+      string localAddr = stringFromVch(vchNodeLocator);
+      string f = stringFromVch(vvch[7]);
+      if(channel(localAddr, f, aesKeyStr))
+      {
+        bool fInvalid = false;
+        vector<unsigned char> aesRawVector = DecodeBase64(aesKeyStr.c_str(), &fInvalid);
+        string decrypted;
+        DecryptMessageAES(stringFromVch(vvch[4]),
+          decrypted,
+          aesRawVector,
+          iv128);
+
+        value = decrypted;
+      }
+      else
+      {
+        throw JSONRPCError(RPC_TYPE_ERROR, "key not foound");
+      }
+    }
+
     stringstream is(value, ios_base::in | ios_base::binary);   
     filtering_streambuf<input> in__;
     in__.push(gzip_decompressor());
@@ -2217,7 +2273,7 @@ Value transientStatus__C(const Array& params, bool fHelp)
 
               string sigBase64 = EncodeBase64(&vchSig[0], vchSig.size());
 
-              scriptPubKey << OP_ALIAS_ENCRYPTED << vvch[0] << vchFromString(sigBase64) << vvch[2] << vvch[3] << vchValue << vchFromString("0") << vchFromString("_") << OP_2DROP << OP_2DROP << OP_2DROP << OP_2DROP;
+              scriptPubKey << OP_ALIAS_ENCRYPTED << vvch[0] << vchFromString(sigBase64) << vvch[2] << vvch[3] << vchValue << vchFromString("0") << vchFromString("_") << vchFromString(State::GROUND) << OP_2DROP << OP_2DROP << OP_2DROP << OP_2DROP << OP_DROP;
               scriptPubKeyOrig.SetBitcoinAddress(stringFromVch(vvch[2]));
               scriptPubKey += scriptPubKeyOrig;
               found = true;
@@ -2374,7 +2430,7 @@ Value updateEncryptedAliasFile(const Array& params, bool fHelp)
 
               string sigBase64 = EncodeBase64(&vchSig[0], vchSig.size());
 
-              scriptPubKey << OP_ALIAS_ENCRYPTED << vvch[0] << vchFromString(sigBase64) << vvch[2] << vvch[3] << vchValue << vchFromString("0") << vchFromString("_") << OP_2DROP << OP_2DROP << OP_2DROP << OP_2DROP;
+              scriptPubKey << OP_ALIAS_ENCRYPTED << vvch[0] << vchFromString(sigBase64) << vvch[2] << vvch[3] << vchValue << vchFromString("0") << vchFromString("_") << vchFromString(State::GROUND) << OP_2DROP << OP_2DROP << OP_2DROP << OP_2DROP << OP_DROP;
               scriptPubKeyOrig.SetBitcoinAddress(stringFromVch(vvch[2]));
               scriptPubKey += scriptPubKeyOrig;
               found = true;
@@ -2504,7 +2560,7 @@ Value updateEncryptedAlias(const Array& params, bool fHelp)
 
               string sigBase64 = EncodeBase64(&vchSig[0], vchSig.size());
 
-              scriptPubKey << OP_ALIAS_ENCRYPTED << vvch[0] << vchFromString(sigBase64) << vvch[2] << vvch[3] << vchValue << vchFromString("0") << vchFromString("_") << OP_2DROP << OP_2DROP << OP_2DROP << OP_2DROP;
+              scriptPubKey << OP_ALIAS_ENCRYPTED << vvch[0] << vchFromString(sigBase64) << vvch[2] << vvch[3] << vchValue << vchFromString("0") << vchFromString("_") << vchFromString(State::GROUND) << OP_2DROP << OP_2DROP << OP_2DROP << OP_2DROP << OP_DROP;
               scriptPubKeyOrig.SetBitcoinAddress(stringFromVch(vvch[2]));
               scriptPubKey += scriptPubKeyOrig;
               found = true;
@@ -2687,7 +2743,6 @@ Value transferEncryptedAlias(const Array& params, bool fHelp)
           + HelpRequiringPassphrase());
 
     vchType vchAlias = vchFromValue(params[0]);
-    const vchType vchLocal = vchFromValue(params[1]);
 
     CBitcoinAddress localAddr((params[1]).get_str());
 
@@ -2706,6 +2761,9 @@ Value transferEncryptedAlias(const Array& params, bool fHelp)
     string r_;
     if(!pwalletMain->GetRandomKeyMetadata(localkey.GetPubKey(), vchRand, r_))
         throw JSONRPCError(RPC_WALLET_ERROR, "no random key available for address");
+
+    CPubKey vchPubKey;
+    pwalletMain->GetPubKey(localkeyID, vchPubKey);
 
     string recipientAddrStr=(params[2]).get_str();
     CBitcoinAddress address(recipientAddrStr);
@@ -2750,11 +2808,20 @@ Value transferEncryptedAlias(const Array& params, bool fHelp)
     string locatorStr = stringFromVch(vchAlias);
 
     vchType recipientPubKeyVch;
-
-    if(!getImportedPubKey(address.ToString(), recipientPubKeyVch))
+    vchType aesVch;
+    vector<unsigned char> aesRawVector;
+    string f = address.ToString();
+    if(!getImportedPubKey(localAddr.ToString(), f, recipientPubKeyVch, aesVch))
     {
-      if(!internalReference__(address.ToString(), recipientPubKeyVch))
+      if(!internalReference__(f, recipientPubKeyVch))
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "transferEncryptedAlias no RSA key for recipient");
+
+      string aesKeyStr;
+      if(pwalletMain->aes_(vchPubKey, f, aesKeyStr))
+      {
+        bool fInvalid = false;
+        aesRawVector = DecodeBase64(aesKeyStr.c_str(), &fInvalid);
+      }
     }
 
     CWalletTx wtx;
@@ -2815,13 +2882,60 @@ Value transferEncryptedAlias(const Array& params, bool fHelp)
                 if(op != OP_ALIAS_ENCRYPTED)
                   throw runtime_error("previous transaction was not OP_ALIAS_ENCRYPTED");
 
-                 uint160 hash = uint160(vvch[3]);
+                 string gen;
+                 string reference;
+                 string iv128 = stringFromVch(vvch[6]);
+                 if(iv128 != "_")
+                 {
+                   string r = stringFromVch(vvch[5]); 
+                   State s__(stringFromVch(vvch[7])); 
+                   if(s__() != State::ATOMIC)
+                   {
+                     string decrypted;
+                     DecryptMessageAES(stringFromVch(vvch[4]),
+                              decrypted,
+                              aesRawVector,
+                              iv128);
 
-                 CDataStream ss(SER_GETHASH, 0);
-                 ss << encryptedAliasForRecipient;
-                 ss << hash.ToString();
-                 ss << stringFromVch(vvch[4]);
-                 ss << encryptedRandForRecipient;
+                     EncryptMessageAES(decrypted, gen, aesRawVector, reference);
+                     if(gen.size() > MAX_XUNIT_LENGTH) 
+                       throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "xunit size exceeded");
+                   }
+                   else
+                   {
+                     Relay r;
+                     if(pwalletMain->relay_(vchAlias, r))
+                     {
+                       string ctrl_ = r.ctrl_();
+                       bool fInvalid = false;
+                       aesRawVector = DecodeBase64(ctrl_.c_str(), &fInvalid);
+                       string decrypted;
+                       DecryptMessageAES(stringFromVch(vvch[4]),
+                              decrypted,
+                              aesRawVector,
+                              iv128);
+
+                       EncryptMessageAES(decrypted, gen, aesRawVector, reference);
+                       if(gen.size() > MAX_XUNIT_LENGTH) 
+                         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "xunit size exceeded");
+                     }
+                   }
+                 }
+
+                uint160 hash = uint160(vvch[3]);
+
+                CDataStream ss(SER_GETHASH, 0);
+                ss << encryptedAliasForRecipient;
+                ss << hash.ToString();
+
+                if(iv128 == "_")
+                  ss << stringFromVch(vvch[4]);
+                else
+                  ss << gen;
+
+                ss << encryptedRandForRecipient;
+
+                  vchType fs = vchFromString(localAddr.ToString());
 
                 CScript script;
                 script.SetBitcoinAddress(stringFromVch(vvch[2]));
@@ -2843,7 +2957,7 @@ Value transferEncryptedAlias(const Array& params, bool fHelp)
                   throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Sign failed");
 
                 string sigBase64 = EncodeBase64(&vchSig[0], vchSig.size());
-              scriptPubKey << OP_ALIAS_ENCRYPTED << vchFromString(encryptedAliasForRecipient) << vchFromString(sigBase64) << rVch << vvch[3] << vvch[4] << vchFromString(encryptedRandForRecipient) << vchFromString("_") << OP_2DROP << OP_2DROP << OP_2DROP << OP_2DROP;
+              scriptPubKey << OP_ALIAS_ENCRYPTED << vchFromString(encryptedAliasForRecipient) << vchFromString(sigBase64) << rVch << vvch[3] << vvch[4] << vchFromString(encryptedRandForRecipient) << vchFromString("_") << fs << OP_2DROP << OP_2DROP << OP_2DROP << OP_2DROP << OP_DROP;
 
               scriptPubKey += scriptPubKeyOrig;
               found = true;
@@ -3137,7 +3251,7 @@ Value uC(const Array& params, bool fHelp)
 
               string sigBase64 = EncodeBase64(&vchSig[0], vchSig.size());
 
-              scriptPubKey << OP_ALIAS_ENCRYPTED << vvch[0] << vchFromString(sigBase64) << vvch[2] << vvch[3] << vchValue << vchFromString("0") << vchFromString(reference) << OP_2DROP << OP_2DROP << OP_2DROP << OP_2DROP;
+              scriptPubKey << OP_ALIAS_ENCRYPTED << vvch[0] << vchFromString(sigBase64) << vvch[2] << vvch[3] << vchValue << vchFromString("0") << vchFromString(reference) << vchFromString(State::ATOMIC) << OP_2DROP << OP_2DROP << OP_2DROP << OP_2DROP << OP_DROP;
               scriptPubKeyOrig.SetBitcoinAddress(stringFromVch(vvch[2]));
               scriptPubKey += scriptPubKeyOrig;
               found = true;
@@ -4008,7 +4122,6 @@ Value sendMessage(const Array& params, bool fHelp)
       {
         bool fInvalid = false;
         aesRawVector = DecodeBase64(aesBase64Plain.c_str(), &fInvalid);
-
       }
       else
       {
@@ -4252,7 +4365,7 @@ Value registerAliasGenerate(const Array& params, bool fHelp)
 
     string sigBase64 = EncodeBase64(&vchSig[0], vchSig.size());
 
-    scriptPubKey << OP_ALIAS_ENCRYPTED << vchEncryptedAlias << vchFromString(sigBase64) << vchFromString(keyAddress.ToString()) << hash << vchValue << vchFromString("0") << vchFromString("_") << OP_2DROP << OP_2DROP << OP_2DROP << OP_2DROP;
+    scriptPubKey << OP_ALIAS_ENCRYPTED << vchEncryptedAlias << vchFromString(sigBase64) << vchFromString(keyAddress.ToString()) << hash << vchValue << vchFromString("0") << vchFromString("_") << vchFromString(State::GROUND) << OP_2DROP << OP_2DROP << OP_2DROP << OP_2DROP << OP_DROP;
     scriptPubKey += scriptPubKeyOrig;
 
     ENTER_CRITICAL_SECTION(cs_main)
@@ -4378,7 +4491,7 @@ Value registerAlias(const Array& params, bool fHelp)
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Sign failed");
 
     string sigBase64 = EncodeBase64(&vchSig[0], vchSig.size());
-    scriptPubKey << OP_ALIAS_ENCRYPTED << vchEncryptedAlias << vchFromString(sigBase64) << vchFromString(strAddress) << hash << vchValue << vchFromString("0") << vchFromString("_") << OP_2DROP << OP_2DROP << OP_2DROP << OP_2DROP;
+    scriptPubKey << OP_ALIAS_ENCRYPTED << vchEncryptedAlias << vchFromString(sigBase64) << vchFromString(strAddress) << hash << vchValue << vchFromString("0") << vchFromString("_") << vchFromString(State::GROUND) << OP_2DROP << OP_2DROP << OP_2DROP << OP_2DROP << OP_DROP;
     scriptPubKey += scriptPubKeyOrig;
 
     ENTER_CRITICAL_SECTION(cs_main)
@@ -4443,7 +4556,7 @@ bool aliasScript(const CScript& script, int& op, vector<vector<unsigned char> > 
 
     pc--;
 
-    if((op == OP_ALIAS_ENCRYPTED && vvch.size() == 7) ||
+    if((op == OP_ALIAS_ENCRYPTED && vvch.size() == 8) ||
        (op == OP_ALIAS_SET && vvch.size() == 5) ||
            (op == OP_MESSAGE) ||
            (op == OP_ENCRYPTED_MESSAGE) ||

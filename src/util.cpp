@@ -129,7 +129,7 @@ public:
 }
 instance_of_cinit;
 
-void handleErrors(void)
+void ex(void)
 {
   ERR_print_errors_fp(stderr);
   abort();
@@ -144,16 +144,16 @@ int encrypt(unsigned char *plaintext, int plaintext_len, unsigned char *key,
 
   int ciphertext_len;
 
-  if(!(ctx = EVP_CIPHER_CTX_new())) handleErrors();
+  if(!(ctx = EVP_CIPHER_CTX_new())) ex();
 
-  if(1 != EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv))
-    handleErrors();
+  if(EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv) != 1)
+    ex();
 
-  if(1 != EVP_EncryptUpdate(ctx, ciphertext, &len, plaintext, plaintext_len))
-    handleErrors();
+  if(EVP_EncryptUpdate(ctx, ciphertext, &len, plaintext, plaintext_len) != 1)
+    ex();
   ciphertext_len = len;
 
-  if(1 != EVP_EncryptFinal_ex(ctx, ciphertext + len, &len)) handleErrors();
+  if(EVP_EncryptFinal_ex(ctx, ciphertext + len, &len) != 1) ex();
   ciphertext_len += len;
 
   EVP_CIPHER_CTX_free(ctx);
@@ -170,16 +170,16 @@ int decrypt(unsigned char* ciphertext, int ciphertext_len, unsigned char* key,
 
   int plaintext_len;
 
-  if(!(ctx = EVP_CIPHER_CTX_new())) handleErrors();
+  if(!(ctx = EVP_CIPHER_CTX_new())) ex();
 
-  if(1 != EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv))
-    handleErrors();
+  if(EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv) != 1)
+    ex();
 
-  if(1 != EVP_DecryptUpdate(ctx, plaintext, &len, ciphertext, ciphertext_len))
-    handleErrors();
+  if(EVP_DecryptUpdate(ctx, plaintext, &len, ciphertext, ciphertext_len) != 1)
+    ex();
   plaintext_len = len;
 
-  if(1 != EVP_DecryptFinal_ex(ctx, plaintext + len, &len)) handleErrors();
+  if(EVP_DecryptFinal_ex(ctx, plaintext + len, &len) != 1) ex();
   plaintext_len += len;
 
   EVP_CIPHER_CTX_free(ctx);
@@ -233,10 +233,6 @@ bool DecryptMessageAES(const string& encryptedMsg, string& message, vector<unsig
 {
 
   string tmp = EncodeBase64(&key[0], key.size());
-  printf("DecryptMessageAES\n");
-  printf("  key >>>%s<<<\n", tmp.c_str());
-  printf("  iv  >>>%s<<<\n", iv128Base64.c_str());
-  printf("  msg >>>%s<<<\n", encryptedMsg.c_str());
 
   ERR_load_crypto_strings();
   OpenSSL_add_all_algorithms();
