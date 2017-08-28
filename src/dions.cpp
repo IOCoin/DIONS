@@ -3679,7 +3679,7 @@ Value publicKey(const Array& params, bool fHelp)
 {
     if(fHelp || params.size() != 1)
         throw runtime_error(
-                "newPlublicKey <public_address>"
+                "publicKey <public_address>"
                 + HelpRequiringPassphrase());
 
   EnsureWalletIsUnlocked();

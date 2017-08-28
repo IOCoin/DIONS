@@ -115,19 +115,21 @@ bool CWallet::LoadRelay(const vchType& k, const Relay& r)
 
 bool CWallet::envCP0(const CPubKey &pubkey, string& rsaPrivKey)
 {
-   printf("CWallet::envCP0 1\n");
     AssertLockHeld(cs_wallet); // mapKeyMetadata
-   printf("CWallet::envCP0 2\n");
     rsaPrivKey = mapKeyMetadata[pubkey.GetID()].rsaPrivateKey;
-   printf("CWallet::envCP0 3\n");
     return (mapKeyMetadata[pubkey.GetID()].rsaPrivateKey != "");
 }
 
 bool CWallet::envCP1(const CPubKey &pubkey, string& rsaPubKey)
 {
     AssertLockHeld(cs_wallet); // mapKeyMetadata
-    rsaPubKey = mapKeyMetadata[pubkey.GetID()].rsaPublicKey;
-    return (mapKeyMetadata[pubkey.GetID()].rsaPublicKey != "");
+   if(mapKeyMetadata.count(pubkey.GetID()))
+   {
+     rsaPubKey = mapKeyMetadata[pubkey.GetID()].rsaPublicKey;
+     return true;
+   }
+   
+  return false;
 }
 
 bool CWallet::GetRandomKeyMetadata(const CPubKey& pubkey, vchType &r, string& r_)
@@ -175,10 +177,15 @@ bool CWallet::SetRSAMetadata(const CPubKey &pubkey)
 {
     AssertLockHeld(cs_wallet); // mapKeyMetadata
 
-    GenerateRSAKey(mapKeyMetadata[pubkey.GetID()].rsaPrivateKey,
-       mapKeyMetadata[pubkey.GetID()].rsaPublicKey);
+    if(mapKeyMetadata.count(pubkey.GetID()) == 0)
+    {
+      GenerateRSAKey(mapKeyMetadata[pubkey.GetID()].rsaPrivateKey,
+         mapKeyMetadata[pubkey.GetID()].rsaPublicKey);
 
-    return true;
+      return true;
+    }
+
+    return false;
 }
 
 bool CWallet::LoadCryptedKey(const CPubKey &vchPubKey, const std::vector<unsigned char> &vchCryptedSecret)
@@ -219,9 +226,13 @@ bool CWallet::relay(const vchType& k, Relay& r)
 {
     AssertLockHeld(cs_wallet);
 
-    lCache[k] = r;
+    if(lCache.count(k) == 0)
+    {
+      lCache[k] = r;
+      return true;
+    }
 
-    return true;
+    return false;
 }
 
 bool CWallet::Unlock(const SecureString& strWalletPassphrase)
