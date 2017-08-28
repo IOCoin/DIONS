@@ -140,18 +140,18 @@ int encrypt(unsigned char *plaintext, int plaintext_len, unsigned char *key,
 {
   EVP_CIPHER_CTX *ctx;
 
-  int len;
 
-  int ciphertext_len;
+  int ciphertext_len = 0;
 
   if(!(ctx = EVP_CIPHER_CTX_new())) ex();
 
   if(EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv) != 1)
     ex();
 
-  if(EVP_EncryptUpdate(ctx, ciphertext, &len, plaintext, plaintext_len) != 1)
-    ex();
-  ciphertext_len = len;
+  int len;
+    if(EVP_EncryptUpdate(ctx, ciphertext, &len, plaintext, plaintext_len) != 1)
+      ex();
+    ciphertext_len += len;
 
   if(EVP_EncryptFinal_ex(ctx, ciphertext + len, &len) != 1) ex();
   ciphertext_len += len;
@@ -166,18 +166,18 @@ int decrypt(unsigned char* ciphertext, int ciphertext_len, unsigned char* key,
 {
   EVP_CIPHER_CTX *ctx;
 
-  int len;
 
-  int plaintext_len;
+  int plaintext_len=0;
 
   if(!(ctx = EVP_CIPHER_CTX_new())) ex();
 
   if(EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv) != 1)
     ex();
 
+  int len;
   if(EVP_DecryptUpdate(ctx, plaintext, &len, ciphertext, ciphertext_len) != 1)
     ex();
-  plaintext_len = len;
+  plaintext_len += len;
 
   if(EVP_DecryptFinal_ex(ctx, plaintext + len, &len) != 1) ex();
   plaintext_len += len;
@@ -208,14 +208,17 @@ bool EncryptMessageAES(const string& message, string& encryptedMsg, vector<unsig
   const char* m = message.c_str();
   unsigned char* msg = (unsigned char*)m;
 
+  printf("EncryptMessageAES message.size() %d\n", message.size());
+
   ERR_load_crypto_strings();
   OpenSSL_add_all_algorithms();
 
 
-  unsigned char encrypted_msg[4096];
+  unsigned char* encrypted_msg = (unsigned char*)malloc(message.size() + 16);
+
 
   int encrypted_msg_len = encrypt(msg,
-                                  strlen((char*)msg),
+                                  message.size(),
                                   key256_array,
                                   iv128_array,
                                   encrypted_msg);
@@ -225,6 +228,7 @@ bool EncryptMessageAES(const string& message, string& encryptedMsg, vector<unsig
   encryptedMsg = EncodeBase64(encrypted_msg, encrypted_msg_len);
 
   iv128Base64 = EncodeBase64(&iv128[0], 16);
+  free(encrypted_msg);
 
   return true;
 }
@@ -232,26 +236,28 @@ bool EncryptMessageAES(const string& message, string& encryptedMsg, vector<unsig
 bool DecryptMessageAES(const string& encryptedMsg, string& message, vector<unsigned char>& key, string& iv128Base64)
 {
 
-  string tmp = EncodeBase64(&key[0], key.size());
-
   ERR_load_crypto_strings();
   OpenSSL_add_all_algorithms();
 
 
-  unsigned char plain[4096];
+  unsigned char* plain = (unsigned char*)malloc(encryptedMsg.size());
+
 
   vector<unsigned char> msg__ = DecodeBase64(encryptedMsg.c_str());
 
+  printf("msg__.size() %d\n", msg__.size());
+
   vector<unsigned char> iv128RawVector = DecodeBase64(iv128Base64.c_str());
-  int decryptedtext_len = decrypt(&msg__[0],
+  int p_len = decrypt(&msg__[0],
                                   msg__.size(),
                                   &key[0],
                                   &iv128RawVector[0],
                                   plain);
 
-  plain[decryptedtext_len] = '\0';
+  std::string s( reinterpret_cast<char const*>(plain), p_len ) ;
+  message = s;
+  free(plain);
 
-  message = (const char*)plain;
   return true;
 }
 

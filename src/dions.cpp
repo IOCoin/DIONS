@@ -1968,6 +1968,64 @@ Value nodeDebug1(const Array& params, bool fHelp)
     printf("-------------------------\n");
     return true;
 }
+Value transform(const Array& params, bool fHelp)
+{
+  if(fHelp || params.size() != 2)
+      throw runtime_error(
+              "aliasOut [<node opt>]\n"
+              );
+  string locatorStr = params[0].get_str();
+
+  std::transform(locatorStr.begin(), locatorStr.end(), locatorStr.begin(), ::tolower);
+  const vchType vchAlias = vchFromValue(locatorStr);
+  const char* locatorFile = (params[1].get_str()).c_str();
+
+  fs::path p = locatorFile;
+  if(!fs::exists(p))
+    throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Locator file does not exist");
+
+  ifstream file(locatorFile, ios_base::in | ios_base::binary);
+  filtering_streambuf<input> in;
+  in.push(gzip_compressor());
+  in.push(file);
+
+  stringstream ss;
+  boost::iostreams::copy(in, ss);
+  string s = ss.str();
+
+  printf("transform commpressed input, size %d\n", s.size());
+
+  vchType kAlpha;
+  GenerateAESKey(kAlpha);
+
+  string alpha = EncodeBase64(&kAlpha[0], kAlpha.size());
+
+  string gen;
+  string reference;
+    
+  bool fInvalid = false;
+  vector<unsigned char> v = DecodeBase64(alpha.c_str(), &fInvalid);
+
+  EncryptMessageAES(s, gen, v, reference);
+
+  printf("  gen.size() %d\n", gen.size());
+
+  vector<unsigned char> aesRawVector = DecodeBase64(alpha.c_str(), &fInvalid);
+  string decrypted;
+  DecryptMessageAES(gen,
+    decrypted,
+    aesRawVector,
+    reference);
+
+  stringstream is(decrypted, ios_base::in | ios_base::binary);   
+  filtering_streambuf<input> in__;
+  in__.push(gzip_decompressor());
+  in__.push(is);
+  ofstream file__("T", ios_base::binary);
+  boost::iostreams::copy(in__, file__);
+
+  return true;
+}
 Value validate(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() != 2)
@@ -1975,6 +2033,7 @@ Value validate(const Array& params, bool fHelp)
               "aliasOut [<node opt>]\n"
               );
 
+    printf("validate 11\n");
   string k1;
   vchType vchNodeLocator;
   k1 =(params[0]).get_str();
@@ -1998,11 +2057,18 @@ Value validate(const Array& params, bool fHelp)
         vector< vector<unsigned char> > vv;
         int nOut;
         int op__=-1;
+    printf("validate 10\n");
         if(!tx.aliasSet(op__, nOut, vv))
+        {
+    printf("validate 9\n");
           continue;
+        }
 
         if(op__ != OP_ALIAS_ENCRYPTED)
+        {
+    printf("validate 8\n");
           continue;
+        }
 
         const int nHeight = tx.GetHeightInMainChain();
         if(nHeight == -1)
@@ -2015,6 +2081,7 @@ Value validate(const Array& params, bool fHelp)
         aliasAddress(tx, strAddress);
         if(op__ == OP_ALIAS_ENCRYPTED)
         {
+    printf("validate 7\n");
           CBitcoinAddress r(strAddress);
           if(!r.IsValid())
             throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
@@ -2026,6 +2093,7 @@ Value validate(const Array& params, bool fHelp)
           CKey key;
           if(!pwalletMain->GetKey(keyID, key))
           {
+    printf("validate 6\n");
             continue;
           }
 
@@ -2033,17 +2101,21 @@ Value validate(const Array& params, bool fHelp)
           string rsaPrivKey;
           if(pwalletMain->envCP0(pubKey, rsaPrivKey) == false)
           {
+    printf("validate 4\n");
             continue;
           }
         if(mapAliasVchInt.find(vchFromString(decrypted)) != mapAliasVchInt.end() && mapAliasVchInt[vchFromString(decrypted)] > nHeight)
         {
+    printf("validate 5\n");
           continue;
         }
           mapAliasVchInt[vchFromString(decrypted)] = nHeight;
 
+    printf("validate 2\n");
           DecryptMessage(rsaPrivKey, stringFromVch(vv[0]), decrypted);
           if(k1 != decrypted) 
           {
+    printf("validate 3\n");
             continue;
           }
           else
@@ -2061,6 +2133,7 @@ Value validate(const Array& params, bool fHelp)
 
   if(found == true)
   {
+    printf("validate 1\n");
     string value;
     string iv128 = stringFromVch(vvch[6]);
     State hydr(stringFromVch(vvch[7]));
@@ -2078,6 +2151,7 @@ Value validate(const Array& params, bool fHelp)
           aesRawVector,
           iv128);
 
+    printf("validate 12\n");
         value = decrypted;
       }
     }
@@ -2108,12 +2182,20 @@ Value validate(const Array& params, bool fHelp)
       }
     }
 
+    try
+    {
     stringstream is(value, ios_base::in | ios_base::binary);   
     filtering_streambuf<input> in__;
     in__.push(gzip_decompressor());
     in__.push(is);
-    ofstream file__(out__, ios_base::out | ios_base::binary);
+    ofstream file__(out__, ios_base::binary);
     boost::iostreams::copy(in__, file__);
+    }
+    catch(std::exception& e)
+    {
+      std::cerr << e.what() << std::endl; 
+    }
+
     return true;
   }
 
@@ -3093,9 +3175,7 @@ Value transferAlias(const Array& params, bool fHelp)
     LEAVE_CRITICAL_SECTION(cs_main)
     return wtx.GetHash().GetHex();
 }
-Value uC(const Array& params, bool fHelp)
-{
-    if(fHelp || params.size() != 2)
+Value uC(const Array& params, bool fHelp) { if(fHelp || params.size() != 2)
         throw runtime_error(
                 "uC <url> <value>"
                 + HelpRequiringPassphrase());
@@ -3134,14 +3214,12 @@ Value uC(const Array& params, bool fHelp)
     }
 
     ifstream file(locatorFile, ios_base::in | ios_base::binary);
-
     filtering_streambuf<input> in;
     in.push(gzip_compressor());
     in.push(file);
 
     stringstream ss;
     boost::iostreams::copy(in, ss);
-
     string s = ss.str();
 
     string gen;
