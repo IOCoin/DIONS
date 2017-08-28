@@ -277,7 +277,6 @@ bool txPost(const vector<pair<CScript, int64_t> >& vecSend, const CWalletTx& wtx
     }
     LEAVE_CRITICAL_SECTION(cs_main)
 
-    printf(">>> nFeeRet %"PRIszu"\n", nFeeRet);
 
     return true;
 }
@@ -1993,8 +1992,6 @@ Value transform(const Array& params, bool fHelp)
   boost::iostreams::copy(in, ss);
   string s = ss.str();
 
-  printf("transform commpressed input, size %d\n", s.size());
-
   vchType kAlpha;
   GenerateAESKey(kAlpha);
 
@@ -2008,7 +2005,6 @@ Value transform(const Array& params, bool fHelp)
 
   EncryptMessageAES(s, gen, v, reference);
 
-  printf("  gen.size() %d\n", gen.size());
 
   vector<unsigned char> aesRawVector = DecodeBase64(alpha.c_str(), &fInvalid);
   string decrypted;
@@ -2033,7 +2029,6 @@ Value validate(const Array& params, bool fHelp)
               "aliasOut [<node opt>]\n"
               );
 
-    printf("validate 11\n");
   string k1;
   vchType vchNodeLocator;
   k1 =(params[0]).get_str();
@@ -2057,16 +2052,13 @@ Value validate(const Array& params, bool fHelp)
         vector< vector<unsigned char> > vv;
         int nOut;
         int op__=-1;
-    printf("validate 10\n");
         if(!tx.aliasSet(op__, nOut, vv))
         {
-    printf("validate 9\n");
           continue;
         }
 
         if(op__ != OP_ALIAS_ENCRYPTED)
         {
-    printf("validate 8\n");
           continue;
         }
 
@@ -2081,7 +2073,6 @@ Value validate(const Array& params, bool fHelp)
         aliasAddress(tx, strAddress);
         if(op__ == OP_ALIAS_ENCRYPTED)
         {
-    printf("validate 7\n");
           CBitcoinAddress r(strAddress);
           if(!r.IsValid())
             throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
@@ -2093,7 +2084,6 @@ Value validate(const Array& params, bool fHelp)
           CKey key;
           if(!pwalletMain->GetKey(keyID, key))
           {
-    printf("validate 6\n");
             continue;
           }
 
@@ -2101,21 +2091,17 @@ Value validate(const Array& params, bool fHelp)
           string rsaPrivKey;
           if(pwalletMain->envCP0(pubKey, rsaPrivKey) == false)
           {
-    printf("validate 4\n");
             continue;
           }
         if(mapAliasVchInt.find(vchFromString(decrypted)) != mapAliasVchInt.end() && mapAliasVchInt[vchFromString(decrypted)] > nHeight)
         {
-    printf("validate 5\n");
           continue;
         }
           mapAliasVchInt[vchFromString(decrypted)] = nHeight;
 
-    printf("validate 2\n");
           DecryptMessage(rsaPrivKey, stringFromVch(vv[0]), decrypted);
           if(k1 != decrypted) 
           {
-    printf("validate 3\n");
             continue;
           }
           else
@@ -2133,7 +2119,6 @@ Value validate(const Array& params, bool fHelp)
 
   if(found == true)
   {
-    printf("validate 1\n");
     string value;
     string iv128 = stringFromVch(vvch[6]);
     State hydr(stringFromVch(vvch[7]));
@@ -2151,7 +2136,6 @@ Value validate(const Array& params, bool fHelp)
           aesRawVector,
           iv128);
 
-    printf("validate 12\n");
         value = decrypted;
       }
     }
@@ -2856,7 +2840,6 @@ Value transferEncryptedAlias(const Array& params, bool fHelp)
       vchType vchAlias = vchFromString(recipientAddrStr);
       if (ln1Db.lKey (vchAlias))
       {
-        printf("  name exists\n");
         if (!ln1Db.lGet (vchAlias, vtxPos))
           return error("aliasHeight() : failed to read from name DB");
         if (vtxPos.empty ())
@@ -3010,14 +2993,21 @@ Value transferEncryptedAlias(const Array& params, bool fHelp)
                 ss << encryptedAliasForRecipient;
                 ss << hash.ToString();
 
+                vchType q1;
                 if(iv128 == "_")
+                {
                   ss << stringFromVch(vvch[4]);
+                  q1 = vvch[4]; 
+                }
                 else
+                {
                   ss << gen;
+                  q1 = vchFromString(gen); 
+                }
 
                 ss << encryptedRandForRecipient;
 
-                  vchType fs = vchFromString(localAddr.ToString());
+                vchType fs = vchFromString(localAddr.ToString());
 
                 CScript script;
                 script.SetBitcoinAddress(stringFromVch(vvch[2]));
@@ -3039,7 +3029,7 @@ Value transferEncryptedAlias(const Array& params, bool fHelp)
                   throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Sign failed");
 
                 string sigBase64 = EncodeBase64(&vchSig[0], vchSig.size());
-              scriptPubKey << OP_ALIAS_ENCRYPTED << vchFromString(encryptedAliasForRecipient) << vchFromString(sigBase64) << rVch << vvch[3] << vvch[4] << vchFromString(encryptedRandForRecipient) << vchFromString("_") << fs << OP_2DROP << OP_2DROP << OP_2DROP << OP_2DROP << OP_DROP;
+              scriptPubKey << OP_ALIAS_ENCRYPTED << vchFromString(encryptedAliasForRecipient) << vchFromString(sigBase64) << rVch << vvch[3] << q1 << vchFromString(encryptedRandForRecipient) << vchFromString(iv128) << fs << OP_2DROP << OP_2DROP << OP_2DROP << OP_2DROP << OP_DROP;
 
               scriptPubKey += scriptPubKeyOrig;
               found = true;
@@ -3093,7 +3083,6 @@ Value transferAlias(const Array& params, bool fHelp)
       vchType vchAlias = vchFromString(strAddress);
       if (ln1Db.lKey (vchAlias))
       {
-        printf("  name exists\n");
         if (!ln1Db.lGet (vchAlias, vtxPos))
           return error("aliasHeight() : failed to read from name DB");
         if (vtxPos.empty ())
@@ -4977,7 +4966,6 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
     int nPrevHeight;
     int nDepth;
 
-    printf("LOC %d\n", vvchArgs[0].size());
     if(vvchArgs[0].size() > MAX_LOCATOR_LENGTH)
         return error("alias transaction with alias too long");
 
@@ -5027,7 +5015,6 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
              {
                ENTER_CRITICAL_SECTION(cs_main)
                {
-                 printf("KEY INSERTED\n");
                  k1Export[k1Base].insert(tx.GetHash());
                }
                LEAVE_CRITICAL_SECTION(cs_main)
@@ -5182,7 +5169,6 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
         {
             if(!found || prevOp != OP_ALIAS_ENCRYPTED)
             {
-              printf("  OP_ALIAS_ENCRYPTED %d\n", prevOp);
                 return error("ConnectInputsPost() : decryptAlias tx without previous registerAlias tx");
             }
 
