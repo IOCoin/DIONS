@@ -440,7 +440,7 @@ bool CTransaction::AreInputsStandard(const MapPrevTx& mapInputs) const
         // beside "push data" in the scriptSig the
         // IsStandard() call returns false
         vector<vector<unsigned char> > stack;
-        if (!EvalScript(stack, vin[i].scriptSig, *this, i, 0))
+        if(!EvalScript(stack, vin[i].scriptSig, *this, i, SCRIPT_VERIFY_NONE, 0))
             return false;
 
         if (whichType == TX_SCRIPTHASH)
@@ -732,7 +732,7 @@ bool AcceptToMemoryPool(CTxMemPool& pool, CTransaction &tx,
         }
 
         CDiskTxPos cDiskTxPos = CDiskTxPos(1,1,1);
-        if(!tx.ConnectInputs(txdb, mapInputs, mapUnused, cDiskTxPos, pindexBest, false, false))
+        if(!tx.ConnectInputs(txdb, mapInputs, mapUnused, cDiskTxPos, pindexBest, false, false, STANDARD_SCRIPT_VERIFY_FLAGS))
         {
             return error("AcceptToMemoryPool : ConnectInputs failed %s", hash.ToString().substr(0,10).c_str());
         }
@@ -1575,7 +1575,7 @@ unsigned int CTransaction::GetP2SHSigOpCount(const MapPrevTx& inputs) const
 }
 
 bool CTransaction::ConnectInputs(CTxDB& txdb, MapPrevTx inputs, map<uint256, CTxIndex>& mapTestPool, CDiskTxPos& posThisTx,
-    CBlockIndex* pindexBlock, bool fBlock, bool fMiner)
+    CBlockIndex* pindexBlock, bool fBlock, bool fMiner, int flags)
 {
     // Take over previous transactions' spent pointers
     // fBlock is true when this is called from AcceptBlock when a new best-block is added to the blockchain
@@ -1638,8 +1638,25 @@ bool CTransaction::ConnectInputs(CTxDB& txdb, MapPrevTx inputs, map<uint256, CTx
             if (!(fBlock && (nBestHeight < Checkpoints::GetTotalBlocksEstimate())))
             {
                 // Verify signature
-                if (!VerifySignature(txPrev, *this, i, 0))
+                if (!VerifySignature(txPrev, *this, i, flags, 0))
                 {
+                    if (flags & STANDARD_NOT_MANDATORY_VERIFY_FLAGS) {
+                        // Check whether the failure was caused by a
+                        // non-mandatory script verification check, such as
+                        // non-null dummy arguments;
+                        // if so, don't trigger DoS protection to
+                        // avoid splitting the network between upgraded and
+                        // non-upgraded nodes.
+                        if (VerifySignature(txPrev, *this, i, flags & ~STANDARD_NOT_MANDATORY_VERIFY_FLAGS, 0))
+                            return error("ConnectInputs() : %s non-mandatory VerifySignature failed", GetHash().ToString().c_str());
+                    }
+                    // Failures of other flags indicate a transaction that is
+                    // invalid in new blocks, e.g. a invalid P2SH. We DoS ban
+                    // such nodes as they are not following the protocol. That
+                    // said during an upgrade careful thought should be taken
+                    // as to the correct behavior - we may want to continue
+                    // peering with non-upgraded nodes even after a soft-fork
+                    // super-majority vote has passed.
                     return DoS(100,error("ConnectInputs() : %s VerifySignature failed", GetHash().ToString().substr(0,10).c_str()));
                 }
             }
@@ -1710,6 +1727,17 @@ bool CBlock::ConnectBlock(CTxDB& txdb, CBlockIndex* pindex, bool fJustCheck)
     // Check it again in case a previous version let a bad block in, but skip BlockSig checking
     if (!CheckBlock(!fJustCheck, !fJustCheck, false))
         return false;
+
+     unsigned int flags = SCRIPT_VERIFY_NOCACHE;
+
+    if(V3(nTime))
+    {
+      flags |= SCRIPT_VERIFY_NULLDUMMY |
+               SCRIPT_VERIFY_STRICTENC |
+               SCRIPT_VERIFY_ALLOW_EMPTY_SIG |
+               SCRIPT_VERIFY_FIX_HASHTYPE |
+               SCRIPT_VERIFY_CHECKLOCKTIMEVERIFY;
+    }
 
     //// issue here: it doesn't know the version
     unsigned int nTxPos;
@@ -1789,7 +1817,7 @@ bool CBlock::ConnectBlock(CTxDB& txdb, CBlockIndex* pindex, bool fJustCheck)
             if (tx.IsCoinStake())
                 nStakeReward = nTxValueOut - nTxValueIn;
 
-            if (!tx.ConnectInputs(txdb, mapInputs, mapQueuedChanges, posThisTx, pindex, true, false))
+            if (!tx.ConnectInputs(txdb, mapInputs, mapQueuedChanges, posThisTx, pindex, true, false, flags))
                 return false;
         }
 

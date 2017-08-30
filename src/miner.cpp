@@ -319,7 +319,7 @@ CBlock* CreateNewBlock(CWallet* pwallet, bool fProofOfStake, int64_t* pFees)
                 continue;
 
             CDiskTxPos cDiskTxPos = CDiskTxPos(1,1,1);
-            if (!tx.ConnectInputs(txdb, mapInputs, mapTestPoolTmp, cDiskTxPos, pindexPrev, false, true))
+            if (!tx.ConnectInputs(txdb, mapInputs, mapTestPoolTmp, cDiskTxPos, pindexPrev, false, true, MANDATORY_SCRIPT_VERIFY_FLAGS))
                 continue;
             mapTestPoolTmp[tx.GetHash()] = CTxIndex(CDiskTxPos(1,1,1), tx.vout.size());
             swap(mapTestPool, mapTestPoolTmp);
