@@ -391,9 +391,6 @@ Value createrawtransaction(const Array& params, bool fHelp)
           throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid I/OCoin address or unknown alias");
         }
       }
-        //CBitcoinAddress address(s.name_);
-        //if (!address.IsValid())
-        //    throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, string("Invalid I/OCoin address: ")+s.name_);
 
         if (setAddress.count(address))
             throw JSONRPCError(RPC_INVALID_PARAMETER, string("Invalid parameter, duplicated address: ")+s.name_);

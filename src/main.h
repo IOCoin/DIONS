@@ -110,7 +110,7 @@ extern bool fUseFastIndex;
 extern unsigned int nDerivationMethodIndex;
 
 extern bool fEnforceCanonical;
-
+extern int nStakeMinConfirmations;
 // Minimum disk space required - used in CheckDiskSpace()
 static const uint64_t nMinDiskSpace = 52428800;
 
@@ -140,6 +140,7 @@ int64_t GetProofOfStakeInterest(int nHeight);
 int64_t GetProofOfStakeReward(int64_t nCoinAge, int64_t nFees, int nHeight);
 unsigned int ComputeMinWork(unsigned int nBase, int64_t nTime);
 unsigned int ComputeMinStake(unsigned int nBase, int64_t nTime, unsigned int nBlockTime);
+bool minBase(const CTxIndex& txindex, const CBlockIndex* pindexFrom, int nMaxDepth, int& nActualDepth);
 int GetNumBlocksOfPeers();
 bool IsInitialBlockDownload();
 std::string GetWarnings(std::string strFor);
@@ -706,7 +707,7 @@ public:
                        std::map<uint256, CTxIndex>& mapTestPool, CDiskTxPos& posThisTx,
                        CBlockIndex* pindexBlock, bool fBlock, bool fMiner, int flags);
     bool CheckTransaction() const;
-    bool GetCoinAge(CTxDB& txdb, uint64_t& nCoinAge) const;  // ppcoin: get transaction coin age
+    bool GetCoinAge(CTxDB& txdb, const CBlockIndex* pindexPrev, uint64_t& nCoinAge) const;  // ppcoin: get transaction coin age
 
 protected:
     const CTxOut& GetOutputFor(const CTxIn& input, const MapPrevTx& inputs) const;
@@ -1119,7 +1120,6 @@ public:
     bool AddToBlockIndex(unsigned int nFile, unsigned int nBlockPos, const uint256& hashProof);
     bool CheckBlock(bool fCheckPOW=true, bool fCheckMerkleRoot=true, bool fCheckSig=true) const;
     bool AcceptBlock();
-    bool GetCoinAge(uint64_t& nCoinAge) const; // ppcoin: calculate total coin age spent in block
     bool SignBlock(CWallet& keystore, int64_t nFees);
     bool CheckBlockSignature() const;
 

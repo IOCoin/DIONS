@@ -426,10 +426,10 @@ bool CheckStakeKernelHash(CBlockIndex* pindexPrev, unsigned int nBits, const CBl
 // Check kernel hash target and coinstake signature
 bool CheckProofOfStake(CBlockIndex* pindexPrev, const CTransaction& tx, unsigned int nBits, uint256& hashProofOfStake, uint256& targetProofOfStake)
 {
-    if (!tx.IsCoinStake())
+    if(!tx.IsCoinStake())
         return error("CheckProofOfStake() : called on non-coinstake %s", tx.GetHash().ToString().c_str());
 
-    // Kernel (input 0) must match the stake hash target per coin age (nBits)
+    //Kernel (input 0) must match the stake hash target per coin age (nBits)
     const CTxIn& txin = tx.vin[0];
 
     // First try finding the previous transaction in database
@@ -447,6 +447,19 @@ bool CheckProofOfStake(CBlockIndex* pindexPrev, const CTransaction& tx, unsigned
     CBlock block;
     if (!block.ReadFromDisk(txindex.pos.nFile, txindex.pos.nBlockPos, false))
         return fDebug? error("CheckProofOfStake() : read block failed") : false; // unable to read block of previous transaction
+
+    if(V3(nBestHeight))
+    {
+        int base;
+        if(!minBase(txindex, pindexPrev, nStakeMinConfirmations - 1, base))
+            return tx.DoS(100, error("CheckProofOfStake() : insufficient depth %d", base + 1));
+    }
+    else
+    {
+        unsigned int nTimeBlockFrom = block.GetBlockTime();
+        if (nTimeBlockFrom + nStakeMinAge > tx.nTime)
+            return error("CheckProofOfStake() : min age violation");
+    }
 
     if (!CheckStakeKernelHash(pindexPrev, nBits, block, txindex.pos.nTxPos - txindex.pos.nBlockPos, txPrev, txin.prevout, tx.nTime, hashProofOfStake, targetProofOfStake, fDebug))
         return tx.DoS(1, error("CheckProofOfStake() : INFO: check kernel failed on coinstake %s, hashProof=%s", tx.GetHash().ToString().c_str(), hashProofOfStake.ToString().c_str())); // may occur during initial download or if behind on block chain sync

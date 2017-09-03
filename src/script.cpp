@@ -440,7 +440,7 @@ bool EvalScript(vector<vector<unsigned char> >& stack, const CScript& script, co
         // In the rare event that the argument may be < 0 due to
         // some arithmetic being done first, you can always use
         // 0 MAX CHECKLOCKTIMEVERIFY.
-        if (nLockTime < 0)
+        if(nLockTime < 0)
             return false;
     
         // There are two types of nLockTime: lock-by-blockheight
@@ -475,7 +475,6 @@ bool EvalScript(vector<vector<unsigned char> >& stack, const CScript& script, co
             return false;
     
         break;
-    
     }
 
                 case OP_NOP1: case OP_NOP3: case OP_NOP4: case OP_NOP5:
@@ -1836,19 +1835,20 @@ bool ExtractDestinations(const CScript& scriptPubKey, txnouttype& typeRet, vecto
 bool VerifyScript(const CScript& scriptSig, const CScript& scriptPubKey, const CTransaction& txTo, unsigned int nIn, int flags,
                   int nHashType)
 {
+  printf("VerifyScript\n");
     vector<vector<unsigned char> > stack, stackCopy;
     if (!EvalScript(stack, scriptSig, txTo, nIn, flags, nHashType))
     {
         return false;
-     }
+    }
 
     stackCopy = stack;
 
     if (!EvalScript(stack, scriptPubKey, txTo, nIn, flags, nHashType))
     {
         return false;
-   } 
-    if (stack.empty())
+    }
+    if(stack.empty())
     {
         return false;
     }

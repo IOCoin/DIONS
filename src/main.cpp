@@ -34,6 +34,7 @@ CCriticalSection cs_main;
 CTxMemPool mempool;
 unsigned int nTransactionsUpdated = 0;
 
+int nStakeMinConfirmations = 500;
 
 map<uint256, CBlockIndex*> mapBlockIndex;
 set<pair<COutPoint, unsigned int> > setStakeSeen;
@@ -135,6 +136,20 @@ void static EraseFromWallets(uint256 hash)
 {
     BOOST_FOREACH(CWallet* pwallet, setpwalletRegistered)
         pwallet->EraseFromWallet(hash);
+}
+
+bool minBase(const CTxIndex& txindex, const CBlockIndex* pindexFrom, int nMaxDepth, int& nActualDepth)
+{
+    for (const CBlockIndex* pindex = pindexFrom; pindex && pindexFrom->nHeight - pindex->nHeight < nMaxDepth; pindex = pindex->pprev)
+    {
+        if (pindex->nBlockPos == txindex.pos.nBlockPos && pindex->nFile == txindex.pos.nFile)
+        {
+            nActualDepth = pindexFrom->nHeight - pindex->nHeight;
+            return false;
+        }
+    }
+
+    return true;
 }
 
 // make sure all wallets know about the given transaction, in the given block
@@ -1166,12 +1181,19 @@ int64_t GetProofOfStakeInterestV3(int nHeight)
     return rate;
 }
 
-// miner's coin stake reward based on coin age spent (coin-days)
 int64_t GetProofOfStakeReward(int64_t nCoinAge, int64_t nFees, int nHeight)
 {
-    //int64_t interest = GetProofOfStakeInterest(nHeight);
-    int64_t interest = (nHeight>STAKE_INTEREST_V3)? GetProofOfStakeInterestV3(nHeight) : GetProofOfStakeInterestV2(nHeight);
-    int64_t nSubsidy = nCoinAge * interest * 33 / (365 * 33 + 8);
+    int64_t nSubsidy;
+
+    if(V3(nHeight))
+    {
+      nSubsidy = COIN * 1.5;
+    }
+    else
+    {
+      int64_t interest = (nHeight>STAKE_INTEREST_V3)? GetProofOfStakeInterestV3(nHeight) : GetProofOfStakeInterestV2(nHeight);
+      nSubsidy = nCoinAge * interest * 33 / (365 * 33 + 8);
+    }
 
     if (fDebug && GetBoolArg("-printcreation"))
         printf("GetProofOfStakeReward(): create=%s nCoinAge=%"PRId64"\n", FormatMoney(nSubsidy).c_str(), nCoinAge);
@@ -1311,6 +1333,12 @@ static unsigned int GetNextTargetRequiredV3(const CBlockIndex* pindexLast, bool 
     if (nActualSpacing < 0)
         nActualSpacing = nTargetSpacing;
 
+    if(V3(pindexLast->nHeight))
+    {
+      if(nActualSpacing > nTargetSpacing * 10)
+        nActualSpacing = nTargetSpacing;
+    }
+
     // ppcoin: target change every block
     // ppcoin: retarget with exponential moving toward target spacing
     CBigNum bnNew, bnMit;
@@ -1338,15 +1366,15 @@ static unsigned int GetNextTargetRequiredV3(const CBlockIndex* pindexLast, bool 
 
 unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, bool fProofOfStake, int64_t nFees)
 {
-    if (pindexLast->nHeight < 24376)
-        return GetNextTargetRequiredV1(pindexLast, fProofOfStake);
+    if(pindexLast->nHeight < 24376)
+      return GetNextTargetRequiredV1(pindexLast, fProofOfStake);
     else
-        {
-        if (pindexLast->nHeight < POS_v3_DIFFICULTY_HEIGHT)
-            return GetNextTargetRequiredV2(pindexLast, fProofOfStake);
-        else
-            return GetNextTargetRequiredV3(pindexLast, fProofOfStake, nFees);
-        }
+    {
+      if (pindexLast->nHeight < POS_v3_DIFFICULTY_HEIGHT)
+        return GetNextTargetRequiredV2(pindexLast, fProofOfStake);
+      else
+        return GetNextTargetRequiredV3(pindexLast, fProofOfStake, nFees);
+    }
 }
 
 bool CheckProofOfWork(uint256 hash, unsigned int nBits)
@@ -1577,6 +1605,7 @@ unsigned int CTransaction::GetP2SHSigOpCount(const MapPrevTx& inputs) const
 bool CTransaction::ConnectInputs(CTxDB& txdb, MapPrevTx inputs, map<uint256, CTxIndex>& mapTestPool, CDiskTxPos& posThisTx,
     CBlockIndex* pindexBlock, bool fBlock, bool fMiner, int flags)
 {
+  printf("ConnectInputs\n");
     // Take over previous transactions' spent pointers
     // fBlock is true when this is called from AcceptBlock when a new best-block is added to the blockchain
     // fMiner is true when called from the internal bitcoin miner
@@ -1730,7 +1759,7 @@ bool CBlock::ConnectBlock(CTxDB& txdb, CBlockIndex* pindex, bool fJustCheck)
 
      unsigned int flags = SCRIPT_VERIFY_NOCACHE;
 
-    if(V3(nTime))
+    if(V3(pindex->nHeight))
     {
       flags |= SCRIPT_VERIFY_NULLDUMMY |
                SCRIPT_VERIFY_STRICTENC |
@@ -1837,7 +1866,7 @@ bool CBlock::ConnectBlock(CTxDB& txdb, CBlockIndex* pindex, bool fJustCheck)
     {
         // ppcoin: coin stake tx earns reward instead of paying fee
         uint64_t nCoinAge;
-        if (!vtx[1].GetCoinAge(txdb, nCoinAge))
+        if (!vtx[1].GetCoinAge(txdb, pindex->pprev, nCoinAge))
             return error("ConnectBlock() : %s unable to get coin age for coinstake", vtx[1].GetHash().ToString().substr(0,10).c_str());
 
         int64_t nCalculatedStakeReward = GetProofOfStakeReward(nCoinAge, nFees, pindex->nHeight);
@@ -2131,7 +2160,7 @@ bool CBlock::SetBestChain(CTxDB& txdb, CBlockIndex* pindexNew)
 // guaranteed to be in main chain by sync-checkpoint. This rule is
 // introduced to help nodes establish a consistent view of the coin
 // age (trust score) of competing branches.
-bool CTransaction::GetCoinAge(CTxDB& txdb, uint64_t& nCoinAge) const
+bool CTransaction::GetCoinAge(CTxDB& txdb, const CBlockIndex* pindexPrev, uint64_t& nCoinAge) const
 {
     CBigNum bnCentSecond = 0;  // coin age in the unit of cent-seconds
     nCoinAge = 0;
@@ -2141,54 +2170,43 @@ bool CTransaction::GetCoinAge(CTxDB& txdb, uint64_t& nCoinAge) const
 
     BOOST_FOREACH(const CTxIn& txin, vin)
     {
-        // First try finding the previous transaction in database
-        CTransaction txPrev;
-        CTxIndex txindex;
-        if (!txPrev.ReadFromDisk(txdb, txin.prevout, txindex))
-            continue;  // previous transaction not in main chain
-        if (nTime < txPrev.nTime)
-            return false;  // Transaction timestamp violation
+      // First try finding the previous transaction in database
+      CTransaction txPrev;
+      CTxIndex txindex;
+      if (!txPrev.ReadFromDisk(txdb, txin.prevout, txindex))
+        continue;  // previous transaction not in main chain
+      if (nTime < txPrev.nTime)
+        return false;  // Transaction timestamp violation
 
+      if(V3(pindexPrev->nHeight))
+      {
+        int nSpendDepth;
+        if(!minBase(txindex, pindexPrev, nStakeMinConfirmations - 1, nSpendDepth))
+        {
+          continue;
+        }
+      }
+      else
+      {
         // Read block header
         CBlock block;
         if (!block.ReadFromDisk(txindex.pos.nFile, txindex.pos.nBlockPos, false))
-            return false; // unable to read block of previous transaction
+          return false; // unable to read block of previous transaction
         if (block.GetBlockTime() + nStakeMinAge > nTime)
-            continue; // only count coins meeting min age requirement
+          continue; // only count coins meeting min age requirement
 
         int64_t nValueIn = txPrev.vout[txin.prevout.n].nValue;
         bnCentSecond += CBigNum(nValueIn) * (nTime-txPrev.nTime) / CENT;
 
         if (fDebug && GetBoolArg("-printcoinage"))
-            printf("coin age nValueIn=%"PRId64" nTimeDiff=%d bnCentSecond=%s\n", nValueIn, nTime - txPrev.nTime, bnCentSecond.ToString().c_str());
+          printf("coin age nValueIn=%"PRId64" nTimeDiff=%d bnCentSecond=%s\n", nValueIn, nTime - txPrev.nTime, bnCentSecond.ToString().c_str());
+      }
     }
 
     CBigNum bnCoinDay = bnCentSecond * CENT / COIN / (24 * 60 * 60);
     if (fDebug && GetBoolArg("-printcoinage"))
         printf("coin age bnCoinDay=%s\n", bnCoinDay.ToString().c_str());
     nCoinAge = bnCoinDay.getuint64();
-    return true;
-}
-
-// ppcoin: total coin age spent in block, in the unit of coin-days.
-bool CBlock::GetCoinAge(uint64_t& nCoinAge) const
-{
-    nCoinAge = 0;
-
-    CTxDB txdb("r");
-    BOOST_FOREACH(const CTransaction& tx, vtx)
-    {
-        uint64_t nTxCoinAge;
-        if (tx.GetCoinAge(txdb, nTxCoinAge))
-            nCoinAge += nTxCoinAge;
-        else
-            return false;
-    }
-
-    if (nCoinAge == 0) // block coin age minimum 1 coin-day
-        nCoinAge = 1;
-    if (fDebug && GetBoolArg("-printcoinage"))
-        printf("block coin age total nCoinDays=%"PRId64"\n", nCoinAge);
     return true;
 }
 
