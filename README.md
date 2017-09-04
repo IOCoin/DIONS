@@ -2,13 +2,15 @@ I/O Coin - DIONS (Decentralized Input Output Name Server)
 ===========================
 
 
-I/O Coin is a POS-Based Blockchain.
+I/O Coin is a POS CiPher-Based Blockchain.
 
 
 Features:
 * Symbol: IOC
 * 16 Million POW coins
 * 22 Million total coins
+*  4 MB Blocks
+*  2 MB Data Cap
 * 60 second blocktime
 * Dinamic interest 1-2%, based on the percentage of coins staking
 * Rewards .01 IOC per transaction
