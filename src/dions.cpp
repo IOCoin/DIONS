@@ -48,6 +48,8 @@ std::map<vchType, set<uint256> > k1Export;
 extern std::map<uint160, vchType> mapLocatorHashes;
 #endif
 
+extern int INTERN_REF0__;
+
 extern uint256 SignatureHash(CScript scriptCode, const CTransaction& txTo, unsigned int nIn, int nHashType);
 
 extern bool Solver(const CKeyStore& keystore, const CScript& scriptPubKey, uint256 hash, int nHashType, CScript& scriptSigRet, txnouttype& type);
@@ -57,6 +59,7 @@ extern Value sendtoaddress(const Array& params, bool fHelp);
 bool getImportedPubKey(string senderAddress, string recipientAddress, vchType& recipientPubKeyVch, vchType& aesKeyBase64EncryptedVch);
 bool getImportedPubKey(string recipientAddress, vchType& recipientPubKeyVch);
 bool internalReference__(string recipientAddress, vchType& recipientPubKeyVch);
+bool tunnelSwitch__(int r);
 
 vchType vchFromValue(const Value& value)
 {
@@ -1057,10 +1060,14 @@ Value nodeValidate(const Array& params, bool fHelp)
         pwalletMain->GetPubKey(keyID, vchPubKey);
         vchType vchRand;
 
-        const int expiresIn = nHeight + scaleMonitor() - pindexBest->nHeight;
-        aliasObj.push_back(Pair("expires_in", expiresIn));
-        if(expiresIn <= 0)
+        const int ex = nHeight + scaleMonitor() - pindexBest->nHeight;
+        aliasObj.push_back(Pair("expires_in", ex));
+        if(ex <= 0)
           aliasObj.push_back(Pair("expired", 1));
+
+        if(tunnelSwitch__(ex))
+          aliasObj.push_back(Pair("tunnel_switch", 1));
+  
 
         if(mapState.count(vchAlias) && mapState[vchAlias].size())
         {
@@ -3811,6 +3818,10 @@ Value sendSymmetric(const Array& params, bool fHelp)
     res.push_back(sigBase64);
     return res;
 
+}
+bool tunnelSwitch__(int r)
+{
+  return r < INTERN_REF0__;
 }
 bool internalReference__(string ref__, vchType& recipientPubKeyVch)
 {

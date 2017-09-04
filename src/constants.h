@@ -5,6 +5,7 @@
 
 typedef std::vector<unsigned char> vchType;
 
+
 #endif
 
 
