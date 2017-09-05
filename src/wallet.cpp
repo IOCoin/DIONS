@@ -116,8 +116,12 @@ bool CWallet::LoadRelay(const vchType& k, const Relay& r)
 bool CWallet::envCP0(const CPubKey &pubkey, string& rsaPrivKey)
 {
     AssertLockHeld(cs_wallet); // mapKeyMetadata
-    rsaPrivKey = mapKeyMetadata[pubkey.GetID()].patch.domainImage();
-    return (! (mapKeyMetadata[pubkey.GetID()].patch.scale_() || mapKeyMetadata[pubkey.GetID()].patch.scale()));
+    if(mapKeyMetadata.count(pubkey.GetID()))
+    {
+      if(! (mapKeyMetadata[pubkey.GetID()].patch.scale_() || mapKeyMetadata[pubkey.GetID()].patch.scale()))
+        rsaPrivKey = mapKeyMetadata[pubkey.GetID()].patch.domainImage();
+    }
+    return false;
 }
 
 bool CWallet::envCP1(const CPubKey &pubkey, string& rsaPubKey)
@@ -125,8 +129,8 @@ bool CWallet::envCP1(const CPubKey &pubkey, string& rsaPubKey)
     AssertLockHeld(cs_wallet); // mapKeyMetadata
    if(mapKeyMetadata.count(pubkey.GetID()))
    {
-     rsaPubKey = mapKeyMetadata[pubkey.GetID()].patch.codomainImage();
-    return (! (mapKeyMetadata[pubkey.GetID()].patch.scale_() || mapKeyMetadata[pubkey.GetID()].patch.scale()));
+    if(! (mapKeyMetadata[pubkey.GetID()].patch.scale_() || mapKeyMetadata[pubkey.GetID()].patch.scale()))
+       rsaPubKey = mapKeyMetadata[pubkey.GetID()].patch.codomainImage();
    }
    
   return false;

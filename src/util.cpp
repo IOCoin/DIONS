@@ -1593,7 +1593,7 @@ int atod(const std::string& addr, std::string& d)
 {
     printf("atod %s\n", addr.c_str());
     CBitcoinAddress address__(addr);
-    if (!address__.IsValid())
+    if(!address__.IsValid())
       return -2;
 
     LocatorNodeDB ln1Db("r");

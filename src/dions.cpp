@@ -397,7 +397,6 @@ Value myRSAKeys(const Array& params, bool fHelp)
   Array jsonAddressRSAList;
   BOOST_FOREACH(const PAIRTYPE(CBitcoinAddress, string)& item, pwalletMain->mapAddressBook)
   {
-
     const CBitcoinAddress& a = item.first;
     const string& aliasStr = item.second;
     Object oAddressInfo;
@@ -430,7 +429,6 @@ Value myRSAKeys(const Array& params, bool fHelp)
       continue;
 
     jsonAddressRSAList.push_back(oAddressInfo);
-
   }
 
   return jsonAddressRSAList;

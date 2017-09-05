@@ -30,8 +30,8 @@ class CoordinateVector : InterfaceCrypt
 
     inline bool scale_() { return this->d0_.size() == 0; }
     inline bool scale() { return this->d1_.size() == 0; }
-    inline string&   domainImage() { this->d0_.back(); }
-    inline string& codomainImage() { this->d1_.back(); }
+    inline string&   domainImage() { return this->d0_.back(); }
+    inline string& codomainImage() { return this->d1_.back(); }
     inline void   domain(string s) { this->d0_.push_back(s); }
     inline void codomain(string s) { this->d1_.push_back(s); }
 
