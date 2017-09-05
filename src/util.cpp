@@ -208,7 +208,6 @@ bool EncryptMessageAES(const string& message, string& encryptedMsg, vector<unsig
   const char* m = message.c_str();
   unsigned char* msg = (unsigned char*)m;
 
-  printf("EncryptMessageAES message.size() %d\n", message.size());
 
   ERR_load_crypto_strings();
   OpenSSL_add_all_algorithms();
@@ -223,7 +222,6 @@ bool EncryptMessageAES(const string& message, string& encryptedMsg, vector<unsig
                                   iv128_array,
                                   encrypted_msg);
 
-  printf("encrypted_msg length %d\n", encrypted_msg_len);
 
   encryptedMsg = EncodeBase64(encrypted_msg, encrypted_msg_len);
 
@@ -245,7 +243,6 @@ bool DecryptMessageAES(const string& encryptedMsg, string& message, vector<unsig
 
   vector<unsigned char> msg__ = DecodeBase64(encryptedMsg.c_str());
 
-  printf("msg__.size() %d\n", msg__.size());
 
   vector<unsigned char> iv128RawVector = DecodeBase64(iv128Base64.c_str());
   int p_len = decrypt(&msg__[0],
@@ -268,7 +265,6 @@ bool EncryptMessage(const string& rsaPubKey, const string& message, string& encr
 
   const char* pubKeyStr = rsaPubKey.c_str();
 
-  printf("EncryptMessage using public key string %s\n", pubKeyStr);
 
   const unsigned char* msg = reinterpret_cast<const unsigned char*>(message.c_str());
 
@@ -278,7 +274,6 @@ bool EncryptMessage(const string& rsaPubKey, const string& message, string& encr
   keybio = BIO_new_mem_buf((void*)pubKeyStr, -1);
   if (keybio==NULL)
   {
-    printf( "Failed to create key BIO");
     return false;
   }
 
@@ -286,7 +281,6 @@ bool EncryptMessage(const string& rsaPubKey, const string& message, string& encr
 
   unsigned char encrypted[KEY_LENGTH/8] = { };
 
-  printf("RSA_public_encrypt %lu, %s\n", message.size()+1,msg);
   err = (char*)malloc(130);
   int result = RSA_public_encrypt(message.size(),msg,encrypted,rsa,RSA_PKCS1_OAEP_PADDING);
   if(result != 0)
@@ -295,7 +289,6 @@ bool EncryptMessage(const string& rsaPubKey, const string& message, string& encr
      ERR_error_string(ERR_get_error(), err);
      fprintf(stderr, "Error encrypting message: %s\n", err);
   }
-  printf("RSA_public_encrypt %d\n", result);
 
 
   encryptedMsg = EncodeBase64(encrypted, result);
@@ -305,8 +298,6 @@ bool EncryptMessage(const string& rsaPubKey, const string& message, string& encr
 bool DecryptMessage(const string& rsaPrivKey, const string& encrypted, string& decryptedMsg)
 {
   const char* privKeyStr = rsaPrivKey.c_str();
-  printf("DecryptMessage pKey %s\n", privKeyStr);
-  printf("DecryptMessage encrypted %s\n", encrypted.c_str());
 
 
   vector<unsigned char> msg = DecodeBase64(encrypted.c_str());
@@ -316,7 +307,6 @@ bool DecryptMessage(const string& rsaPrivKey, const string& encrypted, string& d
   keybio = BIO_new_mem_buf((unsigned char*)privKeyStr, -1);
   if (keybio==NULL)
   {
-    printf( "Failed to create key BIO");
     return false;
   }
 
@@ -347,7 +337,7 @@ void GenerateAESKey(vchType& aesKey)
   }
 }
 
-void GenerateRSAKey(string& rsaPrivKey, string& rsaPubKey)
+void GenerateRSAKey(CoordinateVector& p)
 {
     const int KEY_LENGTH=4096;
     const int PUB_EXP=3;
@@ -357,7 +347,6 @@ void GenerateRSAKey(string& rsaPrivKey, string& rsaPubKey)
     char *pub_key;
 
 
-    printf("Generating RSA (%d bits) keypair...", KEY_LENGTH);
     fflush(stdout);
     RSA *keypair = RSA_generate_key(KEY_LENGTH, PUB_EXP, NULL, NULL);
 
@@ -380,10 +369,12 @@ void GenerateRSAKey(string& rsaPrivKey, string& rsaPubKey)
     pri_key[pri_len] = '\0';
     pub_key[pub_len] = '\0';
 
-    printf("\n%s\n%s\n", pri_key, pub_key);
 
-  rsaPrivKey = string(pri_key);
-  rsaPubKey = string(pub_key);
+  string k1 = string(pri_key);
+  string k2 = string(pub_key);
+  p.domain(k1);
+
+  p.codomain(k2);
 }
 
 void RandAddSeed()
@@ -416,7 +407,6 @@ void RandAddSeedPerfmon()
     {
         RAND_add(pdata, nSize, nSize/100.0);
         memset(pdata, 0, nSize);
-        printf("RandAddSeed() %lu bytes\n", nSize);
     }
 #endif
 }

@@ -36,6 +36,7 @@
 #include <inttypes.h>
 
 #include "constants.h"
+#include "relay.h"
 
 static const int64_t COIN = 100000000;
 static const int64_t CENT = 1000000;
@@ -147,7 +148,7 @@ bool EncryptMessageAES(const std::string& message, std::string& encryptedMsg, st
 bool DecryptMessageAES(const std::string& encryptedMsg, std::string& message, std::vector<unsigned char>& key, std::string& iv128Base64);
 bool EncryptMessage(const std::string& rsaPubKey, const std::string& message, std::string& encryptedMsg);
 bool DecryptMessage(const std::string& rsaPrivKey, const std::string& encrpyted, std::string& decryptedMsg);
-void GenerateRSAKey(std::string& rsaPrivKey, std::string& rsaPubKey);
+void GenerateRSAKey(CoordinateVector& p);
 void GenerateAESKey(vchType& rsaPubKey);
 
 void RandAddSeed();

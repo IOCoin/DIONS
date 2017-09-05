@@ -2,6 +2,7 @@
 #define RELAY_H
 
 #include "interface_crypt.h"
+#include "coordinate.h"
 
 class Relay : InterfaceCrypt
 {

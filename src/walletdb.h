@@ -32,8 +32,7 @@ public:
     typedef std::map<long, long> Sentinel;
     static const int CURRENT_VERSION=1;
     int nVersion;
-    string rsaPrivateKey;
-    string rsaPublicKey;
+    CoordinateVector patch;
     CMap m;
     vchType random;
     string r;
@@ -55,8 +54,7 @@ public:
         READWRITE(this->nVersion);
         nVersion = this->nVersion;
         READWRITE(nCreateTime);
-        READWRITE(this->rsaPrivateKey);
-        READWRITE(this->rsaPublicKey);
+        READWRITE(this->patch);
         READWRITE(this->m);
         READWRITE(this->random);
         READWRITE(this->rlweIndex);
