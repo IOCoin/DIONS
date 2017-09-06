@@ -3710,17 +3710,17 @@ Value publicKey(const Array& params, bool fHelp)
   string testKey;
 
   if(!pwalletMain->SetRSAMetadata(pubKey))
-    throw JSONRPCError(RPC_TYPE_ERROR, "Failed to load meta data for key");
+    throw JSONRPCError(RPC_TYPE_ERROR, "Failed set");
 
   if(!walletdb.UpdateKey(pubKey, pwalletMain->mapKeyMetadata[pubKey.GetID()]))
     throw JSONRPCError(RPC_TYPE_ERROR, "Failed to write meta data for key");
 
   if(!pwalletMain->envCP1(pubKey, testKey))
-    throw JSONRPCError(RPC_TYPE_ERROR, "Failed to load meta data for key");
+    throw JSONRPCError(RPC_TYPE_ERROR, "Failed load alpha");
 
   string pKey;
   if(!pwalletMain->envCP0(pubKey, pKey))
-    throw JSONRPCError(RPC_TYPE_ERROR, "Failed to load meta data for key");
+    throw JSONRPCError(RPC_TYPE_ERROR, "Failed load beta");
 
   vector<Value> res;
   res.push_back(myAddress);
@@ -4400,7 +4400,7 @@ Value registerAliasGenerate(const Array& params, bool fHelp)
 
   string pKey;
   if(!pwalletMain->envCP0(vchPubKey, pKey))
-    throw JSONRPCError(RPC_TYPE_ERROR, "Failed to load meta data for key");
+    throw JSONRPCError(RPC_TYPE_ERROR, "Failed to load alpha");
 
   string pub_k;
   if(!pwalletMain->envCP1(vchPubKey, pub_k))

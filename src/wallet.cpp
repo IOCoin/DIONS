@@ -119,7 +119,10 @@ bool CWallet::envCP0(const CPubKey &pubkey, string& rsaPrivKey)
     if(mapKeyMetadata.count(pubkey.GetID()))
     {
       if(! (mapKeyMetadata[pubkey.GetID()].patch.scale_() || mapKeyMetadata[pubkey.GetID()].patch.scale()))
+      {
         rsaPrivKey = mapKeyMetadata[pubkey.GetID()].patch.domainImage();
+        return true;
+      }
     }
     return false;
 }
@@ -129,8 +132,11 @@ bool CWallet::envCP1(const CPubKey &pubkey, string& rsaPubKey)
     AssertLockHeld(cs_wallet); // mapKeyMetadata
    if(mapKeyMetadata.count(pubkey.GetID()))
    {
-    if(! (mapKeyMetadata[pubkey.GetID()].patch.scale_() || mapKeyMetadata[pubkey.GetID()].patch.scale()))
+    if(!(mapKeyMetadata[pubkey.GetID()].patch.scale_() || mapKeyMetadata[pubkey.GetID()].patch.scale()))
+    {
        rsaPubKey = mapKeyMetadata[pubkey.GetID()].patch.codomainImage();
+        return true;
+    }
    }
    
   return false;
@@ -181,13 +187,15 @@ bool CWallet::SetRSAMetadata(const CPubKey &pubkey)
 {
     AssertLockHeld(cs_wallet); // mapKeyMetadata
 
-    if(mapKeyMetadata[pubkey.GetID()].patch.scale_() && mapKeyMetadata[pubkey.GetID()].patch.scale() )
+    if(mapKeyMetadata[pubkey.GetID()].patch.scale_() && mapKeyMetadata[pubkey.GetID()].patch.scale())
     {
+      printf("SetRSA 2\n");
       GenerateRSAKey(mapKeyMetadata[pubkey.GetID()].patch);
 
       return true;
     }
 
+      printf("SetRSA 3\n");
     return false;
 }
 
