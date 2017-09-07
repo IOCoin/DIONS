@@ -1064,8 +1064,7 @@ Value nodeValidate(const Array& params, bool fHelp)
           aliasObj.push_back(Pair("expired", 1));
 
         if(tunnelSwitch__(ex))
-          aliasObj.push_back(Pair("tunnel_switch", 1));
-  
+          aliasObj.push_back(Pair("tunnel_switch", ex));
 
         if(mapState.count(vchAlias) && mapState[vchAlias].size())
         {
@@ -3821,6 +3820,7 @@ bool tunnelSwitch__(int r)
 {
   return r < INTERN_REF0__;
 }
+
 bool internalReference__(string ref__, vchType& recipientPubKeyVch)
 {
   bool s__=false;

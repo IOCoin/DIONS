@@ -1,23 +1,21 @@
-#ifndef RELAY_H
-#define RELAY_H
+#ifndef COORDINATE_H
+#define COORDINATE_H
 
 #include "interface_crypt.h"
-#include "coordinate.h"
-#include "coordinate_patch.h"
 
-class Relay : InterfaceCrypt
+class CoordinatePatch : InterfaceCrypt
 {
   public:
-    Relay()
+    CoordinatePatch()
     {
     }
 
-    Relay(string& s) 
+    CoordinatePatch(string& s) 
     {
       this->r_ = s;
     };
 
-    virtual ~Relay()
+    virtual ~CoordinatePatch()
     {
     }
 
@@ -30,15 +28,10 @@ class Relay : InterfaceCrypt
     inline virtual string ctrl_() { return this->r_; }
     inline virtual void ctrl(string& c) { this->r_ = c; }
 
-    IMPLEMENT_SERIALIZE
-    (
-        READWRITE(this->r_);
-        READWRITE(this->locator_);
-    )
-
   private:
     string r_;
     string locator_;
+    vector<unsigned int> connectionVector_;
 };
 
 #endif
