@@ -3,6 +3,8 @@
 
 #include "interface_crypt.h"
 
+#include "state.h"
+
 class CoordinatePatch : InterfaceCrypt
 {
   public:
