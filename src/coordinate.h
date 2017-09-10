@@ -28,7 +28,18 @@ class CoordinateVector : InterfaceCrypt
     inline virtual string ctrl_() { return this->r_; }
     inline virtual void ctrl(string& c) { this->r_ = c; }
 
-    inline bool mapNode() { return true; }
+    inline bool mapNode(string l, int& p) 
+    {         
+      vector<string>::iterator iter;
+      iter=find(this->d1_.begin(),this->d1_.end(),l);
+      if(iter != this->d1_.end())
+      {
+        p = iter - this->d1_.begin();
+        return true;
+      }
+
+      return false;
+    }
 
     inline bool scale_() { return this->d0_.size() == 0; }
     inline bool scale() { return this->d1_.size() == 0; }
