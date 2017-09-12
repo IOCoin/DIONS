@@ -852,7 +852,8 @@ Value externFrame__(const Array& params, bool fHelp)
   string k1;
   vchType vchNodeLocator;
   k1=(params[0]).get_str();
-  vchNodeLocator = vchFromValue(params[0]);
+  std::transform(k1.begin(), k1.end(), k1.begin(), ::tolower);
+  vchNodeLocator = vchFromString(k1);
 
   CWalletTx wtx;
   wtx.nVersion = CTransaction::DION_TX_VERSION;
@@ -872,7 +873,7 @@ Value externFrame__(const Array& params, bool fHelp)
         mapState[vchNodeLocator].begin()->GetHex().c_str());
         LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
         LEAVE_CRITICAL_SECTION(cs_main)
-        throw runtime_error("there are pending operations ");
+        throw runtime_error("pending ops ");
       }
 
       EnsureWalletIsUnlocked();
@@ -899,7 +900,7 @@ Value externFrame__(const Array& params, bool fHelp)
       string strAddress = "";
       aliasAddress(tx, strAddress);
       if(strAddress == "")
-        throw runtime_error("alias has no associated address");
+        throw runtime_error("no associated address");
 
       uint160 hash160;
       bool isValid = AddressToHash160(strAddress, hash160);
@@ -936,7 +937,7 @@ Value internFrame__(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() != 1)
       throw runtime_error(
-              "aliasOut [<node opt>]\n"
+              "internFrame__ [<node opt>]\n"
               );
 
   string k1;
@@ -1006,15 +1007,76 @@ Value internFrame__(const Array& params, bool fHelp)
                 if(op != OP_ALIAS_ENCRYPTED)
                   throw runtime_error("previous transaction was not an OP_ALIAS_ENCRYPTED");
 
+              
+              string iv = stringFromVch(vvch[6]);
+              State hydr(stringFromVch(vvch[7]));
+              string gen;
+              string reference = "_";
+              if(iv != "_")
+              {
+                if(hydr() == State::ION)
+                {
+                  string csKStr;
+                  string f = stringFromVch(vvch[7]);
+                  string l = stringFromVch(vvch[2]);
+                  if(channel(l, f, csKStr))
+                  {
+                    bool fInvalid = false;
+                    vector<unsigned char> csK = DecodeBase64(csKStr.c_str(), &fInvalid);
+                    string decrypted;
+                    DecryptMessageAES(stringFromVch(vvch[4]),
+                      decrypted,
+                      csK,
+                      iv);
+
+                    string value = decrypted;
+                    Relay r;
+                    if(!pwalletMain->relay_(vvch[2], r))
+                    {
+                      vchType kAlpha;
+                      GenerateAESKey(kAlpha);
+  
+                      string alpha = EncodeBase64(&kAlpha[0], kAlpha.size());
+  
+                      r.ctrl(alpha);
+
+                      pwalletMain->relay(vvch[2], r);
+  
+                      CWalletDB walletdb(pwalletMain->strWalletFile, "r+");
+ 
+                      pwalletMain->LoadRelay(vchNodeLocator, r); 
+                      if(!walletdb.UpdateKey(vchNodeLocator, pwalletMain->lCache[vchNodeLocator]))
+                        throw JSONRPCError(RPC_TYPE_ERROR, "Failed to write data for key");
+                    }
+    
+                    string idx = r.ctrl_();
+                    fInvalid = false;
+                    vector<unsigned char> v = DecodeBase64(idx.c_str(), &fInvalid);
+
+                    EncryptMessageAES(decrypted, gen, v, reference);
+                    if(gen.size() > MAX_XUNIT_LENGTH) 
+                      throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "xunit size exceeded");
+                  }
+                  else
+                  {
+                    throw JSONRPCError(RPC_TYPE_ERROR, "non ionic state");
+                  }
+                }
+              }
+
               string encrypted = stringFromVch(vvch[0]);
               uint160 hash = uint160(vvch[3]);
-              string vXStr = stringFromVch(vvch[4]);
-
+              string vXStr;
+              if(iv == "_")
+                vXStr = stringFromVch(vvch[4]);
+              else
+                vXStr = gen;
+              string ionExcitation = stringFromVch(vvch[5]);
               CDataStream ss(SER_GETHASH, 0);
               ss << encrypted;
               ss << hash.ToString();
               ss << vXStr;
-              ss << string("0");
+              ss << ionExcitation;
 
               CScript script;
               script.SetBitcoinAddress(stringFromVch(vvch[2]));
@@ -1040,7 +1102,7 @@ Value internFrame__(const Array& params, bool fHelp)
 
               string sigBase64 = EncodeBase64(&vchSig[0], vchSig.size());
 
-              scriptPubKey << OP_ALIAS_ENCRYPTED << vvch[0] << vchFromString(sigBase64) << vvch[2] << vvch[3] << vvch[4] << vchFromString("0") << vchFromString("_") << vchFromString(State::GROUND) << OP_2DROP << OP_2DROP << OP_2DROP << OP_2DROP << OP_DROP;
+              scriptPubKey << OP_ALIAS_ENCRYPTED << vvch[0] << vchFromString(sigBase64) << vvch[2] << vvch[3] << vchFromString(vXStr) << vvch[5] << vchFromString(reference) << vvch[7] << OP_2DROP << OP_2DROP << OP_2DROP << OP_2DROP << OP_DROP;
               scriptPubKeyOrig.SetBitcoinAddress(stringFromVch(vvch[2]));
               scriptPubKey += scriptPubKeyOrig;
               found = true;
@@ -2358,11 +2420,11 @@ Value validate(const Array& params, bool fHelp)
       {
         string ctrl_ = r.ctrl_();
         bool fInvalid = false;
-        vector<unsigned char> aesRawVector = DecodeBase64(ctrl_.c_str(), &fInvalid);
+        vector<unsigned char> asK = DecodeBase64(ctrl_.c_str(), &fInvalid);
         string decrypted;
         DecryptMessageAES(stringFromVch(vvch[4]),
           decrypted,
-          aesRawVector,
+          asK,
           iv128);
 
         value = decrypted;
@@ -2374,17 +2436,18 @@ Value validate(const Array& params, bool fHelp)
     }
     else
     {
-      string aesKeyStr;
+      string csKStr;
       string localAddr = stringFromVch(vchNodeLocator);
       string f = stringFromVch(vvch[7]);
-      if(channel(localAddr, f, aesKeyStr))
+      string l = stringFromVch(vvch[2]);
+      if(channel(l, f, csKStr))
       {
         bool fInvalid = false;
-        vector<unsigned char> aesRawVector = DecodeBase64(aesKeyStr.c_str(), &fInvalid);
+        vector<unsigned char> csK = DecodeBase64(csKStr.c_str(), &fInvalid);
         string decrypted;
         DecryptMessageAES(stringFromVch(vvch[4]),
           decrypted,
-          aesRawVector,
+          csK,
           iv128);
 
         value = decrypted;
@@ -3034,10 +3097,12 @@ Value transferEncryptedAlias(const Array& params, bool fHelp)
 {
     if(fHelp || params.size() != 3)
         throw runtime_error(
-          "transferAlias <alias> <localaddress> <toaddress> transfer a alias to a new address"
+          "transferEncryptedAlias <alias> <localaddress> <toaddress> transfer a alias to a new address"
           + HelpRequiringPassphrase());
 
-    vchType vchAlias = vchFromValue(params[0]);
+    string locatorStr = params[0].get_str();
+    std::transform(locatorStr.begin(), locatorStr.end(), locatorStr.begin(), ::tolower);
+    vchType vchAlias = vchFromString(locatorStr);
 
     CBitcoinAddress localAddr((params[1]).get_str());
 
@@ -3087,7 +3152,7 @@ Value transferEncryptedAlias(const Array& params, bool fHelp)
 
     CKeyID rkeyID;
     if(!address.GetKeyID(rkeyID))
-        throw JSONRPCError(RPC_TYPE_ERROR, "ownerAddr does not refer to key");
+        throw JSONRPCError(RPC_TYPE_ERROR, "no key");
 
     CPubKey vchRecipientPubKey;
     pwalletMain->GetPubKey(rkeyID, vchRecipientPubKey);
@@ -3098,8 +3163,6 @@ Value transferEncryptedAlias(const Array& params, bool fHelp)
     CBitcoinAddress tmp;
     tmp.Set(rkeyID);
     string a=(tmp).ToString();
-
-    string locatorStr = stringFromVch(vchAlias);
 
     vchType recipientPubKeyVch;
     vchType aesVch;
@@ -3165,7 +3228,7 @@ Value transferEncryptedAlias(const Array& params, bool fHelp)
           string encryptedRandForRecipient;
           EncryptMessage(stringFromVch(recipientPubKeyVch), randBase64, encryptedRandForRecipient);
 
-          const CWalletTx& wtxIn = pwalletMain->mapWallet[wtxInHash];
+        const CWalletTx& wtxIn = pwalletMain->mapWallet[wtxInHash];
         bool found = false;
         BOOST_FOREACH(const CTxOut& out, wtxIn.vout)
         {
@@ -3174,21 +3237,27 @@ Value transferEncryptedAlias(const Array& params, bool fHelp)
             if(aliasScript(out.scriptPubKey, op, vvch)) 
             {
                 if(op != OP_ALIAS_ENCRYPTED)
-                  throw runtime_error("previous transaction was not OP_ALIAS_ENCRYPTED");
+                  throw runtime_error("previous was not OP_ALIAS_ENCRYPTED");
 
                  string gen;
                  string reference;
                  string iv128 = stringFromVch(vvch[6]);
+                 string r = stringFromVch(vvch[5]); 
+                 State s__(stringFromVch(vvch[7])); 
                  if(iv128 != "_")
                  {
-                   string r = stringFromVch(vvch[5]); 
-                   State s__(stringFromVch(vvch[7])); 
                    if(s__() != State::ATOMIC)
                    {
+                     string csK;
+                     string l = stringFromVch(vvch[2]);
+                     if(!channel(l, f, csK))
+                       throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "invalid channel");
+                     bool fInvalid = false;
+                     vector<unsigned char> cskRaw = DecodeBase64(csK.c_str(), &fInvalid);
                      string decrypted;
                      DecryptMessageAES(stringFromVch(vvch[4]),
                               decrypted,
-                              aesRawVector,
+                              cskRaw,
                               iv128);
 
                      EncryptMessageAES(decrypted, gen, aesRawVector, reference);
@@ -3202,11 +3271,11 @@ Value transferEncryptedAlias(const Array& params, bool fHelp)
                      {
                        string ctrl_ = r.ctrl_();
                        bool fInvalid = false;
-                       aesRawVector = DecodeBase64(ctrl_.c_str(), &fInvalid);
+                       vector<unsigned char> asK = DecodeBase64(ctrl_.c_str(), &fInvalid);
                        string decrypted;
                        DecryptMessageAES(stringFromVch(vvch[4]),
                               decrypted,
-                              aesRawVector,
+                              asK,
                               iv128);
 
                        EncryptMessageAES(decrypted, gen, aesRawVector, reference);
