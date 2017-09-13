@@ -56,6 +56,7 @@ CBlockIndex* pindexGenesisBlock = NULL;
 int nBestHeight = -1;
 
 int INTERN_REF0__ = 13600;
+int EXTERN_REF0__ = 3;
 uint256 nBestChainTrust = 0;
 uint256 nBestInvalidTrust = 0;
 

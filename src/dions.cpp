@@ -49,6 +49,7 @@ extern std::map<uint160, vchType> mapLocatorHashes;
 #endif
 
 extern int INTERN_REF0__;
+extern int EXTERN_REF0__;
 
 extern uint256 SignatureHash(CScript scriptCode, const CTransaction& txTo, unsigned int nIn, int nHashType);
 
@@ -111,7 +112,10 @@ bool channel(string l, string f, string k)
 }
 int scaleMonitor()
 {
-  return 210000;
+  if(!fTestNet)
+    return 210000;
+  
+  return 12;
 }
 int GetTxPosHeight(AliasIndex& txPos)
 {
@@ -1067,7 +1071,7 @@ Value internFrame__(const Array& params, bool fHelp)
               string encrypted = stringFromVch(vvch[0]);
               uint160 hash = uint160(vvch[3]);
               string vXStr;
-              if(iv == "_")
+              if(iv == "_" || hydr() == State::ATOMIC)
                 vXStr = stringFromVch(vvch[4]);
               else
                 vXStr = gen;
@@ -1977,10 +1981,12 @@ Value aliasList__(const Array& params, bool fHelp)
         pwalletMain->GetPubKey(keyID, vchPubKey);
         vchType vchRand;
 
-        const int expiresIn = nHeight + scaleMonitor() - pindexBest->nHeight;
-        aliasObj.push_back(Pair("expires_in", expiresIn));
-        if(expiresIn <= 0)
+        const int ex = nHeight + scaleMonitor() - pindexBest->nHeight;
+        aliasObj.push_back(Pair("expires_in", ex));
+        if(ex <= 0)
           aliasObj.push_back(Pair("expired", 1));
+        if(tunnelSwitch__(ex))
+          aliasObj.push_back(Pair("tunnel_switch", ex));
 
         if(mapState.count(vchAlias) && mapState[vchAlias].size())
         {
@@ -2157,10 +2163,12 @@ Value aliasList(const Array& params, bool fHelp)
         pwalletMain->GetPubKey(keyID, vchPubKey);
         vchType vchRand;
 
-        const int expiresIn = nHeight + scaleMonitor() - pindexBest->nHeight;
-        aliasObj.push_back(Pair("expires_in", expiresIn));
-        if(expiresIn <= 0)
+        const int ex = nHeight + scaleMonitor() - pindexBest->nHeight;
+        aliasObj.push_back(Pair("expires_in", ex));
+        if(ex <= 0)
           aliasObj.push_back(Pair("expired", 1));
+        if(tunnelSwitch__(ex))
+          aliasObj.push_back(Pair("tunnel_switch", ex));
 
         if(mapState.count(vchAlias) && mapState[vchAlias].size())
         {
@@ -4112,7 +4120,10 @@ Value sendSymmetric(const Array& params, bool fHelp)
 }
 bool tunnelSwitch__(int r)
 {
-  return r < INTERN_REF0__;
+  if(!fTestNet)
+    return r < INTERN_REF0__;
+
+  return r < EXTERN_REF0__;
 }
 
 bool internalReference__(string ref__, vchType& recipientPubKeyVch)
