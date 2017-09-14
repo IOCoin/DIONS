@@ -3119,7 +3119,7 @@ Value transferEncryptedAlias(const Array& params, bool fHelp)
 
     CKeyID localkeyID;
     if(!localAddr.GetKeyID(localkeyID))
-        throw JSONRPCError(RPC_TYPE_ERROR, "ownerAddr does not refer to key");
+        throw JSONRPCError(RPC_TYPE_ERROR, "does not refer to key");
 
     CKey localkey;
     if(!pwalletMain->GetKey(localkeyID, localkey))
@@ -3179,7 +3179,7 @@ Value transferEncryptedAlias(const Array& params, bool fHelp)
     if(!getImportedPubKey(localAddr.ToString(), f, recipientPubKeyVch, aesVch))
     {
       if(!internalReference__(f, recipientPubKeyVch))
-        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "transferEncryptedAlias no RSA key for recipient");
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "no key");
 
       string aesKeyStr;
       if(pwalletMain->aes_(vchPubKey, f, aesKeyStr))
