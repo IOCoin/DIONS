@@ -2,27 +2,32 @@
 # Distributed under the MIT/X11 software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+CC=x86_64-w64-mingw32-gcc -Wl,-Bstatic
+CXX=x86_64-w64-mingw32-g++ -Wl,-Bstatic
+
 USE_UPNP:=0
 
+CROSS_BUILD=/home/io-tester/CROSS_COMPILE/
 INCLUDEPATHS= \
- -I"C:\boost-1.50.0-mgw" \
- -I"C:\db-4.8.30.NC-mgw\build_unix" \
- -I"C:\openssl-1.0.1c-mgw\include"
+ -I"$(CROSS_BUILD)/x86_64-w64-mingw32/boost_1_55_0/include" \
+ -I"$(CROSS_BUILD)/x86_64-w64-mingw32/db-4.8/include" \
+ -I"$(CROSS_BUILD)/x86_64-w64-mingw32/openssl-1.0/include/"
 
 LIBPATHS= \
- -L"C:\boost-1.50.0-mgw\stage\lib" \
- -L"C:\db-4.8.30.NC-mgw\build_unix" \
- -L"C:\openssl-1.0.1c-mgw"
+ -L"$(CROSS_BUILD)/x86_64-w64-mingw32/boost_1_55_0/lib" \
+ -L"$(CROSS_BUILD)/x86_64-w64-mingw32/db-4.8/lib" \
+ -L"$(CROSS_BUILD)/x86_64-w64-mingw32/openssl-1.0/lib/" \
+ -L/usr/x86_64-w64-mingw32/lib
 
 LIBS= \
- -l boost_system-mgw44-mt-1_53 \
- -l boost_filesystem-mgw44-mt-1_53 \
- -l boost_program_options-mgw44-mt-1_53 \
- -l boost_thread-mgw44-mt-1_53 \
- -l boost_chrono-mgw44-mt-1_53 \
+ -l boost_system-mt-s \
+ -l boost_filesystem-mt-s \
+ -l boost_program_options-mt-s \
+ -l boost_thread_win32-mt-s \
+ -l boost_chrono-mt-s \
  -l db_cxx \
- -l boost_iostreams \
- -l z \
+ -l boost_iostreams-mt-s \
+ -l boost_zlib-mt-s \
  -l ssl \
  -l crypto
 
@@ -37,8 +42,8 @@ ifndef USE_UPNP
 	override USE_UPNP = -
 endif
 ifneq (${USE_UPNP}, -)
- INCLUDEPATHS += -I"C:\miniupnpc-1.6-mgw"
- LIBPATHS += -L"C:\miniupnpc-1.6-mgw"
+ INCLUDEPATHS += -I"$(CROSS_BUILD)/miniupnpc-1.9.20140610/"
+ LIBPATHS += -L"$(CROSS_BUILD)/miniupnpc-1.9.20140610/"
  LIBS += -l miniupnpc -l iphlpapi
  DEFS += -DSTATICLIB -DUSE_UPNP=$(USE_UPNP)
 endif
@@ -61,6 +66,8 @@ OBJS= \
     obj/irc.o \
     obj/keystore.o \
     obj/main.o \
+    obj/state.o \
+    obj/dions.o \
     obj/miner.o \
     obj/net.o \
     obj/protocol.o \
@@ -104,8 +111,8 @@ OBJS= \
 
 all: iocoind.exe
 
-LIBS += $(CURDIR)/leveldb/libleveldb.a $(CURDIR)/leveldb/libmemenv.a
-DEFS += $(addprefix -I,$(CURDIR)/leveldb/include)
+LIBS += $(CURDIR)/leveldb/libleveldb.so $(CURDIR)/leveldb/libmemenv.a
+DEFS += $(addprefix -I,$(CURDIR)/leveldb/include/)
 DEFS += $(addprefix -I,$(CURDIR)/leveldb/helpers)
 OBJS += obj/txdb-leveldb.o
 leveldb/libleveldb.a:
@@ -113,16 +120,16 @@ leveldb/libleveldb.a:
 obj/txdb-leveldb.o: leveldb/libleveldb.a
 
 obj/%.o: %.cpp $(HEADERS)
-	g++ -c $(CFLAGS) -o $@ $<
+	$(CXX) -c $(CFLAGS) -o $@ $<
 
 obj/%.o: %.c $(HEADERS)
-	gcc -c $(CFLAGS) -o $@ $<
+	$(CC) -c $(CFLAGS) -o $@ $<
 
 obj/zerocoin/%.o: zerocoin/%.cpp
-	g++ -c $(CFLAGS) -o $@ $<
+	$(CXX) -c $(CFLAGS) -o $@ $<
 
 iocoind.exe: $(OBJS:obj/%=obj/%)
-	g++ $(CFLAGS) $(LDFLAGS) -o $@ $(LIBPATHS) $^ $(LIBS)
+	$(CXX) $(CFLAGS) $(LDFLAGS) -o $@ -static $(LIBPATHS) $^ $(LIBS)
 
 clean:
 	-del /Q iocoind
