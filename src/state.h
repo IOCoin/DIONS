@@ -40,6 +40,7 @@ class State
   private:
     std::vector<std::string> STATE_;  
     std::string m_;
+    int delta_;
 };
 
 
