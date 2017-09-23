@@ -116,14 +116,7 @@ int scaleMonitor()
   if(!fTestNet)
     return 210000;
   
-  return 16;
-}
-int minRange()
-{
-  if(!fTestNet)
-    return 6;
-   
-  return 1;
+  return 12;
 }
 int GetTxPosHeight(AliasIndex& txPos)
 {
@@ -3161,44 +3154,27 @@ Value decryptAlias(const Array& params, bool fHelp)
 
 Value transferEncryptedAlias(const Array& params, bool fHelp)
 {
-    if(fHelp || params.size() != 3)
+    if(fHelp || params.size() != 4)
         throw runtime_error(
-          "transferEncryptedAlias <alias> <l0> <l1>"
+          "transferEncryptedAlias <alias> <predicate> <l0> <l1>"
           + HelpRequiringPassphrase());
 
     string locatorStr = params[0].get_str();
     std::transform(locatorStr.begin(), locatorStr.end(), locatorStr.begin(), ::tolower);
     vchType vchLocator = vchFromString(locatorStr);
 
-    CBitcoinAddress predicate(locatorStr);
-    if(!predicate.IsValid())
-    {
-      vector<AliasIndex> vtxPos;
-      LocatorNodeDB ln1Db("r");
-      vchType vchLocator = vchFromString(locatorStr);
-      if (ln1Db.lKey (vchLocator))
-      {
-        if (!ln1Db.lGet (vchLocator, vtxPos))
-          return error("aliasHeight() : failed to read from name DB");
-        if (vtxPos.empty ())
-          return -1;
+    CBitcoinAddress predicate((params[1]).get_str());
 
-        AliasIndex& txPos = vtxPos.back ();
-        predicate.SetString(txPos.vAddress); 
-      }
-      else
-      {
-          throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid I/OCoin address or unknown alias");
-      }
-    }
+    if(!predicate.IsValid())
+        throw JSONRPCError(RPC_TYPE_ERROR, "predicate");
 
     CKeyID pid;
     if(!predicate.GetKeyID(pid))
-      throw JSONRPCError(RPC_TYPE_ERROR, "pid");
+        throw JSONRPCError(RPC_TYPE_ERROR, "pid");
 
     CKey pid_;
     if(!pwalletMain->GetKey(pid, pid_))
-      throw JSONRPCError(RPC_WALLET_ERROR, "pid_");
+        throw JSONRPCError(RPC_WALLET_ERROR, "pid_");
 
     CBitcoinAddress localPredicate((params[2]).get_str());
     if(!localPredicate.IsValid())
@@ -5613,21 +5589,23 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
                 }
             }
 
-            nDepth = CheckTransactionAtRelativeDepth(pindexBlock, vTxindex[nInput], minRange());
+            nPrevHeight = aliasHeight(vvchArgs[0]);
+            if(nPrevHeight >= 0 && pindexBlock->nHeight - nPrevHeight < scaleMonitor())
+                return error("ConnectInputsPost() : decryptAlias on an unexpired alias");
+            nDepth = CheckTransactionAtRelativeDepth(pindexBlock, vTxindex[nInput], MIN_SET_DEPTH);
 
-            if((fBlock || fMiner) && nDepth >= 0 && nDepth < minRange())
+            if((fBlock || fMiner) && nDepth >= 0 && nDepth < MIN_SET_DEPTH)
                 return false;
 
-            if(fBlock || fMiner)
+
+
+            if(fMiner)
             {
-                set<uint256>& setPending = mapState[vvchArgs[0]];
                 nDepth = CheckTransactionAtRelativeDepth(pindexBlock, vTxindex[nInput], scaleMonitor());
                 if(nDepth == -1)
-                {
-                    setPending.clear();
-                    return error("ConnectInputsPost() : decryptAlias invalid");
-                }
+                    return error("ConnectInputsPost() : decryptAlias cannot be mined if registerAlias is not already in chain and unexpired");
 
+                set<uint256>& setPending = mapState[vvchArgs[0]];
                 BOOST_FOREACH(const PAIRTYPE(uint256, CTxIndex)& s, mapTestPool)
                 {
                     if(setPending.count(s.first))
