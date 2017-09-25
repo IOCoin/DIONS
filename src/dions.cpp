@@ -3604,7 +3604,7 @@ Value transferEncryptedAlias(const Array& params, bool fHelp)
     ENTER_CRITICAL_SECTION(cs_main)
     {
       uint256 wtxInHash;
-      if(!searchAliasEncrypted(stringFromVch(vchLocator), wtxInHash))
+      if(!searchAliasEncrypted2(stringFromVch(vchLocator), wtxInHash))
       {
         LEAVE_CRITICAL_SECTION(cs_main)
         throw runtime_error("could not find this alias");
