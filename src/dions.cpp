@@ -160,7 +160,7 @@ int scaleMonitor()
   if(!fTestNet)
     return 210000;
   
-  return 12;
+  return 128;
 }
 int GetTxPosHeight(AliasIndex& txPos)
 {
@@ -3496,8 +3496,36 @@ Value transferEncryptedAlias(const Array& params, bool fHelp)
     if(!pwalletMain->GetKey(pid, pid_))
         throw JSONRPCError(RPC_WALLET_ERROR, "pid_");
 
+
+    string extPredicate = (params[2]).get_str();
+    CBitcoinAddress externPredicate(extPredicate);
+    if(!externPredicate.IsValid())
+    {
+      vector<AliasIndex> vtxPos;
+      LocatorNodeDB ln1Db("r");
+      vchType vchPredicate = vchFromString(extPredicate);
+      if (ln1Db.lKey (vchPredicate))
+      {
+        if (!ln1Db.lGet (vchPredicate, vtxPos))
+          return error("aliasHeight() : failed to read from name DB");
+        if (vtxPos.empty ())
+          return -1;
+
+        AliasIndex& txPos = vtxPos.back ();
+        externPredicate.SetString(txPos.vAddress); 
+      }
+      else
+      {
+          throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid I/OCoin predicate");
+      }
+    }
+
+    CKeyID epid;
+    if(!externPredicate.GetKeyID(epid))
+        throw JSONRPCError(RPC_TYPE_ERROR, "epid");
+
     string l0Str; 
-    string ext = (params[2].get_str());
+    string ext = externPredicate.ToString();
     if(!channelPredicate(ext, l0Str))
     {
       throw JSONRPCError(RPC_WALLET_ERROR, "local predicate");
@@ -3512,14 +3540,6 @@ Value transferEncryptedAlias(const Array& params, bool fHelp)
     CKey l0id_;
     if(!pwalletMain->GetKey(l0id, l0id_))
         throw JSONRPCError(RPC_WALLET_ERROR, "l0id_");
-
-    CBitcoinAddress externPredicate((params[2]).get_str());
-    if(!externPredicate.IsValid())
-        throw JSONRPCError(RPC_TYPE_ERROR, "externPredicate");
-
-    CKeyID epid;
-    if(!externPredicate.GetKeyID(epid))
-        throw JSONRPCError(RPC_TYPE_ERROR, "epid");
 
     vchType vchRand;
     string r_;
