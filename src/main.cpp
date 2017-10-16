@@ -43,7 +43,7 @@ libzerocoin::Params* ZCParams;
 CBigNum bnProofOfWorkLimit(~uint256(0) >> 20); // "standard" scrypt target limit for proof of work, results with 0,000244140625 proof-of-work difficulty
 CBigNum bnProofOfStakeLimit(~uint256(0) >> 20);
 CBigNum bnProofOfStakeLimitV2(~uint256(0) >> 48);
-CBigNum bnProofOfWorkLimitTestNet(~uint256(0) >> 8);
+CBigNum bnProofOfWorkLimitTestNet(~uint256(0) >> 1);
 
 unsigned int nStakeMinAge = 8 * 60 * 60; // 8 hours
 unsigned int nStakeMaxAge = -1; // unlimited
@@ -1607,7 +1607,6 @@ unsigned int CTransaction::GetP2SHSigOpCount(const MapPrevTx& inputs) const
 bool CTransaction::ConnectInputs(CTxDB& txdb, MapPrevTx inputs, map<uint256, CTxIndex>& mapTestPool, CDiskTxPos& posThisTx,
     CBlockIndex* pindexBlock, bool fBlock, bool fMiner, int flags)
 {
-  printf("ConnectInputs\n");
     // Take over previous transactions' spent pointers
     // fBlock is true when this is called from AcceptBlock when a new best-block is added to the blockchain
     // fMiner is true when called from the internal bitcoin miner
@@ -2693,10 +2692,8 @@ bool CBlock::SignBlock(CWallet& wallet, int64_t nFees)
                 return key.Sign(GetHash(), vchBlockSig);
             }
         }
-        printf("updating nLastCoinStakeSearchInterval\n");
         nLastCoinStakeSearchInterval = nSearchTime - nLastCoinStakeSearchTime;
         nLastCoinStakeSearchTime = nSearchTime;
-        printf("nLastCoinStakeSearchInterval %"PRId64"\n" , nLastCoinStakeSearchInterval);
     }
 
     return false;
@@ -2872,7 +2869,7 @@ bool LoadBlockIndex(bool fAllowNew)
         block.nVersion = 1;
         block.nTime    = 1406153471;
         block.nBits    = bnProofOfWorkLimit.GetCompact();
-        block.nNonce   = !fTestNet ? 306504 : 222584;
+        block.nNonce   = !fTestNet ? 222584 : 222584;
         // genesis block miner
 
          if ((block.hashMerkleRoot != hashGenesisMerkleRoot) ||

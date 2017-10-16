@@ -1275,19 +1275,9 @@ void CWallet::AvailableCoinsForStaking(vector<COutput>& vCoins, unsigned int nSp
       {
 	  const CWalletTx* pcoin = &(*it).second;
 
-	  // Filtering by tx timestamp instead of block timestamp may give false positives but never false negatives
-          printf("pcoin->nTime %d\n", pcoin->nTime);
-          printf("nStakeMinAge %d\n", nStakeMinAge);
-          printf("nSpendTime   %d\n", nSpendTime);
-	  if (pcoin->nTime + nStakeMinAge > nSpendTime)
-          {
-	    continue;
-          }
-
 	  if (pcoin->GetBlocksToMaturity() > 0)
 	    continue;
 
-          printf("depth %d\n", pcoin->GetDepthInMainChain());
 	  int nDepth = pcoin->GetDepthInMainChain();
 	  if (nDepth < 1)
 	      continue;
@@ -1523,7 +1513,6 @@ bool CWallet::SelectCoinsForStaking(int64_t nTargetValue, unsigned int nSpendTim
 {
   vector<COutput> vCoins;
   AvailableCoinsForStaking(vCoins, nSpendTime);
-  printf("SelectCoinsForStaking available : %d\n", vCoins.size());
 
   setCoinsRet.clear();
   nValueRet = 0;
@@ -1864,22 +1853,8 @@ bool CWallet::GetStakeWeight(uint64_t& nWeight)
       if (!txdb.ReadTxIndex(pcoin.first->GetHash(), txindex))
 	  continue;
 
-      if (IsProtocolV2(nBestHeight+1))
-      {
-	  if (nCurrentTime - pcoin.first->nTime > nStakeMinAge)
-	      nWeight += pcoin.first->vout[pcoin.second].nValue;
-      }
-      else
-      {
-	  int64_t nTimeWeight = GetWeight((int64_t)pcoin.first->nTime, nCurrentTime);
-	  CBigNum bnWeight = CBigNum(pcoin.first->vout[pcoin.second].nValue) * nTimeWeight / COIN / (24 * 60 * 60);
-
-	  // Weight is greater than zero
-	  if (nTimeWeight > 0)
-	  {
-	      nWeight += bnWeight.getuint64();
-	  }
-      }
+    if(pcoin.first->GetDepthInMainChain() >= nStakeMinConfirmations)
+      nWeight += pcoin.first->vout[pcoin.second].nValue;
   }
 
   return true;
@@ -1887,7 +1862,6 @@ bool CWallet::GetStakeWeight(uint64_t& nWeight)
 
 bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int64_t nSearchInterval, int64_t nFees, CTransaction& txNew, CKey& key, int nHeight)
 {
-  printf("CreateCoinStake\n");
   CBlockIndex* pindexPrev = pindexBest;
   CBigNum bnTargetPerCoinDay;
   bnTargetPerCoinDay.SetCompact(nBits);
@@ -1939,10 +1913,6 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
       }
 
       static int nMaxStakeSearchInterval = 60;
-      if (block.GetBlockTime() + nStakeMinAge > txNew.nTime - nMaxStakeSearchInterval)
-	  continue; // only count coins meeting min age requirement
-
-      printf("CreateCoinStake min age success\n");
       bool fKernelFound = false;
       for (unsigned int n=0; n<min(nSearchInterval,(int64_t)nMaxStakeSearchInterval) && !fKernelFound && !fShutdown && pindexPrev == pindexBest; n++)
       {
@@ -1950,9 +1920,9 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
 	  // Search nSearchInterval seconds back up to nMaxStakeSearchInterval
 	  uint256 hashProofOfStake = 0, targetProofOfStake = 0;
 	  COutPoint prevoutStake = COutPoint(pcoin.first->GetHash(), pcoin.second);
-	  if (CheckStakeKernelHash(pindexPrev, nBits, block, txindex.pos.nTxPos - txindex.pos.nBlockPos, *pcoin.first, prevoutStake, txNew.nTime - n, hashProofOfStake, targetProofOfStake))
+          int64_t nBlockTime;
+	  if(CheckKernel(pindexPrev,  nBits, txNew.nTime, prevoutStake, &nBlockTime))
 	  {
-              printf("CreateCoinStake found a kernel\n");
 	      // Found a kernel
 	      if (fDebug && GetBoolArg("-printcoinstake"))
 		  printf("CreateCoinStake : kernel found\n");

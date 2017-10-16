@@ -150,14 +150,11 @@ public:
     template<typename K, typename T>
     bool Write(const K& key, const T& value, bool fOverwrite=true)
     {
-      printf("db.h Write 1\n");
         if (!pdb)
             return false;
-      printf("db.h Write 2\n");
         if (fReadOnly)
             assert(!"Write called on database in read-only mode");
 
-      printf("db.h Write 3\n");
         // Key
         CDataStream ssKey(SER_DISK, CLIENT_VERSION);
         ssKey.reserve(1000);

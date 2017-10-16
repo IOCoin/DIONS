@@ -336,8 +336,6 @@ bool CKey::Sign(uint256 hash, std::vector<unsigned char>& vchSig)
     vchSig.clear();
 
 
-    printf("CKey::Sign hash.GetHex() %s\n", hash.GetHex().c_str());
-    printf("CKey::Sign pkey %d\n", pkey);
     ECDSA_SIG *sig = ECDSA_do_sign((unsigned char*)&hash, sizeof(hash), pkey);
     if (sig == NULL)
         return false;
@@ -361,7 +359,6 @@ bool CKey::Sign(uint256 hash, std::vector<unsigned char>& vchSig)
     ECDSA_SIG_free(sig);
     vchSig.resize(nSize); // Shrink to fit actual size
 
-    printf("CKey::Sign return true\n");
     return true;
 }
 
