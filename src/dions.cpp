@@ -58,6 +58,7 @@ extern bool VerifyScript(const CScript& scriptSig, const CScript& scriptPubKey, 
 extern Value sendtoaddress(const Array& params, bool fHelp);
 
 bool searchAliasEncrypted2(string l, uint256& wtxInHash);
+bool getImportedPubKey(string senderAddress, string recipientAddress, vchType& recipientPubKeyVch, vchType& aesKeyBase64EncryptedVch, bool& thresholdCount);
 bool getImportedPubKey(string senderAddress, string recipientAddress, vchType& recipientPubKeyVch, vchType& aesKeyBase64EncryptedVch);
 bool getImportedPubKey(string recipientAddress, vchType& recipientPubKeyVch);
 bool internalReference__(string recipientAddress, vchType& recipientPubKeyVch);
@@ -135,7 +136,8 @@ bool channel(string l, string f, string& k, bool& black)
 {
   vchType rVch;
   vchType alphaVch;
-  if(!getImportedPubKey(l, f, rVch, alphaVch))
+  bool transient=false;
+  if((!getImportedPubKey(l, f, rVch, alphaVch, transient)) || transient)
   {
     CKeyID keyID;
     CBitcoinAddress keyAddress(l);
@@ -4585,6 +4587,43 @@ bool getImportedPubKey(string fKey, vchType& recipientPubKeyVch)
         if(senderAddr == fKey)
         {
           recipientPubKeyVch = vchKey;
+    LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+  LEAVE_CRITICAL_SECTION(cs_main)
+          return true;
+        }
+      }
+    }
+    LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+  }
+  LEAVE_CRITICAL_SECTION(cs_main)
+
+  return false;
+}
+bool getImportedPubKey(string myAddress, string fKey, vchType& recipientPubKeyVch, vchType& aesKeyBase64EncryptedVch, bool& transientThreshold)
+{
+  ENTER_CRITICAL_SECTION(cs_main)
+  {
+    ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    {
+      BOOST_FOREACH(PAIRTYPE(const uint256, CWalletTx)& item,
+                      pwalletMain->mapWallet)
+      {
+        const CWalletTx& tx = item.second;
+
+        vchType vchSender, vchRecipient, vchKey, vchAes, vchSig;
+        int nOut;
+        if(!tx.GetPublicKeyUpdate(nOut, vchSender, vchRecipient, vchKey, vchAes, vchSig))
+          continue;
+
+        string keyRecipientAddr = stringFromVch(vchRecipient);
+        string ext = stringFromVch(vchSender);
+        if(keyRecipientAddr == myAddress && ext == fKey )
+        {
+          recipientPubKeyVch = vchKey;
+          aesKeyBase64EncryptedVch = vchAes;
+
+          string a = stringFromVch(vchAes);
+          if(a == "I") transientThreshold = true;
     LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
   LEAVE_CRITICAL_SECTION(cs_main)
           return true;

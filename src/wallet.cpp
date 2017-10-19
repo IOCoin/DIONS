@@ -3130,6 +3130,5 @@ int CMerkleTx::GetDepthInMainChain(int& nHeightRet) const
   }
 
   nHeightRet = pindex->nHeight;
-  printf("  GetDepthInMainChain nHeightRet %d\n", nHeightRet);
   return pindexBest->nHeight - pindex->nHeight + 1;
 }
