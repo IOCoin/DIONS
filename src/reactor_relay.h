@@ -12,6 +12,12 @@ class RLWE__CTRL__
   }
 };
 
+class Acceptor
+{
+  virtual void rwle__base() = 0;
+  virtual void* operator()() = 0;
+};
+
 class ReactorRelay
 {
   virtual void burstBufferCRC() = 0;

@@ -162,7 +162,7 @@ int scaleMonitor()
   if(!fTestNet)
     return 210000;
   
-  return 128;
+  return 1000;
 }
 int GetTxPosHeight(AliasIndex& txPos)
 {
@@ -3200,7 +3200,7 @@ Value decryptAlias(const Array& params, bool fHelp)
 
 Value transferEncryptedExtPredicate(const Array& params, bool fHelp)
 {
-    if(fHelp || params.size() != 4)
+    if(fHelp || params.size() < 3 || params.size() > 4)
         throw runtime_error(
           "transferEncryptedExtPredicate <alias> <predicate> <l0> <l1>"
           + HelpRequiringPassphrase());
