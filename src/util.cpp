@@ -1591,7 +1591,6 @@ bool NewThread(void(*pfn)(void*), void* parg)
 
 int atod(const std::string& addr, std::string& d)
 {
-    printf("atod %s\n", addr.c_str());
     CBitcoinAddress address__(addr);
     if(!address__.IsValid())
       return -2;
@@ -1608,7 +1607,6 @@ int atod(const std::string& addr, std::string& d)
 
       while ((ret = cursorp->get(&key, &data, DB_NEXT)) == 0) 
       {
-        printf("  key \n");
         CDataStream ssKey(SER_DISK, CLIENT_VERSION);
         ssKey.write((char*)key.get_data(), key.get_size());
 
@@ -1616,11 +1614,9 @@ int atod(const std::string& addr, std::string& d)
         ssKey >> k1;
         if(k1 == "alias_")
         {
-          printf("  k1 %s\n", k1.c_str());
           vchType k2;
           ssKey >> k2; 
           string a = stringFromVch(k2);
-          printf("  k2 %s\n", a.c_str());
 
           vector<AliasIndex> vtxPos;
           CDataStream ssValue((char*)data.get_data(), (char*)data.get_data() + data.get_size(), SER_DISK, CLIENT_VERSION);
@@ -1628,7 +1624,6 @@ int atod(const std::string& addr, std::string& d)
 
           AliasIndex i = vtxPos.back();
           string i_address = (i.vAddress).c_str();
-          printf("  vAddress %s\n", i_address.c_str());
           if(i_address == addr)
           {
             d = a;

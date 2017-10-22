@@ -162,7 +162,7 @@ int scaleMonitor()
   if(!fTestNet)
     return 210000;
   
-  return 1000;
+  return 10000;
 }
 int GetTxPosHeight(AliasIndex& txPos)
 {
@@ -2078,6 +2078,9 @@ Value aliasList__(const Array& params, bool fHelp)
 
         }
 
+        string bitSig = stringFromVch(vchValue);
+        if(bitSig != "")
+          aliasObj.push_back(Pair("xtuVector", "transform"));
 
         if(op__ != OP_ALIAS_ENCRYPTED)
           aliasMapVchObj[vchAlias] = aliasObj;
