@@ -1931,6 +1931,11 @@ Value aliasList__(const Array& params, bool fHelp)
     std::map<vchType, int> mapAliasVchInt;
     std::map<vchType, Object> aliasMapVchObj;
 
+    Array oRes;
+    
+    if(pwalletMain->IsLocked())
+      return oRes; 
+
     ENTER_CRITICAL_SECTION(cs_main)
     {
       ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
@@ -1993,6 +1998,7 @@ Value aliasList__(const Array& params, bool fHelp)
 
               std::vector<vchType> vvchPrevArgsRead;
               int prevOp;
+              out.scriptPubKey;
               if(aliasScript(out.scriptPubKey, prevOp, vvchPrevArgsRead))
               {
                 string a__ = "";
@@ -2094,7 +2100,6 @@ Value aliasList__(const Array& params, bool fHelp)
     LEAVE_CRITICAL_SECTION(cs_main)
 
 
-    Array oRes;
     BOOST_FOREACH(const PAIRTYPE(vector<unsigned char>, Object)& item, aliasMapVchObj)
         oRes.push_back(item.second);
 
