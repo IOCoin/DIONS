@@ -704,9 +704,13 @@ public:
             return false;
         int nDepth = GetDepthInMainChain();
         if (nDepth >= 1)
+        {
             return true;
+        }
         if (nDepth < 0)
+        {
             return false;
+        }
         if (fConfChange || !IsFromMe()) // using wtx's cached debit
             return false;
 
@@ -721,14 +725,22 @@ public:
             const CMerkleTx* ptx = vWorkQueue[i];
 
             if (!IsFinalTx(*ptx))
+            {
                 return false;
+            }
             int nPDepth = ptx->GetDepthInMainChain();
             if (nPDepth >= 1)
+            {
                 continue;
+            }
             if (nPDepth < 0)
+            {
                 return false;
+            }
             if (!pwallet->IsFromMe(*ptx))
+            {
                 return false;
+             }
 
             if (mapPrev.empty())
             {
@@ -739,7 +751,9 @@ public:
             BOOST_FOREACH(const CTxIn& txin, ptx->vin)
             {
                 if (!mapPrev.count(txin.prevout.hash))
+                {
                     return false;
+                }
                 vWorkQueue.push_back(mapPrev[txin.prevout.hash]);
             }
         }

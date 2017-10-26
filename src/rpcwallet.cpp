@@ -87,6 +87,7 @@ Value getinfo(const Array& params, bool fHelp)
     obj.push_back(Pair("protocolversion",(int)PROTOCOL_VERSION));
     obj.push_back(Pair("walletversion", pwalletMain->GetVersion()));
     obj.push_back(Pair("balance",       ValueFromAmount(pwalletMain->GetBalance())));
+    obj.push_back(Pair("pending",       ValueFromAmount(pwalletMain->GetUnconfirmedBalance())));
     obj.push_back(Pair("newmint",       ValueFromAmount(pwalletMain->GetNewMint())));
     obj.push_back(Pair("stake",         ValueFromAmount(pwalletMain->GetStake())));
     obj.push_back(Pair("blocks",        (int)nBestHeight));
@@ -386,7 +387,7 @@ Value sendtodion(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() < 2 || params.size() > 4)
         throw runtime_error(
-            "sendtoaddress <iocoinaddress> <amount> [comment] [comment-to] [info-for-receiver]\n"
+            "sendtodion <iocoinaddress> <amount> [comment] [comment-to] [info-for-receiver]\n"
             "<amount> is a real and is rounded to the nearest 0.000001"
             + HelpRequiringPassphrase());
 
@@ -823,6 +824,16 @@ int64_t GetAccountBalance(const string& strAccount, int nMinDepth)
     return GetAccountBalance(walletdb, strAccount, nMinDepth);
 }
 
+Value pending(const Array& params, bool fHelp)
+{
+    if (fHelp || params.size() > 2)
+        throw runtime_error(
+            "pending [account] [minconf=1]\n"
+            "If [account] is not specified, returns the server's total available balance.\n"
+            "If [account] is specified, returns the balance in the account.");
+
+    return  ValueFromAmount(pwalletMain->GetUnconfirmedBalance());
+}
 
 Value getbalance(const Array& params, bool fHelp)
 {
