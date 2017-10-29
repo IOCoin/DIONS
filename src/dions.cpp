@@ -1827,7 +1827,7 @@ bool searchAliasEncrypted2(string alias, uint256& wtxInHash)
           CPubKey pubKey = key.GetPubKey();
           if(pwalletMain->envCP0(pubKey, rsaPrivKey) == false)
           {
-            throw JSONRPCError(RPC_WALLET_ERROR, "error p0");
+            continue;
           }
 
           DecryptMessage(rsaPrivKey, stringFromVch(vchAlias), decrypted);
