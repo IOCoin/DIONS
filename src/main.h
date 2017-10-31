@@ -64,12 +64,13 @@ static const unsigned int MAX_TX_INFO_LEN = 140; // Like Twitter
 static const int64_t MIN_COIN_YEAR_REWARD = 1 * CENT; // 1% per year
 static const int64_t MAX_COIN_YEAR_REWARD = 3 * CENT; // 3% per year
 
+
 static const uint256 hashGenesisBlock("0x00000afad2d5833b50b59a9784fdc59869b688680e1670a52c52e3c2c04c1fe8");
 static const uint256 hashGenesisBlockTestNet("7efb0928714dd5fc9642581cc4eb54afb22b585639c415b295ec1b1686cb135d");
 static const uint256 hashGenesisMerkleRoot("0x49c1c4f222aa6ca1c879d9b9c6e91a10d0cf779d26e75efbb457c8774e1f521a");
 
 inline bool IsProtocolV2(int nHeight) { return nHeight > 65000; }
-inline bool V3(int nHeight) { return fTestNet || nHeight > 1553000; }
+inline bool V3(int nHeight) { return fTestNet || nHeight >= 1625000; }
 
 inline int64_t PastDrift(int64_t nTime, int nHeight)   { return IsProtocolV2(nHeight) ? nTime      : nTime - 10 * 60; }
 inline int64_t FutureDrift(int64_t nTime, int nHeight) { return IsProtocolV2(nHeight) ? nTime + 15 : nTime + 10 * 60; }
