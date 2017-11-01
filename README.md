@@ -135,13 +135,16 @@ I/O Digital Blockchain & I/O Coin makes every effort to keep the Blockchain up a
 
 The Curators, I/O Digital Foundation, I/O Digital Blockchain & I/O Coin Wallet take no responsibility for and will not be liable for any financial loss arising from the use of our wallet service including any of the following. 
 
-Financial loss due to forgotten mnemonics.
+Financial loss due to forgotten mnemonics if in the event of an HD Wallet System.
 Financial loss due to wallet data being "Brute-forced".
-Financial loss due to server failure or data loss.
-Financial loss due to server hacks or unavailability.
-Financial loss due to corrupted data on our servers.
-Financial loss due to incorrectly constructed transactions or mistyped bitcoin addresses.
-Financial loss due to "phishing" or other websites masquerading as I/O Digital Foundation, I/O Coin Blockchain.
+Financial loss due to blockchain fork.
+Financial loss due to centralized wallet host server failure, hack or data loss.
+Financial loss due to wallet hacks or unavailability.
+Financial loss due to corrupted data on our blockchain or encryption failiure.
+Financial loss or data losss due to ecncryption brutte force or blockchain failiure.
+Financial loss or data losss due to corrupted wallet.dat or end user computer failiure.
+Financial loss due to incorrectly constructed transactions or mistyped iocoin addresses.
+Financial loss due to "phishing" or other websites masquerading as I/O Digital Foundation, I/O Coin Blockchain or IOCoin Github.
 
 The I/O Digital Blockchain is not a bank or regulated financial institution. Any I/O Coin stored using I/O Digital’s Blockchain wallets are not in I/O Digital Foundation control. The I/O Digital Open Source Developers simply provide an interface to access the I/O Digital Blockchain. The I/O Digital Blockchain community and developers does not have control over or take any responsibility for any transactions made through the I/O Digital Blockchain & I/O Coin Wallet. The I/O Digital foundation, Curators or the I/O Digital community have no control of any failure as the blockchain is an open source project  (Open Source Blockchain) and therefore carries no liability to any central entity regarding failure of wallets or the Blockchain. Open Source developers can make requests through proper channels for upgrades, bug reporting and enhancements which would ultimately be approved via consensus mechanisms by the open source I/O Digital community. 
 
