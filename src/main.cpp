@@ -2854,8 +2854,7 @@ bool LoadBlockIndex(bool fAllowNew)
         //     CTxOut(empty)
         //   vMerkleTree: cd5029ac01
 
-        //const char* pszTimestamp = "23 July 2014 BitPay Releases Copay Beta - A New Multi-signature Wallet";
-        const char* pszTimestamp = ">>>>>> October 4 2016 - testnet launched <<<<<<<<";
+        const char* pszTimestamp = "23 July 2014 BitPay Releases Copay Beta - A New Multi-signature Wallet";
         CTransaction txNew;
         txNew.nTime = 1406153471;
         txNew.vin.resize(1);
@@ -2869,37 +2868,38 @@ bool LoadBlockIndex(bool fAllowNew)
         block.nVersion = 1;
         block.nTime    = 1406153471;
         block.nBits    = bnProofOfWorkLimit.GetCompact();
-        block.nNonce   = !fTestNet ? 222584 : 222584;
         // genesis block miner
 
-         if ((block.hashMerkleRoot != hashGenesisMerkleRoot) ||
-           (block.GetHash() != (!fTestNet ? hashGenesisBlock : hashGenesisBlockTestNet)))
-         {
-             printf("Bad genesis block found. Minting new one.\n Please recompile with the newly found block as the new genesis block.\n");
+         //if ((block.hashMerkleRoot != hashGenesisMerkleRoot) ||
+         //  (block.GetHash() != (!fTestNet ? hashGenesisBlock : hashGenesisBlockTestNet)))
+         //{
+         //    printf("Bad genesis block found. Minting new one.\n Please recompile with the newly found block as the new genesis block.\n");
 
-             uint256 hashTarget = CBigNum().SetCompact(block.nBits).getuint256();
-             uint256 thash;
+          //   uint256 hashTarget = CBigNum().SetCompact(block.nBits).getuint256();
+          //   uint256 thash;
 
-             while(true)
-             {
+          //   while(true)
+          //   {
                  // thash = Hash9(BEGIN(block.nVersion), END(block.nNonce));
-                 thash = block.GetHash();
-                 if (thash <= hashTarget)
-                     break;
-                 if ((block.nNonce & 0xFFF) == 0)
-                 {
-                     printf("nonce %08X: hash = %s (target = %s)\n", block.nNonce, thash.ToString().c_str(), hashTarget.ToString().c_str());
-                 }
-                 ++block.nNonce;
-                 if (block.nNonce == 0)
-                 {
-                     printf("NONCE WRAPPED, incrementing time\n");
-                     ++block.nTime;
-                 }
-             }
-             printf("Found genesis block:\n");
-             block.print();
-         }
+          //       thash = block.GetHash();
+          //       if (thash <= hashTarget)
+          //           break;
+          //       if ((block.nNonce & 0xFFF) == 0)
+          //       {
+          //           printf("nonce %08X: hash = %s (target = %s)\n", block.nNonce, thash.ToString().c_str(), hashTarget.ToString().c_str());
+          //       }
+          //       ++block.nNonce;
+          //       if (block.nNonce == 0)
+          //       {
+          //           printf("NONCE WRAPPED, incrementing time\n");
+          //           ++block.nTime;
+          //       }
+          //   }
+          //   printf("Found genesis block:\n");
+          //   block.print();
+         //}
+
+                block.nNonce   = !fTestNet ? 306504 : 222553;
 
         //// debug print
         assert(block.hashMerkleRoot == hashGenesisMerkleRoot);
