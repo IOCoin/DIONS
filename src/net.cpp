@@ -1244,11 +1244,7 @@ void ThreadDNSAddressSeed(void* parg)
     try
     {
         vnThreadsRunning[THREAD_DNSSEED]++;
-        if(strDNSSeedNode == "defualt")
           ThreadDNSAddressSeed2(parg);
-        else
-          ThreadDNSAddressSeed__(parg);
-
         vnThreadsRunning[THREAD_DNSSEED]--;
     }
     catch (std::exception& e) {
