@@ -652,6 +652,9 @@ bool AcceptToMemoryPool(CTxMemPool& pool, CTransaction &tx,
     if (tx.IsCoinStake())
       return tx.DoS(100, error("AcceptToMemoryPool : coinstake as individual tx"));
 
+    if (!fTestNet && tx.nVersion == CTransaction::DION_TX_VERSION && !V3(nBestHeight))
+      return error("AcceptToMemoryPool : type");
+
     // Rather not work on nonstandard transactions (unless -testnet)
     if (!fTestNet && !IsStandardTx(tx) && tx.nVersion != CTransaction::DION_TX_VERSION)
       return error("AcceptToMemoryPool : nonstandard transaction type");
@@ -1820,6 +1823,9 @@ bool CBlock::ConnectBlock(CTxDB& txdb, CBlockIndex* pindex, bool fJustCheck)
             nValueOut += tx.GetValueOut();
         else
         {
+          if(tx.nVersion == CTransaction::DION_TX_VERSION && !V3(nBestHeight))
+            return false;
+
             bool fInvalid;
             if (!tx.FetchInputs(txdb, mapQueuedChanges, true, false, mapInputs, fInvalid))
                 return false;
