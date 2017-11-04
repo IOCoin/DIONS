@@ -17,7 +17,7 @@ using namespace std;
 using namespace boost;
 using namespace boost::assign;
 using namespace json_spirit;
-/*
+
 void ScriptPubKeyToJSON(const CScript& scriptPubKey, Object& out, bool fIncludeHex)
 {
     txnouttype type;
@@ -42,7 +42,8 @@ void ScriptPubKeyToJSON(const CScript& scriptPubKey, Object& out, bool fIncludeH
     BOOST_FOREACH(const CTxDestination& addr, addresses)
         a.push_back(CBitcoinAddress(addr).ToString());
     out.push_back(Pair("addresses", a));
-}*/
+}
+/*
 void ScriptPubKeyToJSON(const CScript& scriptPubKey, Object& out, bool fIncludeHex)
 {
     //txnouttype type;
@@ -125,18 +126,13 @@ void ScriptPubKeyToJSON(const CScript& scriptPubKey, Object& out, bool fIncludeH
         script = CScript(pc, script.end());
     }
 
-    /* Write out the results.  */
     out.push_back(Pair("asm", aliasPrefix + script.ToString()));
     if (fIncludeHex)
         out.push_back(Pair("hex", HexStr(scriptPubKey.begin(), scriptPubKey.end())));
     out.push_back(Pair("hex", HexStr(scriptPubKey.begin(), scriptPubKey.end())));
 
-    /* Note:  ExtractDestination handles both pubkey hash and pubkey,
-       but the code below prints pubkeyhash as type in both cases.  That
-       is not so big a deal, presumably.  */
-
     out.push_back(Pair("reqSigs", nRequired));
-    out.push_back(Pair("type", "pubkeyhash" /*GetTxnOutputType(type)*/ ));
+    out.push_back(Pair("type", GetTxnOutputType(type) ));
 
     Array a;
     //BOOST_FOREACH(const CTxDestination& addr, addresses)
@@ -144,7 +140,7 @@ void ScriptPubKeyToJSON(const CScript& scriptPubKey, Object& out, bool fIncludeH
     a.push_back(address);
 
     out.push_back(Pair("addresses", a));
-}
+} */
 
 void TxToJSON(const CTransaction& tx, const uint256 hashBlock, Object& entry)
 {
