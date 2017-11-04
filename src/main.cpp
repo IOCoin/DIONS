@@ -1823,7 +1823,7 @@ bool CBlock::ConnectBlock(CTxDB& txdb, CBlockIndex* pindex, bool fJustCheck)
             nValueOut += tx.GetValueOut();
         else
         {
-          if(tx.nVersion == CTransaction::DION_TX_VERSION && !V3(nBestHeight))
+          if(!fTestNet && tx.nVersion == CTransaction::DION_TX_VERSION && !V3(nBestHeight))
             return false;
 
             bool fInvalid;
