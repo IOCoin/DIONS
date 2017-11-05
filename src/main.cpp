@@ -1823,9 +1823,6 @@ bool CBlock::ConnectBlock(CTxDB& txdb, CBlockIndex* pindex, bool fJustCheck)
             nValueOut += tx.GetValueOut();
         else
         {
-          if(!fTestNet && tx.nVersion == CTransaction::DION_TX_VERSION && !V3(nBestHeight))
-            return false;
-
             bool fInvalid;
             if (!tx.FetchInputs(txdb, mapQueuedChanges, true, false, mapInputs, fInvalid))
                 return false;
