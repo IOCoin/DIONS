@@ -1921,7 +1921,7 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
 	  // Search nSearchInterval seconds back up to nMaxStakeSearchInterval
 	  COutPoint prevoutStake = COutPoint(pcoin.first->GetHash(), pcoin.second);
           int64_t nBlockTime;
-	  if(CheckKernel(pindexPrev,  nBits, txNew.nTime, prevoutStake, &nBlockTime))
+	  if(CheckKernel(pindexPrev,  nBits, txNew.nTime -n, prevoutStake, &nBlockTime))
 	  {
 	      // Found a kernel
 	      if (fDebug && GetBoolArg("-printcoinstake"))
@@ -2029,8 +2029,20 @@ bool CWallet::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int
   }
 
   //Calculate reward
+  int64_t nReward;
   {
-      int64_t nReward = GetProofOfStakeReward(0, nFees, nHeight+1);
+      if(V3(nBestHeight))
+        nReward = GetProofOfStakeReward(0, nFees, nHeight+1);
+      else
+      {
+        uint64_t nCoinAge;
+        CTxDB txdb("r");
+        if (!txNew.GetCoinAge(txdb, nCoinAge))
+            return error("CreateCoinStake : failed to calculate coin age");
+
+        nReward = GetProofOfStakeReward(nCoinAge, nFees, nHeight+1);
+      }
+
       if (nReward <= 0)
 	return false;
 

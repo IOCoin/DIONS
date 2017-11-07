@@ -2157,6 +2157,46 @@ bool CBlock::SetBestChain(CTxDB& txdb, CBlockIndex* pindexNew)
     return true;
 }
 
+bool CTransaction::GetCoinAge(CTxDB& txdb, uint64_t& nCoinAge) const
+{
+    CBigNum bnCentSecond = 0;  // coin age in the unit of cent-seconds
+    nCoinAge = 0;
+
+    if (IsCoinBase())
+        return true;
+
+    BOOST_FOREACH(const CTxIn& txin, vin)
+    {
+        // First try finding the previous transaction in database
+        CTransaction txPrev;
+        CTxIndex txindex;
+        if (!txPrev.ReadFromDisk(txdb, txin.prevout, txindex))
+            continue;  // previous transaction not in main chain
+        if (nTime < txPrev.nTime)
+            return false;  // Transaction timestamp violation
+
+        // Read block header
+        CBlock block;
+        if (!block.ReadFromDisk(txindex.pos.nFile, txindex.pos.nBlockPos, false))
+            return false; // unable to read block of previous transaction
+        if (block.GetBlockTime() + nStakeMinAge > nTime)
+            continue; // only count coins meeting min age requirement
+
+        int64_t nValueIn = txPrev.vout[txin.prevout.n].nValue;
+        bnCentSecond += CBigNum(nValueIn) * (nTime-txPrev.nTime) / CENT;
+
+        if (fDebug && GetBoolArg("-printcoinage"))
+            printf("coin age nValueIn=%"PRId64" nTimeDiff=%d bnCentSecond=%s\n", nValueIn, nTime - txPrev.nTime, bnCentSecond.ToString().c_str());
+    }
+
+    CBigNum bnCoinDay = bnCentSecond * CENT / COIN / (24 * 60 * 60);
+    if (fDebug && GetBoolArg("-printcoinage"))
+        printf("coin age bnCoinDay=%s\n", bnCoinDay.ToString().c_str());
+    nCoinAge = bnCoinDay.getuint64();
+    return true;
+}
+
+
 // ppcoin: total coin age spent in transaction, in the unit of coin-days.
 // Only those coins meeting minimum age requirement counts. As those
 // transactions not in main chain are not currently indexed so we

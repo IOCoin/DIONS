@@ -708,6 +708,7 @@ public:
                        std::map<uint256, CTxIndex>& mapTestPool, CDiskTxPos& posThisTx,
                        CBlockIndex* pindexBlock, bool fBlock, bool fMiner, int flags);
     bool CheckTransaction() const;
+    bool GetCoinAge(CTxDB& txdb, uint64_t& nCoinAge) const;  // ppcoin: get tran
     bool GetCoinAge(CTxDB& txdb, const CBlockIndex* pindexPrev, uint64_t& nCoinAge) const;  // ppcoin: get transaction coin age
 
 protected:
