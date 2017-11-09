@@ -48,6 +48,39 @@ std::map<vchType, set<uint256> > k1Export;
 extern std::map<uint160, vchType> mapLocatorHashes;
 #endif
 
+#ifdef LL_RELAY_BASE__
+#define mul_mod(a,b,m) (( (long long) (a) * (long long) (b) ) % (m))
+#else
+#define mul_mod(a,b,m) fmod( (double) a * (double) b, m)
+#endif
+
+int relay_inv(int x, int y)
+{
+    int q, u, v, a, c, t;
+
+    u = x;
+    v = y;
+    c = 1;
+    a = 0;
+    do 
+    {
+      q = v / u;
+
+      t = c;
+      c = a - q * c;
+      a = t;
+
+      t = u;
+      u = v - q * u;
+      v = t;
+    } while (u != 0);
+      a = a % y;
+      if (a < 0)
+        a = y + a;
+    return a;
+}
+
+
 extern int INTERN_REF0__;
 extern int EXTERN_REF0__;
 
@@ -3114,6 +3147,7 @@ Value updateEncryptedAliasFile(const Array& params, bool fHelp)
    
     const vchType vchValue = vchFromValue(s);
 
+    int CRC__KEY = relay_inv(INTERN_REF0__, EXTERN_REF0__);
 
     CWalletTx wtx;
     wtx.nVersion = CTransaction::DION_TX_VERSION;
@@ -3165,6 +3199,7 @@ Value updateEncryptedAliasFile(const Array& params, bool fHelp)
 
         CScript scriptPubKey;
 
+        
 
         CWalletTx& wtxIn = pwalletMain->mapWallet[wtxInHash];
         bool found = false;

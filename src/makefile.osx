@@ -19,7 +19,6 @@ LIBPATHS= \
  -L"$(DEPSDIR)/lib" \
  -L"$(DEPSDIR)/lib/db48"
 
-USE_UPNP:=1
 
 LIBS= -dead_strip
 
@@ -29,6 +28,7 @@ LIBS += \
  $(DEPSDIR)/lib/db48/libdb_cxx-4.8.a \
  $(DEPSDIR)/lib/libboost_system-mt.a \
  $(DEPSDIR)/lib/libboost_filesystem-mt.a \
+ $(DEPSDIR)/lib/libboost_iostreams-mt.a \
  $(DEPSDIR)/lib/libboost_program_options-mt.a \
  $(DEPSDIR)/lib/libboost_thread-mt.a \
  $(DEPSDIR)/lib/libssl.a \
@@ -43,7 +43,6 @@ LIBS += \
  -lboost_thread-mt \
  -lssl \
  -lcrypto \
- -lboost_iostreams \
  -lz
 endif
 
@@ -77,6 +76,7 @@ OBJS= \
     obj/main.o \
     obj/miner.o \
     obj/net.o \
+    obj/state.o \
     obj/dions.o \
     obj/protocol.o \
     obj/bitcoinrpc.o \
