@@ -36,6 +36,11 @@ class Encode__N
     return n;
   }
 
+  bool conformal(int n)
+  {
+    return this->BASE__ == n; 
+  }
+
   private:
     long BASE__;
 };
