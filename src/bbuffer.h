@@ -16,6 +16,8 @@ class BurstBuffer
 
     int get(Burst* data, int offset, int length);
 
+    virtual Burst* __(int offset );
+
     Burst* array()
     {
       return this->b_;

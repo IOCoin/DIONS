@@ -5590,6 +5590,7 @@ Value registerAlias(const Array& params, bool fHelp)
       throw JSONRPCError(RPC_WALLET_ERROR, err);
     }
 
+
     std::transform(locatorStr.begin(), locatorStr.end(), locatorStr.begin(), ::tolower);
     uint256 wtxInHash__;
     if(searchAliasEncrypted2(locatorStr, wtxInHash__) == true)
@@ -5624,6 +5625,17 @@ Value registerAlias(const Array& params, bool fHelp)
       throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY,
         "Invalid dions address");
 
+    Encode__N graphN;
+    int h = 0;
+    const char* l = locatorStr.c_str();
+    while (*l)
+      h = h << 1 ^ *l++;
+
+    if(!graphN.conformal(h))
+      throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY,
+        "external file index");
+      
+    
     CBitcoinAddress keyAddress(strAddress);
     CKeyID keyID;
     keyAddress.GetKeyID(keyID);
