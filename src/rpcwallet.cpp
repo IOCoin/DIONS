@@ -1856,7 +1856,10 @@ Value walletpassphrasechange(const Array& params, bool fHelp)
 
 Value walletlockstatus(const Array& params, bool fHelp)
 {
-    return pwalletMain->IsLocked();
+    Object result;
+    result.push_back(Pair("isEncrypted", pwalletMain->IsCrypted()));
+    result.push_back(Pair("isLocked", pwalletMain->IsLocked()));
+    return result;
 }
 
 Value walletlock(const Array& params, bool fHelp)

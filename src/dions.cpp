@@ -808,9 +808,6 @@ Value decryptedMessageList(const Array& params, bool fHelp)
             if(!r.IsValid())
             {
               continue;
-              LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
-              LEAVE_CRITICAL_SECTION(cs_main)
-              throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
             }
 
             CKeyID keyID;
