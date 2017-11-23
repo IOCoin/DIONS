@@ -239,6 +239,7 @@ Value getrawtransaction(const Array& params, bool fHelp)
 
 Array listunspent__(double p, double& iR)
 {
+  printf("XXXX 1\n");
     int nMinDepth = 1;
     int nMaxDepth = 9999999;
 
@@ -369,8 +370,10 @@ Value listunspent(const Array& params, bool fHelp)
 
     return results;
 }
+
 Value crawgen(const Array& params, bool fHelp)
 {
+  printf("XXXX 2\n");
     double p = (params[0]).get_real();
 
     double i;
@@ -385,8 +388,18 @@ Value crawgen(const Array& params, bool fHelp)
       throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter");
 
     CTransaction rawTx;
+    //XXXX if (params.size() == 3) 
+    //XXXX     {
+    //XXXX            std::string txinfo = params[2].get_str();
+    //XXXX            if (txinfo.length() > MAX_TX_INFO_LEN)
+    //XXXX                  {
+    //XXXX                     txinfo.resize(140);
+    //XXXX                  }
+    //XXXX            rawTx.strTxInfo = txinfo;
+    //XXXX     }
     BOOST_FOREACH(Value& input, inputs)
     {
+  printf("XXXX 3\n");
         const Object& o = input.get_obj();
 
         const Value& txid_v = find_value(o, "txid");
@@ -410,6 +423,7 @@ Value crawgen(const Array& params, bool fHelp)
     set<CBitcoinAddress> setAddress;
     BOOST_FOREACH(const Pair& s, sendTo)
     {
+  printf("XXXX 4\n");
       CBitcoinAddress address(s.name_);
       if(!address.IsValid())
       {
@@ -447,10 +461,12 @@ Value crawgen(const Array& params, bool fHelp)
         rawTx.vout.push_back(out);
     }
 
+  printf("XXXX 5\n");
     unsigned int nBytes = ::GetSerializeSize(*(CTransaction*)&rawTx, SER_NETWORK);
     unsigned int n__ = (1 + nBytes/1000);
     double f = 0.001 * n__;
 
+  printf("XXXX 6\n");
     if (setAddress.count(cAddr))
       throw JSONRPCError(RPC_INVALID_PARAMETER, string("Invalid parameter, duplicated address "));
 
@@ -466,12 +482,12 @@ Value crawgen(const Array& params, bool fHelp)
     ss << rawTx;
     
 
+  printf("XXXX 7\n");
     Object result;
     result.push_back(Pair("hex", HexStr(ss.begin(), ss.end())));
     result.push_back(Pair("fee", f));
   return result;
 }
-
 Value createrawtransaction(const Array& params, bool fHelp)
 {
     if (fHelp || (params.size() < 2 || params.size() > 3))
