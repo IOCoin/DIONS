@@ -32,6 +32,7 @@ class CTxMemPool;
 //typedef std::vector<unsigned char> vchType;
 #include "constants.h"
 
+
 static const int LAST_POW_BLOCK = 12815;
 
 

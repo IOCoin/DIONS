@@ -55,6 +55,7 @@ int nCoinbaseMaturity = 100;
 CBlockIndex* pindexGenesisBlock = NULL;
 int nBestHeight = -1;
 
+unsigned long EAX0_SHIFT_REGISTER__ = 0x989680;
 int INTERN_REF0__ = 0x3520;
 int EXTERN_REF0__ = 0x0800;
 uint256 nBestChainTrust = 0;
