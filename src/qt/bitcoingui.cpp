@@ -126,25 +126,6 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
 
     signVerifyMessageDialog = new SignVerifyMessageDialog(this);
 
-    ionsPage = new QWidget(this);
-    Ui::IONSPage ions;
-    ions.setupUi(ionsPage);
-    QPushButton * homeButton = ionsPage->findChild<QPushButton *>("homeButton");
-    QPushButton * registerButton = ionsPage->findChild<QPushButton *>("registerButton");
-    QPushButton * checkButton = ionsPage->findChild<QPushButton *>("checkButton");
-    QPushButton * myUsernamesButton = ionsPage->findChild<QPushButton *>("myUsernamesButton");
-    QPushButton * reloadButton = ionsPage->findChild<QPushButton *>("reloadButton");
-    connect(reloadButton, SIGNAL(clicked()), ionsPage->findChild<QWebView *>("webView"), SLOT(reload()));
-
-    ionsFrame = ionsPage->findChild<QWebView *>("webView")->page()->mainFrame();
-    ionsProcessor = new IONSPaymentProcessor(this);
-    ionsPaymentSetup();
-    connect(ionsFrame, SIGNAL(javaScriptWindowObjectCleared()), this, SLOT(ionsPaymentSetup()));
-
-    connect(homeButton, SIGNAL(clicked()), this, SLOT(ionsHomeClicked()));
-    connect(registerButton, SIGNAL(clicked()), this, SLOT(ionsRegisterClicked()));
-    connect(checkButton, SIGNAL(clicked()), this, SLOT(ionsCheckClicked()));
-    connect(myUsernamesButton, SIGNAL(clicked()), this, SLOT(ionsMyUsernamesClicked()));
 
     centralWidget = new QStackedWidget(this);
     centralWidget->addWidget(overviewPage);
@@ -152,7 +133,6 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
     centralWidget->addWidget(addressBookPage);
     centralWidget->addWidget(receiveCoinsPage);
     centralWidget->addWidget(sendCoinsPage);
-    centralWidget->addWidget(ionsPage);
     setCentralWidget(centralWidget);
 
     // Create status bar
@@ -270,11 +250,6 @@ void BitcoinGUI::createActions()
     addressBookAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_5));
     tabGroup->addAction(addressBookAction);
 
-    IONSAction = new QAction(QIcon(":/icons/bitcoin"), tr("&IONS"), this);
-    IONSAction->setToolTip(tr("Get info on your IONS usernames."));
-    IONSAction->setCheckable(true);
-    IONSAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_6));
-    tabGroup->addAction(IONSAction);
 
     connect(overviewAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(overviewAction, SIGNAL(triggered()), this, SLOT(gotoOverviewPage()));
@@ -286,8 +261,6 @@ void BitcoinGUI::createActions()
     connect(historyAction, SIGNAL(triggered()), this, SLOT(gotoHistoryPage()));
     connect(addressBookAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(addressBookAction, SIGNAL(triggered()), this, SLOT(gotoAddressBookPage()));
-    connect(IONSAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
-    connect(IONSAction, SIGNAL(triggered()), this, SLOT(gotoIONSPage()));
 
     quitAction = new QAction(QIcon(":/icons/quit"), tr("E&xit"), this);
     quitAction->setToolTip(tr("Quit application"));
@@ -379,7 +352,6 @@ void BitcoinGUI::createToolBars()
     toolbar->addAction(receiveCoinsAction);
     toolbar->addAction(historyAction);
     toolbar->addAction(addressBookAction);
-    toolbar->addAction(IONSAction);
 
     QToolBar *toolbar2 = addToolBar(tr("Actions toolbar"));
     toolbar2->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);

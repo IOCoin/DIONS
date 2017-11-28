@@ -65,18 +65,7 @@ void SendCoinsEntry::on_addressBookButton_clicked()
 
 void SendCoinsEntry::on_ionsLookupButton_clicked()
 {
-    QDialog * ions = new QDialog();
-    Ui_IONSLookupDialog dlg;
-    dlg.setupUi(ions);
-
-    ionsFrame = ions->findChild<QWebView *>("webView")->page()->mainFrame();
-    ionsProcessor = new IONSLookupAddressProcessor(ions, this);
-    ionsProcessorSetup();
     connect(ionsFrame, SIGNAL(javaScriptWindowObjectCleared()), this, SLOT(ionsProcessorSetup()));
-
-    ions->findChild<QWebView *>("webView")->load(QUrl("http://"+ionsURL+"/address-book/1"));
-
-    ions->exec();
 }
 
 void SendCoinsEntry::on_payTo_textChanged(const QString &address)
@@ -204,7 +193,6 @@ void SendCoinsEntry::setFocus()
 
 void SendCoinsEntry::setPaymentAddress(QString ionsName, QString address)
 {
-    ui->ionsUsername->setText(ionsName);
     ui->payTo->setText(address);
     ui->payAmount->setFocus();
 }
