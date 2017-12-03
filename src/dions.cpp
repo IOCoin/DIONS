@@ -5963,6 +5963,16 @@ AcceptToMemoryPoolPost(const CTransaction& tx)
       return error("AcceptToMemoryPoolPost: no output out script in alias tx %s",
                     tx.GetHash().ToString().c_str());
 
+    if(op == OP_ALIAS_SET)
+    {
+      if(vvch[0].size() > MAX_LOCATOR_LENGTH)
+        return error("locator too long");
+
+      int nPrevHeight = aliasHeight(vvch[0]);
+      if(nPrevHeight >= 0 && nBestHeight - nPrevHeight < scaleMonitor())
+        return false;
+    }
+
     if(op != OP_ALIAS_ENCRYPTED)
     {
       ENTER_CRITICAL_SECTION(cs_main)
