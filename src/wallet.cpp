@@ -2884,7 +2884,6 @@ if (true)
       switch (op)
 	{
 	case OP_ENCRYPTED_MESSAGE:
-          printf("GetEncryptedMessageUpdate OP_ENCRYPTED_MESSAGE found\n");
 	  vchSender = vvch[0];
 	  vchRecipient = vvch[1];
 	  vchKey = vvch[2];
