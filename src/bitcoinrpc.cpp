@@ -189,14 +189,12 @@ string CRPCTable::help(string strCommand) const
 
 Value help(const Array& params, bool fHelp)
 {
-    if (fHelp || params.size() > 1)
+    if (params.size() != 1)
         throw runtime_error(
             "help [command]\n"
             "List commands, or get help for a command.");
 
-    string strCommand;
-    if (params.size() > 0)
-        strCommand = params[0].get_str();
+    string strCommand = params[0].get_str();
 
     return tableRPC.help(strCommand);
 }
