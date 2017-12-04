@@ -165,6 +165,69 @@ bool channelPredicate(string ext, string& tor)
 
   return true;
 }
+Value gw1(const Array& params, bool fHelp)
+{
+    Array oRes;
+    LocatorNodeDB ln1Db("r");
+
+    Dbc* cursorp;
+    try 
+    {
+      cursorp = ln1Db.GetCursor(); 
+
+      Dbt key, data;
+      int ret;
+
+      while ((ret = cursorp->get(&key, &data, DB_NEXT)) == 0) 
+      {
+        printf("  key \n");
+        CDataStream ssKey(SER_DISK, CLIENT_VERSION);
+        ssKey.write((char*)key.get_data(), key.get_size());
+
+        string k1;
+        ssKey >> k1;
+        if(k1 == "alias_")
+        {
+          Object o;
+          printf("  k1 %s\n", k1.c_str());
+          vchType k2;
+          ssKey >> k2; 
+          string a = stringFromVch(k2);
+          printf("  k2 %s\n", a.c_str());
+          o.push_back(Pair("alias", a));
+          oRes.push_back(o);
+
+          vector<AliasIndex> vtxPos;
+          CDataStream ssValue((char*)data.get_data(), (char*)data.get_data() + data.get_size(), SER_DISK, CLIENT_VERSION);
+          ssValue >> vtxPos;
+
+          AliasIndex i = vtxPos.back();
+          string i_address = (i.vAddress).c_str();
+          printf("  vAddress %s\n", i_address.c_str());
+        }
+      }
+      if (ret != DB_NOTFOUND) 
+      {
+        // ret should be DB_NOTFOUND upon exiting the loop.
+        // Dbc::get() will by default throw an exception if any
+        // significant errors occur, so by default this if block
+        // can never be reached. 
+      }
+    } 
+    catch(DbException &e) 
+    {
+      //ln1Db.err(e.get_errno(), "Error!");
+    } 
+    catch(std::exception &e) 
+    {
+      //ln1Db.errx("Error! %s", e.what());
+    }
+
+    if (cursorp != NULL) 
+      cursorp->close();
+
+	return oRes;
+}
 bool channel(string l, string f, string& k, bool& black)
 {
   vchType rVch;

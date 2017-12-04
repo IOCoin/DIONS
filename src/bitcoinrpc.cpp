@@ -233,6 +233,7 @@ static const CRPCCommand vRPCCommands[] =
     { "getnumblocksofpeers",    &getnumblocksofpeers,    true,   false },
     { "getpeerinfo",            &getpeerinfo,            true,   false },
     { "getdifficulty",          &getdifficulty,          true,   false },
+    { "gw1",          &gw1,          true,   false },
     { "getnetworkmhashps",      &getnetworkmhashps,      true,   false },
     { "getinfo",                &getinfo,                true,   false },
     { "getsubsidy",             &getsubsidy,             true,   false },
