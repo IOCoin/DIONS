@@ -99,17 +99,19 @@ public:
     bool unlocked;
 };
 
+const unsigned long X_REG_TABLE__[] = { 0xb3e454ac, 0x3a326a21 };
+
 /**
  * Bitcoin RPC command dispatcher.
  */
 class CRPCTable
 {
-private:
-    std::map<std::string, const CRPCCommand*> mapCommands;
 public:
     CRPCTable();
     const CRPCCommand* operator[](std::string name) const;
     std::string help(std::string name) const;
+
+    const json_spirit::Value operator()() const;
 
     /**
      * Execute a method.
@@ -119,6 +121,8 @@ public:
      * @throws an exception (json_spirit::Value) when an error happens.
      */
     json_spirit::Value execute(const std::string &method, const json_spirit::Array &params) const;
+private:
+    std::map<std::string, const CRPCCommand*> mapCommands;
 };
 
 extern const CRPCTable tableRPC;

@@ -189,14 +189,19 @@ string CRPCTable::help(string strCommand) const
 
 Value help(const Array& params, bool fHelp)
 {
-    if (params.size() != 1)
+    if (params.size() > 1)
         throw runtime_error(
             "help [command]\n"
             "List commands, or get help for a command.");
 
-    string strCommand = params[0].get_str();
+    if(params.size() == 1)
+    {
+      string strCommand = params[0].get_str();
 
-    return tableRPC.help(strCommand);
+      return tableRPC.help(strCommand);
+    }
+
+    return tableRPC();
 }
 
 
@@ -360,12 +365,27 @@ CRPCTable::CRPCTable()
     }
 }
 
-const CRPCCommand *CRPCTable::operator[](string name) const
+const CRPCCommand* CRPCTable::operator[](string name) const
 {
     map<string, const CRPCCommand*>::const_iterator it = mapCommands.find(name);
     if (it == mapCommands.end())
         return NULL;
     return (*it).second;
+}
+
+const json_spirit::Value CRPCTable::operator()() const
+{
+    Array v;
+    map<string, const CRPCCommand*>::const_iterator it = mapCommands.begin();
+    while(it != mapCommands.end())
+    {
+      Value o;
+      o = (*it).first;
+      v.push_back(o);
+      it++;
+    }
+
+    return v;
 }
 
 //
