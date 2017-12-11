@@ -374,6 +374,7 @@ Value listunspent(const Array& params, bool fHelp)
 
 Value crawgen(const Array& params, bool fHelp)
 {
+    printf("crawgen %f\n", params[0].get_real());
     double p = (params[0]).get_real();
 
     double i;
