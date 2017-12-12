@@ -6507,7 +6507,7 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
 
           if(linkSet(vvchArgs, pindexBlock, txPos, a1, ln1Db) == -1)
           {
-            printf("link set %s\n", stringFromVch(vvchArgs[0]));
+            printf("link set %s\n", stringFromVch(vvchArgs[0]).c_str());
           }
         }
 
