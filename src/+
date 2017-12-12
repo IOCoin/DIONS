@@ -44,7 +44,7 @@ std::map<vchType, uint256> mapLocator;
 std::map<vchType, set<uint256> > mapState;
 std::map<vchType, set<uint256> > k1Export;
 
-static int linkSet(vector<vchType>, CBlockIndex*, CDiskTxPos&, const string&, LocatorNodeDB&);
+static int linkSet(vector<vchType>, CBlockIndex*, const string&, LocatorNodeDB&);
 
 #ifdef GUI
 extern std::map<uint160, vchType> mapLocatorHashes;
@@ -5876,7 +5876,7 @@ bool aliasTx(const CTransaction& tx, int& op, int& nOut, vector<vector<unsigned 
     return found;
 }
 
-int linkSet(vector<vchType> v, CBlockIndex* p, CDiskTxPos& txPos, const string& s, LocatorNodeDB& ln1)
+int linkSet(vector<vchType> v, CBlockIndex* p, const string& a1, LocatorNodeDB&)
 {
   if(aliasHeight(v[0]) != -1)
   {
@@ -5884,14 +5884,15 @@ int linkSet(vector<vchType> v, CBlockIndex* p, CDiskTxPos& txPos, const string& 
     vector<AliasIndex> vtxPos;
     int nHeight;
     uint256 hash;
+    AliasIndex txPos;
     AliasIndex txPos2;
     txTrace(txPos, vchValue, hash, nHeight);
     txPos2.nHeight = p->nHeight;
     txPos2.vValue = vchValue;
-    txPos2.vAddress = s;
+    txPos2.vAddress = a1;
     txPos2.txPos = txPos;
     vtxPos.push_back(txPos2);
-    if(!ln1.lPut(v[0], vtxPos))
+    if(!ln1Db.lPut(vvchArgs[0], vtxPos))
       return -1;
   }
 
@@ -6505,7 +6506,7 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
               }
             }
 
-          if(linkSet(vvchArgs, pindexBlock, txPos, a1, ln1Db) == -1)
+          if(linkSet(vvchArgs[0], pindexBlock, ln1Db) == -1)
           {
             printf("link set %s\n", stringFromVch(vvchArgs[0]));
           }
