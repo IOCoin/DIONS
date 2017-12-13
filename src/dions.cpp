@@ -5880,8 +5880,10 @@ bool aliasTx(const CTransaction& tx, int& op, int& nOut, vector<vector<unsigned 
 
 int linkSet(vector<vchType> v, CBlockIndex* p, CDiskTxPos& txPos, const string& s, LocatorNodeDB& ln1)
 {
-  if(aliasHeight(v[0]) != -1)
+  if(ln1.lKey(v[0]))
   {
+    return 0;
+  }
     vector<unsigned char> vchValue;
     vector<AliasIndex> vtxPos;
     int nHeight;
@@ -5895,9 +5897,8 @@ int linkSet(vector<vchType> v, CBlockIndex* p, CDiskTxPos& txPos, const string& 
     vtxPos.push_back(txPos2);
     if(!ln1.lPut(v[0], vtxPos))
       return -1;
-  }
 
-  return 0;
+  return 1;
 }
 
 bool aliasTxValue(const CTransaction& tx, vector<unsigned char>& value)
@@ -6531,7 +6532,53 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
 
 void xsc(CBlockIndex* p)
 {
- 
+  printf("XXXX xsc scanning for current dions\n");
+  LocatorNodeDB l("cr+");
+  CTxDB txdb("r");
+
+  for(; p; p=p->pnext) 
+  {
+    if(p->nHeight < 1625000)
+      continue;
+
+    CBlock block;
+    CDiskTxPos txPos;
+    block.ReadFromDisk(p);
+    uint256 h;
+
+    BOOST_FOREACH(CTransaction& tx, block.vtx) 
+    {
+      if (tx.nVersion != CTransaction::DION_TX_VERSION)
+        continue;
+
+      vector<vector<unsigned char> > vvchArgs;
+      int op, nOut;
+
+      aliasTx(tx, op, nOut, vvchArgs);
+      if (op != OP_ALIAS_SET)
+        continue;
+
+      const vector<unsigned char>& v = vvchArgs[0];
+      string a = stringFromVch(v);
+       
+      if (!GetTransaction(tx.GetHash(), tx, h))
+        continue;
+
+      printf("XXXX ALIAS  %s\n", a.c_str());
+      const CTxOut& txout = tx.vout[nOut];
+      const CScript& scriptPubKey = aliasStrip(txout.scriptPubKey);
+      string s = scriptPubKey.GetBitcoinAddress();
+      printf("XXXX ADDRESS %s\n", s.c_str());
+      printf("XXXX HEIGHT %d\n", p->nHeight);
+      printf("XXXX TX     %s\n", tx.GetHash().ToString().c_str());
+      CTxIndex txI;
+      if(!txdb.ReadTxIndex(tx.GetHash(), txI))
+        continue;
+     
+      printf("XXXX read txI\n");
+      linkSet(vvchArgs, p, txI.pos, s, l);
+    }
+  }
 }
 
 unsigned char GetAddressVersion() 

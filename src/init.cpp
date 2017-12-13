@@ -862,11 +862,24 @@ bool AppInit2()
 
         if(GetBoolArg("-xscan"))
         {
+          filesystem::path dc = GetDataDir() / "aliascache.dat";
+          FILE *file = fopen(dc.string().c_str(), "rb");
+          if (file) 
+          {
+            filesystem::path dc__ = GetDataDir() / "aliascache.dat.old";
+            RenameOver(dc, dc__);
+          }
           xsc(pindexRescan);
         }
     }
 
     // ********************************************************* Step 9: import blocks
+    {
+      filesystem::path aliascache;
+      aliascache = filesystem::path(GetDataDir())/"aliascache.dat";
+
+      LocatorNodeDB aliasCacheDB("cr+");
+    }
 
     if (mapArgs.count("-loadblock"))
     {
@@ -909,12 +922,6 @@ bool AppInit2()
            addrman.size(), GetTimeMillis() - nStart);
 
 
-    {
-      filesystem::path aliascache;
-      aliascache = filesystem::path(GetDataDir())/"aliascache.dat";
-
-      LocatorNodeDB aliasCacheDB("cr+");
-    }
 
     if (!CheckDiskSpace())
         return false;
