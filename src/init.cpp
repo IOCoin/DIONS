@@ -28,6 +28,7 @@
 using namespace std;
 using namespace boost;
 
+extern void xsc(CBlockIndex*);
 CWallet* pwalletMain;
 CClientUIInterface uiInterface;
 bool fConfChange;
@@ -861,7 +862,7 @@ bool AppInit2()
 
         if(GetBoolArg("-xscan"))
         {
-
+          xsc(pindexRescan);
         }
     }
 

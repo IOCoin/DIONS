@@ -44,6 +44,8 @@ std::map<vchType, uint256> mapLocator;
 std::map<vchType, set<uint256> > mapState;
 std::map<vchType, set<uint256> > k1Export;
 
+void xsc(CBlockIndex*);
+
 static int linkSet(vector<vchType>, CBlockIndex*, CDiskTxPos&, const string&, LocatorNodeDB&);
 
 #ifdef GUI
@@ -6526,7 +6528,15 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
 
     return true;
 }
+
+void xsc(CBlockIndex* p)
+{
+ 
+}
+
 unsigned char GetAddressVersion() 
 { 
   return((unsigned char)(fTestNet ? 111 : 103)); 
 }
+
+
