@@ -6499,6 +6499,7 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
             {
               printf("ConnectInputsPost() : flagged active with tx %s\n",
               tx.GetHash().GetHex().c_str());
+              return false;
             }
           }
 
