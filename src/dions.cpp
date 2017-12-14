@@ -6489,24 +6489,18 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
         if(op == OP_ALIAS_SET || op == OP_ALIAS_RELAY)
         {
 
-            string locatorStr = stringFromVch(vvchArgs[0]);
-            std::transform(locatorStr.begin(), locatorStr.end(), locatorStr.begin(), ::tolower);
-            vector<AliasIndex> vtxPos;
-            if(ln1Db.lKey(vchFromString(locatorStr))
-                && !ln1Db.lGet(vchFromString(locatorStr), vtxPos))
-            {
-              return error("ConnectInputsPost() : failed to read from alias DB");
-            }
+          string locatorStr = stringFromVch(vvchArgs[0]);
+          std::transform(locatorStr.begin(), locatorStr.end(), locatorStr.begin(), ::tolower);
             
-            if(op == OP_ALIAS_SET)
+          if(op == OP_ALIAS_SET)
+          {
+            CTransaction tx;
+            if(aliasTx(ln1Db, vchFromString(locatorStr), tx))
             {
-              CTransaction tx;
-              if(aliasTx(ln1Db, vchFromString(locatorStr), tx))
-              {
-                return error("ConnectInputsPost() : this alias is already active with tx %s",
-                tx.GetHash().GetHex().c_str());
-              }
+              printf("ConnectInputsPost() : flagged active with tx %s\n",
+              tx.GetHash().GetHex().c_str());
             }
+          }
 
           if(linkSet(vvchArgs, pindexBlock, txPos, a1, ln1Db) == -1)
           {
