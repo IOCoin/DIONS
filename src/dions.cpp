@@ -6410,14 +6410,14 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
 
              if(vvchArgs[2] != vvchPrevArgs[2])
              {
-               return error("Dions::ConnectInputsPost: OP_ALIAS_SET owner address does not match registerAlias address");
+               return error("mismatch");
              }
 
             if(vvchArgs[3].size() > 20)
-                return error("decryptAlias tx with rand too big");
+                return error("tx with field offset too long");
             
             if(vvchArgs[2].size() > MAX_XUNIT_LENGTH)
-                return error("decryptAlias tx with value too long");
+                return error("tx with field entry too long");
 
             {
                 const vchType& vchHash = vvchPrevArgs[3];
@@ -6428,7 +6428,7 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
                 uint160 hash = Hash160(vchToHash);
                 if(uint160(vchHash) != hash)
                 {
-                        return error("ConnectInputsPost() : decryptAlias hash mismatch");
+                        return error("hash mismatch");
                 }
             }
 
@@ -6443,7 +6443,7 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
             {
                 nDepth = CheckTransactionAtRelativeDepth(pindexBlock, vTxindex[nInput], scaleMonitor());
                 if(nDepth == -1)
-                    return error("ConnectInputsPost() : decryptAlias cannot be mined if registerAlias is not already in chain and unexpired");
+                    return error("cannot be mined if not already in chain and unexpired");
 
                 set<uint256>& setPending = mapState[vvchArgs[0]];
                 BOOST_FOREACH(const PAIRTYPE(uint256, CTxIndex)& s, mapTestPool)
@@ -6465,15 +6465,15 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
 
             if(vvchPrevArgs[0] != vvchArgs[0])
             {
-                    return error("ConnectInputsPost() : updateAlias alias mismatch");
+                    return error("alias mismatch");
             }
 
             nDepth = CheckTransactionAtRelativeDepth(pindexBlock, vTxindex[nInput], scaleMonitor());
             if((fBlock || fMiner) && nDepth < 0)
-                return error("ConnectInputsPost() : updateAlias on an expired alias, or there is a pending transaction on the alias");
+                return error("expired alias, or there is a pending transaction on the alias");
             break;
         default:
-            return error("ConnectInputsPost() : alias transaction has unknown op");
+            return error("alias transaction has unknown op");
     }
     if(!fBlock && op == OP_ALIAS_RELAY)
     {
@@ -6497,7 +6497,7 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
             CTransaction tx;
             if(aliasTx(ln1Db, vchFromString(locatorStr), tx))
             {
-              printf("ConnectInputsPost() : flagged active with tx %s\n",
+              printf("flagged active with tx %s\n",
               tx.GetHash().GetHex().c_str());
               return false;
             }

@@ -755,7 +755,7 @@ bool AcceptToMemoryPool(CTxMemPool& pool, CTransaction &tx,
         CDiskTxPos cDiskTxPos = CDiskTxPos(1,1,1);
         if(!tx.ConnectInputs(txdb, mapInputs, mapUnused, cDiskTxPos, pindexBest, false, false, STANDARD_SCRIPT_VERIFY_FLAGS))
         {
-            return error("AcceptToMemoryPool : ConnectInputs failed %s", hash.ToString().substr(0,10).c_str());
+          return error("AcceptToMemoryPool : ConnectInputs failed %s", hash.ToString().substr(0,10).c_str());
         }
     }
 
@@ -1712,7 +1712,9 @@ bool CTransaction::ConnectInputs(CTxDB& txdb, MapPrevTx inputs, map<uint256, CTx
 
           if (!ConnectInputsPost (mapTestPool, *this, vTxPrev, vTxindex,
                                    pindexBlock, posThisTx, fBlock, fMiner))
-              return false;
+          {
+            return DoS(100, error("pre forward %s\n", GetHash().ToString().substr(0,10).c_str()));
+          }
 
             // Tally transaction fees
             int64_t nTxFee = nValueIn - GetValueOut();
@@ -1851,8 +1853,11 @@ bool CBlock::ConnectBlock(CTxDB& txdb, CBlockIndex* pindex, bool fJustCheck)
             if (tx.IsCoinStake())
                 nStakeReward = nTxValueOut - nTxValueIn;
 
-            if (!tx.ConnectInputs(txdb, mapInputs, mapQueuedChanges, posThisTx, pindex, true, false, flags))
-                return false;
+            bool pre = tx.ConnectInputs(txdb, mapInputs, mapQueuedChanges, posThisTx, pindex, true, false, flags);
+            if(!pre && tx.nVersion == CTransaction::DION_TX_VERSION)
+              return DoS(100, error("pre count"));
+            else if(!pre)
+              return false;
         }
 
         mapQueuedChanges[hashTx] = CTxIndex(posThisTx, tx.vout.size());
