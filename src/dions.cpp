@@ -6477,7 +6477,7 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
         default:
             return error("alias transaction has unknown op");
     }
-    if(!fBlock && op == OP_ALIAS_RELAY)
+    if(op == OP_ALIAS_RELAY)
     {
         vector<AliasIndex> vtxPos;
         if(ln1Db.lKey(vvchArgs[0])
