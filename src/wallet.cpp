@@ -1275,6 +1275,7 @@ void CWallet::AvailableCoinsForStaking(vector<COutput>& vCoins, unsigned int nSp
       for (map<uint256, CWalletTx>::const_iterator it = mapWallet.begin(); it != mapWallet.end(); ++it)
       {
 	  const CWalletTx* pcoin = &(*it).second;
+  
 
 	  if (pcoin->GetBlocksToMaturity() > 0)
 	    continue;

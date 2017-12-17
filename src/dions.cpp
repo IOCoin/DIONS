@@ -6139,6 +6139,8 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
 
     int prevOp;
     std::vector<vchType> vvchPrevArgs;
+    printf("CIP tx %s\n",
+              tx.GetHash().GetHex().c_str());
 
     for(int i = 0; i < tx.vin.size(); i++)
     {
@@ -6484,7 +6486,6 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
         if(!aliasTxPos(vtxPos, vTxindex[nInput].pos))
             return error("ConnectInputsPost() : tx %s rejected, since previous tx(%s) is not in the alias DB\n", tx.GetHash().ToString().c_str(), vTxPrev[nInput].GetHash().ToString().c_str());
     }
-    if(fBlock)
     {
         if(op == OP_ALIAS_SET || op == OP_ALIAS_RELAY)
         {
@@ -6497,7 +6498,7 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
             CTransaction tx;
             if(aliasTx(ln1Db, vchFromString(locatorStr), tx))
             {
-              printf("flagged active with tx %s\n",
+              printf("%s flagged active with tx %s\n", locatorStr.c_str(),
               tx.GetHash().GetHex().c_str());
               return false;
             }
@@ -6559,13 +6560,13 @@ void xsc(CBlockIndex* p)
       if (!GetTransaction(tx.GetHash(), tx, h))
         continue;
 
-      //printf("XXXX ALIAS  %s\n", a.c_str());
+      printf("XXXX ALIAS  %s\n", a.c_str());
       const CTxOut& txout = tx.vout[nOut];
       const CScript& scriptPubKey = aliasStrip(txout.scriptPubKey);
       string s = scriptPubKey.GetBitcoinAddress();
-      //printf("XXXX ADDRESS %s\n", s.c_str());
-      //printf("XXXX HEIGHT %d\n", p->nHeight);
-      //printf("XXXX TX     %s\n", tx.GetHash().ToString().c_str());
+      printf("XXXX ADDRESS %s\n", s.c_str());
+      printf("XXXX HEIGHT %d\n", p->nHeight);
+      printf("XXXX TX     %s\n", tx.GetHash().ToString().c_str());
       CTxIndex txI;
       if(!txdb.ReadTxIndex(tx.GetHash(), txI))
         continue;
