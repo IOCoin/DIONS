@@ -6560,13 +6560,13 @@ void xsc(CBlockIndex* p)
       if (!GetTransaction(tx.GetHash(), tx, h))
         continue;
 
-      printf("XXXX ALIAS  %s\n", a.c_str());
+      //printf("XXXX ALIAS  %s\n", a.c_str());
       const CTxOut& txout = tx.vout[nOut];
       const CScript& scriptPubKey = aliasStrip(txout.scriptPubKey);
       string s = scriptPubKey.GetBitcoinAddress();
-      printf("XXXX ADDRESS %s\n", s.c_str());
-      printf("XXXX HEIGHT %d\n", p->nHeight);
-      printf("XXXX TX     %s\n", tx.GetHash().ToString().c_str());
+      //printf("XXXX ADDRESS %s\n", s.c_str());
+      //printf("XXXX HEIGHT %d\n", p->nHeight);
+      //printf("XXXX TX     %s\n", tx.GetHash().ToString().c_str());
       CTxIndex txI;
       if(!txdb.ReadTxIndex(tx.GetHash(), txI))
         continue;

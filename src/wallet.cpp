@@ -1516,6 +1516,8 @@ bool CWallet::SelectCoinsForStaking(int64_t nTargetValue, unsigned int nSpendTim
   vector<COutput> vCoins;
   AvailableCoinsForStaking(vCoins, nSpendTime);
 
+  random_shuffle(vCoins.begin(), vCoins.end(), GetRandInt);
+
   setCoinsRet.clear();
   nValueRet = 0;
 
