@@ -4,8 +4,8 @@
 class ExtTor
 {
   public:
-    ExtTor() { }
-     
+    virtual void gr() == 0; 
+    ~virtual ExtTor();
   private:
 };
 
