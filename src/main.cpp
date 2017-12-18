@@ -2456,8 +2456,6 @@ bool CBlock::AcceptBlock()
     map<uint256, CTxIndex> mapQueuedChanges;
     BOOST_FOREACH(CTransaction& tx, vtx)
     {
-        
-
         MapPrevTx mapInputs;
         if (!tx.IsCoinBase())
         {
@@ -2531,8 +2529,11 @@ bool CBlock::AcceptBlock()
     unsigned int nBlockPos = 0;
     if (!WriteToDisk(nFile, nBlockPos))
         return error("AcceptBlock() : WriteToDisk failed");
+
     if (!AddToBlockIndex(nFile, nBlockPos, hashProof))
-        return error("AcceptBlock() : AddToBlockIndex failed");
+    {
+        return error("add : failed");
+    }
 
     // Relay inventory, but don't relay old inventory during initial block download
     int nBlockEstimate = Checkpoints::GetTotalBlocksEstimate();

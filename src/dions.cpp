@@ -6133,6 +6133,26 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
                                CBlockIndex* pindexBlock, CDiskTxPos& txPos,
                                bool fBlock, bool fMiner)
 {
+    if(tx.nVersion != CTransaction::DION_TX_VERSION)
+    {
+        bool found= false;
+        for(int i = 0; i < tx.vout.size(); i++)
+        {
+            const CTxOut& out = tx.vout[i];
+
+            std::vector<vchType> vvchRead;
+            int opRead;
+
+            if(aliasScript(out.scriptPubKey, opRead, vvchRead))
+                found=true;
+        }
+
+        if(found)
+            return error("ConnectInputsPost() : a non-dions transaction with a dions input");
+        return true;
+    }
+
+
     LocatorNodeDB ln1Db("r+");
     int nInput;
     bool found = false;
@@ -6157,25 +6177,6 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
 
         vvchPrevArgs = vvchPrevArgsRead;
       }
-    }
-    if(tx.nVersion != CTransaction::DION_TX_VERSION)
-    {
-
-        bool found= false;
-        for(int i = 0; i < tx.vout.size(); i++)
-        {
-            const CTxOut& out = tx.vout[i];
-
-            std::vector<vchType> vvchRead;
-            int opRead;
-
-            if(aliasScript(out.scriptPubKey, opRead, vvchRead))
-                found=true;
-        }
-
-        if(found)
-            return error("ConnectInputsPost() : a non-dions transaction with a dions input");
-        return true;
     }
 
     std::vector<vchType> vvchArgs;
