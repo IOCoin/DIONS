@@ -24,7 +24,7 @@ qrc_*.cpp
 .DS_Store
 build
 keys
-
+L
 !src/leveldb/Makefile
 *.aux
 *.log
