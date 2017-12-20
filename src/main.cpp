@@ -53,6 +53,7 @@ unsigned int  POS_v3_DIFFICULTY_HEIGHT = 100000;
 
 int nCoinbaseMaturity = 100;
 CBlockIndex* pindexGenesisBlock = NULL;
+CBlockIndex* p__ = NULL;
 int nBestHeight = -1;
 
 unsigned long EAX0_SHIFT_REGISTER__ = 0x989680;
@@ -2057,6 +2058,7 @@ bool CBlock::SetBestChain(CTxDB& txdb, CBlockIndex* pindexNew)
         if (!txdb.TxnCommit())
             return error("SetBestChain() : TxnCommit failed");
         pindexGenesisBlock = pindexNew;
+        p__ = pindexNew;
     }
     else if (hashPrevBlock == hashBestChain)
     {
@@ -2949,7 +2951,7 @@ bool LoadBlockIndex(bool fAllowNew)
           //   block.print();
          //}
 
-                block.nNonce   = !fTestNet ? 306504 : 222553;
+                block.nNonce   = !fTestNet ? 306504 : 0;
 
         //// debug print
         assert(block.hashMerkleRoot == hashGenesisMerkleRoot);

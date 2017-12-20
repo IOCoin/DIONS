@@ -29,12 +29,16 @@
 #include <boost/iostreams/stream.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
 #include <boost/iostreams/device/file_descriptor.hpp>
+
+#include "hbook.h"
+
 using namespace std;
 using namespace json_spirit;
 using namespace boost::iostreams;
 
 namespace fs = boost::filesystem;
 
+extern CBlockIndex* p__;
 extern Object JSONRPCError(int code, const string& message);
 extern Value xtu_url__(const string& url);
 template<typename T> void ConvertTo(Value& value, bool fAllowNull=false);
@@ -46,6 +50,7 @@ std::map<vchType, set<uint256> > k1Export;
 
 void xsc(CBlockIndex*);
 
+static void tFrame();
 static int linkSet(vector<vchType>, CBlockIndex*, CDiskTxPos&, const string&, LocatorNodeDB&);
 
 #ifdef GUI
@@ -57,6 +62,8 @@ extern std::map<uint160, vchType> mapLocatorHashes;
 #else
 #define mul_mod(a,b,m) fmod( (double) a * (double) b, m)
 #endif
+
+Hbook hb;
 
 int relay_inv(int x, int y)
 {
@@ -6478,7 +6485,7 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
         default:
             return error("alias transaction has unknown op");
     }
-    if(op == OP_ALIAS_RELAY)
+    if(!fBlock && op == OP_ALIAS_RELAY)
     {
         vector<AliasIndex> vtxPos;
         if(ln1Db.lKey(vvchArgs[0])
@@ -6487,6 +6494,7 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
         if(!aliasTxPos(vtxPos, vTxindex[nInput].pos))
             return error("ConnectInputsPost() : tx %s rejected, since previous tx(%s) is not in the alias DB\n", tx.GetHash().ToString().c_str(), vTxPrev[nInput].GetHash().ToString().c_str());
     }
+    if(fBlock)
     {
         if(op == OP_ALIAS_SET || op == OP_ALIAS_RELAY)
         {
@@ -6527,6 +6535,71 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
     return true;
 }
 
+void tFrame()
+{
+  CTxDB txdb("r");
+
+  CBlockIndex* p = p__;
+  for(; p; p=p->pnext) 
+  {
+    if(p->nHeight <= hb())
+      continue;
+
+    CBlock block;
+    CDiskTxPos txPos;
+    block.ReadFromDisk(p);
+    uint256 h;
+
+    BOOST_FOREACH(CTransaction& tx, block.vtx) 
+    {
+      if (tx.nVersion != CTransaction::DION_TX_VERSION)
+        continue;
+
+      vector<vector<unsigned char> > vvchArgs;
+      int op, nOut;
+
+      aliasTx(tx, op, nOut, vvchArgs);
+      if (op != OP_ALIAS_SET)
+        continue;
+
+      const vector<unsigned char>& v = vvchArgs[0];
+      string a = stringFromVch(v);
+       
+      if (!GetTransaction(tx.GetHash(), tx, h))
+        continue;
+
+      printf("XXXX ALIAS  %s\n", a.c_str());
+      const CTxOut& txout = tx.vout[nOut];
+      const CScript& scriptPubKey = aliasStrip(txout.scriptPubKey);
+      string s = scriptPubKey.GetBitcoinAddress();
+      printf("XXXX ADDRESS %s\n", s.c_str());
+      printf("XXXX HEIGHT %d\n", p->nHeight);
+      printf("XXXX TX     %s\n", tx.GetHash().ToString().c_str());
+      CTxIndex txI;
+      if(!txdb.ReadTxIndex(tx.GetHash(), txI))
+        continue;
+     
+      printf("XXXX read txI\n");
+      f c(a, s, p->nHeight, tx.GetHash().ToString()); 
+      f o;
+      if(hb.set(c, o))
+      {
+        printf("updated book\n");
+      }
+      else
+      {
+        printf("REJECTED\n");
+        c.r();
+        printf("alredy active\n");
+        o.r();
+      }
+    }
+  }
+
+  hb.r();
+  printf("XXX el %d\n", hb());
+}
+
 void xsc(CBlockIndex* p)
 {
   printf("XXXX xsc scanning for current dions\n");
@@ -6561,21 +6634,37 @@ void xsc(CBlockIndex* p)
       if (!GetTransaction(tx.GetHash(), tx, h))
         continue;
 
-      //printf("XXXX ALIAS  %s\n", a.c_str());
+      printf("XXXX ALIAS  %s\n", a.c_str());
       const CTxOut& txout = tx.vout[nOut];
       const CScript& scriptPubKey = aliasStrip(txout.scriptPubKey);
       string s = scriptPubKey.GetBitcoinAddress();
-      //printf("XXXX ADDRESS %s\n", s.c_str());
-      //printf("XXXX HEIGHT %d\n", p->nHeight);
-      //printf("XXXX TX     %s\n", tx.GetHash().ToString().c_str());
+      printf("XXXX ADDRESS %s\n", s.c_str());
+      printf("XXXX HEIGHT %d\n", p->nHeight);
+      printf("XXXX TX     %s\n", tx.GetHash().ToString().c_str());
       CTxIndex txI;
       if(!txdb.ReadTxIndex(tx.GetHash(), txI))
         continue;
      
-      //printf("XXXX read txI\n");
+      printf("XXXX read txI\n");
       linkSet(vvchArgs, p, txI.pos, s, l);
+      f c(a, s, p->nHeight, tx.GetHash().ToString()); 
+      f o;
+      if(hb.set(c, o))
+      {
+        printf("updated book\n");
+      }
+      else
+      {
+        printf("REJECTED\n");
+        c.r();
+        printf("alredy active\n");
+        o.r();
+      }
     }
   }
+
+  hb.r();
+  printf("XXX el %d\n", hb());
 }
 
 unsigned char GetAddressVersion() 
