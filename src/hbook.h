@@ -20,6 +20,11 @@ class f
       return *this;
     }
 
+   void m(const string& s) 
+   {
+     this->u = s;
+   }
+
    void r() const
    {
      printf("%s\n", this->u.c_str());
@@ -61,6 +66,18 @@ class Hbook
       v.push_back(o);
       el=o();
       return true;  
+    }
+
+    bool l(const f& s, f& n) const
+    {
+      for(int a=0; a<v.size(); a++)
+      {
+        if((n=(f)v[a]) == s) 
+        {
+          return true;
+        }
+      }
+      return false;
     }
 
     int operator()() const
