@@ -39,6 +39,7 @@ unsigned int nMinerSleep;
 string strDNSSeedNode;
 bool fUseFastIndex;
 enum Checkpoints::CPMode CheckpointsMode;
+LocatorNodeDB* ln1Db = NULL;
 //////////////////////////////////////////////////////////////////////////////
 //
 // Shutdown
@@ -878,7 +879,8 @@ bool AppInit2()
       filesystem::path aliascache;
       aliascache = filesystem::path(GetDataDir())/"aliascache.dat";
 
-      LocatorNodeDB aliasCacheDB("cr+");
+      //XXXX LocatorNodeDB aliasCacheDB("cr+");
+      ln1Db = new LocatorNodeDB("cr+");
     }
 
     if (mapArgs.count("-loadblock"))

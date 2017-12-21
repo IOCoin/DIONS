@@ -578,4 +578,61 @@ bool CAddrDB::Read(CAddrMan& addr)
 
     return true;
 }
+    void LocatorNodeDB::filter()
+    {
+      printf("XXXX filter\n");
+      CTxDB txdb("r");
 
+      //XXXX CBlockIndex* p = p__;
+      CBlockIndex* p = pindexGenesisBlock;
+      for(; p; p=p->pnext) 
+      {
+      printf("XXXX filter ...\n");
+        CBlock block;
+        CDiskTxPos txPos;
+        block.ReadFromDisk(p);
+        uint256 h;
+
+        BOOST_FOREACH(CTransaction& tx, block.vtx) 
+        {
+      printf("XXXX filter ... search\n");
+          if (tx.nVersion != CTransaction::DION_TX_VERSION)
+            continue;
+
+          vector<vector<unsigned char> > vvchArgs;
+          int op, nOut;
+
+          aliasTx(tx, op, nOut, vvchArgs);
+          if (op != OP_ALIAS_SET)
+            continue;
+
+          const vector<unsigned char>& v = vvchArgs[0];
+          string a = stringFromVch(v);
+       
+          if (!GetTransaction(tx.GetHash(), tx, h))
+            continue;
+
+          const CTxOut& txout = tx.vout[nOut];
+          const CScript& scriptPubKey = aliasStrip(txout.scriptPubKey);
+          string s = scriptPubKey.GetBitcoinAddress();
+          CTxIndex txI;
+          if(!txdb.ReadTxIndex(tx.GetHash(), txI))
+            continue;
+
+          vector<unsigned char> vchValue;
+          vector<AliasIndex> vtxPos;
+          int nHeight;
+          uint256 hash;
+          AliasIndex txPos2;
+          txTrace(txPos, vchValue, hash, nHeight);
+          txPos2.nHeight = p->nHeight;
+          txPos2.vValue = vchValue;
+          txPos2.vAddress = s;
+          txPos2.txPos = txPos;
+          vtxPos.push_back(txPos2);
+          printf("XXXX filter name %s\n", stringFromVch(vvchArgs[0]).c_str());
+          if(op == OP_ALIAS_SET && !lKey(vvchArgs[0]))
+            lPut(vvchArgs[0], vtxPos);
+        }
+      }
+    } 

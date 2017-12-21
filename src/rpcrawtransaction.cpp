@@ -18,6 +18,7 @@ using namespace boost;
 using namespace boost::assign;
 using namespace json_spirit;
 
+extern LocatorNodeDB* ln1Db;
 void ScriptPubKeyToJSON(const CScript& scriptPubKey, Object& out, bool fIncludeHex)
 {
     txnouttype type;
@@ -418,13 +419,13 @@ Value crawgen(const Array& params, bool fHelp)
       if(!address.IsValid())
       {
         vector<AliasIndex> vtxPos;
-        LocatorNodeDB ln1Db("r");
+        //XXXX LocatorNodeDB ln1Db("r");
         string aliasStr = s.name_;
         std::transform(aliasStr.begin(), aliasStr.end(), aliasStr.begin(), ::tolower);
         vchType vchAlias = vchFromString(aliasStr);
-        if (ln1Db.lKey (vchAlias))
+        if (ln1Db->lKey (vchAlias))
         {
-          if (!ln1Db.lGet (vchAlias, vtxPos))
+          if (!ln1Db->lGet (vchAlias, vtxPos))
             return error("aliasHeight() : failed to read from alias DB");
           if (vtxPos.empty ())
             return -1;
@@ -531,13 +532,13 @@ Value createrawtransaction(const Array& params, bool fHelp)
       if(!address.IsValid())
       {
         vector<AliasIndex> vtxPos;
-        LocatorNodeDB ln1Db("r");
+        //XXXX LocatorNodeDB ln1Db("r");
         string aliasStr = s.name_;
         std::transform(aliasStr.begin(), aliasStr.end(), aliasStr.begin(), ::tolower);
         vchType vchAlias = vchFromString(aliasStr);
-        if (ln1Db.lKey (vchAlias))
+        if (ln1Db->lKey (vchAlias))
         {
-          if (!ln1Db.lGet (vchAlias, vtxPos))
+          if (!ln1Db->lGet (vchAlias, vtxPos))
             return error("aliasHeight() : failed to read from alias DB");
           if (vtxPos.empty ())
             return -1;

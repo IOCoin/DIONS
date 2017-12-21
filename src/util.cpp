@@ -16,6 +16,7 @@
 #include <openssl/pem.h>
 #include <openssl/conf.h>
 
+#include "init.h"
 #include "constants.h"
 #include "base58.h"
 #include "db.h"
@@ -65,6 +66,8 @@ namespace boost {
 #endif
 
 using namespace std;
+
+extern LocatorNodeDB* ln1Db;
 
 map<string, string> mapArgs;
 map<string, vector<string> > mapMultiArgs;
@@ -1595,12 +1598,12 @@ int atod(const std::string& addr, std::string& d)
     if(!address__.IsValid())
       return -2;
 
-    LocatorNodeDB ln1Db("r");
+    //XXXX LocatorNodeDB ln1Db("r");
 
     Dbc* cursorp;
     try 
     {
-      cursorp = ln1Db.GetCursor(); 
+      cursorp = ln1Db->GetCursor(); 
 
       Dbt key, data;
       int ret;

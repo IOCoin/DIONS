@@ -16,7 +16,7 @@ int64_t nWalletUnlockTime;
 static CCriticalSection cs_nWalletUnlockTime;
 
 extern void TxToJSON(const CTransaction& tx, const uint256 hashBlock, json_spirit::Object& entry);
-
+extern LocatorNodeDB* ln1Db;
 static void accountingDeprecationCheck()
 {
     if (!GetBoolArg("-enableaccounts", false))
@@ -314,12 +314,12 @@ Value addresstodion(const Array& params, bool fHelp)
 
     string alias;
 
-    LocatorNodeDB ln1Db("r");
+    //XXXX LocatorNodeDB ln1Db("r");
 
     Dbc* cursorp;
     try 
     {
-      cursorp = ln1Db.GetCursor(); 
+      cursorp = ln1Db->GetCursor(); 
 
       Dbt key, data;
       int ret;
@@ -396,11 +396,11 @@ Value sendtodion(const Array& params, bool fHelp)
     string address = "address not found";
 
     vector<AliasIndex> vtxPos;
-    LocatorNodeDB ln1Db("r");
+    //XXXX LocatorNodeDB ln1Db("r");
     vchType vchAlias = vchFromString(alias);
-    if (ln1Db.lKey (vchAlias))
+    if (ln1Db->lKey (vchAlias))
     {
-      if (!ln1Db.lGet (vchAlias, vtxPos))
+      if (!ln1Db->lGet (vchAlias, vtxPos))
         return error("aliasHeight() : failed to read from name DB");
       if (vtxPos.empty ())
         return -1;
@@ -429,12 +429,12 @@ Value sendtoaddress(const Array& params, bool fHelp)
     if(!address.IsValid())
     {
       vector<AliasIndex> vtxPos;
-      LocatorNodeDB ln1Db("r");
+      //XXXX LocatorNodeDB ln1Db("r");
       vchType vchAlias = vchFromString(addrStr);
-      if (ln1Db.lKey (vchAlias))
+      if (ln1Db->lKey (vchAlias))
       {
         printf("  name exists\n");
-        if (!ln1Db.lGet (vchAlias, vtxPos))
+        if (!ln1Db->lGet (vchAlias, vtxPos))
           return error("aliasHeight() : failed to read from name DB");
         if (vtxPos.empty ())
           return -1;
@@ -597,11 +597,11 @@ Value xtu_url__(const string& s)
     string target = "state-0";
 
     vector<AliasIndex> vtxPos;
-    LocatorNodeDB ln1Db("r");
+    //XXXX LocatorNodeDB ln1Db("r");
     vchType vchURL = vchFromString(url);
-    if (ln1Db.lKey(vchURL))
+    if (ln1Db->lKey(vchURL))
     {
-      if (!ln1Db.lGet(vchURL, vtxPos))
+      if (!ln1Db->lGet(vchURL, vtxPos))
         return error("failed to read from DB");
       if (vtxPos.empty ())
         return -1;
@@ -655,11 +655,11 @@ Value xtu_url(const Array& params, bool fHelp)
     string target = "state-0";
 
     vector<AliasIndex> vtxPos;
-    LocatorNodeDB ln1Db("r");
+    //XXXX LocatorNodeDB ln1Db("r");
     vchType vchURL = vchFromString(url);
-    if (ln1Db.lKey(vchURL))
+    if (ln1Db->lKey(vchURL))
     {
-      if (!ln1Db.lGet(vchURL, vtxPos))
+      if (!ln1Db->lGet(vchURL, vtxPos))
         return error("failed to read from DB");
       if (vtxPos.empty ())
         return -1;

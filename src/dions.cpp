@@ -38,6 +38,7 @@ using namespace boost::iostreams;
 
 namespace fs = boost::filesystem;
 
+extern LocatorNodeDB* ln1Db;
 extern CBlockIndex* p__;
 extern Object JSONRPCError(int code, const string& message);
 extern Value xtu_url__(const string& url);
@@ -51,7 +52,7 @@ std::map<vchType, set<uint256> > k1Export;
 void xsc(CBlockIndex*);
 
 static void tFrame();
-static int linkSet(vector<vchType>, CBlockIndex*, CDiskTxPos&, const string&, LocatorNodeDB&);
+static int linkSet(vector<vchType>, CBlockIndex*, CDiskTxPos&, const string&, LocatorNodeDB*);
 
 #ifdef GUI
 extern std::map<uint160, vchType> mapLocatorHashes;
@@ -179,12 +180,12 @@ bool channelPredicate(string ext, string& tor)
 Value gw1(const Array& params, bool fHelp)
 {
     Array oRes;
-    LocatorNodeDB ln1Db("r");
-
+    //XXXX LocatorNodeDB ln1Db("r");
+    ln1Db->filter();
     Dbc* cursorp;
     try 
     {
-      cursorp = ln1Db.GetCursor(); 
+      cursorp = ln1Db->GetCursor(); 
 
       Dbt key, data;
       int ret;
@@ -292,10 +293,10 @@ int
 aliasHeight(vector<unsigned char> vchAlias)
 {
   vector<AliasIndex> vtxPos;
-  LocatorNodeDB ln1Db("r");
-  if(ln1Db.lKey(vchAlias))
+  //XXXX LocatorNodeDB ln1Db("r");
+  if(ln1Db->lKey(vchAlias))
     {
-      if(!ln1Db.lGet(vchAlias, vtxPos))
+      if(!ln1Db->lGet(vchAlias, vtxPos))
         return error("aliasHeight() : failed to read from alias DB");
       if(vtxPos.empty())
         return -1;
@@ -505,11 +506,11 @@ bool txTrace(CDiskTxPos& txPos, vector<unsigned char>& vchValue, uint256& hash, 
     hash = tx.GetHash();
     return true;
 }
-bool aliasTx(LocatorNodeDB& aliasCacheDB, const vector<unsigned char> &vchAlias, CTransaction& tx)
+bool aliasTx(LocatorNodeDB*& ln1Db, const vector<unsigned char> &vchAlias, CTransaction& tx)
 {
 
     vector<AliasIndex> vtxPos;
-    if(!aliasCacheDB.lGet(vchAlias, vtxPos) || vtxPos.empty())
+    if(!ln1Db->lGet(vchAlias, vtxPos) || vtxPos.empty())
         return false;
 
     AliasIndex& txPos = vtxPos.back();
@@ -1033,7 +1034,7 @@ Value externFrame__(const Array& params, bool fHelp)
 
       EnsureWalletIsUnlocked();
 
-      LocatorNodeDB ln1Db("r");
+      //XXXX LocatorNodeDB ln1Db("r");
       CTransaction tx;
       if(!aliasTx(ln1Db, vchNodeLocator, tx))
       {
@@ -1120,7 +1121,7 @@ Value internFrame__(const Array& params, bool fHelp)
 
   string ownerAddrStr;
   {
-        LocatorNodeDB ln1Db("r");
+        //XXXX LocatorNodeDB ln1Db("r");
         CTransaction tx;
         if(aliasTx(ln1Db, vchNodeLocator, tx))
         {
@@ -2431,8 +2432,7 @@ Value nodeDebug1(const Array& params, bool fHelp)
     {
 
         vector<AliasIndex> vtxPos;
-        LocatorNodeDB aliasCacheDB("r");
-        if(!aliasCacheDB.lGet(vchAlias, vtxPos))
+        if(!ln1Db->lGet(vchAlias, vtxPos))
         {
             error("failed to read from alias DB");
             return false;
@@ -2538,11 +2538,11 @@ Value primaryCXValidate(const Array& params, bool fHelp)
     if(!externPredicate.IsValid())
     {
       vector<AliasIndex> vtxPos;
-      LocatorNodeDB ln1Db("r");
+      //XXXX LocatorNodeDB ln1Db("r");
       vchType vchPredicate = vchFromString(extPredicate);
-      if (ln1Db.lKey (vchPredicate))
+      if (ln1Db->lKey (vchPredicate))
       {
-        if (!ln1Db.lGet (vchPredicate, vtxPos))
+        if (!ln1Db->lGet (vchPredicate, vtxPos))
           return error("aliasHeight() : failed to read from name DB");
         if (vtxPos.empty ())
           return -1;
@@ -3061,9 +3061,8 @@ Value transientStatus__C(const Array& params, bool fHelp)
 
     string ownerAddrStr;
     {
-        LocatorNodeDB aliasCacheDB("r");
         CTransaction tx;
-        if(aliasTx(aliasCacheDB, vchAlias, tx))
+        if(aliasTx(ln1Db, vchAlias, tx))
         {
           ret.push_back(Pair("status", "error"));
           ret.push_back(Pair("message", "alias is active"));
@@ -3238,9 +3237,8 @@ Value updateEncryptedAliasFile(const Array& params, bool fHelp)
 
     string ownerAddrStr;
     {
-        LocatorNodeDB aliasCacheDB("r");
         CTransaction tx;
-        if(aliasTx(aliasCacheDB, vchAlias, tx))
+        if(aliasTx(ln1Db, vchAlias, tx))
         {
             error("updateEncryptedAlias() : this alias is already active with tx %s",
                     tx.GetHash().GetHex().c_str());
@@ -3367,9 +3365,8 @@ Value updateEncryptedAlias(const Array& params, bool fHelp)
 
     string ownerAddrStr;
     {
-        LocatorNodeDB aliasCacheDB("r");
         CTransaction tx;
-        if(aliasTx(aliasCacheDB, vchAlias, tx))
+        if(aliasTx(ln1Db, vchAlias, tx))
         {
             error("updateEncryptedAlias() : this alias is already active with tx %s",
                     tx.GetHash().GetHex().c_str());
@@ -3524,9 +3521,8 @@ Value decryptAlias(const Array& params, bool fHelp)
     LEAVE_CRITICAL_SECTION(cs_main)
 
     {
-        LocatorNodeDB aliasCacheDB("r");
         CTransaction tx;
-        if(aliasTx(aliasCacheDB, vchAlias, tx))
+        if(aliasTx(ln1Db, vchAlias, tx))
         {
             error("decryptAlias() : this alias is already active with tx %s",
                     tx.GetHash().GetHex().c_str());
@@ -3927,11 +3923,11 @@ Value transferEncryptedAlias(const Array& params, bool fHelp)
     if(!externPredicate.IsValid())
     {
       vector<AliasIndex> vtxPos;
-      LocatorNodeDB ln1Db("r");
+      //XXXX LocatorNodeDB ln1Db("r");
       vchType vchPredicate = vchFromString(extPredicate);
-      if (ln1Db.lKey (vchPredicate))
+      if (ln1Db->lKey (vchPredicate))
       {
-        if (!ln1Db.lGet (vchPredicate, vtxPos))
+        if (!ln1Db->lGet (vchPredicate, vtxPos))
           return error("aliasHeight() : failed to read from name DB");
         if (vtxPos.empty ())
           return -1;
@@ -4218,11 +4214,11 @@ Value transferAlias(const Array& params, bool fHelp)
     if(!address.IsValid())
     {
       vector<AliasIndex> vtxPos;
-      LocatorNodeDB ln1Db("r");
+      //XXXX LocatorNodeDB ln1Db("r");
       vchType vchAlias = vchFromString(strAddress);
-      if (ln1Db.lKey (vchAlias))
+      if (ln1Db->lKey (vchAlias))
       {
-        if (!ln1Db.lGet (vchAlias, vtxPos))
+        if (!ln1Db->lGet (vchAlias, vtxPos))
           return error("aliasHeight() : failed to read from name DB");
         if (vtxPos.empty ())
           return -1;
@@ -4259,9 +4255,8 @@ Value transferAlias(const Array& params, bool fHelp)
 
           EnsureWalletIsUnlocked();
 
-          LocatorNodeDB aliasCacheDB("r");
           CTransaction tx;
-          if(!aliasTx(aliasCacheDB, vchAlias, tx))
+          if(!aliasTx(ln1Db, vchAlias, tx))
           {
             LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
             LEAVE_CRITICAL_SECTION(cs_main)
@@ -4380,9 +4375,8 @@ Value uC(const Array& params, bool fHelp) { if(fHelp || params.size() != 2)
 
     string ownerAddrStr;
     {
-        LocatorNodeDB aliasCacheDB("r");
         CTransaction tx;
-        if(aliasTx(aliasCacheDB, vchAlias, tx))
+        if(aliasTx(ln1Db, vchAlias, tx))
         {
             error("updateEncryptedAlias() : this alias is already active with tx %s",
                     tx.GetHash().GetHex().c_str());
@@ -4541,9 +4535,8 @@ Value transientStatus__(const Array& params, bool fHelp)
 
           EnsureWalletIsUnlocked();
 
-          LocatorNodeDB aliasCacheDB("r");
           CTransaction tx;
-          if(!aliasTx(aliasCacheDB, vchAlias, tx))
+          if(!aliasTx(ln1Db, vchAlias, tx))
           {
             LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
             LEAVE_CRITICAL_SECTION(cs_main)
@@ -4669,9 +4662,8 @@ Value updateAliasFile(const Array& params, bool fHelp)
 
           EnsureWalletIsUnlocked();
 
-          LocatorNodeDB aliasCacheDB("r");
           CTransaction tx;
-          if(!aliasTx(aliasCacheDB, vchAlias, tx))
+          if(!aliasTx(ln1Db, vchAlias, tx))
           {
               LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
               LEAVE_CRITICAL_SECTION(cs_main)
@@ -4763,9 +4755,8 @@ Value updateAlias(const Array& params, bool fHelp)
 
         EnsureWalletIsUnlocked();
 
-        LocatorNodeDB aliasCacheDB("r");
         CTransaction tx;
-        if(!aliasTx(aliasCacheDB, vchAlias, tx))
+        if(!aliasTx(ln1Db, vchAlias, tx))
         {
           LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
           LEAVE_CRITICAL_SECTION(cs_main)
@@ -5101,12 +5092,12 @@ int checkAddress(string addr, CBitcoinAddress& a)
   if(!address.IsValid())
   {
     vector<AliasIndex> vtxPos;
-    LocatorNodeDB ln1Db("r");
+    //XXXX LocatorNodeDB ln1Db("r");
     std::transform(addr.begin(), addr.end(), addr.begin(), ::tolower);
     vchType vchAlias = vchFromString(addr);
-    if(ln1Db.lKey(vchAlias))
+    if(ln1Db->lKey(vchAlias))
     {
-      if(!ln1Db.lGet(vchAlias, vtxPos))
+      if(!ln1Db->lGet(vchAlias, vtxPos))
         return -2;
       if(vtxPos.empty())
         return -3;
@@ -5529,9 +5520,8 @@ Value registerAliasGenerate(const Array& params, bool fHelp)
     }
 
     vector<Value> res;
-    LocatorNodeDB aliasCacheDB("r");
     CTransaction tx;
-    if(aliasTx(aliasCacheDB, vchFromString(locatorStr), tx))
+    if(aliasTx(ln1Db, vchFromString(locatorStr), tx))
     {
       if(IsMinePost(tx))
       {
@@ -5671,9 +5661,8 @@ Value registerAlias(const Array& params, bool fHelp)
       throw JSONRPCError(RPC_WALLET_ERROR, err);
     }
 
-    LocatorNodeDB aliasCacheDB("r");
     CTransaction tx;
-    if(aliasTx(aliasCacheDB, vchFromString(locatorStr), tx))
+    if(aliasTx(ln1Db, vchFromString(locatorStr), tx))
     {
       string err = "Attempt to register alias : " + locatorStr + ", this alias is already active with tx " + tx.GetHash().GetHex();
 
@@ -5885,9 +5874,9 @@ bool aliasTx(const CTransaction& tx, int& op, int& nOut, vector<vector<unsigned 
     return found;
 }
 
-int linkSet(vector<vchType> v, CBlockIndex* p, CDiskTxPos& txPos, const string& s, LocatorNodeDB& ln1)
+int linkSet(vector<vchType> v, CBlockIndex* p, CDiskTxPos& txPos, const string& s, LocatorNodeDB* ln1)
 {
-  if(ln1.lKey(v[0]))
+  if(ln1->lKey(v[0]))
   {
     return 0;
   }
@@ -5902,7 +5891,7 @@ int linkSet(vector<vchType> v, CBlockIndex* p, CDiskTxPos& txPos, const string& 
     txPos2.vAddress = s;
     txPos2.txPos = txPos;
     vtxPos.push_back(txPos2);
-    if(!ln1.lPut(v[0], vtxPos))
+    if(!ln1->lPut(v[0], vtxPos))
       return -1;
 
   return 1;
@@ -6160,7 +6149,7 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
     }
 
 
-    LocatorNodeDB ln1Db("r+");
+    //XXXX LocatorNodeDB ln1Db("r+");
     int nInput;
     bool found = false;
 
@@ -6488,8 +6477,8 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
     if(!fBlock && op == OP_ALIAS_RELAY)
     {
         vector<AliasIndex> vtxPos;
-        if(ln1Db.lKey(vvchArgs[0])
-            && !ln1Db.lGet(vvchArgs[0], vtxPos))
+        if(ln1Db->lKey(vvchArgs[0])
+            && !ln1Db->lGet(vvchArgs[0], vtxPos))
           return error("ConnectInputsPost() : failed to read from alias DB");
         if(!aliasTxPos(vtxPos, vTxindex[nInput].pos))
             return error("ConnectInputsPost() : tx %s rejected, since previous tx(%s) is not in the alias DB\n", tx.GetHash().ToString().c_str(), vTxPrev[nInput].GetHash().ToString().c_str());
@@ -6504,18 +6493,7 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
             
           if(op == OP_ALIAS_SET)
           {
-            //XXXX
-            //XXXX f c; 
-            //XXXX c.m(locatorStr);
-            //XXXX f n; 
-            //XXXX tFrame();
-            //XXXX if(hb.l(c, n))
-            //XXXX {
-            //XXXX   printf("%s flagged active\n");
-            //XXXX   n.r();
-            //XXXX   return false;
-            //XXXX }
-
+            ln1Db->filter();
             CTransaction tx;
             if(aliasTx(ln1Db, vchFromString(locatorStr), tx))
             {
@@ -6615,7 +6593,6 @@ void tFrame()
 void xsc(CBlockIndex* p)
 {
   printf("XXXX xsc scanning for current dions\n");
-  LocatorNodeDB l("cr+");
   CTxDB txdb("r");
 
   for(; p; p=p->pnext) 
@@ -6658,7 +6635,7 @@ void xsc(CBlockIndex* p)
         continue;
      
       printf("XXXX read txI\n");
-      linkSet(vvchArgs, p, txI.pos, s, l);
+      linkSet(vvchArgs, p, txI.pos, s, ln1Db);
       f c(a, s, p->nHeight, tx.GetHash().ToString()); 
       f o;
       if(hb.set(c, o))
