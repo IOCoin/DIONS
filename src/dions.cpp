@@ -6505,16 +6505,16 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
           if(op == OP_ALIAS_SET)
           {
             //XXXX
-            f c; 
-            c.m(locatorStr);
-            f n; 
-            tFrame();
-            if(hb.l(c, n))
-            {
-              printf("%s flagged active\n");
-              n.r();
-              return false;
-            }
+            //XXXX f c; 
+            //XXXX c.m(locatorStr);
+            //XXXX f n; 
+            //XXXX tFrame();
+            //XXXX if(hb.l(c, n))
+            //XXXX {
+            //XXXX   printf("%s flagged active\n");
+            //XXXX   n.r();
+            //XXXX   return false;
+            //XXXX }
 
             CTransaction tx;
             if(aliasTx(ln1Db, vchFromString(locatorStr), tx))

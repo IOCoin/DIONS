@@ -13,7 +13,8 @@
 
 #include <db_cxx.h>
 
-//#include "txdb-leveldb.h"
+#include "txdb-leveldb.h"
+#include "dions.h"
 
 class CAddress;
 class CAddrMan;
@@ -26,13 +27,17 @@ class CTxIndex;
 class CWallet;
 class CWalletTx;
 class AliasIndex;
+class CTxDB;
 
-
+extern CBlockIndex* p__;
 extern unsigned int nWalletDBUpdated;
 
 void ThreadFlushWalletDB(void* parg);
 bool BackupWallet(const CWallet& wallet, const std::string& strDest);
 
+extern bool aliasTx(const CTransaction& tx, int& op, int& nOut, vector<vector<unsigned char> >& vvch );
+extern CScript aliasStrip(const CScript& scriptIn);
+extern bool txTrace(CDiskTxPos& txPos, vector<unsigned char>& vchValue, uint256& hash, int& nHeight);
 
 class CDBEnv
 {
@@ -323,6 +328,34 @@ public:
     bool Write(const CAddrMan& addr);
     bool Read(CAddrMan& addr);
 };
+class AliasIndex
+{
+  public:
+    CDiskTxPos txPos;
+    unsigned int nHeight;
+    std::vector<unsigned char> vValue;
+    std::string vAddress;
+
+    AliasIndex()
+    {
+    }
+
+    AliasIndex(CDiskTxPos txPosIn, unsigned int nHeightIn, std::vector<unsigned char> vValueIn, std::string vAddressIn)
+    {
+        txPos = txPosIn;
+        nHeight = nHeightIn;
+        vValue = vValueIn;
+        vAddress = vAddressIn;
+    }
+
+    IMPLEMENT_SERIALIZE
+    (
+        READWRITE(txPos);
+        READWRITE(nHeight);
+        READWRITE(vValue);
+        READWRITE(vAddress);
+    )
+};
 
 class LocatorNodeDB : public CDB
 {
@@ -349,41 +382,63 @@ public:
         return Erase(make_pair(std::string("alias_"), alias));
     }
 
-    bool AliasScan(
-            const vchType& vchAlias,
-            int nMax,
-            std::vector<std::pair<vchType, AliasIndex> >& aliasScan);
-
     bool test();
-
-};
-class AliasIndex
-{
-public:
-    CDiskTxPos txPos;
-    unsigned int nHeight;
-    std::vector<unsigned char> vValue;
-    std::string vAddress;
-
-    AliasIndex()
+    void filter()
     {
-    }
+      CTxDB txdb("r");
 
-    AliasIndex(CDiskTxPos txPosIn, unsigned int nHeightIn, std::vector<unsigned char> vValueIn, std::string vAddressIn)
-    {
-        txPos = txPosIn;
-        nHeight = nHeightIn;
-        vValue = vValueIn;
-        vAddress = vAddressIn;
-    }
+      CBlockIndex* p = p__;
+      for(; p; p=p->pnext) 
+      {
+        //if(p->nHeight <= hb())
+        //  continue;
 
-    IMPLEMENT_SERIALIZE
-    (
-        READWRITE(txPos);
-        READWRITE(nHeight);
-        READWRITE(vValue);
-        READWRITE(vAddress);
-    )
+        CBlock block;
+        CDiskTxPos txPos;
+        block.ReadFromDisk(p);
+        uint256 h;
+
+        BOOST_FOREACH(CTransaction& tx, block.vtx) 
+        {
+          if (tx.nVersion != CTransaction::DION_TX_VERSION)
+            continue;
+
+          vector<vector<unsigned char> > vvchArgs;
+          int op, nOut;
+
+          aliasTx(tx, op, nOut, vvchArgs);
+          if (op != OP_ALIAS_SET)
+            continue;
+
+          const vector<unsigned char>& v = vvchArgs[0];
+          string a = stringFromVch(v);
+       
+          if (!GetTransaction(tx.GetHash(), tx, h))
+            continue;
+
+          const CTxOut& txout = tx.vout[nOut];
+          const CScript& scriptPubKey = aliasStrip(txout.scriptPubKey);
+          string s = scriptPubKey.GetBitcoinAddress();
+          CTxIndex txI;
+          if(!txdb.ReadTxIndex(tx.GetHash(), txI))
+            continue;
+
+          vector<unsigned char> vchValue;
+          vector<AliasIndex> vtxPos;
+          int nHeight;
+          uint256 hash;
+          AliasIndex txPos2;
+          txTrace(txPos, vchValue, hash, nHeight);
+          txPos2.nHeight = p->nHeight;
+          txPos2.vValue = vchValue;
+          txPos2.vAddress = s;
+          txPos2.txPos = txPos;
+          vtxPos.push_back(txPos2);
+          if(op == OP_ALIAS_SET && !lKey(vvchArgs[0]))
+            lPut(vvchArgs[0], vtxPos);
+        }
+      }
+    } 
 };
 
 
