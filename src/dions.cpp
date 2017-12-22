@@ -182,6 +182,7 @@ Value gw1(const Array& params, bool fHelp)
     Array oRes;
     //XXXX LocatorNodeDB ln1Db("r");
     ln1Db->filter();
+    return oRes;
     Dbc* cursorp;
     try 
     {

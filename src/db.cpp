@@ -578,10 +578,10 @@ bool CAddrDB::Read(CAddrMan& addr)
 
     return true;
 }
+    //XXXX void LocatorNodeDB::filter(CTxDB& txdb)
     void LocatorNodeDB::filter()
     {
       printf("XXXX filter\n");
-      CTxDB txdb("r");
 
       //XXXX CBlockIndex* p = p__;
       CBlockIndex* p = pindexGenesisBlock;
@@ -589,7 +589,7 @@ bool CAddrDB::Read(CAddrMan& addr)
       {
       printf("XXXX filter ...\n");
         CBlock block;
-        CDiskTxPos txPos;
+        //XXXX CDiskTxPos txPos;
         block.ReadFromDisk(p);
         uint256 h;
 
@@ -603,7 +603,7 @@ bool CAddrDB::Read(CAddrMan& addr)
           int op, nOut;
 
           aliasTx(tx, op, nOut, vvchArgs);
-          if (op != OP_ALIAS_SET)
+          if (!(op == OP_ALIAS_SET || op == OP_ALIAS_RELAY))
             continue;
 
           const vector<unsigned char>& v = vvchArgs[0];
@@ -616,21 +616,31 @@ bool CAddrDB::Read(CAddrMan& addr)
           const CScript& scriptPubKey = aliasStrip(txout.scriptPubKey);
           string s = scriptPubKey.GetBitcoinAddress();
           CTxIndex txI;
+          CTxDB txdb("r");
           if(!txdb.ReadTxIndex(tx.GetHash(), txI))
+          {
+            printf("XXXX txdb.ReadTxIndex failed\n");
             continue;
+          }
 
           vector<unsigned char> vchValue;
           vector<AliasIndex> vtxPos;
           int nHeight;
           uint256 hash;
           AliasIndex txPos2;
-          txTrace(txPos, vchValue, hash, nHeight);
+          //XXXX 
+          unsigned int nTxPos = p->nBlockPos + ::GetSerializeSize(CBlock(), SER_DISK, CLIENT_VERSION) - (2 * GetSizeOfCompactSize(0)) + GetSizeOfCompactSize(block.vtx.size());
+          CDiskTxPos txPos(p->nFile, p->nBlockPos, nTxPos);
+          //XXXX txTrace(txPos, vchValue, hash, nHeight);
+          
           txPos2.nHeight = p->nHeight;
           txPos2.vValue = vchValue;
           txPos2.vAddress = s;
           txPos2.txPos = txPos;
           vtxPos.push_back(txPos2);
           printf("XXXX filter name %s\n", stringFromVch(vvchArgs[0]).c_str());
+          if(op == OP_ALIAS_RELAY)
+            printf("XXXX RELAY filter value %s\n", stringFromVch(vvchArgs[1]).c_str());
           if(op == OP_ALIAS_SET && !lKey(vvchArgs[0]))
             lPut(vvchArgs[0], vtxPos);
         }
