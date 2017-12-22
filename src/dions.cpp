@@ -6618,6 +6618,8 @@ void tFrame()
 void xsc(CBlockIndex* p)
 {
   printf("XXXX xsc scanning for current dions\n");
+  return;
+
   CTxDB txdb("r");
 
   for(; p; p=p->pnext) 
