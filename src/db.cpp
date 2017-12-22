@@ -580,15 +580,15 @@ bool CAddrDB::Read(CAddrMan& addr)
 }
     void LocatorNodeDB::filter()
     {
-      for(; p__; )
+      printf("XXXXX filter \n"); 
+      for(; p__; p__=p__->pnext)
       {
+        printf("XXXXX filter h %d\n", p__->nHeight); 
         if(p__->nHeight < 1625000)
         {
-          p__=p__->pnext; 
           continue;
         }
        
-        printf("XXXXX s\n"); 
         CBlock block;
         block.ReadFromDisk(p__);
         uint256 h;
@@ -623,7 +623,6 @@ bool CAddrDB::Read(CAddrMan& addr)
 
           vector<unsigned char> vchValue;
           vector<AliasIndex> vtxPos;
-          int nHeight;
           uint256 hash;
           AliasIndex txPos2;
           unsigned int nTxPos = p__->nBlockPos + ::GetSerializeSize(CBlock(), SER_DISK, CLIENT_VERSION) - (2 * GetSizeOfCompactSize(0)) + GetSizeOfCompactSize(block.vtx.size());
@@ -637,10 +636,5 @@ bool CAddrDB::Read(CAddrMan& addr)
           if(op == OP_ALIAS_SET && !lKey(vvchArgs[0]))
             lPut(vvchArgs[0], vtxPos);
         }
-
-        if(p__->pnext != 0)
-          p__ = p__->pnext;
-        else
-          break;
       }
     } 

@@ -880,7 +880,7 @@ bool AppInit2()
       filesystem::path aliascache;
       aliascache = filesystem::path(GetDataDir())/"aliascache.dat";
 
-      ln1Db = new LocatorNodeDB("cr+");
+      ln1Db = new LocatorNodeDB(pindexGenesisBlock, "cr+");
     }
 
     if (mapArgs.count("-loadblock"))
