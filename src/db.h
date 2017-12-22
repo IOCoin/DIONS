@@ -360,7 +360,7 @@ class AliasIndex
 class LocatorNodeDB : public CDB
 {
 public:
-    LocatorNodeDB(const char* pszMode="cr+") : CDB("aliascache.dat", pszMode) { }
+    LocatorNodeDB(const char* pszMode="cr+") : CDB("aliascache.dat", pszMode) { p__=pindexGenesisBlock;  }
 
     bool lPut(const vchType& alias, const std::vector<AliasIndex>& vtxPos)
     {
@@ -384,6 +384,9 @@ public:
 
     bool test();
     void filter();
+
+    private:
+      CBlockIndex* p__;
 };
 
 

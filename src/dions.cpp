@@ -6179,7 +6179,6 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
 
     ln1Db->filter();
 
-
     int nInput;
     bool found = false;
 
@@ -6617,7 +6616,8 @@ void tFrame()
 
 void xsc(CBlockIndex* p)
 {
-  printf("XXXX xsc scanning for current dions\n");
+  ln1Db->filter();
+
   return;
 
   CTxDB txdb("r");

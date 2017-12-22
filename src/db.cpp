@@ -580,11 +580,13 @@ bool CAddrDB::Read(CAddrMan& addr)
 }
     void LocatorNodeDB::filter()
     {
-      CBlockIndex* p = pindexGenesisBlock;
-      for(; p; p=p->pnext) 
+      for(; p__; )
       {
+        if(p__->nHeight < 1625000)
+          continue;
+        
         CBlock block;
-        block.ReadFromDisk(p);
+        block.ReadFromDisk(p__);
         uint256 h;
 
         BOOST_FOREACH(CTransaction& tx, block.vtx) 
@@ -620,10 +622,10 @@ bool CAddrDB::Read(CAddrMan& addr)
           int nHeight;
           uint256 hash;
           AliasIndex txPos2;
-          unsigned int nTxPos = p->nBlockPos + ::GetSerializeSize(CBlock(), SER_DISK, CLIENT_VERSION) - (2 * GetSizeOfCompactSize(0)) + GetSizeOfCompactSize(block.vtx.size());
-          CDiskTxPos txPos(p->nFile, p->nBlockPos, nTxPos);
+          unsigned int nTxPos = p__->nBlockPos + ::GetSerializeSize(CBlock(), SER_DISK, CLIENT_VERSION) - (2 * GetSizeOfCompactSize(0)) + GetSizeOfCompactSize(block.vtx.size());
+          CDiskTxPos txPos(p__->nFile, p__->nBlockPos, nTxPos);
           
-          txPos2.nHeight = p->nHeight;
+          txPos2.nHeight = p__->nHeight;
           txPos2.vValue = vchValue;
           txPos2.vAddress = s;
           txPos2.txPos = txPos;
@@ -631,5 +633,10 @@ bool CAddrDB::Read(CAddrMan& addr)
           if(op == OP_ALIAS_SET && !lKey(vvchArgs[0]))
             lPut(vvchArgs[0], vtxPos);
         }
+
+        if(p__->pnext != 0)
+          p__ = p__->pnext;
+        else
+          break;
       }
     } 
