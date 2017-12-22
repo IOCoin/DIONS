@@ -578,24 +578,17 @@ bool CAddrDB::Read(CAddrMan& addr)
 
     return true;
 }
-    //XXXX void LocatorNodeDB::filter(CTxDB& txdb)
     void LocatorNodeDB::filter()
     {
-      printf("XXXX filter\n");
-
-      //XXXX CBlockIndex* p = p__;
       CBlockIndex* p = pindexGenesisBlock;
       for(; p; p=p->pnext) 
       {
-      printf("XXXX filter ...\n");
         CBlock block;
-        //XXXX CDiskTxPos txPos;
         block.ReadFromDisk(p);
         uint256 h;
 
         BOOST_FOREACH(CTransaction& tx, block.vtx) 
         {
-      printf("XXXX filter ... search\n");
           if (tx.nVersion != CTransaction::DION_TX_VERSION)
             continue;
 
@@ -619,7 +612,6 @@ bool CAddrDB::Read(CAddrMan& addr)
           CTxDB txdb("r");
           if(!txdb.ReadTxIndex(tx.GetHash(), txI))
           {
-            printf("XXXX txdb.ReadTxIndex failed\n");
             continue;
           }
 
@@ -628,19 +620,14 @@ bool CAddrDB::Read(CAddrMan& addr)
           int nHeight;
           uint256 hash;
           AliasIndex txPos2;
-          //XXXX 
           unsigned int nTxPos = p->nBlockPos + ::GetSerializeSize(CBlock(), SER_DISK, CLIENT_VERSION) - (2 * GetSizeOfCompactSize(0)) + GetSizeOfCompactSize(block.vtx.size());
           CDiskTxPos txPos(p->nFile, p->nBlockPos, nTxPos);
-          //XXXX txTrace(txPos, vchValue, hash, nHeight);
           
           txPos2.nHeight = p->nHeight;
           txPos2.vValue = vchValue;
           txPos2.vAddress = s;
           txPos2.txPos = txPos;
           vtxPos.push_back(txPos2);
-          printf("XXXX filter name %s\n", stringFromVch(vvchArgs[0]).c_str());
-          if(op == OP_ALIAS_RELAY)
-            printf("XXXX RELAY filter value %s\n", stringFromVch(vvchArgs[1]).c_str());
           if(op == OP_ALIAS_SET && !lKey(vvchArgs[0]))
             lPut(vvchArgs[0], vtxPos);
         }

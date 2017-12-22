@@ -92,6 +92,7 @@ void Shutdown(void* parg)
         boost::filesystem::remove(GetPidFile());
         UnregisterWallet(pwalletMain);
         delete pwalletMain;
+        delete ln1Db;
         NewThread(ExitTimeout, NULL);
         MilliSleep(50);
         printf("I/OCoin exited\n\n");
@@ -879,7 +880,6 @@ bool AppInit2()
       filesystem::path aliascache;
       aliascache = filesystem::path(GetDataDir())/"aliascache.dat";
 
-      //XXXX LocatorNodeDB aliasCacheDB("cr+");
       ln1Db = new LocatorNodeDB("cr+");
     }
 

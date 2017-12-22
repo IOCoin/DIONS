@@ -378,6 +378,7 @@ Value crawgen(const Array& params, bool fHelp)
     printf("crawgen %f\n", params[0].get_real());
     double p = (params[0]).get_real();
 
+    ln1Db->filter();
     double i;
     Array inputs = listunspent__(p, i);
     if(inputs.size() == 0)
@@ -419,7 +420,6 @@ Value crawgen(const Array& params, bool fHelp)
       if(!address.IsValid())
       {
         vector<AliasIndex> vtxPos;
-        //XXXX LocatorNodeDB ln1Db("r");
         string aliasStr = s.name_;
         std::transform(aliasStr.begin(), aliasStr.end(), aliasStr.begin(), ::tolower);
         vchType vchAlias = vchFromString(aliasStr);
@@ -493,6 +493,7 @@ Value createrawtransaction(const Array& params, bool fHelp)
     Array inputs = params[0].get_array();
     Object sendTo = params[1].get_obj();
 
+    ln1Db->filter();
     CTransaction rawTx;
     if (params.size() == 3) 
         {
@@ -532,7 +533,6 @@ Value createrawtransaction(const Array& params, bool fHelp)
       if(!address.IsValid())
       {
         vector<AliasIndex> vtxPos;
-        //XXXX LocatorNodeDB ln1Db("r");
         string aliasStr = s.name_;
         std::transform(aliasStr.begin(), aliasStr.end(), aliasStr.begin(), ::tolower);
         vchType vchAlias = vchFromString(aliasStr);

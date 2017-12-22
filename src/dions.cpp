@@ -180,7 +180,6 @@ bool channelPredicate(string ext, string& tor)
 Value gw1(const Array& params, bool fHelp)
 {
     Array oRes;
-    //XXXX LocatorNodeDB ln1Db("r");
     ln1Db->filter();
     return oRes;
     Dbc* cursorp;
@@ -294,7 +293,6 @@ int
 aliasHeight(vector<unsigned char> vchAlias)
 {
   vector<AliasIndex> vtxPos;
-  //XXXX LocatorNodeDB ln1Db("r");
   if(ln1Db->lKey(vchAlias))
     {
       if(!ln1Db->lGet(vchAlias, vtxPos))
@@ -598,6 +596,7 @@ Value myRSAKeys(const Array& params, bool fHelp)
 
 Value myRSAKeys__(const Array& params, bool fHelp)
 {
+    ln1Db->filter();
     if(fHelp || params.size() > 1)
         throw runtime_error(
                 "myRSAKeys\n"
@@ -652,6 +651,7 @@ Value publicKeyExports(const Array& params, bool fHelp)
                 "list exported public keys "
                 );
 
+    ln1Db->filter();
     vchType vchNodeLocator;
     if(params.size() == 1)
       vchNodeLocator = vchFromValue(params[0]);
@@ -710,6 +710,7 @@ Value publicKeys(const Array& params, bool fHelp)
         throw runtime_error(
                 "publicKeys [<alias>]\n"
                 );
+    ln1Db->filter();
     vchType vchNodeLocator;
     if(params.size() == 1)
       vchNodeLocator = vchFromValue(params[0]);
@@ -831,6 +832,7 @@ Value decryptedMessageList(const Array& params, bool fHelp)
                 "decryptedMessageList [<alias>]\n"
                 );
     vchType vchNodeLocator;
+    ln1Db->filter();
     if(params.size() == 1)
       vchNodeLocator = vchFromValue(params[0]);
 
@@ -958,6 +960,7 @@ Value plainTextMessageList(const Array& params, bool fHelp)
                 "plainTextMessageList [<alias>]\n"
                 );
 
+    ln1Db->filter();
     vchType vchNodeLocator;
     if(params.size() == 1)
       vchNodeLocator = vchFromValue(params[0]);
@@ -1006,6 +1009,7 @@ Value externFrame__(const Array& params, bool fHelp)
               "externFrame__ [<node opt>]\n"
               );
 
+    ln1Db->filter();
   string k1;
   vchType vchNodeLocator;
   k1=(params[0]).get_str();
@@ -1035,7 +1039,6 @@ Value externFrame__(const Array& params, bool fHelp)
 
       EnsureWalletIsUnlocked();
 
-      //XXXX LocatorNodeDB ln1Db("r");
       CTransaction tx;
       if(!aliasTx(ln1Db, vchNodeLocator, tx))
       {
@@ -1097,6 +1100,7 @@ Value internFrame__(const Array& params, bool fHelp)
               "internFrame__ [<node opt>]\n"
               );
 
+    ln1Db->filter();
   string k1;
   vchType vchNodeLocator;
   k1=(params[0]).get_str();
@@ -1122,7 +1126,6 @@ Value internFrame__(const Array& params, bool fHelp)
 
   string ownerAddrStr;
   {
-        //XXXX LocatorNodeDB ln1Db("r");
         CTransaction tx;
         if(aliasTx(ln1Db, vchNodeLocator, tx))
         {
@@ -1320,6 +1323,7 @@ Value aliasOut(const Array& params, bool fHelp)
               "aliasOut [<node opt>]\n"
               );
 
+    ln1Db->filter();
   string k1;
   vchType vchNodeLocator;
   k1 =(params[0]).get_str();
@@ -1439,6 +1443,7 @@ Value nodeValidate(const Array& params, bool fHelp)
                 "nodeValidate [<node opt>]\n"
                 );
 
+    ln1Db->filter();
     string k1;
     vchType vchNodeLocator;
     if(params.size() == 1)
@@ -1569,6 +1574,7 @@ Value validateLocator(const Array& params, bool fHelp)
             "validateLocator <locator>\n"
             "Return information about <locator>.");
 
+    ln1Db->filter();
     CBitcoinAddress address;
     int r = checkAddress(params[0].get_str(), address);
 
@@ -1602,6 +1608,7 @@ Value nodeRetrieve(const Array& params, bool fHelp)
                 "nodeRetrieve [<node opt>]\n"
                 );
 
+    ln1Db->filter();
     string k1;
     vchType vchNodeLocator;
     if(params.size() == 1)
@@ -1736,6 +1743,7 @@ Value getNodeRecord(const Array& params, bool fHelp)
                 "getNodeRecord [<node opt>]\n"
                 );
 
+    ln1Db->filter();
     string k1;
     vchType vchNodeLocator;
     if(params.size() == 1)
@@ -2030,6 +2038,7 @@ Value aliasList__(const Array& params, bool fHelp)
                 "aliasList__ [<alias>]\n"
                 );
 
+    ln1Db->filter();
     vchType vchNodeLocator;
     if(params.size() == 1)
       vchNodeLocator = vchFromValue(params[0]);
@@ -2219,6 +2228,7 @@ Value aliasList(const Array& params, bool fHelp)
                 "aliasList [<alias>]\n"
                 );
 
+    ln1Db->filter();
     vchType vchNodeLocator;
     if(params.size() == 1)
       vchNodeLocator = vchFromValue(params[0]);
@@ -2400,6 +2410,7 @@ Value nodeDebug(const Array& params, bool fHelp)
             "nodeDebug\n"
             "Dump pending transactions id in the debug file.\n");
 
+    ln1Db->filter();
     printf("Pending:\n----------------------------\n");
     pair<vector<unsigned char>, set<uint256> > pairPending;
 
@@ -2460,6 +2471,7 @@ Value transform(const Array& params, bool fHelp)
       throw runtime_error(
               "aliasOut [<node opt>]\n"
               );
+    ln1Db->filter();
   string locatorStr = params[0].get_str();
 
   std::transform(locatorStr.begin(), locatorStr.end(), locatorStr.begin(), ::tolower);
@@ -2516,6 +2528,7 @@ Value primaryCXValidate(const Array& params, bool fHelp)
           "transferEncryptedAlias <alias> <predicate> <l1_internal>"
           + HelpRequiringPassphrase());
 
+    ln1Db->filter();
     string locatorStr = params[0].get_str();
     std::transform(locatorStr.begin(), locatorStr.end(), locatorStr.begin(), ::tolower);
     vchType vchLocator = vchFromString(locatorStr);
@@ -2539,7 +2552,6 @@ Value primaryCXValidate(const Array& params, bool fHelp)
     if(!externPredicate.IsValid())
     {
       vector<AliasIndex> vtxPos;
-      //XXXX LocatorNodeDB ln1Db("r");
       vchType vchPredicate = vchFromString(extPredicate);
       if (ln1Db->lKey (vchPredicate))
       {
@@ -2825,6 +2837,7 @@ Value validate(const Array& params, bool fHelp)
               "validate [<node opt>]\n"
               );
 
+    ln1Db->filter();
   string k1;
   vchType vchNodeLocator;
   k1 =(params[0]).get_str();
@@ -3011,6 +3024,7 @@ Value transientStatus__C(const Array& params, bool fHelp)
                 "transientStatus__C <locator> <file>"
                 + HelpRequiringPassphrase());
 
+    ln1Db->filter();
     string locatorStr = params[0].get_str();
 
     std::transform(locatorStr.begin(), locatorStr.end(), locatorStr.begin(), ::tolower);
@@ -3194,6 +3208,7 @@ Value updateEncryptedAliasFile(const Array& params, bool fHelp)
                 "updateEncryptedAlias <locator> <file>"
                 + HelpRequiringPassphrase());
 
+    ln1Db->filter();
     string locatorStr = params[0].get_str();
 
     std::transform(locatorStr.begin(), locatorStr.end(), locatorStr.begin(), ::tolower);
@@ -3345,6 +3360,7 @@ Value updateEncryptedAlias(const Array& params, bool fHelp)
                 "updateEncryptedAlias <alias> <value> <address>"
                 + HelpRequiringPassphrase());
 
+    ln1Db->filter();
     const vchType vchAlias = vchFromString(params[0].get_str());
     vchType vchValue = vchFromString(params[1].get_str());
 
@@ -3475,6 +3491,7 @@ Value decryptAlias(const Array& params, bool fHelp)
                 "decryptAlias <alias> <address specified by owner>\n"
                 + HelpRequiringPassphrase());
 
+    ln1Db->filter();
     string locatorStr = params[0].get_str();
     std::transform(locatorStr.begin(), locatorStr.end(), locatorStr.begin(), ::tolower);
     const vchType vchAlias = vchFromValue(locatorStr);
@@ -3625,6 +3642,7 @@ Value transferEncryptedExtPredicate(const Array& params, bool fHelp)
           "transferEncryptedExtPredicate <alias> <predicate> <l0> <l1>"
           + HelpRequiringPassphrase());
 
+    ln1Db->filter();
     string locatorStr = params[0].get_str();
     std::transform(locatorStr.begin(), locatorStr.end(), locatorStr.begin(), ::tolower);
     vchType vchLocator = vchFromString(locatorStr);
@@ -3901,6 +3919,7 @@ Value transferEncryptedAlias(const Array& params, bool fHelp)
           "transferEncryptedAlias <alias> <predicate> <l1_internal>"
           + HelpRequiringPassphrase());
 
+    ln1Db->filter();
     string locatorStr = params[0].get_str();
     std::transform(locatorStr.begin(), locatorStr.end(), locatorStr.begin(), ::tolower);
     vchType vchLocator = vchFromString(locatorStr);
@@ -3924,7 +3943,6 @@ Value transferEncryptedAlias(const Array& params, bool fHelp)
     if(!externPredicate.IsValid())
     {
       vector<AliasIndex> vtxPos;
-      //XXXX LocatorNodeDB ln1Db("r");
       vchType vchPredicate = vchFromString(extPredicate);
       if (ln1Db->lKey (vchPredicate))
       {
@@ -4199,6 +4217,7 @@ Value transferAlias(const Array& params, bool fHelp)
           "transferAlias <alias> <toaddress>"
           + HelpRequiringPassphrase());
 
+    ln1Db->filter();
     vchType vchAlias = vchFromValue(params[0]);
     const vchType vchAddress = vchFromValue(params[1]);
 
@@ -4215,7 +4234,6 @@ Value transferAlias(const Array& params, bool fHelp)
     if(!address.IsValid())
     {
       vector<AliasIndex> vtxPos;
-      //XXXX LocatorNodeDB ln1Db("r");
       vchType vchAlias = vchFromString(strAddress);
       if (ln1Db->lKey (vchAlias))
       {
@@ -4305,6 +4323,7 @@ Value uC(const Array& params, bool fHelp) { if(fHelp || params.size() != 2)
                 + HelpRequiringPassphrase());
     string locatorStr = params[0].get_str();
 
+    ln1Db->filter();
     std::transform(locatorStr.begin(), locatorStr.end(), locatorStr.begin(), ::tolower);
     const vchType vchAlias = vchFromValue(locatorStr);
     const char* locatorFile = (params[1].get_str()).c_str();
@@ -4484,6 +4503,7 @@ Value transientStatus__(const Array& params, bool fHelp)
     Object ret;
     string locatorStr = params[0].get_str();
 
+    ln1Db->filter();
     std::transform(locatorStr.begin(), locatorStr.end(), locatorStr.begin(), ::tolower);
     const vchType vchAlias = vchFromValue(locatorStr);
     const char* locatorFile = (params[1].get_str()).c_str();
@@ -4608,6 +4628,7 @@ Value updateAliasFile(const Array& params, bool fHelp)
                 + HelpRequiringPassphrase());
     string locatorStr = params[0].get_str();
 
+    ln1Db->filter();
     std::transform(locatorStr.begin(), locatorStr.end(), locatorStr.begin(), ::tolower);
     const vchType vchAlias = vchFromValue(locatorStr);
     const char* locatorFile = (params[1].get_str()).c_str();
@@ -4718,6 +4739,7 @@ Value updateAlias(const Array& params, bool fHelp)
         throw runtime_error(
                 "updateAlias <alias> <value> [<toaddress>]\nUpdate and possibly transfer a alias"
                 + HelpRequiringPassphrase());
+    ln1Db->filter();
     string locatorStr = params[0].get_str();
     std::transform(locatorStr.begin(), locatorStr.end(), locatorStr.begin(), ::tolower);
     const vchType vchAlias = vchFromValue(locatorStr);
@@ -4813,6 +4835,7 @@ Value publicKey(const Array& params, bool fHelp)
                 "publicKey <public_address>"
                 + HelpRequiringPassphrase());
 
+    ln1Db->filter();
   EnsureWalletIsUnlocked();
 
   CWalletDB walletdb(pwalletMain->strWalletFile, "r+");
@@ -4864,6 +4887,7 @@ Value sendSymmetric(const Array& params, bool fHelp)
 
     EnsureWalletIsUnlocked();
 
+    ln1Db->filter();
     string myAddress = params[0].get_str();
     string f = params[1].get_str();
 
@@ -5093,7 +5117,6 @@ int checkAddress(string addr, CBitcoinAddress& a)
   if(!address.IsValid())
   {
     vector<AliasIndex> vtxPos;
-    //XXXX LocatorNodeDB ln1Db("r");
     std::transform(addr.begin(), addr.end(), addr.begin(), ::tolower);
     vchType vchAlias = vchFromString(addr);
     if(ln1Db->lKey(vchAlias))
@@ -5252,6 +5275,7 @@ Value sendPlainMessage(const Array& params, bool fHelp)
                 "sendPlainMessage <sender_address> <message> <recipient_address>"
                 + HelpRequiringPassphrase());
 
+    ln1Db->filter();
     const string myAddress = params[0].get_str();
     const string strMessage = params[1].get_str();
     const string f = params[2].get_str();
@@ -5328,6 +5352,7 @@ Value sendMessage(const Array& params, bool fHelp)
                 "sendMessage <addr> <message> <addr>"
                 + HelpRequiringPassphrase());
 
+    ln1Db->filter();
     string myAddress = params[0].get_str();
     string strMessage = params[1].get_str();
     string f = params[2].get_str();
@@ -5496,6 +5521,7 @@ Value registerAliasGenerate(const Array& params, bool fHelp)
 
     string locatorStr = params[0].get_str();
 
+    ln1Db->filter();
     locatorStr = stripSpacesAndQuotes(locatorStr);
 
     if(isOnlyWhiteSpace(locatorStr))
@@ -5881,6 +5907,7 @@ int linkSet(vector<vchType> v, CBlockIndex* p, CDiskTxPos& txPos, const string& 
   {
     return 0;
   }
+    ln1Db->filter();
     vector<unsigned char> vchValue;
     vector<AliasIndex> vtxPos;
     int nHeight;
@@ -6038,6 +6065,7 @@ AcceptToMemoryPoolPost(const CTransaction& tx)
     if(tx.nVersion != CTransaction::DION_TX_VERSION)
         return true;
 
+    ln1Db->filter();
     if(tx.vout.size() < 1)
       return error("AcceptToMemoryPoolPost: no output in alias tx %s\n",
                     tx.GetHash().ToString().c_str());
@@ -6149,8 +6177,9 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
         return true;
     }
 
+    ln1Db->filter();
 
-    //XXXX LocatorNodeDB ln1Db("r+");
+
     int nInput;
     bool found = false;
 
@@ -6559,18 +6588,13 @@ void tFrame()
       if (!GetTransaction(tx.GetHash(), tx, h))
         continue;
 
-      printf("XXXX ALIAS  %s\n", a.c_str());
       const CTxOut& txout = tx.vout[nOut];
       const CScript& scriptPubKey = aliasStrip(txout.scriptPubKey);
       string s = scriptPubKey.GetBitcoinAddress();
-      printf("XXXX ADDRESS %s\n", s.c_str());
-      printf("XXXX HEIGHT %d\n", p->nHeight);
-      printf("XXXX TX     %s\n", tx.GetHash().ToString().c_str());
       CTxIndex txI;
       if(!txdb.ReadTxIndex(tx.GetHash(), txI))
         continue;
      
-      printf("XXXX read txI\n");
       f c(a, s, p->nHeight, tx.GetHash().ToString()); 
       f o;
       if(hb.set(c, o))
@@ -6624,18 +6648,13 @@ void xsc(CBlockIndex* p)
       if (!GetTransaction(tx.GetHash(), tx, h))
         continue;
 
-      printf("XXXX ALIAS  %s\n", a.c_str());
       const CTxOut& txout = tx.vout[nOut];
       const CScript& scriptPubKey = aliasStrip(txout.scriptPubKey);
       string s = scriptPubKey.GetBitcoinAddress();
-      printf("XXXX ADDRESS %s\n", s.c_str());
-      printf("XXXX HEIGHT %d\n", p->nHeight);
-      printf("XXXX TX     %s\n", tx.GetHash().ToString().c_str());
       CTxIndex txI;
       if(!txdb.ReadTxIndex(tx.GetHash(), txI))
         continue;
      
-      printf("XXXX read txI\n");
       linkSet(vvchArgs, p, txI.pos, s, ln1Db);
       f c(a, s, p->nHeight, tx.GetHash().ToString()); 
       f o;

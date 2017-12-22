@@ -1598,7 +1598,7 @@ int atod(const std::string& addr, std::string& d)
     if(!address__.IsValid())
       return -2;
 
-    //XXXX LocatorNodeDB ln1Db("r");
+    ln1Db->filter();
 
     Dbc* cursorp;
     try 

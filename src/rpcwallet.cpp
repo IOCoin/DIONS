@@ -308,13 +308,13 @@ Value addresstodion(const Array& params, bool fHelp)
 
     string address = params[0].get_str();
 
+    ln1Db->filter();
     CBitcoinAddress address__(address);
     if (!address__.IsValid())
       throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid I/OCoin address");
 
     string alias;
 
-    //XXXX LocatorNodeDB ln1Db("r");
 
     Dbc* cursorp;
     try 
@@ -391,12 +391,12 @@ Value sendtodion(const Array& params, bool fHelp)
             "<amount> is a real and is rounded to the nearest 0.000001"
             + HelpRequiringPassphrase());
 
+    ln1Db->filter();
     string alias = params[0].get_str();
     std::transform(alias.begin(), alias.end(), alias.begin(), ::tolower);
     string address = "address not found";
 
     vector<AliasIndex> vtxPos;
-    //XXXX LocatorNodeDB ln1Db("r");
     vchType vchAlias = vchFromString(alias);
     if (ln1Db->lKey (vchAlias))
     {
@@ -429,7 +429,6 @@ Value sendtoaddress(const Array& params, bool fHelp)
     if(!address.IsValid())
     {
       vector<AliasIndex> vtxPos;
-      //XXXX LocatorNodeDB ln1Db("r");
       vchType vchAlias = vchFromString(addrStr);
       if (ln1Db->lKey (vchAlias))
       {
@@ -596,8 +595,8 @@ Value xtu_url__(const string& s)
     std::transform(url.begin(), url.end(), url.begin(), ::tolower);
     string target = "state-0";
 
+    ln1Db->filter();
     vector<AliasIndex> vtxPos;
-    //XXXX LocatorNodeDB ln1Db("r");
     vchType vchURL = vchFromString(url);
     if (ln1Db->lKey(vchURL))
     {
@@ -654,8 +653,8 @@ Value xtu_url(const Array& params, bool fHelp)
     std::transform(url.begin(), url.end(), url.begin(), ::tolower);
     string target = "state-0";
 
+    ln1Db->filter();
     vector<AliasIndex> vtxPos;
-    //XXXX LocatorNodeDB ln1Db("r");
     vchType vchURL = vchFromString(url);
     if (ln1Db->lKey(vchURL))
     {
