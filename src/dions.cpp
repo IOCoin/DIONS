@@ -180,8 +180,8 @@ bool channelPredicate(string ext, string& tor)
 Value gw1(const Array& params, bool fHelp)
 {
     Array oRes;
-    ln1Db->filter();
-    return oRes;
+    //ln1Db->filter();
+    //return oRes;
     Dbc* cursorp;
     try 
     {
@@ -6184,8 +6184,6 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
 
     int prevOp;
     std::vector<vchType> vvchPrevArgs;
-    printf("CIP tx %s\n",
-              tx.GetHash().GetHex().c_str());
 
     for(int i = 0; i < tx.vin.size(); i++)
     {
@@ -6618,8 +6616,8 @@ void xsc(CBlockIndex* p)
 {
   for(; p; p=p->pnext)
   {
-    //XXXX if(p->nHeight < 1625000)
-    //XXXX   continue;
+    if(p->nHeight < 1625000)
+      continue;
 
     ln1Db->filter(p);
   }
