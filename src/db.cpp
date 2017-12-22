@@ -578,16 +578,16 @@ bool CAddrDB::Read(CAddrMan& addr)
 
     return true;
 }
-    void LocatorNodeDB::filter()
+    void LocatorNodeDB::filter(CBlockIndex* p__)
     {
       printf("XXXXX filter \n"); 
-      for(; p__; p__=p__->pnext)
+      //XXXX for(; p__; p__=p__->pnext)
       {
         printf("XXXXX filter h %d\n", p__->nHeight); 
-        if(p__->nHeight < 1625000)
-        {
-          continue;
-        }
+        //XXXX if(p__->nHeight < 1625000)
+        //XXXX {
+        //XXXX   continue;
+        //XXXX }
        
         CBlock block;
         block.ReadFromDisk(p__);

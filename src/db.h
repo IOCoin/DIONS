@@ -29,7 +29,6 @@ class CWalletTx;
 class AliasIndex;
 class CTxDB;
 
-extern CBlockIndex* p__;
 extern unsigned int nWalletDBUpdated;
 
 void ThreadFlushWalletDB(void* parg);
@@ -360,7 +359,7 @@ class AliasIndex
 class LocatorNodeDB : public CDB
 {
 public:
-    LocatorNodeDB(CBlockIndex* p, const char* pszMode="cr+") : CDB("aliascache.dat", pszMode), p__(p)
+    LocatorNodeDB(const char* pszMode="cr+") : CDB("aliascache.dat", pszMode)
     {     
     }
 
@@ -385,9 +384,8 @@ public:
     }
 
     bool test();
-    void filter();
-  private:
-    CBlockIndex* p__;
+    void filter(CBlockIndex*);
+    void filter() { return; };
 };
 
 

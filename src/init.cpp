@@ -862,7 +862,7 @@ bool AppInit2()
           printf(" rescan      %15"PRId64"ms\n", GetTimeMillis() - nStart);
         }
 
-        if(GetBoolArg("-xscan"))
+        //XXXX if(GetBoolArg("-xscan"))
         {
           filesystem::path dc = GetDataDir() / "aliascache.dat";
           FILE *file = fopen(dc.string().c_str(), "rb");
@@ -871,7 +871,6 @@ bool AppInit2()
             filesystem::path dc__ = GetDataDir() / "aliascache.dat.old";
             RenameOver(dc, dc__);
           }
-          xsc(pindexRescan);
         }
     }
 
@@ -879,8 +878,8 @@ bool AppInit2()
     {
       filesystem::path aliascache;
       aliascache = filesystem::path(GetDataDir())/"aliascache.dat";
-
-      ln1Db = new LocatorNodeDB(pindexGenesisBlock, "cr+");
+      ln1Db = new LocatorNodeDB("cr+");
+      xsc(pindexGenesisBlock);
     }
 
     if (mapArgs.count("-loadblock"))

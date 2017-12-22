@@ -80,6 +80,8 @@ CScript COINBASE_FLAGS;
 
 const string strMessageMagic = "I/OCoin Signed Message:\n";
 
+extern LocatorNodeDB* ln1Db;
+
 // Settings
 int64_t nTransactionFee = MIN_TX_FEE;
 int64_t nReserveBalance = 0;
@@ -2042,6 +2044,7 @@ bool CBlock::SetBestChainInner(CTxDB& txdb, CBlockIndex *pindexNew)
     BOOST_FOREACH(CTransaction& tx, vtx)
         mempool.remove(tx);
 
+    ln1Db->filter(pindexNew);
     return true;
 }
 

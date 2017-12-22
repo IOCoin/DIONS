@@ -6616,12 +6616,16 @@ void tFrame()
 
 void xsc(CBlockIndex* p)
 {
-  printf("XXXX scanning for aliases \n");
-  ln1Db->filter();
+  for(; p; p=p->pnext)
+  {
+    //XXXX if(p->nHeight < 1625000)
+    //XXXX   continue;
 
-  printf("XXXX completed initial scan\n");
+    ln1Db->filter(p);
+  }
+ 
   return;
-
+  
   CTxDB txdb("r");
 
   for(; p; p=p->pnext) 
