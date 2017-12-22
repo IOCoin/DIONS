@@ -862,7 +862,6 @@ bool AppInit2()
           printf(" rescan      %15"PRId64"ms\n", GetTimeMillis() - nStart);
         }
 
-        //XXXX if(GetBoolArg("-xscan"))
         {
           filesystem::path dc = GetDataDir() / "aliascache.dat";
           FILE *file = fopen(dc.string().c_str(), "rb");
