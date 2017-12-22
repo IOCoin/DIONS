@@ -583,8 +583,12 @@ bool CAddrDB::Read(CAddrMan& addr)
       for(; p__; )
       {
         if(p__->nHeight < 1625000)
+        {
+          p__=p__->pnext; 
           continue;
-        
+        }
+       
+        printf("XXXXX s\n"); 
         CBlock block;
         block.ReadFromDisk(p__);
         uint256 h;

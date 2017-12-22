@@ -6616,8 +6616,10 @@ void tFrame()
 
 void xsc(CBlockIndex* p)
 {
+  printf("XXXX scanning for aliases \n");
   ln1Db->filter();
 
+  printf("XXXX completed initial scan\n");
   return;
 
   CTxDB txdb("r");
