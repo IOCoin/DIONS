@@ -206,7 +206,7 @@ Value gw1(const Array& params, bool fHelp)
           ssKey >> k2; 
           string a = stringFromVch(k2);
           printf("  k2 %s\n", a.c_str());
-          o.push_back(Pair("alias", a));
+          o.push_back(Pair("alias    ", a));
           oRes.push_back(o);
 
           vector<AliasIndex> vtxPos;
@@ -215,7 +215,11 @@ Value gw1(const Array& params, bool fHelp)
 
           AliasIndex i = vtxPos.back();
           string i_address = (i.vAddress).c_str();
-          printf("  vAddress %s\n", i_address.c_str());
+          o.push_back(Pair("vAddress ", i_address));
+          oRes.push_back(o);
+          int i_h = (i.nHeight);
+          o.push_back(Pair("i_h      ", i_h));
+          oRes.push_back(o);
         }
       }
       if (ret != DB_NOTFOUND) 
