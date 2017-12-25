@@ -255,6 +255,7 @@ static const CRPCCommand vRPCCommands[] =
     { "sendtodion",             &sendtodion,          false,  false },
     { "addresstodion",             &addresstodion,    false,  false },
     { "getreceivedbyaddress",   &getreceivedbyaddress,   false,  false },
+    { "gra",   &gra,   false,  false },
     { "getreceivedbyaccount",   &getreceivedbyaccount,   false,  false },
     { "listreceivedbyaddress",  &listreceivedbyaddress,  false,  false },
     { "listreceivedbyaccount",  &listreceivedbyaccount,  false,  false },
