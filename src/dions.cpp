@@ -6493,8 +6493,6 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
             if((fBlock || fMiner) && nDepth >= 0 && nDepth < MIN_SET_DEPTH)
                 return false;
 
-
-
             if(fMiner)
             {
                 nDepth = CheckTransactionAtRelativeDepth(pindexBlock, vTxindex[nInput], scaleMonitor());
@@ -6554,13 +6552,7 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
             {
               printf("%s flagged active with tx %s\n", locatorStr.c_str(),
               tx.GetHash().GetHex().c_str());
-              return false;
             }
-          }
-
-          if(linkSet(vvchArgs, pindexBlock, txPos, a1, ln1Db) == -1)
-          {
-            printf("link set %s\n", stringFromVch(vvchArgs[0]).c_str());
           }
         }
 
