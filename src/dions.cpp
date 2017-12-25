@@ -35,6 +35,7 @@ using namespace boost::iostreams;
 
 namespace fs = boost::filesystem;
 
+extern LocatorNodeDB* ln1Db;
 extern Object JSONRPCError(int code, const string& message);
 extern Value xtu_url__(const string& url);
 template<typename T> void ConvertTo(Value& value, bool fAllowNull=false);
@@ -6581,53 +6582,15 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
 
 void xsc(CBlockIndex* p)
 {
-  printf("XXXX xsc scanning for current dions\n");
-  LocatorNodeDB l("cr+");
-  CTxDB txdb("r");
-
-  for(; p; p=p->pnext) 
+  for(; p; p=p->pnext)
   {
     if(p->nHeight < 1625000)
       continue;
 
-    CBlock block;
-    CDiskTxPos txPos;
-    block.ReadFromDisk(p);
-    uint256 h;
-
-    BOOST_FOREACH(CTransaction& tx, block.vtx) 
-    {
-      if (tx.nVersion != CTransaction::DION_TX_VERSION)
-        continue;
-
-      vector<vector<unsigned char> > vvchArgs;
-      int op, nOut;
-
-      aliasTx(tx, op, nOut, vvchArgs);
-      if (op != OP_ALIAS_SET)
-        continue;
-
-      const vector<unsigned char>& v = vvchArgs[0];
-      string a = stringFromVch(v);
-       
-      if (!GetTransaction(tx.GetHash(), tx, h))
-        continue;
-
-      printf("XXXX ALIAS  %s\n", a.c_str());
-      const CTxOut& txout = tx.vout[nOut];
-      const CScript& scriptPubKey = aliasStrip(txout.scriptPubKey);
-      string s = scriptPubKey.GetBitcoinAddress();
-      printf("XXXX ADDRESS %s\n", s.c_str());
-      printf("XXXX HEIGHT %d\n", p->nHeight);
-      printf("XXXX TX     %s\n", tx.GetHash().ToString().c_str());
-      CTxIndex txI;
-      if(!txdb.ReadTxIndex(tx.GetHash(), txI))
-        continue;
-     
-      //printf("XXXX read txI\n");
-      //linkSet(vvchArgs, p, txI.pos, s, l);
-    }
+    ln1Db->filter(p);
   }
+ 
+  return;
 }
 
 unsigned char GetAddressVersion() 
