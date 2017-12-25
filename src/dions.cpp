@@ -6538,6 +6538,7 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
         if(!aliasTxPos(vtxPos, vTxindex[nInput].pos))
             return error("ConnectInputsPost() : tx %s rejected, since previous tx(%s) is not in the alias DB\n", tx.GetHash().ToString().c_str(), vTxPrev[nInput].GetHash().ToString().c_str());
     }
+    if(fBlock)
     {
         if(op == OP_ALIAS_SET || op == OP_ALIAS_RELAY)
         {
