@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+extern unsigned int LR_SHIFT__[];
+
 class State
 {
   public:
