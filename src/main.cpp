@@ -57,6 +57,10 @@ CBlockIndex* p__ = NULL;
 int nBestHeight = -1;
 
 unsigned long EAX0_SHIFT_REGISTER__ = 0x989680;
+
+const unsigned int LR_SHIFT__[] = { 0x1f, 0x29, 0x3b, 0x1a, 0x35, 0x3a, 0x61, 0x5d, 
+                            0x17, 0x54 };
+
 int INTERN_REF0__ = 0x3520;
 int EXTERN_REF0__ = 0x0800;
 uint256 nBestChainTrust = 0;
