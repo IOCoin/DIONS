@@ -1,4 +1,4 @@
-## I/O Digital Blockchain Platform
+## I/O Digital Application Blockchain Platform
 
 I/O Coin - DIONS (Decentralized Input Output Name Server)
 ===========================
