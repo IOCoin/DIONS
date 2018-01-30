@@ -280,6 +280,7 @@ static const CRPCCommand vRPCCommands[] =
     { "addmultisigaddress",     &addmultisigaddress,     false,  false },
     { "addredeemscript",        &addredeemscript,        false,  false },
     { "getrawmempool",          &getrawmempool,          true,   false },
+    { "gettxout",               &gettxout,          true,   false },
     { "getblock",               &getblock,               false,  false },
     { "getblockbynumber",       &getblockbynumber,       false,  false },
     { "getblockhash",           &getblockhash,           false,  false },
@@ -1264,6 +1265,8 @@ Array RPCConvertValues(const std::string &strMethod, const std::vector<std::stri
     if (strMethod == "getblockbynumber"       && n > 0) ConvertTo<int64_t>(params[0]);
     if (strMethod == "getblockbynumber"       && n > 1) ConvertTo<bool>(params[1]);
     if (strMethod == "getblockhash"           && n > 0) ConvertTo<int64_t>(params[0]);
+    if (strMethod == "gettxout"           && n == 2) ConvertTo<int64_t>(params[1]);
+    if (strMethod == "gettxout"           && n == 3) { ConvertTo<int64_t>(params[1]); ConvertTo<bool>(params[2]); }
     if (strMethod == "getnetworkmhashps"      && n > 0) ConvertTo<int64_t>(params[0]);
     if (strMethod == "getnetworkmhashps"      && n > 1) ConvertTo<int64_t>(params[1]);
     if (strMethod == "move"                   && n > 2) ConvertTo<double>(params[2]);

@@ -35,6 +35,7 @@ CTxMemPool mempool;
 unsigned int nTransactionsUpdated = 0;
 
 int nStakeMinConfirmations = 500;
+bool fReindex = false;
 
 map<uint256, CBlockIndex*> mapBlockIndex;
 set<pair<COutPoint, unsigned int> > setStakeSeen;
@@ -60,8 +61,8 @@ unsigned long EAX0_SHIFT_REGISTER__ = 0x989680;
 
 const unsigned int LR_SHIFT__[] = 
 { 
-  0x1f, 0x29, 0x3b, 0x1a, 0x35, 0x3a, 0x61, 0x5d, 0x17, 0x54,
-  0x2c, 0xfe, 0x1b, 0x3f, 0x26, 0x8c, 0x5e, 0x3f, 0x1a, 0x6b
+  0x1f, 0x29, 0x3b, 0x1a, 0x35, 0x3a, 0x61, 0x5d, 0x17, 0x54
+   
 };
 
 int INTERN_REF0__ = 0x3520;
@@ -93,6 +94,8 @@ extern LocatorNodeDB* ln1Db;
 int64_t nTransactionFee = MIN_TX_FEE;
 int64_t nReserveBalance = 0;
 int64_t nMinimumInputValue = 0;
+
+unsigned int nCoinCacheSize = 5000;
 
 static const int NUM_OF_POW_CHECKPOINT = 1;
 static const int checkpointPoWHeight[NUM_OF_POW_CHECKPOINT][2] =
@@ -962,15 +965,19 @@ int CTxIndex::GetDepthInMainChain() const
 }
 
 // Return transaction in tx, and if it was found inside a block, its hash is placed in hashBlock
-bool GetTransaction(const uint256 &hash, CTransaction &tx, uint256 &hashBlock)
+bool GetTransaction(const uint256 &hash, CTransaction &tx, uint256 &hashBlock, 
+                     bool s)
 {
     {
-        LOCK(cs_main);
+        if(s)
         {
+          LOCK(cs_main);
+          {
             if (mempool.lookup(hash, tx))
             {
                 return true;
             }
+          }
         }
         CTxDB txdb("r");
         CTxIndex txindex;

@@ -29,9 +29,10 @@ class CNode;
 
 class CTxMemPool;
 
-//typedef std::vector<unsigned char> vchType;
 #include "constants.h"
 
+
+extern bool fReindex;
 
 static const int LAST_POW_BLOCK = 12815;
 
@@ -78,6 +79,7 @@ inline int64_t FutureDrift(int64_t nTime, int nHeight) { return IsProtocolV2(nHe
 
 inline unsigned int GetTargetSpacing(int nHeight) { return IsProtocolV2(nHeight) ? 64 : 60; }
 
+extern unsigned int nCoinCacheSize;
 extern libzerocoin::Params* ZCParams;
 extern CScript COINBASE_FLAGS;
 extern CCriticalSection cs_main;
@@ -146,7 +148,7 @@ bool minBase(const CTxIndex& txindex, const CBlockIndex* pindexFrom, int nMaxDep
 int GetNumBlocksOfPeers();
 bool IsInitialBlockDownload();
 std::string GetWarnings(std::string strFor);
-bool GetTransaction(const uint256 &hash, CTransaction &tx, uint256 &hashBlock);
+bool GetTransaction(const uint256 &hash, CTransaction &tx, uint256 &hashBlock, bool s=false);
 uint256 WantedByOrphan(const CBlock* pblockOrphan);
 const CBlockIndex* GetLastBlockIndex(const CBlockIndex* pindex, bool fProofOfStake);
 void StakeMiner(CWallet *pwallet);
@@ -394,7 +396,7 @@ public:
         scriptPubKey.clear();
     }
 
-    bool IsNull()
+    bool IsNull() const
     {
         return (nValue == -1);
     }
@@ -413,6 +415,12 @@ public:
     uint256 GetHash() const
     {
         return SerializeHash(*this);
+    }
+
+    bool IsUnspendable() const
+    {
+        return IsEmpty() ||
+               (scriptPubKey.size() > 0 && *scriptPubKey.begin() == OP_RETURN);
     }
 
     friend bool operator==(const CTxOut& a, const CTxOut& b)
@@ -560,6 +568,7 @@ public:
     */
     bool AreInputsStandard(const MapPrevTx& mapInputs) const;
 
+
     /** Count ECDSA signature operations the old-fashioned (pre-0.6) way
         @return number of sigops this transaction's outputs will produce when spent
         @see CTransaction::FetchInputs
@@ -573,6 +582,7 @@ public:
         @see CTransaction::FetchInputs
      */
     unsigned int GetP2SHSigOpCount(const MapPrevTx& mapInputs) const;
+
 
     /** Amount of bitcoins spent by this transaction.
         @return sum of all outputs (note: does not include fees)
@@ -598,6 +608,7 @@ public:
         @see CTransaction::FetchInputs
      */
     int64_t GetValueIn(const MapPrevTx& mapInputs) const;
+
 
     int64_t GetMinFee(unsigned int nBlockSize=1, enum GetMinFee_mode mode=GMF_BLOCK, unsigned int nBytes = 0) const;
 
@@ -711,6 +722,7 @@ public:
     bool CheckTransaction() const;
     bool GetCoinAge(CTxDB& txdb, uint64_t& nCoinAge) const;  // ppcoin: get tran
     bool GetCoinAge(CTxDB& txdb, const CBlockIndex* pindexPrev, uint64_t& nCoinAge) const;  // ppcoin: get transaction coin age
+
 
 protected:
     const CTxOut& GetOutputFor(const CTxIn& input, const MapPrevTx& inputs) const;
