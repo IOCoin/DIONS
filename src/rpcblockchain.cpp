@@ -472,9 +472,11 @@ Value gettxout(const Array& params, bool fHelp)
     if (n<0 || (unsigned int)n>=tx.vout.size() || tx.vout[n].IsNull())
       return Value::null;
 
-    ret.push_back(Pair("bestblock", pindexBest->GetBlockHash().GetHex()));
     if (hashBlock == 0)
+    {
+      ret.push_back(Pair("bestblock", pindexBest->GetBlockHash().GetHex()));
       ret.push_back(Pair("confirmations", 0));
+    }
     else
     {
       map<uint256, CBlockIndex*>::iterator mi = mapBlockIndex.find(hashBlock);
@@ -517,6 +519,7 @@ Value gettxout(const Array& params, bool fHelp)
         else
           return Value::null;
       }
+      ret.push_back(Pair("bestblock", hashBlock.GetHex()));
     }
 
     ret.push_back(Pair("value", ValueFromAmount(tx.vout[n].nValue)));
