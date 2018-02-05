@@ -2559,7 +2559,7 @@ Value primaryCXValidate(const Array& params, bool fHelp)
 {
     if(fHelp || params.size() != 3)
         throw runtime_error(
-          "transferEncryptedAlias <alias> <predicate> <l1_internal>"
+          "primaryCXValidate <alias> <predicate> <l1_internal>"
           + HelpRequiringPassphrase());
 
     string locatorStr = params[0].get_str();
