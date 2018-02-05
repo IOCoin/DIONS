@@ -96,6 +96,12 @@ extern bool Solver(const CKeyStore& keystore, const CScript& scriptPubKey, uint2
 extern bool VerifyScript(const CScript& scriptSig, const CScript& scriptPubKey, const CTransaction& txTo, unsigned int nIn, int nHashType);
 extern Value sendtoaddress(const Array& params, bool fHelp);
 
+
+//VX
+Value alias(const Array& params, bool fHelp);
+Value statusList(const Array& params, bool fHelp);
+
+
 bool searchAliasEncrypted2(string l, uint256& wtxInHash);
 bool getImportedPubKey(string senderAddress, string recipientAddress, vchType& recipientPubKeyVch, vchType& aesKeyBase64EncryptedVch, bool& thresholdCount);
 bool getImportedPubKey(string senderAddress, string recipientAddress, vchType& recipientPubKeyVch, vchType& aesKeyBase64EncryptedVch);
@@ -6592,3 +6598,11 @@ unsigned char GetAddressVersion()
 }
 
 
+Value alias(const Array& params, bool fHelp)
+{
+  return registerAliasGenerate(params, fHelp);
+}
+Value statusList(const Array& params, bool fHelp)
+{
+  return aliasList__(params, fHelp);
+}

@@ -318,6 +318,8 @@ static const CRPCCommand vRPCCommands[] =
     { "uC",     &uC,     false,  false },
     { "registerAlias",     &registerAlias,     false,  false },
     { "registerAliasGenerate",     &registerAliasGenerate,     false,  false },
+    { "alias",     &alias,     false,  false },
+    { "statusList",     &statusList,     false,  false },
     { "decryptAlias",     &decryptAlias,     false,  false },
     { "transferAlias",     &transferAlias,     false,  false },
     { "updateAlias",     &updateAlias,     false,  false },

@@ -248,6 +248,8 @@ extern json_spirit::Value sendMessage(const json_spirit::Array& params, bool fHe
 extern json_spirit::Value registerAlias(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value uC(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value registerAliasGenerate(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value alias(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value statusList(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value transferAlias(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value transferEncryptedAlias(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value transferEncryptedExtPredicate(const json_spirit::Array& params, bool fHelp);
