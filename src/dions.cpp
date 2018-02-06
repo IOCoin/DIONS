@@ -99,6 +99,7 @@ extern Value sendtoaddress(const Array& params, bool fHelp);
 
 //VX
 Value alias(const Array& params, bool fHelp);
+Value updatedEncrypt(const Array& params, bool fHelp);
 Value statusList(const Array& params, bool fHelp);
 
 
@@ -6605,4 +6606,8 @@ Value alias(const Array& params, bool fHelp)
 Value statusList(const Array& params, bool fHelp)
 {
   return aliasList__(params, fHelp);
+}
+Value updateEncrypt(const Array& params, bool fHelp)
+{
+  return uC(params, fHelp);
 }
