@@ -101,6 +101,7 @@ extern Value sendtoaddress(const Array& params, bool fHelp);
 Value alias(const Array& params, bool fHelp);
 Value updatedEncrypt(const Array& params, bool fHelp);
 Value statusList(const Array& params, bool fHelp);
+Value downloadDecrypt(const Array& params, bool fHelp);
 
 
 bool searchAliasEncrypted2(string l, uint256& wtxInHash);
@@ -6610,4 +6611,8 @@ Value statusList(const Array& params, bool fHelp)
 Value updateEncrypt(const Array& params, bool fHelp)
 {
   return uC(params, fHelp);
+}
+Value downloadDecrypt(const Array& params, bool fHelp)
+{
+  return validate(params, fHelp);
 }
