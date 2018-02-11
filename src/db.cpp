@@ -586,48 +586,47 @@ bool CAddrDB::Read(CAddrMan& addr)
         block.ReadFromDisk(p__);
         uint256 h;
 
+        unsigned int nTxPos = p__->nBlockPos + ::GetSerializeSize(CBlock(), SER_DISK, CLIENT_VERSION) - (2 * GetSizeOfCompactSize(0)) + GetSizeOfCompactSize(block.vtx.size());
         BOOST_FOREACH(CTransaction& tx, block.vtx) 
         {
-          if (tx.nVersion != CTransaction::DION_TX_VERSION)
-            continue;
-
-          vector<vector<unsigned char> > vvchArgs;
-          int op, nOut;
-
-          aliasTx(tx, op, nOut, vvchArgs);
-          if (!(op == OP_ALIAS_SET || op == OP_ALIAS_RELAY))
-            continue;
-
-          const vector<unsigned char>& v = vvchArgs[0];
-          string a = stringFromVch(v);
-       
-          if (!GetTransaction(tx.GetHash(), tx, h))
-            continue;
-
-          const CTxOut& txout = tx.vout[nOut];
-          const CScript& scriptPubKey = aliasStrip(txout.scriptPubKey);
-          string s = scriptPubKey.GetBitcoinAddress();
-          CTxIndex txI;
-          CTxDB txdb("r");
-          if(!txdb.ReadTxIndex(tx.GetHash(), txI))
+          if(tx.nVersion == CTransaction::DION_TX_VERSION)
           {
-            continue;
-          }
+            vector<vector<unsigned char> > vvchArgs;
+            int op, nOut;
 
-          vector<unsigned char> vchValue;
-          vector<AliasIndex> vtxPos;
-          uint256 hash;
-          AliasIndex txPos2;
-          unsigned int nTxPos = p__->nBlockPos + ::GetSerializeSize(CBlock(), SER_DISK, CLIENT_VERSION) - (2 * GetSizeOfCompactSize(0)) + GetSizeOfCompactSize(block.vtx.size());
-          CDiskTxPos txPos(p__->nFile, p__->nBlockPos, nTxPos);
-          
-          txPos2.nHeight = p__->nHeight;
-          txPos2.vValue = vchValue;
-          txPos2.vAddress = s;
-          txPos2.txPos = txPos;
-          vtxPos.push_back(txPos2);
-          if(op == OP_ALIAS_SET && !lKey(vvchArgs[0]))
-            lPut(vvchArgs[0], vtxPos);
+            aliasTx(tx, op, nOut, vvchArgs);
+            if((op == OP_ALIAS_SET || op == OP_ALIAS_RELAY))
+            {
+              const vector<unsigned char>& v = vvchArgs[0];
+              string a = stringFromVch(v);
+           
+              if (GetTransaction(tx.GetHash(), tx, h))
+              {
+                const CTxOut& txout = tx.vout[nOut];
+                const CScript& scriptPubKey = aliasStrip(txout.scriptPubKey);
+                string s = scriptPubKey.GetBitcoinAddress();
+                CTxIndex txI;
+                CTxDB txdb("r");
+                if(txdb.ReadTxIndex(tx.GetHash(), txI))
+                {
+                  vector<unsigned char> vchValue;
+                  vector<AliasIndex> vtxPos;
+                  uint256 hash;
+                  AliasIndex txPos2;
+                  CDiskTxPos txPos(p__->nFile, p__->nBlockPos, nTxPos);
+            
+                  txPos2.nHeight = p__->nHeight;
+                  txPos2.vValue = vchValue;
+                  txPos2.vAddress = s;
+                  txPos2.txPos = txPos;
+                  vtxPos.push_back(txPos2);
+                  if(op == OP_ALIAS_SET && !lKey(vvchArgs[0]))
+                    lPut(vvchArgs[0], vtxPos);
+                }
+              }
+            }
+          }
+          nTxPos += ::GetSerializeSize(tx, SER_DISK, CLIENT_VERSION);
         }
       }
     } 
