@@ -105,7 +105,7 @@ Value alias(const Array& params, bool fHelp);
 Value updatedEncrypt(const Array& params, bool fHelp);
 Value statusList(const Array& params, bool fHelp);
 Value downloadDecrypt(const Array& params, bool fHelp);
-
+extern unsigned int LR_SHIFT__[0x28];
 
 bool searchAliasEncrypted2(string l, uint256& wtxInHash);
 bool getImportedPubKey(string senderAddress, string recipientAddress, vchType& recipientPubKeyVch, vchType& aesKeyBase64EncryptedVch, bool& thresholdCount);
