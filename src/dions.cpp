@@ -2956,7 +2956,6 @@ Value vEPID(const Array& params, bool fHelp)
           mapAliasVchInt[vchFromString(decrypted)] = nHeight;
 
           DecryptMessage(rsaPrivKey, stringFromVch(vv[0]), decrypted);
-          //XXXX if(k1 != decrypted) 
           if(k1.ToString() != r.ToString()) 
           {
             continue;
