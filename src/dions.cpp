@@ -2883,6 +2883,8 @@ Value vEPID(const Array& params, bool fHelp)
       "vEPID [<node opt>]\n"
   );
 
+
+  //VX series
   vchType vchNodeLocator;
   string k =(params[0]).get_str();
   CBitcoinAddress k1(k);
