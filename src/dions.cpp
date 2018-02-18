@@ -98,6 +98,7 @@ extern Value sendtoaddress(const Array& params, bool fHelp);
 
 //Ext frame
 bool relaySigFrame(int,vchType&);
+bool frlRelay(int&);
 
 //VX
 Value alias(const Array& params, bool fHelp);
@@ -6622,4 +6623,8 @@ Value downloadDecrypt(const Array& params, bool fHelp)
 bool relaySigFrame(int i, vchType& s)
 {
   return LR_SHIFT__[i] == s[0];  
+}
+bool frlRelay(int& i)
+{
+  return true;  
 }
