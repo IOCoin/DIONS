@@ -102,9 +102,10 @@ bool frlRelay(int&);
 
 //VX
 Value alias(const Array& params, bool fHelp);
-Value updatedEncrypt(const Array& params, bool fHelp);
+Value updateEncrypt(const Array& params, bool fHelp);
 Value statusList(const Array& params, bool fHelp);
 Value downloadDecrypt(const Array& params, bool fHelp);
+Value downloadDecryptEPID(const Array& params, bool fHelp);
 extern unsigned int LR_SHIFT__[0x28];
 
 bool searchAliasEncrypted2(string l, uint256& wtxInHash);
@@ -2874,6 +2875,197 @@ Value primaryCXValidate(const Array& params, bool fHelp)
     }
     LEAVE_CRITICAL_SECTION(cs_main)
     return ret;
+}
+Value vEPID(const Array& params, bool fHelp)
+{
+  if(fHelp || params.size() != 2)
+    throw runtime_error(
+      "vEPID [<node opt>]\n"
+  );
+
+  vchType vchNodeLocator;
+  string k =(params[0]).get_str();
+  CBitcoinAddress k1(k);
+  if(!k1.IsValid())
+    throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
+  const char* out__ = (params[1].get_str()).c_str();
+
+
+  std::map<vchType, int> mapAliasVchInt;
+  std::map<vchType, Object> aliasMapVchObj;
+
+  vector< vector<unsigned char> > vvch;
+  bool found=false;
+  ENTER_CRITICAL_SECTION(cs_main)
+  {
+    ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    {
+      BOOST_FOREACH(PAIRTYPE(const uint256, CWalletTx)& item,
+                  pwalletMain->mapWallet)
+      {
+        const CWalletTx& tx = item.second;
+
+        vector< vector<unsigned char> > vv;
+        int nOut;
+        int op__=-1;
+        if(!tx.aliasSet(op__, nOut, vv))
+        {
+          continue;
+        }
+
+        if(op__ != OP_ALIAS_ENCRYPTED)
+        {
+          continue;
+        }
+
+        const int nHeight = tx.GetHeightInMainChain();
+        if(nHeight == -1)
+          continue;
+        assert(nHeight >= 0);
+
+        string decrypted = "";
+
+        string strAddress = "";
+        aliasAddress(tx, strAddress);
+        if(op__ == OP_ALIAS_ENCRYPTED)
+        {
+          CBitcoinAddress r(strAddress);
+          if(!r.IsValid())
+            throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
+
+          CKeyID keyID;
+          if(!r.GetKeyID(keyID))
+            throw JSONRPCError(RPC_TYPE_ERROR, "Address does not refer to key");
+
+          CKey key;
+          if(!pwalletMain->GetKey(keyID, key))
+          {
+            continue;
+          }
+
+          CPubKey pubKey = key.GetPubKey();
+          string rsaPrivKey;
+          if(pwalletMain->envCP0(pubKey, rsaPrivKey) == false)
+          {
+            continue;
+          }
+        if(mapAliasVchInt.find(vchFromString(decrypted)) != mapAliasVchInt.end() && mapAliasVchInt[vchFromString(decrypted)] > nHeight)
+        {
+          continue;
+        }
+          mapAliasVchInt[vchFromString(decrypted)] = nHeight;
+
+          DecryptMessage(rsaPrivKey, stringFromVch(vv[0]), decrypted);
+          //XXXX if(k1 != decrypted) 
+          if(k1.ToString() != r.ToString()) 
+          {
+            continue;
+          }
+          else
+          {
+            printf(">>>> decrypted %s\n", decrypted.c_str());
+            vchNodeLocator = vchFromString(decrypted);
+            vvch = vv;
+            found=true;
+          }
+        }
+      }
+    }
+    LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+  }
+  LEAVE_CRITICAL_SECTION(cs_main)
+
+
+  if(found == true)
+  {
+    string value;
+    string iv128 = stringFromVch(vvch[6]);
+    State hydr(stringFromVch(vvch[7]));
+    if(hydr() == State::ATOMIC)
+    {
+      Relay r;
+      if(pwalletMain->relay_(vchNodeLocator, r))
+      {
+        string ctrl_ = r.ctrl_();
+        bool fInvalid = false;
+        vector<unsigned char> asK = DecodeBase64(ctrl_.c_str(), &fInvalid);
+        string decrypted;
+        DecryptMessageAES(stringFromVch(vvch[4]),
+          decrypted,
+          asK,
+          iv128);
+
+        value = decrypted;
+      }
+    }
+    else if(hydr() == State::GROUND)
+    {
+      value = stringFromVch(vvch[4]);
+    }
+    else
+    {
+      string csKStr;
+      string localAddr = stringFromVch(vchNodeLocator);
+      string f = stringFromVch(vvch[7]);
+      string l = stringFromVch(vvch[2]);
+      bool black_0=true;
+      if(channel(l, f, csKStr, black_0))
+      {
+        string alpha;
+        if(black_0)
+        {
+          CBitcoinAddress p(l);
+          if(!p.IsValid())
+            throw JSONRPCError(RPC_TYPE_ERROR, "address");
+          CKeyID k;
+          if(!p.GetKeyID(k))
+            throw JSONRPCError(RPC_TYPE_ERROR, "key");
+
+          CKey k_;
+          if(!pwalletMain->GetKey(k, k_))
+            throw JSONRPCError(RPC_TYPE_ERROR, "not found");
+
+          CPubKey pk = k_.GetPubKey();
+          string q;
+          pwalletMain->envCP0(pk, q);
+          DecryptMessage(q, csKStr, alpha);
+          csKStr=alpha;
+        }
+
+        bool fInvalid = false;
+        vector<unsigned char> csK = DecodeBase64(csKStr.c_str(), &fInvalid);
+        string decrypted;
+        DecryptMessageAES(stringFromVch(vvch[4]),
+          decrypted,
+          csK,
+          iv128);
+
+        value = decrypted;
+      }
+      else
+      {
+        throw JSONRPCError(RPC_TYPE_ERROR, "key not foound");
+      }
+    }
+
+    try
+    {
+      stringstream is(value, ios_base::in | ios_base::binary);   
+      filtering_streambuf<input> in__;
+      in__.push(gzip_decompressor());
+      in__.push(is);
+      ofstream file__(out__, ios_base::binary);
+      boost::iostreams::copy(in__, file__);
+    }
+    catch(std::exception& e)
+    {
+      std::cerr << e.what() << std::endl; 
+    }
+
+    return true;
+  }
+
+  return false;
 }
 Value validate(const Array& params, bool fHelp)
 {
@@ -6618,6 +6810,11 @@ Value updateEncrypt(const Array& params, bool fHelp)
 Value downloadDecrypt(const Array& params, bool fHelp)
 {
   return validate(params, fHelp);
+}
+
+Value downloadDecryptEPID(const Array& params, bool fHelp)
+{
+  return vEPID(params, fHelp);
 }
 
 bool relaySigFrame(int i, vchType& s)
