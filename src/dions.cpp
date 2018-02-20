@@ -1382,6 +1382,10 @@ Value aliasOut(const Array& params, bool fHelp)
   k1 =(params[0]).get_str();
   vchNodeLocator = vchFromValue(params[0]);
   const char* out__ = (params[1].get_str()).c_str();
+  fs::path p = out__;
+  boost::filesystem::path ve = p.parent_path();
+  if(!fs::exists(ve))
+    throw runtime_error("Invalid out put path");
 
   std::map<vchType, int> mapAliasVchInt;
   std::map<vchType, Object> aliasMapVchObj;
@@ -2892,6 +2896,10 @@ Value vEPID(const Array& params, bool fHelp)
     throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
   const char* out__ = (params[1].get_str()).c_str();
 
+  fs::path p = out__;
+  boost::filesystem::path ve = p.parent_path();
+  if(!fs::exists(ve))
+    throw runtime_error("Invalid out put path");
 
   std::map<vchType, int> mapAliasVchInt;
   std::map<vchType, Object> aliasMapVchObj;
