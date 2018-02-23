@@ -3,8 +3,9 @@
 
 #include <string>
 #include <vector>
+#include "main.h"
 
-extern unsigned int LR_SHIFT__[0x28];
+extern unsigned int LR_SHIFT__[LR_R];
 
 class State
 {
