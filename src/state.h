@@ -5,6 +5,7 @@
 #include <vector>
 #include "main.h"
 
+//vtx shift
 extern unsigned int LR_SHIFT__[LR_R];
 
 class State
