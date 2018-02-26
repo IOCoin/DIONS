@@ -29,6 +29,12 @@ class RayShade : InterfaceCrypt
     inline virtual string ctrl_() { return this->tgt_; }
     inline virtual void ctrl(string& c) { this->tgt_ = c; }
 
+    IMPLEMENT_SERIALIZE
+    (
+        READWRITE(this->tgt_);
+        READWRITE(this->o_);
+    )
+
   private:
     string tgt_;
     string o_;

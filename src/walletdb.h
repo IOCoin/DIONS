@@ -56,6 +56,7 @@ public:
         nVersion = this->nVersion;
         READWRITE(nCreateTime);
         READWRITE(this->patch);
+        //READWRITE(this->rs_);
         READWRITE(this->m);
         READWRITE(this->random);
         READWRITE(this->rlweIndex);
