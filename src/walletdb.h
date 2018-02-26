@@ -33,6 +33,7 @@ public:
     static const int CURRENT_VERSION=1;
     int nVersion;
     CoordinateVector patch;
+    RayShade rs_;
     CMap m;
     vchType random;
     string r;
