@@ -4,6 +4,7 @@
 #include "interface_crypt.h"
 #include "coordinate.h"
 #include "coordinate_patch.h"
+#include "ray_shade.h"
 
 class Relay : InterfaceCrypt
 {
