@@ -175,6 +175,7 @@ extern json_spirit::Value getaccount(const json_spirit::Array& params, bool fHel
 extern json_spirit::Value getaddressesbyaccount(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value sendtoaddress(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value sendtodion(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value shade(const json_spirit::Array& params, bool fHelp); // in rpcwallet.cpp
 extern json_spirit::Value addresstodion(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value signmessage(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value verifymessage(const json_spirit::Array& params, bool fHelp);

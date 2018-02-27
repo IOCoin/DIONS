@@ -172,6 +172,17 @@ Value getnewaddress(const Array& params, bool fHelp)
     return CBitcoinAddress(keyID).ToString();
 }
 
+Value shade(const Array& params, bool fHelp)
+{
+    if (fHelp || params.size() > 1)
+        throw runtime_error(
+            "shade [account] ray id\n"
+            );
+
+    Array oRes;
+    return oRes; 
+}
+
 
 CBitcoinAddress GetAccountAddress(string strAccount, bool bForceNew=false)
 {
