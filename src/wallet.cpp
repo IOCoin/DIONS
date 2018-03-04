@@ -648,7 +648,7 @@ bool CWallet::AddToWallet(const CWalletTx& wtxIn)
     if (txout.scriptPubKey == scriptDefaultKey)
     {
 	CPubKey newDefaultKey;
-	if (GetKeyFromPool(newDefaultKey, false))
+	if(GetKeyFromPool(newDefaultKey, false))
 	{
       SetDefaultKey(newDefaultKey);
       SetAddressBookName(vchDefaultKey.GetID(), "");
@@ -2513,6 +2513,48 @@ void CWallet::ReturnKey(int64_t nIndex)
   }
   if(fDebug)
       printf("keypool return %"PRId64"\n", nIndex);
+}
+
+bool CWallet::GetKeyFromPool(CPubKey& r1, CPubKey& r2, bool fAllowReuse)
+{
+  int64_t nIndex = 0;
+  CKeyPool k1;
+  {
+      LOCK(cs_wallet);
+      ReserveKeyFromKeyPool(nIndex, k1);
+      if (nIndex == -1)
+      {
+	  if (fAllowReuse && vchDefaultKey.IsValid())
+	  {
+	      r1 = vchDefaultKey;
+	      return true;
+	  }
+	  if (IsLocked()) return false;
+	  r1 = GenerateNewKey();
+      }
+      else
+      {
+      KeepKey(nIndex);
+      r1 = k1.vchPubKey;
+      }
+      ReserveKeyFromKeyPool(nIndex, k1);
+      if (nIndex == -1)
+      {
+	  if (fAllowReuse && vchDefaultKey.IsValid())
+	  {
+	      r1 = vchDefaultKey;
+	      return true;
+	  }
+	  if (IsLocked()) return false;
+	  r2 = GenerateNewKey();
+      }
+      else
+      {
+      KeepKey(nIndex);
+      r2 = k1.vchPubKey;
+      }
+  }
+  return true;
 }
 
 bool CWallet::GetKeyFromPool(CPubKey& result, bool fAllowReuse)

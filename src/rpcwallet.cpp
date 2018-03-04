@@ -154,15 +154,15 @@ Value getnewaddress(const Array& params, bool fHelp)
 
     // Parse the account first so we don't generate a key if there's an error
     string strAccount;
-    if (params.size() > 0)
+    if(params.size() > 0)
         strAccount = AccountFromValue(params[0]);
 
-    if (!pwalletMain->IsLocked())
+    if(!pwalletMain->IsLocked())
         pwalletMain->TopUpKeyPool();
 
     // Generate a new key that is added to wallet
     CPubKey newKey;
-    if (!pwalletMain->GetKeyFromPool(newKey, false))
+    if(!pwalletMain->GetKeyFromPool(newKey, false))
         throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
 
     CKeyID keyID = newKey.GetID();
@@ -180,6 +180,29 @@ Value shade(const Array& params, bool fHelp)
             );
 
     Array oRes;
+
+    if(!pwalletMain->IsLocked())
+      pwalletMain->TopUpKeyPool();
+
+    CPubKey k1;
+    CPubKey k2;
+    if(!pwalletMain->GetKeyFromPool(k1, k2, false))
+      throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
+   
+
+    //Verify - orange 
+    oRes.push_back(CBitcoinAddress(k1.GetID()).ToString());
+    oRes.push_back(CBitcoinAddress(k2.GetID()).ToString());
+    vector<unsigned char> k;
+    k.reserve(k1.Raw().size() + k2.Raw().size());
+    vchType a = k1.Raw();
+    vchType b = k2.Raw();
+    k.insert(k.end(), a.begin(), a.end());
+    k.insert(k.end(), b.begin(), b.end());
+    if(k.size() == 0)
+      throw runtime_error("k size " + k.size());
+    string s1 = EncodeBase58(&k[0], &k[0] + k.size());
+    oRes.push_back(s1);
     return oRes; 
 }
 
