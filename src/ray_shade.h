@@ -28,16 +28,20 @@ class RayShade : InterfaceCrypt
     inline virtual string alias() { return ""; }
     inline virtual string ctrl_() { return this->tgt_; }
     inline virtual void ctrl(string& c) { this->tgt_ = c; }
+    inline virtual void ctrlExternalDtx(string& o) { this->o_ = o; }
+    inline virtual void ctrlDtx(string& o) { this->vtx_ = o; }
 
     IMPLEMENT_SERIALIZE
     (
         READWRITE(this->tgt_);
         READWRITE(this->o_);
+        READWRITE(this->vtx_);
     )
 
   private:
     string tgt_;
     string o_;
+    string vtx_;
 };
 
 #endif
