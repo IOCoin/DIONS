@@ -2554,10 +2554,13 @@ bool CWallet::GetKeyFromPool(CPubKey& r1, CPubKey& r2, bool fAllowReuse)
       r2 = k2.vchPubKey;
       }
 
-    RayShade& rs = mapKeyMetadata[k1.vchPubKey.GetID()].rs_;
-    rs.ctrlExternalDtx(RayShade::RAY_VTX, (uint160)(k2.vchPubKey.GetID()));
+    RayShade& rs7 = mapKeyMetadata[k1.vchPubKey.GetID()].rs_;
+    rs7.ctrlExternalDtx(RayShade::RAY_VTX, (uint160)(k2.vchPubKey.GetID()));
 
-    if(!IsCrypted() && !CWalletDB(strWalletFile).UpdateKey(k1.vchPubKey, mapKeyMetadata[k1.vchPubKey.GetID()]))
+    RayShade& rs1 = mapKeyMetadata[k2.vchPubKey.GetID()].rs_;
+    rs1.ctrlExternalDtx(RayShade::RAY_SET, (uint160)(k2.vchPubKey.GetID()));
+
+    if(!IsCrypted() && !CWalletDB(strWalletFile).UpdateKey(k1.vchPubKey, mapKeyMetadata[k1.vchPubKey.GetID()]) && !CWalletDB(strWalletFile).UpdateKey(k2.vchPubKey, mapKeyMetadata[k2.vchPubKey.GetID()]))
       throw runtime_error("update vtx");
   }
   return true;
