@@ -13,6 +13,7 @@
 #include "reference.h"
 #include "coincontrol.h"
 #include <boost/algorithm/string/replace.hpp>
+#include "ray_shade.h"
 
 #include "main.h"
 
@@ -190,13 +191,11 @@ bool CWallet::SetRSAMetadata(const CPubKey &pubkey)
 
     if(mapKeyMetadata[pubkey.GetID()].patch.scale_() && mapKeyMetadata[pubkey.GetID()].patch.scale())
     {
-      printf("SetRSA 2\n");
       GenerateRSAKey(mapKeyMetadata[pubkey.GetID()].patch);
 
       return true;
     }
 
-      printf("SetRSA 3\n");
     return false;
 }
 
@@ -2519,6 +2518,7 @@ bool CWallet::GetKeyFromPool(CPubKey& r1, CPubKey& r2, bool fAllowReuse)
 {
   int64_t nIndex = 0;
   CKeyPool k1;
+  CKeyPool k2;
   {
       LOCK(cs_wallet);
       ReserveKeyFromKeyPool(nIndex, k1);
@@ -2537,7 +2537,7 @@ bool CWallet::GetKeyFromPool(CPubKey& r1, CPubKey& r2, bool fAllowReuse)
       KeepKey(nIndex);
       r1 = k1.vchPubKey;
       }
-      ReserveKeyFromKeyPool(nIndex, k1);
+      ReserveKeyFromKeyPool(nIndex, k2);
       if (nIndex == -1)
       {
 	  if (fAllowReuse && vchDefaultKey.IsValid())
@@ -2551,8 +2551,14 @@ bool CWallet::GetKeyFromPool(CPubKey& r1, CPubKey& r2, bool fAllowReuse)
       else
       {
       KeepKey(nIndex);
-      r2 = k1.vchPubKey;
+      r2 = k2.vchPubKey;
       }
+
+    RayShade& rs = mapKeyMetadata[k1.vchPubKey.GetID()].rs_;
+    rs.ctrlExternalDtx(RayShade::RAY_VTX, (uint160)(k2.vchPubKey.GetID()));
+
+    if(!IsCrypted() && !CWalletDB(strWalletFile).UpdateKey(k1.vchPubKey, mapKeyMetadata[k1.vchPubKey.GetID()]))
+      throw runtime_error("update vtx");
   }
   return true;
 }

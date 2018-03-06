@@ -7,6 +7,9 @@
 class RayShade : InterfaceCrypt
 {
   public:
+    static const int RAY_VTX = 0xa1;
+    static const int RAY_SET = 0xc2; 
+
     RayShade()
     {
     }
@@ -28,7 +31,11 @@ class RayShade : InterfaceCrypt
     inline virtual string alias() { return ""; }
     inline virtual string ctrl_() { return this->tgt_; }
     inline virtual void ctrl(string& c) { this->tgt_ = c; }
-    inline virtual void ctrlExternalDtx(string& o) { this->o_ = o; }
+    inline virtual void ctrlExternalDtx(int i, uint160 o) 
+    { 
+      this->l7_ = i; this->o_ = o; 
+    }
+
     inline virtual void ctrlDtx(string& o) { this->vtx_ = o; }
 
     IMPLEMENT_SERIALIZE
@@ -39,8 +46,9 @@ class RayShade : InterfaceCrypt
     )
 
   private:
+    int l7_;
     string tgt_;
-    string o_;
+    uint160 o_;
     string vtx_;
 };
 
