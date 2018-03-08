@@ -189,7 +189,6 @@ Value shade(const Array& params, bool fHelp)
     if(!pwalletMain->GetKeyFromPool(k1, k2, false))
       throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
    
-
     //Verify - orange 
     oRes.push_back(CBitcoinAddress(k1.GetID()).ToString());
     oRes.push_back(CBitcoinAddress(k2.GetID()).ToString());
@@ -203,6 +202,18 @@ Value shade(const Array& params, bool fHelp)
       throw runtime_error("k size " + k.size());
     string s1 = EncodeBase58(&k[0], &k[0] + k.size());
     oRes.push_back(s1);
+    return oRes; 
+}
+
+Value sr71(const Array& params, bool fHelp)
+{
+    if (fHelp || params.size() > 1)
+        throw runtime_error(
+            "shade [account] ray id\n"
+            );
+
+    Array oRes;
+
     return oRes; 
 }
 

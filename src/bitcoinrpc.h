@@ -272,6 +272,7 @@ extern json_spirit::Value aliasOut(const json_spirit::Array& params, bool fHelp)
 extern json_spirit::Value externFrame__(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value internFrame__(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value getNodeRecord(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value sr71(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value nodeRetrieve(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value nodeValidate(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value aliasList(const json_spirit::Array& params, bool fHelp);
