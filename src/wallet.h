@@ -93,7 +93,7 @@ public:
     bool fFileBacked;
     std::string strWalletFile;
     std::set<int64_t> setKeyPool;
-    std::map<CKeyID, CKeyMetadata> mapKeyMetadata;
+    std::map<CKeyID, CKeyMetadata> kd;
     std::map<vchType, Relay> lCache;
 
     typedef std::map<unsigned int, CMasterKey> MasterKeyMap;
@@ -170,7 +170,7 @@ public:
     bool ChangeWalletPassphrase(const SecureString& strOldWalletPassphrase, const SecureString& strNewWalletPassphrase);
     bool EncryptWallet(const SecureString& strWalletPassphrase);
 
-    void GetKeyBirthTimes(std::map<CKeyID, int64_t> &mapKeyBirth) const;
+    void kt(std::map<CKeyID, int64_t> &mapKeyBirth) const;
 
 
     /** Increment the next transaction order id

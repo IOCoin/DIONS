@@ -5111,7 +5111,7 @@ Value publicKey(const Array& params, bool fHelp)
   if(!pwalletMain->SetRSAMetadata(pubKey))
     throw JSONRPCError(RPC_TYPE_ERROR, "Failed set");
 
-  if(!walletdb.UpdateKey(pubKey, pwalletMain->mapKeyMetadata[pubKey.GetID()]))
+  if(!walletdb.UpdateKey(pubKey, pwalletMain->kd[pubKey.GetID()]))
     throw JSONRPCError(RPC_TYPE_ERROR, "Failed to write meta data for key");
 
   if(!pwalletMain->envCP1(pubKey, testKey))
@@ -5466,7 +5466,7 @@ Value sendPublicKey(const Array& params, bool fHelp)
       if(!pwalletMain->aes(vchPubKey, f, aesKeyStr))
         throw JSONRPCError(RPC_TYPE_ERROR, "Failed to set meta data for key");
 
-      if(!walletdb.UpdateKey(vchPubKey, pwalletMain->mapKeyMetadata[vchPubKey.GetID()]))
+      if(!walletdb.UpdateKey(vchPubKey, pwalletMain->kd[vchPubKey.GetID()]))
         throw JSONRPCError(RPC_TYPE_ERROR, "Failed to write meta data for key");
 
       ss <<(rsaPubKeyStr + encrypted);
@@ -5836,7 +5836,7 @@ Value registerAliasGenerate(const Array& params, bool fHelp)
   if(!pwalletMain->SetRSAMetadata(vchPubKey))
     throw JSONRPCError(RPC_TYPE_ERROR, "Failed to load meta data for key");
 
-  if(!walletdb.UpdateKey(vchPubKey, pwalletMain->mapKeyMetadata[vchPubKey.GetID()]))
+  if(!walletdb.UpdateKey(vchPubKey, pwalletMain->kd[vchPubKey.GetID()]))
     throw JSONRPCError(RPC_TYPE_ERROR, "Failed to write meta data for key");
 
   string pKey;
@@ -5850,7 +5850,7 @@ Value registerAliasGenerate(const Array& params, bool fHelp)
   if(!pwalletMain->SetRandomKeyMetadata(vchPubKey, vchRand))
     throw JSONRPCError(RPC_WALLET_ERROR, "Failed to set meta data for key");
 
-  if(!walletdb.UpdateKey(vchPubKey, pwalletMain->mapKeyMetadata[vchPubKey.GetID()]))
+  if(!walletdb.UpdateKey(vchPubKey, pwalletMain->kd[vchPubKey.GetID()]))
     throw JSONRPCError(RPC_TYPE_ERROR, "Failed to write meta data for key");
 
   CKey key;
@@ -5986,7 +5986,7 @@ Value registerAlias(const Array& params, bool fHelp)
 
     CWalletDB walletdb(pwalletMain->strWalletFile, "r+");
 
-    if(!walletdb.UpdateKey(vchPubKey, pwalletMain->mapKeyMetadata[vchPubKey.GetID()]))
+    if(!walletdb.UpdateKey(vchPubKey, pwalletMain->kd[vchPubKey.GetID()]))
       throw JSONRPCError(RPC_TYPE_ERROR, "Failed to write meta data for key");
 
     CKey key;
@@ -6657,7 +6657,7 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
              if(!pwalletMain->SetRandomKeyMetadata(vchPubKey, vchRand))
                throw JSONRPCError(RPC_WALLET_ERROR, "Failed to set meta data for key");
             CWalletDB walletdb(pwalletMain->strWalletFile, "r+");
-            if(!walletdb.UpdateKey(vchPubKey, pwalletMain->mapKeyMetadata[vchPubKey.GetID()]))
+            if(!walletdb.UpdateKey(vchPubKey, pwalletMain->kd[vchPubKey.GetID()]))
               throw JSONRPCError(RPC_TYPE_ERROR, "Failed to write meta data for key");
            }
            

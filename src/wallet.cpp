@@ -43,7 +43,7 @@ struct CompareValueOnly
 
 CPubKey CWallet::GenerateNewKey()
 {
-    AssertLockHeld(cs_wallet); // mapKeyMetadata
+    AssertLockHeld(cs_wallet); // kd
     bool fCompressed = CanSupportFeature(FEATURE_COMPRPUBKEY); // default to compressed public keys if we want 0.6.0 wallets
 
     RandAddSeedPerfmon();
@@ -58,7 +58,7 @@ CPubKey CWallet::GenerateNewKey()
 
     // Create new metadata
     int64_t nCreationTime = GetTime();
-    mapKeyMetadata[pubkey.GetID()] = CKeyMetadata(nCreationTime);
+    kd[pubkey.GetID()] = CKeyMetadata(nCreationTime);
     if (!nTimeFirstKey || nCreationTime < nTimeFirstKey)
   nTimeFirstKey = nCreationTime;
 
@@ -69,7 +69,7 @@ CPubKey CWallet::GenerateNewKey()
 
 bool CWallet::AddKey(const CKey& key)
 {
-    AssertLockHeld(cs_wallet); // mapKeyMetadata
+    AssertLockHeld(cs_wallet); // kd
 
     CPubKey pubkey = key.GetPubKey();
 
@@ -78,7 +78,7 @@ bool CWallet::AddKey(const CKey& key)
     if (!fFileBacked)
   return true;
     if (!IsCrypted())
-  return CWalletDB(strWalletFile).WriteKey(pubkey, key.GetPrivKey(), mapKeyMetadata[pubkey.GetID()]);
+  return CWalletDB(strWalletFile).WriteKey(pubkey, key.GetPrivKey(), kd[pubkey.GetID()]);
     return true;
 }
 
@@ -91,38 +91,38 @@ bool CWallet::AddCryptedKey(const CPubKey &vchPubKey, const vector<unsigned char
     {
   LOCK(cs_wallet);
   if (pwalletdbEncryption)
-      return pwalletdbEncryption->WriteCryptedKey(vchPubKey, vchCryptedSecret, mapKeyMetadata[vchPubKey.GetID()]);
+      return pwalletdbEncryption->WriteCryptedKey(vchPubKey, vchCryptedSecret, kd[vchPubKey.GetID()]);
   else
-      return CWalletDB(strWalletFile).WriteCryptedKey(vchPubKey, vchCryptedSecret, mapKeyMetadata[vchPubKey.GetID()]);
+      return CWalletDB(strWalletFile).WriteCryptedKey(vchPubKey, vchCryptedSecret, kd[vchPubKey.GetID()]);
     }
     return false;
 }
 
 bool CWallet::LoadKeyMetadata(const CPubKey &pubkey, const CKeyMetadata &meta)
 {
-    AssertLockHeld(cs_wallet); // mapKeyMetadata
+    AssertLockHeld(cs_wallet); // kd
     if (meta.nCreateTime && (!nTimeFirstKey || meta.nCreateTime < nTimeFirstKey))
   nTimeFirstKey = meta.nCreateTime;
 
-    mapKeyMetadata[pubkey.GetID()] = meta;
+    kd[pubkey.GetID()] = meta;
     return true;
 }
 
 bool CWallet::LoadRelay(const vchType& k, const Relay& r)
 {
-    AssertLockHeld(cs_wallet); // mapKeyMetadata
+    AssertLockHeld(cs_wallet); // kd
     lCache[k] = r;
     return true;
 }
 
 bool CWallet::envCP0(const CPubKey &pubkey, string& rsaPrivKey)
 {
-    AssertLockHeld(cs_wallet); // mapKeyMetadata
-    if(mapKeyMetadata.count(pubkey.GetID()))
+    AssertLockHeld(cs_wallet); // kd
+    if(kd.count(pubkey.GetID()))
     {
-      if(! (mapKeyMetadata[pubkey.GetID()].patch.scale_() || mapKeyMetadata[pubkey.GetID()].patch.scale()))
+      if(! (kd[pubkey.GetID()].patch.scale_() || kd[pubkey.GetID()].patch.scale()))
       {
-        rsaPrivKey = mapKeyMetadata[pubkey.GetID()].patch.domainImage();
+        rsaPrivKey = kd[pubkey.GetID()].patch.domainImage();
         return true;
       }
     }
@@ -131,12 +131,12 @@ bool CWallet::envCP0(const CPubKey &pubkey, string& rsaPrivKey)
 
 bool CWallet::envCP1(const CPubKey &pubkey, string& rsaPubKey)
 {
-    AssertLockHeld(cs_wallet); // mapKeyMetadata
-   if(mapKeyMetadata.count(pubkey.GetID()))
+    AssertLockHeld(cs_wallet); // kd
+   if(kd.count(pubkey.GetID()))
    {
-    if(!(mapKeyMetadata[pubkey.GetID()].patch.scale_() || mapKeyMetadata[pubkey.GetID()].patch.scale()))
+    if(!(kd[pubkey.GetID()].patch.scale_() || kd[pubkey.GetID()].patch.scale()))
     {
-       rsaPubKey = mapKeyMetadata[pubkey.GetID()].patch.codomainImage();
+       rsaPubKey = kd[pubkey.GetID()].patch.codomainImage();
         return true;
     }
    }
@@ -146,29 +146,29 @@ bool CWallet::envCP1(const CPubKey &pubkey, string& rsaPubKey)
 
 bool CWallet::GetRandomKeyMetadata(const CPubKey& pubkey, vchType &r, string& r_)
 {
-    AssertLockHeld(cs_wallet); // mapKeyMetadata
+    AssertLockHeld(cs_wallet); // kd
 
-    r = mapKeyMetadata[pubkey.GetID()].random;
-    r_ = mapKeyMetadata[pubkey.GetID()].r;
+    r = kd[pubkey.GetID()].random;
+    r_ = kd[pubkey.GetID()].r;
 
     return true;
 }
 
 bool CWallet::SetRandomKeyMetadata(const CPubKey& pubkey, const vchType &r)
 {
-    AssertLockHeld(cs_wallet); // mapKeyMetadata
+    AssertLockHeld(cs_wallet); // kd
 
-    mapKeyMetadata[pubkey.GetID()].random = r;
-    mapKeyMetadata[pubkey.GetID()].r = stringFromVch(r);
+    kd[pubkey.GetID()].random = r;
+    kd[pubkey.GetID()].r = stringFromVch(r);
 
     return true;
 }
 
 bool CWallet::aes_(const CPubKey& pubkey, string& f, string& aesPlainBase64)
 {
-    AssertLockHeld(cs_wallet); // mapKeyMetadata
+    AssertLockHeld(cs_wallet); // kd
 
-    aesPlainBase64 = mapKeyMetadata[pubkey.GetID()].m[f];
+    aesPlainBase64 = kd[pubkey.GetID()].m[f];
     
     if(aesPlainBase64 != "")
       return true;
@@ -178,20 +178,20 @@ bool CWallet::aes_(const CPubKey& pubkey, string& f, string& aesPlainBase64)
 
 bool CWallet::aes(const CPubKey &pubkey, string& f, string& aes256KeyBase64)
 {
-    AssertLockHeld(cs_wallet); // mapKeyMetadata
+    AssertLockHeld(cs_wallet); // kd
 
-    mapKeyMetadata[pubkey.GetID()].m[f] = aes256KeyBase64;
+    kd[pubkey.GetID()].m[f] = aes256KeyBase64;
 
     return true;
 }
 
 bool CWallet::SetRSAMetadata(const CPubKey &pubkey)
 {
-    AssertLockHeld(cs_wallet); // mapKeyMetadata
+    AssertLockHeld(cs_wallet); // kd
 
-    if(mapKeyMetadata[pubkey.GetID()].patch.scale_() && mapKeyMetadata[pubkey.GetID()].patch.scale())
+    if(kd[pubkey.GetID()].patch.scale_() && kd[pubkey.GetID()].patch.scale())
     {
-      GenerateRSAKey(mapKeyMetadata[pubkey.GetID()].patch);
+      GenerateRSAKey(kd[pubkey.GetID()].patch);
 
       return true;
     }
@@ -2554,13 +2554,13 @@ bool CWallet::GetKeyFromPool(CPubKey& r1, CPubKey& r2, bool fAllowReuse)
       r2 = k2.vchPubKey;
       }
 
-    RayShade& rs7 = mapKeyMetadata[k1.vchPubKey.GetID()].rs_;
+    RayShade& rs7 = kd[k1.vchPubKey.GetID()].rs_;
     rs7.ctrlExternalDtx(RayShade::RAY_VTX, (uint160)(k2.vchPubKey.GetID()));
 
-    RayShade& rs1 = mapKeyMetadata[k2.vchPubKey.GetID()].rs_;
+    RayShade& rs1 = kd[k2.vchPubKey.GetID()].rs_;
     rs1.ctrlExternalDtx(RayShade::RAY_SET, (uint160)(k2.vchPubKey.GetID()));
 
-    if(!IsCrypted() && (!CWalletDB(strWalletFile).UpdateKey(k1.vchPubKey, mapKeyMetadata[k1.vchPubKey.GetID()]) || !CWalletDB(strWalletFile).UpdateKey(k2.vchPubKey, mapKeyMetadata[k2.vchPubKey.GetID()])))
+    if(!IsCrypted() && (!CWalletDB(strWalletFile).UpdateKey(k1.vchPubKey, kd[k1.vchPubKey.GetID()]) || !CWalletDB(strWalletFile).UpdateKey(k2.vchPubKey, kd[k2.vchPubKey.GetID()])))
       throw runtime_error("update vtx");
   }
   return true;
@@ -2874,12 +2874,12 @@ void CWallet::UpdatedTransaction(const uint256 &hashTx)
   }
 }
 
-void CWallet::GetKeyBirthTimes(std::map<CKeyID, int64_t> &mapKeyBirth) const {
-  AssertLockHeld(cs_wallet); // mapKeyMetadata
+void CWallet::kt(std::map<CKeyID, int64_t> &mapKeyBirth) const {
+  AssertLockHeld(cs_wallet); // kd
   mapKeyBirth.clear();
 
   // get birth times for keys with metadata
-  for (std::map<CKeyID, CKeyMetadata>::const_iterator it = mapKeyMetadata.begin(); it != mapKeyMetadata.end(); it++)
+  for (std::map<CKeyID, CKeyMetadata>::const_iterator it = kd.begin(); it != kd.end(); it++)
       if (it->second.nCreateTime)
 	  mapKeyBirth[it->first] = it->second.nCreateTime;
 

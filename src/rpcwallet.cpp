@@ -209,10 +209,27 @@ Value sr71(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() > 1)
         throw runtime_error(
-            "shade [account] ray id\n"
+            "sr71 tunnel list\n"
             );
 
     Array oRes;
+
+    EnsureWalletIsUnlocked();
+    std::map<CKeyID, int64_t> mk;
+    pwalletMain->kt(mk);
+
+    for(std::map<CKeyID, int64_t>::const_iterator it = mk.begin(); it != mk.end(); it++)
+    {
+      CKeyID ck = it->first;
+      RayShade& r = pwalletMain->kd[ck].rs_;
+      if(r.ctrlExternalAngle())
+      {
+        Object obj;
+        obj.push_back(Pair("vertex point", CBitcoinAddress(ck).ToString()));
+        obj.push_back(Pair("vertex i", r.ctrlIndex()));
+        oRes.push_back(obj);
+      }
+    }
 
     return oRes; 
 }

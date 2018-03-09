@@ -139,7 +139,7 @@ Value importprivkey(const Array& params, bool fHelp)
         if (pwalletMain->HaveKey(vchAddress))
             return Value::null;
 
-        pwalletMain->mapKeyMetadata[vchAddress].nCreateTime = 1;
+        pwalletMain->kd[vchAddress].nCreateTime = 1;
 
         if (!pwalletMain->AddKey(key))
             throw JSONRPCError(RPC_WALLET_ERROR, "Error adding key to wallet");
@@ -216,7 +216,7 @@ Value importwallet(const Array& params, bool fHelp)
             fGood = false;
             continue;
         }
-        pwalletMain->mapKeyMetadata[keyid].nCreateTime = nTime;
+        pwalletMain->kd[keyid].nCreateTime = nTime;
         if (fLabel)
             pwalletMain->SetAddressBookName(keyid, strLabel);
         nTimeBegin = std::min(nTimeBegin, nTime);
@@ -288,7 +288,7 @@ Value dumpwallet(const Array& params, bool fHelp)
 
     std::set<CKeyID> setKeyPool;
 
-    pwalletMain->GetKeyBirthTimes(mapKeyBirth);
+    pwalletMain->kt(mapKeyBirth);
 
     pwalletMain->GetAllReserveKeys(setKeyPool);
 

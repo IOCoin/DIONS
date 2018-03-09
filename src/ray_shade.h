@@ -35,6 +35,14 @@ class RayShade : InterfaceCrypt
     { 
       this->l7_ = i; this->o_ = o; 
     }
+    inline virtual bool ctrlExternalAngle() 
+    { 
+      return this->l7_ == RAY_VTX;
+    }
+    inline virtual int ctrlIndex() 
+    { 
+      return this->l7_ ;
+    }
 
     inline virtual void ctrlDtx(string& o) { this->vtx_ = o; }
 
@@ -42,6 +50,7 @@ class RayShade : InterfaceCrypt
     (
         READWRITE(this->tgt_);
         READWRITE(this->o_);
+        READWRITE(this->l7_);
         READWRITE(this->vtx_);
     )
 
