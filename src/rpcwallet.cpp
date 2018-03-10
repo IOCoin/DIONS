@@ -221,12 +221,23 @@ Value sr71(const Array& params, bool fHelp)
     for(std::map<CKeyID, int64_t>::const_iterator it = mk.begin(); it != mk.end(); it++)
     {
       CKeyID ck = it->first;
-      RayShade& r = pwalletMain->kd[ck].rs_;
-      if(r.ctrlExternalAngle())
+      RayShade& r1 = pwalletMain->kd[ck].rs_;
+      if(r1.ctrlExternalAngle())
       {
         Object obj;
         obj.push_back(Pair("vertex point", CBitcoinAddress(ck).ToString()));
-        obj.push_back(Pair("vertex i", r.ctrlIndex()));
+        obj.push_back(Pair("vertex i", r1.ctrlIndex()));
+
+        for(std::map<CKeyID, int64_t>::const_iterator it = mk.begin(); it != mk.end(); it++)
+        {
+          CKeyID ck = it->first;
+          RayShade& r = pwalletMain->kd[ck].rs_;
+          if(!r.ctrlExternalAngle() && r.ctrlPath() == r1.ctrlPath())
+          {
+            obj.push_back(Pair("ray id", CBitcoinAddress(ck).ToString()));
+          }
+        }
+
         oRes.push_back(obj);
       }
     }

@@ -43,6 +43,10 @@ class RayShade : InterfaceCrypt
     { 
       return this->l7_ ;
     }
+    inline virtual uint160 ctrlPath() 
+    { 
+      return this->o_ ;
+    }
 
     inline virtual void ctrlDtx(string& o) { this->vtx_ = o; }
 
