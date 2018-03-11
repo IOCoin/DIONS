@@ -2280,3 +2280,13 @@ Value rmtx(const Array& params, bool fHelp)
     return tx.GetHash().GetHex();
 }
 
+Value rfl(const Array& params, bool fHelp)
+{
+    if (fHelp || params.size() < 2 || params.size() > 4)
+        throw runtime_error(
+            "rfl <target> <scale>\n"
+            + HelpRequiringPassphrase());
+
+    Array oRes;
+    return oRes;
+}

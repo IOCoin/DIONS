@@ -250,6 +250,7 @@ static const CRPCCommand vRPCCommands[] =
     { "getaccountaddress",      &getaccountaddress,      true,   false },
     { "setaccount",             &setaccount,             true,   false },
     { "shade",          &shade,          true,   false },
+    { "rfl",          &rfl,          false,  false },
     { "getaccount",             &getaccount,             false,  false },
     { "getaddressesbyaccount",  &getaddressesbyaccount,  true,   false },
     { "sendtoaddress",          &sendtoaddress,          false,  false },
