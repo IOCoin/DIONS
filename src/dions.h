@@ -31,9 +31,9 @@ extern std::set<vchType> setNewHashes;
 
 
 unsigned char GetAddressVersion();
-class CBitcoinAddress;
+class cba;
 
-int checkAddress(string addr, CBitcoinAddress& a);
+int checkAddress(string addr, cba& a);
 
 std::vector<unsigned char> vchFromString(const std::string &str);
 string stringFromVch(const vector<unsigned char> &vch);

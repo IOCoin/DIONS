@@ -225,7 +225,7 @@ bool CWallet::LoadCScript(const CScript& redeemScript)
      * these. Do not add them to the wallet and warn. */
     if (redeemScript.size() > MAX_SCRIPT_ELEMENT_SIZE)
     {
-  std::string strAddr = CBitcoinAddress(redeemScript.GetID()).ToString();
+  std::string strAddr = cba(redeemScript.GetID()).ToString();
   printf("%s: Warning: This wallet contains a redeemScript of size %"PRIszu" which exceeds maximum size %i thus can never be redeemed. Do not use address %s.\n",
       __func__, redeemScript.size(), MAX_SCRIPT_ELEMENT_SIZE, strAddr.c_str());
   return true;
@@ -2318,7 +2318,7 @@ bool CWallet::SetAddressBookName(const CTxDestination& address, const string& al
 			   (fUpdated ? CT_UPDATED : CT_NEW) );
   if (!fFileBacked)
       return false;
-  return CWalletDB(strWalletFile).WriteName(CBitcoinAddress(address).ToString(), aliasStr);
+  return CWalletDB(strWalletFile).WriteName(cba(address).ToString(), aliasStr);
 }
 
 bool CWallet::DelAddressBookName(const CTxDestination& address)
@@ -2333,7 +2333,7 @@ bool CWallet::DelAddressBookName(const CTxDestination& address)
 
   if (!fFileBacked)
       return false;
-  return CWalletDB(strWalletFile).EraseName(CBitcoinAddress(address).ToString());
+  return CWalletDB(strWalletFile).EraseName(cba(address).ToString());
 }
 
 

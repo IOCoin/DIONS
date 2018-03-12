@@ -169,7 +169,7 @@ Value getnewaddress(const Array& params, bool fHelp)
 
     pwalletMain->SetAddressBookName(keyID, strAccount);
 
-    return CBitcoinAddress(keyID).ToString();
+    return cba(keyID).ToString();
 }
 
 Value shade(const Array& params, bool fHelp)
@@ -190,8 +190,8 @@ Value shade(const Array& params, bool fHelp)
       throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
    
     //Verify - orange 
-    oRes.push_back(CBitcoinAddress(k1.GetID()).ToString());
-    oRes.push_back(CBitcoinAddress(k2.GetID()).ToString());
+    oRes.push_back(cba(k1.GetID()).ToString());
+    oRes.push_back(cba(k2.GetID()).ToString());
     vector<unsigned char> k;
     k.reserve(k1.Raw().size() + k2.Raw().size());
     vchType a = k1.Raw();
@@ -226,7 +226,7 @@ Value sr71(const Array& params, bool fHelp)
       if(r1.ctrlExternalAngle())
       {
         Object obj;
-        obj.push_back(Pair("vertex point", CBitcoinAddress(ck).ToString()));
+        obj.push_back(Pair("vertex point", cba(ck).ToString()));
         obj.push_back(Pair("vertex i", r1.ctrlIndex()));
 
         for(std::map<CKeyID, int64_t>::const_iterator it = mk.begin(); it != mk.end(); it++)
@@ -235,7 +235,7 @@ Value sr71(const Array& params, bool fHelp)
           RayShade& r = pwalletMain->kd[ck].rs_;
           if(!r.ctrlExternalAngle() && r.ctrlPath() == r1.ctrlPath())
           {
-            obj.push_back(Pair("ray id", CBitcoinAddress(ck).ToString()));
+            obj.push_back(Pair("ray id", cba(ck).ToString()));
           }
         }
 
@@ -247,7 +247,7 @@ Value sr71(const Array& params, bool fHelp)
 }
 
 
-CBitcoinAddress GetAccountAddress(string strAccount, bool bForceNew=false)
+cba GetAccountAddress(string strAccount, bool bForceNew=false)
 {
     CWalletDB walletdb(pwalletMain->strWalletFile);
 
@@ -282,7 +282,7 @@ CBitcoinAddress GetAccountAddress(string strAccount, bool bForceNew=false)
         walletdb.WriteAccount(strAccount, account);
     }
 
-    return CBitcoinAddress(account.vchPubKey.GetID());
+    return cba(account.vchPubKey.GetID());
 }
 
 Value getaccountaddress(const Array& params, bool fHelp)
@@ -311,7 +311,7 @@ Value setaccount(const Array& params, bool fHelp)
             "setaccount <iocoinaddress> <account>\n"
             "Sets the account associated with the given address.");
 
-    CBitcoinAddress address(params[0].get_str());
+    cba address(params[0].get_str());
     if (!address.IsValid())
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid I/OCoin address");
 
@@ -341,7 +341,7 @@ Value getaccount(const Array& params, bool fHelp)
             "getaccount <iocoinaddress>\n"
             "Returns the account associated with the given address.");
 
-    CBitcoinAddress address(params[0].get_str());
+    cba address(params[0].get_str());
     if (!address.IsValid())
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid I/OCoin address");
 
@@ -364,9 +364,9 @@ Value getaddressesbyaccount(const Array& params, bool fHelp)
 
     // Find all addresses that have the given account
     Array ret;
-    BOOST_FOREACH(const PAIRTYPE(CBitcoinAddress, string)& item, pwalletMain->mapAddressBook)
+    BOOST_FOREACH(const PAIRTYPE(cba, string)& item, pwalletMain->mapAddressBook)
     {
-        const CBitcoinAddress& address = item.first;
+        const cba& address = item.first;
         const string& aliasStr = item.second;
         if (aliasStr == strAccount)
             ret.push_back(address.ToString());
@@ -383,7 +383,7 @@ Value addresstodion(const Array& params, bool fHelp)
     string address = params[0].get_str();
 
     ln1Db->filter();
-    CBitcoinAddress address__(address);
+    cba address__(address);
     if (!address__.IsValid())
       throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid I/OCoin address");
 
@@ -499,7 +499,7 @@ Value sendtoaddress(const Array& params, bool fHelp)
             + HelpRequiringPassphrase());
 
     string addrStr = params[0].get_str();
-    CBitcoinAddress address(addrStr);
+    cba address(addrStr);
     if(!address.IsValid())
     {
       vector<AliasIndex> vtxPos;
@@ -566,17 +566,17 @@ Value listaddressgroupings(const Array& params, bool fHelp)
         BOOST_FOREACH(CTxDestination address, grouping)
         {
             Array addressInfo;
-            addressInfo.push_back(CBitcoinAddress(address).ToString());
+            addressInfo.push_back(cba(address).ToString());
             addressInfo.push_back(ValueFromAmount(balances[address]));
             {
                 LOCK(pwalletMain->cs_wallet);
-                if (pwalletMain->mapAddressBook.find(CBitcoinAddress(address).Get()) != pwalletMain->mapAddressBook.end())
-                    addressInfo.push_back(pwalletMain->mapAddressBook.find(CBitcoinAddress(address).Get())->second);
+                if (pwalletMain->mapAddressBook.find(cba(address).Get()) != pwalletMain->mapAddressBook.end())
+                    addressInfo.push_back(pwalletMain->mapAddressBook.find(cba(address).Get())->second);
 
                 string pub_k;
                 string priv_k;
                 CKeyID keyID;
-                CBitcoinAddress(address).GetKeyID(keyID);
+                cba(address).GetKeyID(keyID);
 
                 CPubKey vchPubKey;
                 pwalletMain->GetPubKey(keyID, vchPubKey);
@@ -604,7 +604,7 @@ Value signmessage(const Array& params, bool fHelp)
     string strAddress = params[0].get_str();
     string strMessage = params[1].get_str();
 
-    CBitcoinAddress addr(strAddress);
+    cba addr(strAddress);
     if (!addr.IsValid())
         throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
 
@@ -638,7 +638,7 @@ Value verifymessage(const Array& params, bool fHelp)
     string strSign     = params[1].get_str();
     string strMessage  = params[2].get_str();
 
-    CBitcoinAddress addr(strAddress);
+    cba addr(strAddress);
     if (!addr.IsValid())
         throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
 
@@ -687,7 +687,7 @@ Value xtu_url__(const string& s)
       throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "does not exist.");
     }
 
-    CBitcoinAddress address = CBitcoinAddress(target);
+    cba address = cba(target);
 
     CScript scriptPubKey;
     if (!address.IsValid())
@@ -745,7 +745,7 @@ Value xtu_url(const Array& params, bool fHelp)
       throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "does not exist.");
     }
 
-    CBitcoinAddress address = CBitcoinAddress(target);
+    cba address = cba(target);
 
     CScript scriptPubKey;
     if (!address.IsValid())
@@ -784,7 +784,7 @@ Value getreceivedbyaddress(const Array& params, bool fHelp)
             "Returns the total amount received by <iocoinaddress> in transactions with at least [minconf] confirmations.");
 
     // Bitcoin address
-    CBitcoinAddress address = CBitcoinAddress(params[0].get_str());
+    cba address = cba(params[0].get_str());
     CScript scriptPubKey;
     if (!address.IsValid())
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid I/OCoin address");
@@ -822,7 +822,7 @@ Value gra(const Array& params, bool fHelp)
             "Returns the total amount received by <iocoinaddress> in transactions with at least [minconf] confirmations.");
 
     // Bitcoin address
-    CBitcoinAddress address = CBitcoinAddress(params[0].get_str());
+    cba address = cba(params[0].get_str());
     CScript scriptPubKey;
     if (!address.IsValid())
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid I/OCoin address");
@@ -1063,7 +1063,7 @@ Value sendfrom(const Array& params, bool fHelp)
             + HelpRequiringPassphrase());
 
     string strAccount = AccountFromValue(params[0]);
-    CBitcoinAddress address(params[1].get_str());
+    cba address(params[1].get_str());
     if (!address.IsValid())
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid I/OCoin address");
     int64_t nAmount = AmountFromValue(params[2]);
@@ -1123,13 +1123,13 @@ Value sendmany(const Array& params, bool fHelp)
     if (params.size() > 4 && params[4].type() != null_type && !params[4].get_str().empty())
         strTxInfo = params[4].get_str();
 
-    set<CBitcoinAddress> setAddress;
+    set<cba> setAddress;
     vector<pair<CScript, int64_t> > vecSend;
 
     int64_t totalAmount = 0;
     BOOST_FOREACH(const Pair& s, sendTo)
     {
-        CBitcoinAddress address(s.name_);
+        cba address(s.name_);
         if (!address.IsValid())
             throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, string("Invalid I/OCoin address: ")+s.name_);
 
@@ -1200,7 +1200,7 @@ Value addmultisigaddress(const Array& params, bool fHelp)
         const std::string& ks = keys[i].get_str();
 
         // Case 1: Bitcoin address and we have full public key:
-        CBitcoinAddress address(ks);
+        cba address(ks);
         if (address.IsValid())
         {
             CKeyID keyID;
@@ -1236,7 +1236,7 @@ Value addmultisigaddress(const Array& params, bool fHelp)
         throw runtime_error("AddCScript() failed");
 
     pwalletMain->SetAddressBookName(innerID, strAccount);
-    return CBitcoinAddress(innerID).ToString();
+    return cba(innerID).ToString();
 }
 
 Value addredeemscript(const Array& params, bool fHelp)
@@ -1261,7 +1261,7 @@ Value addredeemscript(const Array& params, bool fHelp)
         throw runtime_error("AddCScript() failed");
 
     pwalletMain->SetAddressBookName(innerID, strAccount);
-    return CBitcoinAddress(innerID).ToString();
+    return cba(innerID).ToString();
 }
 
 struct tallyitem
@@ -1288,7 +1288,7 @@ Value ListReceived(const Array& params, bool fByAccounts)
         fIncludeEmpty = params[1].get_bool();
 
     // Tally
-    map<CBitcoinAddress, tallyitem> mapTally;
+    map<cba, tallyitem> mapTally;
     for (map<uint256, CWalletTx>::iterator it = pwalletMain->mapWallet.begin(); it != pwalletMain->mapWallet.end(); ++it)
     {
         const CWalletTx& wtx = (*it).second;
@@ -1315,11 +1315,11 @@ Value ListReceived(const Array& params, bool fByAccounts)
     // Reply
     Array ret;
     map<string, tallyitem> mapAccountTally;
-    BOOST_FOREACH(const PAIRTYPE(CBitcoinAddress, string)& item, pwalletMain->mapAddressBook)
+    BOOST_FOREACH(const PAIRTYPE(cba, string)& item, pwalletMain->mapAddressBook)
     {
-        const CBitcoinAddress& address = item.first;
+        const cba& address = item.first;
         const string& strAccount = item.second;
-        map<CBitcoinAddress, tallyitem>::iterator it = mapTally.find(address);
+        map<cba, tallyitem>::iterator it = mapTally.find(address);
         if (it == mapTally.end() && !fIncludeEmpty)
             continue;
 
@@ -1400,7 +1400,7 @@ Value listreceivedbyaccount(const Array& params, bool fHelp)
 
 static void MaybePushAddress(Object & entry, const CTxDestination &dest)
 {
-    CBitcoinAddress addr;
+    cba addr;
     if (addr.Set(dest))
         entry.push_back(Pair("address", addr.ToString()));
 }
@@ -2069,7 +2069,7 @@ public:
         obj.push_back(Pair("hex", HexStr(subscript.begin(), subscript.end())));
         Array a;
         BOOST_FOREACH(const CTxDestination& addr, addresses)
-            a.push_back(CBitcoinAddress(addr).ToString());
+            a.push_back(cba(addr).ToString());
         obj.push_back(Pair("addresses", a));
         if (whichType == TX_MULTISIG)
             obj.push_back(Pair("sigsrequired", nRequired));
@@ -2085,7 +2085,7 @@ Value validateaddress(const Array& params, bool fHelp)
             "validateaddress <iocoinaddress>\n"
             "Return information about <iocoinaddress>.");
 
-    CBitcoinAddress address(params[0].get_str());
+    cba address(params[0].get_str());
     bool isValid = address.IsValid();
 
     Object ret;
@@ -2121,7 +2121,7 @@ Value validatepubkey(const Array& params, bool fHelp)
     bool isCompressed = pubKey.IsCompressed();
     CKeyID keyID = pubKey.GetID();
 
-    CBitcoinAddress address;
+    cba address;
     address.Set(keyID);
 
     Object ret;
@@ -2304,8 +2304,8 @@ Value rfl(const Array& params, bool fHelp)
       CPubKey k1_(k1);
       CPubKey k2_(k2);
       Object obj;
-      obj.push_back(Pair("vertex point", CBitcoinAddress(k1_.GetID()).ToString()));
-      obj.push_back(Pair("ray id", CBitcoinAddress(k2_.GetID()).ToString()));
+      obj.push_back(Pair("vertex point", cba(k1_.GetID()).ToString()));
+      obj.push_back(Pair("ray id", cba(k2_.GetID()).ToString()));
       oRes.push_back(obj);
     }
 
