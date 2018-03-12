@@ -201,6 +201,7 @@ Value shade(const Array& params, bool fHelp)
     if(k.size() == 0)
       throw runtime_error("k size " + k.size());
     string s1 = EncodeBase58(&k[0], &k[0] + k.size());
+
     oRes.push_back(s1);
     return oRes; 
 }
@@ -2288,5 +2289,25 @@ Value rfl(const Array& params, bool fHelp)
             + HelpRequiringPassphrase());
 
     Array oRes;
+   
+    string ray_ = params[0].get_str();
+    vector<unsigned char> k;
+    k.reserve(0x42);
+    if(DecodeBase58(ray_.c_str(), k))
+    {
+      vector<unsigned char> k1;
+      vector<unsigned char> k2;
+      k1.reserve(0x21);
+      k2.reserve(0x21);
+      k1.insert(k1.end(), k.begin(), k.begin() + 0x21);
+      k2.insert(k2.end(), k.begin() + 0x21, k.end());
+      CPubKey k1_(k1);
+      CPubKey k2_(k2);
+      Object obj;
+      obj.push_back(Pair("vertex point", CBitcoinAddress(k1_.GetID()).ToString()));
+      obj.push_back(Pair("ray id", CBitcoinAddress(k2_.GetID()).ToString()));
+      oRes.push_back(obj);
+    }
+
     return oRes;
 }
