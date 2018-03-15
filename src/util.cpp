@@ -264,13 +264,10 @@ bool DecryptMessageAES(const string& encryptedMsg, string& message, vector<unsig
 bool EncryptMessage(const string& rsaPubKey, const string& message, string& encryptedMsg)
 {
   const int KEY_LENGTH=4096;
-  char *err;
 
   const char* pubKeyStr = rsaPubKey.c_str();
 
-
   const unsigned char* msg = reinterpret_cast<const unsigned char*>(message.c_str());
-
 
   RSA *rsa= NULL;
   BIO *keybio ;
@@ -284,13 +281,14 @@ bool EncryptMessage(const string& rsaPubKey, const string& message, string& encr
 
   unsigned char encrypted[KEY_LENGTH/8] = { };
 
-  err = (char*)malloc(130);
   int result = RSA_public_encrypt(message.size(),msg,encrypted,rsa,RSA_PKCS1_OAEP_PADDING);
   if(result != 0)
   {
      ERR_load_crypto_strings();
+     char* err = (char*)malloc(0x100);
      ERR_error_string(ERR_get_error(), err);
      fprintf(stderr, "Error encrypting message: %s\n", err);
+     free(err);
   }
 
 
@@ -1651,4 +1649,20 @@ int atod(const std::string& addr, std::string& d)
       return -1;
 
     return 0; 
+}
+
+int fqa__7(vector<unsigned char>& a)
+{
+  RandAddSeedPerfmon();
+  int r = RAND_bytes((unsigned char*)&a[0], 0x20);
+ 
+  if(r != 1)
+  {
+    char* err = (char*)malloc(0x100);
+    ERR_error_string(ERR_get_error(), err);
+    fprintf(stderr, "Error : %s\n", err);
+    free(err);
+  }
+ 
+  return r;
 }

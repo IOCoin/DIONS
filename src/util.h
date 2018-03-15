@@ -151,6 +151,8 @@ bool DecryptMessage(const std::string& rsaPrivKey, const std::string& encrpyted,
 void GenerateRSAKey(CoordinateVector& p);
 void GenerateAESKey(vchType& rsaPubKey);
 
+int fqa__7(vector<unsigned char>&);
+
 void RandAddSeed();
 void RandAddSeedPerfmon();
 int ATTR_WARN_PRINTF(1,2) OutputDebugStringF(const char* pszFormat, ...);
