@@ -2309,12 +2309,24 @@ Value rfl(const Array& params, bool fHelp)
 
       vector<unsigned char> fq_;
       fq_.resize(0x20);
+      vector<unsigned char> fq1_;
+      fq1_.resize(0x20);
+      vector<unsigned char> fq2_;
+      fq2_.resize(0x21);
       int rIndex = fqa__7(fq_);
       if(rIndex != 1)
         throw runtime_error("rfl fq error");
 
-      __pq__ v = { fq_, k1, k2, fq_, fq_ };
+      __pq__ v = { fq_, k1, k2, fq1_, fq2_ };
 
+      if(reflection(v) != -1)
+      {
+        CPubKey pivot(v.__fq5);
+        if(!pivot.IsValid())
+          throw runtime_error("rfl pivot point");
+
+        obj.push_back(Pair("pivot point", cba(pivot.GetID()).ToString()));
+      }
       
       oRes.push_back(obj);
     }

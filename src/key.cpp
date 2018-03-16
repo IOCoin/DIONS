@@ -9,6 +9,42 @@
 
 #include "key.h"
 
+struct __fbase__
+{
+  BIGNUM* _g1;
+  EC_POINT* _g0;
+  EC_POINT* _kvtx;
+  EC_POINT* _o1;
+  EC_POINT* _k;
+  BIGNUM* _s;
+  BIGNUM* _q1;
+  BIGNUM* _l1;
+  BIGNUM* _q;
+  BIGNUM* _t;
+  BN_CTX* ctx;
+};
+
+void __fbase__x(__fbase__* x)
+{
+  BN_free(x->_g1);
+  EC_POINT_free(x->_g0);
+  EC_POINT_free(x->_kvtx);
+  EC_POINT_free(x->_o1);
+  EC_POINT_free(x->_k);
+  BN_free(x->_s);
+  BN_free(x->_q1);
+  BN_free(x->_l1);
+  BN_free(x->_q);
+  BN_free(x->_t);
+  BN_CTX_free(x->ctx);
+}
+
+void __vtx_clean(__fbase__* x, EC_GROUP* g)
+{
+  __fbase__x(x);
+  EC_GROUP_free(g);
+}
+
 // Generate a private key from just the secret parameter
 int EC_KEY_regenerate_key(EC_KEY *eckey, BIGNUM *priv_key)
 {
@@ -474,7 +510,145 @@ bool ECC_InitSanityCheck() {
     return true;
 }
 
-int reflection(__pq__& t)
+int reflection(__pq__& v)
 {
-  return 0;
+  int r = 0;
+  std::vector<unsigned char> vt_;
+  
+  __fbase__ __fb; 
+    
+  EC_GROUP* group = EC_GROUP_new_by_curve_name(NID_secp256k1);
+    
+  if (!group)
+    throw runtime_error("reflection ec group");
+    
+  if (!(__fb.ctx = BN_CTX_new()))
+  {
+    r = 1;
+    __vtx_clean(&__fb, group);
+    return r;
+  };
+    
+  if (!(__fb._t = BN_bin2bn(&v.__fq1[0], 0x20, BN_new())))
+  {
+    r = 1;
+    __vtx_clean(&__fb, group);
+    return r;
+  };
+    
+  if (!(__fb._s = BN_bin2bn(&v.__fq9[0], v.__fq9.size(), BN_new())))
+  {
+    r = 1;
+    __vtx_clean(&__fb, group);
+    return r;
+  };
+    
+  if (!(__fb._k = EC_POINT_bn2point(group, __fb._s, NULL, __fb.ctx)))
+  {
+    r = 1;
+    __vtx_clean(&__fb, group);
+    return r;
+  };
+    
+  if (!EC_POINT_mul(group, __fb._k, NULL, __fb._k, __fb._t, __fb.ctx))
+  {
+    r = 1;
+    __vtx_clean(&__fb, group);
+    return r;
+  };
+    
+  if (!(__fb._q = EC_POINT_point2bn(group, __fb._k, POINT_CONVERSION_COMPRESSED, BN_new(), __fb.ctx)))
+  {
+    r = 1;
+    __vtx_clean(&__fb, group);
+    return r;
+  };
+    
+    
+  vt_.resize(0x21);
+  if (BN_num_bytes(__fb._q) != 0x21
+    || BN_bn2bin(__fb._q, &vt_[0]) != 0x21)
+  {
+    r = 1;
+    __vtx_clean(&__fb, group);
+    return r;
+  };
+    
+  SHA256(&vt_[0], vt_.size(), &v.__fq2[0]);
+    
+  if (!(__fb._l1 = BN_bin2bn(&v.__fq2[0], 0x20, BN_new())))
+  {
+    r = 1;
+    __vtx_clean(&__fb, group);
+    return r;
+  };
+    
+  if (!(__fb._o1 = EC_POINT_new(group)))
+  {
+    r = 1;
+    __vtx_clean(&__fb, group);
+    return r;
+  };
+    
+  if (!EC_POINT_mul(group, __fb._o1, __fb._l1, NULL, NULL, __fb.ctx))
+  {
+    r = 1;
+    __vtx_clean(&__fb, group);
+    return r;
+  };
+    
+  if (!(__fb._q1 = BN_bin2bn(&v.__fq0[0], v.__fq0.size(), BN_new())))
+  {
+    r = 1;
+    __vtx_clean(&__fb, group);
+    return r;
+  };
+    
+    
+  if (!(__fb._kvtx = EC_POINT_bn2point(group, __fb._q1, NULL, __fb.ctx)))
+  {
+    r = 1;
+    __vtx_clean(&__fb, group);
+    return r;
+  };
+    
+  if (!EC_POINT_mul(group, __fb._o1, __fb._l1, NULL, NULL, __fb.ctx))
+  {
+    r = 1;
+    __vtx_clean(&__fb, group);
+    return r;
+  };
+    
+  if (!(__fb._g0 = EC_POINT_new(group)))
+  {
+    r = 1;
+    __vtx_clean(&__fb, group);
+    return r;
+  };
+    
+  if (!EC_POINT_add(group, __fb._g0, __fb._kvtx, __fb._o1, __fb.ctx))
+  {
+    r = 1;
+    __vtx_clean(&__fb, group);
+    return r;
+  };
+    
+  if (!(__fb._g1 = EC_POINT_point2bn(group, __fb._g0, POINT_CONVERSION_COMPRESSED, BN_new(), __fb.ctx)))
+  {
+    r = 1;
+    __vtx_clean(&__fb, group);
+    return r;
+  };
+    
+    
+  v.__fq5.resize(0x21);
+  if (BN_num_bytes(__fb._g1) != 0x21
+    || BN_bn2bin(__fb._g1, &v.__fq5[0]) != 0x21)
+  {
+    r = 1;
+    __vtx_clean(&__fb, group);
+    return r;
+  };
+    
+  return r;
 }
