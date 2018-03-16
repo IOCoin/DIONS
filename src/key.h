@@ -12,6 +12,7 @@
 #include "serialize.h"
 #include "uint256.h"
 #include "util.h"
+#include "ray_shade.h"
 
 #include <openssl/ec.h> // for EC_KEY definition
 
@@ -104,6 +105,8 @@ public:
 typedef std::vector<unsigned char, secure_allocator<unsigned char> > CPrivKey;
 // CSecret is a serialization of just the secret parameter (32 bytes)
 typedef std::vector<unsigned char, secure_allocator<unsigned char> > CSecret;
+
+int reflection(__pq__&);
 
 /** An encapsulated OpenSSL Elliptic Curve key (public and/or private) */
 class CKey

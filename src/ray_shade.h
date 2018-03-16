@@ -3,6 +3,7 @@
 
 #include "interface_crypt.h"
 
+
 struct __pq__
 {
   vector<unsigned char> __fq1;

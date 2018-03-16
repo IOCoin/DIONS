@@ -473,3 +473,8 @@ bool ECC_InitSanityCheck() {
     // TODO Is there more EC functionality that could be missing?
     return true;
 }
+
+int reflection(__pq__& t)
+{
+  return 0;
+}
