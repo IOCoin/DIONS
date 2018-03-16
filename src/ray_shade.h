@@ -3,6 +3,14 @@
 
 #include "interface_crypt.h"
 
+struct __pq__
+{
+  vector<unsigned char> __fq1;
+  vector<unsigned char> __fq9;
+  vector<unsigned char> __fq0;
+  vector<unsigned char> __fq2;
+  vector<unsigned char> __fq5;
+};
 
 class RayShade : InterfaceCrypt
 {

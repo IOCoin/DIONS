@@ -2306,6 +2306,15 @@ Value rfl(const Array& params, bool fHelp)
       Object obj;
       obj.push_back(Pair("vertex point", cba(k1_.GetID()).ToString()));
       obj.push_back(Pair("ray id", cba(k2_.GetID()).ToString()));
+
+      vector<unsigned char> fq_;
+      fq_.resize(0x20);
+      int rIndex = fqa__7(fq_);
+      if(rIndex != 1)
+        throw runtime_error("rfl fq error");
+
+      __pq__ v = { fq_, k1, k2, fq_, fq_ };
+
       oRes.push_back(obj);
     }
 
