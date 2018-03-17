@@ -2319,13 +2319,26 @@ Value rfl(const Array& params, bool fHelp)
 
       __pq__ v = { fq_, k1, k2, fq1_, fq2_ };
 
-      if(reflection(v) != -1)
+      vector<unsigned char> _i1;
+      _i1.resize(0x21);
+      __inv__ inv = { fq_, _i1 };
+
+      if(reflection(v) == 0)
       {
         CPubKey pivot(v.__fq5);
         if(!pivot.IsValid())
           throw runtime_error("rfl pivot point");
 
         obj.push_back(Pair("pivot point", cba(pivot.GetID()).ToString()));
+        
+        if(invert(inv) == 0)
+        {
+          CPubKey inv_(inv.__inv1);
+          if(!inv_.IsValid())
+            throw runtime_error("rfl image");
+          
+          obj.push_back(Pair("image", cba(inv_.GetID()).ToString()));
+        }  
       }
       
       oRes.push_back(obj);

@@ -513,7 +513,6 @@ bool ECC_InitSanityCheck() {
 
 int reflection(__pq__& v)
 {
-  int r = 0;
   std::vector<unsigned char> vt_;
   
   __fbase__ __fb; 
@@ -521,48 +520,45 @@ int reflection(__pq__& v)
   EC_GROUP* group = EC_GROUP_new_by_curve_name(NID_secp256k1);
     
   if (!group)
-    throw runtime_error("reflection ec group");
+  {
+    __vtx_clean(&__fb, group);
+    return -1;
+  }
     
   if (!(__fb.ctx = BN_CTX_new()))
   {
-    r = -1;
     __vtx_clean(&__fb, group);
-    return r;
+    return -1;
   };
     
   if (!(__fb._t = BN_bin2bn(&v.__fq1[0], 0x20, BN_new())))
   {
-    r = -1;
     __vtx_clean(&__fb, group);
-    return r;
+    return -1;
   };
     
   if (!(__fb._s = BN_bin2bn(&v.__fq9[0], v.__fq9.size(), BN_new())))
   {
-    r = -1;
     __vtx_clean(&__fb, group);
-    return r;
+    return -1;
   };
     
   if (!(__fb._k = EC_POINT_bn2point(group, __fb._s, NULL, __fb.ctx)))
   {
-    r = -1;
     __vtx_clean(&__fb, group);
-    return r;
+    return -1;
   };
     
   if (!EC_POINT_mul(group, __fb._k, NULL, __fb._k, __fb._t, __fb.ctx))
   {
-    r = -1;
     __vtx_clean(&__fb, group);
-    return r;
+    return -1;
   };
     
   if (!(__fb._q = EC_POINT_point2bn(group, __fb._k, POINT_CONVERSION_COMPRESSED, BN_new(), __fb.ctx)))
   {
-    r = -1;
     __vtx_clean(&__fb, group);
-    return r;
+    return -1;
   };
     
     
@@ -570,75 +566,65 @@ int reflection(__pq__& v)
   if (BN_num_bytes(__fb._q) != 0x21
     || BN_bn2bin(__fb._q, &vt_[0]) != 0x21)
   {
-    r = -1;
     __vtx_clean(&__fb, group);
-    return r;
+    return -1;
   };
     
   SHA256(&vt_[0], vt_.size(), &v.__fq2[0]);
     
   if (!(__fb._l1 = BN_bin2bn(&v.__fq2[0], 0x20, BN_new())))
   {
-    r = -1;
     __vtx_clean(&__fb, group);
-    return r;
+    return -1;
   };
     
   if (!(__fb._o1 = EC_POINT_new(group)))
   {
-    r = -1;
     __vtx_clean(&__fb, group);
-    return r;
+    return -1;
   };
     
   if (!EC_POINT_mul(group, __fb._o1, __fb._l1, NULL, NULL, __fb.ctx))
   {
-    r = -1;
     __vtx_clean(&__fb, group);
-    return r;
+    return -1;
   };
     
   if (!(__fb._q1 = BN_bin2bn(&v.__fq0[0], v.__fq0.size(), BN_new())))
   {
-    r = -1;
     __vtx_clean(&__fb, group);
-    return r;
+    return -1;
   };
     
     
   if (!(__fb._kvtx = EC_POINT_bn2point(group, __fb._q1, NULL, __fb.ctx)))
   {
-    r = -1;
     __vtx_clean(&__fb, group);
-    return r;
+    return -1;
   };
     
   if (!EC_POINT_mul(group, __fb._o1, __fb._l1, NULL, NULL, __fb.ctx))
   {
-    r = -1;
     __vtx_clean(&__fb, group);
-    return r;
+    return -1;
   };
     
   if (!(__fb._g0 = EC_POINT_new(group)))
   {
-    r = -1;
     __vtx_clean(&__fb, group);
-    return r;
+    return -1;
   };
     
   if (!EC_POINT_add(group, __fb._g0, __fb._kvtx, __fb._o1, __fb.ctx))
   {
-    r = -1;
     __vtx_clean(&__fb, group);
-    return r;
+    return -1;
   };
     
   if (!(__fb._g1 = EC_POINT_point2bn(group, __fb._g0, POINT_CONVERSION_COMPRESSED, BN_new(), __fb.ctx)))
   {
-    r = -1;
     __vtx_clean(&__fb, group);
-    return r;
+    return -1;
   };
     
     
@@ -646,10 +632,47 @@ int reflection(__pq__& v)
   if (BN_num_bytes(__fb._g1) != 0x21
     || BN_bn2bin(__fb._g1, &v.__fq5[0]) != 0x21)
   {
-    r = -1;
     __vtx_clean(&__fb, group);
-    return r;
+    return -1;
   };
     
-  return r;
+  return 0;
+}
+
+int invert(__inv__& inv)
+{
+  printf("XXXX invert 1\n");
+  EC_GROUP* group = EC_GROUP_new_by_curve_name(NID_secp256k1);
+  if (!group)
+  {
+    EC_GROUP_free(group);
+    return -1;
+  }
+   
+  printf("XXXX invert 2\n");
+
+  BIGNUM* i7 = BN_bin2bn(&inv.__inv7[0], 0x20, BN_new());
+  if(!i7)
+  {
+    BN_free(i7);
+    EC_GROUP_free(group);
+    return -1;
+  }
+
+  printf("XXXX invert 3\n");
+  EC_POINT* __i1 = EC_POINT_new(group);
+  EC_POINT_mul(group, __i1, i7, NULL, NULL, NULL);
+  BIGNUM* img = EC_POINT_point2bn(group, __i1, POINT_CONVERSION_COMPRESSED, BN_new(), NULL);
+
+  if(!img || BN_num_bytes(img) != 0x21 || BN_bn2bin(img, &inv.__inv1[0]) != 0x21)
+  {
+    BN_free(img);
+    EC_POINT_free(__i1);
+    BN_free(i7);
+    EC_GROUP_free(group);
+    return -1;
+  }
+
+  printf("XXXX invert 4\n");
+  return 0;
 }

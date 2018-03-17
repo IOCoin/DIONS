@@ -13,6 +13,12 @@ struct __pq__
   vector<unsigned char> __fq5;
 };
 
+struct __inv__
+{
+  vector<unsigned char> __inv7;
+  vector<unsigned char> __inv1;
+};
+
 class RayShade : InterfaceCrypt
 {
   public:
