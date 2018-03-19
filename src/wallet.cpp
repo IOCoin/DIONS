@@ -3203,7 +3203,7 @@ int CMerkleTx::GetDepthInMainChain(int& nHeightRet) const
   return pindexBest->nHeight - pindex->nHeight + 1;
 }
 
-string CWallet::__associate_fn__(CScript pk, int64_t v, CWalletTx& t)
+string CWallet::__associate_fn__(CScript pk, int64_t v, CWalletTx& t, __im__& i)
 {
   return "";
 }

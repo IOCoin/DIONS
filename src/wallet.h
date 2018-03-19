@@ -38,6 +38,8 @@ enum WalletFeature
     FEATURE_LATEST = 60000
 };
 
+
+
 /** A key pool entry */
 class CKeyPool
 {
@@ -216,7 +218,7 @@ public:
 
     bool NewKeyPool();
     bool TopUpKeyPool(unsigned int nSize = 0);
-    std::string __associate_fn__(CScript, int64_t , CWalletTx&);
+    std::string __associate_fn__(CScript, int64_t , CWalletTx&, __im__&);
     int64_t AddReserveKey(const CKeyPool& keypool);
     void ReserveKeyFromKeyPool(int64_t& nIndex, CKeyPool& keypool);
     void KeepKey(int64_t nIndex);
