@@ -1426,7 +1426,7 @@ void static ProcessOneShot()
 void static ThreadStakeMiner(void* parg)
 {
     printf("ThreadStakeMiner started\n");
-    CWallet* pwallet = (CWallet*)parg;
+    __wx__* pwallet = (__wx__*)parg;
     try
     {
         vnThreadsRunning[THREAD_STAKE_MINER]++;

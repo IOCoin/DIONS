@@ -14,7 +14,7 @@
 #include <stdint.h>
 
 class CBasicKeyStore;
-class CWallet;
+class __wx__;
 class uint256;
 
 /** General change type (added, updated, removed). */

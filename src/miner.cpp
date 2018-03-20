@@ -107,7 +107,7 @@ public:
 };
 
 // CreateNewBlock: create new block (without proof-of-work/proof-of-stake)
-CBlock* CreateNewBlock(CWallet* pwallet, bool fProofOfStake, int64_t* pFees)
+CBlock* CreateNewBlock(__wx__* pwallet, bool fProofOfStake, int64_t* pFees)
 {
     // Create new block
     auto_ptr<CBlock> pblock(new CBlock());
@@ -447,7 +447,7 @@ void FormatHashBuffers(CBlock* pblock, char* pmidstate, char* pdata, char* phash
 }
 
 
-bool CheckWork(CBlock* pblock, CWallet& wallet, CReserveKey& reservekey)
+bool CheckWork(CBlock* pblock, __wx__& wallet, CReserveKey& reservekey)
 {
     uint256 hashBlock = pblock->GetHash();
     uint256 hashProof = pblock->GetPoWHash();
@@ -487,7 +487,7 @@ bool CheckWork(CBlock* pblock, CWallet& wallet, CReserveKey& reservekey)
     return true;
 }
 
-bool CheckStake(CBlock* pblock, CWallet& wallet)
+bool CheckStake(CBlock* pblock, __wx__& wallet)
 {
     uint256 proofHash = 0, hashTarget = 0;
     uint256 hashBlock = pblock->GetHash();
@@ -524,7 +524,7 @@ bool CheckStake(CBlock* pblock, CWallet& wallet)
     return true;
 }
 
-void StakeMiner(CWallet *pwallet)
+void StakeMiner(__wx__ *pwallet)
 {
     SetThreadPriority(THREAD_PRIORITY_LOWEST);
 

@@ -29,7 +29,7 @@ using namespace std;
 using namespace boost;
 
 extern void xsc(CBlockIndex*);
-CWallet* pwalletMain;
+__wx__* pwalletMain;
 CClientUIInterface uiInterface;
 bool fConfChange;
 bool fEnforceCanonical;
@@ -570,13 +570,13 @@ bool AppInit2()
     if (GetBoolArg("-salvagewallet"))
     {
         // Recover readable keypairs:
-        if (!CWalletDB::Recover(bitdb, strWalletFileName, true))
+        if (!__wx__DB::Recover(bitdb, strWalletFileName, true))
             return false;
     }
 
     if (filesystem::exists(GetDataDir() / strWalletFileName))
     {
-        CDBEnv::VerifyResult r = bitdb.Verify(strWalletFileName, CWalletDB::Recover);
+        CDBEnv::VerifyResult r = bitdb.Verify(strWalletFileName, __wx__DB::Recover);
         if (r == CDBEnv::RECOVER_OK)
         {
             string msg = strprintf(_("Warning: wallet.dat corrupt, data salvaged!"
@@ -780,7 +780,7 @@ bool AppInit2()
     printf("Loading wallet...\n");
     nStart = GetTimeMillis();
     bool fFirstRun = true;
-    pwalletMain = new CWallet(strWalletFileName);
+    pwalletMain = new __wx__(strWalletFileName);
     DBErrors nLoadWalletRet = pwalletMain->LoadWallet(fFirstRun);
     if (nLoadWalletRet != DB_LOAD_OK)
     {
@@ -846,7 +846,7 @@ bool AppInit2()
     }
     else
     {
-        CWalletDB walletdb(strWalletFileName);
+        __wx__DB walletdb(strWalletFileName);
         CBlockLocator locator;
         if (walletdb.ReadBestBlock(locator))
             pindexRescan = locator.GetBlockIndex();

@@ -15,7 +15,7 @@
 #include <list>
 
 
-class CWallet;
+class __wx__;
 class CBlock;
 class CBlockIndex;
 class CKeyItem;
@@ -104,7 +104,7 @@ extern int64_t nLastCoinStakeSearchInterval;
 extern const std::string strMessageMagic;
 extern int64_t nTimeBestReceived;
 extern CCriticalSection cs_setpwalletRegistered;
-extern std::set<CWallet*> setpwalletRegistered;
+extern std::set<__wx__*> setpwalletRegistered;
 extern unsigned char pchMessageStart[4];
 extern std::map<uint256, CBlock*> mapOrphanBlocks;
 
@@ -124,8 +124,8 @@ class CReserveKey;
 class CTxDB;
 class CTxIndex;
 
-void RegisterWallet(CWallet* pwalletIn);
-void UnregisterWallet(CWallet* pwalletIn);
+void RegisterWallet(__wx__* pwalletIn);
+void UnregisterWallet(__wx__* pwalletIn);
 void SyncWithWallets(const CTransaction& tx, const CBlock* pblock = NULL, bool fUpdate = false, bool fConnect = true);
 bool ProcessBlock(CNode* pfrom, CBlock* pblock);
 bool CheckDiskSpace(uint64_t nAdditionalBytes=0);
@@ -153,7 +153,7 @@ std::string GetWarnings(std::string strFor);
 bool GetTransaction(const uint256 &hash, CTransaction &tx, uint256 &hashBlock, bool s=false);
 uint256 WantedByOrphan(const CBlock* pblockOrphan);
 const CBlockIndex* GetLastBlockIndex(const CBlockIndex* pindex, bool fProofOfStake);
-void StakeMiner(CWallet *pwallet);
+void StakeMiner(__wx__ *pwallet);
 void ResendWalletTransactions(bool fForce = false);
 
 
@@ -168,7 +168,7 @@ bool AcceptToMemoryPool(CTxMemPool& pool, CTransaction &tx,
 
 
 
-bool GetWalletFile(CWallet* pwallet, std::string &strWalletFileOut);
+bool GetWalletFile(__wx__* pwallet, std::string &strWalletFileOut);
 
 /** Position on disk for a particular transaction. */
 class CDiskTxPos
@@ -1137,7 +1137,7 @@ public:
     bool AddToBlockIndex(unsigned int nFile, unsigned int nBlockPos, const uint256& hashProof);
     bool CheckBlock(bool fCheckPOW=true, bool fCheckMerkleRoot=true, bool fCheckSig=true) const;
     bool AcceptBlock();
-    bool SignBlock(CWallet& keystore, int64_t nFees);
+    bool SignBlock(__wx__& keystore, int64_t nFees);
     bool CheckBlockSignature() const;
 
 private:

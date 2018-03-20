@@ -72,21 +72,21 @@ public:
 
 
 /** Access to the wallet database (wallet.dat) */
-class CWalletDB : public CDB
+class __wx__DB : public CDB
 {
 public:
-    CWalletDB(std::string strFilename, const char* pszMode="r+") : CDB(strFilename.c_str(), pszMode)
+    __wx__DB(std::string strFilename, const char* pszMode="r+") : CDB(strFilename.c_str(), pszMode)
     {
     }
 private:
-    CWalletDB(const CWalletDB&);
-    void operator=(const CWalletDB&);
+    __wx__DB(const __wx__DB&);
+    void operator=(const __wx__DB&);
 public:
     bool WriteName(const std::string& strAddress, const std::string& aliasStr);
 
     bool EraseName(const std::string& strAddress);
 
-    bool WriteTx(uint256 hash, const CWalletTx& wtx)
+    bool WriteTx(uint256 hash, const __wx__Tx& wtx)
     {
         nWalletDBUpdated++;
         return Write(std::make_pair(std::string("tx"), hash), wtx);
@@ -216,8 +216,8 @@ public:
     int64_t GetAccountCreditDebit(const std::string& strAccount);
     void ListAccountCreditDebit(const std::string& strAccount, std::list<CAccountingEntry>& acentries);
 
-    DBErrors ReorderTransactions(CWallet*);
-    DBErrors LoadWallet(CWallet* pwallet);
+    DBErrors ReorderTransactions(__wx__*);
+    DBErrors LoadWallet(__wx__* pwallet);
     static bool Recover(CDBEnv& dbenv, std::string filename, bool fOnlyKeys);
     static bool Recover(CDBEnv& dbenv, std::string filename);
 };

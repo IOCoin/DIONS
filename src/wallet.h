@@ -22,7 +22,7 @@
 extern bool fWalletUnlockStakingOnly;
 extern bool fConfChange;
 class CAccountingEntry;
-class CWalletTx;
+class __wx__Tx;
 class CReserveKey;
 class COutput;
 class CCoinControl;
@@ -67,15 +67,15 @@ public:
     )
 };
 
-/** A CWallet is an extension of a keystore, which also maintains a set of transactions and balances,
+/** A __wx__ is an extension of a keystore, which also maintains a set of transactions and balances,
  * and provides the ability to create new transactions.
  */
-class CWallet : public CCryptoKeyStore
+class __wx__ : public CCryptoKeyStore
 {
 private:
-    bool SelectCoinsForStaking(int64_t nTargetValue, unsigned int nSpendTime, std::set<std::pair<const CWalletTx*,unsigned int> >& setCoinsRet, int64_t& nValueRet) const;
+    bool SelectCoinsForStaking(int64_t nTargetValue, unsigned int nSpendTime, std::set<std::pair<const __wx__Tx*,unsigned int> >& setCoinsRet, int64_t& nValueRet) const;
 
-    CWalletDB *pwalletdbEncryption;
+    __wx__DB *pwalletdbEncryption;
 
     // the current wallet version: clients below this version are not able to load the wallet
     int nWalletVersion;
@@ -84,9 +84,9 @@ private:
     int nWalletMaxVersion;
 
 public:
-    bool SelectCoins(int64_t nTargetValue, unsigned int nSpendTime, std::set<std::pair<const CWalletTx*,unsigned int> >& setCoinsRet, int64_t& nValueRet, const CCoinControl *coinControl=NULL) const;
+    bool SelectCoins(int64_t nTargetValue, unsigned int nSpendTime, std::set<std::pair<const __wx__Tx*,unsigned int> >& setCoinsRet, int64_t& nValueRet, const CCoinControl *coinControl=NULL) const;
     /// Main wallet lock.
-    /// This lock protects all the fields added by CWallet
+    /// This lock protects all the fields added by __wx__
     ///   except for:
     ///      fFileBacked (immutable after instantiation)
     ///      strWalletFile (immutable after instantiation)
@@ -102,11 +102,11 @@ public:
     MasterKeyMap mapMasterKeys;
     unsigned int nMasterKeyMaxID;
 
-    CWallet()
+    __wx__()
     {
         SetNull();
     }
-    CWallet(std::string strWalletFileIn)
+    __wx__(std::string strWalletFileIn)
     {
         SetNull();
 
@@ -124,7 +124,7 @@ public:
         nTimeFirstKey = 0;
     }
 
-    std::map<uint256, CWalletTx> mapWallet;
+    std::map<uint256, __wx__Tx> mapWallet;
     int64_t nOrderPosNext;
     std::map<uint256, int> mapRequestCount;
 
@@ -137,7 +137,7 @@ public:
 
     void AvailableCoinsForStaking(std::vector<COutput>& vCoins, unsigned int nSpendTime) const;
     void AvailableCoins(std::vector<COutput>& vCoins, bool fOnlyConfirmed=true, const CCoinControl *coinControl=NULL) const;
-    bool SelectCoinsMinConf(int64_t nTargetValue, unsigned int nSpendTime, int nConfMine, int nConfTheirs, std::vector<COutput> vCoins, std::set<std::pair<const CWalletTx*,unsigned int> >& setCoinsRet, int64_t& nValueRet) const;
+    bool SelectCoinsMinConf(int64_t nTargetValue, unsigned int nSpendTime, int nConfMine, int nConfTheirs, std::vector<COutput> vCoins, std::set<std::pair<const __wx__Tx*,unsigned int> >& setCoinsRet, int64_t& nValueRet) const;
 
     // keystore implementation
     // Generate a new key
@@ -178,9 +178,9 @@ public:
     /** Increment the next transaction order id
         @return next transaction order id
      */
-    int64_t IncOrderPosNext(CWalletDB *pwalletdb = NULL);
+    int64_t IncOrderPosNext(__wx__DB *pwalletdb = NULL);
 
-    typedef std::pair<CWalletTx*, CAccountingEntry*> TxPair;
+    typedef std::pair<__wx__Tx*, CAccountingEntry*> TxPair;
     typedef std::multimap<int64_t, TxPair > TxItems;
 
     /** Get the wallet's activity log
@@ -190,7 +190,7 @@ public:
     TxItems OrderedTxItems(std::list<CAccountingEntry>& acentries, std::string strAccount = "");
 
     void MarkDirty();
-    bool AddToWallet(const CWalletTx& wtxIn);
+    bool AddToWallet(const __wx__Tx& wtxIn);
     bool AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlock* pblock, bool fUpdate = false, bool fFindBlock = false);
     bool EraseFromWallet(uint256 hash);
     void WalletUpdateSpent(const CTransaction& prevout, bool fBlock = false);
@@ -202,24 +202,24 @@ public:
     int64_t GetImmatureBalance() const;
     int64_t GetStake() const;
     int64_t GetNewMint() const;
-    bool CreateTransaction(const std::vector<std::pair<CScript, int64_t> >& vecSend, CWalletTx& wtxNew, CReserveKey& reservekey, int64_t& nFeeRet, std::string strTxInfo, const CCoinControl *coinControl=NULL);
-    bool CreateTransaction__(const std::vector<std::pair<CScript, int64_t> >& vecSend, CWalletTx& wtxNew, CReserveKey& reservekey, int64_t& nFeeRet, std::string strTxInfo, const CCoinControl *coinControl=NULL);
-    bool CreateTransaction(CScript scriptPubKey, int64_t nValue, CWalletTx& wtxNew, CReserveKey& reservekey, int64_t& nFeeRet, std::string strTxInfo, const CCoinControl *coinControl=NULL);
-    bool CreateTransaction__(CScript scriptPubKey, int64_t nValue, CWalletTx& wtxNew, CReserveKey& reservekey, int64_t& nFeeRet, std::string strTxInfo, const CCoinControl *coinControl=NULL);
-    bool CommitTransaction(CWalletTx& wtxNew, CReserveKey& reservekey);
-    bool CommitTransaction__(CWalletTx& wtxNew, CReserveKey& reservekey);
+    bool CreateTransaction(const std::vector<std::pair<CScript, int64_t> >& vecSend, __wx__Tx& wtxNew, CReserveKey& reservekey, int64_t& nFeeRet, std::string strTxInfo, const CCoinControl *coinControl=NULL);
+    bool CreateTransaction__(const std::vector<std::pair<CScript, int64_t> >& vecSend, __wx__Tx& wtxNew, CReserveKey& reservekey, int64_t& nFeeRet, std::string strTxInfo, const CCoinControl *coinControl=NULL);
+    bool CreateTransaction(CScript scriptPubKey, int64_t nValue, __wx__Tx& wtxNew, CReserveKey& reservekey, int64_t& nFeeRet, std::string strTxInfo, const CCoinControl *coinControl=NULL);
+    bool CreateTransaction__(CScript scriptPubKey, int64_t nValue, __wx__Tx& wtxNew, CReserveKey& reservekey, int64_t& nFeeRet, std::string strTxInfo, const CCoinControl *coinControl=NULL);
+    bool CommitTransaction(__wx__Tx& wtxNew, CReserveKey& reservekey);
+    bool CommitTransaction__(__wx__Tx& wtxNew, CReserveKey& reservekey);
 
     bool GetStakeWeight(uint64_t& nWeight);
     bool CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int64_t nSearchInterval, int64_t nFees, CTransaction& txNew, CKey& key, int nHeight);
 
-    std::string SendMoney(CScript scriptPubKey, int64_t nValue, CWalletTx& wtxNew, bool fAskFee=false,std::string strTx="");
-    std::string SendMoney__(CScript scriptPubKey, int64_t nValue, CWalletTx& wtxNew, bool fAskFee=false,std::string strTx="");
-    std::string SendMoneyToDestination(const CTxDestination &address, int64_t nValue, CWalletTx& wtxNew, bool fAskFee=false,std::string strTx="");
+    std::string SendMoney(CScript scriptPubKey, int64_t nValue, __wx__Tx& wtxNew, bool fAskFee=false,std::string strTx="");
+    std::string SendMoney__(CScript scriptPubKey, int64_t nValue, __wx__Tx& wtxNew, bool fAskFee=false,std::string strTx="");
+    std::string SendMoneyToDestination(const CTxDestination &address, int64_t nValue, __wx__Tx& wtxNew, bool fAskFee=false,std::string strTx="");
 
     bool NewKeyPool();
     bool TopUpKeyPool(unsigned int nSize = 0);
-    std::string __associate_fn__(CScript,int64_t,CWalletTx&,__im__&);
-    bool __x_form__(CScript,int64_t,__im__&,CWalletTx&,int64_t&);
+    std::string __associate_fn__(CScript,int64_t,__wx__Tx&,__im__&);
+    bool __x_form__(CScript,int64_t,__im__&,__wx__Tx&,int64_t&);
     int64_t AddReserveKey(const CKeyPool& keypool);
     void ReserveKeyFromKeyPool(int64_t& nIndex, CKeyPool& keypool);
     void KeepKey(int64_t nIndex);
@@ -242,7 +242,7 @@ public:
     int64_t GetCredit(const CTxOut& txout) const
     {
         if (!MoneyRange(txout.nValue))
-            throw std::runtime_error("CWallet::GetCredit() : value out of range");
+            throw std::runtime_error("__wx__::GetCredit() : value out of range");
 
         if(IsMine(txout))
           return txout.nValue;
@@ -253,7 +253,7 @@ public:
     int64_t GetChange(const CTxOut& txout) const
     {
         if (!MoneyRange(txout.nValue))
-            throw std::runtime_error("CWallet::GetChange() : value out of range");
+            throw std::runtime_error("__wx__::GetChange() : value out of range");
         return (IsChange(txout) ? txout.nValue : 0);
     }
     bool IsMine(const CTransaction& tx) const
@@ -280,7 +280,7 @@ public:
         {
             nDebit += GetDebit(txin);
             if (!MoneyRange(nDebit))
-                throw std::runtime_error("CWallet::GetDebit() : value out of range");
+                throw std::runtime_error("__wx__::GetDebit() : value out of range");
         }
         return nDebit;
     }
@@ -291,7 +291,7 @@ public:
         {
             nCredit += GetCredit(txout);
             if (!MoneyRange(nCredit))
-                throw std::runtime_error("CWallet::GetCredit() : value out of range");
+                throw std::runtime_error("__wx__::GetCredit() : value out of range");
         }
         return nCredit;
     }
@@ -302,7 +302,7 @@ public:
         {
             nChange += GetChange(txout);
             if (!MoneyRange(nChange))
-                throw std::runtime_error("CWallet::GetChange() : value out of range");
+                throw std::runtime_error("__wx__::GetChange() : value out of range");
         }
         return nChange;
     }
@@ -334,12 +334,12 @@ public:
         return setKeyPool.size();
     }
 
-    bool GetTransaction(const uint256 &hashTx, CWalletTx& wtx);
+    bool GetTransaction(const uint256 &hashTx, __wx__Tx& wtx);
 
     bool SetDefaultKey(const CPubKey &vchPubKey);
 
     // signify that a particular wallet feature is now used. this may change nWalletVersion and nWalletMaxVersion if those are lower
-    bool SetMinVersion(enum WalletFeature, CWalletDB* pwalletdbIn = NULL, bool fExplicit = false);
+    bool SetMinVersion(enum WalletFeature, __wx__DB* pwalletdbIn = NULL, bool fExplicit = false);
 
     // change which version we're allowed to upgrade to (note that this does not immediately imply upgrading to that format)
     bool SetMaxVersion(int nVersion);
@@ -354,23 +354,23 @@ public:
     /** Address book entry changed.
      * @note called with lock cs_wallet held.
      */
-    boost::signals2::signal<void (CWallet *wallet, const CTxDestination &address, const std::string &label, bool isMine, ChangeType status)> NotifyAddressBookChanged;
+    boost::signals2::signal<void (__wx__ *wallet, const CTxDestination &address, const std::string &label, bool isMine, ChangeType status)> NotifyAddressBookChanged;
 
     /** Wallet transaction added, removed or updated.
      * @note called with lock cs_wallet held.
      */
-    boost::signals2::signal<void (CWallet *wallet, const uint256 &hashTx, ChangeType status)> NotifyTransactionChanged;
+    boost::signals2::signal<void (__wx__ *wallet, const uint256 &hashTx, ChangeType status)> NotifyTransactionChanged;
 };
 
 /** A key allocated from the key pool. */
 class CReserveKey
 {
 protected:
-    CWallet* pwallet;
+    __wx__* pwallet;
     int64_t nIndex;
     CPubKey vchPubKey;
 public:
-    CReserveKey(CWallet* pwalletIn)
+    CReserveKey(__wx__* pwalletIn)
     {
         nIndex = -1;
         pwallet = pwalletIn;
@@ -413,12 +413,12 @@ static void WriteOrderPos(const int64_t& nOrderPos, mapValue_t& mapValue)
 /** A transaction with a bunch of additional info that only the owner cares about.
  * It includes any unrecorded transactions needed to link it back to the block chain.
  */
-class CWalletTx : public CMerkleTx
+class __wx__Tx : public CMerkleTx
 {
 private:
 
 public:
-    const CWallet* pwallet;
+    const __wx__* pwallet;
     std::vector<CMerkleTx> vtxPrev;
     mapValue_t mapValue;
     std::vector<std::pair<std::string, std::string> > vOrderForm;
@@ -461,27 +461,27 @@ public:
     mutable vchType iv128Base64Vch;
     mutable vchType vchSignature;
 
-    CWalletTx()
+    __wx__Tx()
     {
         Init(NULL);
     }
 
-    CWalletTx(const CWallet* pwalletIn)
+    __wx__Tx(const __wx__* pwalletIn)
     {
         Init(pwalletIn);
     }
 
-    CWalletTx(const CWallet* pwalletIn, const CMerkleTx& txIn) : CMerkleTx(txIn)
+    __wx__Tx(const __wx__* pwalletIn, const CMerkleTx& txIn) : CMerkleTx(txIn)
     {
         Init(pwalletIn);
     }
 
-    CWalletTx(const CWallet* pwalletIn, const CTransaction& txIn) : CMerkleTx(txIn)
+    __wx__Tx(const __wx__* pwalletIn, const CTransaction& txIn) : CMerkleTx(txIn)
     {
         Init(pwalletIn);
     }
 
-    void Init(const CWallet* pwalletIn)
+    void Init(const __wx__* pwalletIn)
     {
         pwallet = pwalletIn;
         vtxPrev.clear();
@@ -506,7 +506,7 @@ public:
 
     IMPLEMENT_SERIALIZE
     (
-        CWalletTx* pthis = const_cast<CWalletTx*>(this);
+        __wx__Tx* pthis = const_cast<__wx__Tx*>(this);
         if (fRead)
             pthis->Init(NULL);
         char fSpent = false;
@@ -590,7 +590,7 @@ public:
         fChangeCached = false;
     }
 
-    void BindWallet(CWallet *pwalletIn)
+    void BindWallet(__wx__ *pwalletIn)
     {
         pwallet = pwalletIn;
         MarkDirty();
@@ -600,7 +600,7 @@ public:
     {
 
         if (nOut >= vout.size())
-            throw std::runtime_error("CWalletTx::MarkSpent() : nOut out of range");
+            throw std::runtime_error("__wx__Tx::MarkSpent() : nOut out of range");
         vfSpent.resize(vout.size());
         if (!vfSpent[nOut])
         {
@@ -612,7 +612,7 @@ public:
     void MarkUnspent(unsigned int nOut)
     {
         if (nOut >= vout.size())
-            throw std::runtime_error("CWalletTx::MarkUnspent() : nOut out of range");
+            throw std::runtime_error("__wx__Tx::MarkUnspent() : nOut out of range");
         vfSpent.resize(vout.size());
         if (vfSpent[nOut])
         {
@@ -624,7 +624,7 @@ public:
     bool IsSpent(unsigned int nOut) const
     {
         if (nOut >= vout.size())
-            throw std::runtime_error("CWalletTx::IsSpent() : nOut out of range");
+            throw std::runtime_error("__wx__Tx::IsSpent() : nOut out of range");
         if (nOut >= vfSpent.size())
             return false;
         return (!!vfSpent[nOut]);
@@ -672,7 +672,7 @@ public:
                 const CTxOut &txout = vout[i];
                 nCredit += pwallet->GetCredit(txout);
                 if (!MoneyRange(nCredit))
-                    throw std::runtime_error("CWalletTx::GetAvailableCredit() : value out of range");
+                    throw std::runtime_error("__wx__Tx::GetAvailableCredit() : value out of range");
             }
         }
 
@@ -793,11 +793,11 @@ public:
 class COutput
 {
 public:
-    const CWalletTx *tx;
+    const __wx__Tx *tx;
     int i;
     int nDepth;
 
-    COutput(const CWalletTx *txIn, int iIn, int nDepthIn)
+    COutput(const __wx__Tx *txIn, int iIn, int nDepthIn)
     {
         tx = txIn; i = iIn; nDepth = nDepthIn;
     }
@@ -817,7 +817,7 @@ public:
 
 
 /** Private key that includes an expiration date in case it never gets used. */
-class CWalletKey
+class __wx__Key
 {
 public:
     CPrivKey vchPrivKey;
@@ -827,7 +827,7 @@ public:
     //// todo: add something to note what created it (user, getnewaddress, change)
     ////   maybe should have a map<string, string> property map
 
-    CWalletKey(int64_t nExpires=0)
+    __wx__Key(int64_t nExpires=0)
     {
         nTimeCreated = (nExpires ? GetTime() : 0);
         nTimeExpires = nExpires;
@@ -955,6 +955,6 @@ private:
     std::vector<char> _ssExtra;
 };
 
-bool GetWalletFile(CWallet* pwallet, std::string &strWalletFileOut);
+bool GetWalletFile(__wx__* pwallet, std::string &strWalletFileOut);
 
 #endif

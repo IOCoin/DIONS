@@ -24,15 +24,15 @@ class CDiskTxPos;
 class CMasterKey;
 class COutPoint;
 class CTxIndex;
-class CWallet;
-class CWalletTx;
+class __wx__;
+class __wx__Tx;
 class AliasIndex;
 class CTxDB;
 
 extern unsigned int nWalletDBUpdated;
 
 void ThreadFlushWalletDB(void* parg);
-bool BackupWallet(const CWallet& wallet, const std::string& strDest);
+bool BackupWallet(const __wx__& wallet, const std::string& strDest);
 
 extern bool aliasTx(const CTransaction& tx, int& op, int& nOut, vector<vector<unsigned char> >& vvch );
 extern CScript aliasStrip(const CScript& scriptIn);

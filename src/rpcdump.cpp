@@ -94,9 +94,9 @@ public:
     CBlockIndex *pindex;
     int64_t nValue;
     bool fSpent;
-    CWalletTx* ptx;
+    __wx__Tx* ptx;
     int nOut;
-    CTxDump(CWalletTx* ptx = NULL, int nOut = -1)
+    CTxDump(__wx__Tx* ptx = NULL, int nOut = -1)
     {
         pindex = NULL;
         nValue = 0;

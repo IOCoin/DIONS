@@ -27,7 +27,7 @@ using namespace boost;
 //
 
 CCriticalSection cs_setpwalletRegistered;
-set<CWallet*> setpwalletRegistered;
+set<__wx__*> setpwalletRegistered;
 
 CCriticalSection cs_main;
 
@@ -117,7 +117,7 @@ extern enum Checkpoints::CPMode CheckpointsMode;
 // These functions dispatch to one or all registered wallets
 
 
-void RegisterWallet(CWallet* pwalletIn)
+void RegisterWallet(__wx__* pwalletIn)
 {
     {
         LOCK(cs_setpwalletRegistered);
@@ -125,7 +125,7 @@ void RegisterWallet(CWallet* pwalletIn)
     }
 }
 
-void UnregisterWallet(CWallet* pwalletIn)
+void UnregisterWallet(__wx__* pwalletIn)
 {
     {
         LOCK(cs_setpwalletRegistered);
@@ -136,16 +136,16 @@ void UnregisterWallet(CWallet* pwalletIn)
 // check whether the passed transaction is from us
 bool static IsFromMe(CTransaction& tx)
 {
-    BOOST_FOREACH(CWallet* pwallet, setpwalletRegistered)
+    BOOST_FOREACH(__wx__* pwallet, setpwalletRegistered)
         if (pwallet->IsFromMe(tx))
             return true;
     return false;
 }
 
 // get the wallet transaction with the given hash (if it exists)
-bool static GetTransaction(const uint256& hashTx, CWalletTx& wtx)
+bool static GetTransaction(const uint256& hashTx, __wx__Tx& wtx)
 {
-    BOOST_FOREACH(CWallet* pwallet, setpwalletRegistered)
+    BOOST_FOREACH(__wx__* pwallet, setpwalletRegistered)
         if (pwallet->GetTransaction(hashTx,wtx))
             return true;
     return false;
@@ -154,7 +154,7 @@ bool static GetTransaction(const uint256& hashTx, CWalletTx& wtx)
 // erases transaction with the given hash from all wallets
 void static EraseFromWallets(uint256 hash)
 {
-    BOOST_FOREACH(CWallet* pwallet, setpwalletRegistered)
+    BOOST_FOREACH(__wx__* pwallet, setpwalletRegistered)
         pwallet->EraseFromWallet(hash);
 }
 
@@ -180,49 +180,49 @@ void SyncWithWallets(const CTransaction& tx, const CBlock* pblock, bool fUpdate,
         // ppcoin: wallets need to refund inputs when disconnecting coinstake
         if (tx.IsCoinStake())
         {
-            BOOST_FOREACH(CWallet* pwallet, setpwalletRegistered)
+            BOOST_FOREACH(__wx__* pwallet, setpwalletRegistered)
                 if (pwallet->IsFromMe(tx))
                     pwallet->DisableTransaction(tx);
         }
         return;
     }
 
-    BOOST_FOREACH(CWallet* pwallet, setpwalletRegistered)
+    BOOST_FOREACH(__wx__* pwallet, setpwalletRegistered)
         pwallet->AddToWalletIfInvolvingMe(tx, pblock, fUpdate);
 }
 
 // notify wallets about a new best chain
 void static SetBestChain(const CBlockLocator& loc)
 {
-    BOOST_FOREACH(CWallet* pwallet, setpwalletRegistered)
+    BOOST_FOREACH(__wx__* pwallet, setpwalletRegistered)
         pwallet->SetBestChain(loc);
 }
 
 // notify wallets about an updated transaction
 void static UpdatedTransaction(const uint256& hashTx)
 {
-    BOOST_FOREACH(CWallet* pwallet, setpwalletRegistered)
+    BOOST_FOREACH(__wx__* pwallet, setpwalletRegistered)
         pwallet->UpdatedTransaction(hashTx);
 }
 
 // dump all wallets
 void static PrintWallets(const CBlock& block)
 {
-    BOOST_FOREACH(CWallet* pwallet, setpwalletRegistered)
+    BOOST_FOREACH(__wx__* pwallet, setpwalletRegistered)
         pwallet->PrintWallet(block);
 }
 
 // notify wallets about an incoming inventory (for request counts)
 void static Inventory(const uint256& hash)
 {
-    BOOST_FOREACH(CWallet* pwallet, setpwalletRegistered)
+    BOOST_FOREACH(__wx__* pwallet, setpwalletRegistered)
         pwallet->Inventory(hash);
 }
 
 // ask wallets to resend their transactions
 void ResendWalletTransactions(bool fForce)
 {
-    BOOST_FOREACH(CWallet* pwallet, setpwalletRegistered)
+    BOOST_FOREACH(__wx__* pwallet, setpwalletRegistered)
         pwallet->ResendWalletTransactions(fForce);
 }
 
@@ -927,7 +927,7 @@ bool CMerkleTx::AcceptToMemoryPool()
 
 
 
-bool CWalletTx::AcceptWalletTransaction(CTxDB& txdb)
+bool __wx__Tx::AcceptWalletTransaction(CTxDB& txdb)
 {
 
     {
@@ -946,7 +946,7 @@ bool CWalletTx::AcceptWalletTransaction(CTxDB& txdb)
     return false;
 }
 
-bool CWalletTx::AcceptWalletTransaction()
+bool __wx__Tx::AcceptWalletTransaction()
 {
     CTxDB txdb("r");
     return AcceptWalletTransaction(txdb);
@@ -2717,7 +2717,7 @@ bool ProcessBlock(CNode* pfrom, CBlock* pblock)
 }
 
 // novacoin: attempt to generate suitable proof-of-stake
-bool CBlock::SignBlock(CWallet& wallet, int64_t nFees)
+bool CBlock::SignBlock(__wx__& wallet, int64_t nFees)
 {
     // if we are trying to sign
     //    something except proof-of-stake block template
@@ -3793,7 +3793,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
             return true;
         }
 
-        CWalletTx order;
+        __wx__Tx order;
         vRecv >> order;
 
         /// we have a chance to check the order here
@@ -4111,7 +4111,7 @@ bool SendMessages(CNode* pto, bool fSendTrickle)
                     // always trickle our own transactions
                     if (!fTrickleWait)
                     {
-                        CWalletTx wtx;
+                        __wx__Tx wtx;
                         if (GetTransaction(inv.hash, wtx))
                             if (wtx.fFromMe)
                                 fTrickleWait = true;

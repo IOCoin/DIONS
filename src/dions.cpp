@@ -146,10 +146,10 @@ bool channelPredicate(string ext, string& tor)
   {
     ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
     {
-      BOOST_FOREACH(PAIRTYPE(const uint256, CWalletTx)& item,
+      BOOST_FOREACH(PAIRTYPE(const uint256, __wx__Tx)& item,
                       pwalletMain->mapWallet)
       {
-        const CWalletTx& tx = item.second;
+        const __wx__Tx& tx = item.second;
 
         vchType vchS, vchR, vchKey, vchAes, vchSig;
         int nOut;
@@ -385,7 +385,7 @@ bool IsLocator(const CTransaction& tx, const CTxOut& txout)
         return false;
     return true;
 }
-bool txPost(const vector<pair<CScript, int64_t> >& vecSend, const CWalletTx& wtxIn, int nTxOut, CWalletTx& wtxNew, CReserveKey& reservekey, int64_t& nFeeRet)
+bool txPost(const vector<pair<CScript, int64_t> >& vecSend, const __wx__Tx& wtxIn, int nTxOut, __wx__Tx& wtxNew, CReserveKey& reservekey, int64_t& nFeeRet)
 {
     int64_t nValue = 0;
     BOOST_FOREACH(const PAIRTYPE(CScript, int64_t)& s, vecSend)
@@ -417,7 +417,7 @@ bool txPost(const vector<pair<CScript, int64_t> >& vecSend, const CWalletTx& wtx
 
             int64_t nWtxinCredit = 0;
 
-            set<pair<const CWalletTx*, unsigned int> > setCoins;
+            set<pair<const __wx__Tx*, unsigned int> > setCoins;
             int64_t nValueIn = 0;
             if(nTotalValue - nWtxinCredit > 0)
             {
@@ -430,7 +430,7 @@ bool txPost(const vector<pair<CScript, int64_t> >& vecSend, const CWalletTx& wtx
             }
 
 
-            vector<pair<const CWalletTx*, unsigned int> >
+            vector<pair<const __wx__Tx*, unsigned int> >
               vecCoins(setCoins.begin(), setCoins.end());
 
               vecCoins.insert(vecCoins.begin(), make_pair(&wtxIn, nTxOut));
@@ -457,13 +457,13 @@ bool txPost(const vector<pair<CScript, int64_t> >& vecSend, const CWalletTx& wtx
             else
               reservekey.ReturnKey();
   
-            BOOST_FOREACH(PAIRTYPE(const CWalletTx*, unsigned int)& coin, vecCoins)
+            BOOST_FOREACH(PAIRTYPE(const __wx__Tx*, unsigned int)& coin, vecCoins)
             {
               wtxNew.vin.push_back(CTxIn(coin.first->GetHash(), coin.second));
             }
 
             int nIn = 0;
-            BOOST_FOREACH(PAIRTYPE(const CWalletTx*, unsigned int)& coin, vecCoins)
+            BOOST_FOREACH(PAIRTYPE(const __wx__Tx*, unsigned int)& coin, vecCoins)
             {
               if(!SignSignature(*pwalletMain, *coin.first, wtxNew, nIn++))
               {
@@ -503,7 +503,7 @@ bool txPost(const vector<pair<CScript, int64_t> >& vecSend, const CWalletTx& wtx
 
     return true;
 }
-bool txRelayPre__(const CScript& scriptPubKey, const CWalletTx& wtxIn, CWalletTx& wtxNew, int64_t& t, string& e)
+bool txRelayPre__(const CScript& scriptPubKey, const __wx__Tx& wtxIn, __wx__Tx& wtxNew, int64_t& t, string& e)
 {
     int nTxOut = aliasOutIndex(wtxIn);
     CReserveKey reservekey(pwalletMain);
@@ -521,7 +521,7 @@ bool txRelayPre__(const CScript& scriptPubKey, const CWalletTx& wtxIn, CWalletTx
 
     return true;
 }
-string txRelay(const CScript& scriptPubKey, int64_t nValue, const CWalletTx& wtxIn, CWalletTx& wtxNew, bool fAskFee)
+string txRelay(const CScript& scriptPubKey, int64_t nValue, const __wx__Tx& wtxIn, __wx__Tx& wtxNew, bool fAskFee)
 {
     int nTxOut = aliasOutIndex(wtxIn);
     CReserveKey reservekey(pwalletMain);
@@ -722,10 +722,10 @@ Value publicKeyExports(const Array& params, bool fHelp)
     {
       ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
       {
-        BOOST_FOREACH(PAIRTYPE(const uint256, CWalletTx)& item,
+        BOOST_FOREACH(PAIRTYPE(const uint256, __wx__Tx)& item,
                       pwalletMain->mapWallet)
           {
-            const CWalletTx& tx = item.second;
+            const __wx__Tx& tx = item.second;
 
             vchType vchSender, vchRecipient, vchKey, vchAes, vchSig;
             int nOut;
@@ -780,10 +780,10 @@ Value publicKeys(const Array& params, bool fHelp)
     {
       ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
       {
-        BOOST_FOREACH(PAIRTYPE(const uint256, CWalletTx)& item,
+        BOOST_FOREACH(PAIRTYPE(const uint256, __wx__Tx)& item,
                       pwalletMain->mapWallet)
           {
-            const CWalletTx& tx = item.second;
+            const __wx__Tx& tx = item.second;
 
             vchType vchS, vchR, vchKey, vchAes, vchSig;
             int nOut;
@@ -900,10 +900,10 @@ Value decryptedMessageList(const Array& params, bool fHelp)
     {
       ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
       {
-        BOOST_FOREACH(PAIRTYPE(const uint256, CWalletTx)& item,
+        BOOST_FOREACH(PAIRTYPE(const uint256, __wx__Tx)& item,
                       pwalletMain->mapWallet)
         {
-            const CWalletTx& tx = item.second;
+            const __wx__Tx& tx = item.second;
 
             vchType vchSender, vchRecipient, vchEncryptedMessage, ivVch, vchSig;
             int nOut;
@@ -1028,10 +1028,10 @@ Value plainTextMessageList(const Array& params, bool fHelp)
     {
       ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
       {
-        BOOST_FOREACH(PAIRTYPE(const uint256, CWalletTx)& item,
+        BOOST_FOREACH(PAIRTYPE(const uint256, __wx__Tx)& item,
                       pwalletMain->mapWallet)
         {
-            const CWalletTx& tx = item.second;
+            const __wx__Tx& tx = item.second;
 
 
 
@@ -1070,7 +1070,7 @@ Value externFrame__(const Array& params, bool fHelp)
   std::transform(k1.begin(), k1.end(), k1.begin(), ::tolower);
   vchNodeLocator = vchFromString(k1);
 
-  CWalletTx wtx;
+  __wx__Tx wtx;
   wtx.nVersion = CTransaction::DION_TX_VERSION;
   CScript scriptPubKeyOrig;
   CScript scriptPubKey;
@@ -1123,7 +1123,7 @@ Value externFrame__(const Array& params, bool fHelp)
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid dions address");
       scriptPubKeyOrig.SetBitcoinAddress(strAddress);
 
-      const CWalletTx& wtxIn = pwalletMain->mapWallet[wtxInHash];
+      const __wx__Tx& wtxIn = pwalletMain->mapWallet[wtxInHash];
       int op__;
       int nOut;
       vchType vX;
@@ -1162,7 +1162,7 @@ Value internFrame__(const Array& params, bool fHelp)
   std::transform(k1.begin(), k1.end(), k1.begin(), ::tolower);
   vchNodeLocator = vchFromString(k1);
 
-  CWalletTx wtx;
+  __wx__Tx wtx;
   wtx.nVersion = CTransaction::DION_TX_VERSION;
 
   ENTER_CRITICAL_SECTION(cs_main)
@@ -1212,7 +1212,7 @@ Value internFrame__(const Array& params, bool fHelp)
 
         CScript scriptPubKey;
 
-        CWalletTx& wtxIn = pwalletMain->mapWallet[wtxInHash];
+        __wx__Tx& wtxIn = pwalletMain->mapWallet[wtxInHash];
         bool found = false;
         BOOST_FOREACH(CTxOut& out, wtxIn.vout)
         {
@@ -1280,7 +1280,7 @@ Value internFrame__(const Array& params, bool fHelp)
 
                       pwalletMain->relay(vvch[2], r);
   
-                      CWalletDB walletdb(pwalletMain->strWalletFile, "r+");
+                      __wx__DB walletdb(pwalletMain->strWalletFile, "r+");
  
                       pwalletMain->LoadRelay(vchNodeLocator, r); 
                       if(!walletdb.UpdateKey(vchNodeLocator, pwalletMain->lCache[vchNodeLocator]))
@@ -1397,10 +1397,10 @@ Value aliasOut(const Array& params, bool fHelp)
   {
     ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
     {
-      BOOST_FOREACH(PAIRTYPE(const uint256, CWalletTx)& item,
+      BOOST_FOREACH(PAIRTYPE(const uint256, __wx__Tx)& item,
                   pwalletMain->mapWallet)
       {
-        const CWalletTx& tx = item.second;
+        const __wx__Tx& tx = item.second;
 
         vchType vchAlias, vchValue;
         int nOut;
@@ -1514,10 +1514,10 @@ Value nodeValidate(const Array& params, bool fHelp)
     {
       ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
       {
-        BOOST_FOREACH(PAIRTYPE(const uint256, CWalletTx)& item,
+        BOOST_FOREACH(PAIRTYPE(const uint256, __wx__Tx)& item,
                       pwalletMain->mapWallet)
           {
-            const CWalletTx& tx = item.second;
+            const __wx__Tx& tx = item.second;
 
             vchType vchAlias, vchValue;
             int nOut;
@@ -1677,10 +1677,10 @@ Value nodeRetrieve(const Array& params, bool fHelp)
     {
       ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
       {
-        BOOST_FOREACH(PAIRTYPE(const uint256, CWalletTx)& item,
+        BOOST_FOREACH(PAIRTYPE(const uint256, __wx__Tx)& item,
                       pwalletMain->mapWallet)
           {
-            const CWalletTx& tx = item.second;
+            const __wx__Tx& tx = item.second;
 
             vchType vchAlias, vchValue;
             int nOut;
@@ -1814,10 +1814,10 @@ Value getNodeRecord(const Array& params, bool fHelp)
     {
       ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
       {
-        BOOST_FOREACH(PAIRTYPE(const uint256, CWalletTx)& item,
+        BOOST_FOREACH(PAIRTYPE(const uint256, __wx__Tx)& item,
                       pwalletMain->mapWallet)
           {
-            const CWalletTx& tx = item.second;
+            const __wx__Tx& tx = item.second;
 
             vchType vchAlias, vchValue;
             int nOut;
@@ -1953,10 +1953,10 @@ bool searchAliasEncrypted2(string alias, uint256& wtxInHash)
   {
     ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
     {
-      BOOST_FOREACH(PAIRTYPE(const uint256, CWalletTx)& item,
+      BOOST_FOREACH(PAIRTYPE(const uint256, __wx__Tx)& item,
                     pwalletMain->mapWallet)
       {
-        const CWalletTx& tx = item.second;
+        const __wx__Tx& tx = item.second;
 
         vchType vchAlias, vchValue;
         int nOut;
@@ -2023,10 +2023,10 @@ bool searchAliasEncrypted(string alias, uint256& wtxInHash)
   {
     ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
     {
-      BOOST_FOREACH(PAIRTYPE(const uint256, CWalletTx)& item,
+      BOOST_FOREACH(PAIRTYPE(const uint256, __wx__Tx)& item,
                     pwalletMain->mapWallet)
       {
-        const CWalletTx& tx = item.second;
+        const __wx__Tx& tx = item.second;
 
         vchType vchAlias, vchValue;
         int nOut;
@@ -2108,10 +2108,10 @@ Value aliasList__(const Array& params, bool fHelp)
     {
       ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
       {
-        BOOST_FOREACH(PAIRTYPE(const uint256, CWalletTx)& item,
+        BOOST_FOREACH(PAIRTYPE(const uint256, __wx__Tx)& item,
                       pwalletMain->mapWallet)
           {
-            const CWalletTx& tx = item.second;
+            const __wx__Tx& tx = item.second;
 
             vchType vchAlias, vchValue;
             int nOut;
@@ -2160,7 +2160,7 @@ Value aliasList__(const Array& params, bool fHelp)
             for(int i=0; i < tx.vin.size(); i++)
             {
               COutPoint prevout = tx.vin[i].prevout;
-              CWalletTx& txPrev = pwalletMain->mapWallet[prevout.hash];
+              __wx__Tx& txPrev = pwalletMain->mapWallet[prevout.hash];
 
               CTxOut& out = txPrev.vout[prevout.n];
 
@@ -2292,10 +2292,10 @@ Value aliasList(const Array& params, bool fHelp)
     {
       ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
       {
-        BOOST_FOREACH(PAIRTYPE(const uint256, CWalletTx)& item,
+        BOOST_FOREACH(PAIRTYPE(const uint256, __wx__Tx)& item,
                       pwalletMain->mapWallet)
           {
-            CWalletTx& tx = item.second;
+            __wx__Tx& tx = item.second;
 
             vchType vchAlias, vchValue;
             int nOut;
@@ -2344,7 +2344,7 @@ Value aliasList(const Array& params, bool fHelp)
             for(int i=0; i < tx.vin.size(); i++)
             {
               COutPoint prevout = tx.vin[i].prevout;
-              CWalletTx& txPrev = pwalletMain->mapWallet[prevout.hash];
+              __wx__Tx& txPrev = pwalletMain->mapWallet[prevout.hash];
 
               CTxOut& out = txPrev.vout[prevout.n];
 
@@ -2693,7 +2693,7 @@ Value primaryCXValidate(const Array& params, bool fHelp)
       }
     }
 
-    CWalletTx wtx;
+    __wx__Tx wtx;
     wtx.nVersion = CTransaction::DION_TX_VERSION;
     CScript scriptPubKeyOrig;
 
@@ -2742,7 +2742,7 @@ Value primaryCXValidate(const Array& params, bool fHelp)
           string encryptedAliasForRecipient;
           EncryptMessage(stringFromVch(extVch), locatorStr, encryptedAliasForRecipient);
 
-        const CWalletTx& wtxIn = pwalletMain->mapWallet[wtxInHash];
+        const __wx__Tx& wtxIn = pwalletMain->mapWallet[wtxInHash];
         bool found = false;
         BOOST_FOREACH(const CTxOut& out, wtxIn.vout)
         {
@@ -2911,10 +2911,10 @@ Value vEPID(const Array& params, bool fHelp)
   {
     ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
     {
-      BOOST_FOREACH(PAIRTYPE(const uint256, CWalletTx)& item,
+      BOOST_FOREACH(PAIRTYPE(const uint256, __wx__Tx)& item,
                   pwalletMain->mapWallet)
       {
-        const CWalletTx& tx = item.second;
+        const __wx__Tx& tx = item.second;
 
         vector< vector<unsigned char> > vv;
         int nOut;
@@ -3104,10 +3104,10 @@ Value validate(const Array& params, bool fHelp)
   {
     ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
     {
-      BOOST_FOREACH(PAIRTYPE(const uint256, CWalletTx)& item,
+      BOOST_FOREACH(PAIRTYPE(const uint256, __wx__Tx)& item,
                   pwalletMain->mapWallet)
       {
-        const CWalletTx& tx = item.second;
+        const __wx__Tx& tx = item.second;
 
         vector< vector<unsigned char> > vv;
         int nOut;
@@ -3309,7 +3309,7 @@ Value transientStatus__C(const Array& params, bool fHelp)
     const vchType vchValue = vchFromValue(s);
 
 
-    CWalletTx wtx;
+    __wx__Tx wtx;
     wtx.nVersion = CTransaction::DION_TX_VERSION;
 
     ENTER_CRITICAL_SECTION(cs_main)
@@ -3362,7 +3362,7 @@ Value transientStatus__C(const Array& params, bool fHelp)
         CScript scriptPubKey;
 
 
-        CWalletTx& wtxIn = pwalletMain->mapWallet[wtxInHash];
+        __wx__Tx& wtxIn = pwalletMain->mapWallet[wtxInHash];
         bool found = false;
         BOOST_FOREACH(CTxOut& out, wtxIn.vout)
         {
@@ -3485,7 +3485,7 @@ Value updateEncryptedAliasFile(const Array& params, bool fHelp)
 
     int CRC__KEY = relay_inv(INTERN_REF0__, EXTERN_REF0__);
 
-    CWalletTx wtx;
+    __wx__Tx wtx;
     wtx.nVersion = CTransaction::DION_TX_VERSION;
 
     ENTER_CRITICAL_SECTION(cs_main)
@@ -3537,7 +3537,7 @@ Value updateEncryptedAliasFile(const Array& params, bool fHelp)
 
         
 
-        CWalletTx& wtxIn = pwalletMain->mapWallet[wtxInHash];
+        __wx__Tx& wtxIn = pwalletMain->mapWallet[wtxInHash];
         bool found = false;
         BOOST_FOREACH(CTxOut& out, wtxIn.vout)
         {
@@ -3614,7 +3614,7 @@ Value updateEncryptedAlias(const Array& params, bool fHelp)
     const vchType vchAlias = vchFromString(params[0].get_str());
     vchType vchValue = vchFromString(params[1].get_str());
 
-    CWalletTx wtx;
+    __wx__Tx wtx;
     wtx.nVersion = CTransaction::DION_TX_VERSION;
 
     ENTER_CRITICAL_SECTION(cs_main)
@@ -3665,7 +3665,7 @@ Value updateEncryptedAlias(const Array& params, bool fHelp)
         CScript scriptPubKey;
 
 
-        CWalletTx& wtxIn = pwalletMain->mapWallet[wtxInHash];
+        __wx__Tx& wtxIn = pwalletMain->mapWallet[wtxInHash];
         bool found = false;
         BOOST_FOREACH(CTxOut& out, wtxIn.vout)
         {
@@ -3772,7 +3772,7 @@ Value decryptAlias(const Array& params, bool fHelp)
         throw JSONRPCError(RPC_WALLET_ERROR, "no random key available for address");
 
 
-    CWalletTx wtx;
+    __wx__Tx wtx;
     wtx.nVersion = CTransaction::DION_TX_VERSION;
 
     ENTER_CRITICAL_SECTION(cs_main)
@@ -3824,7 +3824,7 @@ Value decryptAlias(const Array& params, bool fHelp)
         CScript scriptPubKey;
 
 
-        CWalletTx& wtxIn = pwalletMain->mapWallet[wtxInHash];
+        __wx__Tx& wtxIn = pwalletMain->mapWallet[wtxInHash];
         vector<unsigned char> vchPrevSig;
         bool found = false;
         BOOST_FOREACH(CTxOut& out, wtxIn.vout)
@@ -3985,7 +3985,7 @@ Value transferEncryptedExtPredicate(const Array& params, bool fHelp)
       }
     }
 
-    CWalletTx wtx;
+    __wx__Tx wtx;
     wtx.nVersion = CTransaction::DION_TX_VERSION;
     CScript scriptPubKeyOrig;
 
@@ -4033,7 +4033,7 @@ Value transferEncryptedExtPredicate(const Array& params, bool fHelp)
           string encryptedAliasForRecipient;
           EncryptMessage(stringFromVch(extVch), locatorStr, encryptedAliasForRecipient);
 
-        const CWalletTx& wtxIn = pwalletMain->mapWallet[wtxInHash];
+        const __wx__Tx& wtxIn = pwalletMain->mapWallet[wtxInHash];
         bool found = false;
         BOOST_FOREACH(const CTxOut& out, wtxIn.vout)
         {
@@ -4283,7 +4283,7 @@ Value transferEncryptedAlias(const Array& params, bool fHelp)
       }
     }
 
-    CWalletTx wtx;
+    __wx__Tx wtx;
     wtx.nVersion = CTransaction::DION_TX_VERSION;
     CScript scriptPubKeyOrig;
 
@@ -4331,7 +4331,7 @@ Value transferEncryptedAlias(const Array& params, bool fHelp)
           string encryptedAliasForRecipient;
           EncryptMessage(stringFromVch(extVch), locatorStr, encryptedAliasForRecipient);
 
-        const CWalletTx& wtxIn = pwalletMain->mapWallet[wtxInHash];
+        const __wx__Tx& wtxIn = pwalletMain->mapWallet[wtxInHash];
         bool found = false;
         BOOST_FOREACH(const CTxOut& out, wtxIn.vout)
         {
@@ -4474,7 +4474,7 @@ Value transferAlias(const Array& params, bool fHelp)
     string addressStr = stringFromVch(vchAddress);
 
 
-    CWalletTx wtx;
+    __wx__Tx wtx;
     wtx.nVersion = CTransaction::DION_TX_VERSION;
     CScript scriptPubKeyOrig;
 
@@ -4544,7 +4544,7 @@ Value transferAlias(const Array& params, bool fHelp)
               throw runtime_error("this coin is not in your wallet");
           }
 
-          const CWalletTx& wtxIn = pwalletMain->mapWallet[wtxInHash];
+          const __wx__Tx& wtxIn = pwalletMain->mapWallet[wtxInHash];
           int op__;
           int nOut;
           vchType vchValue;
@@ -4599,7 +4599,7 @@ Value uC(const Array& params, bool fHelp) { if(fHelp || params.size() != 2)
 
       pwalletMain->relay(l, r);
 
-      CWalletDB walletdb(pwalletMain->strWalletFile, "r+");
+      __wx__DB walletdb(pwalletMain->strWalletFile, "r+");
  
       pwalletMain->LoadRelay(vchAlias, r); 
       if(!walletdb.UpdateKey(l, pwalletMain->lCache[l]))
@@ -4628,7 +4628,7 @@ Value uC(const Array& params, bool fHelp) { if(fHelp || params.size() != 2)
    
     const vchType vchValue = vchFromString(gen);
 
-    CWalletTx wtx;
+    __wx__Tx wtx;
     wtx.nVersion = CTransaction::DION_TX_VERSION;
     ENTER_CRITICAL_SECTION(cs_main)
     {
@@ -4678,7 +4678,7 @@ Value uC(const Array& params, bool fHelp) { if(fHelp || params.size() != 2)
         CScript scriptPubKey;
 
 
-        CWalletTx& wtxIn = pwalletMain->mapWallet[wtxInHash];
+        __wx__Tx& wtxIn = pwalletMain->mapWallet[wtxInHash];
         bool found = false;
         BOOST_FOREACH(CTxOut& out, wtxIn.vout)
         {
@@ -4784,7 +4784,7 @@ Value transientStatus__(const Array& params, bool fHelp)
     const vchType vchValue = vchFromValue(s);
 
 
-    CWalletTx wtx;
+    __wx__Tx wtx;
     wtx.nVersion = CTransaction::DION_TX_VERSION;
     CScript scriptPubKeyOrig;
 
@@ -4849,7 +4849,7 @@ Value transientStatus__(const Array& params, bool fHelp)
               return ret;
           }
 
-          CWalletTx& wtxIn = pwalletMain->mapWallet[wtxInHash];
+          __wx__Tx& wtxIn = pwalletMain->mapWallet[wtxInHash];
           scriptPubKey += scriptPubKeyOrig;
           int64_t t;
           string strError;
@@ -4901,7 +4901,7 @@ Value updateAliasFile(const Array& params, bool fHelp)
     const vchType vchValue = vchFromValue(s);
 
 
-    CWalletTx wtx;
+    __wx__Tx wtx;
     wtx.nVersion = CTransaction::DION_TX_VERSION;
     CScript scriptPubKeyOrig;
 
@@ -4968,7 +4968,7 @@ Value updateAliasFile(const Array& params, bool fHelp)
               throw runtime_error("this coin is not in your wallet");
           }
 
-          CWalletTx& wtxIn = pwalletMain->mapWallet[wtxInHash];
+          __wx__Tx& wtxIn = pwalletMain->mapWallet[wtxInHash];
           scriptPubKey += scriptPubKeyOrig;
           string strError = txRelay(scriptPubKey, CTRL__, wtxIn, wtx, false);
           if(strError != "")
@@ -4995,7 +4995,7 @@ Value updateAlias(const Array& params, bool fHelp)
     const vchType vchAlias = vchFromValue(locatorStr);
     const vchType vchValue = vchFromValue(params[1]);
 
-    CWalletTx wtx;
+    __wx__Tx wtx;
     wtx.nVersion = CTransaction::DION_TX_VERSION;
     CScript scriptPubKeyOrig;
 
@@ -5062,7 +5062,7 @@ Value updateAlias(const Array& params, bool fHelp)
           scriptPubKeyOrig.SetBitcoinAddress(strAddress);
         }
 
-        CWalletTx& wtxIn = pwalletMain->mapWallet[wtxInHash];
+        __wx__Tx& wtxIn = pwalletMain->mapWallet[wtxInHash];
         scriptPubKey += scriptPubKeyOrig;
         string strError = txRelay(scriptPubKey, CTRL__, wtxIn, wtx, false);
         if(strError != "")
@@ -5088,7 +5088,7 @@ Value publicKey(const Array& params, bool fHelp)
 
   EnsureWalletIsUnlocked();
 
-  CWalletDB walletdb(pwalletMain->strWalletFile, "r+");
+  __wx__DB walletdb(pwalletMain->strWalletFile, "r+");
 
   string myAddress = params[0].get_str();
 
@@ -5174,7 +5174,7 @@ Value sendSymmetric(const Array& params, bool fHelp)
     const vchType vchSender = vchFromValue(myAddress);
     const vchType vchRecipient = vchFromValue(f);
 
-    CWalletTx wtx;
+    __wx__Tx wtx;
     wtx.nVersion = CTransaction::DION_TX_VERSION;
 
     CScript scriptPubKeyOrig;
@@ -5261,10 +5261,10 @@ bool getImportedPubKey(string fKey, vchType& recipientPubKeyVch)
   {
     ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
     {
-      BOOST_FOREACH(PAIRTYPE(const uint256, CWalletTx)& item,
+      BOOST_FOREACH(PAIRTYPE(const uint256, __wx__Tx)& item,
                       pwalletMain->mapWallet)
       {
-        const CWalletTx& tx = item.second;
+        const __wx__Tx& tx = item.second;
 
         vchType vchSender, vchRecipient, vchKey, vchAes, vchSig;
         int nOut;
@@ -5293,10 +5293,10 @@ bool getImportedPubKey(string myAddress, string fKey, vchType& recipientPubKeyVc
   {
     ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
     {
-      BOOST_FOREACH(PAIRTYPE(const uint256, CWalletTx)& item,
+      BOOST_FOREACH(PAIRTYPE(const uint256, __wx__Tx)& item,
                       pwalletMain->mapWallet)
       {
-        const CWalletTx& tx = item.second;
+        const __wx__Tx& tx = item.second;
 
         vchType vchSender, vchRecipient, vchKey, vchAes, vchSig;
         int nOut;
@@ -5331,10 +5331,10 @@ bool getImportedPubKey(string myAddress, string fKey, vchType& recipientPubKeyVc
   {
     ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
     {
-      BOOST_FOREACH(PAIRTYPE(const uint256, CWalletTx)& item,
+      BOOST_FOREACH(PAIRTYPE(const uint256, __wx__Tx)& item,
                       pwalletMain->mapWallet)
       {
-        const CWalletTx& tx = item.second;
+        const __wx__Tx& tx = item.second;
 
         vchType vchSender, vchRecipient, vchKey, vchAes, vchSig;
         int nOut;
@@ -5436,7 +5436,7 @@ Value sendPublicKey(const Array& params, bool fHelp)
     vector<unsigned char> vchSig;
     CDataStream ss(SER_GETHASH, 0);
 
-    CWalletTx wtx;
+    __wx__Tx wtx;
     wtx.nVersion = CTransaction::DION_TX_VERSION;
 
     CScript scriptPubKeyOrig;
@@ -5462,7 +5462,7 @@ Value sendPublicKey(const Array& params, bool fHelp)
       const string publicKeyStr = stringFromVch(recipientPubKeyVch);
       EncryptMessage(publicKeyStr, aesKeyStr, encrypted);
 
-      CWalletDB walletdb(pwalletMain->strWalletFile, "r+");
+      __wx__DB walletdb(pwalletMain->strWalletFile, "r+");
       if(!pwalletMain->aes(vchPubKey, f, aesKeyStr))
         throw JSONRPCError(RPC_TYPE_ERROR, "Failed to set meta data for key");
 
@@ -5558,7 +5558,7 @@ Value sendPlainMessage(const Array& params, bool fHelp)
 
     string sigBase64 = EncodeBase64(&vchSig[0], vchSig.size());
 
-    CWalletTx wtx;
+    __wx__Tx wtx;
     wtx.nVersion = CTransaction::DION_TX_VERSION;
 
     CScript scriptPubKeyOrig;
@@ -5674,7 +5674,7 @@ Value sendMessage(const Array& params, bool fHelp)
 
     string sigBase64 = EncodeBase64(&vchSig[0], vchSig.size());
 
-    CWalletTx wtx;
+    __wx__Tx wtx;
     wtx.nVersion = CTransaction::DION_TX_VERSION;
 
     CScript scriptPubKeyOrig;
@@ -5832,7 +5832,7 @@ Value registerAliasGenerate(const Array& params, bool fHelp)
     keyAddress.GetKeyID(keyID);
     pwalletMain->SetAddressBookName(keyID, "");
 
-  CWalletDB walletdb(pwalletMain->strWalletFile, "r+");
+  __wx__DB walletdb(pwalletMain->strWalletFile, "r+");
   if(!pwalletMain->SetRSAMetadata(vchPubKey))
     throw JSONRPCError(RPC_TYPE_ERROR, "Failed to load meta data for key");
 
@@ -5860,7 +5860,7 @@ Value registerAliasGenerate(const Array& params, bool fHelp)
   string encrypted;
   EncryptMessage(pub_k, locatorStr, encrypted);
 
-  CWalletTx wtx;
+  __wx__Tx wtx;
   wtx.nVersion = CTransaction::DION_TX_VERSION;
 
   CScript scriptPubKeyOrig;
@@ -5984,7 +5984,7 @@ Value registerAlias(const Array& params, bool fHelp)
     if(!pwalletMain->SetRandomKeyMetadata(vchPubKey, vchRand))
       throw JSONRPCError(RPC_WALLET_ERROR, "Failed to set meta data for key");
 
-    CWalletDB walletdb(pwalletMain->strWalletFile, "r+");
+    __wx__DB walletdb(pwalletMain->strWalletFile, "r+");
 
     if(!walletdb.UpdateKey(vchPubKey, pwalletMain->kd[vchPubKey.GetID()]))
       throw JSONRPCError(RPC_TYPE_ERROR, "Failed to write meta data for key");
@@ -5998,7 +5998,7 @@ Value registerAlias(const Array& params, bool fHelp)
     EncryptMessage(pub_k, locatorStr, encrypted);
 
 
-    CWalletTx wtx;
+    __wx__Tx wtx;
     wtx.nVersion = CTransaction::DION_TX_VERSION;
 
     CScript scriptPubKeyOrig;
@@ -6656,7 +6656,7 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
              vchType vchRand = DecodeBase64(decryptedRand.c_str(), &fInvalid);
              if(!pwalletMain->SetRandomKeyMetadata(vchPubKey, vchRand))
                throw JSONRPCError(RPC_WALLET_ERROR, "Failed to set meta data for key");
-            CWalletDB walletdb(pwalletMain->strWalletFile, "r+");
+            __wx__DB walletdb(pwalletMain->strWalletFile, "r+");
             if(!walletdb.UpdateKey(vchPubKey, pwalletMain->kd[vchPubKey.GetID()]))
               throw JSONRPCError(RPC_TYPE_ERROR, "Failed to write meta data for key");
            }
