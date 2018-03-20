@@ -3208,7 +3208,7 @@ string CWallet::__associate_fn__(CScript pk, int64_t v, CWalletTx& t, __im__& i)
   return "";
 }
 
-bool CWallet::__x_form__(CScript pk, int64_t v, __im__& P, CWalletTx& t, int64_t& rf)
+bool CWallet::__x_form__(CScript pk, int64_t v, __im__& i, CWalletTx& t, int64_t& rf)
 {
   return true;
 }
