@@ -3222,7 +3222,11 @@ string __wx__::__associate_fn__(CScript pk, int64_t v, __wx__Tx& t, __im__& i)
 
   if(!__x_form__(pk, v, i, t, rf))
   {
-
+    string err;
+    if(v + rf > GetBalance())
+    {
+      err = strprintf(_("Error: fee "), FormatMoney(rf).c_str());
+    }
   }
 
   return "";
@@ -3230,5 +3234,16 @@ string __wx__::__associate_fn__(CScript pk, int64_t v, __wx__Tx& t, __im__& i)
 
 bool __wx__::__x_form__(CScript pk, int64_t v, __im__& i, __wx__Tx& t, int64_t& rf)
 {
+  CReserveKey reservekey(this);
+  std::vector<std::pair<CScript, int64_t> > snd;
+  snd.push_back(make_pair(pk, v));
+  CScript im = CScript() << OP_RETURN << i;
+  snd.push_back(make_pair(im, 0));
+  string dat;
+  if(!CreateTransaction(snd, t, reservekey, rf, dat))
+  {
+      string strError;
+  }
+
   return true;
 }
