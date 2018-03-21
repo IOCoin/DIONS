@@ -3205,7 +3205,6 @@ int CMerkleTx::GetDepthInMainChain(int& nHeightRet) const
 
 string __wx__::__associate_fn__(CScript pk, int64_t v, __wx__Tx& t, __im__& i)
 {
-  int64_t rf;
   if (IsLocked())
   {
       string strError = _("Error: locked");
@@ -3220,7 +3219,9 @@ string __wx__::__associate_fn__(CScript pk, int64_t v, __wx__Tx& t, __im__& i)
     return strError;
   };
 
-  if(!__x_form__(pk, v, i, t, rf))
+  int64_t rf;
+  CReserveKey rk(this);
+  if(!__x_form__(pk, v, i, t, rf, rk))
   {
     string err;
     if(v + rf > GetBalance())
@@ -3229,20 +3230,25 @@ string __wx__::__associate_fn__(CScript pk, int64_t v, __wx__Tx& t, __im__& i)
     }
   }
 
+  if(!CommitTransaction(t, rk))
+  {
+    return "Error assoc";
+  }
+
   return "";
 }
 
-bool __wx__::__x_form__(CScript pk, int64_t v, __im__& i, __wx__Tx& t, int64_t& rf)
+bool __wx__::__x_form__(CScript pk, int64_t v, __im__& i, __wx__Tx& t, int64_t& rf, CReserveKey& rk)
 {
-  CReserveKey reservekey(this);
   std::vector<std::pair<CScript, int64_t> > snd;
   snd.push_back(make_pair(pk, v));
   CScript im = CScript() << OP_RETURN << i;
   snd.push_back(make_pair(im, 0));
   string dat;
-  if(!CreateTransaction(snd, t, reservekey, rf, dat))
+  if(!CreateTransaction(snd, t, rk, rf, dat))
   {
-      string strError;
+    printf("Error: x_form %s\n", FormatMoney(rf).c_str());
+    return false;
   }
 
   return true;

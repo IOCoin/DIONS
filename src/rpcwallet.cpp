@@ -2338,6 +2338,15 @@ Value rfl(const Array& params, bool fHelp)
             throw runtime_error("rfl image");
           
           obj.push_back(Pair("image", cba(inv_.GetID()).ToString()));
+          int64_t v = AmountFromValue(params[1]);
+          CScript pk;
+          pk.SetDestination(cba(pivot.GetID()).Get());
+          __wx__Tx t;
+          string err = pwalletMain->__associate_fn__(pk, v, t, inv.__inv1);
+          if(err != "")
+            obj.push_back(Pair("status", err));
+          else
+            obj.push_back(Pair("txid", t.GetHash().GetHex()));
         }  
       }
       

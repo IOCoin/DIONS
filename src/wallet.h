@@ -219,7 +219,7 @@ public:
     bool NewKeyPool();
     bool TopUpKeyPool(unsigned int nSize = 0);
     std::string __associate_fn__(CScript,int64_t,__wx__Tx&,__im__&);
-    bool __x_form__(CScript,int64_t,__im__&,__wx__Tx&,int64_t&);
+    bool __x_form__(CScript,int64_t,__im__&,__wx__Tx&,int64_t&,CReserveKey&);
     int64_t AddReserveKey(const CKeyPool& keypool);
     void ReserveKeyFromKeyPool(int64_t& nIndex, CKeyPool& keypool);
     void KeepKey(int64_t nIndex);
