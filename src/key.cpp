@@ -46,6 +46,28 @@ void __vtx_clean(__fbase__* x, EC_GROUP* g)
   EC_GROUP_free(g);
 }
 
+struct __convol__77
+{
+  BN_CTX* ctx;
+  BIGNUM* q1;
+  EC_POINT* q2;
+  BIGNUM* q3;
+  EC_POINT* q4;
+  EC_POINT* q5;
+  BIGNUM* q6;
+};
+
+void __convol_x__(__convol__77* c)
+{
+  BN_CTX_free(c->ctx);
+  BN_free(c->q1);
+  EC_POINT_free(c->q2);
+  BN_free(c->q3);
+  EC_POINT_free(c->q4);
+  EC_POINT_free(c->q5);
+  BN_free(c->q6);
+}
+
 // Generate a private key from just the secret parameter
 int EC_KEY_regenerate_key(EC_KEY *eckey, BIGNUM *priv_key)
 {
@@ -679,5 +701,9 @@ int invert(__inv__& inv)
 
 int __synth_piv__conv77(__im__& offset1, __im__& g, __im__& s)
 {
+  EC_GROUP *group = EC_GROUP_new_by_curve_name(NID_secp256k1);
+  if(!group)
+    throw runtime_error("conv synth");
+
   return 0;
 }
