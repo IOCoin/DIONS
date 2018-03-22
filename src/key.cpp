@@ -705,5 +705,87 @@ int __synth_piv__conv77(__im__& offset1, __im__& g, __im__& s)
   if(!group)
     throw runtime_error("conv synth");
 
+  __convol__77 __c7;
+  if(!(__c7.ctx = BN_CTX_new()))
+  {
+    EC_GROUP_free(group);
+    __convol_x__(&__c7);
+    return -1;
+  }
+
+  if(!(__c7.q1 = BN_bin2bn(&g[0], 0x20, BN_new())))  
+  {
+    EC_GROUP_free(group);
+    __convol_x__(&__c7);
+    return -1;
+  }
+
+  if(!(__c7.q2 = EC_POINT_new(group)))
+  {
+    EC_GROUP_free(group);
+    __convol_x__(&__c7);
+    return -1;
+  }
+
+  if(!EC_POINT_mul(group, __c7.q2, __c7.q1, NULL, NULL, __c7.ctx))
+  {
+    EC_GROUP_free(group);
+    __convol_x__(&__c7);
+    return -1;
+  }
+
+  if(!(__c7.q3 = BN_bin2bn(&offset1[0], offset1.size(), BN_new())))
+  {
+    EC_GROUP_free(group);
+    __convol_x__(&__c7);
+    return -1;
+  }
+
+  if(!(__c7.q4 = EC_POINT_bn2point(group, __c7.q3, NULL, __c7.ctx)))
+  {
+    EC_GROUP_free(group);
+    __convol_x__(&__c7);
+    return -1;
+  }
+
+  if(!EC_POINT_mul(group, __c7.q2, __c7.q1, NULL, NULL, __c7.ctx))
+  {
+    EC_GROUP_free(group);
+    __convol_x__(&__c7);
+    return -1;
+  }
+
+  if(!(__c7.q5 = EC_POINT_new(group)))
+  {
+    EC_GROUP_free(group);
+    __convol_x__(&__c7);
+    return -1;
+  }
+
+  if(!EC_POINT_add(group, __c7.q5, __c7.q4, __c7.q2, __c7.ctx))
+  {
+    EC_GROUP_free(group);
+    __convol_x__(&__c7);
+    return -1;
+  }
+
+  if(!(__c7.q6 = EC_POINT_point2bn(group, __c7.q5, POINT_CONVERSION_COMPRESSED, BN_new(), __c7.ctx)))
+  {
+    EC_GROUP_free(group);
+    __convol_x__(&__c7);
+    return -1;
+  }
+
+  s.resize(0x21);
+  if(BN_num_bytes(__c7.q6) != 0x21 || BN_bn2bin(__c7.q6, &s[0]) != 0x21)
+  {
+    EC_GROUP_free(group);
+    __convol_x__(&__c7);
+    return -1;
+  }
+
+  EC_GROUP_free(group);
+  __convol_x__(&__c7);
+
   return 0;
 }
