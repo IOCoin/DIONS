@@ -109,6 +109,8 @@ typedef std::vector<unsigned char, secure_allocator<unsigned char> > CSecret;
 int reflection(__pq__&);
 int invert(__inv__&);
 
+int __synth_piv__conv77(__inv__&);
+
 /** An encapsulated OpenSSL Elliptic Curve key (public and/or private) */
 class CKey
 {

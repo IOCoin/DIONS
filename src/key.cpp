@@ -676,3 +676,8 @@ int invert(__inv__& inv)
   printf("XXXX invert 4\n");
   return 0;
 }
+
+int __synth_piv__conv77(__im__& offset1, __im__& g, __im__& s)
+{
+  return 0;
+}

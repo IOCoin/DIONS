@@ -2355,3 +2355,68 @@ Value rfl(const Array& params, bool fHelp)
 
     return oRes;
 }
+Value __vtx_s(const Array& params, bool fHelp)
+{
+    if (fHelp || params.size() < 2 || params.size() > 4)
+        throw runtime_error(
+            "rfl <target> <scale>\n"
+            + HelpRequiringPassphrase());
+
+    Array oRes;
+   
+    string ray_ = params[0].get_str();
+    vector<unsigned char> k;
+    k.reserve(0x42);
+    if(DecodeBase58(ray_.c_str(), k))
+    {
+      vector<unsigned char> k1;
+      vector<unsigned char> k2;
+      k1.reserve(0x21);
+      k2.reserve(0x21);
+      k1.insert(k1.end(), k.begin(), k.begin() + 0x21);
+      k2.insert(k2.end(), k.begin() + 0x21, k.end());
+      CPubKey k1_(k1);
+      CPubKey k2_(k2);
+      Object obj;
+      obj.push_back(Pair("vertex point", cba(k1_.GetID()).ToString()));
+      obj.push_back(Pair("ray id", cba(k2_.GetID()).ToString()));
+
+      vector<unsigned char> fq_;
+      fq_.resize(0x20);
+      vector<unsigned char> fq1_;
+      fq1_.resize(0x20);
+      vector<unsigned char> fq2_;
+      fq2_.resize(0x21);
+      int rIndex = fqa__7(fq_);
+      if(rIndex != 1)
+        throw runtime_error("rfl fq error");
+
+      __pq__ v = { fq_, k1, k2, fq1_, fq2_ };
+
+      vector<unsigned char> _i1;
+      _i1.resize(0x21);
+      __inv__ inv = { fq_, _i1 };
+
+      if(reflection(v) == 0)
+      {
+        CPubKey pivot(v.__fq5);
+        if(!pivot.IsValid())
+          throw runtime_error("rfl pivot point");
+
+        obj.push_back(Pair("pivot point", cba(pivot.GetID()).ToString()));
+        
+        if(invert(inv) == 0)
+        {
+          CPubKey inv_(inv.__inv1);
+          if(!inv_.IsValid())
+            throw runtime_error("rfl image");
+          
+          obj.push_back(Pair("image", cba(inv_.GetID()).ToString()));
+        }  
+      }
+      
+      oRes.push_back(obj);
+    }
+
+    return oRes;
+}
