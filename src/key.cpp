@@ -68,6 +68,30 @@ void __convol_x__(__convol__77* c)
   BN_free(c->q6);
 }
 
+struct __conv__intern__
+{
+  BN_CTX* ctx;
+  BIGNUM* s1;
+  BIGNUM* s2;
+  EC_POINT* s3;
+  BIGNUM* s4;
+  BIGNUM* s5;
+  BIGNUM* s6;
+  BIGNUM* s7;
+};
+
+void __conv_intern__x__(__conv__intern__* c)
+{
+  BN_CTX_free(c->ctx);
+  BN_free(c->s1);
+  BN_free(c->s2);
+  EC_POINT_free(c->s3);
+  BN_free(c->s4);
+  BN_free(c->s5);
+  BN_free(c->s6);
+  BN_free(c->s7);
+}
+
 // Generate a private key from just the secret parameter
 int EC_KEY_regenerate_key(EC_KEY *eckey, BIGNUM *priv_key)
 {
@@ -658,12 +682,13 @@ int reflection(__pq__& v)
     return -1;
   };
     
+  __vtx_clean(&__fb, group);
+
   return 0;
 }
 
 int invert(__inv__& inv)
 {
-  printf("XXXX invert 1\n");
   EC_GROUP* group = EC_GROUP_new_by_curve_name(NID_secp256k1);
   if (!group)
   {
@@ -671,7 +696,6 @@ int invert(__inv__& inv)
     return -1;
   }
    
-  printf("XXXX invert 2\n");
 
   BIGNUM* i7 = BN_bin2bn(&inv.__inv7[0], 0x20, BN_new());
   if(!i7)
@@ -681,7 +705,6 @@ int invert(__inv__& inv)
     return -1;
   }
 
-  printf("XXXX invert 3\n");
   EC_POINT* __i1 = EC_POINT_new(group);
   EC_POINT_mul(group, __i1, i7, NULL, NULL, NULL);
   BIGNUM* img = EC_POINT_point2bn(group, __i1, POINT_CONVERSION_COMPRESSED, BN_new(), NULL);
@@ -693,9 +716,13 @@ int invert(__inv__& inv)
     BN_free(i7);
     EC_GROUP_free(group);
     return -1;
-  }
+  }  
 
-  printf("XXXX invert 4\n");
+  BN_free(img);
+  EC_POINT_free(__i1);
+  BN_free(i7);
+  EC_GROUP_free(group);
+
   return 0;
 }
 
@@ -786,6 +813,122 @@ int __synth_piv__conv77(__im__& offset1, __im__& g, __im__& s)
 
   EC_GROUP_free(group);
   __convol_x__(&__c7);
+
+  return 0;
+}
+
+int __synth_piv__conv71__intern(__im__& x_intern, __im__& im, 
+                                __im__& y_intern, __im__& p_intern)
+{
+  EC_GROUP* group = EC_GROUP_new_by_curve_name(NID_secp256k1);
+  if(!group)
+    throw runtime_error("synth conv, group");
+
+  __conv__intern__ conv;
+  if(!(conv.ctx = BN_CTX_new()))
+  {
+    __conv_intern__x__(&conv);
+    EC_GROUP_free(group);
+    return -1;
+  }  
+
+  if(!(conv.s1 = BN_bin2bn(&x_intern[0], 0x20, BN_new())))
+  {
+    __conv_intern__x__(&conv);
+    EC_GROUP_free(group);
+    return -1;
+  }
+
+  if(!(conv.s2 = BN_bin2bn(&im[0], im.size(), BN_new())))
+  {
+    __conv_intern__x__(&conv);
+    EC_GROUP_free(group);
+    return -1;
+  }
+
+  if(!(conv.s3 = EC_POINT_bn2point(group, conv.s2, NULL, conv.ctx)))
+  {
+    __conv_intern__x__(&conv);
+    EC_GROUP_free(group);
+    return -1;
+  }
+
+  if(!EC_POINT_mul(group, conv.s3, NULL, conv.s3, conv.s1, conv.ctx))
+  {
+    __conv_intern__x__(&conv);
+    EC_GROUP_free(group);
+    return -1;
+  }
+
+
+  if(!(conv.s4 = EC_POINT_point2bn(group, conv.s3, POINT_CONVERSION_COMPRESSED, BN_new(), conv.ctx)))
+  {
+    __conv_intern__x__(&conv);
+    EC_GROUP_free(group);
+    return -1;
+  }
+
+  vector<unsigned char> v;
+  v.resize(0x21);
+
+  if(BN_num_bytes(conv.s4) != 0x21 || BN_bn2bin(conv.s4, &v[0]) != 0x21)
+  {
+    __conv_intern__x__(&conv);
+    EC_GROUP_free(group);
+    return -1;
+  }
+
+  vector<unsigned char> v__f;
+  v__f.resize(0x20);
+  SHA256(&v[0], v.size(), &v__f[0]);
+
+  if(!(conv.s5 = BN_bin2bn(&v__f[0], 0x20, BN_new())))
+  {
+    __conv_intern__x__(&conv);
+    EC_GROUP_free(group);
+    return -1;
+  }
+
+  if(!(conv.s6 = BN_new()) || !EC_GROUP_get_order(group, conv.s6, conv.ctx))
+  {
+    __conv_intern__x__(&conv);
+    EC_GROUP_free(group);
+    return -1;
+  }
+
+  if(!(conv.s7 = BN_bin2bn(&y_intern[0], 0x20, BN_new())))
+  {
+    __conv_intern__x__(&conv);
+    EC_GROUP_free(group);
+    return -1;
+  }
+
+  if(!BN_mod_add(conv.s7, conv.s7, conv.s5, conv.s6, conv.ctx))
+  {
+    __conv_intern__x__(&conv);
+    EC_GROUP_free(group);
+    return -1;
+  }
+
+  if(BN_is_zero(conv.s7))
+  {
+    __conv_intern__x__(&conv);
+    EC_GROUP_free(group);
+    return -1;
+  }
+
+  memset(&p_intern[0], 0, 0x20);
+  int n_;
+  if((n_ = BN_num_bytes(conv.s7)) > 0x20 
+    || BN_bn2bin(conv.s7, &p_intern[0x20-n_]) != n_)
+  {
+    __conv_intern__x__(&conv);
+    EC_GROUP_free(group);
+    return -1;
+  };
+
+  __conv_intern__x__(&conv);
+  EC_GROUP_free(group);
 
   return 0;
 }

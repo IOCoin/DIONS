@@ -2359,7 +2359,7 @@ Value __vtx_s(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() < 2 || params.size() > 4)
         throw runtime_error(
-            "rfl <target> <scale>\n"
+            "__vtx_s <target> <scale>\n"
             + HelpRequiringPassphrase());
 
     Array oRes;
@@ -2376,7 +2376,26 @@ Value __vtx_s(const Array& params, bool fHelp)
       k1.insert(k1.end(), k.begin(), k.begin() + 0x21);
       k2.insert(k2.end(), k.begin() + 0x21, k.end());
       CPubKey k1_(k1);
+
+      CKeyID k_id1;
+      if (!cba(k1_.GetID()).GetKeyID(k_id1))
+        throw runtime_error("key");
+
+      CSecret vchSecret1;
+      bool fCompressed;
+      if (!pwalletMain->GetSecret(k_id1, vchSecret1, fCompressed))
+       throw runtime_error("k1 secret"); 
+
       CPubKey k2_(k2);
+
+      CKeyID k_id2;
+      if (!cba(k2_.GetID()).GetKeyID(k_id2))
+        throw runtime_error("key");
+
+      CSecret vchSecret2;
+      if (!pwalletMain->GetSecret(k_id2, vchSecret2, fCompressed))
+       throw runtime_error("k2 secret"); 
+      
       Object obj;
       obj.push_back(Pair("vertex point", cba(k1_.GetID()).ToString()));
       obj.push_back(Pair("ray id", cba(k2_.GetID()).ToString()));
@@ -2412,6 +2431,21 @@ Value __vtx_s(const Array& params, bool fHelp)
             throw runtime_error("rfl image");
           
           obj.push_back(Pair("image", cba(inv_.GetID()).ToString()));
+
+          unsigned char* a1 = vchSecret1.data();
+          unsigned char* a2 = vchSecret2.data();
+          __im__ tmp1(a1, a1 + 0x20);
+          __im__ tmp2 = inv.__inv1;
+          __im__ tmp3(a2, a2 + 0x20);
+          __im__ tmp4;
+          tmp4.resize(0x20);
+          __synth_piv__conv71__intern(tmp1,tmp2,tmp3,tmp4);
+          CSecret sx(tmp4.data(), tmp4.data() + 0x20);
+          CKey ks_x;
+          ks_x.SetSecret(sx, true);
+          CPubKey sx_p = ks_x.GetPubKey();
+          cba sxa(sx_p.GetID());
+          obj.push_back(Pair("sx_p", sxa.ToString()));
         }  
       }
       
