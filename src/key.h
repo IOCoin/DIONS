@@ -112,6 +112,8 @@ int invert(__inv__&);
 int __synth_piv__conv77(__im__&,__im__&,__im__&);
 int __synth_piv__conv71__intern(__im__&,__im__&,__im__&,__im__&);
 
+bool __intersect(CPubKey&,CPubKey&);
+
 /** An encapsulated OpenSSL Elliptic Curve key (public and/or private) */
 class CKey
 {
