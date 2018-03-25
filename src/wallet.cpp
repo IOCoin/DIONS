@@ -3243,6 +3243,7 @@ bool __wx__::__x_form__(CScript pk, int64_t v, __im__& i, __wx__Tx& t, int64_t& 
   std::vector<std::pair<CScript, int64_t> > snd;
   snd.push_back(make_pair(pk, v));
   CScript im = CScript() << OP_RETURN << i;
+  CPubKey k(i);
   snd.push_back(make_pair(im, 0));
   string dat;
   if(!CreateTransaction(snd, t, rk, rf, dat))
@@ -3252,4 +3253,21 @@ bool __wx__::__x_form__(CScript pk, int64_t v, __im__& i, __wx__Tx& t, int64_t& 
   }
 
   return true;
+}
+
+bool __wx__::__xfa(const CScript& s) const
+{
+  opcodetype o;
+  CScript::const_iterator pre = s.begin();
+    vector<unsigned char> v;
+  if(s.GetOp(pre, o, v) && o == OP_RETURN)
+  {
+    if(s.GetOp(pre, o, v) && v.size() == 0x21)
+    {
+      CPubKey c(v);
+      return true;
+    }
+  }
+
+  return false;
 }
