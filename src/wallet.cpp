@@ -3265,7 +3265,16 @@ bool __wx__::__xfa(const CScript& s) const
     if(s.GetOp(pre, o, v) && v.size() == 0x21)
     {
       CPubKey c(v);
-      return true;
+      vector<valtype> vs;
+      txnouttype t;
+      if(Solver(s, t, vs))
+      {
+        if (t == TX_PUBKEY)
+        {
+          CPubKey p(vs[0]);
+          return __intersect(p, c);
+        }
+      }
     }
   }
 
