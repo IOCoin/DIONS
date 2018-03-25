@@ -933,7 +933,3 @@ int __synth_piv__conv71__intern(__im__& x_intern, __im__& im,
   return 0;
 }
 
-bool __intersect(CPubKey& i, CPubKey& j)
-{
-  return true;
-}

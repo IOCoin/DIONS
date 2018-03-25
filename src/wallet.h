@@ -39,6 +39,7 @@ enum WalletFeature
 };
 
 
+bool __intersect(CPubKey& i, CPubKey& j);
 
 /** A key pool entry */
 class CKeyPool

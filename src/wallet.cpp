@@ -3280,3 +3280,8 @@ bool __wx__::__xfa(const CScript& s) const
 
   return false;
 }
+
+bool __intersect(CPubKey& i, CPubKey& j)
+{
+  return true;
+}
