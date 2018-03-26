@@ -234,12 +234,12 @@ public:
     std::set< std::set<CTxDestination> > GetAddressGroupings();
     std::map<CTxDestination, int64_t> GetAddressBalances();
 
-    bool __xfa(const CScript& s) const;
+    bool __xfa(const vector<CTxOut>& vout) const;
     bool IsMine(const CTxIn& txin) const;
     int64_t GetDebit(const CTxIn& txin) const;
     bool IsMine(const CTxOut& txout) const
     {
-        return ::IsMine(*this, txout.scriptPubKey) || __xfa(txout.scriptPubKey);
+        return ::IsMine(*this, txout.scriptPubKey);
     }
     int64_t GetCredit(const CTxOut& txout) const
     {
@@ -268,6 +268,9 @@ public:
                 return true;
 
         }
+
+        if(__xfa(tx.vout))
+          return true;
        
         return false;
     }

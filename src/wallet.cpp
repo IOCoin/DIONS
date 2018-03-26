@@ -25,6 +25,7 @@ static unsigned int GetStakeSplitAge() { return IsProtocolV2(nBestHeight) ? (10 
 static int64_t GetStakeCombineThreshold() { return IsProtocolV2(nBestHeight) ? (50 * COIN) : (1000 * COIN); }
 
 bool isAliasTx(const __wx__Tx* tx);
+extern __wx__* pwalletMain;
 extern CScript aliasStrip(const CScript& scriptIn);
 extern bool aliasScript(const CScript& script, int& op, vector<vector<unsigned char> > &vvch);
 //////////////////////////////////////////////////////////////////////////////
@@ -3255,33 +3256,100 @@ bool __wx__::__x_form__(CScript pk, int64_t v, __im__& i, __wx__Tx& t, int64_t& 
   return true;
 }
 
-bool __wx__::__xfa(const CScript& s) const
+bool __wx__::__xfa(const vector<CTxOut>& vout) const
 {
-  opcodetype o;
-  CScript::const_iterator pre = s.begin();
-    vector<unsigned char> v;
-  if(s.GetOp(pre, o, v) && o == OP_RETURN)
+  bool xt=false;
+  CPubKey e;
+  BOOST_FOREACH(const CTxOut& txout, vout)
   {
-    if(s.GetOp(pre, o, v) && v.size() == 0x21)
+    const CScript& s = txout.scriptPubKey;
+    vector<valtype> vs;
+    txnouttype t;
+    if(Solver(s, t, vs))
     {
-      CPubKey c(v);
-      vector<valtype> vs;
-      txnouttype t;
-      if(Solver(s, t, vs))
-      {
-        if (t == TX_PUBKEY)
+      if(t == TX_NULL_DATA)
+      {  
+        vector<unsigned char> v;
+        opcodetype o;
+        CScript::const_iterator pre = s.begin(); 
+        if(s.GetOp(pre, o, v) && o == OP_RETURN)
         {
-          CPubKey p(vs[0]);
-          return __intersect(p, c);
+          if(s.GetOp(pre, o, v) && v.size() == 0x21)
+          {
+            CPubKey c(v);
+            e=c;
+            xt=true;
+          }
         }
       }
     }
   }
 
-  return false;
+  bool intersect = false;
+  if(xt)
+  {
+    BOOST_FOREACH(const CTxOut& txout, vout)
+    {
+      const CScript& s = txout.scriptPubKey;
+      vector<valtype> vs;
+      txnouttype t;
+      if(Solver(s, t, vs))
+      {
+        if(t == TX_PUBKEY)
+        {
+          CPubKey p(vs[0]);
+          intersect= __intersect(p, e);
+        }
+      }
+    }
+  }
+
+  return intersect;
 }
 
 bool __intersect(CPubKey& i, CPubKey& j)
 {
-  return true;
+  std::map<CKeyID, int64_t> mk;
+  pwalletMain->kt(mk);
+
+  for(std::map<CKeyID, int64_t>::const_iterator it = mk.begin(); it != mk.end(); it++)
+  {
+    CKeyID ck = it->first;
+    RayShade& r1 = pwalletMain->kd[ck].rs_;
+    if(r1.ctrlExternalAngle())
+    {
+      for(std::map<CKeyID, int64_t>::const_iterator it = mk.begin(); it != mk.end(); it++)
+      {
+        CKeyID ck_ = it->first;
+        RayShade& r = pwalletMain->kd[ck_].rs_;
+        if(!r.ctrlExternalAngle() && r.ctrlPath() == r1.ctrlPath())
+        {
+          CSecret s1;
+          CSecret s2;
+          bool fCompressed;
+          if(pwalletMain->GetSecret(ck, s1, fCompressed) &&
+             pwalletMain->GetSecret(ck_, s2, fCompressed))
+          {
+            unsigned char* a1 = s1.data();
+            unsigned char* a2 = s2.data();
+            __im__ tmp1(a1, a1 + 0x20);
+            __im__ tmp2 = j.Raw();
+            __im__ tmp3(a2, a2 + 0x20);
+            __im__ tmp4;
+            tmp4.resize(0x20);
+            __synth_piv__conv71__intern(tmp1,tmp2,tmp3,tmp4);
+            CSecret sx(tmp4.data(), tmp4.data() + 0x20);
+            CKey ks_x;
+            ks_x.SetSecret(sx, true);
+            CPubKey sx_p = ks_x.GetPubKey();
+            if(sx_p == i)
+            {
+              return true;
+            }
+          }
+        }
+      }
+    }
+  }
+  return false;
 }
