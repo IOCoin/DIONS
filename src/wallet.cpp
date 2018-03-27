@@ -3295,9 +3295,9 @@ bool __wx__::__xfa(const vector<CTxOut>& vout) const
       txnouttype t;
       if(Solver(s, t, vs))
       {
-        if(t == TX_PUBKEY)
+        if(t == TX_PUBKEYHASH)
         {
-          CPubKey p(vs[0]);
+          CKeyID p = CKeyID(uint160(vs[0]));
           intersect= __intersect(p, e);
         }
       }
@@ -3307,7 +3307,7 @@ bool __wx__::__xfa(const vector<CTxOut>& vout) const
   return intersect;
 }
 
-bool __intersect(CPubKey& i, CPubKey& j)
+bool __intersect(CKeyID& i, CPubKey& j)
 {
   std::map<CKeyID, int64_t> mk;
   pwalletMain->kt(mk);
@@ -3342,8 +3342,14 @@ bool __intersect(CPubKey& i, CPubKey& j)
             CKey ks_x;
             ks_x.SetSecret(sx, true);
             CPubKey sx_p = ks_x.GetPubKey();
-            if(sx_p == i)
+            if(sx_p.GetID() == i)
             {
+
+              int64_t ct = GetTime();
+              pwalletMain->kd[sx_p.GetID()] = CKeyMetadata(ct);
+              if(!pwalletMain->AddKey(ks_x))
+                throw std::runtime_error("Key");
+
               return true;
             }
           }
