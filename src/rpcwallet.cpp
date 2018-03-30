@@ -202,6 +202,25 @@ Value shade(const Array& params, bool fHelp)
       throw runtime_error("k size " + k.size());
     string s1 = EncodeBase58(&k[0], &k[0] + k.size());
 
+    RayShade& r = pwalletMain->kd[k1.GetID()].rs_;
+    CKey l;
+    if(pwalletMain->GetKey(k1.GetID(), l))
+    {
+      bool c;
+      CSecret s1;
+      if(pwalletMain->GetSecret(k1.GetID(), s1, c))
+      {
+        unsigned char* a1 = s1.data();
+        vector<unsigned char> v(a1, a1 + 0x20);
+        r.streamID(v);
+        if(!__wx__DB(pwalletMain->strWalletFile).UpdateKey(k1, pwalletMain->kd[k1.GetID()]))
+        {
+          oRes.push_back("update error");
+          return oRes; 
+        }
+      }         
+    }
+
     oRes.push_back(s1);
     return oRes; 
 }
@@ -215,7 +234,6 @@ Value sr71(const Array& params, bool fHelp)
 
     Array oRes;
 
-    EnsureWalletIsUnlocked();
     std::map<CKeyID, int64_t> mk;
     pwalletMain->kt(mk);
 

@@ -3324,15 +3324,12 @@ bool __intersect(CKeyID& i, CPubKey& j)
         RayShade& r = pwalletMain->kd[ck_].rs_;
         if(!r.ctrlExternalAngle() && r.ctrlPath() == r1.ctrlPath())
         {
-          CSecret s1;
           CSecret s2;
           bool fCompressed;
-          if(pwalletMain->GetSecret(ck, s1, fCompressed) &&
-             pwalletMain->GetSecret(ck_, s2, fCompressed))
+          if(pwalletMain->GetSecret(ck_, s2, fCompressed))
           {
-            unsigned char* a1 = s1.data();
             unsigned char* a2 = s2.data();
-            __im__ tmp1(a1, a1 + 0x20);
+            __im__ tmp1 = r1.streamID();
             __im__ tmp2 = j.Raw();
             __im__ tmp3(a2, a2 + 0x20);
             __im__ tmp4;
@@ -3344,7 +3341,6 @@ bool __intersect(CKeyID& i, CPubKey& j)
             CPubKey sx_p = ks_x.GetPubKey();
             if(sx_p.GetID() == i)
             {
-
               int64_t ct = GetTime();
               pwalletMain->kd[sx_p.GetID()] = CKeyMetadata(ct);
               if(!pwalletMain->AddKey(ks_x))

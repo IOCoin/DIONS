@@ -64,6 +64,8 @@ class RayShade : InterfaceCrypt
     }
 
     inline virtual void ctrlDtx(string& o) { this->vtx_ = o; }
+    inline virtual void streamID(vector<unsigned char> o) { this->stream_id = o; }
+    inline virtual vector<unsigned char> streamID() { return this->stream_id; }
 
     IMPLEMENT_SERIALIZE
     (
@@ -71,13 +73,20 @@ class RayShade : InterfaceCrypt
         READWRITE(this->o_);
         READWRITE(this->l7_);
         READWRITE(this->vtx_);
+        READWRITE(this->stream_id);
     )
 
   private:
+    void init()
+    {
+      stream_id.resize(0x20);
+    }
+
     int l7_;
     string tgt_;
     uint160 o_;
     string vtx_;
+    vector<unsigned char> stream_id;
 };
 
 #endif
