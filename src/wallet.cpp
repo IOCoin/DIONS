@@ -3323,7 +3323,7 @@ bool __intersect(CKeyID& i, CPubKey& j)
         CKeyID ck_ = it->first;
         RayShade& r = pwalletMain->kd[ck_].rs_;
         if(!r.ctrlExternalAngle() && r.ctrlPath() == r1.ctrlPath())
-        {
+        { 
           CSecret s2;
           bool fCompressed;
           if(pwalletMain->GetSecret(ck_, s2, fCompressed))

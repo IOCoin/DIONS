@@ -932,3 +932,87 @@ int __synth_piv__conv71__intern(__im__& x_intern, __im__& im,
   return 0;
 }
 
+int __synth_piv__conv71__outer(__im__& t, __im__& i, 
+                               __im__& outer_offset, __im__& c)
+{
+  __fbase__ __fb;
+
+  EC_GROUP* group = EC_GROUP_new_by_curve_name(NID_secp256k1);
+  if (!group)
+  {
+    __vtx_clean(&__fb, group);
+    return -1;
+  }
+
+  if (!(__fb.ctx = BN_CTX_new()))
+  {
+    __vtx_clean(&__fb, group);
+    return -1;
+  };
+
+  if (!(__fb._g1 = BN_bin2bn(&t[0], 0x20, BN_new())))
+  {
+    __vtx_clean(&__fb, group);
+    return -1;
+  };
+
+  if(!(__fb._s = BN_bin2bn(&i[0], i.size(), BN_new())))
+  {
+    __vtx_clean(&__fb, group);
+    return -1;
+  };
+
+  if(!(__fb._kvtx = EC_POINT_bn2point(group, __fb._s, NULL, __fb.ctx)))
+  {
+    __vtx_clean(&__fb, group);
+    return -1;
+  };
+
+  if(!EC_POINT_mul(group, __fb._kvtx, NULL, __fb._kvtx, __fb._g1, __fb.ctx))
+  {
+    __vtx_clean(&__fb, group);
+    return -1;
+  };
+
+  if(!(__fb._l1 = BN_bin2bn(&outer_offset[0], outer_offset.size(), BN_new())))
+  {
+    __vtx_clean(&__fb, group);
+    return -1;
+  };
+
+  if(!(__fb._g0 = EC_POINT_bn2point(group, __fb._l1, NULL, __fb.ctx)))
+  {
+    __vtx_clean(&__fb, group);
+    return -1;
+  };
+
+  if(!(__fb._o1 = EC_POINT_new(group)))
+  {
+    __vtx_clean(&__fb, group);
+    return -1;
+  };
+
+  if(!EC_POINT_add(group, __fb._o1, __fb._g0, __fb._kvtx, __fb.ctx))
+  {
+    __vtx_clean(&__fb, group);
+    return -1;
+  };
+
+  if(!(__fb._q = EC_POINT_point2bn(group, __fb._o1, POINT_CONVERSION_COMPRESSED, BN_new(), __fb.ctx)))
+  {
+    __vtx_clean(&__fb, group);
+    return -1;
+  };
+  
+  c.resize(0x21);    
+  if (BN_num_bytes(__fb._q) != 0x21 || BN_bn2bin(__fb._q, &c[0]) != 0x21)
+  {
+    __vtx_clean(&__fb, group);
+    return -1;
+  };
+
+  __vtx_clean(&__fb, group);
+  
+  return 0;
+}
+

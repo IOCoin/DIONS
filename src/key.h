@@ -109,8 +109,9 @@ typedef std::vector<unsigned char, secure_allocator<unsigned char> > CSecret;
 int reflection(__pq__&);
 int invert(__inv__&);
 
-int __synth_piv__conv77(__im__&,__im__&,__im__&);
 int __synth_piv__conv71__intern(__im__&,__im__&,__im__&,__im__&);
+int __synth_piv__conv71__outer(__im__&,__im__&,__im__&,__im__&);
+int __synth_piv__conv77(__im__&,__im__&,__im__&);
 
 bool __intersect(CPubKey&,CPubKey&);
 

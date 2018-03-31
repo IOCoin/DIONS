@@ -18,6 +18,7 @@
 #include "util.h"
 #include "walletdb.h"
 
+#include "ray_shade.h"
 
 extern bool fWalletUnlockStakingOnly;
 extern bool fConfChange;
