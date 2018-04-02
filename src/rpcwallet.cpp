@@ -38,7 +38,7 @@ std::string HelpRequiringPassphrase()
 
 void EnsureWalletIsUnlocked()
 {
-    if (pwalletMain->IsLocked())
+    if (pwalletMain->as())
         throw JSONRPCError(RPC_WALLET_UNLOCK_NEEDED, "Error: Please enter the wallet passphrase with walletpassphrase first.");
     if (fWalletUnlockStakingOnly)
         throw JSONRPCError(RPC_WALLET_UNLOCK_NEEDED, "Error: Wallet is unlocked for staking only.");
@@ -127,7 +127,7 @@ Value getnewpubkey(const Array& params, bool fHelp)
     if (params.size() > 0)
         strAccount = AccountFromValue(params[0]);
 
-    if (!pwalletMain->IsLocked())
+    if (!pwalletMain->as())
         pwalletMain->TopUpKeyPool();
 
     // Generate a new key that is added to wallet
@@ -157,7 +157,7 @@ Value getnewaddress(const Array& params, bool fHelp)
     if(params.size() > 0)
         strAccount = AccountFromValue(params[0]);
 
-    if(!pwalletMain->IsLocked())
+    if(!pwalletMain->as())
         pwalletMain->TopUpKeyPool();
 
     // Generate a new key that is added to wallet
@@ -181,7 +181,7 @@ Value shade(const Array& params, bool fHelp)
 
     Array oRes;
 
-    if(!pwalletMain->IsLocked())
+    if(!pwalletMain->as())
       pwalletMain->TopUpKeyPool();
 
     CPubKey k1;
@@ -557,7 +557,7 @@ Value sendtoaddress(const Array& params, bool fHelp)
             {txdetails.resize(MAX_TX_INFO_LEN);}
       }
 
-    if (pwalletMain->IsLocked())
+    if (pwalletMain->as())
         throw JSONRPCError(RPC_WALLET_UNLOCK_NEEDED, "Error: Please enter the wallet passphrase with walletpassphrase first.");
 
     string strError = pwalletMain->SendMoneyToDestination(address.Get(), nAmount, wtx, false, txdetails);
@@ -1920,7 +1920,7 @@ Value walletpassphrase(const Array& params, bool fHelp)
     if (!pwalletMain->IsCrypted())
         throw JSONRPCError(RPC_WALLET_WRONG_ENC_STATE, "Error: running with an unencrypted wallet, but walletpassphrase was called.");
 
-    if (!pwalletMain->IsLocked())
+    if (!pwalletMain->as())
         throw JSONRPCError(RPC_WALLET_ALREADY_UNLOCKED, "Error: Wallet is already unlocked, use walletlock first if need to change unlock settings.");
     // Note that the walletpassphrase is stored in params[0] which is not mlock()ed
     SecureString strWalletPass;
@@ -1989,7 +1989,7 @@ Value walletlockstatus(const Array& params, bool fHelp)
 {
     Object result;
     result.push_back(Pair("isEncrypted", pwalletMain->IsCrypted()));
-    result.push_back(Pair("isLocked", pwalletMain->IsLocked()));
+    result.push_back(Pair("isLocked", pwalletMain->as()));
     return result;
 }
 

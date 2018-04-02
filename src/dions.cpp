@@ -2101,7 +2101,7 @@ Value aliasList__(const Array& params, bool fHelp)
 
     Array oRes;
     
-    if(pwalletMain->IsLocked())
+    if(pwalletMain->as())
       return oRes; 
 
     ENTER_CRITICAL_SECTION(cs_main)

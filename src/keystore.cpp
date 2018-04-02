@@ -128,7 +128,7 @@ bool CCryptoKeyStore::AddKey(const CKey& key)
         if (!IsCrypted())
             return CBasicKeyStore::AddKey(key);
 
-        if (IsLocked())
+        if (as())
             return false;
 
         std::vector<unsigned char> vchCryptedSecret;

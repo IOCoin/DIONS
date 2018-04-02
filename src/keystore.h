@@ -135,7 +135,7 @@ public:
     }
 
 
-    bool IsLocked() const
+    bool as() const
     {
         if (!IsCrypted())
             return false;

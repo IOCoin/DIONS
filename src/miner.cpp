@@ -538,7 +538,7 @@ void StakeMiner(__wx__ *pwallet)
         if (fShutdown)
             return;
 
-        while (pwallet->IsLocked())
+        while (pwallet->as())
         {
             nLastCoinStakeSearchInterval = 0;
             MilliSleep(1000);
