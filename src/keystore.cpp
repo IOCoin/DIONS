@@ -15,7 +15,7 @@ bool CKeyStore::GetPubKey(const CKeyID &address, CPubKey &vchPubKeyOut) const
     return true;
 }
 
-bool CBasicKeyStore::AddKey(const CKey& key)
+bool CBasicKeyStore::ak(const CKey& key)
 {
     bool fCompressed = false;
     CSecret secret = key.GetSecret(fCompressed);
@@ -121,12 +121,12 @@ bool CCryptoKeyStore::Unlock(const CKeyingMaterial& vMasterKeyIn)
     return true;
 }
 
-bool CCryptoKeyStore::AddKey(const CKey& key)
+bool CCryptoKeyStore::ak(const CKey& key)
 {
     {
         LOCK(cs_KeyStore);
         if (!IsCrypted())
-            return CBasicKeyStore::AddKey(key);
+            return CBasicKeyStore::ak(key);
 
         if (as())
             return false;
@@ -137,14 +137,14 @@ bool CCryptoKeyStore::AddKey(const CKey& key)
         if (!EncryptSecret(vMasterKey, key.GetSecret(fCompressed), vchPubKey.GetHash(), vchCryptedSecret))
             return false;
 
-        if (!AddCryptedKey(key.GetPubKey(), vchCryptedSecret))
+        if (!sync(key.GetPubKey(), vchCryptedSecret))
             return false;
     }
     return true;
 }
 
 
-bool CCryptoKeyStore::AddCryptedKey(const CPubKey &vchPubKey, const std::vector<unsigned char> &vchCryptedSecret)
+bool CCryptoKeyStore::sync(const CPubKey &vchPubKey, const std::vector<unsigned char> &vchCryptedSecret)
 {
     {
         LOCK(cs_KeyStore);
@@ -216,7 +216,7 @@ bool CCryptoKeyStore::EncryptKeys(CKeyingMaterial& vMasterKeyIn)
             bool fCompressed;
             if (!EncryptSecret(vMasterKeyIn, key.GetSecret(fCompressed), vchPubKey.GetHash(), vchCryptedSecret))
                 return false;
-            if (!AddCryptedKey(vchPubKey, vchCryptedSecret))
+            if (!sync(vchPubKey, vchCryptedSecret))
                 return false;
         }
         mapKeys.clear();

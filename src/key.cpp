@@ -10,43 +10,41 @@
 #include "key.h"
 
 
-struct __fbase__
+class __fbase__
 {
-  BIGNUM* _g1;
-  EC_POINT* _g0;
-  EC_POINT* _kvtx;
-  EC_POINT* _o1;
-  EC_POINT* _k;
-  EC_POINT* _f;
-  BIGNUM* _s;
-  BIGNUM* _q1;
-  BIGNUM* _l1;
-  BIGNUM* _q;
-  BIGNUM* _t;
-  BN_CTX* ctx;
+  public:
+  __fbase__() { }
+  ~__fbase__() 
+  {
+    BN_free(this->_g1);
+    EC_POINT_free(this->_g0);
+    EC_POINT_free(this->_kvtx);
+    EC_POINT_free(this->_o1);
+    EC_POINT_free(this->_k);
+    EC_POINT_free(this->_f);
+    BN_free(this->_s);
+    BN_free(this->_q1);
+    BN_free(this->_l1);
+    BN_free(this->_q);
+    BN_free(this->_t);
+    EC_GROUP_free(this->_group);
+    BN_CTX_free(this->ctx);
+  }
+
+  EC_GROUP* _group=NULL;
+  BIGNUM* _g1=NULL;
+  EC_POINT* _g0=NULL;
+  EC_POINT* _kvtx=NULL;
+  EC_POINT* _o1=NULL;
+  EC_POINT* _k=NULL;
+  EC_POINT* _f=NULL;
+  BIGNUM* _s=NULL;
+  BIGNUM* _q1=NULL;
+  BIGNUM* _l1=NULL;
+  BIGNUM* _q=NULL;
+  BIGNUM* _t=NULL;
+  BN_CTX* ctx=NULL;
 };
-
-void __fbase__x(__fbase__* x)
-{
-  BN_free(x->_g1);
-  EC_POINT_free(x->_g0);
-  EC_POINT_free(x->_kvtx);
-  EC_POINT_free(x->_o1);
-  EC_POINT_free(x->_k);
-  EC_POINT_free(x->_f);
-  BN_free(x->_s);
-  BN_free(x->_q1);
-  BN_free(x->_l1);
-  BN_free(x->_q);
-  BN_free(x->_t);
-  BN_CTX_free(x->ctx);
-}
-
-void __vtx_clean(__fbase__* x, EC_GROUP* g)
-{
-  __fbase__x(x);
-  EC_GROUP_free(g);
-}
 
 struct __convol__77
 {
@@ -562,49 +560,41 @@ int reflection(__pq__& v)
 {
   std::vector<unsigned char> vt_;
   
-  __fbase__ __fb; 
+  __fbase__ __fb ; 
     
-  EC_GROUP* group = EC_GROUP_new_by_curve_name(NID_secp256k1);
-    
-  if (!group)
+  __fb._group = EC_GROUP_new_by_curve_name(NID_secp256k1);
+  if (!__fb._group)
   {
-    __vtx_clean(&__fb, group);
     return -1;
   }
     
   if (!(__fb.ctx = BN_CTX_new()))
   {
-    __vtx_clean(&__fb, group);
     return -1;
   };
     
   if (!(__fb._t = BN_bin2bn(&v.__fq1[0], 0x20, BN_new())))
   {
-    __vtx_clean(&__fb, group);
     return -1;
   };
     
   if (!(__fb._s = BN_bin2bn(&v.__fq9[0], v.__fq9.size(), BN_new())))
   {
-    __vtx_clean(&__fb, group);
     return -1;
   };
     
-  if (!(__fb._k = EC_POINT_bn2point(group, __fb._s, NULL, __fb.ctx)))
+  if (!(__fb._k = EC_POINT_bn2point(__fb._group, __fb._s, NULL, __fb.ctx)))
   {
-    __vtx_clean(&__fb, group);
     return -1;
   };
     
-  if (!EC_POINT_mul(group, __fb._k, NULL, __fb._k, __fb._t, __fb.ctx))
+  if (!EC_POINT_mul(__fb._group, __fb._k, NULL, __fb._k, __fb._t, __fb.ctx))
   {
-    __vtx_clean(&__fb, group);
     return -1;
   };
     
-  if (!(__fb._q = EC_POINT_point2bn(group, __fb._k, POINT_CONVERSION_COMPRESSED, BN_new(), __fb.ctx)))
+  if (!(__fb._q = EC_POINT_point2bn(__fb._group, __fb._k, POINT_CONVERSION_COMPRESSED, BN_new(), __fb.ctx)))
   {
-    __vtx_clean(&__fb, group);
     return -1;
   };
     
@@ -613,7 +603,6 @@ int reflection(__pq__& v)
   if (BN_num_bytes(__fb._q) != 0x21
     || BN_bn2bin(__fb._q, &vt_[0]) != 0x21)
   {
-    __vtx_clean(&__fb, group);
     return -1;
   };
     
@@ -621,56 +610,47 @@ int reflection(__pq__& v)
     
   if (!(__fb._l1 = BN_bin2bn(&v.__fq2[0], 0x20, BN_new())))
   {
-    __vtx_clean(&__fb, group);
     return -1;
   };
     
-  if (!(__fb._o1 = EC_POINT_new(group)))
+  if (!(__fb._o1 = EC_POINT_new(__fb._group)))
   {
-    __vtx_clean(&__fb, group);
     return -1;
   };
     
-  if (!EC_POINT_mul(group, __fb._o1, __fb._l1, NULL, NULL, __fb.ctx))
+  if (!EC_POINT_mul(__fb._group, __fb._o1, __fb._l1, NULL, NULL, __fb.ctx))
   {
-    __vtx_clean(&__fb, group);
     return -1;
   };
     
   if (!(__fb._q1 = BN_bin2bn(&v.__fq0[0], v.__fq0.size(), BN_new())))
   {
-    __vtx_clean(&__fb, group);
     return -1;
   };
     
     
-  if (!(__fb._kvtx = EC_POINT_bn2point(group, __fb._q1, NULL, __fb.ctx)))
+  if (!(__fb._kvtx = EC_POINT_bn2point(__fb._group, __fb._q1, NULL, __fb.ctx)))
   {
-    __vtx_clean(&__fb, group);
     return -1;
   };
     
-  if (!EC_POINT_mul(group, __fb._o1, __fb._l1, NULL, NULL, __fb.ctx))
+  if (!EC_POINT_mul(__fb._group, __fb._o1, __fb._l1, NULL, NULL, __fb.ctx))
   {
-    __vtx_clean(&__fb, group);
     return -1;
   };
     
-  if (!(__fb._g0 = EC_POINT_new(group)))
+  if (!(__fb._g0 = EC_POINT_new(__fb._group)))
   {
-    __vtx_clean(&__fb, group);
     return -1;
   };
     
-  if (!EC_POINT_add(group, __fb._g0, __fb._kvtx, __fb._o1, __fb.ctx))
+  if (!EC_POINT_add(__fb._group, __fb._g0, __fb._kvtx, __fb._o1, __fb.ctx))
   {
-    __vtx_clean(&__fb, group);
     return -1;
   };
     
-  if (!(__fb._g1 = EC_POINT_point2bn(group, __fb._g0, POINT_CONVERSION_COMPRESSED, BN_new(), __fb.ctx)))
+  if (!(__fb._g1 = EC_POINT_point2bn(__fb._group, __fb._g0, POINT_CONVERSION_COMPRESSED, BN_new(), __fb.ctx)))
   {
-    __vtx_clean(&__fb, group);
     return -1;
   };
     
@@ -679,11 +659,9 @@ int reflection(__pq__& v)
   if (BN_num_bytes(__fb._g1) != 0x21
     || BN_bn2bin(__fb._g1, &v.__fq5[0]) != 0x21)
   {
-    __vtx_clean(&__fb, group);
     return -1;
   };
     
-  __vtx_clean(&__fb, group);
 
   return 0;
 }

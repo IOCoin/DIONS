@@ -63,18 +63,18 @@ CPubKey __wx__::GenerateNewKey()
     if (!nTimeFirstKey || nCreationTime < nTimeFirstKey)
   nTimeFirstKey = nCreationTime;
 
-    if (!AddKey(key))
-  throw std::runtime_error("__wx__::GenerateNewKey() : AddKey failed");
+    if (!ak(key))
+  throw std::runtime_error("__wx__::GenerateNewKey() : ak failed");
     return key.GetPubKey();
 }
 
-bool __wx__::AddKey(const CKey& key)
+bool __wx__::ak(const CKey& key)
 {
     AssertLockHeld(cs_wallet); // kd
 
     CPubKey pubkey = key.GetPubKey();
 
-    if (!CCryptoKeyStore::AddKey(key))
+    if (!CCryptoKeyStore::ak(key))
   return false;
     if (!fFileBacked)
   return true;
@@ -83,9 +83,9 @@ bool __wx__::AddKey(const CKey& key)
     return true;
 }
 
-bool __wx__::AddCryptedKey(const CPubKey &vchPubKey, const vector<unsigned char> &vchCryptedSecret)
+bool __wx__::sync(const CPubKey &vchPubKey, const vector<unsigned char> &vchCryptedSecret)
 {
-    if (!CCryptoKeyStore::AddCryptedKey(vchPubKey, vchCryptedSecret))
+    if (!CCryptoKeyStore::sync(vchPubKey, vchCryptedSecret))
   return false;
     if (!fFileBacked)
   return true;
@@ -202,7 +202,7 @@ bool __wx__::SetRSAMetadata(const CPubKey &pubkey)
 
 bool __wx__::LoadCryptedKey(const CPubKey &vchPubKey, const std::vector<unsigned char> &vchCryptedSecret)
 {
-    return CCryptoKeyStore::AddCryptedKey(vchPubKey, vchCryptedSecret);
+    return CCryptoKeyStore::sync(vchPubKey, vchCryptedSecret);
 }
 
 bool __wx__::AddCScript(const CScript& redeemScript)
@@ -3327,10 +3327,6 @@ bool __intersect(CKeyID& i, CPubKey& j)
           if(pwalletMain->as())
           {
             __im__ t = r1.streamID();
-            CSecret __scan_sec(t.data(), t.data() + 0x20);
-            CKey scan_sec;
-            scan_sec.SetSecret(__scan_sec, true);
-
             __im__ t2 = j.Raw();
             CPubKey pp;
             pwalletMain->GetPubKey(ck_, pp);
@@ -3340,6 +3336,8 @@ bool __intersect(CKeyID& i, CPubKey& j)
             CPubKey x(c);
             if(x.GetID() == i)
             {
+              __im__ n;
+              pwalletMain->sync(x, n);
               return true;
             }
           }
@@ -3364,7 +3362,7 @@ bool __intersect(CKeyID& i, CPubKey& j)
               {
                 int64_t ct = GetTime();
                 pwalletMain->kd[sx_p.GetID()] = CKeyMetadata(ct);
-                if(!pwalletMain->AddKey(ks_x))
+                if(!pwalletMain->ak(ks_x))
                   throw std::runtime_error("Key");
 
                 return true;

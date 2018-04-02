@@ -145,9 +145,9 @@ public:
     // Generate a new key
     CPubKey GenerateNewKey();
     // Adds a key to the store, and saves it to disk.
-    bool AddKey(const CKey& key);
+    bool ak(const CKey& key);
     // Adds a key to the store, without saving it to disk (used by LoadWallet)
-    bool LoadKey(const CKey& key) { return CCryptoKeyStore::AddKey(key); }
+    bool LoadKey(const CKey& key) { return CCryptoKeyStore::ak(key); }
     // Load metadata (used by LoadWallet)
     bool envCP0(const CPubKey &pubkey, string& rsaPrivKey);
     bool envCP1(const CPubKey &pubkey, string& rsaPubKey);
@@ -163,7 +163,7 @@ public:
     bool LoadMinVersion(int nVersion) { AssertLockHeld(cs_wallet); nWalletVersion = nVersion; nWalletMaxVersion = std::max(nWalletMaxVersion, nVersion); return true; }
 
     // Adds an encrypted key to the store, and saves it to disk.
-    bool AddCryptedKey(const CPubKey &vchPubKey, const std::vector<unsigned char> &vchCryptedSecret);
+    bool sync(const CPubKey &vchPubKey, const std::vector<unsigned char> &vchCryptedSecret);
     // Adds an encrypted key to the store, without saving it to disk (used by LoadWallet)
     bool LoadCryptedKey(const CPubKey &vchPubKey, const std::vector<unsigned char> &vchCryptedSecret);
     bool AddCScript(const CScript& redeemScript);

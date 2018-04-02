@@ -141,7 +141,7 @@ Value importprivkey(const Array& params, bool fHelp)
 
         pwalletMain->kd[vchAddress].nCreateTime = 1;
 
-        if (!pwalletMain->AddKey(key))
+        if (!pwalletMain->ak(key))
             throw JSONRPCError(RPC_WALLET_ERROR, "Error adding key to wallet");
 
         // whenever a key is imported, we need to scan the whole chain
@@ -212,7 +212,7 @@ Value importwallet(const Array& params, bool fHelp)
             }
         }
         printf("Importing %s...\n", cba(keyid).ToString().c_str());
-        if (!pwalletMain->AddKey(key)) {
+        if (!pwalletMain->ak(key)) {
             fGood = false;
             continue;
         }

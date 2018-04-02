@@ -23,7 +23,7 @@ public:
     virtual ~CKeyStore() {}
 
     // Add a key to the store.
-    virtual bool AddKey(const CKey& key) =0;
+    virtual bool ak(const CKey& key) =0;
     mutable CCriticalSection cs_mapKeys;
 
     // Check whether a key corresponding to a given address is present in the store.
@@ -58,7 +58,7 @@ protected:
     ScriptMap mapScripts;
 
 public:
-    bool AddKey(const CKey& key);
+    bool ak(const CKey& key);
     bool HaveKey(const CKeyID &address) const
     {
         bool result;
@@ -149,8 +149,8 @@ public:
 
     bool Lock();
 
-    virtual bool AddCryptedKey(const CPubKey &vchPubKey, const std::vector<unsigned char> &vchCryptedSecret);
-    bool AddKey(const CKey& key);
+    virtual bool sync(const CPubKey &vchPubKey, const std::vector<unsigned char> &vchCryptedSecret);
+    bool ak(const CKey& key);
     bool HaveKey(const CKeyID &address) const
     {
         {
