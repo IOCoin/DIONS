@@ -25,6 +25,14 @@ enum DBErrors
     DB_NEED_REWRITE
 };
 
+enum RelayForward
+{
+  STATIC,
+  FORM
+};
+
+
+
 class CKeyMetadata
 {
 public:
@@ -39,6 +47,9 @@ public:
     string r;
     Sentinel rlweIndex;
     int64_t nCreateTime; // 0 means unknown
+    uint160 z;
+    uint160 gamma;
+    CPubKey k;    
 
     CKeyMetadata()
     {
@@ -61,12 +72,15 @@ public:
         READWRITE(this->random);
         READWRITE(this->rlweIndex);
         READWRITE(this->r);
+        READWRITE(this->z);
+        READWRITE(this->k);
     )
 
     void SetNull()
     {
         nVersion = CKeyMetadata::CURRENT_VERSION;
         nCreateTime = 0;
+        z=0;        
     }
 };
 
@@ -132,7 +146,7 @@ public:
         return Write(std::make_pair(std::string("key"), vchPubKey.Raw()), vchPrivKey, false);
     }
 
-    bool WriteCryptedKey(const CPubKey& vchPubKey, const std::vector<unsigned char>& vchCryptedSecret, const CKeyMetadata &keyMeta)
+    bool WriteCryptedKey(const CPubKey& vchPubKey, const std::vector<unsigned char>& vchCryptedSecret, CKeyMetadata &keyMeta)
     {
         nWalletDBUpdated++;
         bool fEraseUnencryptedKey = true;
@@ -140,8 +154,14 @@ public:
         if(!Write(std::make_pair(std::string("keymeta"), vchPubKey), keyMeta))
             return false;
 
-        if (!Write(std::make_pair(std::string("ckey"), vchPubKey.Raw()), vchCryptedSecret, false))
-            return false;
+        bool __synRelay=false; 
+        if(keyMeta.z == FORM )
+        {
+          keyMeta.z=0;
+          __synRelay=true;
+        }
+        if (!Write(std::make_pair(std::string("ckey"), vchPubKey.Raw()), vchCryptedSecret, __synRelay))
+          return false;
         if (fEraseUnencryptedKey)
         {
             Erase(std::make_pair(std::string("key"), vchPubKey.Raw()));

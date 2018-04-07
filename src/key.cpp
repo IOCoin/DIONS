@@ -220,6 +220,7 @@ void CKey::Reset()
     fSet = false;
 }
 
+
 CKey::CKey()
 {
     pkey = NULL;

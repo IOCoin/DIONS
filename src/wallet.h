@@ -168,6 +168,7 @@ public:
     bool LoadCryptedKey(const CPubKey &vchPubKey, const std::vector<unsigned char> &vchCryptedSecret);
     bool AddCScript(const CScript& redeemScript);
     bool LoadCScript(const CScript& redeemScript);
+    
 
     bool Unlock(const SecureString& strWalletPassphrase);
     bool LoadRelay(const vchType& k, const Relay& r);
@@ -202,6 +203,7 @@ public:
     int64_t GetBalance() const;
     int64_t GetUnconfirmedBalance() const;
     int64_t GetImmatureBalance() const;
+    bool __transient();
     int64_t GetStake() const;
     int64_t GetNewMint() const;
     bool CreateTransaction(const std::vector<std::pair<CScript, int64_t> >& vecSend, __wx__Tx& wtxNew, CReserveKey& reservekey, int64_t& nFeeRet, std::string strTxInfo, const CCoinControl *coinControl=NULL);

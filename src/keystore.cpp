@@ -69,7 +69,10 @@ bool CCryptoKeyStore::SetCrypted()
     {
         LOCK(cs_KeyStore);
         if (fUseCrypto)
+        {
             return true;
+        }
+        
         if (!mapKeys.empty())
             return false;
         fUseCrypto = true;
@@ -137,8 +140,11 @@ bool CCryptoKeyStore::ak(const CKey& key)
         if (!EncryptSecret(vMasterKey, key.GetSecret(fCompressed), vchPubKey.GetHash(), vchCryptedSecret))
             return false;
 
+         
         if (!sync(key.GetPubKey(), vchCryptedSecret))
+        {
             return false;
+        }
     }
     return true;
 }

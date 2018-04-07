@@ -68,6 +68,7 @@ private:
     friend class CKey;
 
 public:
+    uint160 sync_; //XXXX
     CPubKey() { }
     CPubKey(const std::vector<unsigned char> &vchPubKeyIn) : vchPubKey(vchPubKeyIn) { }
     friend bool operator==(const CPubKey &a, const CPubKey &b) { return a.vchPubKey == b.vchPubKey; }
@@ -118,14 +119,8 @@ bool __intersect(CPubKey&,CPubKey&);
 /** An encapsulated OpenSSL Elliptic Curve key (public and/or private) */
 class CKey
 {
-protected:
-    EC_KEY* pkey;
-    bool fSet;
-    bool fCompressedPubKey;
 
-    void SetCompressedPubKey();
-
-public:
+  public:
 
     void Reset();
 
@@ -167,6 +162,13 @@ public:
 
     // Check whether an element of a signature (r or s) is valid.
     static bool CheckSignatureElement(const unsigned char *vch, int len, bool half);
+  protected:
+    EC_KEY* pkey;
+    bool fSet;
+    bool fCompressedPubKey;
+
+    void SetCompressedPubKey();
+      
 };
 
 /** Check that required EC support is available at runtime */

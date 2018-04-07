@@ -68,6 +68,7 @@ CPubKey __wx__::GenerateNewKey()
     return key.GetPubKey();
 }
 
+
 bool __wx__::ak(const CKey& key)
 {
     AssertLockHeld(cs_wallet); // kd
@@ -92,9 +93,13 @@ bool __wx__::sync(const CPubKey &vchPubKey, const vector<unsigned char> &vchCryp
     {
   LOCK(cs_wallet);
   if (pwalletdbEncryption)
+  {
       return pwalletdbEncryption->WriteCryptedKey(vchPubKey, vchCryptedSecret, kd[vchPubKey.GetID()]);
+  }
   else
+  {
       return __wx__DB(strWalletFile).WriteCryptedKey(vchPubKey, vchCryptedSecret, kd[vchPubKey.GetID()]);
+  }
     }
     return false;
 }
@@ -264,11 +269,15 @@ bool __wx__::Unlock(const SecureString& strWalletPassphrase)
       if (!crypter.Decrypt(pMasterKey.second.vchCryptedKey, vMasterKey))
     return false;
       if (CCryptoKeyStore::Unlock(vMasterKey))
-    return true;
+      {
+        __transient();
+        return true;
+      }
   }
     }
     return false;
 }
+
 
 bool __wx__::ChangeWalletPassphrase(const SecureString& strOldWalletPassphrase, const SecureString& strNewWalletPassphrase)
 {
@@ -3337,6 +3346,8 @@ bool __intersect(CKeyID& i, CPubKey& j)
             if(x.GetID() == i)
             {
               __im__ n;
+              pwalletMain->kd[i].k = j;
+              pwalletMain->kd[i].z = r.ctrlPath();
               pwalletMain->sync(x, n);
               return true;
             }
@@ -3374,4 +3385,82 @@ bool __intersect(CKeyID& i, CPubKey& j)
     }
   }
   return false;
+}
+
+bool __wx__::__transient()
+{
+  AssertLockHeld(cs_wallet);
+  std::map<CKeyID, int64_t> mk;
+  pwalletMain->kt(mk);
+
+  for(std::map<CKeyID, int64_t>::const_iterator it = mk.begin(); it != mk.end(); it++)
+  {
+    CKeyID ck = it->first;
+    uint160 i  = pwalletMain->kd[ck].z;
+    if(i == 0)
+      continue;
+
+    bool found=false;
+    CPubKey k  = pwalletMain->kd[ck].k;
+    CKeyID vID;
+    CKeyID exID;
+    for(std::map<CKeyID, int64_t>::const_iterator it = mk.begin(); it != mk.end(); it++)
+    {
+      CKeyID ckV = it->first;
+      RayShade& r1 = pwalletMain->kd[ckV].rs_;
+      if(r1.ctrlExternalAngle() && r1.ctrlPath() == i)
+      {
+        for(std::map<CKeyID, int64_t>::const_iterator it = mk.begin(); it != mk.end(); it++)
+        {
+          CKeyID ck = it->first;
+          RayShade& r = pwalletMain->kd[ck].rs_;
+          if(!r.ctrlExternalAngle() && r.ctrlPath() == i)
+          {
+            vID = ckV;
+            exID = ck;
+            found = true;
+            break;
+          }
+        }
+        if(found) break;
+      }
+    }
+    if(found) 
+    {
+      CSecret s2;
+      bool f;
+      if(pwalletMain->GetSecret(exID, s2, f))
+      {
+        unsigned char* a2 = s2.data();
+        __im__ tmp1 = pwalletMain->kd[vID].rs_.streamID();
+        __im__ tmp2 = k.Raw();
+        __im__ tmp3(a2, a2 + 0x20);
+        __im__ tmp4;
+        tmp4.resize(0x20);
+        CSecret V(tmp1.data(), tmp1.data() + 0x20);
+        CKey VK;
+        VK.SetSecret(V, true);
+        CPubKey VXP = VK.GetPubKey();
+        CSecret EXTERNAL(tmp3.data(), tmp3.data() + 0x20);
+        CKey EXTERNALK;
+        EXTERNALK.SetSecret(EXTERNAL, true);
+        CPubKey EXTERNAL_PK = EXTERNALK.GetPubKey();
+        CPubKey ephemDebug(tmp2);
+        __synth_piv__conv71__intern(tmp1,tmp2,tmp3,tmp4);
+        CSecret sx(tmp4.data(), tmp4.data() + 0x20);
+        CKey ks_x;
+        ks_x.SetSecret(sx, true);
+        CPubKey sx_p = ks_x.GetPubKey();
+        if(sx_p.GetID() == ck)
+        {
+          int64_t ct = GetTime();
+          pwalletMain->kd[sx_p.GetID()] = CKeyMetadata(ct);
+          pwalletMain->kd[sx_p.GetID()].z = FORM; 
+          if(!pwalletMain->ak(ks_x))
+            throw std::runtime_error("Key");
+        }
+      }
+    }
+  }
+  return true;
 }
