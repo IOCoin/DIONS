@@ -68,7 +68,7 @@ private:
     friend class CKey;
 
 public:
-    uint160 sync_; //XXXX
+    uint160 sync_; 
     CPubKey() { }
     CPubKey(const std::vector<unsigned char> &vchPubKeyIn) : vchPubKey(vchPubKeyIn) { }
     friend bool operator==(const CPubKey &a, const CPubKey &b) { return a.vchPubKey == b.vchPubKey; }

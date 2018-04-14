@@ -15,6 +15,10 @@ using namespace std;
 int64_t nWalletUnlockTime;
 static CCriticalSection cs_nWalletUnlockTime;
 
+static unsigned char trans__[] = {
+  0x21, 0x56, 0x02, 0x71, 0x54, 0x78, 0x62, 0xa0
+};
+
 extern void TxToJSON(const CTransaction& tx, const uint256 hashBlock, json_spirit::Object& entry);
 extern LocatorNodeDB* ln1Db;
 static void accountingDeprecationCheck()
@@ -175,9 +179,9 @@ Value getnewaddress(const Array& params, bool fHelp)
 Value shade(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() > 1)
-        throw runtime_error(
-            "shade [account] ray id\n"
-            );
+    throw runtime_error(
+    "shade [account] ray id\n"
+    );
 
     Array oRes;
 
@@ -193,9 +197,11 @@ Value shade(const Array& params, bool fHelp)
     oRes.push_back(cba(k1.GetID()).ToString());
     oRes.push_back(cba(k2.GetID()).ToString());
     vector<unsigned char> k;
-    k.reserve(k1.Raw().size() + k2.Raw().size());
+    k.reserve(1 + k1.Raw().size() + k2.Raw().size());
     vchType a = k1.Raw();
     vchType b = k2.Raw();
+    k.push_back(0x18);
+
     k.insert(k.end(), a.begin(), a.end());
     k.insert(k.end(), b.begin(), b.end());
     if(k.size() == 0)
@@ -2317,8 +2323,8 @@ Value rfl(const Array& params, bool fHelp)
       vector<unsigned char> k2;
       k1.reserve(0x21);
       k2.reserve(0x21);
-      k1.insert(k1.end(), k.begin(), k.begin() + 0x21);
-      k2.insert(k2.end(), k.begin() + 0x21, k.end());
+      k1.insert(k1.end(), k.begin() + 0x01, k.begin() + 0x22);
+      k2.insert(k2.end(), k.begin() + 0x22, k.end());
       CPubKey k1_(k1);
       CPubKey k2_(k2);
       Object obj;
