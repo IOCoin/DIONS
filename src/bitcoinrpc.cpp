@@ -250,7 +250,7 @@ static const CRPCCommand vRPCCommands[] =
     { "getaccountaddress",      &getaccountaddress,      true,   false },
     { "setaccount",             &setaccount,             true,   false },
     { "shade",          &shade,          true,   false },
-    { "rfl",          &rfl,          false,  false },
+    { "shadesend",          &shadesend,          false,  false },
     { "__vtx_s",          &__vtx_s,          false,  false },
     { "getaccount",             &getaccount,             false,  false },
     { "getaddressesbyaccount",  &getaddressesbyaccount,  true,   false },
@@ -1263,7 +1263,7 @@ Array RPCConvertValues(const std::string &strMethod, const std::vector<std::stri
     if (strMethod == "getreceivedbyaddress"   && n > 1) ConvertTo<int64_t>(params[1]);
     if (strMethod == "getreceivedbyaccount"   && n > 1) ConvertTo<int64_t>(params[1]);
     if (strMethod == "listreceivedbyaddress"  && n > 0) ConvertTo<int64_t>(params[0]);
-    if (strMethod == "rfl"          && n > 1) ConvertTo<double>(params[1]);
+    if (strMethod == "shadesend"          && n > 1) ConvertTo<double>(params[1]);
     if (strMethod == "__vtx_s"          && n > 1) ConvertTo<double>(params[1]);
     if (strMethod == "listreceivedbyaddress"  && n > 1) ConvertTo<bool>(params[1]);
     if (strMethod == "listreceivedbyaccount"  && n > 0) ConvertTo<int64_t>(params[0]);

@@ -180,7 +180,7 @@ Value shade(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() > 1)
     throw runtime_error(
-    "shade [account] ray id\n"
+    "shade [account] [ray id]\n"
     );
 
     Array oRes;
@@ -2305,11 +2305,11 @@ Value rmtx(const Array& params, bool fHelp)
     return tx.GetHash().GetHex();
 }
 
-Value rfl(const Array& params, bool fHelp)
+Value shadesend(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() < 2 || params.size() > 4)
         throw runtime_error(
-            "rfl <target> <scale>\n"
+            "shadesend <shade> <amount>\n"
             + HelpRequiringPassphrase());
 
     Array oRes;
@@ -2328,8 +2328,8 @@ Value rfl(const Array& params, bool fHelp)
       CPubKey k1_(k1);
       CPubKey k2_(k2);
       Object obj;
-      obj.push_back(Pair("vertex point", cba(k1_.GetID()).ToString()));
-      obj.push_back(Pair("ray id", cba(k2_.GetID()).ToString()));
+      obj.push_back(Pair("abs", cba(k1_.GetID()).ToString()));
+      obj.push_back(Pair("ord", cba(k2_.GetID()).ToString()));
 
       vector<unsigned char> fq_;
       fq_.resize(0x20);
@@ -2353,7 +2353,7 @@ Value rfl(const Array& params, bool fHelp)
         if(!pivot.IsValid())
           throw runtime_error("rfl pivot point");
 
-        obj.push_back(Pair("pivot point", cba(pivot.GetID()).ToString()));
+        obj.push_back(Pair("target", cba(pivot.GetID()).ToString()));
         
         if(invert(inv) == 0)
         {
@@ -2361,7 +2361,7 @@ Value rfl(const Array& params, bool fHelp)
           if(!inv_.IsValid())
             throw runtime_error("rfl image");
           
-          obj.push_back(Pair("image", cba(inv_.GetID()).ToString()));
+          obj.push_back(Pair("trace", cba(inv_.GetID()).ToString()));
           int64_t v = AmountFromValue(params[1]);
           CScript pk;
           pk.SetDestination(cba(pivot.GetID()).Get());
