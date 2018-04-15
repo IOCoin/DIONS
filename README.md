@@ -25,6 +25,7 @@ Features:
 * P2P Port: 33764
 * RPC Port: 33765
 * Dedicated Node: 178.62.109.73
+* Shade API added. (Stealth addresses based on Diffie Hellman key exchange)
 
 
 Development process
