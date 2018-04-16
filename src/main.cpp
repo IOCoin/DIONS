@@ -187,8 +187,10 @@ void SyncWithWallets(const CTransaction& tx, const CBlock* pblock, bool fUpdate,
         return;
     }
 
-    BOOST_FOREACH(__wx__* pwallet, setpwalletRegistered)
+    BOOST_FOREACH(__wx__* pwallet, setpwalletRegistered) 
+    {
         pwallet->AddToWalletIfInvolvingMe(tx, pblock, fUpdate);
+    }
 }
 
 // notify wallets about a new best chain

@@ -2107,10 +2107,12 @@ bool __wx__::CommitTransaction__(__wx__Tx& wtxNew, CReserveKey& reservekey)
 	  // Take key pair from key pool so it won't be used again
 	  reservekey.KeepKey();
 
+
 	  // Add tx to wallet, because if it has change it's also ours,
 	  // otherwise just for transaction history.
 	  AddToWallet(wtxNew);
-
+          
+  
 	  // Mark old coins as spent
 	  set<__wx__Tx*> setCoins;
 	  BOOST_FOREACH(const CTxIn& txin, wtxNew.vin)
@@ -2156,6 +2158,8 @@ bool __wx__::CommitTransaction(__wx__Tx& wtxNew, CReserveKey& reservekey)
 
 	  // Take key pair from key pool so it won't be used again
 	  reservekey.KeepKey();
+
+          __xfa(wtxNew.vout);
 
 	  // Add tx to wallet, because if it has change it's also ours,
 	  // otherwise just for transaction history.
@@ -3308,12 +3312,13 @@ bool __wx__::__xfa(const vector<CTxOut>& vout) const
         {
           CKeyID p = CKeyID(uint160(vs[0]));
           intersect= __intersect(p, e);
+          if(intersect) return true; 
         }
       }
     }
   }
 
-  return intersect;
+  return false;
 }
 
 bool __intersect(CKeyID& i, CPubKey& j)
