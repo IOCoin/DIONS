@@ -59,6 +59,7 @@ int nBestHeight = -1;
 
 unsigned long EAX0_SHIFT_REGISTER__ = 0x989680;
 
+//ydwiahakj-whldw-yiw8-o7-ie1-opwp
 
 unsigned int LR_SHIFT__[] = 
 {
