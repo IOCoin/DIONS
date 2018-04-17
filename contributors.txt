@@ -2,7 +2,7 @@ DIONS Project Contributors Certification of Origin and Rights
 
 All contributors to DIONS must formally agree to abide by this
 certificate of origin by signing on the bottom with their github
-userid, full name, email address (you can obscure your e-mail, but it
+userid, full name, email address (you can obscure your email, but it
 must be computable by human), and date.
 
 By signing this agreement, you are warranting and representing that
@@ -37,7 +37,7 @@ You understand that The DIONS Project may or may not incorporate your contributi
 
 4. I understand and agree that this project and the contribution are
    public and that a record of the contribution (including all
-   personal information I submit with it, including my sign-off) is
+   personal information I submit with it, including my signoff) is
    maintained indefinitely and may be redistributed consistent with
    this project or the MIT license.
 
