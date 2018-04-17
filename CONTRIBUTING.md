@@ -15,8 +15,10 @@ Please provide thorough development test information and full details of environ
 ## Please note we have a [code of conduct](https://github.com/IOCoin/DIONS/blob/master/CODE_OF_CONDUCT.md), please follow it in all your interactions with the project.
 
 In summary the procedure is:
-1. Fork the [IOCoin/DIONS repo](https://github.com/IOCoin/DIONS)
-2. Create a [pull request](https://help.github.com/articles/using-pull-requests/) including your change
+1. Discuss with the other contributors your proposed new feature or bug fix.
+2. Fork the [IOCoin/DIONS repo](https://github.com/IOCoin/DIONS)
+3. Develop your feature / fix and test thoroughly.
+4. Create a [pull request](https://help.github.com/articles/using-pull-requests/) including your change
 
 
 **Note:** If you haven't done so already, sign the `contributors.txt` certificate of origin with your pull request.
