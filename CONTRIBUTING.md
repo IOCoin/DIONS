@@ -2,7 +2,7 @@
 
 When contributing to this repository, please first discuss the change you wish to make the owners of this repository before making a change. 
 
-Sometimes another solution maybe have been identified already or some workaround may have been discussed by the other contributors. 
+Sometimes another solution may have been identified already or some workaround may have been discussed by the other contributors. 
 
 Developers are responsible for carrying out developer tests of their changes prior to submitting any pull request.
 
