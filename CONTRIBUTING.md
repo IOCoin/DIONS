@@ -8,8 +8,9 @@ Developers are responsible for carrying out developer tests of their changes pri
 
 If a bug is identified then include precise information on the scenario in which it was found so that it may be reproduced. Explain the nature of the bug fix and how you tested the fix including system envrironment in question.
 
-If a new feature is proposed, please provide precise test information 
-e.g. system environment for the development and testing.
+If a new feature is proposed, please provide precise information on the nature and scope as well as use cases include precise testing information e.g. system environment for the development and testing etc
+
+Please provide thorough development test information and full details of environments in which testing was carried out.
 
 ## Please note we have a [code of conduct](https://github.com/IOCoin/DIONS/blob/master/CODE_OF_CONDUCT.md), please follow it in all your interactions with the project.
 
