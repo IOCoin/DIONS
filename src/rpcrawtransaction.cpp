@@ -746,7 +746,7 @@ Value signrawtransaction(const Array& params, bool fHelp)
             bool fCompressed;
             CSecret secret = vchSecret.GetSecret(fCompressed);
             key.SetSecret(secret, fCompressed);
-            tempKeystore.ak(key);
+            tempKeystore.AddKey(key);
         }
     }
     else

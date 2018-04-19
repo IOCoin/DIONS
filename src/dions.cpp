@@ -2101,7 +2101,7 @@ Value aliasList__(const Array& params, bool fHelp)
 
     Array oRes;
     
-    if(pwalletMain->as())
+    if(pwalletMain->IsLocked())
       return oRes; 
 
     ENTER_CRITICAL_SECTION(cs_main)
@@ -2157,7 +2157,7 @@ Value aliasList__(const Array& params, bool fHelp)
           }
           else
           {
-            for(int i=0; i < tx.vin.size(); i++)
+            for(unsigned int i=0; i < tx.vin.size(); i++)
             {
               COutPoint prevout = tx.vin[i].prevout;
               __wx__Tx& txPrev = pwalletMain->mapWallet[prevout.hash];
@@ -2341,7 +2341,7 @@ Value aliasList(const Array& params, bool fHelp)
           }
           else
           {
-            for(int i=0; i < tx.vin.size(); i++)
+            for(unsigned int i=0; i < tx.vin.size(); i++)
             {
               COutPoint prevout = tx.vin[i].prevout;
               __wx__Tx& txPrev = pwalletMain->mapWallet[prevout.hash];
@@ -5111,7 +5111,7 @@ Value publicKey(const Array& params, bool fHelp)
   if(!pwalletMain->SetRSAMetadata(pubKey))
     throw JSONRPCError(RPC_TYPE_ERROR, "Failed set");
 
-  if(!walletdb.UpdateKey(pubKey, pwalletMain->kd[pubKey.GetID()]))
+  if(!walletdb.UpdateKey(pubKey, pwalletMain->keyMetadata[pubKey.GetID()]))
     throw JSONRPCError(RPC_TYPE_ERROR, "Failed to write meta data for key");
 
   if(!pwalletMain->envCP1(pubKey, testKey))
@@ -5466,7 +5466,7 @@ Value sendPublicKey(const Array& params, bool fHelp)
       if(!pwalletMain->aes(vchPubKey, f, aesKeyStr))
         throw JSONRPCError(RPC_TYPE_ERROR, "Failed to set meta data for key");
 
-      if(!walletdb.UpdateKey(vchPubKey, pwalletMain->kd[vchPubKey.GetID()]))
+      if(!walletdb.UpdateKey(vchPubKey, pwalletMain->keyMetadata[vchPubKey.GetID()]))
         throw JSONRPCError(RPC_TYPE_ERROR, "Failed to write meta data for key");
 
       ss <<(rsaPubKeyStr + encrypted);
@@ -5836,7 +5836,7 @@ Value registerAliasGenerate(const Array& params, bool fHelp)
   if(!pwalletMain->SetRSAMetadata(vchPubKey))
     throw JSONRPCError(RPC_TYPE_ERROR, "Failed to load meta data for key");
 
-  if(!walletdb.UpdateKey(vchPubKey, pwalletMain->kd[vchPubKey.GetID()]))
+  if(!walletdb.UpdateKey(vchPubKey, pwalletMain->keyMetadata[vchPubKey.GetID()]))
     throw JSONRPCError(RPC_TYPE_ERROR, "Failed to write meta data for key");
 
   string pKey;
@@ -5850,7 +5850,7 @@ Value registerAliasGenerate(const Array& params, bool fHelp)
   if(!pwalletMain->SetRandomKeyMetadata(vchPubKey, vchRand))
     throw JSONRPCError(RPC_WALLET_ERROR, "Failed to set meta data for key");
 
-  if(!walletdb.UpdateKey(vchPubKey, pwalletMain->kd[vchPubKey.GetID()]))
+  if(!walletdb.UpdateKey(vchPubKey, pwalletMain->keyMetadata[vchPubKey.GetID()]))
     throw JSONRPCError(RPC_TYPE_ERROR, "Failed to write meta data for key");
 
   CKey key;
@@ -5986,7 +5986,7 @@ Value registerAlias(const Array& params, bool fHelp)
 
     __wx__DB walletdb(pwalletMain->strWalletFile, "r+");
 
-    if(!walletdb.UpdateKey(vchPubKey, pwalletMain->kd[vchPubKey.GetID()]))
+    if(!walletdb.UpdateKey(vchPubKey, pwalletMain->keyMetadata[vchPubKey.GetID()]))
       throw JSONRPCError(RPC_TYPE_ERROR, "Failed to write meta data for key");
 
     CKey key;
@@ -6408,7 +6408,7 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
     if(tx.nVersion != CTransaction::DION_TX_VERSION)
     {
       bool found= false;
-      for(int i = 0; i < tx.vout.size(); i++)
+      for(unsigned int i = 0; i < tx.vout.size(); i++)
       {
         const CTxOut& out = tx.vout[i];
 
@@ -6433,7 +6433,7 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
     printf("CIP tx %s\n",
               tx.GetHash().GetHex().c_str());
 
-    for(int i = 0; i < tx.vin.size(); i++)
+    for(unsigned int i = 0; i < tx.vin.size(); i++)
     {
       const CTxOut& out = vTxPrev[i].vout[tx.vin[i].prevout.n];
       std::vector<vchType> vvchPrevArgsRead;
@@ -6600,10 +6600,10 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
             else
               script.SetBitcoinAddress(stringFromVch(vvchArgs[2]));
 
-              string encrypted = stringFromVch(vvchArgs[0]);
-              uint160 hash = uint160(vvchArgs[3]);
-              string value = stringFromVch(vvchArgs[4]);
-              string r = stringFromVch(vvchArgs[5]);
+            string encrypted = stringFromVch(vvchArgs[0]);
+            uint160 hash = uint160(vvchArgs[3]);
+            string value = stringFromVch(vvchArgs[4]);
+            string r = stringFromVch(vvchArgs[5]);
             if(!verifymessage(script.GetBitcoinAddress(), stringFromVch(vvchArgs[1]), encrypted, hash.ToString(), value, r))
             {
               return error("Dions::ConnectInputsPost: failed to verify signature for registerAlias tx %s",
@@ -6657,7 +6657,7 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
              if(!pwalletMain->SetRandomKeyMetadata(vchPubKey, vchRand))
                throw JSONRPCError(RPC_WALLET_ERROR, "Failed to set meta data for key");
             __wx__DB walletdb(pwalletMain->strWalletFile, "r+");
-            if(!walletdb.UpdateKey(vchPubKey, pwalletMain->kd[vchPubKey.GetID()]))
+            if(!walletdb.UpdateKey(vchPubKey, pwalletMain->keyMetadata[vchPubKey.GetID()]))
               throw JSONRPCError(RPC_TYPE_ERROR, "Failed to write meta data for key");
            }
            

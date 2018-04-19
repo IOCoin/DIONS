@@ -139,9 +139,9 @@ Value importprivkey(const Array& params, bool fHelp)
         if (pwalletMain->HaveKey(vchAddress))
             return Value::null;
 
-        pwalletMain->kd[vchAddress].nCreateTime = 1;
+        pwalletMain->keyMetadata[vchAddress].nCreateTime = 1;
 
-        if (!pwalletMain->ak(key))
+        if (!pwalletMain->AddKey(key))
             throw JSONRPCError(RPC_WALLET_ERROR, "Error adding key to wallet");
 
         // whenever a key is imported, we need to scan the whole chain
@@ -212,11 +212,11 @@ Value importwallet(const Array& params, bool fHelp)
             }
         }
         printf("Importing %s...\n", cba(keyid).ToString().c_str());
-        if (!pwalletMain->ak(key)) {
+        if (!pwalletMain->AddKey(key)) {
             fGood = false;
             continue;
         }
-        pwalletMain->kd[keyid].nCreateTime = nTime;
+        pwalletMain->keyMetadata[keyid].nCreateTime = nTime;
         if (fLabel)
             pwalletMain->SetAddressBookName(keyid, strLabel);
         nTimeBegin = std::min(nTimeBegin, nTime);

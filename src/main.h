@@ -42,7 +42,7 @@ static const int LAST_POW_BLOCK = 12815;
 /** The maximum allowed size for a serialized block, in bytes (network rule) */
 static const unsigned int MAX_BLOCK_SIZE = 4.0 * 1024 * 1024;
 
-static unsigned int  STAKE_INTEREST_V3 = 150000;
+static const int STAKE_INTEREST_V3 = 150000;
 /** The maximum size for mined blocks */
 //static const unsigned int MAX_BLOCK_SIZE_GEN = MAX_BLOCK_SIZE/2;
 static const unsigned int MAX_BLOCK_SIZE_GEN = MAX_BLOCK_SIZE;
@@ -666,7 +666,7 @@ public:
     {
         std::string str;
         str += IsCoinBase()? "Coinbase" : (IsCoinStake()? "Coinstake" : "CTransaction");
-        str += strprintf("(hash=%s, nTime=%d, ver=%d, vin.size=%"PRIszu", vout.size=%"PRIszu", nLockTime=%d, strTxInfo=%s)\n",
+        str += strprintf("(hash=%s, nTime=%d, ver=%d, vin.size=%" PRIszu ", vout.size=%" PRIszu ", nLockTime=%d, strTxInfo=%s)\n",
             GetHash().ToString().substr(0,10).c_str(),
             nTime,
             nVersion,
@@ -1110,7 +1110,7 @@ public:
 
     void print() const
     {
-        printf("CBlock(hash=%s, ver=%d, hashPrevBlock=%s, hashMerkleRoot=%s, nTime=%u, nBits=%08x, nNonce=%u, vtx=%"PRIszu", vchBlockSig=%s)\n",
+        printf("CBlock(hash=%s, ver=%d, hashPrevBlock=%s, hashMerkleRoot=%s, nTime=%u, nBits=%08x, nNonce=%u, vtx=%" PRIszu ", vchBlockSig=%s)\n",
             GetHash().ToString().c_str(),
             nVersion,
             hashPrevBlock.ToString().c_str(),
@@ -1362,7 +1362,7 @@ public:
 
     std::string ToString() const
     {
-        return strprintf("CBlockIndex(nprev=%p, pnext=%p, nFile=%u, nBlockPos=%-6d nHeight=%d, nMint=%s, nMoneySupply=%s, nFlags=(%s)(%d)(%s), nStakeModifier=%016"PRIx64", nStakeModifierChecksum=%08x, hashProof=%s, prevoutStake=(%s), nStakeTime=%d merkle=%s, hashBlock=%s)",
+        return strprintf("CBlockIndex(nprev=%p, pnext=%p, nFile=%u, nBlockPos=%-6d nHeight=%d, nMint=%s, nMoneySupply=%s, nFlags=(%s)(%d)(%s), nStakeModifier=%016" PRIx64 ", nStakeModifierChecksum=%08x, hashProof=%s, prevoutStake=(%s), nStakeTime=%d merkle=%s, hashBlock=%s)",
             pprev, pnext, nFile, nBlockPos, nHeight,
             FormatMoney(nMint).c_str(), FormatMoney(nMoneySupply).c_str(),
             GeneratedStakeModifier() ? "MOD" : "-", GetStakeEntropyBit(), IsProofOfStake()? "PoS" : "PoW",

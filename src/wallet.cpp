@@ -44,7 +44,7 @@ struct CompareValueOnly
 
 CPubKey __wx__::GenerateNewKey()
 {
-    AssertLockHeld(cs_wallet); // kd
+    AssertLockHeld(cs_wallet); // keyMetadata
     bool fCompressed = CanSupportFeature(FEATURE_COMPRPUBKEY); // default to compressed public keys if we want 0.6.0 wallets
 
     RandAddSeedPerfmon();
@@ -59,28 +59,28 @@ CPubKey __wx__::GenerateNewKey()
 
     // Create new metadata
     int64_t nCreationTime = GetTime();
-    kd[pubkey.GetID()] = CKeyMetadata(nCreationTime);
+    keyMetadata[pubkey.GetID()] = CKeyMetadata(nCreationTime);
     if (!nTimeFirstKey || nCreationTime < nTimeFirstKey)
   nTimeFirstKey = nCreationTime;
 
-    if (!ak(key))
+    if (!AddKey(key))
   throw std::runtime_error("__wx__::GenerateNewKey() : ak failed");
     return key.GetPubKey();
 }
 
 
-bool __wx__::ak(const CKey& key)
+bool __wx__::AddKey(const CKey& key)
 {
-    AssertLockHeld(cs_wallet); // kd
+    AssertLockHeld(cs_wallet); // keyMetadata
 
     CPubKey pubkey = key.GetPubKey();
 
-    if (!CCryptoKeyStore::ak(key))
+    if (!CCryptoKeyStore::AddKey(key))
   return false;
     if (!fFileBacked)
   return true;
     if (!IsCrypted())
-  return __wx__DB(strWalletFile).WriteKey(pubkey, key.GetPrivKey(), kd[pubkey.GetID()]);
+  return __wx__DB(strWalletFile).WriteKey(pubkey, key.GetPrivKey(), keyMetadata[pubkey.GetID()]);
     return true;
 }
 
@@ -94,11 +94,11 @@ bool __wx__::sync(const CPubKey &vchPubKey, const vector<unsigned char> &vchCryp
   LOCK(cs_wallet);
   if (pwalletdbEncryption)
   {
-      return pwalletdbEncryption->WriteCryptedKey(vchPubKey, vchCryptedSecret, kd[vchPubKey.GetID()]);
+      return pwalletdbEncryption->WriteCryptedKey(vchPubKey, vchCryptedSecret, keyMetadata[vchPubKey.GetID()]);
   }
   else
   {
-      return __wx__DB(strWalletFile).WriteCryptedKey(vchPubKey, vchCryptedSecret, kd[vchPubKey.GetID()]);
+      return __wx__DB(strWalletFile).WriteCryptedKey(vchPubKey, vchCryptedSecret, keyMetadata[vchPubKey.GetID()]);
   }
     }
     return false;
@@ -106,29 +106,29 @@ bool __wx__::sync(const CPubKey &vchPubKey, const vector<unsigned char> &vchCryp
 
 bool __wx__::LoadKeyMetadata(const CPubKey &pubkey, const CKeyMetadata &meta)
 {
-    AssertLockHeld(cs_wallet); // kd
+    AssertLockHeld(cs_wallet); // keyMetadata
     if (meta.nCreateTime && (!nTimeFirstKey || meta.nCreateTime < nTimeFirstKey))
   nTimeFirstKey = meta.nCreateTime;
 
-    kd[pubkey.GetID()] = meta;
+    keyMetadata[pubkey.GetID()] = meta;
     return true;
 }
 
 bool __wx__::LoadRelay(const vchType& k, const Relay& r)
 {
-    AssertLockHeld(cs_wallet); // kd
+    AssertLockHeld(cs_wallet); // keyMetadata
     lCache[k] = r;
     return true;
 }
 
 bool __wx__::envCP0(const CPubKey &pubkey, string& rsaPrivKey)
 {
-    AssertLockHeld(cs_wallet); // kd
-    if(kd.count(pubkey.GetID()))
+    AssertLockHeld(cs_wallet); // keyMetadata
+    if(keyMetadata.count(pubkey.GetID()))
     {
-      if(! (kd[pubkey.GetID()].patch.scale_() || kd[pubkey.GetID()].patch.scale()))
+      if(! (keyMetadata[pubkey.GetID()].patch.scale_() || keyMetadata[pubkey.GetID()].patch.scale()))
       {
-        rsaPrivKey = kd[pubkey.GetID()].patch.domainImage();
+        rsaPrivKey = keyMetadata[pubkey.GetID()].patch.domainImage();
         return true;
       }
     }
@@ -137,12 +137,12 @@ bool __wx__::envCP0(const CPubKey &pubkey, string& rsaPrivKey)
 
 bool __wx__::envCP1(const CPubKey &pubkey, string& rsaPubKey)
 {
-    AssertLockHeld(cs_wallet); // kd
-   if(kd.count(pubkey.GetID()))
+    AssertLockHeld(cs_wallet); // keyMetadata
+   if(keyMetadata.count(pubkey.GetID()))
    {
-    if(!(kd[pubkey.GetID()].patch.scale_() || kd[pubkey.GetID()].patch.scale()))
+    if(!(keyMetadata[pubkey.GetID()].patch.scale_() || keyMetadata[pubkey.GetID()].patch.scale()))
     {
-       rsaPubKey = kd[pubkey.GetID()].patch.codomainImage();
+       rsaPubKey = keyMetadata[pubkey.GetID()].patch.codomainImage();
         return true;
     }
    }
@@ -152,29 +152,29 @@ bool __wx__::envCP1(const CPubKey &pubkey, string& rsaPubKey)
 
 bool __wx__::GetRandomKeyMetadata(const CPubKey& pubkey, vchType &r, string& r_)
 {
-    AssertLockHeld(cs_wallet); // kd
+    AssertLockHeld(cs_wallet); // keyMetadata
 
-    r = kd[pubkey.GetID()].random;
-    r_ = kd[pubkey.GetID()].r;
+    r = keyMetadata[pubkey.GetID()].random;
+    r_ = keyMetadata[pubkey.GetID()].r;
 
     return true;
 }
 
 bool __wx__::SetRandomKeyMetadata(const CPubKey& pubkey, const vchType &r)
 {
-    AssertLockHeld(cs_wallet); // kd
+    AssertLockHeld(cs_wallet); // keyMetadata
 
-    kd[pubkey.GetID()].random = r;
-    kd[pubkey.GetID()].r = stringFromVch(r);
+    keyMetadata[pubkey.GetID()].random = r;
+    keyMetadata[pubkey.GetID()].r = stringFromVch(r);
 
     return true;
 }
 
 bool __wx__::aes_(const CPubKey& pubkey, string& f, string& aesPlainBase64)
 {
-    AssertLockHeld(cs_wallet); // kd
+    AssertLockHeld(cs_wallet); // keyMetadata
 
-    aesPlainBase64 = kd[pubkey.GetID()].m[f];
+    aesPlainBase64 = keyMetadata[pubkey.GetID()].m[f];
     
     if(aesPlainBase64 != "")
       return true;
@@ -184,20 +184,20 @@ bool __wx__::aes_(const CPubKey& pubkey, string& f, string& aesPlainBase64)
 
 bool __wx__::aes(const CPubKey &pubkey, string& f, string& aes256KeyBase64)
 {
-    AssertLockHeld(cs_wallet); // kd
+    AssertLockHeld(cs_wallet); // keyMetadata
 
-    kd[pubkey.GetID()].m[f] = aes256KeyBase64;
+    keyMetadata[pubkey.GetID()].m[f] = aes256KeyBase64;
 
     return true;
 }
 
 bool __wx__::SetRSAMetadata(const CPubKey &pubkey)
 {
-    AssertLockHeld(cs_wallet); // kd
+    AssertLockHeld(cs_wallet); // keyMetadata
 
-    if(kd[pubkey.GetID()].patch.scale_() && kd[pubkey.GetID()].patch.scale())
+    if(keyMetadata[pubkey.GetID()].patch.scale_() && keyMetadata[pubkey.GetID()].patch.scale())
     {
-      GenerateRSAKey(kd[pubkey.GetID()].patch);
+      GenerateRSAKey(keyMetadata[pubkey.GetID()].patch);
 
       return true;
     }
@@ -232,7 +232,7 @@ bool __wx__::LoadCScript(const CScript& redeemScript)
     if (redeemScript.size() > MAX_SCRIPT_ELEMENT_SIZE)
     {
   std::string strAddr = cba(redeemScript.GetID()).ToString();
-  printf("%s: Warning: This wallet contains a redeemScript of size %"PRIszu" which exceeds maximum size %i thus can never be redeemed. Do not use address %s.\n",
+  printf("%s: Warning: This wallet contains a redeemScript of size %" PRIszu " which exceeds maximum size %i thus can never be redeemed. Do not use address %s.\n",
       __func__, redeemScript.size(), MAX_SCRIPT_ELEMENT_SIZE, strAddr.c_str());
   return true;
     }
@@ -254,7 +254,7 @@ bool __wx__::relay(const vchType& k, Relay& r)
 
 bool __wx__::Unlock(const SecureString& strWalletPassphrase)
 {
-    if (!as())
+    if (!IsLocked())
   return false;
 
     CCrypter crypter;
@@ -281,7 +281,7 @@ bool __wx__::Unlock(const SecureString& strWalletPassphrase)
 
 bool __wx__::ChangeWalletPassphrase(const SecureString& strOldWalletPassphrase, const SecureString& strNewWalletPassphrase)
 {
-    bool fWasLocked = as();
+    bool fWasLocked = IsLocked();
 
     {
   LOCK(cs_wallet);
@@ -1045,7 +1045,7 @@ void __wx__::ReacceptWalletTransactions()
 	      // Update fSpent if a tx got spent somewhere else by a copy of wallet.dat
 	      if (txindex.vSpent.size() != wtx.vout.size())
 	      {
-		  printf("ERROR: ReacceptWalletTransactions() : txindex.vSpent.size() %"PRIszu" != wtx.vout.size() %"PRIszu"\n", txindex.vSpent.size(), wtx.vout.size());
+		  printf("ERROR: ReacceptWalletTransactions() : txindex.vSpent.size() %" PRIszu " != wtx.vout.size() %" PRIszu "\n", txindex.vSpent.size(), wtx.vout.size());
 		  continue;
 	      }
 	      for (unsigned int i = 0; i < txindex.vSpent.size(); i++)
@@ -1411,7 +1411,7 @@ bool __wx__::SelectCoinsMinConf(int64_t nTargetValue, unsigned int nSpendTime, i
 
       if (pcoin->nTime > nSpendTime)
       {
-	  printf("pcoin->nTime %"PRId64", nSpendTime %"PRId64"\n", pcoin->nTime, nSpendTime);
+	  printf("pcoin->nTime %" PRId64 ", nSpendTime %" PRId64 "\n", pcoin->nTime, nSpendTime);
 	  continue;
       }
 
@@ -2201,7 +2201,7 @@ string __wx__::SendMoney__(CScript scriptPubKey, int64_t nValue, __wx__Tx& wtxNe
   CReserveKey reservekey(this);
   int64_t nFeeRequired;
 
-  if (as())
+  if (IsLocked())
   {
       string strError = _("Error: Wallet locked, unable to create transaction  ");
       printf("SendMoney() : %s", strError.c_str());
@@ -2239,7 +2239,7 @@ string __wx__::SendMoney(CScript scriptPubKey, int64_t nValue, __wx__Tx& wtxNew,
   CReserveKey reservekey(this);
   int64_t nFeeRequired;
 
-  if (as())
+  if (IsLocked())
   {
       string strError = _("Error: Wallet locked, unable to create transaction  ");
       printf("SendMoney() : %s", strError.c_str());
@@ -2358,12 +2358,12 @@ void __wx__::PrintWallet(const CBlock& block)
       if (block.IsProofOfWork() && mapWallet.count(block.vtx[0].GetHash()))
       {
 	  __wx__Tx& wtx = mapWallet[block.vtx[0].GetHash()];
-	  printf("    mine:  %d  %d  %"PRId64"", wtx.GetDepthInMainChain(), wtx.GetBlocksToMaturity(), wtx.GetCredit());
+	  printf("    mine:  %d  %d  %" PRId64 "", wtx.GetDepthInMainChain(), wtx.GetBlocksToMaturity(), wtx.GetCredit());
       }
       if (block.IsProofOfStake() && mapWallet.count(block.vtx[1].GetHash()))
       {
 	  __wx__Tx& wtx = mapWallet[block.vtx[1].GetHash()];
-	  printf("    stake: %d  %d  %"PRId64"", wtx.GetDepthInMainChain(), wtx.GetBlocksToMaturity(), wtx.GetCredit());
+	  printf("    stake: %d  %d  %" PRId64 "", wtx.GetDepthInMainChain(), wtx.GetBlocksToMaturity(), wtx.GetCredit());
        }
 
   }
@@ -2416,7 +2416,7 @@ bool __wx__::NewKeyPool()
 	  walletdb.ErasePool(nIndex);
       setKeyPool.clear();
 
-      if (as())
+      if (IsLocked())
 	  return false;
 
       int64_t nKeys = max(GetArg("-keypool", 100), (int64_t)0);
@@ -2426,7 +2426,7 @@ bool __wx__::NewKeyPool()
 	  walletdb.WritePool(nIndex, CKeyPool(GenerateNewKey()));
 	  setKeyPool.insert(nIndex);
       }
-      printf("__wx__::NewKeyPool wrote %"PRId64" new keys\n", nKeys);
+      printf("__wx__::NewKeyPool wrote %" PRId64 " new keys\n", nKeys);
   }
   return true;
 }
@@ -2436,7 +2436,7 @@ bool __wx__::TopUpKeyPool(unsigned int nSize)
   {
       LOCK(cs_wallet);
 
-      if (as())
+      if (IsLocked())
 	  return false;
 
       __wx__DB walletdb(strWalletFile);
@@ -2456,7 +2456,7 @@ bool __wx__::TopUpKeyPool(unsigned int nSize)
 	  if (!walletdb.WritePool(nEnd, CKeyPool(GenerateNewKey())))
 	      throw runtime_error("TopUpKeyPool() : writing generated key failed");
 	  setKeyPool.insert(nEnd);
-	  printf("keypool added key %"PRId64", size=%"PRIszu"\n", nEnd, setKeyPool.size());
+	  printf("keypool added key %" PRId64 ", size=%" PRIszu "\n", nEnd, setKeyPool.size());
       }
   }
   return true;
@@ -2469,7 +2469,7 @@ void __wx__::ReserveKeyFromKeyPool(int64_t& nIndex, CKeyPool& keypool)
   {
       LOCK(cs_wallet);
 
-      if (!as())
+      if (!IsLocked())
 	  TopUpKeyPool();
 
       // Get the oldest key
@@ -2486,7 +2486,7 @@ void __wx__::ReserveKeyFromKeyPool(int64_t& nIndex, CKeyPool& keypool)
 	  throw runtime_error("ReserveKeyFromKeyPool() : unknown key in key pool");
       assert(keypool.vchPubKey.IsValid());
       if (fDebug && GetBoolArg("-printkeypool"))
-	  printf("keypool reserve %"PRId64"\n", nIndex);
+	  printf("keypool reserve %" PRId64 "\n", nIndex);
   }
 }
 
@@ -2514,7 +2514,7 @@ void __wx__::KeepKey(int64_t nIndex)
       walletdb.ErasePool(nIndex);
   }
   if(fDebug)
-      printf("keypool keep %"PRId64"\n", nIndex);
+      printf("keypool keep %" PRId64 "\n", nIndex);
 }
 
 void __wx__::ReturnKey(int64_t nIndex)
@@ -2525,56 +2525,56 @@ void __wx__::ReturnKey(int64_t nIndex)
       setKeyPool.insert(nIndex);
   }
   if(fDebug)
-      printf("keypool return %"PRId64"\n", nIndex);
+      printf("keypool return %" PRId64 "\n", nIndex);
 }
 
-bool __wx__::GetKeyFromPool(CPubKey& r1, CPubKey& r2, bool fAllowReuse)
+bool __wx__::GetKeyFromPool(CPubKey& key1, CPubKey& key2, bool fAllowReuse)
 {
   int64_t nIndex = 0;
-  CKeyPool k1;
-  CKeyPool k2;
+  CKeyPool tempkey1;
+  CKeyPool tempkey2;
   {
       LOCK(cs_wallet);
-      ReserveKeyFromKeyPool(nIndex, k1);
+      ReserveKeyFromKeyPool(nIndex, tempkey1);
       if (nIndex == -1)
       {
 	  if (fAllowReuse && vchDefaultKey.IsValid())
 	  {
-	      r1 = vchDefaultKey;
+	      key1 = vchDefaultKey;
 	      return true;
 	  }
-	  if (as()) return false;
-	  r1 = GenerateNewKey();
+	  if (IsLocked()) return false;
+	  key1 = GenerateNewKey();
       }
       else
       {
       KeepKey(nIndex);
-      r1 = k1.vchPubKey;
+      key1 = tempkey1.vchPubKey;
       }
-      ReserveKeyFromKeyPool(nIndex, k2);
+      ReserveKeyFromKeyPool(nIndex, tempkey2);
       if (nIndex == -1)
       {
 	  if (fAllowReuse && vchDefaultKey.IsValid())
 	  {
-	      r1 = vchDefaultKey;
+	      key2 = vchDefaultKey;
 	      return true;
 	  }
-	  if (as()) return false;
-	  r2 = GenerateNewKey();
+	  if (IsLocked()) return false;
+	  key2 = GenerateNewKey();
       }
       else
       {
       KeepKey(nIndex);
-      r2 = k2.vchPubKey;
+      key2 = tempkey2.vchPubKey;
       }
 
-    RayShade& rs7 = kd[k1.vchPubKey.GetID()].rs_;
-    rs7.ctrlExternalDtx(RayShade::RAY_VTX, (uint160)(k2.vchPubKey.GetID()));
+    RayShade& rs7 = keyMetadata[tempkey1.vchPubKey.GetID()].rayshade;
+    rs7.ctrlExternalDtx(RayShade::RAY_VTX, (uint160)(tempkey2.vchPubKey.GetID()));
 
-    RayShade& rs1 = kd[k2.vchPubKey.GetID()].rs_;
-    rs1.ctrlExternalDtx(RayShade::RAY_SET, (uint160)(k2.vchPubKey.GetID()));
+    RayShade& rs1 = keyMetadata[tempkey2.vchPubKey.GetID()].rayshade;
+    rs1.ctrlExternalDtx(RayShade::RAY_SET, (uint160)(tempkey2.vchPubKey.GetID()));
 
-    if(!IsCrypted() && (!__wx__DB(strWalletFile).UpdateKey(k1.vchPubKey, kd[k1.vchPubKey.GetID()]) || !__wx__DB(strWalletFile).UpdateKey(k2.vchPubKey, kd[k2.vchPubKey.GetID()])))
+    if(!IsCrypted() && (!__wx__DB(strWalletFile).UpdateKey(tempkey1.vchPubKey, keyMetadata[tempkey1.vchPubKey.GetID()]) || !__wx__DB(strWalletFile).UpdateKey(tempkey2.vchPubKey, keyMetadata[tempkey2.vchPubKey.GetID()])))
       throw runtime_error("update vtx");
   }
   return true;
@@ -2594,7 +2594,7 @@ bool __wx__::GetKeyFromPool(CPubKey& result, bool fAllowReuse)
 	      result = vchDefaultKey;
 	      return true;
 	  }
-	  if (as()) return false;
+	  if (IsLocked()) return false;
 	  result = GenerateNewKey();
 	  return true;
       }
@@ -2889,11 +2889,11 @@ void __wx__::UpdatedTransaction(const uint256 &hashTx)
 }
 
 void __wx__::kt(std::map<CKeyID, int64_t> &mapKeyBirth) const {
-  AssertLockHeld(cs_wallet); // kd
+  AssertLockHeld(cs_wallet); // keyMetadata
   mapKeyBirth.clear();
 
   // get birth times for keys with metadata
-  for (std::map<CKeyID, CKeyMetadata>::const_iterator it = kd.begin(); it != kd.end(); it++)
+  for (std::map<CKeyID, CKeyMetadata>::const_iterator it = keyMetadata.begin(); it != keyMetadata.end(); it++)
       if (it->second.nCreateTime)
 	  mapKeyBirth[it->first] = it->second.nCreateTime;
 
@@ -3219,7 +3219,7 @@ int CMerkleTx::GetDepthInMainChain(int& nHeightRet) const
 
 string __wx__::__associate_fn__(CScript pk, int64_t v, __wx__Tx& t, __im__& i)
 {
-  if (as())
+  if (IsLocked())
   {
       string strError = _("Error: locked");
       printf("__associate_fn__() : %s", strError.c_str());
@@ -3329,16 +3329,16 @@ bool __intersect(CKeyID& i, CPubKey& j)
   for(std::map<CKeyID, int64_t>::const_iterator it = mk.begin(); it != mk.end(); it++)
   {
     CKeyID ck = it->first;
-    RayShade& r1 = pwalletMain->kd[ck].rs_;
+    RayShade& r1 = pwalletMain->keyMetadata[ck].rayshade;
     if(r1.ctrlExternalAngle())
     {
       for(std::map<CKeyID, int64_t>::const_iterator it = mk.begin(); it != mk.end(); it++)
       {
         CKeyID ck_ = it->first;
-        RayShade& r = pwalletMain->kd[ck_].rs_;
+        RayShade& r = pwalletMain->keyMetadata[ck_].rayshade;
         if(!r.ctrlExternalAngle() && r.ctrlPath() == r1.ctrlPath())
         { 
-          if(pwalletMain->as())
+          if(pwalletMain->IsLocked())
           {
             __im__ t = r1.streamID();
             __im__ t2 = j.Raw();
@@ -3351,8 +3351,8 @@ bool __intersect(CKeyID& i, CPubKey& j)
             if(x.GetID() == i)
             {
               __im__ n;
-              pwalletMain->kd[i].k = j;
-              pwalletMain->kd[i].z = r.ctrlPath();
+              pwalletMain->keyMetadata[i].k = j;
+              pwalletMain->keyMetadata[i].z = r.ctrlPath();
               pwalletMain->sync(x, n);
               return true;
             }
@@ -3377,8 +3377,8 @@ bool __intersect(CKeyID& i, CPubKey& j)
               if(sx_p.GetID() == i)
               {
                 int64_t ct = GetTime();
-                pwalletMain->kd[sx_p.GetID()] = CKeyMetadata(ct);
-                if(!pwalletMain->ak(ks_x))
+                pwalletMain->keyMetadata[sx_p.GetID()] = CKeyMetadata(ct);
+                if(!pwalletMain->AddKey(ks_x))
                   throw std::runtime_error("Key");
 
                 return true;
@@ -3401,24 +3401,24 @@ bool __wx__::__transient()
   for(std::map<CKeyID, int64_t>::const_iterator it = mk.begin(); it != mk.end(); it++)
   {
     CKeyID ck = it->first;
-    uint160 i  = pwalletMain->kd[ck].z;
+    uint160 i  = pwalletMain->keyMetadata[ck].z;
     if(i == 0)
       continue;
 
     bool found=false;
-    CPubKey k  = pwalletMain->kd[ck].k;
+    CPubKey k  = pwalletMain->keyMetadata[ck].k;
     CKeyID vID;
     CKeyID exID;
     for(std::map<CKeyID, int64_t>::const_iterator it = mk.begin(); it != mk.end(); it++)
     {
       CKeyID ckV = it->first;
-      RayShade& r1 = pwalletMain->kd[ckV].rs_;
+      RayShade& r1 = pwalletMain->keyMetadata[ckV].rayshade;
       if(r1.ctrlExternalAngle() && r1.ctrlPath() == i)
       {
         for(std::map<CKeyID, int64_t>::const_iterator it = mk.begin(); it != mk.end(); it++)
         {
           CKeyID ck = it->first;
-          RayShade& r = pwalletMain->kd[ck].rs_;
+          RayShade& r = pwalletMain->keyMetadata[ck].rayshade;
           if(!r.ctrlExternalAngle() && r.ctrlPath() == i)
           {
             vID = ckV;
@@ -3433,11 +3433,11 @@ bool __wx__::__transient()
     if(found) 
     {
       CSecret s2;
-      bool f;
-      if(pwalletMain->GetSecret(exID, s2, f))
+      bool fCompressed;
+      if(pwalletMain->GetSecret(exID, s2, fCompressed))
       {
         unsigned char* a2 = s2.data();
-        __im__ tmp1 = pwalletMain->kd[vID].rs_.streamID();
+        __im__ tmp1 = pwalletMain->keyMetadata[vID].rayshade.streamID();
         __im__ tmp2 = k.Raw();
         __im__ tmp3(a2, a2 + 0x20);
         __im__ tmp4;
@@ -3459,9 +3459,9 @@ bool __wx__::__transient()
         if(sx_p.GetID() == ck)
         {
           int64_t ct = GetTime();
-          pwalletMain->kd[sx_p.GetID()] = CKeyMetadata(ct);
-          pwalletMain->kd[sx_p.GetID()].z = FORM; 
-          if(!pwalletMain->ak(ks_x))
+          pwalletMain->keyMetadata[sx_p.GetID()] = CKeyMetadata(ct);
+          pwalletMain->keyMetadata[sx_p.GetID()].z = FORM; 
+          if(!pwalletMain->AddKey(ks_x))
             throw std::runtime_error("Key");
         }
       }
