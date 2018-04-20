@@ -2538,13 +2538,8 @@ bool __wx__::GetKeyFromPool(CPubKey& key1, CPubKey& key2, bool fAllowReuse)
       ReserveKeyFromKeyPool(nIndex, tempkey1);
       if (nIndex == -1)
       {
-	  if (fAllowReuse && vchDefaultKey.IsValid())
-	  {
-	      key1 = vchDefaultKey;
-	      return true;
-	  }
-	  if (IsLocked()) return false;
-	  key1 = GenerateNewKey();
+        if (IsLocked()) return false;
+        key1 = GenerateNewKey();
       }
       else
       {
@@ -2554,13 +2549,8 @@ bool __wx__::GetKeyFromPool(CPubKey& key1, CPubKey& key2, bool fAllowReuse)
       ReserveKeyFromKeyPool(nIndex, tempkey2);
       if (nIndex == -1)
       {
-	  if (fAllowReuse && vchDefaultKey.IsValid())
-	  {
-	      key2 = vchDefaultKey;
-	      return true;
-	  }
-	  if (IsLocked()) return false;
-	  key2 = GenerateNewKey();
+        if (IsLocked()) return false;
+        key2 = GenerateNewKey();
       }
       else
       {
