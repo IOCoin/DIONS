@@ -31,9 +31,9 @@ extern std::set<vchType> setNewHashes;
 
 
 unsigned char GetAddressVersion();
-class cba;
+class cIOCaddress;
 
-int checkAddress(string addr, cba& a);
+int checkAddress(string addr, cIOCaddress& a);
 
 std::vector<unsigned char> vchFromString(const std::string &str);
 string stringFromVch(const vector<unsigned char> &vch);

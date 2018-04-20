@@ -213,7 +213,7 @@ ReadKeyValue(__wx__* pwallet, CDataStream& ssKey, CDataStream& ssValue,
         {
             string strAddress;
             ssKey >> strAddress;
-            ssValue >> pwallet->mapAddressBook[cba(strAddress).Get()];
+            ssValue >> pwallet->mapAddressBook[cIOCaddress(strAddress).Get()];
         }
         else if (strType == "tx")
         {

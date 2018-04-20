@@ -173,7 +173,7 @@ Value getnewaddress(const Array& params, bool fHelp)
 
     pwalletMain->SetAddressBookName(keyID, strAccount);
 
-    return cba(keyID).ToString();
+    return cIOCaddress(keyID).ToString();
 }
 
 Value shade(const Array& params, bool fHelp)
@@ -194,8 +194,8 @@ Value shade(const Array& params, bool fHelp)
       throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
    
     //Verify - orange 
-    aResult.push_back(cba(abskey.GetID()).ToString());
-    aResult.push_back(cba(ordkey.GetID()).ToString());
+    aResult.push_back(cIOCaddress(abskey.GetID()).ToString());
+    aResult.push_back(cIOCaddress(ordkey.GetID()).ToString());
     vector<unsigned char> k;
     k.reserve(1 + abskey.Raw().size() + ordkey.Raw().size());
     vchType a = abskey.Raw();
@@ -250,7 +250,7 @@ Value sr71(const Array& params, bool fHelp)
       if(r1.ctrlExternalAngle())
       {
         Object obj;
-        obj.push_back(Pair("vertex point", cba(keyID).ToString()));
+        obj.push_back(Pair("vertex point", cIOCaddress(keyID).ToString()));
         obj.push_back(Pair("vertex i", r1.ctrlIndex()));
 
         for(std::map<CKeyID, int64_t>::const_iterator it = mk.begin(); it != mk.end(); it++)
@@ -259,7 +259,7 @@ Value sr71(const Array& params, bool fHelp)
           RayShade& r = pwalletMain->keyMetadata[keyID].rayshade;
           if(!r.ctrlExternalAngle() && r.ctrlPath() == r1.ctrlPath())
           {
-            obj.push_back(Pair("ray id", cba(keyID).ToString()));
+            obj.push_back(Pair("ray id", cIOCaddress(keyID).ToString()));
           }
         }
 
@@ -271,7 +271,7 @@ Value sr71(const Array& params, bool fHelp)
 }
 
 
-cba GetAccountAddress(string strAccount, bool bForceNew=false)
+cIOCaddress GetAccountAddress(string strAccount, bool bForceNew=false)
 {
     __wx__DB walletdb(pwalletMain->strWalletFile);
 
@@ -306,7 +306,7 @@ cba GetAccountAddress(string strAccount, bool bForceNew=false)
         walletdb.WriteAccount(strAccount, account);
     }
 
-    return cba(account.vchPubKey.GetID());
+    return cIOCaddress(account.vchPubKey.GetID());
 }
 
 Value getaccountaddress(const Array& params, bool fHelp)
@@ -335,7 +335,7 @@ Value setaccount(const Array& params, bool fHelp)
             "setaccount <iocoinaddress> <account>\n"
             "Sets the account associated with the given address.");
 
-    cba address(params[0].get_str());
+    cIOCaddress address(params[0].get_str());
     if (!address.IsValid())
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid I/OCoin address");
 
@@ -365,7 +365,7 @@ Value getaccount(const Array& params, bool fHelp)
             "getaccount <iocoinaddress>\n"
             "Returns the account associated with the given address.");
 
-    cba address(params[0].get_str());
+    cIOCaddress address(params[0].get_str());
     if (!address.IsValid())
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid I/OCoin address");
 
@@ -388,9 +388,9 @@ Value getaddressesbyaccount(const Array& params, bool fHelp)
 
     // Find all addresses that have the given account
     Array ret;
-    BOOST_FOREACH(const PAIRTYPE(cba, string)& item, pwalletMain->mapAddressBook)
+    BOOST_FOREACH(const PAIRTYPE(cIOCaddress, string)& item, pwalletMain->mapAddressBook)
     {
-        const cba& address = item.first;
+        const cIOCaddress& address = item.first;
         const string& aliasStr = item.second;
         if (aliasStr == strAccount)
             ret.push_back(address.ToString());
@@ -407,7 +407,7 @@ Value addresstodion(const Array& params, bool fHelp)
     string address = params[0].get_str();
 
     ln1Db->filter();
-    cba address__(address);
+    cIOCaddress address__(address);
     if (!address__.IsValid())
       throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid I/OCoin address");
 
@@ -523,7 +523,7 @@ Value sendtoaddress(const Array& params, bool fHelp)
             + HelpRequiringPassphrase());
 
     string addrStr = params[0].get_str();
-    cba address(addrStr);
+    cIOCaddress address(addrStr);
     if(!address.IsValid())
     {
       vector<AliasIndex> vtxPos;
@@ -590,17 +590,17 @@ Value listaddressgroupings(const Array& params, bool fHelp)
         BOOST_FOREACH(CTxDestination address, grouping)
         {
             Array addressInfo;
-            addressInfo.push_back(cba(address).ToString());
+            addressInfo.push_back(cIOCaddress(address).ToString());
             addressInfo.push_back(ValueFromAmount(balances[address]));
             {
                 LOCK(pwalletMain->cs_wallet);
-                if (pwalletMain->mapAddressBook.find(cba(address).Get()) != pwalletMain->mapAddressBook.end())
-                    addressInfo.push_back(pwalletMain->mapAddressBook.find(cba(address).Get())->second);
+                if (pwalletMain->mapAddressBook.find(cIOCaddress(address).Get()) != pwalletMain->mapAddressBook.end())
+                    addressInfo.push_back(pwalletMain->mapAddressBook.find(cIOCaddress(address).Get())->second);
 
                 string pub_k;
                 string priv_k;
                 CKeyID keyID;
-                cba(address).GetKeyID(keyID);
+                cIOCaddress(address).GetKeyID(keyID);
 
                 CPubKey vchPubKey;
                 pwalletMain->GetPubKey(keyID, vchPubKey);
@@ -628,7 +628,7 @@ Value signmessage(const Array& params, bool fHelp)
     string strAddress = params[0].get_str();
     string strMessage = params[1].get_str();
 
-    cba addr(strAddress);
+    cIOCaddress addr(strAddress);
     if (!addr.IsValid())
         throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
 
@@ -662,7 +662,7 @@ Value verifymessage(const Array& params, bool fHelp)
     string strSign     = params[1].get_str();
     string strMessage  = params[2].get_str();
 
-    cba addr(strAddress);
+    cIOCaddress addr(strAddress);
     if (!addr.IsValid())
         throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
 
@@ -711,7 +711,7 @@ Value xtu_url__(const string& s)
       throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "does not exist.");
     }
 
-    cba address = cba(target);
+    cIOCaddress address = cIOCaddress(target);
 
     CScript scriptPubKey;
     if (!address.IsValid())
@@ -769,7 +769,7 @@ Value xtu_url(const Array& params, bool fHelp)
       throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "does not exist.");
     }
 
-    cba address = cba(target);
+    cIOCaddress address = cIOCaddress(target);
 
     CScript scriptPubKey;
     if (!address.IsValid())
@@ -808,7 +808,7 @@ Value getreceivedbyaddress(const Array& params, bool fHelp)
             "Returns the total amount received by <iocoinaddress> in transactions with at least [minconf] confirmations.");
 
     // Bitcoin address
-    cba address = cba(params[0].get_str());
+    cIOCaddress address = cIOCaddress(params[0].get_str());
     CScript scriptPubKey;
     if (!address.IsValid())
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid I/OCoin address");
@@ -846,7 +846,7 @@ Value gra(const Array& params, bool fHelp)
             "Returns the total amount received by <iocoinaddress> in transactions with at least [minconf] confirmations.");
 
     // Bitcoin address
-    cba address = cba(params[0].get_str());
+    cIOCaddress address = cIOCaddress(params[0].get_str());
     CScript scriptPubKey;
     if (!address.IsValid())
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid I/OCoin address");
@@ -1087,7 +1087,7 @@ Value sendfrom(const Array& params, bool fHelp)
             + HelpRequiringPassphrase());
 
     string strAccount = AccountFromValue(params[0]);
-    cba address(params[1].get_str());
+    cIOCaddress address(params[1].get_str());
     if (!address.IsValid())
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid I/OCoin address");
     int64_t nAmount = AmountFromValue(params[2]);
@@ -1147,13 +1147,13 @@ Value sendmany(const Array& params, bool fHelp)
     if (params.size() > 4 && params[4].type() != null_type && !params[4].get_str().empty())
         strTxInfo = params[4].get_str();
 
-    set<cba> setAddress;
+    set<cIOCaddress> setAddress;
     vector<pair<CScript, int64_t> > vecSend;
 
     int64_t totalAmount = 0;
     BOOST_FOREACH(const Pair& s, sendTo)
     {
-        cba address(s.name_);
+        cIOCaddress address(s.name_);
         if (!address.IsValid())
             throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, string("Invalid I/OCoin address: ")+s.name_);
 
@@ -1224,7 +1224,7 @@ Value addmultisigaddress(const Array& params, bool fHelp)
         const std::string& ks = keys[i].get_str();
 
         // Case 1: Bitcoin address and we have full public key:
-        cba address(ks);
+        cIOCaddress address(ks);
         if (address.IsValid())
         {
             CKeyID keyID;
@@ -1260,7 +1260,7 @@ Value addmultisigaddress(const Array& params, bool fHelp)
         throw runtime_error("AddCScript() failed");
 
     pwalletMain->SetAddressBookName(innerID, strAccount);
-    return cba(innerID).ToString();
+    return cIOCaddress(innerID).ToString();
 }
 
 Value addredeemscript(const Array& params, bool fHelp)
@@ -1285,7 +1285,7 @@ Value addredeemscript(const Array& params, bool fHelp)
         throw runtime_error("AddCScript() failed");
 
     pwalletMain->SetAddressBookName(innerID, strAccount);
-    return cba(innerID).ToString();
+    return cIOCaddress(innerID).ToString();
 }
 
 struct tallyitem
@@ -1312,7 +1312,7 @@ Value ListReceived(const Array& params, bool fByAccounts)
         fIncludeEmpty = params[1].get_bool();
 
     // Tally
-    map<cba, tallyitem> mapTally;
+    map<cIOCaddress, tallyitem> mapTally;
     for (map<uint256, __wx__Tx>::iterator it = pwalletMain->mapWallet.begin(); it != pwalletMain->mapWallet.end(); ++it)
     {
         const __wx__Tx& wtx = (*it).second;
@@ -1339,11 +1339,11 @@ Value ListReceived(const Array& params, bool fByAccounts)
     // Reply
     Array ret;
     map<string, tallyitem> mapAccountTally;
-    BOOST_FOREACH(const PAIRTYPE(cba, string)& item, pwalletMain->mapAddressBook)
+    BOOST_FOREACH(const PAIRTYPE(cIOCaddress, string)& item, pwalletMain->mapAddressBook)
     {
-        const cba& address = item.first;
+        const cIOCaddress& address = item.first;
         const string& strAccount = item.second;
-        map<cba, tallyitem>::iterator it = mapTally.find(address);
+        map<cIOCaddress, tallyitem>::iterator it = mapTally.find(address);
         if (it == mapTally.end() && !fIncludeEmpty)
             continue;
 
@@ -1424,7 +1424,7 @@ Value listreceivedbyaccount(const Array& params, bool fHelp)
 
 static void MaybePushAddress(Object & entry, const CTxDestination &dest)
 {
-    cba addr;
+    cIOCaddress addr;
     if (addr.Set(dest))
         entry.push_back(Pair("address", addr.ToString()));
 }
@@ -2093,7 +2093,7 @@ public:
         obj.push_back(Pair("hex", HexStr(subscript.begin(), subscript.end())));
         Array a;
         BOOST_FOREACH(const CTxDestination& addr, addresses)
-            a.push_back(cba(addr).ToString());
+            a.push_back(cIOCaddress(addr).ToString());
         obj.push_back(Pair("addresses", a));
         if (whichType == TX_MULTISIG)
             obj.push_back(Pair("sigsrequired", nRequired));
@@ -2109,7 +2109,7 @@ Value validateaddress(const Array& params, bool fHelp)
             "validateaddress <iocoinaddress>\n"
             "Return information about <iocoinaddress>.");
 
-    cba address(params[0].get_str());
+    cIOCaddress address(params[0].get_str());
     bool isValid = address.IsValid();
 
     Object ret;
@@ -2145,7 +2145,7 @@ Value validatepubkey(const Array& params, bool fHelp)
     bool isCompressed = pubKey.IsCompressed();
     CKeyID keyID = pubKey.GetID();
 
-    cba address;
+    cIOCaddress address;
     address.Set(keyID);
 
     Object ret;
@@ -2328,8 +2328,8 @@ Value shadesend(const Array& params, bool fHelp)
       CPubKey k1_(k1);
       CPubKey k2_(k2);
       Object obj;
-      obj.push_back(Pair("abs", cba(k1_.GetID()).ToString()));
-      obj.push_back(Pair("ord", cba(k2_.GetID()).ToString()));
+      obj.push_back(Pair("abs", cIOCaddress(k1_.GetID()).ToString()));
+      obj.push_back(Pair("ord", cIOCaddress(k2_.GetID()).ToString()));
 
       vector<unsigned char> fq_;
       fq_.resize(0x20);
@@ -2353,7 +2353,7 @@ Value shadesend(const Array& params, bool fHelp)
         if(!pivot.IsValid())
           throw runtime_error("rfl pivot point");
 
-        obj.push_back(Pair("target", cba(pivot.GetID()).ToString()));
+        obj.push_back(Pair("target", cIOCaddress(pivot.GetID()).ToString()));
         
         if(invert(inv) == 0)
         {
@@ -2361,10 +2361,10 @@ Value shadesend(const Array& params, bool fHelp)
           if(!inv_.IsValid())
             throw runtime_error("rfl image");
           
-          obj.push_back(Pair("trace", cba(inv_.GetID()).ToString()));
+          obj.push_back(Pair("trace", cIOCaddress(inv_.GetID()).ToString()));
           int64_t v = AmountFromValue(params[1]);
           CScript pk;
-          pk.SetDestination(cba(pivot.GetID()).Get());
+          pk.SetDestination(cIOCaddress(pivot.GetID()).Get());
           __wx__Tx t;
           string err = pwalletMain->__associate_fn__(pk, v, t, inv.__inv1);
           if(err != "")
@@ -2402,7 +2402,7 @@ Value __vtx_s(const Array& params, bool fHelp)
       CPubKey k1_(k1);
 
       CKeyID k_id1;
-      if (!cba(k1_.GetID()).GetKeyID(k_id1))
+      if (!cIOCaddress(k1_.GetID()).GetKeyID(k_id1))
         throw runtime_error("key");
 
       CSecret vchSecret1;
@@ -2413,7 +2413,7 @@ Value __vtx_s(const Array& params, bool fHelp)
       CPubKey k2_(k2);
 
       CKeyID k_id2;
-      if (!cba(k2_.GetID()).GetKeyID(k_id2))
+      if (!cIOCaddress(k2_.GetID()).GetKeyID(k_id2))
         throw runtime_error("key");
 
       CSecret vchSecret2;
@@ -2421,8 +2421,8 @@ Value __vtx_s(const Array& params, bool fHelp)
        throw runtime_error("k2 secret"); 
       
       Object obj;
-      obj.push_back(Pair("vertex point", cba(k1_.GetID()).ToString()));
-      obj.push_back(Pair("ray id", cba(k2_.GetID()).ToString()));
+      obj.push_back(Pair("vertex point", cIOCaddress(k1_.GetID()).ToString()));
+      obj.push_back(Pair("ray id", cIOCaddress(k2_.GetID()).ToString()));
 
       vector<unsigned char> fq_;
       fq_.resize(0x20);
@@ -2446,7 +2446,7 @@ Value __vtx_s(const Array& params, bool fHelp)
         if(!pivot.IsValid())
           throw runtime_error("rfl pivot point");
 
-        obj.push_back(Pair("pivot point", cba(pivot.GetID()).ToString()));
+        obj.push_back(Pair("pivot point", cIOCaddress(pivot.GetID()).ToString()));
         
         if(invert(inv) == 0)
         {
@@ -2454,7 +2454,7 @@ Value __vtx_s(const Array& params, bool fHelp)
           if(!inv_.IsValid())
             throw runtime_error("rfl image");
           
-          obj.push_back(Pair("image", cba(inv_.GetID()).ToString()));
+          obj.push_back(Pair("image", cIOCaddress(inv_.GetID()).ToString()));
 
           unsigned char* a1 = vchSecret1.data();
           unsigned char* a2 = vchSecret2.data();
@@ -2468,7 +2468,7 @@ Value __vtx_s(const Array& params, bool fHelp)
           CKey ks_x;
           ks_x.SetSecret(sx, true);
           CPubKey sx_p = ks_x.GetPubKey();
-          cba sxa(sx_p.GetID());
+          cIOCaddress sxa(sx_p.GetID());
           obj.push_back(Pair("sx_p", sxa.ToString()));
         }  
       }

@@ -231,7 +231,7 @@ bool __wx__::LoadCScript(const CScript& redeemScript)
      * these. Do not add them to the wallet and warn. */
     if (redeemScript.size() > MAX_SCRIPT_ELEMENT_SIZE)
     {
-  std::string strAddr = cba(redeemScript.GetID()).ToString();
+  std::string strAddr = cIOCaddress(redeemScript.GetID()).ToString();
   printf("%s: Warning: This wallet contains a redeemScript of size %" PRIszu " which exceeds maximum size %i thus can never be redeemed. Do not use address %s.\n",
       __func__, redeemScript.size(), MAX_SCRIPT_ELEMENT_SIZE, strAddr.c_str());
   return true;
@@ -2332,7 +2332,7 @@ bool __wx__::SetAddressBookName(const CTxDestination& address, const string& ali
 			   (fUpdated ? CT_UPDATED : CT_NEW) );
   if (!fFileBacked)
       return false;
-  return __wx__DB(strWalletFile).WriteName(cba(address).ToString(), aliasStr);
+  return __wx__DB(strWalletFile).WriteName(cIOCaddress(address).ToString(), aliasStr);
 }
 
 bool __wx__::DelAddressBookName(const CTxDestination& address)
@@ -2347,7 +2347,7 @@ bool __wx__::DelAddressBookName(const CTxDestination& address)
 
   if (!fFileBacked)
       return false;
-  return __wx__DB(strWalletFile).EraseName(cba(address).ToString());
+  return __wx__DB(strWalletFile).EraseName(cIOCaddress(address).ToString());
 }
 
 

@@ -260,19 +260,19 @@ public:
  * Script-hash-addresses have version 85 (or 196 testnet).
  * The data vector contains RIPEMD160(SHA256(cscript)), where cscript is the serialized redemption script.
  */
-class cba;
-class cbaVisitor : public boost::static_visitor<bool>
+class cIOCaddress;
+class cIOCaddressVisitor : public boost::static_visitor<bool>
 {
 private:
-    cba *addr;
+    cIOCaddress *addr;
 public:
-    cbaVisitor(cba *addrIn) : addr(addrIn) { }
+    cIOCaddressVisitor(cIOCaddress *addrIn) : addr(addrIn) { }
     bool operator()(const CKeyID &id) const;
     bool operator()(const CScriptID &id) const;
     bool operator()(const CNoDestination &no) const;
 };
 
-class cba : public CBase58Data
+class cIOCaddress : public CBase58Data
 {
 public:
     enum
@@ -295,7 +295,7 @@ public:
 
     bool Set(const CTxDestination &dest)
     {
-        return boost::apply_visitor(cbaVisitor(this), dest);
+        return boost::apply_visitor(cIOCaddressVisitor(this), dest);
     }
 
     bool IsValid() const
@@ -328,21 +328,21 @@ public:
         return fExpectTestNet == fTestNet && vchData.size() == nExpectedSize;
     }
 
-    cba()
+    cIOCaddress()
     {
     }
 
-    cba(const CTxDestination &dest)
+    cIOCaddress(const CTxDestination &dest)
     {
         Set(dest);
     }
 
-    cba(const std::string& strAddress)
+    cIOCaddress(const std::string& strAddress)
     {
         SetString(strAddress);
     }
 
-    cba(const char* pszAddress)
+    cIOCaddress(const char* pszAddress)
     {
         SetString(pszAddress);
     }
@@ -395,9 +395,9 @@ public:
     }
 };
 
-bool inline cbaVisitor::operator()(const CKeyID &id) const         { return addr->Set(id); }
-bool inline cbaVisitor::operator()(const CScriptID &id) const      { return addr->Set(id); }
-bool inline cbaVisitor::operator()(const CNoDestination &id) const { return false; }
+bool inline cIOCaddressVisitor::operator()(const CKeyID &id) const         { return addr->Set(id); }
+bool inline cIOCaddressVisitor::operator()(const CScriptID &id) const      { return addr->Set(id); }
+bool inline cIOCaddressVisitor::operator()(const CNoDestination &id) const { return false; }
 
 /** A base58-encoded secret key */
 class CBitcoinSecret : public CBase58Data
@@ -406,7 +406,7 @@ public:
     void SetSecret(const CSecret& vchSecret, bool fCompressed)
     {
         assert(vchSecret.size() == 32);
-        SetData(128 + (fTestNet ? cba::PUBKEY_ADDRESS_TEST : cba::PUBKEY_ADDRESS), &vchSecret[0], vchSecret.size());
+        SetData(128 + (fTestNet ? cIOCaddress::PUBKEY_ADDRESS_TEST : cIOCaddress::PUBKEY_ADDRESS), &vchSecret[0], vchSecret.size());
         if (fCompressed)
             vchData.push_back(1);
     }
@@ -425,10 +425,10 @@ public:
         bool fExpectTestNet = false;
         switch(nVersion)
         {
-            case (128 + cba::PUBKEY_ADDRESS):
+            case (128 + cIOCaddress::PUBKEY_ADDRESS):
                 break;
 
-            case (128 + cba::PUBKEY_ADDRESS_TEST):
+            case (128 + cIOCaddress::PUBKEY_ADDRESS_TEST):
                 fExpectTestNet = true;
                 break;
 

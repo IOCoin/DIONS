@@ -1592,7 +1592,7 @@ bool NewThread(void(*pfn)(void*), void* parg)
 
 int atod(const std::string& addr, std::string& d)
 {
-    cba address__(addr);
+    cIOCaddress address__(addr);
     if(!address__.IsValid())
       return -2;
 
