@@ -23,7 +23,7 @@ void EnsureWalletIsUnlocked();
 
 namespace bt = boost::posix_time;
 
-extern int checkAddress(string addr, cba& a);
+extern int checkAddress(string addr, cIOCaddress& a);
 // Extended DecodeDumpTime implementation, see this page for details:
 // http://stackoverflow.com/questions/3786201/parsing-of-date-time-from-string-boost
 const std::locale formats[] = {
@@ -139,9 +139,9 @@ Value importprivkey(const Array& params, bool fHelp)
         if (pwalletMain->HaveKey(vchAddress))
             return Value::null;
 
-        pwalletMain->kd[vchAddress].nCreateTime = 1;
+        pwalletMain->keyMetadata[vchAddress].nCreateTime = 1;
 
-        if (!pwalletMain->ak(key))
+        if (!pwalletMain->AddKey(key))
             throw JSONRPCError(RPC_WALLET_ERROR, "Error adding key to wallet");
 
         // whenever a key is imported, we need to scan the whole chain
@@ -193,7 +193,7 @@ Value importwallet(const Array& params, bool fHelp)
         CKeyID keyid = key.GetPubKey().GetID();
 
         if (pwalletMain->HaveKey(keyid)) {
-            printf("Skipping import of %s (key already present)\n", cba(keyid).ToString().c_str());
+            printf("Skipping import of %s (key already present)\n", cIOCaddress(keyid).ToString().c_str());
             continue;
         }
         int64_t nTime = DecodeDumpTime(vstr[1]);
@@ -211,12 +211,12 @@ Value importwallet(const Array& params, bool fHelp)
                 fLabel = true;
             }
         }
-        printf("Importing %s...\n", cba(keyid).ToString().c_str());
-        if (!pwalletMain->ak(key)) {
+        printf("Importing %s...\n", cIOCaddress(keyid).ToString().c_str());
+        if (!pwalletMain->AddKey(key)) {
             fGood = false;
             continue;
         }
-        pwalletMain->kd[keyid].nCreateTime = nTime;
+        pwalletMain->keyMetadata[keyid].nCreateTime = nTime;
         if (fLabel)
             pwalletMain->SetAddressBookName(keyid, strLabel);
         nTimeBegin = std::min(nTimeBegin, nTime);
@@ -252,7 +252,7 @@ Value dumpprivkey(const Array& params, bool fHelp)
     EnsureWalletIsUnlocked();
 
     string strAddress = params[0].get_str();
-    cba address;
+    cIOCaddress address;
     if(checkAddress(strAddress, address) != 0)
     {
       throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Failed to resolve locator");
@@ -309,7 +309,7 @@ Value dumpwallet(const Array& params, bool fHelp)
     for (std::vector<std::pair<int64_t, CKeyID> >::const_iterator it = vKeyBirth.begin(); it != vKeyBirth.end(); it++) {
         const CKeyID &keyid = it->second;
         std::string strTime = EncodeDumpTime(it->first);
-        std::string strAddr = cba(keyid).ToString();
+        std::string strAddr = cIOCaddress(keyid).ToString();
         bool IsCompressed;
 
         CKey key;

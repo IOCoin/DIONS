@@ -41,7 +41,7 @@ void spj(const CScript& scriptPubKey, Object& out, bool fIncludeHex)
 
     Array a;
     BOOST_FOREACH(const CTxDestination& addr, addresses)
-        a.push_back(cba(addr).ToString());
+        a.push_back(cIOCaddress(addr).ToString());
     out.push_back(Pair("addresses", a));
 }
 /*
@@ -137,7 +137,7 @@ void spj(const CScript& scriptPubKey, Object& out, bool fIncludeHex)
 
     Array a;
     //BOOST_FOREACH(const CTxDestination& addr, addresses)
-    //    a.push_back(cba(addr).ToString());
+    //    a.push_back(cIOCaddress(addr).ToString());
     a.push_back(address);
 
     out.push_back(Pair("addresses", a));
@@ -243,7 +243,7 @@ Array listunspent__(double p, double& iR)
     int nMinDepth = 1;
     int nMaxDepth = 9999999;
 
-    set<cba> setAddress;
+    set<cIOCaddress> setAddress;
 
     double i;
     Array results;
@@ -275,7 +275,7 @@ Array listunspent__(double p, double& iR)
         CTxDestination address;
         if (ExtractDestination(out.tx->vout[out.i].scriptPubKey, address))
         {
-            entry.push_back(Pair("address", cba(address).ToString()));
+            entry.push_back(Pair("address", cIOCaddress(address).ToString()));
             if (pwalletMain->mapAddressBook.count(address))
                 entry.push_back(Pair("account", pwalletMain->mapAddressBook[address]));
         }
@@ -319,13 +319,13 @@ Value listunspent(const Array& params, bool fHelp)
     if (params.size() > 1)
         nMaxDepth = params[1].get_int();
 
-    set<cba> setAddress;
+    set<cIOCaddress> setAddress;
     if (params.size() > 2)
     {
         Array inputs = params[2].get_array();
         BOOST_FOREACH(Value& input, inputs)
         {
-            cba address(input.get_str());
+            cIOCaddress address(input.get_str());
             if (!address.IsValid())
                 throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, string("Invalid I/OCoin address: ")+input.get_str());
             if (setAddress.count(address))
@@ -360,7 +360,7 @@ Value listunspent(const Array& params, bool fHelp)
         CTxDestination address;
         if (ExtractDestination(out.tx->vout[out.i].scriptPubKey, address))
         {
-            entry.push_back(Pair("address", cba(address).ToString()));
+            entry.push_back(Pair("address", cIOCaddress(address).ToString()));
             if (pwalletMain->mapAddressBook.count(address))
                 entry.push_back(Pair("account", pwalletMain->mapAddressBook[address]));
         }
@@ -386,7 +386,7 @@ Value crawgen(const Array& params, bool fHelp)
    
     Object sendTo = params[1].get_obj();
     string c = params[2].get_str();
-    cba cAddr(c);
+    cIOCaddress cAddr(c);
     if(!cAddr.IsValid())
       throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter");
 
@@ -413,10 +413,10 @@ Value crawgen(const Array& params, bool fHelp)
         rawTx.vin.push_back(in);
     }
 
-    set<cba> setAddress;
+    set<cIOCaddress> setAddress;
     BOOST_FOREACH(const Pair& s, sendTo)
     {
-      cba address(s.name_);
+      cIOCaddress address(s.name_);
       if(!address.IsValid())
       {
         vector<AliasIndex> vtxPos;
@@ -526,10 +526,10 @@ Value createrawtransaction(const Array& params, bool fHelp)
         rawTx.vin.push_back(in);
     }
 
-    set<cba> setAddress;
+    set<cIOCaddress> setAddress;
     BOOST_FOREACH(const Pair& s, sendTo)
     {
-      cba address(s.name_);
+      cIOCaddress address(s.name_);
       if(!address.IsValid())
       {
         vector<AliasIndex> vtxPos;
@@ -615,7 +615,7 @@ Value decodescript(const Array& params, bool fHelp)
     }
     spj(script, r, false);
 
-    r.push_back(Pair("p2sh", cba(script.GetID()).ToString()));
+    r.push_back(Pair("p2sh", cIOCaddress(script.GetID()).ToString()));
     return r;
 }
 
@@ -746,7 +746,7 @@ Value signrawtransaction(const Array& params, bool fHelp)
             bool fCompressed;
             CSecret secret = vchSecret.GetSecret(fCompressed);
             key.SetSecret(secret, fCompressed);
-            tempKeystore.ak(key);
+            tempKeystore.AddKey(key);
         }
     }
     else

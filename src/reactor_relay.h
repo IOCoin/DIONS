@@ -50,7 +50,7 @@ class RLWE__CTRL__
   template<int N>
   void operator()() 
   {
-    return N;
+    return;
   }
 };
 

@@ -97,7 +97,7 @@ public:
     bool fFileBacked;
     std::string strWalletFile;
     std::set<int64_t> setKeyPool;
-    std::map<CKeyID, CKeyMetadata> kd;
+    std::map<CKeyID, CKeyMetadata> keyMetadata;
     std::map<vchType, Relay> lCache;
 
     typedef std::map<unsigned int, CMasterKey> MasterKeyMap;
@@ -145,9 +145,9 @@ public:
     // Generate a new key
     CPubKey GenerateNewKey();
     // Adds a key to the store, and saves it to disk.
-    bool ak(const CKey& key);
+    bool AddKey(const CKey& key);
     // Adds a key to the store, without saving it to disk (used by LoadWallet)
-    bool LoadKey(const CKey& key) { return CCryptoKeyStore::ak(key); }
+    bool LoadKey(const CKey& key) { return CCryptoKeyStore::AddKey(key); }
     // Load metadata (used by LoadWallet)
     bool envCP0(const CPubKey &pubkey, string& rsaPrivKey);
     bool envCP1(const CPubKey &pubkey, string& rsaPubKey);

@@ -15,7 +15,7 @@ bool CKeyStore::GetPubKey(const CKeyID &address, CPubKey &vchPubKeyOut) const
     return true;
 }
 
-bool CBasicKeyStore::ak(const CKey& key)
+bool CBasicKeyStore::AddKey(const CKey& key)
 {
     bool fCompressed = false;
     CSecret secret = key.GetSecret(fCompressed);
@@ -124,14 +124,14 @@ bool CCryptoKeyStore::Unlock(const CKeyingMaterial& vMasterKeyIn)
     return true;
 }
 
-bool CCryptoKeyStore::ak(const CKey& key)
+bool CCryptoKeyStore::AddKey(const CKey& key)
 {
     {
         LOCK(cs_KeyStore);
         if (!IsCrypted())
-            return CBasicKeyStore::ak(key);
+            return CBasicKeyStore::AddKey(key);
 
-        if (as())
+        if (IsLocked())
             return false;
 
         std::vector<unsigned char> vchCryptedSecret;

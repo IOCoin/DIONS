@@ -161,7 +161,7 @@ bool channelPredicate(string ext, string& tor)
           continue;
 
         string k2 = stringFromVch(vchS);
-        cba r(k2);
+        cIOCaddress r(k2);
         CKeyID keyID;
         r.GetKeyID(keyID);
         CKey key;
@@ -307,7 +307,7 @@ bool channel(string l, string f, string& k, bool& black)
   if((!getImportedPubKey(l, f, rVch, alphaVch, transient)) || transient)
   {
     CKeyID keyID;
-    cba keyAddress(l);
+    cIOCaddress keyAddress(l);
     keyAddress.GetKeyID(keyID);
     CPubKey vchPubKey;
     pwalletMain->GetPubKey(keyID, vchPubKey);
@@ -615,9 +615,9 @@ Value myRSAKeys(const Array& params, bool fHelp)
                 );
 
   Array jsonAddressRSAList;
-  BOOST_FOREACH(const PAIRTYPE(cba, string)& item, pwalletMain->mapAddressBook)
+  BOOST_FOREACH(const PAIRTYPE(cIOCaddress, string)& item, pwalletMain->mapAddressBook)
   {
-    const cba& a = item.first;
+    const cIOCaddress& a = item.first;
     const string& aliasStr = item.second;
     Object oAddressInfo;
     oAddressInfo.push_back(Pair("address", a.ToString()));
@@ -663,10 +663,10 @@ Value myRSAKeys__(const Array& params, bool fHelp)
                 );
 
   Array jsonAddressRSAList;
-  BOOST_FOREACH(const PAIRTYPE(cba, string)& item, pwalletMain->mapAddressBook)
+  BOOST_FOREACH(const PAIRTYPE(cIOCaddress, string)& item, pwalletMain->mapAddressBook)
   {
 
-    const cba& a = item.first;
+    const cIOCaddress& a = item.first;
     const string& aliasStr = item.second;
     Object oAddressInfo;
     oAddressInfo.push_back(Pair("address", a.ToString()));
@@ -791,7 +791,7 @@ Value publicKeys(const Array& params, bool fHelp)
               continue;
 
             string keySenderAddr = stringFromVch(vchS);
-            cba r(keySenderAddr);
+            cIOCaddress r(keySenderAddr);
             CKeyID keyID;
             r.GetKeyID(keyID);
             CKey key;
@@ -865,7 +865,7 @@ Value publicKeys(const Array& params, bool fHelp)
 
 bool isMyAddress(string addrStr)
 {
-  cba r(addrStr);
+  cIOCaddress r(addrStr);
   if(!r.IsValid())
   {
     return false;
@@ -938,7 +938,7 @@ Value decryptedMessageList(const Array& params, bool fHelp)
             string rsaPrivKey;
             string recipient = stringFromVch(vchRecipient);
 
-            cba r(myAddr);
+            cIOCaddress r(myAddr);
             if(!r.IsValid())
             {
               continue;
@@ -1241,7 +1241,7 @@ Value internFrame__(const Array& params, bool fHelp)
                     string alpha;
                     if(black_0)
                     {
-                      cba p(l);
+                      cIOCaddress p(l);
                       if(!p.IsValid())
                         throw JSONRPCError(RPC_TYPE_ERROR, "address");
                       CKeyID k;
@@ -1324,7 +1324,7 @@ Value internFrame__(const Array& params, bool fHelp)
               CScript script;
               script.SetBitcoinAddress(stringFromVch(vvch[2]));
 
-              cba ownerAddr = script.GetBitcoinAddress();
+              cIOCaddress ownerAddr = script.GetBitcoinAddress();
               if(!ownerAddr.IsValid())
                 throw JSONRPCError(RPC_TYPE_ERROR, "Invalid owner address");
 
@@ -1420,7 +1420,7 @@ Value aliasOut(const Array& params, bool fHelp)
         if(op__ == OP_ALIAS_ENCRYPTED)
         {
           string rsaPrivKey;
-          cba r(strAddress);
+          cIOCaddress r(strAddress);
           if(!r.IsValid())
             throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
 
@@ -1541,7 +1541,7 @@ Value nodeValidate(const Array& params, bool fHelp)
         if(op__ == OP_ALIAS_ENCRYPTED)
         {
           string rsaPrivKey;
-          cba r(strAddress);
+          cIOCaddress r(strAddress);
           if(!r.IsValid())
             throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
 
@@ -1585,7 +1585,7 @@ Value nodeValidate(const Array& params, bool fHelp)
         aliasObj.push_back(Pair("nHeigt", nHeight));
 
 
-        cba keyAddress(strAddress);
+        cIOCaddress keyAddress(strAddress);
         CKeyID keyID;
         keyAddress.GetKeyID(keyID);
         CPubKey vchPubKey;
@@ -1631,7 +1631,7 @@ Value validateLocator(const Array& params, bool fHelp)
             "validateLocator <locator>\n"
             "Return information about <locator>.");
 
-    cba address;
+    cIOCaddress address;
     int r = checkAddress(params[0].get_str(), address);
 
     Object ret;
@@ -1704,7 +1704,7 @@ Value nodeRetrieve(const Array& params, bool fHelp)
         if(op__ == OP_ALIAS_ENCRYPTED)
         {
           string rsaPrivKey;
-          cba r(strAddress);
+          cIOCaddress r(strAddress);
           if(!r.IsValid())
             throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
 
@@ -1750,7 +1750,7 @@ Value nodeRetrieve(const Array& params, bool fHelp)
         aliasObj.push_back(Pair("nHeigt", nHeight));
 
 
-        cba keyAddress(strAddress);
+        cIOCaddress keyAddress(strAddress);
         CKeyID keyID;
         keyAddress.GetKeyID(keyID);
         CPubKey vchPubKey;
@@ -1841,7 +1841,7 @@ Value getNodeRecord(const Array& params, bool fHelp)
         if(op__ == OP_ALIAS_ENCRYPTED)
         {
           string rsaPrivKey;
-          cba r(strAddress);
+          cIOCaddress r(strAddress);
           if(!r.IsValid())
             throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
 
@@ -1898,7 +1898,7 @@ Value getNodeRecord(const Array& params, bool fHelp)
         aliasObj.push_back(Pair("nHeigt", nHeight));
 
 
-        cba keyAddress(strAddress);
+        cIOCaddress keyAddress(strAddress);
         CKeyID keyID;
         keyAddress.GetKeyID(keyID);
         CPubKey vchPubKey;
@@ -1978,7 +1978,7 @@ bool searchAliasEncrypted2(string alias, uint256& wtxInHash)
         if(op__ == OP_ALIAS_ENCRYPTED)
         {
           string rsaPrivKey;
-          cba r(strAddress);
+          cIOCaddress r(strAddress);
           if(!r.IsValid())
             throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
 
@@ -2048,7 +2048,7 @@ bool searchAliasEncrypted(string alias, uint256& wtxInHash)
         if(op__ == OP_ALIAS_ENCRYPTED)
         {
           string rsaPrivKey;
-          cba r(strAddress);
+          cIOCaddress r(strAddress);
           if(!r.IsValid())
             throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
 
@@ -2101,7 +2101,7 @@ Value aliasList__(const Array& params, bool fHelp)
 
     Array oRes;
     
-    if(pwalletMain->as())
+    if(pwalletMain->IsLocked())
       return oRes; 
 
     ENTER_CRITICAL_SECTION(cs_main)
@@ -2137,7 +2137,7 @@ Value aliasList__(const Array& params, bool fHelp)
         if(op__ == OP_ALIAS_ENCRYPTED)
         {
           string rsaPrivKey;
-          cba r(strAddress);
+          cIOCaddress r(strAddress);
           if(!r.IsValid())
             throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
 
@@ -2157,7 +2157,7 @@ Value aliasList__(const Array& params, bool fHelp)
           }
           else
           {
-            for(int i=0; i < tx.vin.size(); i++)
+            for(unsigned int i=0; i < tx.vin.size(); i++)
             {
               COutPoint prevout = tx.vin[i].prevout;
               __wx__Tx& txPrev = pwalletMain->mapWallet[prevout.hash];
@@ -2172,7 +2172,7 @@ Value aliasList__(const Array& params, bool fHelp)
                 string a__ = "";
                 aliasAddress(txPrev, a__);
 
-                cba r0(a__);
+                cIOCaddress r0(a__);
                 if(!r0.IsValid())
                   throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
 
@@ -2223,7 +2223,7 @@ Value aliasList__(const Array& params, bool fHelp)
         aliasObj.push_back(Pair("address", strAddress));
         aliasObj.push_back(Pair("nHeigt", nHeight));
 
-        cba keyAddress(strAddress);
+        cIOCaddress keyAddress(strAddress);
         CKeyID keyID;
         keyAddress.GetKeyID(keyID);
         CPubKey vchPubKey;
@@ -2321,7 +2321,7 @@ Value aliasList(const Array& params, bool fHelp)
         if(op__ == OP_ALIAS_ENCRYPTED)
         {
           string rsaPrivKey;
-          cba r(strAddress);
+          cIOCaddress r(strAddress);
           if(!r.IsValid())
             throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
 
@@ -2341,7 +2341,7 @@ Value aliasList(const Array& params, bool fHelp)
           }
           else
           {
-            for(int i=0; i < tx.vin.size(); i++)
+            for(unsigned int i=0; i < tx.vin.size(); i++)
             {
               COutPoint prevout = tx.vin[i].prevout;
               __wx__Tx& txPrev = pwalletMain->mapWallet[prevout.hash];
@@ -2355,7 +2355,7 @@ Value aliasList(const Array& params, bool fHelp)
                 string a__ = "";
                 aliasAddress(txPrev, a__);
 
-                cba r0(a__);
+                cIOCaddress r0(a__);
                 if(!r0.IsValid())
                   throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
 
@@ -2407,7 +2407,7 @@ Value aliasList(const Array& params, bool fHelp)
         aliasObj.push_back(Pair("nHeigt", nHeight));
 
 
-        cba keyAddress(strAddress);
+        cIOCaddress keyAddress(strAddress);
         CKeyID keyID;
         keyAddress.GetKeyID(keyID);
         CPubKey vchPubKey;
@@ -2583,7 +2583,7 @@ Value primaryCXValidate(const Array& params, bool fHelp)
     std::transform(locatorStr.begin(), locatorStr.end(), locatorStr.begin(), ::tolower);
     vchType vchLocator = vchFromString(locatorStr);
 
-    cba predicate((params[1]).get_str());
+    cIOCaddress predicate((params[1]).get_str());
 
     if(!predicate.IsValid())
         throw JSONRPCError(RPC_TYPE_ERROR, "predicate");
@@ -2598,7 +2598,7 @@ Value primaryCXValidate(const Array& params, bool fHelp)
 
 
     string extPredicate = (params[2]).get_str();
-    cba externPredicate(extPredicate);
+    cIOCaddress externPredicate(extPredicate);
     if(!externPredicate.IsValid())
     {
       vector<AliasIndex> vtxPos;
@@ -2631,7 +2631,7 @@ Value primaryCXValidate(const Array& params, bool fHelp)
       throw JSONRPCError(RPC_WALLET_ERROR, "local predicate");
     }
 
-    cba localPredicate(l0Str);
+    cIOCaddress localPredicate(l0Str);
 
     CKeyID l0id;
     if(!localPredicate.GetKeyID(l0id))
@@ -2827,7 +2827,7 @@ Value primaryCXValidate(const Array& params, bool fHelp)
                 CScript script;
                 script.SetBitcoinAddress(stringFromVch(vvch[2]));
 
-                cba ownerAddr = script.GetBitcoinAddress();
+                cIOCaddress ownerAddr = script.GetBitcoinAddress();
                 if(!ownerAddr.IsValid())
                   throw JSONRPCError(RPC_TYPE_ERROR, "Invalid owner address");
 
@@ -2892,7 +2892,7 @@ Value vEPID(const Array& params, bool fHelp)
   //VX series
   vchType vchNodeLocator;
   string k =(params[0]).get_str();
-  cba k1(k);
+  cIOCaddress k1(k);
   if(!k1.IsValid())
     throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
   const char* out__ = (params[1].get_str()).c_str();
@@ -2940,7 +2940,7 @@ Value vEPID(const Array& params, bool fHelp)
         aliasAddress(tx, strAddress);
         if(op__ == OP_ALIAS_ENCRYPTED)
         {
-          cba r(strAddress);
+          cIOCaddress r(strAddress);
           if(!r.IsValid())
             throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
 
@@ -3024,7 +3024,7 @@ Value vEPID(const Array& params, bool fHelp)
         string alpha;
         if(black_0)
         {
-          cba p(l);
+          cIOCaddress p(l);
           if(!p.IsValid())
             throw JSONRPCError(RPC_TYPE_ERROR, "address");
           CKeyID k;
@@ -3133,7 +3133,7 @@ Value validate(const Array& params, bool fHelp)
         aliasAddress(tx, strAddress);
         if(op__ == OP_ALIAS_ENCRYPTED)
         {
-          cba r(strAddress);
+          cIOCaddress r(strAddress);
           if(!r.IsValid())
             throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
 
@@ -3215,7 +3215,7 @@ Value validate(const Array& params, bool fHelp)
         string alpha;
         if(black_0)
         {
-          cba p(l);
+          cIOCaddress p(l);
           if(!p.IsValid())
             throw JSONRPCError(RPC_TYPE_ERROR, "address");
           CKeyID k;
@@ -3389,7 +3389,7 @@ Value transientStatus__C(const Array& params, bool fHelp)
               CScript script;
               script.SetBitcoinAddress(stringFromVch(vvch[2]));
 
-              cba ownerAddr = script.GetBitcoinAddress();
+              cIOCaddress ownerAddr = script.GetBitcoinAddress();
               if(!ownerAddr.IsValid())
               {
                   ret.push_back(Pair("status", "error"));
@@ -3560,7 +3560,7 @@ Value updateEncryptedAliasFile(const Array& params, bool fHelp)
               CScript script;
               script.SetBitcoinAddress(stringFromVch(vvch[2]));
 
-              cba ownerAddr = script.GetBitcoinAddress();
+              cIOCaddress ownerAddr = script.GetBitcoinAddress();
               if(!ownerAddr.IsValid())
                 throw JSONRPCError(RPC_TYPE_ERROR, "Invalid owner address");
 
@@ -3689,7 +3689,7 @@ Value updateEncryptedAlias(const Array& params, bool fHelp)
               CScript script;
               script.SetBitcoinAddress(stringFromVch(vvch[2]));
 
-              cba ownerAddr = script.GetBitcoinAddress();
+              cIOCaddress ownerAddr = script.GetBitcoinAddress();
               if(!ownerAddr.IsValid())
                 throw JSONRPCError(RPC_TYPE_ERROR, "Invalid owner address");
 
@@ -3747,7 +3747,7 @@ Value decryptAlias(const Array& params, bool fHelp)
     const vchType vchAlias = vchFromValue(locatorStr);
     const std::string addressOfOwner = params[1].get_str();
 
-    cba ownerAddr(addressOfOwner);
+    cIOCaddress ownerAddr(addressOfOwner);
     if(!ownerAddr.IsValid())
         throw JSONRPCError(RPC_TYPE_ERROR, "Invalid owner address");
 
@@ -3839,7 +3839,7 @@ Value decryptAlias(const Array& params, bool fHelp)
                 CScript script;
                 script.SetBitcoinAddress(stringFromVch(vvch[2]));
 
-                cba ownerAddr = script.GetBitcoinAddress();
+                cIOCaddress ownerAddr = script.GetBitcoinAddress();
                 if(!ownerAddr.IsValid())
                   throw JSONRPCError(RPC_TYPE_ERROR, "Invalid owner address");
 
@@ -3897,7 +3897,7 @@ Value transferEncryptedExtPredicate(const Array& params, bool fHelp)
     std::transform(locatorStr.begin(), locatorStr.end(), locatorStr.begin(), ::tolower);
     vchType vchLocator = vchFromString(locatorStr);
 
-    cba predicate((params[1]).get_str());
+    cIOCaddress predicate((params[1]).get_str());
 
     if(!predicate.IsValid())
         throw JSONRPCError(RPC_TYPE_ERROR, "predicate");
@@ -3910,7 +3910,7 @@ Value transferEncryptedExtPredicate(const Array& params, bool fHelp)
     if(!pwalletMain->GetKey(pid, pid_))
         throw JSONRPCError(RPC_WALLET_ERROR, "pid_");
 
-    cba localPredicate((params[2]).get_str());
+    cIOCaddress localPredicate((params[2]).get_str());
     if(!localPredicate.IsValid())
         throw JSONRPCError(RPC_TYPE_ERROR, "local predicate");
 
@@ -3922,7 +3922,7 @@ Value transferEncryptedExtPredicate(const Array& params, bool fHelp)
     if(!pwalletMain->GetKey(l0id, l0id_))
         throw JSONRPCError(RPC_WALLET_ERROR, "l0id_");
 
-    cba externPredicate((params[3]).get_str());
+    cIOCaddress externPredicate((params[3]).get_str());
     if(!externPredicate.IsValid())
         throw JSONRPCError(RPC_TYPE_ERROR, "externPredicate");
 
@@ -4118,7 +4118,7 @@ Value transferEncryptedExtPredicate(const Array& params, bool fHelp)
                 CScript script;
                 script.SetBitcoinAddress(stringFromVch(vvch[2]));
 
-                cba ownerAddr = script.GetBitcoinAddress();
+                cIOCaddress ownerAddr = script.GetBitcoinAddress();
                 if(!ownerAddr.IsValid())
                   throw JSONRPCError(RPC_TYPE_ERROR, "Invalid owner address");
 
@@ -4173,7 +4173,7 @@ Value transferEncryptedAlias(const Array& params, bool fHelp)
     std::transform(locatorStr.begin(), locatorStr.end(), locatorStr.begin(), ::tolower);
     vchType vchLocator = vchFromString(locatorStr);
 
-    cba predicate((params[1]).get_str());
+    cIOCaddress predicate((params[1]).get_str());
 
     if(!predicate.IsValid())
         throw JSONRPCError(RPC_TYPE_ERROR, "predicate");
@@ -4188,7 +4188,7 @@ Value transferEncryptedAlias(const Array& params, bool fHelp)
 
 
     string extPredicate = (params[2]).get_str();
-    cba externPredicate(extPredicate);
+    cIOCaddress externPredicate(extPredicate);
     if(!externPredicate.IsValid())
     {
       vector<AliasIndex> vtxPos;
@@ -4221,7 +4221,7 @@ Value transferEncryptedAlias(const Array& params, bool fHelp)
       throw JSONRPCError(RPC_WALLET_ERROR, "local predicate");
     }
 
-    cba localPredicate(l0Str);
+    cIOCaddress localPredicate(l0Str);
 
     CKeyID l0id;
     if(!localPredicate.GetKeyID(l0id))
@@ -4416,7 +4416,7 @@ Value transferEncryptedAlias(const Array& params, bool fHelp)
                 CScript script;
                 script.SetBitcoinAddress(stringFromVch(vvch[2]));
 
-                cba ownerAddr = script.GetBitcoinAddress();
+                cIOCaddress ownerAddr = script.GetBitcoinAddress();
                 if(!ownerAddr.IsValid())
                   throw JSONRPCError(RPC_TYPE_ERROR, "Invalid owner address");
 
@@ -4479,7 +4479,7 @@ Value transferAlias(const Array& params, bool fHelp)
     CScript scriptPubKeyOrig;
 
     string strAddress = params[1].get_str();
-    cba address(strAddress);
+    cIOCaddress address(strAddress);
     if(!address.IsValid())
     {
       vector<AliasIndex> vtxPos;
@@ -4701,7 +4701,7 @@ Value uC(const Array& params, bool fHelp) { if(fHelp || params.size() != 2)
               CScript script;
               script.SetBitcoinAddress(stringFromVch(vvch[2]));
 
-              cba ownerAddr = script.GetBitcoinAddress();
+              cIOCaddress ownerAddr = script.GetBitcoinAddress();
               if(!ownerAddr.IsValid())
                 throw JSONRPCError(RPC_TYPE_ERROR, "Invalid owner address");
 
@@ -5092,7 +5092,7 @@ Value publicKey(const Array& params, bool fHelp)
 
   string myAddress = params[0].get_str();
 
-  cba addr(myAddress);
+  cIOCaddress addr(myAddress);
   if(!addr.IsValid())
     throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
 
@@ -5111,7 +5111,7 @@ Value publicKey(const Array& params, bool fHelp)
   if(!pwalletMain->SetRSAMetadata(pubKey))
     throw JSONRPCError(RPC_TYPE_ERROR, "Failed set");
 
-  if(!walletdb.UpdateKey(pubKey, pwalletMain->kd[pubKey.GetID()]))
+  if(!walletdb.UpdateKey(pubKey, pwalletMain->keyMetadata[pubKey.GetID()]))
     throw JSONRPCError(RPC_TYPE_ERROR, "Failed to write meta data for key");
 
   if(!pwalletMain->envCP1(pubKey, testKey))
@@ -5140,7 +5140,7 @@ Value sendSymmetric(const Array& params, bool fHelp)
     string myAddress = params[0].get_str();
     string f = params[1].get_str();
 
-    cba addr;
+    cIOCaddress addr;
     int r = checkAddress(myAddress, addr);
     if(r<0)
         throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
@@ -5153,7 +5153,7 @@ Value sendSymmetric(const Array& params, bool fHelp)
     if(!pwalletMain->GetKey(keyID, key))
         throw JSONRPCError(RPC_WALLET_ERROR, "Private key not available");
 
-    cba aRecipient;
+    cIOCaddress aRecipient;
     r = checkAddress(f, aRecipient);
     if(r < 0)
         throw JSONRPCError(RPC_TYPE_ERROR, "Invalid recipient address");
@@ -5231,7 +5231,7 @@ bool internalReference__(string ref__, vchType& recipientPubKeyVch)
   {
     ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
     {
-      cba a(ref__) ;
+      cIOCaddress a(ref__) ;
       CKeyID keyID;
       if(a.GetKeyID(keyID))
       {
@@ -5360,9 +5360,9 @@ bool getImportedPubKey(string myAddress, string fKey, vchType& recipientPubKeyVc
   return false;
 }
 
-int checkAddress(string addr, cba& a)
+int checkAddress(string addr, cIOCaddress& a)
 {
-  cba address(addr);
+  cIOCaddress address(addr);
   if(!address.IsValid())
   {
     vector<AliasIndex> vtxPos;
@@ -5403,12 +5403,12 @@ Value sendPublicKey(const Array& params, bool fHelp)
     string myAddress = params[0].get_str();
     string f = params[1].get_str();
 
-    cba addr;
+    cIOCaddress addr;
     int r = checkAddress(myAddress, addr);
     if(r < 0)
         throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
 
-    cba aRecipient;
+    cIOCaddress aRecipient;
     r = checkAddress(f, aRecipient);
     if(r < 0)
         throw JSONRPCError(RPC_TYPE_ERROR, "Invalid recipient address");
@@ -5466,7 +5466,7 @@ Value sendPublicKey(const Array& params, bool fHelp)
       if(!pwalletMain->aes(vchPubKey, f, aesKeyStr))
         throw JSONRPCError(RPC_TYPE_ERROR, "Failed to set meta data for key");
 
-      if(!walletdb.UpdateKey(vchPubKey, pwalletMain->kd[vchPubKey.GetID()]))
+      if(!walletdb.UpdateKey(vchPubKey, pwalletMain->keyMetadata[vchPubKey.GetID()]))
         throw JSONRPCError(RPC_TYPE_ERROR, "Failed to write meta data for key");
 
       ss <<(rsaPubKeyStr + encrypted);
@@ -5529,7 +5529,7 @@ Value sendPlainMessage(const Array& params, bool fHelp)
     const string strMessage = params[1].get_str();
     const string f = params[2].get_str();
 
-    cba senderAddr(myAddress);
+    cIOCaddress senderAddr(myAddress);
     if(!senderAddr.IsValid())
         throw JSONRPCError(RPC_TYPE_ERROR, "Invalid sender address");
 
@@ -5541,7 +5541,7 @@ Value sendPlainMessage(const Array& params, bool fHelp)
     if(!pwalletMain->GetKey(keyID, key))
         throw JSONRPCError(RPC_WALLET_ERROR, "Private key not available");
 
-    cba recipientAddr(f);
+    cIOCaddress recipientAddr(f);
     if(!recipientAddr.IsValid())
         throw JSONRPCError(RPC_TYPE_ERROR, "Invalid recipient address");
 
@@ -5605,7 +5605,7 @@ Value sendMessage(const Array& params, bool fHelp)
     string strMessage = params[1].get_str();
     string f = params[2].get_str();
 
-    cba recipientAddr(f);
+    cIOCaddress recipientAddr(f);
     if(!recipientAddr.IsValid())
         throw JSONRPCError(RPC_TYPE_ERROR, "Invalid recipient address");
 
@@ -5620,7 +5620,7 @@ Value sendMessage(const Array& params, bool fHelp)
     CKey key;
     if(params.size() == 3)
     {
-      cba senderAddr(myAddress);
+      cIOCaddress senderAddr(myAddress);
       if(!senderAddr.IsValid())
         throw JSONRPCError(RPC_TYPE_ERROR, "Invalid sender address");
 
@@ -5716,7 +5716,7 @@ Value sendMessage(const Array& params, bool fHelp)
 bool sign_verifymessage(string address)
 {
   string message = "test";
-    cba ownerAddr(address);
+    cIOCaddress ownerAddr(address);
     if(!ownerAddr.IsValid())
         throw JSONRPCError(RPC_TYPE_ERROR, "Invalid owner address");
 
@@ -5737,7 +5737,7 @@ bool sign_verifymessage(string address)
 
     string sigBase64 = EncodeBase64(&vchSig[0], vchSig.size());
 
-    cba addr(address);
+    cIOCaddress addr(address);
     if(!addr.IsValid())
         throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
 
@@ -5827,7 +5827,7 @@ Value registerAliasGenerate(const Array& params, bool fHelp)
 
     reservekey.KeepKey();
 
-    cba keyAddress(vchPubKey.GetID());
+    cIOCaddress keyAddress(vchPubKey.GetID());
     CKeyID keyID;
     keyAddress.GetKeyID(keyID);
     pwalletMain->SetAddressBookName(keyID, "");
@@ -5836,7 +5836,7 @@ Value registerAliasGenerate(const Array& params, bool fHelp)
   if(!pwalletMain->SetRSAMetadata(vchPubKey))
     throw JSONRPCError(RPC_TYPE_ERROR, "Failed to load meta data for key");
 
-  if(!walletdb.UpdateKey(vchPubKey, pwalletMain->kd[vchPubKey.GetID()]))
+  if(!walletdb.UpdateKey(vchPubKey, pwalletMain->keyMetadata[vchPubKey.GetID()]))
     throw JSONRPCError(RPC_TYPE_ERROR, "Failed to write meta data for key");
 
   string pKey;
@@ -5850,7 +5850,7 @@ Value registerAliasGenerate(const Array& params, bool fHelp)
   if(!pwalletMain->SetRandomKeyMetadata(vchPubKey, vchRand))
     throw JSONRPCError(RPC_WALLET_ERROR, "Failed to set meta data for key");
 
-  if(!walletdb.UpdateKey(vchPubKey, pwalletMain->kd[vchPubKey.GetID()]))
+  if(!walletdb.UpdateKey(vchPubKey, pwalletMain->keyMetadata[vchPubKey.GetID()]))
     throw JSONRPCError(RPC_TYPE_ERROR, "Failed to write meta data for key");
 
   CKey key;
@@ -5972,7 +5972,7 @@ Value registerAlias(const Array& params, bool fHelp)
         "external file index");
       
     
-    cba keyAddress(strAddress);
+    cIOCaddress keyAddress(strAddress);
     CKeyID keyID;
     keyAddress.GetKeyID(keyID);
     CPubKey vchPubKey;
@@ -5986,7 +5986,7 @@ Value registerAlias(const Array& params, bool fHelp)
 
     __wx__DB walletdb(pwalletMain->strWalletFile, "r+");
 
-    if(!walletdb.UpdateKey(vchPubKey, pwalletMain->kd[vchPubKey.GetID()]))
+    if(!walletdb.UpdateKey(vchPubKey, pwalletMain->keyMetadata[vchPubKey.GetID()]))
       throw JSONRPCError(RPC_TYPE_ERROR, "Failed to write meta data for key");
 
     CKey key;
@@ -6234,7 +6234,7 @@ bool IsMinePost(const CTransaction& tx)
 
 bool verifymessage(const string& strAddress, const string& strSig, const string& m1, const string& m2, const string& m3, const string& m4)
 {
-    cba addr(strAddress);
+    cIOCaddress addr(strAddress);
     if(!addr.IsValid())
         throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
 
@@ -6262,7 +6262,7 @@ bool verifymessage(const string& strAddress, const string& strSig, const string&
 }
 bool verifymessage(const string& strAddress, const string& strSig, const string& strMessage)
 {
-    cba addr(strAddress);
+    cIOCaddress addr(strAddress);
     if(!addr.IsValid())
         throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
 
@@ -6408,7 +6408,7 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
     if(tx.nVersion != CTransaction::DION_TX_VERSION)
     {
       bool found= false;
-      for(int i = 0; i < tx.vout.size(); i++)
+      for(unsigned int i = 0; i < tx.vout.size(); i++)
       {
         const CTxOut& out = tx.vout[i];
 
@@ -6433,7 +6433,7 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
     printf("CIP tx %s\n",
               tx.GetHash().GetHex().c_str());
 
-    for(int i = 0; i < tx.vin.size(); i++)
+    for(unsigned int i = 0; i < tx.vin.size(); i++)
     {
       const CTxOut& out = vTxPrev[i].vout[tx.vin[i].prevout.n];
       std::vector<vchType> vvchPrevArgsRead;
@@ -6477,7 +6477,7 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
            const std::string aesEncrypted(stringFromVch(vvchArgs[3]));
            const std::string sig(stringFromVch(vvchArgs[4]));
 
-           cba addr(sender);
+           cIOCaddress addr(sender);
 
            if(!addr.IsValid())
              throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
@@ -6527,7 +6527,7 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
            const std::string iv128Base64(stringFromVch(vvchArgs[3]));
            const std::string sig(stringFromVch(vvchArgs[4]));
 
-           cba addr(sender);
+           cIOCaddress addr(sender);
 
            if(!addr.IsValid())
              throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
@@ -6562,7 +6562,7 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
            const std::string message(vvchArgs[2].begin(), vvchArgs[2].end());
            const std::string sig(stringFromVch(vvchArgs[3]));
 
-           cba addr(sender);
+           cIOCaddress addr(sender);
 
            if(!addr.IsValid())
              throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
@@ -6600,10 +6600,10 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
             else
               script.SetBitcoinAddress(stringFromVch(vvchArgs[2]));
 
-              string encrypted = stringFromVch(vvchArgs[0]);
-              uint160 hash = uint160(vvchArgs[3]);
-              string value = stringFromVch(vvchArgs[4]);
-              string r = stringFromVch(vvchArgs[5]);
+            string encrypted = stringFromVch(vvchArgs[0]);
+            uint160 hash = uint160(vvchArgs[3]);
+            string value = stringFromVch(vvchArgs[4]);
+            string r = stringFromVch(vvchArgs[5]);
             if(!verifymessage(script.GetBitcoinAddress(), stringFromVch(vvchArgs[1]), encrypted, hash.ToString(), value, r))
             {
               return error("Dions::ConnectInputsPost: failed to verify signature for registerAlias tx %s",
@@ -6616,7 +6616,7 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
              CScript script;
              script.SetBitcoinAddress(stringFromVch(vvchArgs[2]));
 
-             cba ownerAddr = script.GetBitcoinAddress();
+             cIOCaddress ownerAddr = script.GetBitcoinAddress();
              if(!ownerAddr.IsValid())
                throw JSONRPCError(RPC_TYPE_ERROR, "Invalid owner address");
 
@@ -6657,7 +6657,7 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
              if(!pwalletMain->SetRandomKeyMetadata(vchPubKey, vchRand))
                throw JSONRPCError(RPC_WALLET_ERROR, "Failed to set meta data for key");
             __wx__DB walletdb(pwalletMain->strWalletFile, "r+");
-            if(!walletdb.UpdateKey(vchPubKey, pwalletMain->kd[vchPubKey.GetID()]))
+            if(!walletdb.UpdateKey(vchPubKey, pwalletMain->keyMetadata[vchPubKey.GetID()]))
               throw JSONRPCError(RPC_TYPE_ERROR, "Failed to write meta data for key");
            }
            

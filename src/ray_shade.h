@@ -48,7 +48,8 @@ class RayShade : InterfaceCrypt
     inline virtual void ctrl(string& c) { this->tgt_ = c; }
     inline virtual void ctrlExternalDtx(int i, uint160 o) 
     { 
-      this->l7_ = i; this->o_ = o; 
+      this->l7_ = i; 
+      this->o_ = o; 
     }
     inline virtual bool ctrlExternalAngle() 
     { 

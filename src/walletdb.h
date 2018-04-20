@@ -41,7 +41,7 @@ public:
     static const int CURRENT_VERSION=1;
     int nVersion;
     CoordinateVector patch;
-    RayShade rs_;
+    RayShade rayshade;
     CMap m;
     vchType random;
     string r;
@@ -67,7 +67,7 @@ public:
         nVersion = this->nVersion;
         READWRITE(nCreateTime);
         READWRITE(this->patch);
-        READWRITE(this->rs_);
+        READWRITE(this->rayshade);
         READWRITE(this->m);
         READWRITE(this->random);
         READWRITE(this->rlweIndex);

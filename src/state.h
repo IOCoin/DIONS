@@ -30,7 +30,7 @@ class State
 
     const std::string operator()() 
     { 
-      for(int i=0; i<STATE_.size(); i++)
+      for(unsigned int i=0; i<STATE_.size(); i++)
       {
         if(this->m_ == STATE_[i])
         {
