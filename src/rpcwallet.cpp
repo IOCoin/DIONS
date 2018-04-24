@@ -2490,6 +2490,27 @@ Value sublimateYdwi(const Array& params, bool fHelp)
 
     Object ret;
     int stat = trans__ydwi[0x0e];
+    string ydwi_point = params[0].get_str();
+
     ret.push_back(Pair("stat-ydwi", stat));
+    vector<unsigned char> k;
+    k.reserve(0x42);
+    if(DecodeBase58(ydwi_point.c_str(), k))
+    {
+      vector<unsigned char> ydwi__k1;
+      vector<unsigned char> ydwi__k2;
+      ydwi__k1.reserve(0x21);
+      ydwi__k2.reserve(0x21);
+      ydwi__k1.insert(ydwi__k1.end(), k.begin() + 0x01, k.begin() + 0x22);
+      ydwi__k2.insert(ydwi__k2.end(), k.begin() + 0x22, k.end());
+      CPubKey ydwi__k1_(ydwi__k1);
+      CPubKey ydwi__k2_(ydwi__k2);
+      cba ydwi_x(ydwi__k1_.GetID());
+      cba ydwi_y(ydwi__k2_.GetID());
+
+      bool sentinel = k[0] == 0x18;
+      bool base = ydwi_x.IsValid() && ydwi_y.IsValid();
+      ret.push_back(Pair("stat", sentinel && base));
+    }
     return ret;
 }
