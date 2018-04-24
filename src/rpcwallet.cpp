@@ -15,8 +15,9 @@ using namespace std;
 int64_t nWalletUnlockTime;
 static CCriticalSection cs_nWalletUnlockTime;
 
-static unsigned char trans__[] = {
-  0x21, 0x56, 0x02, 0x71, 0x54, 0x78, 0x62, 0xa0
+static unsigned char trans__ydwi[] = {
+  0x21, 0x56, 0x02, 0x71, 0x54, 0x78, 0x62, 0xa0,
+  0x1f, 0x21, 0x0f, 0xac, 0x36, 0xcd, 0xaa, 0x3c
 };
 
 extern void TxToJSON(const CTransaction& tx, const uint256 hashBlock, json_spirit::Object& entry);
@@ -2477,4 +2478,18 @@ Value __vtx_s(const Array& params, bool fHelp)
     }
 
     return oRes;
+}
+
+
+Value sublimateYdwi(const Array& params, bool fHelp)
+{
+    if (fHelp || params.size() != 1)
+        throw runtime_error(
+            "sublimateYdwi <ydwi f>\n"
+            "stat <ydwi f>.");
+
+    Object ret;
+    int stat = trans__ydwi[0x0e];
+    ret.push_back(Pair("stat-ydwi", stat));
+    return ret;
 }
