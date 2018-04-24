@@ -278,6 +278,7 @@ static const CRPCCommand vRPCCommands[] =
     { "pending",             &pending,             false,  false },
     { "getbalance",             &getbalance,             false,  false },
     { "move",                   &movecmd,                false,  false },
+    { "sublimateYdwi",     &sublimateYdwi,     false,  false },
     { "sendfrom",               &sendfrom,               false,  false },
     { "sendmany",               &sendmany,               false,  false },
     { "addmultisigaddress",     &addmultisigaddress,     false,  false },
