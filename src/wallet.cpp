@@ -843,7 +843,14 @@ void __wx__Tx::GetAmounts(list<pair<CTxDestination, int64_t> >& listReceived,
       if (txout.scriptPubKey.empty())
 	  continue;
 
-
+      vector<valtype> vs;
+      txnouttype t;
+      if(Solver(txout.scriptPubKey, t, vs))
+      {
+        if(t == TX_NULL_DATA)
+          continue;
+      }
+     
       bool fIsMine;
       // Only need to handle txouts if AT LEAST one of these is true:
       //   1) they debit from us (sent)
