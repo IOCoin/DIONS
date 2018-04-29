@@ -2313,7 +2313,7 @@ Value shadesend(const Array& params, bool fHelp)
             "shadesend <shade> <amount>\n"
             + HelpRequiringPassphrase());
 
-    Array oRes;
+    Object obj;
    
     string ray_ = params[0].get_str();
     vector<unsigned char> k;
@@ -2328,7 +2328,6 @@ Value shadesend(const Array& params, bool fHelp)
       k2.insert(k2.end(), k.begin() + 0x22, k.end());
       CPubKey k1_(k1);
       CPubKey k2_(k2);
-      Object obj;
       obj.push_back(Pair("abs", cba(k1_.GetID()).ToString()));
       obj.push_back(Pair("ord", cba(k2_.GetID()).ToString()));
 
@@ -2374,11 +2373,9 @@ Value shadesend(const Array& params, bool fHelp)
             obj.push_back(Pair("txid", t.GetHash().GetHex()));
         }  
       }
-      
-      oRes.push_back(obj);
     }
 
-    return oRes;
+    return obj;
 }
 Value __vtx_s(const Array& params, bool fHelp)
 {
