@@ -256,11 +256,28 @@ Value sr71(const Array& params, bool fHelp)
 
         for(std::map<CKeyID, int64_t>::const_iterator it = mk.begin(); it != mk.end(); it++)
         {
-          CKeyID ck = it->first;
-          RayShade& r = pwalletMain->kd[ck].rs_;
+          CKeyID ck_ = it->first;
+          RayShade& r = pwalletMain->kd[ck_].rs_;
           if(!r.ctrlExternalAngle() && r.ctrlPath() == r1.ctrlPath())
           {
-            obj.push_back(Pair("ray id", cba(ck).ToString()));
+            obj.push_back(Pair("ray id", cba(ck_).ToString()));
+            //Verify - green - Ydwi
+            CPubKey vertex1;
+            pwalletMain->GetPubKey(ck, vertex1);
+            CPubKey vertex2;
+            pwalletMain->GetPubKey(ck_, vertex2);
+            vector<unsigned char> k;
+            k.reserve(1 + vertex1.Raw().size() + vertex2.Raw().size());
+            vchType a = vertex1.Raw();
+            vchType b = vertex2.Raw();
+            k.push_back(0x18);
+
+            k.insert(k.end(), a.begin(), a.end());
+            k.insert(k.end(), b.begin(), b.end());
+            if(k.size() == 0)
+              throw runtime_error("k size " + k.size());
+            string s1 = EncodeBase58(&k[0], &k[0] + k.size());
+            obj.push_back(Pair("ref", s1));
           }
         }
 
