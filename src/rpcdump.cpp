@@ -331,3 +331,23 @@ Value dumpwallet(const Array& params, bool fHelp)
     file.close();
     return Value::null;
 }
+Value ydwiWhldw_base_diff(const Array& params, bool fHelp)
+{
+  Array a;
+  std::map<CKeyID, int64_t> mk;
+  pwalletMain->kt(mk);
+  for(map< CKeyID, int64_t >::const_iterator it = mk.begin(); it != mk.end(); it++)
+  {
+    if(pwalletMain->mapAddressBook.count(it->first))
+    {
+      string t0 = EncodeDumpString(pwalletMain->mapAddressBook[it->first]);
+      if(t0 == "")
+        continue;
+      string delta = cba(it->first).ToString();
+      Object o; o.push_back(Pair(t0, delta));
+      a.push_back(o);
+    }
+  }
+
+  return a;
+}
