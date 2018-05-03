@@ -336,6 +336,7 @@ Value ydwiWhldw_base_diff(const Array& params, bool fHelp)
   Array a;
   std::map<CKeyID, int64_t> mk;
   pwalletMain->kt(mk);
+
   for(map< CKeyID, int64_t >::const_iterator it = mk.begin(); it != mk.end(); it++)
   {
     if(pwalletMain->mapAddressBook.count(it->first))
