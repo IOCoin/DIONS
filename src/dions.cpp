@@ -1,4 +1,4 @@
-// Copyright (c) 2017 IODigital foundation developers 
+// Copyright (c) 2018 The I/O Coin developers
 //
 //
 #include "db.h"
