@@ -324,7 +324,7 @@ bool channel(string l, string f, string& k, bool& black)
 
   return true;
 }
-int scaleMonitor()
+unsigned int scaleMonitor()
 {
   if(!fTestNet)
     return 210000;
@@ -575,7 +575,7 @@ bool aliasTx(LocatorNodeDB& aliasCacheDB, const vector<unsigned char> &vchAlias,
     AliasIndex& txPos = vtxPos.back();
 
     int nHeight = txPos.nHeight;
-    if(nHeight + scaleMonitor() < pindexBest->nHeight)
+    if(nHeight + scaleMonitor() <= pindexBest->nHeight)
     {
         string alias = stringFromVch(vchAlias);
         return false;

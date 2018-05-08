@@ -22,6 +22,7 @@ static unsigned char trans__ydwi[] = {
 
 extern void TxToJSON(const CTransaction& tx, const uint256 hashBlock, json_spirit::Object& entry);
 extern LocatorNodeDB* ln1Db;
+extern unsigned int scaleMonitor();
 static void accountingDeprecationCheck()
 {
     if (!GetBoolArg("-enableaccounts", false))
@@ -514,14 +515,16 @@ Value sendtodion(const Array& params, bool fHelp)
 
     vector<AliasIndex> vtxPos;
     vchType vchAlias = vchFromString(alias);
-    if (ln1Db->lKey (vchAlias))
+    if(ln1Db->lKey(vchAlias))
     {
-      if (!ln1Db->lGet (vchAlias, vtxPos))
+      if(!ln1Db->lGet(vchAlias, vtxPos))
         return error("aliasHeight() : failed to read from name DB");
-      if (vtxPos.empty ())
+      if(vtxPos.empty())
         return -1;
 
-      AliasIndex& txPos = vtxPos.back ();
+      AliasIndex& txPos = vtxPos.back();
+          if(txPos.nHeight + scaleMonitor() <= nBestHeight)
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "extern alias");
       address = txPos.vAddress;
     }
     else
@@ -555,6 +558,8 @@ Value sendtoaddress(const Array& params, bool fHelp)
           return -1;
 
         AliasIndex& txPos = vtxPos.back ();
+          if(txPos.nHeight + scaleMonitor() <= nBestHeight)
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "extern alias");
         address.SetString(txPos.vAddress); 
       }
       else

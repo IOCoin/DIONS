@@ -383,6 +383,7 @@ public:
         return Erase(make_pair(std::string("alias_"), alias));
     }
 
+    bool ydwiWhldw();
     bool test();
     void filter(CBlockIndex*);
     void filter() { return; };

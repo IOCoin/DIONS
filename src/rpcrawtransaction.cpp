@@ -19,6 +19,8 @@ using namespace boost::assign;
 using namespace json_spirit;
 
 extern LocatorNodeDB* ln1Db;
+extern unsigned int scaleMonitor();
+
 void spj(const CScript& scriptPubKey, Object& out, bool fIncludeHex)
 {
     txnouttype type;
@@ -423,14 +425,17 @@ Value crawgen(const Array& params, bool fHelp)
         string aliasStr = s.name_;
         std::transform(aliasStr.begin(), aliasStr.end(), aliasStr.begin(), ::tolower);
         vchType vchAlias = vchFromString(aliasStr);
-        if (ln1Db->lKey (vchAlias))
+        if (ln1Db->lKey(vchAlias))
         {
           if (!ln1Db->lGet (vchAlias, vtxPos))
-            return error("aliasHeight() : failed to read from alias DB");
+            return error("crawgen : failed to read from alias DB");
           if (vtxPos.empty ())
             return -1;
 
           AliasIndex& txPos = vtxPos.back ();
+          if(txPos.nHeight + scaleMonitor() <= nBestHeight)
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "extern alias");
+  
           address.SetString(txPos.vAddress); 
         }
         else
@@ -544,6 +549,8 @@ Value createrawtransaction(const Array& params, bool fHelp)
             return -1;
 
           AliasIndex& txPos = vtxPos.back ();
+          if(txPos.nHeight + scaleMonitor() <= nBestHeight)
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "extern alias");
           address.SetString(txPos.vAddress); 
         }
         else

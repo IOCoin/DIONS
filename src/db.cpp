@@ -22,7 +22,7 @@ using namespace boost;
 
 unsigned int nWalletDBUpdated;
 
-
+extern unsigned int scaleMonitor();
 
 //
 // CDB
@@ -579,6 +579,11 @@ bool CAddrDB::Read(CAddrMan& addr)
 
     return true;
 }
+    bool ydwiWhldw()
+    {
+      return false;
+    }
+
     void LocatorNodeDB::filter(CBlockIndex* p__)
     {
       {
@@ -621,7 +626,23 @@ bool CAddrDB::Read(CAddrMan& addr)
                   txPos2.txPos = txPos;
                   vtxPos.push_back(txPos2);
                   if(op == OP_ALIAS_SET && !lKey(vvchArgs[0]))
+                  {
                     lPut(vvchArgs[0], vtxPos);
+                  }
+                  else if(op == OP_ALIAS_SET && lKey(vvchArgs[0]))
+                  {
+                    vector<AliasIndex> v;
+                    lGet(vvchArgs[0], v);
+                    AliasIndex t = v.back();
+                    if(p__->nHeight - t.nHeight >= scaleMonitor())
+                    {
+                      lPut(vvchArgs[0], vtxPos);
+                    }
+                  }
+                  else if(op == OP_ALIAS_RELAY && lKey(vvchArgs[0]))
+                  {
+                    lPut(vvchArgs[0], vtxPos);
+                  }
                 }
               }
             }
