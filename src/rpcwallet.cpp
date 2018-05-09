@@ -2388,6 +2388,7 @@ Value shadesend(const Array& params, bool fHelp)
           CScript pk;
           pk.SetDestination(cba(pivot.GetID()).Get());
           __wx__Tx t;
+          t.nVersion = CTransaction::SHADE_TX_VERSION;
           string err = pwalletMain->__associate_fn__(pk, v, t, inv.__inv1);
           if(err != "")
             obj.push_back(Pair("status", err));

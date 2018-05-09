@@ -677,7 +677,7 @@ bool AcceptToMemoryPool(CTxMemPool& pool, CTransaction &tx,
       return error("AcceptToMemoryPool : type");
 
     // Rather not work on nonstandard transactions (unless -testnet)
-    if (!fTestNet && !IsStandardTx(tx) && tx.nVersion != CTransaction::DION_TX_VERSION)
+    if (!fTestNet && !IsStandardTx(tx) && tx.nVersion != CTransaction::DION_TX_VERSION && tx.nVersion != CTransaction::SHADE_TX_VERSION)
       return error("AcceptToMemoryPool : nonstandard transaction type");
 
     // is it already in the memory pool?
