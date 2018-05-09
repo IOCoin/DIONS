@@ -475,6 +475,7 @@ public:
     static const int CURRENT_VERSION=1;
     static const int VERSION_WITH_INFO=3;
     static const int DION_TX_VERSION=5;
+    static const int SHADE_TX_VERSION=6;
     int nVersion; 
     unsigned int nTime;
     std::vector<CTxIn> vin;
