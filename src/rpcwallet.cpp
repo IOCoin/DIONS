@@ -185,10 +185,15 @@ Value shade(const Array& params, bool fHelp)
     "shade [account] [ray id]\n"
     );
 
+    if (pwalletMain->as())
+      throw std::runtime_error("unlock the wallet first!");
+
     Array oRes;
 
     if(!pwalletMain->as())
       pwalletMain->TopUpKeyPool();
+
+
 
     CPubKey k1;
     CPubKey k2;

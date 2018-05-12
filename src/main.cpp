@@ -380,6 +380,9 @@ bool IsStandardTx(const CTransaction& tx)
 
     BOOST_FOREACH(const CTxIn& txin, tx.vin)
     {
+      if(txin.scriptSig[0] == OP_RETURN)
+        continue;
+
         // Biggest 'standard' txin is a 3-signature 3-of-3 CHECKMULTISIG
         // pay-to-script-hash, which is 3 ~80-byte signatures, 3
         // ~65-byte public keys, plus a few script ops.
@@ -395,12 +398,17 @@ bool IsStandardTx(const CTransaction& tx)
     unsigned int nDataOut = 0;
     txnouttype whichType;
     BOOST_FOREACH(const CTxOut& txout, tx.vout) {
+        if(txout.scriptPubKey[0] == OP_RETURN)
+          continue;
+
         if (!::IsStandard(txout.scriptPubKey, whichType))
             return false;
         if (whichType == TX_NULL_DATA)
             nDataOut++;
-        if (txout.nValue == 0)
+        if (txout.nValue == 0) 
+        {
             return false;
+        }
         if (fEnforceCanonical && !txout.scriptPubKey.HasCanonicalPushes()) {
             return false;
         }
@@ -450,6 +458,10 @@ bool CTransaction::AreInputsStandard(const MapPrevTx& mapInputs) const
 
     for (unsigned int i = 0; i < vin.size(); i++)
     {
+      if(vin[i].scriptSig[0] == OP_RETURN)
+        continue;
+
+
         const CTxOut& prev = GetOutputFor(vin[i], mapInputs);
 
         vector<vector<unsigned char> > vSolutions;
