@@ -1725,7 +1725,7 @@ bool __wx__::CreateTransaction(const vector<pair<CScript, int64_t> >& vecSend, _
       // txdb must be opened before the mapWallet lock
       CTxDB txdb("r");
       {
-	  nFeeRet = nTransactionFee;
+	  nFeeRet = S_MIN_TX_FEE;
 	  while (true)
 	  {
 	      wtxNew.vin.clear();
@@ -2285,7 +2285,7 @@ string __wx__::SendMoneyToDestination(const CTxDestination& address, int64_t nVa
   // Check amount
   if (nValue <= 0)
       return _("Invalid amount");
-  if (nValue + nTransactionFee > GetBalance())
+  if (nValue + S_MIN_TX_FEE > GetBalance())
       return _("Insufficient funds");
 
   // Parse Bitcoin address
