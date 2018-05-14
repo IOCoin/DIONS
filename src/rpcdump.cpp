@@ -446,6 +446,13 @@ Value importwallet(const Array& params, bool fHelp)
                 p.codomain(pub_);
                 __wx__DB(strWalletFile).UpdateKey(key.GetPubKey(), pwalletMain->kd[keyid]);
               }
+              if(vstr[nStr].substr(0,5) == "rand=")
+              {
+                string r_ = DecodeDumpString(vstr[nStr].substr(5));
+                pwalletMain->kd[keyid].random = vchFromString(r_);
+                pwalletMain->kd[keyid].r = r_;
+                __wx__DB(strWalletFile).UpdateKey(key.GetPubKey(), pwalletMain->kd[keyid]);
+              }
         }
         printf("Importing %s...\n", cba(keyid).ToString().c_str());
         if (!pwalletMain->ak(key)) {
@@ -528,6 +535,9 @@ Value dumpwallet(const Array& params, bool fHelp)
         if(!pwalletMain->envCP1(pk, pub_k))
           pub_k = "0"; 
 
+        vchType r = pwalletMain->kd[keyid].random;
+        string rStr = stringFromVch(r);
+        
         CKey key;
         if (pwalletMain->GetKey(keyid, key)) {
           RayShade& r1 = pwalletMain->kd[keyid].rs_;
@@ -537,15 +547,15 @@ Value dumpwallet(const Array& params, bool fHelp)
             if (pwalletMain->mapAddressBook.count(keyid)) {
                 CSecret secret = key.GetSecret(IsCompressed);
                
-                  file << strprintf("%s;%s;label=%s;addr=%s;outer=%d;sector=%s;priv=%s;pub=%s;#\n", CBitcoinSecret(secret, IsCompressed).ToString().c_str(), strTime.c_str(), EncodeDumpString(pwalletMain->mapAddressBook[keyid]).c_str(), strAddr.c_str(), r1.ctrlExternalAngle(), p.ToString().c_str(), priv_k.c_str(), pub_k.c_str());
+                  file << strprintf("%s;%s;label=%s;addr=%s;outer=%d;sector=%s;priv=%s;pub=%s;rand=%s;#\n", CBitcoinSecret(secret, IsCompressed).ToString().c_str(), strTime.c_str(), EncodeDumpString(pwalletMain->mapAddressBook[keyid]).c_str(), strAddr.c_str(), r1.ctrlExternalAngle(), p.ToString().c_str(), priv_k.c_str(), pub_k.c_str(), rStr.c_str());
 
             } else if (setKeyPool.count(keyid)) {
                 CSecret secret = key.GetSecret(IsCompressed);
-                  file << strprintf("%s;%s;reserve=1;addr=%s;outer=%d;sector=%s;priv=%s;pub=%s;#\n", CBitcoinSecret(secret, IsCompressed).ToString().c_str(), strTime.c_str(), strAddr.c_str(), r1.ctrlExternalAngle(), p.ToString().c_str(), priv_k.c_str(), pub_k.c_str());
+                  file << strprintf("%s;%s;reserve=1;addr=%s;outer=%d;sector=%s;priv=%s;pub=%s;rand=%s#\n", CBitcoinSecret(secret, IsCompressed).ToString().c_str(), strTime.c_str(), strAddr.c_str(), r1.ctrlExternalAngle(), p.ToString().c_str(), priv_k.c_str(), pub_k.c_str(), rStr.c_str());
 
             } else {
                 CSecret secret = key.GetSecret(IsCompressed);
-                  file << strprintf("%s;%s;change=1;addr=%s;outer=%d;sector=%s;priv=%s;pub=%s;#\n", CBitcoinSecret(secret, IsCompressed).ToString().c_str(), strTime.c_str(), strAddr.c_str(), r1.ctrlExternalAngle(), p.ToString().c_str(), priv_k.c_str(), pub_k.c_str());
+                  file << strprintf("%s;%s;change=1;addr=%s;outer=%d;sector=%s;priv=%s;pub=%s;rand=%s#\n", CBitcoinSecret(secret, IsCompressed).ToString().c_str(), strTime.c_str(), strAddr.c_str(), r1.ctrlExternalAngle(), p.ToString().c_str(), priv_k.c_str(), pub_k.c_str(), rStr.c_str());
             }
         }
     }
