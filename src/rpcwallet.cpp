@@ -2535,6 +2535,8 @@ Value sublimateYdwi(const Array& params, bool fHelp)
       bool sentinel = k[0] == 0x18;
       bool base = ydwi_x.IsValid() && ydwi_y.IsValid();
       ret.push_back(Pair("stat", sentinel && base));
+      ret.push_back(Pair("abs", ydwi_x.ToString().c_str()));
+      ret.push_back(Pair("ord", ydwi_y.ToString().c_str()));
     }
     return ret;
 }
