@@ -5,12 +5,13 @@
 CC=x86_64-w64-mingw32-gcc -Wl,-Bstatic
 CXX=x86_64-w64-mingw32-g++ -Wl,-Bstatic
 
-USE_UPNP:=0
+#USE_UPNP:=0
 
-CROSS_BUILD=/home/io-tester/CROSS_COMPILE/
+CROSS_BUILD=/home/ioctest/CROSS_COMPILE/
 INCLUDEPATHS= \
  -I"$(CROSS_BUILD)/x86_64-w64-mingw32/boost_1_55_0/include" \
  -I"$(CROSS_BUILD)/x86_64-w64-mingw32/db-4.8/include" \
+ -I"$(CROSS_BUILD)/x86_64-w64-mingw32/miniupnpc-1.9.20140610//include" \
  -I"$(CROSS_BUILD)/x86_64-w64-mingw32/openssl-1.0/include/"
 
 LIBPATHS= \
@@ -61,7 +62,6 @@ OBJS= \
     obj/addrman.o \
     obj/crypter.o \
     obj/key.o \
-    obj/db.o \
     obj/init.o \
     obj/irc.o \
     obj/keystore.o \
@@ -80,6 +80,7 @@ OBJS= \
     obj/rpcrawtransaction.o \
     obj/script.o \
     obj/sync.o \
+    obj/db.o \
     obj/util.o \
     obj/wallet.o \
     obj/walletdb.o \
