@@ -449,8 +449,10 @@ Value importwallet(const Array& params, bool fHelp)
               if(vstr[nStr].substr(0,5) == "rand=")
               {
                 string r_ = DecodeDumpString(vstr[nStr].substr(5));
-                pwalletMain->kd[keyid].random = vchFromString(r_);
-                pwalletMain->kd[keyid].r = r_;
+                bool e;
+                vchType v = DecodeBase64(r_.c_str(), &e);
+                pwalletMain->kd[keyid].random = v;
+                pwalletMain->kd[keyid].r = stringFromVch(v);
                 __wx__DB(strWalletFile).UpdateKey(key.GetPubKey(), pwalletMain->kd[keyid]);
               }
         }
@@ -536,7 +538,8 @@ Value dumpwallet(const Array& params, bool fHelp)
           pub_k = "0"; 
 
         vchType r = pwalletMain->kd[keyid].random;
-        string rStr = stringFromVch(r);
+        string rStr = EncodeBase64(&r[0], r.size());
+        
         
         CKey key;
         if (pwalletMain->GetKey(keyid, key)) {
