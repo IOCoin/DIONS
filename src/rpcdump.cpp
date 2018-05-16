@@ -380,6 +380,7 @@ Value importwallet(const Array& params, bool fHelp)
 
     bool fGood = true;
 
+    //ydwi base
     while (file.good()) {
         std::string line;
         std::getline(file, line, '#');
