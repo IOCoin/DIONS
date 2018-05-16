@@ -471,6 +471,22 @@ Value importwallet(const Array& params, bool fHelp)
                 pwalletMain->kd[keyid].m = m_;
                 __wx__DB(strWalletFile).UpdateKey(key.GetPubKey(), pwalletMain->kd[keyid]);
               }
+              if(vstr[nStr].substr(0,2) == "k=")
+              {
+                string k_str = DecodeDumpString(vstr[nStr].substr(2));
+                bool e;
+                vchType v = DecodeBase64(k_str.c_str(), &e);
+                CPubKey pk(v);
+                pwalletMain->kd[keyid].k = pk;
+                __wx__DB(strWalletFile).UpdateKey(key.GetPubKey(), pwalletMain->kd[keyid]);
+              }
+              if(vstr[nStr].substr(0,2) == "z=")
+              {
+                string z_str = DecodeDumpString(vstr[nStr].substr(2));
+                uint160 z_(z_str);
+                pwalletMain->kd[keyid].z = z_;
+                __wx__DB(strWalletFile).UpdateKey(key.GetPubKey(), pwalletMain->kd[keyid]);
+              }
         }
         printf("Importing %s...\n", cba(keyid).ToString().c_str());
         if (!pwalletMain->ak(key)) {
@@ -561,6 +577,11 @@ Value dumpwallet(const Array& params, bool fHelp)
         boost::archive::text_oarchive ar(ss);
         ar << m_;
         string m_ser = ss.str();
+
+        CPubKey k_ = pwalletMain->kd[keyid].k;
+        string k_str = EncodeBase64(&k_.Raw()[0], k_.Raw().size());
+        uint160 z_ = pwalletMain->kd[keyid].z;
+        string z_str = z_.ToString();
         
         CKey key;
         if (pwalletMain->GetKey(keyid, key)) {
@@ -571,15 +592,15 @@ Value dumpwallet(const Array& params, bool fHelp)
             if (pwalletMain->mapAddressBook.count(keyid)) {
                 CSecret secret = key.GetSecret(IsCompressed);
                
-                  file << strprintf("%s;%s;label=%s;addr=%s;outer=%d;sector=%s;priv=%s;pub=%s;rand=%s;m=%s;#\n", CBitcoinSecret(secret, IsCompressed).ToString().c_str(), strTime.c_str(), EncodeDumpString(pwalletMain->mapAddressBook[keyid]).c_str(), strAddr.c_str(), r1.ctrlExternalAngle(), p.ToString().c_str(), priv_k.c_str(), pub_k.c_str(), rStr.c_str(), m_ser.c_str());
+                  file << strprintf("%s;%s;label=%s;addr=%s;outer=%d;sector=%s;priv=%s;pub=%s;rand=%s;m=%s;k=%s;z=%s;#\n", CBitcoinSecret(secret, IsCompressed).ToString().c_str(), strTime.c_str(), EncodeDumpString(pwalletMain->mapAddressBook[keyid]).c_str(), strAddr.c_str(), r1.ctrlExternalAngle(), p.ToString().c_str(), priv_k.c_str(), pub_k.c_str(), rStr.c_str(), m_ser.c_str(), k_str.c_str(), z_str.c_str());
 
             } else if (setKeyPool.count(keyid)) {
                 CSecret secret = key.GetSecret(IsCompressed);
-                  file << strprintf("%s;%s;reserve=1;addr=%s;outer=%d;sector=%s;priv=%s;pub=%s;rand=%s;m=%s;#\n", CBitcoinSecret(secret, IsCompressed).ToString().c_str(), strTime.c_str(), strAddr.c_str(), r1.ctrlExternalAngle(), p.ToString().c_str(), priv_k.c_str(), pub_k.c_str(), rStr.c_str(), m_ser.c_str());
+                  file << strprintf("%s;%s;reserve=1;addr=%s;outer=%d;sector=%s;priv=%s;pub=%s;rand=%s;m=%s;k=%s;z=%s;#\n", CBitcoinSecret(secret, IsCompressed).ToString().c_str(), strTime.c_str(), strAddr.c_str(), r1.ctrlExternalAngle(), p.ToString().c_str(), priv_k.c_str(), pub_k.c_str(), rStr.c_str(), m_ser.c_str(), k_str.c_str(), z_str.c_str());
 
             } else {
                 CSecret secret = key.GetSecret(IsCompressed);
-                  file << strprintf("%s;%s;change=1;addr=%s;outer=%d;sector=%s;priv=%s;pub=%s;rand=%s;m=%s;#\n", CBitcoinSecret(secret, IsCompressed).ToString().c_str(), strTime.c_str(), strAddr.c_str(), r1.ctrlExternalAngle(), p.ToString().c_str(), priv_k.c_str(), pub_k.c_str(), rStr.c_str(), m_ser.c_str());
+                  file << strprintf("%s;%s;change=1;addr=%s;outer=%d;sector=%s;priv=%s;pub=%s;rand=%s;m=%s;k=%s;z=%s;#\n", CBitcoinSecret(secret, IsCompressed).ToString().c_str(), strTime.c_str(), strAddr.c_str(), r1.ctrlExternalAngle(), p.ToString().c_str(), priv_k.c_str(), pub_k.c_str(), rStr.c_str(), m_ser.c_str(), k_str.c_str(), z_str.c_str());
             }
         }
     }
