@@ -380,9 +380,6 @@ bool IsStandardTx(const CTransaction& tx)
 
     BOOST_FOREACH(const CTxIn& txin, tx.vin)
     {
-      if(txin.scriptSig[0] == OP_RETURN)
-        continue;
-
         // Biggest 'standard' txin is a 3-signature 3-of-3 CHECKMULTISIG
         // pay-to-script-hash, which is 3 ~80-byte signatures, 3
         // ~65-byte public keys, plus a few script ops.
@@ -398,14 +395,13 @@ bool IsStandardTx(const CTransaction& tx)
     unsigned int nDataOut = 0;
     txnouttype whichType;
     BOOST_FOREACH(const CTxOut& txout, tx.vout) {
-        if(txout.scriptPubKey[0] == OP_RETURN)
-          continue;
-
         if (!::IsStandard(txout.scriptPubKey, whichType))
+        {
             return false;
+        }
         if (whichType == TX_NULL_DATA)
             nDataOut++;
-        if (txout.nValue == 0) 
+        else if(txout.nValue == 0) 
         {
             return false;
         }
@@ -458,10 +454,6 @@ bool CTransaction::AreInputsStandard(const MapPrevTx& mapInputs) const
 
     for (unsigned int i = 0; i < vin.size(); i++)
     {
-      if(vin[i].scriptSig[0] == OP_RETURN)
-        continue;
-
-
         const CTxOut& prev = GetOutputFor(vin[i], mapInputs);
 
         vector<vector<unsigned char> > vSolutions;
@@ -689,7 +681,7 @@ bool AcceptToMemoryPool(CTxMemPool& pool, CTransaction &tx,
       return error("AcceptToMemoryPool : type");
 
     // Rather not work on nonstandard transactions (unless -testnet)
-    if (!fTestNet && !IsStandardTx(tx) && tx.nVersion != CTransaction::DION_TX_VERSION)
+    if (!IsStandardTx(tx) && tx.nVersion != CTransaction::DION_TX_VERSION)
       return error("AcceptToMemoryPool : nonstandard transaction type");
 
     // is it already in the memory pool?
@@ -747,7 +739,7 @@ bool AcceptToMemoryPool(CTxMemPool& pool, CTransaction &tx,
         }
 
         // Check for non-standard pay-to-script-hash in inputs
-        if (!tx.AreInputsStandard(mapInputs) && !fTestNet)
+        if (!tx.AreInputsStandard(mapInputs)) 
           return error("AcceptToMemoryPool : nonstandard transaction input");
 
         int64_t nFees = tx.GetValueIn(mapInputs)-tx.GetValueOut();
