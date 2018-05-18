@@ -2194,8 +2194,6 @@ bool CBlock::SetBestChain(CTxDB& txdb, CBlockIndex* pindexNew)
         {
             if (pindex->nVersion > CBlock::CURRENT_VERSION)
                 ++nUpgraded;
-            if (pindex->nVersion == CBlock::CURRENT_VERSION)
-                ++nShadeSet;
 
             pindex = pindex->pprev;
         }
@@ -2204,10 +2202,6 @@ bool CBlock::SetBestChain(CTxDB& txdb, CBlockIndex* pindexNew)
         if (nUpgraded > 100/2)
             // strMiscWarning is read by GetWarnings(), called by Qt and the JSON-RPC code to warn the user:
             strMiscWarning = _("Warning: This version is obsolete, upgrade required!");
-        if(nShadeSet == CONSISTENCY_MARGIN)
-        {
-          FEATURE_SET_SHADE_ACTIVE = true;
-        }
     }
 
     std::string strCmd = GetArg("-blocknotify", "");
