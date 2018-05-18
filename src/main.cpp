@@ -52,6 +52,10 @@ unsigned int nModifierInterval = 10 * 60; // time to elapse before new modifier 
 
 unsigned int  POS_v3_DIFFICULTY_HEIGHT = 100000;
 
+bool FEATURE_SET_SHADE_ACTIVE = false;
+
+unsigned int CONSISTENCY_MARGIN = 100;
+vector<bool> SHADE_TRACK_POST;
 int nCoinbaseMaturity = 100;
 CBlockIndex* pindexGenesisBlock = NULL;
 CBlockIndex* p__ = NULL;
@@ -69,6 +73,7 @@ unsigned int LR_SHIFT__[] =
   0x51, 0xd3, 0xfe, 0xae, 0x32, 0x41, 0x29, 0x57, 0xcb, 0xa4,
   0x85, 0xc7, 0xbc, 0x47, 0x19, 0x29, 0x62, 0x71, 0xff, 0x5c
 };
+
 
 int INTERN_REF0__ = 0x3520;
 int EXTERN_REF0__ = 0x0800;
@@ -2069,6 +2074,21 @@ bool CBlock::SetBestChainInner(CTxDB& txdb, CBlockIndex *pindexNew)
     BOOST_FOREACH(CTransaction& tx, vtx)
         mempool.remove(tx);
 
+    if(!FEATURE_SET_SHADE_ACTIVE && pindexNew->nVersion == CBlock::CURRENT_VERSION)
+    {
+      SHADE_TRACK_POST.push_back(true);
+      if(SHADE_TRACK_POST.size() == CONSISTENCY_MARGIN)
+      {
+        if(std::find(begin(SHADE_TRACK_POST), end(SHADE_TRACK_POST), false) == end(SHADE_TRACK_POST))
+
+        {
+          FEATURE_SET_SHADE_ACTIVE=true; 
+        }
+        else
+          SHADE_TRACK_POST.erase(SHADE_TRACK_POST.begin());
+      }
+    }
+  
     ln1Db->filter(pindexNew);
     return true;
 }
@@ -2168,11 +2188,15 @@ bool CBlock::SetBestChain(CTxDB& txdb, CBlockIndex* pindexNew)
     if (!fIsInitialDownload)
     {
         int nUpgraded = 0;
+        unsigned int nShadeSet = 0;
         const CBlockIndex* pindex = pindexBest;
-        for (int i = 0; i < 100 && pindex != NULL; i++)
+        for (int i = 0; i < CONSISTENCY_MARGIN && pindex != NULL; i++)
         {
             if (pindex->nVersion > CBlock::CURRENT_VERSION)
                 ++nUpgraded;
+            if (pindex->nVersion == CBlock::CURRENT_VERSION)
+                ++nShadeSet;
+
             pindex = pindex->pprev;
         }
         if (nUpgraded > 0)
@@ -2180,6 +2204,10 @@ bool CBlock::SetBestChain(CTxDB& txdb, CBlockIndex* pindexNew)
         if (nUpgraded > 100/2)
             // strMiscWarning is read by GetWarnings(), called by Qt and the JSON-RPC code to warn the user:
             strMiscWarning = _("Warning: This version is obsolete, upgrade required!");
+        if(nShadeSet == CONSISTENCY_MARGIN)
+        {
+          FEATURE_SET_SHADE_ACTIVE = true;
+        }
     }
 
     std::string strCmd = GetArg("-blocknotify", "");
@@ -2462,7 +2490,7 @@ bool CBlock::AcceptBlock()
 
     if (IsProtocolV2(nHeight) && nVersion < 7)
         return DoS(100, error("AcceptBlock() : reject too old nVersion = %d", nVersion));
-    else if (!IsProtocolV2(nHeight) && nVersion > 6)
+    else if (!fTestNet && !IsProtocolV2(nHeight) && nVersion > 6)
         return DoS(100, error("AcceptBlock() : reject too new nVersion = %d", nVersion));
 
     if (IsProofOfWork() && nPowHeight > LAST_POW_BLOCK)

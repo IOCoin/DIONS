@@ -82,6 +82,7 @@ inline int64_t FutureDrift(int64_t nTime, int nHeight) { return IsProtocolV2(nHe
 
 inline unsigned int GetTargetSpacing(int nHeight) { return IsProtocolV2(nHeight) ? 64 : 60; }
 
+
 extern unsigned int nCoinCacheSize;
 extern libzerocoin::Params* ZCParams;
 extern CScript COINBASE_FLAGS;
@@ -881,7 +882,7 @@ class CBlock
 {
 public:
     // header
-    static const int CURRENT_VERSION = 7;
+    static const int CURRENT_VERSION = 8;
     int nVersion;
     uint256 hashPrevBlock;
     uint256 hashMerkleRoot;

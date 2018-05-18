@@ -117,8 +117,8 @@ CBlock* CreateNewBlock(__wx__* pwallet, bool fProofOfStake, int64_t* pFees)
     CBlockIndex* pindexPrev = pindexBest;
     int nHeight = pindexPrev->nHeight + 1;
 
-    if (!IsProtocolV2(nHeight))
-        pblock->nVersion = 6;
+    if(!fTestNet && !IsProtocolV2(nHeight))
+      pblock->nVersion = 6;
 
     // Create coinbase tx
     CTransaction txNew;
