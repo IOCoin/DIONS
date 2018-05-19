@@ -21,7 +21,7 @@ static unsigned char trans__ydwi[] = {
 };
 
 extern bool FEATURE_SET_SHADE_ACTIVE;
-extern vector<bool> SHADE_TRACK_POST;
+extern int nShadeUpdate;
 extern unsigned int CONSISTENCY_MARGIN;
 extern void TxToJSON(const CTransaction& tx, const uint256 hashBlock, json_spirit::Object& entry);
 extern LocatorNodeDB* ln1Db;
@@ -121,14 +121,7 @@ Value getinfo(const Array& params, bool fHelp)
         obj.push_back(Pair("unlocked_until", (int64_t)nWalletUnlockTime / 1000));
     if(!FEATURE_SET_SHADE_ACTIVE)
     {
-      float s=0;
-      for(int i=0; i<SHADE_TRACK_POST.size(); i++)
-      {
-        if(SHADE_TRACK_POST[i])
-          s++;
-      }
-     
-      float r = 100 * s / CONSISTENCY_MARGIN ;
+      float r = 100 * ((float)nShadeUpdate) / CONSISTENCY_MARGIN ;
       obj.push_back(Pair("feature:shade:%", r));
     }
     else

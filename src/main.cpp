@@ -55,7 +55,7 @@ unsigned int  POS_v3_DIFFICULTY_HEIGHT = 100000;
 bool FEATURE_SET_SHADE_ACTIVE = false;
 
 unsigned int CONSISTENCY_MARGIN = 100;
-vector<bool> SHADE_TRACK_POST;
+int nShadeUpdate=0;
 int nCoinbaseMaturity = 100;
 CBlockIndex* pindexGenesisBlock = NULL;
 CBlockIndex* p__ = NULL;
@@ -1442,7 +1442,9 @@ bool IsInitialBlockDownload()
 {
     LOCK(cs_main);
     if (pindexBest == NULL || nBestHeight < Checkpoints::GetTotalBlocksEstimate())
+    {
         return true;
+    }
 
     if(fTestNet) return false;
 
@@ -1453,8 +1455,8 @@ bool IsInitialBlockDownload()
         pindexLastBest = pindexBest;
         nLastUpdate = GetTime();
     }
-    return (GetTime() - nLastUpdate < 15 &&
-            pindexBest->GetBlockTime() < GetTime() - 8 * 60 * 60);
+    return GetTime() - nLastUpdate < 15 &&
+           pindexBest->GetBlockTime() < GetTime() - 8 * 60 * 60;
 }
 
 void static InvalidChainFound(CBlockIndex* pindexNew)
@@ -2173,34 +2175,18 @@ bool CBlock::SetBestChain(CTxDB& txdb, CBlockIndex* pindexNew)
       nBestBlockTrust.Get64(),
       DateTimeStrFormat("%x %H:%M:%S", pindexBest->GetBlockTime()).c_str());
 
-    if(!fIsInitialDownload)
-    {
-      if(!FEATURE_SET_SHADE_ACTIVE && 
-          pindexBest->nVersion == CBlock::CURRENT_VERSION)
-      {
-        SHADE_TRACK_POST.push_back(true);
-        if(SHADE_TRACK_POST.size() == CONSISTENCY_MARGIN)
-        {
-          if(std::find(begin(SHADE_TRACK_POST), end(SHADE_TRACK_POST), false) == end(SHADE_TRACK_POST))
-
-          {
-            FEATURE_SET_SHADE_ACTIVE=true; 
-          }
-          else
-            SHADE_TRACK_POST.erase(SHADE_TRACK_POST.begin());
-        }
-      }
-    }
-
     // Check the version of the last 100 blocks to see if we need to upgrade:
     if (!fIsInitialDownload)
     {
         int nUpgraded = 0;
+        nShadeUpdate=0;
         const CBlockIndex* pindex = pindexBest;
-        for (int i = 0; i < 100 && pindex != NULL; i++)
+        for (int i = 0; i < CONSISTENCY_MARGIN && pindex != NULL; i++)
         {
             if (pindex->nVersion > CBlock::CURRENT_VERSION)
                 ++nUpgraded;
+            if (pindex->nVersion == CBlock::CURRENT_VERSION)
+                ++nShadeUpdate;
 
             pindex = pindex->pprev;
         }
@@ -2209,6 +2195,9 @@ bool CBlock::SetBestChain(CTxDB& txdb, CBlockIndex* pindexNew)
         if (nUpgraded > 100/2)
             // strMiscWarning is read by GetWarnings(), called by Qt and the JSON-RPC code to warn the user:
             strMiscWarning = _("Warning: This version is obsolete, upgrade required!");
+
+        if(!FEATURE_SET_SHADE_ACTIVE && nShadeUpdate == CONSISTENCY_MARGIN)
+          FEATURE_SET_SHADE_ACTIVE=true;
 
     }
 
