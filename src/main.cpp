@@ -2185,7 +2185,7 @@ bool CBlock::SetBestChain(CTxDB& txdb, CBlockIndex* pindexNew)
         {
             if (pindex->nVersion > CBlock::CURRENT_VERSION)
                 ++nUpgraded;
-            if (pindex->nVersion == CBlock::CURRENT_VERSION)
+            if (pindex->nVersion >= CBlock::CURRENT_VERSION)
                 ++nShadeUpdate;
 
             pindex = pindex->pprev;
