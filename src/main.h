@@ -74,8 +74,11 @@ static const uint256 hashGenesisBlock("0x00000afad2d5833b50b59a9784fdc59869b6886
 static const uint256 hashGenesisBlockTestNet("5f97300cd3dc3d2215dd38ce6d99bf7d5984bb62b2777060d3b5564298bd5484");
 static const uint256 hashGenesisMerkleRoot("0xcd5029ac01fb6cd7da8ff00ff1e82f3aca6bf3ecce5fb60623ee807fa83d1795");
 
+const int SHADE_FEATURE_UPDATE = 1625000;
+
 inline bool IsProtocolV2(int nHeight) { return nHeight > 65000; }
-inline bool V3(int nHeight) { return fTestNet || nHeight >= 1625000; }
+inline bool V3(int nHeight) { return fTestNet ? nHeight >= 10 : nHeight >= 1625000; }
+inline bool V4(int nHeight) { return fTestNet ? nHeight >= 40 : nHeight >= SHADE_FEATURE_UPDATE; }
 
 inline int64_t PastDrift(int64_t nTime, int nHeight)   { return IsProtocolV2(nHeight) ? nTime      : nTime - 10 * 60; }
 inline int64_t FutureDrift(int64_t nTime, int nHeight) { return IsProtocolV2(nHeight) ? nTime + 15 : nTime + 10 * 60; }
@@ -882,7 +885,7 @@ class CBlock
 {
 public:
     // header
-    static const int CURRENT_VERSION = 8;
+    static const int CURRENT_VERSION = 7;
     int nVersion;
     uint256 hashPrevBlock;
     uint256 hashMerkleRoot;

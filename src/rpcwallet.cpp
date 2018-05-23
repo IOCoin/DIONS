@@ -20,8 +20,6 @@ static unsigned char trans__ydwi[] = {
   0x1f, 0x26, 0x0f, 0xdc, 0x36, 0xcd, 0xaa, 0x3c
 };
 
-extern bool FEATURE_SET_SHADE_ACTIVE;
-extern int nShadeUpdate;
 extern unsigned int CONSISTENCY_MARGIN;
 extern void TxToJSON(const CTransaction& tx, const uint256 hashBlock, json_spirit::Object& entry);
 extern LocatorNodeDB* ln1Db;
@@ -119,15 +117,6 @@ Value getinfo(const Array& params, bool fHelp)
     obj.push_back(Pair("mininput",      ValueFromAmount(nMinimumInputValue)));
     if (pwalletMain->IsCrypted())
         obj.push_back(Pair("unlocked_until", (int64_t)nWalletUnlockTime / 1000));
-    if(!FEATURE_SET_SHADE_ACTIVE)
-    {
-      float r = 100 * ((float)nShadeUpdate) / CONSISTENCY_MARGIN ;
-      obj.push_back(Pair("feature:shade:%", r));
-    }
-    else
-    {
-      obj.push_back(Pair("shade:feature:active", true));
-    }
 
     obj.push_back(Pair("errors",        GetWarnings("statusbar")));
     return obj;
@@ -2353,9 +2342,12 @@ Value shadesend(const Array& params, bool fHelp)
             "shadesend <shade> <amount>\n"
             + HelpRequiringPassphrase());
 
-    if(!FEATURE_SET_SHADE_ACTIVE)
-      throw std::runtime_error("Feature not yet active. Consensus not reached");
-    
+
+    if(!V4(nBestHeight))
+    {
+      throw std::runtime_error("Feature not active. Block not reached");
+    }
+
     Object obj;
    
     string ray_ = params[0].get_str();

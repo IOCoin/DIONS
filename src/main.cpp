@@ -55,7 +55,6 @@ unsigned int  POS_v3_DIFFICULTY_HEIGHT = 100000;
 bool FEATURE_SET_SHADE_ACTIVE = false;
 
 unsigned int CONSISTENCY_MARGIN = 100;
-int nShadeUpdate=0;
 int nCoinbaseMaturity = 100;
 CBlockIndex* pindexGenesisBlock = NULL;
 CBlockIndex* p__ = NULL;
@@ -2179,15 +2178,11 @@ bool CBlock::SetBestChain(CTxDB& txdb, CBlockIndex* pindexNew)
     if (!fIsInitialDownload)
     {
         int nUpgraded = 0;
-        nShadeUpdate=0;
         const CBlockIndex* pindex = pindexBest;
         for (int i = 0; i < CONSISTENCY_MARGIN && pindex != NULL; i++)
         {
             if (pindex->nVersion > CBlock::CURRENT_VERSION)
                 ++nUpgraded;
-            if (pindex->nVersion >= CBlock::CURRENT_VERSION)
-                ++nShadeUpdate;
-
             pindex = pindex->pprev;
         }
         if (nUpgraded > 0)
@@ -2195,10 +2190,6 @@ bool CBlock::SetBestChain(CTxDB& txdb, CBlockIndex* pindexNew)
         if (nUpgraded > 100/2)
             // strMiscWarning is read by GetWarnings(), called by Qt and the JSON-RPC code to warn the user:
             strMiscWarning = _("Warning: This version is obsolete, upgrade required!");
-
-        if(!FEATURE_SET_SHADE_ACTIVE && nShadeUpdate == CONSISTENCY_MARGIN)
-          FEATURE_SET_SHADE_ACTIVE=true;
-
     }
 
     std::string strCmd = GetArg("-blocknotify", "");
@@ -2463,8 +2454,11 @@ bool CBlock::AcceptBlock()
 {
     AssertLockHeld(cs_main);
 
-    if (nVersion > CURRENT_VERSION)
+    if(!V4(nBestHeight))
+    {
+      if (nVersion > CURRENT_VERSION)
         return DoS(100, error("AcceptBlock() : reject unknown block version %d", nVersion));
+    }
 
     // Check for duplicate
     uint256 hash = GetHash();
