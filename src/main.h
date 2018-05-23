@@ -74,7 +74,7 @@ static const uint256 hashGenesisBlock("0x00000afad2d5833b50b59a9784fdc59869b6886
 static const uint256 hashGenesisBlockTestNet("5f97300cd3dc3d2215dd38ce6d99bf7d5984bb62b2777060d3b5564298bd5484");
 static const uint256 hashGenesisMerkleRoot("0xcd5029ac01fb6cd7da8ff00ff1e82f3aca6bf3ecce5fb60623ee807fa83d1795");
 
-const int SHADE_FEATURE_UPDATE = 1625000;
+const int SHADE_FEATURE_UPDATE = 27500 + 1854426;
 
 inline bool IsProtocolV2(int nHeight) { return nHeight > 65000; }
 inline bool V3(int nHeight) { return fTestNet ? nHeight >= 10 : nHeight >= 1625000; }
