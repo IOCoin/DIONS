@@ -38,7 +38,9 @@ class CKeyMetadata
 public:
     typedef std::map<string, string> CMap;
     typedef std::map<long, long> Sentinel;
-    static const int CURRENT_VERSION=1;
+    static const int BASE_DIONS_VERSION=1;
+    static const int SHADE_VERSION=2;
+    static const int CURRENT_VERSION=SHADE_VERSION;
     int nVersion;
     CoordinateVector patch;
     RayShade rs_;
@@ -67,13 +69,16 @@ public:
         nVersion = this->nVersion;
         READWRITE(nCreateTime);
         READWRITE(this->patch);
-        READWRITE(this->rs_);
         READWRITE(this->m);
         READWRITE(this->random);
         READWRITE(this->rlweIndex);
-        READWRITE(this->r);
-        READWRITE(this->z);
-        READWRITE(this->k);
+        if(nVersion >= SHADE_VERSION)
+        {
+          READWRITE(this->r);
+          READWRITE(this->z);
+          READWRITE(this->k);
+          READWRITE(this->rs_);
+        }
     )
 
     void SetNull()
