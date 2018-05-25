@@ -812,6 +812,14 @@ bool AppInit2()
             printf("Performing wallet upgrade to %i\n", FEATURE_LATEST);
             nMaxVersion = CLIENT_VERSION;
             pwalletMain->SetMinVersion(FEATURE_LATEST); // permanently upgrade the wallet immediately
+            std::map<CKeyID, int64_t> mk;
+            pwalletMain->kt(mk);
+
+            for(std::map<CKeyID, int64_t>::const_iterator it = mk.begin(); it != mk.end(); it++)
+            {
+              CKeyID ck = it->first;
+              pwalletMain->kd[ck].nVersion = CKeyMetadata::CURRENT_VERSION;
+            }
         }
         else
             printf("Allowing wallet upgrade up to %i\n", nMaxVersion);
