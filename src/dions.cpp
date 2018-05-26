@@ -329,7 +329,7 @@ unsigned int scaleMonitor()
   if(!fTestNet)
     return 210000;
   
-  return 10000;
+  return 40;
 }
 int GetTxPosHeight(AliasIndex& txPos)
 {
@@ -3811,7 +3811,7 @@ Value decryptAlias(const Array& params, bool fHelp)
           throw runtime_error("could not find a coin with this alias, try specifying the registerAlias transaction id");
         }
 
-
+ 
         if(!pwalletMain->mapWallet.count(wtxInHash))
         {
     LEAVE_CRITICAL_SECTION(cs_main)
@@ -3825,6 +3825,14 @@ Value decryptAlias(const Array& params, bool fHelp)
 
 
         __wx__Tx& wtxIn = pwalletMain->mapWallet[wtxInHash];
+        const int nHeight = wtxIn.GetHeightInMainChain();
+        const int ex = nHeight + scaleMonitor() - pindexBest->nHeight;
+        if(ex <= 0)
+        {
+          LEAVE_CRITICAL_SECTION(cs_main)
+          throw runtime_error("this encrypted alias is expired. You must create a new one of that name to decrypt it.");
+        }
+
         vector<unsigned char> vchPrevSig;
         bool found = false;
         BOOST_FOREACH(CTxOut& out, wtxIn.vout)
@@ -5788,9 +5796,15 @@ Value registerAliasGenerate(const Array& params, bool fHelp)
     uint256 wtxInHash__;
     if(searchAliasEncrypted2(locatorStr, wtxInHash__) == true)
     {
-      string err = "Attempt to register alias : " + locatorStr + ", this alias is already registered as encrypted with tx " + wtxInHash__.GetHex();
+      __wx__Tx& wtxIn = pwalletMain->mapWallet[wtxInHash__];
+      const int nHeight = wtxIn.GetHeightInMainChain();
+      const int ex = nHeight + scaleMonitor() - pindexBest->nHeight;
+      if(ex > 0)
+      {
+        string err = "Attempt to register alias : " + locatorStr + ", this alias is already registered as encrypted with tx " + wtxInHash__.GetHex();
 
-      throw JSONRPCError(RPC_WALLET_ERROR, err);
+        throw JSONRPCError(RPC_WALLET_ERROR, err);
+      }
     }
 
     vector<Value> res;
