@@ -1968,9 +1968,15 @@ bool searchAliasEncrypted2(string alias, uint256& wtxInHash)
           continue;
 
         const int nHeight = tx.GetHeightInMainChain();
+
         if(nHeight == -1)
               continue;
+
         assert(nHeight >= 0);
+
+        const int ex = nHeight + scaleMonitor() - pindexBest->nHeight;
+        if(ex <= 0)
+          continue;
 
         string strAddress = "";
         aliasAddress(tx, strAddress);
