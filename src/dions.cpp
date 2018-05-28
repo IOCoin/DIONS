@@ -214,7 +214,6 @@ Value gw1(const Array& params, bool fHelp)
           string a = stringFromVch(k2);
           printf("  k2 %s\n", a.c_str());
           o.push_back(Pair("alias", a));
-          oRes.push_back(o);
 
           vector<AliasIndex> vtxPos;
           CDataStream ssValue((char*)data.get_data(), (char*)data.get_data() + data.get_size(), SER_DISK, CLIENT_VERSION);
@@ -223,7 +222,6 @@ Value gw1(const Array& params, bool fHelp)
           AliasIndex i = vtxPos.back();
           string i_address = i.vAddress;
           o.push_back(Pair("address", i_address));
-          oRes.push_back(o);
           o.push_back(Pair("h", (int)i.nHeight));
           oRes.push_back(o);
         }
@@ -506,6 +504,7 @@ bool txPost(const vector<pair<CScript, int64_t> >& vecSend, const __wx__Tx& wtxI
 bool txRelayPre__(const CScript& scriptPubKey, const __wx__Tx& wtxIn, __wx__Tx& wtxNew, int64_t& t, string& e)
 {
     int nTxOut = aliasOutIndex(wtxIn);
+    if(nTxOut == -1) return false;
     CReserveKey reservekey(pwalletMain);
     vector< pair<CScript, int64_t> > vecSend;
     vecSend.push_back(make_pair(scriptPubKey, CTRL__));
@@ -524,6 +523,7 @@ bool txRelayPre__(const CScript& scriptPubKey, const __wx__Tx& wtxIn, __wx__Tx& 
 string txRelay(const CScript& scriptPubKey, int64_t nValue, const __wx__Tx& wtxIn, __wx__Tx& wtxNew, bool fAskFee)
 {
     int nTxOut = aliasOutIndex(wtxIn);
+    if(nTxOut == -1) return "error out index";
     CReserveKey reservekey(pwalletMain);
     int64_t nFeeRequired;
     vector< pair<CScript, int64_t> > vecSend;
@@ -6225,7 +6225,7 @@ int aliasOutIndex(const CTransaction& tx)
     int nOut;
 
     if(!aliasTx(tx, op, nOut, vvch))
-        throw runtime_error("aliasOutIndex() : alias output not found");
+      return -1;
     return nOut;
 }
 bool IsMinePost(const CTransaction& tx)
@@ -6815,7 +6815,7 @@ void xsc(CBlockIndex* p)
 {
   for(; p; p=p->pnext)
   {
-    if(p->nHeight < 1625000)
+    if(!fTestNet && p->nHeight < 1625000)
       continue;
 
     ln1Db->filter(p);
