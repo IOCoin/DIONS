@@ -848,7 +848,7 @@ bool AppInit2()
 
 
     CBlockIndex *pindexRescan = pindexBest;
-    if(GetBoolArg("-rescan") || GetBoolArg("-xscan"))
+    if(GetBoolArg("-rescan") || GetBoolArg("-xscan") || GetBoolArg("-upgradewallet"))
     {
         pindexRescan = pindexGenesisBlock;
     }
@@ -870,6 +870,7 @@ bool AppInit2()
           printf(" rescan      %15"PRId64"ms\n", GetTimeMillis() - nStart);
         }
 
+        if(GetBoolArg("-xscan") || GetBoolArg("-upgradewallet"))
         {
           filesystem::path dc = GetDataDir() / "aliascache.dat";
           FILE *file = fopen(dc.string().c_str(), "rb");
@@ -877,17 +878,14 @@ bool AppInit2()
           {
             filesystem::path dc__ = GetDataDir() / "aliascache.dat.old";
             RenameOver(dc, dc__);
+            dc = filesystem::path(GetDataDir())/"aliascache.dat";
+            ln1Db = new LocatorNodeDB("cr+");
+            xsc(pindexGenesisBlock);
           }
         }
     }
 
     // ********************************************************* Step 9: import blocks
-    {
-      filesystem::path aliascache;
-      aliascache = filesystem::path(GetDataDir())/"aliascache.dat";
-      ln1Db = new LocatorNodeDB("cr+");
-      xsc(pindexGenesisBlock);
-    }
 
     if (mapArgs.count("-loadblock"))
     {
