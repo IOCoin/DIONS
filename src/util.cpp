@@ -1592,20 +1592,25 @@ bool NewThread(void(*pfn)(void*), void* parg)
 
 int atod(const std::string& addr, std::string& d)
 {
+   printf("XXXX a 1\n");
     cba address__(addr);
     if(!address__.IsValid())
       return -2;
 
+   printf("XXXX a 2\n");
     ln1Db->filter();
+   printf("XXXX a 3\n");
 
     Dbc* cursorp;
     try 
     {
       cursorp = ln1Db->GetCursor(); 
+   printf("XXXX a 4\n");
 
       Dbt key, data;
       int ret;
 
+   printf("XXXX a 5\n");
       while ((ret = cursorp->get(&key, &data, DB_NEXT)) == 0) 
       {
         CDataStream ssKey(SER_DISK, CLIENT_VERSION);
@@ -1634,12 +1639,11 @@ int atod(const std::string& addr, std::string& d)
       }
     } 
     catch(DbException &e) 
-    {
-      //ln1Db.err(e.get_errno(), "Error!");
+    { 
+   
     } 
     catch(std::exception &e) 
     {
-      //ln1Db.errx("Error! %s", e.what());
     }
 
     if (cursorp != NULL) 

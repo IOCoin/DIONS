@@ -846,7 +846,8 @@ bool AppInit2()
 
     RegisterWallet(pwalletMain);
 
-
+    //XXXX 
+    ln1Db = new LocatorNodeDB("cr+");
     CBlockIndex *pindexRescan = pindexBest;
     if(GetBoolArg("-rescan") || GetBoolArg("-xscan") || GetBoolArg("-upgradewallet"))
     {
