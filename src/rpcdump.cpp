@@ -347,10 +347,29 @@ Value ydwiWhldw_base_diff(const Array& params, bool fHelp)
     if(pwalletMain->mapAddressBook.count(it->first))
     {
       string t0 = EncodeDumpString(pwalletMain->mapAddressBook[it->first]);
-      if(t0 == "")
-        continue;
-      string delta = cba(it->first).ToString();
-      Object o; o.push_back(Pair(t0, delta));
+      cba a_(it->first);
+      string delta = a_.ToString();
+      Object o; 
+      if(delta != "") o.push_back(Pair(t0, delta));
+      else
+      {
+        CScript s;
+        s.SetDestination(a_.Get());
+        for (map<uint256, __wx__Tx>::iterator it = pwalletMain->mapWallet.begin(); it != pwalletMain->mapWallet.end(); ++it)
+        {
+          const __wx__Tx& wtx = (*it).second;
+          if (wtx.IsCoinBase() || wtx.IsCoinStake() || !IsFinalTx(wtx))
+            continue;
+
+          BOOST_FOREACH(const CTxOut& txout, wtx.vout)
+          {
+            if (txout.scriptPubKey == s)
+              if (wtx.GetDepthInMainChain() >= 10)
+                o.push_back(Pair(t0, delta));
+          }
+        }
+      }
+
       a.push_back(o);
     }
   }
