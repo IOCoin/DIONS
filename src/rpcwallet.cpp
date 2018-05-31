@@ -175,6 +175,17 @@ Value getnewaddress(const Array& params, bool fHelp)
 
     CKeyID keyID = newKey.GetID();
 
+    if(strAccount == "sparechange")
+    {
+      BOOST_FOREACH(const PAIRTYPE(cba, string)& item, pwalletMain->mapAddressBook)
+      {
+        if(item.second == strAccount)
+        {
+          pwalletMain->SetAddressBookName(item.first.Get(), "");
+        }
+      }
+    }
+    
     pwalletMain->SetAddressBookName(keyID, strAccount);
 
     return cba(keyID).ToString();
