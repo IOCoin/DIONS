@@ -342,36 +342,73 @@ Value ydwiWhldw_base_diff(const Array& params, bool fHelp)
   std::map<CKeyID, int64_t> mk;
   pwalletMain->kt(mk);
 
+  bool set=false;
   for(map< CKeyID, int64_t >::const_iterator it = mk.begin(); it != mk.end(); it++)
   {
+    cba a_(it->first);
+    string delta = a_.ToString();
+    Object o;
     if(pwalletMain->mapAddressBook.count(it->first))
     {
       string t0 = EncodeDumpString(pwalletMain->mapAddressBook[it->first]);
-      cba a_(it->first);
-      string delta = a_.ToString();
-      Object o; 
-      if(delta != "") o.push_back(Pair(t0, delta));
-      else
+      o.push_back(Pair(t0, delta));
+      a.push_back(o);
+      if(t0 == "sparechange") set = true;
+    } 
+    else
+    {
+      CScript s;
+      s.SetDestination(a_.Get());
+      bool f=false;
+      for (map<uint256, __wx__Tx>::iterator it = pwalletMain->mapWallet.begin(); it != pwalletMain->mapWallet.end(); ++it)
       {
-        CScript s;
-        s.SetDestination(a_.Get());
-        for (map<uint256, __wx__Tx>::iterator it = pwalletMain->mapWallet.begin(); it != pwalletMain->mapWallet.end(); ++it)
-        {
-          const __wx__Tx& wtx = (*it).second;
-          if (wtx.IsCoinBase() || wtx.IsCoinStake() || !IsFinalTx(wtx))
-            continue;
+        const __wx__Tx& wtx = (*it).second;
+        if (wtx.IsCoinBase() || wtx.IsCoinStake() || !IsFinalTx(wtx))
+          continue;
 
-          BOOST_FOREACH(const CTxOut& txout, wtx.vout)
+        BOOST_FOREACH(const CTxOut& txout, wtx.vout)
+        {
+          if (txout.scriptPubKey == s)
           {
-            if (txout.scriptPubKey == s)
-              if (wtx.GetDepthInMainChain() >= 10)
-                o.push_back(Pair(t0, delta));
+            if (wtx.GetDepthInMainChain() >= 10)
+            {
+              o.push_back(Pair("", delta));
+              a.push_back(o);
+              f=true;
+              break;
+            }
           }
         }
+        if(f) break;
       }
-
-      a.push_back(o);
     }
+
+  }
+
+  if(!set)
+  {
+    Object o;
+    if(!pwalletMain->as())
+        pwalletMain->TopUpKeyPool();
+
+    // Generate a new key that is added to wallet
+    CPubKey newKey;
+    if(!pwalletMain->GetKeyFromPool(newKey, false))
+      throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
+
+    CKeyID keyID = newKey.GetID();
+
+    BOOST_FOREACH(const PAIRTYPE(cba, string)& item, pwalletMain->mapAddressBook)
+    {
+      if(item.second == "sparechange")
+      {
+        pwalletMain->SetAddressBookName(item.first.Get(), "");
+      }
+    }
+    
+    pwalletMain->SetAddressBookName(keyID, "sparechange");
+    o.push_back(Pair("sparechange", cba(keyID).ToString()));
+    a.push_back(o);
   }
 
   return a;
