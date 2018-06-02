@@ -393,6 +393,26 @@ Value setaccount(const Array& params, bool fHelp)
 
     return Value::null;
 }
+Value sa(const Array& params, bool fHelp)
+{
+    if (fHelp || params.size() < 1 || params.size() > 2)
+        throw runtime_error(
+            "sa <iocoinaddress> <account>\n"
+            "Sets the account associated with the given address.");
+
+    cba address(params[0].get_str());
+    if (!address.IsValid())
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid I/OCoin address");
+
+
+    string strAccount;
+    if (params.size() > 1)
+        strAccount = AccountFromValue(params[1]);
+
+    pwalletMain->SetAddressBookName(address.Get(), strAccount);
+
+    return Value::null;
+}
 
 
 Value getaccount(const Array& params, bool fHelp)

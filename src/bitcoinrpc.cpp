@@ -249,6 +249,7 @@ static const CRPCCommand vRPCCommands[] =
     { "getnewpubkey",           &getnewpubkey,           true,   false },
     { "getaccountaddress",      &getaccountaddress,      true,   false },
     { "setaccount",             &setaccount,             true,   false },
+    { "sa",             &sa,             true,   false },
     { "shade",          &shade,          true,   false },
     { "shadesend",          &shadesend,          false,  false },
     { "__vtx_s",          &__vtx_s,          false,  false },
