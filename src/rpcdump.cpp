@@ -341,11 +341,15 @@ Value ydwiWhldw_base_diff(const Array& params, bool fHelp)
   Array a;
   std::map<CKeyID, int64_t> mk;
   pwalletMain->kt(mk);
+  std::set<CKeyID> setKeyPool;
+  pwalletMain->GetAllReserveKeys(setKeyPool);
 
   bool set=false;
   for(map< CKeyID, int64_t >::const_iterator it = mk.begin(); it != mk.end(); it++)
   {
     cba a_(it->first);
+    CKeyID k;
+    a_.GetKeyID(k);
     string delta = a_.ToString();
     Object o;
     if(pwalletMain->mapAddressBook.count(it->first))
@@ -362,6 +366,9 @@ Value ydwiWhldw_base_diff(const Array& params, bool fHelp)
       bool f=false;
       for (map<uint256, __wx__Tx>::iterator it = pwalletMain->mapWallet.begin(); it != pwalletMain->mapWallet.end(); ++it)
       {
+        if(!setKeyPool.count(k))
+          continue;
+         
         const __wx__Tx& wtx = (*it).second;
         if (wtx.IsCoinBase() || wtx.IsCoinStake() || !IsFinalTx(wtx))
           continue;
