@@ -1590,65 +1590,6 @@ bool NewThread(void(*pfn)(void*), void* parg)
     return true;
 }
 
-int atod(const std::string& addr, std::string& d)
-{
-    cba address__(addr);
-    if(!address__.IsValid())
-      return -2;
-
-    ln1Db->filter();
-
-    Dbc* cursorp;
-    try 
-    {
-      cursorp = ln1Db->GetCursor(); 
-
-      Dbt key, data;
-      int ret;
-
-      while ((ret = cursorp->get(&key, &data, DB_NEXT)) == 0) 
-      {
-        CDataStream ssKey(SER_DISK, CLIENT_VERSION);
-        ssKey.write((char*)key.get_data(), key.get_size());
-
-        string k1;
-        ssKey >> k1;
-        if(k1 == "alias_")
-        {
-          vchType k2;
-          ssKey >> k2; 
-          string a = stringFromVch(k2);
-
-          vector<AliasIndex> vtxPos;
-          CDataStream ssValue((char*)data.get_data(), (char*)data.get_data() + data.get_size(), SER_DISK, CLIENT_VERSION);
-          ssValue >> vtxPos;
-
-          AliasIndex i = vtxPos.back();
-          string i_address = (i.vAddress).c_str();
-          if(i_address == addr)
-          {
-            d = a;
-            break;
-          }
-        }
-      }
-    } 
-    catch(DbException &e) 
-    { 
-   
-    } 
-    catch(std::exception &e) 
-    {
-    }
-
-    if (cursorp != NULL) 
-      cursorp->close(); 
-
-    if(d == "")
-      return -1;
-
-    return 0; 
-}
 
 int fqa__7(vector<unsigned char>& a)
 {

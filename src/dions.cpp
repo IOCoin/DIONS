@@ -327,7 +327,7 @@ unsigned int scaleMonitor()
   if(!fTestNet)
     return 210000;
   
-  return 40;
+  return 20;
 }
 int GetTxPosHeight(AliasIndex& txPos)
 {
@@ -501,6 +501,77 @@ bool txPost(const vector<pair<CScript, int64_t> >& vecSend, const __wx__Tx& wtxI
 
     return true;
 }
+int atod(const std::string& addr, std::string& d)
+{
+    cba address__(addr);
+    if(!address__.IsValid())
+      return -2;
+
+    vector<AliasIndex> vtxPos_; 
+    string a("a");
+    if (ln1Db->lGet(vchFromString(a), vtxPos_))
+    {
+      AliasIndex i = vtxPos_.back();
+    }
+
+    Dbc* cursorp;
+    try 
+    {
+      cursorp = ln1Db->GetCursor(); 
+
+      Dbt key, data;
+      int ret;
+
+      while ((ret = cursorp->get(&key, &data, DB_NEXT)) == 0) 
+      {
+        CDataStream ssKey(SER_DISK, CLIENT_VERSION);
+        ssKey.write((char*)key.get_data(), key.get_size());
+
+        string k1;
+        ssKey >> k1;
+        if(k1 == "alias_")
+        {
+          vchType k2;
+          ssKey >> k2; 
+          string a = stringFromVch(k2);
+
+          vector<AliasIndex> vtxPos;
+          CDataStream ssValue((char*)data.get_data(), (char*)data.get_data() + data.get_size(), SER_DISK, CLIENT_VERSION);
+          ssValue >> vtxPos;
+
+          BOOST_FOREACH(AliasIndex& i, vtxPos) 
+          {
+            int k = i.nHeight + scaleMonitor() - pindexBest->nHeight;
+            if(k<=0) 
+            {
+              continue;
+            }
+            string i_address = (i.vAddress).c_str();
+            if(i_address == addr)
+            {
+              d = a;
+              break;
+            }
+          }
+        }
+      }
+    } 
+    catch(DbException &e) 
+    { 
+   
+    } 
+    catch(std::exception &e) 
+    {
+    }
+
+    if (cursorp != NULL) 
+      cursorp->close(); 
+
+    if(d == "")
+      return -1;
+
+    return 0; 
+}
 bool txRelayPre__(const CScript& scriptPubKey, const __wx__Tx& wtxIn, __wx__Tx& wtxNew, int64_t& t, string& e)
 {
     int nTxOut = aliasOutIndex(wtxIn);
@@ -624,7 +695,6 @@ Value myRSAKeys(const Array& params, bool fHelp)
 
     string d = "";
     int r = atod(a.ToString(), d);
-
 
     if(r == 0)
       oAddressInfo.push_back(Pair("alias", d));
