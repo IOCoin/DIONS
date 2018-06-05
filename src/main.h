@@ -77,8 +77,8 @@ static const uint256 hashGenesisMerkleRoot("0xcd5029ac01fb6cd7da8ff00ff1e82f3aca
 const int SHADE_FEATURE_UPDATE = 75 * 500 + 1860837;
 
 inline bool IsProtocolV2(int nHeight) { return nHeight > 65000; }
-inline bool V3(int nHeight) { return fTestNet ? nHeight >= 10 : nHeight >= 1625000; }
-inline bool V4(int nHeight) { return fTestNet ? nHeight >= 40 : nHeight >= SHADE_FEATURE_UPDATE; }
+inline bool V3(int nHeight) { return fTestNet ? nHeight >= 0x0a : nHeight >= 1625000; }
+inline bool V4(int nHeight) { return fTestNet ? nHeight >= 0x10 : nHeight >= SHADE_FEATURE_UPDATE; }
 
 inline int64_t PastDrift(int64_t nTime, int nHeight)   { return IsProtocolV2(nHeight) ? nTime      : nTime - 10 * 60; }
 inline int64_t FutureDrift(int64_t nTime, int nHeight) { return IsProtocolV2(nHeight) ? nTime + 15 : nTime + 10 * 60; }
