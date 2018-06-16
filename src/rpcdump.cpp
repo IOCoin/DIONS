@@ -344,9 +344,12 @@ Value ydwiWhldw_base_diff(const Array& params, bool fHelp)
   std::set<CKeyID> setKeyPool;
   pwalletMain->GetAllReserveKeys(setKeyPool);
 
+  int SELECT=20; int index=0;
   bool set=false;
   for(map< CKeyID, int64_t >::const_iterator it = mk.begin(); it != mk.end(); it++)
   {
+    if(index > SELECT)
+      break;
     cba a_(it->first);
     CKeyID k;
     a_.GetKeyID(k);
@@ -356,7 +359,7 @@ Value ydwiWhldw_base_diff(const Array& params, bool fHelp)
     {
       string t0 = EncodeDumpString(pwalletMain->mapAddressBook[it->first]);
       o.push_back(Pair(t0, delta));
-      a.push_back(o);
+      a.push_back(o); index++;
       if(t0 == "sparechange") set = true;
     } 
     else
@@ -380,7 +383,7 @@ Value ydwiWhldw_base_diff(const Array& params, bool fHelp)
             if (wtx.GetDepthInMainChain() >= 10)
             {
               o.push_back(Pair("", delta));
-              a.push_back(o);
+              a.push_back(o); index++;
               f=true;
               break;
             }
