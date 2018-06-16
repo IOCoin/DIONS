@@ -247,14 +247,12 @@ Array listunspent__(double p, double& iR)
 
     set<cba> setAddress;
 
-    double i;
+    double i=0;
     Array results;
     vector<COutput> vecOutputs;
     pwalletMain->AvailableCoins(vecOutputs, false);
     BOOST_FOREACH(const COutput& out, vecOutputs)
     {
-        if(i - p >= 0.001)
-          break;
 
         if (out.nDepth < nMinDepth || out.nDepth > nMaxDepth)
             continue;
@@ -287,6 +285,8 @@ Array listunspent__(double p, double& iR)
         printf("XXXX i %f\n", i);
         entry.push_back(Pair("confirmations",out.nDepth));
         results.push_back(entry);
+        if(i - p >= 0.001)
+          break;
     }
 
     iR = i;
