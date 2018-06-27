@@ -190,12 +190,15 @@ Value getnewaddress(const Array& params, bool fHelp)
 
 Value sectionlog(const Array& params, bool fHelp)
 {
-  if (fHelp || params.size() > 1)
+  if (fHelp || params.size() > 2)
     throw runtime_error(
     "sectionlog [account] [ray id]\n"
   );
 
   Array oRes;
+
+  string sign = params[0].get_str();
+  string primitive = params[1].get_str();
 
   return oRes; 
 }
