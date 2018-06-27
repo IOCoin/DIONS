@@ -188,6 +188,18 @@ Value getnewaddress(const Array& params, bool fHelp)
     return cba(keyID).ToString();
 }
 
+Value sectionlog(const Array& params, bool fHelp)
+{
+  if (fHelp || params.size() > 1)
+    throw runtime_error(
+    "sectionlog [account] [ray id]\n"
+  );
+
+  Array oRes;
+
+  return oRes; 
+}
+
 Value shade(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() > 1)
