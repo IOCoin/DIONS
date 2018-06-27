@@ -192,14 +192,29 @@ Value sectionlog(const Array& params, bool fHelp)
 {
   if (fHelp || params.size() > 2)
     throw runtime_error(
-    "sectionlog [account] [ray id]\n"
+    "sectionlog [sign] [primitive]\n"
   );
 
   Array oRes;
 
   string sign = params[0].get_str();
+  cba s(sign);
+    if (!s.IsValid())
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "sign : Invalid I/OCoin address");
   string primitive = params[1].get_str();
+  vchType p = ParseHex(primitive);
+  CPubKey pk(p);
+  cba pr(pk.GetID());
+    if (!pr.IsValid())
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "primitive : Invalid I/OCoin address");
 
+ 
+  Object o_s; 
+  o_s.push_back(Pair("sign", s.ToString()));
+  oRes.push_back(o_s);
+  Object o_p; 
+  o_p.push_back(Pair("primitive", pr.ToString()));
+  oRes.push_back(o_p);
   return oRes; 
 }
 
