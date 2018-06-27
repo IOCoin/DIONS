@@ -215,6 +215,13 @@ Value sectionlog(const Array& params, bool fHelp)
   Object o_p; 
   o_p.push_back(Pair("primitive", pr.ToString()));
   oRes.push_back(o_p);
+
+  std::map<CKeyID, int64_t> mk;
+  pwalletMain->kt(mk);
+  for(std::map<CKeyID, int64_t>::const_iterator it = mk.begin(); it != mk.end(); it++)
+  {
+  }
+
   return oRes; 
 }
 
