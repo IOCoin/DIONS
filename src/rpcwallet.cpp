@@ -207,7 +207,6 @@ Value sectionlog(const Array& params, bool fHelp)
   cba pr(pk.GetID());
     if (!pr.IsValid())
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "primitive : Invalid I/OCoin address");
-
  
   Object o_s; 
   o_s.push_back(Pair("sign", s.ToString()));
@@ -216,11 +215,54 @@ Value sectionlog(const Array& params, bool fHelp)
   o_p.push_back(Pair("primitive", pr.ToString()));
   oRes.push_back(o_p);
 
+  CPubKey r_p(p);
+
+  CPubKey s_p;
+  CKeyID i;
+  s.GetKeyID(i);
+
   std::map<CKeyID, int64_t> mk;
   pwalletMain->kt(mk);
   for(std::map<CKeyID, int64_t>::const_iterator it = mk.begin(); it != mk.end(); it++)
   {
-  }
+    CKeyID ck = it->first;
+    CSecret z;
+    bool fCompressed;
+    pwalletMain->GetSecret(ck, z, fCompressed);
+              unsigned char* a = z.data();
+              __im__ t(a, a + 0x20);
+
+    {
+      for(std::map<CKeyID, int64_t>::const_iterator it = mk.begin(); it != mk.end(); it++)
+      {
+        CKeyID ck_ = it->first;
+        { 
+          {
+            __im__ t2 = r_p.Raw();
+            CPubKey pp;
+            pwalletMain->GetPubKey(ck_, pp);
+            __im__ off = pp.Raw();
+            __im__ c;
+            __synth_piv__conv71__outer(t,t2,off,c);
+            CPubKey x(c);
+        if(x.GetID() == i)
+              {
+              Object o0;
+              o0.push_back(Pair("x", "x-gen"));
+              Object o;
+              o.push_back(Pair("outer-comp", cba(ck).ToString()));
+              Object o1;
+              o1.push_back(Pair("inner-comp", cba(ck_).ToString()));
+              oRes.push_back(o0);
+              oRes.push_back(o);
+              oRes.push_back(o1);
+              break;
+              }
+            }
+          }
+        }
+      }
+    }
 
   return oRes; 
 }

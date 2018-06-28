@@ -1406,7 +1406,6 @@ bool __wx__::SelectCoinsMinConf(int64_t nTargetValue, unsigned int nSpendTime, i
 
   BOOST_FOREACH(COutput output, vCoins)
   {
-      printf("test available coins\n");
       const __wx__Tx *pcoin = output.tx;
 
       if (output.nDepth < (pcoin->IsFromMe() ? nConfMine : nConfTheirs))
@@ -1430,19 +1429,16 @@ bool __wx__::SelectCoinsMinConf(int64_t nTargetValue, unsigned int nSpendTime, i
       {
 	  setCoinsRet.insert(coin.second);
 	  nValueRet += coin.first;
-	  printf("nValue == nTargetValue\n");
 	  return true;
       }
       else if (n < nTargetValue + CENT)
       {
 	  vValue.push_back(coin);
 	  nTotalLower += n;
-	  printf("nTotalLower increment\n");
       }
       else if (n < coinLowestLarger.first)
       {
 	  coinLowestLarger = coin;
-	  printf("coinLowestLarger = coin\n");
       }
   }
 
@@ -1460,7 +1456,6 @@ bool __wx__::SelectCoinsMinConf(int64_t nTargetValue, unsigned int nSpendTime, i
   {
       if (coinLowestLarger.second.first == NULL)
       { 
-	printf("coinLowestLarger.second.first == NULL\n");
 	  return false;
       }
 
@@ -2103,7 +2098,6 @@ bool __wx__::CommitTransaction__(__wx__Tx& wtxNew, CReserveKey& reservekey)
 {
   {
       LOCK2(cs_main, cs_wallet);
-      printf("Entered __wx__::CommitTransaction\n");
       printf("CommitTransaction:\n%s", wtxNew.ToString().c_str());
       {
 	  // This is only to keep the database open to defeat the auto-flush for the
@@ -2155,7 +2149,6 @@ bool __wx__::CommitTransaction(__wx__Tx& wtxNew, CReserveKey& reservekey)
 {
   {
       LOCK2(cs_main, cs_wallet);
-      printf("Entered __wx__::CommitTransaction\n");
       printf("CommitTransaction:\n%s", wtxNew.ToString().c_str());
       {
 	  // This is only to keep the database open to defeat the auto-flush for the
