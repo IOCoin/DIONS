@@ -386,7 +386,7 @@ Value sr71(const Array& params, bool fHelp)
     return oRes; 
 }
 
-Value center(const Array& params, bool fHelp)
+Value center__base__0(const Array& params, bool fHelp)
 {
   if (fHelp || params.size() > 2)
     throw runtime_error(
@@ -397,6 +397,29 @@ Value center(const Array& params, bool fHelp)
     throw std::runtime_error("unlock the wallet first!");
 
   Array oRes;
+
+  string q = params[0].get_str();
+  string r = params[1].get_str();
+  cba u(q);
+  if(!u.IsValid())
+    throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid I/OCoin address");
+
+  if(!IsMine(*pwalletMain, u.Get()))
+    throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid");
+
+  cba v(r);
+  if(!v.IsValid())
+    throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid I/OCoin address");
+
+  if(!IsMine(*pwalletMain, v.Get()))
+    throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid");
+
+  CKeyID k1;
+  u.GetKeyID(k1);
+  CKeyID k2;
+  v.GetKeyID(k2);
+  RayShade& a = pwalletMain->kd[k1].rs_;
+  RayShade& b = pwalletMain->kd[k2].rs_;
 
   return oRes;
 }
