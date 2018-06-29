@@ -195,6 +195,9 @@ Value sectionlog(const Array& params, bool fHelp)
     "sectionlog [sign] [primitive]\n"
   );
 
+  if (pwalletMain->as())
+    throw std::runtime_error("unlock the wallet first!");
+
   Array oRes;
 
   string sign = params[0].get_str();
@@ -383,6 +386,20 @@ Value sr71(const Array& params, bool fHelp)
     return oRes; 
 }
 
+Value center(const Array& params, bool fHelp)
+{
+  if (fHelp || params.size() > 2)
+    throw runtime_error(
+    "center [q] [r]\n"
+  );
+
+  if (pwalletMain->as())
+    throw std::runtime_error("unlock the wallet first!");
+
+  Array oRes;
+
+  return oRes;
+}
 
 cba GetAccountAddress(string strAccount, bool bForceNew=false)
 {
