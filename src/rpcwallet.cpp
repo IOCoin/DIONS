@@ -420,6 +420,30 @@ Value center__base__0(const Array& params, bool fHelp)
   v.GetKeyID(k2);
   RayShade& a = pwalletMain->kd[k1].rs_;
   RayShade& b = pwalletMain->kd[k2].rs_;
+  a.ctrlExternalDtx(RayShade::RAY_VTX, (uint160)(k2));
+  b.ctrlExternalDtx(RayShade::RAY_SET, (uint160)(k2));
+
+  CPubKey t0;
+  pwalletMain->GetPubKey(k1, t0);
+  CPubKey t1;
+  pwalletMain->GetPubKey(k2, t1);
+  if((!__wx__DB(pwalletMain->strWalletFile).UpdateKey(t0, pwalletMain->kd[k1]) || !__wx__DB(pwalletMain->strWalletFile).UpdateKey(t1, pwalletMain->kd[k2])))
+      throw runtime_error("update, vtx");
+
+  bool c;
+  CSecret s1;
+  if(pwalletMain->GetSecret(k1, s1, c))
+  {
+    unsigned char* a1 = s1.data();
+    vector<unsigned char> v(a1, a1 + 0x20);
+    a.streamID(v);
+    if(!__wx__DB(pwalletMain->strWalletFile).UpdateKey(t0, pwalletMain->kd[k1]))
+    {
+      throw runtime_error("update, log");
+    }
+  }
+
+  oRes.push_back("true");
 
   return oRes;
 }
