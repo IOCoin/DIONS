@@ -3326,7 +3326,7 @@ bool __intersect(CKeyID& i, CPubKey& j)
       {
         CKeyID ck_ = it->first;
         RayShade& r = pwalletMain->kd[ck_].rs_;
-        if(!r.ctrlExternalAngle() && r.ctrlPath() == r1.ctrlPath())
+        if(r.ctrlExternalDtx() && r.ctrlPath() == r1.ctrlPath())
         { 
           if(pwalletMain->as())
           {
@@ -3336,6 +3336,7 @@ bool __intersect(CKeyID& i, CPubKey& j)
             pwalletMain->GetPubKey(ck_, pp);
             __im__ off = pp.Raw();
             __im__ c;
+            if(t.size() == 0) continue;
             __synth_piv__conv71__outer(t,t2,off,c);
             CPubKey x(c);
             if(x.GetID() == i)
@@ -3359,6 +3360,7 @@ bool __intersect(CKeyID& i, CPubKey& j)
               __im__ tmp3(a2, a2 + 0x20);
               __im__ tmp4;
               tmp4.resize(0x20);
+              if(tmp1.size() == 0) continue;
               __synth_piv__conv71__intern(tmp1,tmp2,tmp3,tmp4);
               CSecret sx(tmp4.data(), tmp4.data() + 0x20);
               CKey ks_x;

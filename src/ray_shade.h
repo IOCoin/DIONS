@@ -54,6 +54,10 @@ class RayShade : InterfaceCrypt
     { 
       return this->l7_ == RAY_VTX;
     }
+    inline virtual bool ctrlExternalDtx() 
+    { 
+      return this->l7_ == RAY_SET;
+    }
     inline virtual int ctrlIndex() 
     { 
       return this->l7_ ;
