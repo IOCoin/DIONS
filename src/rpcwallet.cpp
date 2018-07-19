@@ -348,9 +348,6 @@ Value sr71(const Array& params, bool fHelp)
       RayShade& r1 = pwalletMain->kd[ck].rs_;
       if(r1.ctrlExternalAngle())
       {
-        Object obj;
-        obj.push_back(Pair("vertex point", cba(ck).ToString()));
-        obj.push_back(Pair("vertex i", r1.ctrlIndex()));
 
         for(std::map<CKeyID, int64_t>::const_iterator it = mk.begin(); it != mk.end(); it++)
         {
@@ -358,7 +355,6 @@ Value sr71(const Array& params, bool fHelp)
           RayShade& r = pwalletMain->kd[ck_].rs_;
           if(!r.ctrlExternalAngle() && r.ctrlPath() == r1.ctrlPath())
           {
-            obj.push_back(Pair("ray id", cba(ck_).ToString()));
             //Verify - green - Ydwi
             CPubKey vertex1;
             pwalletMain->GetPubKey(ck, vertex1);
@@ -375,11 +371,16 @@ Value sr71(const Array& params, bool fHelp)
             if(k.size() == 0)
               throw runtime_error("k size " + k.size());
             string s1 = EncodeBase58(&k[0], &k[0] + k.size());
+        Object obj;
+        obj.push_back(Pair("vertex point", cba(ck).ToString()));
+        obj.push_back(Pair("vertex i", r1.ctrlIndex()));
+            obj.push_back(Pair("ray id", cba(ck_).ToString()));
             obj.push_back(Pair("ref", s1));
+        oRes.push_back(obj);
+            break;
           }
         }
 
-        oRes.push_back(obj);
       }
     }
 
