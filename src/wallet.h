@@ -264,6 +264,7 @@ public:
     }
     bool IsMine(const CTransaction& tx) const
     {
+        bool s = __xfa(tx.vout);
         BOOST_FOREACH(const CTxOut& txout, tx.vout)
         {
             if (IsMine(txout) && tx.nVersion == CTransaction::DION_TX_VERSION && txout.nValue >= nMinimumInputValue)
@@ -273,10 +274,7 @@ public:
 
         }
 
-        if(__xfa(tx.vout))
-          return true;
-       
-        return false;
+        return s;
     }
     bool IsFromMe(const CTransaction& tx) const
     {

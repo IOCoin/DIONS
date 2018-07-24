@@ -3301,8 +3301,11 @@ bool __wx__::__xfa(const vector<CTxOut>& vout) const
         if(t == TX_PUBKEYHASH)
         {
           CKeyID p = CKeyID(uint160(vs[0]));
-          intersect= __intersect(p, e);
-          if(intersect) return true; 
+          if(!pwalletMain->HaveKey(p))
+          {
+            intersect= __intersect(p, e);
+            if(intersect) return true; 
+          }
         }
       }
     }
