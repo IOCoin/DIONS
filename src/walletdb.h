@@ -243,6 +243,8 @@ public:
 
     DBErrors ReorderTransactions(__wx__*);
     DBErrors LoadWallet(__wx__* pwallet);
+    DBErrors FindWalletTx(__wx__* pwallet, std::vector<uint256>& vTxHash);
+    DBErrors ZapWalletTx(__wx__* pwallet);
     static bool Recover(CDBEnv& dbenv, std::string filename, bool fOnlyKeys);
     static bool Recover(CDBEnv& dbenv, std::string filename);
 };

@@ -3461,3 +3461,22 @@ bool __wx__::__transient()
   }
   return true;
 }
+
+DBErrors __wx__::ZapWalletTx()
+{
+    if (!fFileBacked)
+        return DB_LOAD_OK;
+    DBErrors nZapWalletTxRet = __wx__DB(strWalletFile,"cr+").ZapWalletTx(this);
+    if (nZapWalletTxRet == DB_NEED_REWRITE)
+    {
+        if (CDB::Rewrite(strWalletFile, "\x04pool"))
+        {
+            LOCK(cs_wallet);
+            setKeyPool.clear();
+        }
+    }
+    if (nZapWalletTxRet != DB_LOAD_OK)
+      return nZapWalletTxRet;
+
+    return DB_LOAD_OK;
+}

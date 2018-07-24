@@ -428,8 +428,6 @@ Value center__base__0(const Array& params, bool fHelp)
   pwalletMain->GetPubKey(k1, t0);
   CPubKey t1;
   pwalletMain->GetPubKey(k2, t1);
-  if((!__wx__DB(pwalletMain->strWalletFile).UpdateKey(t0, pwalletMain->kd[k1]) || !__wx__DB(pwalletMain->strWalletFile).UpdateKey(t1, pwalletMain->kd[k2])))
-      throw runtime_error("update, vtx");
 
   bool c;
   CSecret s1;
@@ -438,11 +436,12 @@ Value center__base__0(const Array& params, bool fHelp)
     unsigned char* a1 = s1.data();
     vector<unsigned char> v(a1, a1 + 0x20);
     a.streamID(v);
-    if(!__wx__DB(pwalletMain->strWalletFile).UpdateKey(t0, pwalletMain->kd[k1]))
-    {
-      throw runtime_error("update, log");
-    }
   }
+
+  pwalletMain->kd[k1].nVersion = CKeyMetadata::CURRENT_VERSION;
+  pwalletMain->kd[k2].nVersion = CKeyMetadata::CURRENT_VERSION;
+  if((!__wx__DB(pwalletMain->strWalletFile).UpdateKey(t0, pwalletMain->kd[k1]) || !__wx__DB(pwalletMain->strWalletFile).UpdateKey(t1, pwalletMain->kd[k2])))
+      throw runtime_error("update, vtx");
 
   oRes.push_back("true");
 

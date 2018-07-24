@@ -293,6 +293,7 @@ std::string HelpMessage()
         "  -rpcconnect=<ip>       " + _("Send commands to node running on <ip> (default: 127.0.0.1)") + "\n" +
         "  -blocknotify=<cmd>     " + _("Execute command when the best block changes (%s in cmd is replaced by block hash)") + "\n" +
         "  -walletnotify=<cmd>    " + _("Execute command when a wallet transaction changes (%s in cmd is replaced by TxID)") + "\n" +
+         "  -zapwallettxes=<mode>" +  _("Delete all wallet transactions and only recover those parts of the blockchain through -rescan on startup") +
         "  -confchange            " + _("Require a confirmations for change (default: 0)") + "\n" +
         "  -enforcecanonical      " + _("Enforce transaction scripts to use canonical PUSH operators (default: 1)") + "\n" +
         "  -alertnotify=<cmd>     " + _("Execute command when a relevant alert is received (%s in cmd is replaced by message)") + "\n" +
@@ -443,6 +444,12 @@ bool AppInit2()
         // Rewrite just private keys: rescan to find transactions
         SoftSetBoolArg("-rescan", true);
     }
+    
+     // -zapwallettx implies a rescan
+     if (GetBoolArg("-zapwallettxes", false)) {
+       if (SoftSetBoolArg("-rescan", true))
+       printf("AppInit2 : parameter interaction: -zapwallettxes=1 -> setting -rescan=1\n");
+     }
 
     // ********************************************************* Step 3: parameter-to-internal-flags
 
@@ -775,6 +782,22 @@ bool AppInit2()
     }
 
     // ********************************************************* Step 8: load wallet
+
+      if (GetBoolArg("-zapwallettxes", false)) 
+      {
+        printf("Zapping all transactions from wallet...");
+
+        pwalletMain = new __wx__("wallet.dat");
+        DBErrors nZapWalletRet = pwalletMain->ZapWalletTx();
+        if (nZapWalletRet != DB_LOAD_OK) 
+        {
+          printf("Error loading wallet.dat: Wallet corrupted");
+          return false;
+        }
+
+        delete pwalletMain;
+        pwalletMain = NULL;
+      }
 
     uiInterface.InitMessage(_("Loading wallet..."));
     printf("Loading wallet...\n");
