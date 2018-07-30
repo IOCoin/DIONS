@@ -6930,3 +6930,13 @@ bool frlRelay(int& i)
 {
   return true;  
 }
+
+Value vtx(const Array& params, bool fHelp)
+{
+  if(fHelp || params.size() != 2)
+    throw runtime_error(
+      "vtx <addr> "
+      + HelpRequiringPassphrase());
+
+  return true;
+}
