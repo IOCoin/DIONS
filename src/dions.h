@@ -20,6 +20,7 @@ static const int OP_MESSAGE = 0x05;
 static const int OP_ENCRYPTED_MESSAGE = 0x06;
 static const int OP_PUBLIC_KEY = 0x07;
 static const int OP_ALIAS_RELAY_ENCRYPTED = 0x08;
+static const int OP_VERTEX = 0x09;
 static const int MIN_SET_DEPTH = 1;
 
 static const int UI_MAX_XUNIT_LENGTH = 520;
