@@ -6936,10 +6936,8 @@ Value vtx(const Array& params, bool fHelp)
   if(fHelp || params.size() != 1)
     throw runtime_error(
       "vtx <addr> "
-      + HelpRequiringPassphrase());
+      );
 
-
-  
   string l = params[0].get_str();
   CKeyID keyID;
   cba keyAddress(l);
@@ -6959,4 +6957,12 @@ Value vtx(const Array& params, bool fHelp)
     throw JSONRPCError(RPC_TYPE_ERROR, "Failed to write meta data for key");
 
   return true;
+}
+Value mapVertex(const Array& params, bool fHelp)
+{
+    if(fHelp || params.size() != 2)
+        throw runtime_error(
+                "sendPublicKey <addr> <addr>"
+                + HelpRequiringPassphrase());
+
 }

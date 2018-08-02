@@ -255,6 +255,7 @@ extern json_spirit::Value publicKey(const json_spirit::Array& params, bool fHelp
 extern json_spirit::Value sendPublicKey(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value sendSymmetric(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value sendPlainMessage(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value mapVertex(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value sendMessage(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value registerAlias(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value uC(const json_spirit::Array& params, bool fHelp);
