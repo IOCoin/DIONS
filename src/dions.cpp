@@ -6933,10 +6933,30 @@ bool frlRelay(int& i)
 
 Value vtx(const Array& params, bool fHelp)
 {
-  if(fHelp || params.size() != 2)
+  if(fHelp || params.size() != 1)
     throw runtime_error(
       "vtx <addr> "
       + HelpRequiringPassphrase());
+
+
+  
+  string l = params[0].get_str();
+  CKeyID keyID;
+  cba keyAddress(l);
+  keyAddress.GetKeyID(keyID);
+  CPubKey vchPubKey;
+  pwalletMain->GetPubKey(keyID, vchPubKey);
+
+  vchType kAlpha;
+  GenerateAESKey(kAlpha);
+  string s = EncodeBase64(&kAlpha[0], kAlpha.size());
+  __wx__DB walletdb(pwalletMain->strWalletFile, "r+");
+
+  if(!pwalletMain->vtx_(vchPubKey, s))
+    throw JSONRPCError(RPC_TYPE_ERROR, "Failed to set meta data for key");
+
+  if(!walletdb.UpdateKey(vchPubKey, pwalletMain->kd[vchPubKey.GetID()]))
+    throw JSONRPCError(RPC_TYPE_ERROR, "Failed to write meta data for key");
 
   return true;
 }

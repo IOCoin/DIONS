@@ -191,6 +191,27 @@ bool __wx__::aes(const CPubKey &pubkey, string& f, string& aes256KeyBase64)
     return true;
 }
 
+bool __wx__::vtx_(const CPubKey& pubkey, string& a)
+{
+    AssertLockHeld(cs_wallet); // kd
+
+    a = kd[pubkey.GetID()].q.back();
+    
+    if(a != "")
+      return true;
+
+    return false;
+}
+
+bool __wx__::vtx(const CPubKey &pubkey, string& a)
+{
+    AssertLockHeld(cs_wallet); // kd
+
+    kd[pubkey.GetID()].q.push_back(a);
+
+    return true;
+}
+
 bool __wx__::SetRSAMetadata(const CPubKey &pubkey)
 {
     AssertLockHeld(cs_wallet); // kd

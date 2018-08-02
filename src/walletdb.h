@@ -37,6 +37,7 @@ class CKeyMetadata
 {
 public:
     typedef std::map<string, string> CMap;
+    typedef std::vector<string> CVector;
     typedef std::map<long, long> Sentinel;
     static const int BASE_DIONS_VERSION=1;
     static const int SHADE_VERSION=2;
@@ -45,6 +46,7 @@ public:
     CoordinateVector patch;
     RayShade rs_;
     CMap m;
+    CVector q;
     vchType random;
     string r;
     Sentinel rlweIndex;
@@ -78,6 +80,7 @@ public:
           READWRITE(this->z);
           READWRITE(this->k);
           READWRITE(this->rs_);
+          READWRITE(this->q);
         }
     )
 

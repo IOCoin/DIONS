@@ -158,6 +158,8 @@ public:
     bool GetRandomKeyMetadata(const CPubKey& pubkey, vchType &r, string& r_);
     bool relay_(const vchType &k, Relay& r);
     bool relay(const vchType &k, Relay& r);
+    bool vtx_(const CPubKey &pubkey, string& v);
+    bool vtx(const CPubKey &pubkey, string& v);
     bool SetRandomKeyMetadata(const CPubKey& pubkey, const vchType &r);
     bool LoadKeyMetadata(const CPubKey &pubkey, const CKeyMetadata &metadata);
 
