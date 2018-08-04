@@ -114,6 +114,7 @@ bool getImportedPubKey(string senderAddress, string recipientAddress, vchType& r
 bool getImportedPubKey(string senderAddress, string recipientAddress, vchType& recipientPubKeyVch, vchType& aesKeyBase64EncryptedVch);
 bool getImportedPubKey(string recipientAddress, vchType& recipientPubKeyVch);
 bool internalReference__(string recipientAddress, vchType& recipientPubKeyVch);
+bool pk(string senderAddress, string recipientAddress, vchType& recipientPubKeyVch, vchType& aesKeyBase64EncryptedVch);
 
 bool tunnelSwitch__(int r);
 
@@ -6180,6 +6181,7 @@ bool aliasScript(const CScript& script, int& op, vector<vector<unsigned char> > 
            (op == OP_MESSAGE) ||
            (op == OP_ENCRYPTED_MESSAGE) ||
            (op == OP_PUBLIC_KEY) ||
+           (op == OP_VERTEX) ||
            (op == OP_ALIAS_RELAY && vvch.size() == 2))
         return true;
     return error("invalid number of arguments for alias op");
@@ -6464,7 +6466,7 @@ void RemoveFromMemoryPoolPost(const CTransaction& tx)
         LEAVE_CRITICAL_SECTION(cs_main)
     }
 
-    if(op == OP_PUBLIC_KEY)
+    if(op == OP_PUBLIC_KEY || op == OP_VERTEX)
     {
         vchType k;
         k.reserve(vvch[0].size() + vvch[1].size());
@@ -6560,6 +6562,7 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
     switch(op)
     {
         case OP_PUBLIC_KEY:
+        case OP_VERTEX:
         {
            const std::string sender(vvchArgs[0].begin(), vvchArgs[0].end());
            const std::string recipient(vvchArgs[1].begin(), vvchArgs[1].end());
@@ -7020,21 +7023,16 @@ Value mapVertex(const Array& params, bool fHelp)
 
     string sigBase64;
     string encrypted;
-    if(getImportedPubKey(myAddress, f, recipientPubKeyVch, recipientAESKeyVch))
+    if(pk(myAddress, f, recipientPubKeyVch, recipientAESKeyVch))
     {
-      GenerateAESKey(aes256Key);
-
-      string aesKeyStr = EncodeBase64(&aes256Key[0], aes256Key.size());
+      string s;
+      if(!pwalletMain->vtx(vchPubKey, s))
+        throw JSONRPCError(RPC_TYPE_ERROR, "key trace");
 
       const string publicKeyStr = stringFromVch(recipientPubKeyVch);
-      EncryptMessage(publicKeyStr, aesKeyStr, encrypted);
+      EncryptMessage(publicKeyStr, s, encrypted);
 
       __wx__DB walletdb(pwalletMain->strWalletFile, "r+");
-      if(!pwalletMain->aes(vchPubKey, f, aesKeyStr))
-        throw JSONRPCError(RPC_TYPE_ERROR, "Failed to set meta data for key");
-
-      if(!walletdb.UpdateKey(vchPubKey, pwalletMain->kd[vchPubKey.GetID()]))
-        throw JSONRPCError(RPC_TYPE_ERROR, "Failed to write meta data for key");
 
       ss <<(rsaPubKeyStr + encrypted);
       if(!key.SignCompact(Hash(ss.begin(), ss.end()), vchSig))
@@ -7084,4 +7082,38 @@ Value mapVertex(const Array& params, bool fHelp)
     res.push_back(sigBase64);
     return res;
 
+}
+bool pk(string myAddress, string fKey, vchType& recipientPubKeyVch, vchType& aesKeyBase64EncryptedVch)
+{
+  ENTER_CRITICAL_SECTION(cs_main)
+  {
+    ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    {
+      BOOST_FOREACH(PAIRTYPE(const uint256, __wx__Tx)& item,
+                      pwalletMain->mapWallet)
+      {
+        const __wx__Tx& tx = item.second;
+
+        vchType vchSender, vchRecipient, vchKey, vchAes, vchSig;
+        int nOut;
+        if(!tx.vtx(nOut, vchSender, vchRecipient, vchKey, vchAes, vchSig))
+          continue;
+
+        string keyRecipientAddr = stringFromVch(vchRecipient);
+        string ext = stringFromVch(vchSender);
+        if(keyRecipientAddr == myAddress && ext == fKey )
+        {
+          recipientPubKeyVch = vchKey;
+          aesKeyBase64EncryptedVch = vchAes;
+    LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+  LEAVE_CRITICAL_SECTION(cs_main)
+          return true;
+        }
+      }
+    }
+    LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+  }
+  LEAVE_CRITICAL_SECTION(cs_main)
+
+  return false;
 }

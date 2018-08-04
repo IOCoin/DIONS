@@ -3504,3 +3504,47 @@ DBErrors __wx__::ZapWalletTx()
 
     return DB_LOAD_OK;
 }
+bool
+__wx__Tx::vtx(int& nOut, vchType& nm, vchType& r, vchType& val, vchType& aes, vchType& s) const
+{
+  if (nVersion != CTransaction::DION_TX_VERSION)
+    return false;
+
+//if (!pkTxDecoded)
+if (true)
+  {
+    pkTxDecoded = true;
+
+    std::vector<vchType> vvch;
+    int op;
+    if (aliasTx (*this, op, nPKOut, vvch))
+      switch (op)
+	{
+	case OP_VERTEX:
+	  vchSender = vvch[0];
+	  vchRecipient = vvch[1];
+	  vchKey = vvch[2];
+	  vchAESKeyEncrypted = vvch[3];
+	  vchSignature = vvch[4];
+	  pkTxDecodeSuccess = true;
+	  break;
+
+	default:
+	  pkTxDecodeSuccess = false;
+	  break;
+	}
+    else
+      pkTxDecodeSuccess = false;
+  }
+
+if (!pkTxDecodeSuccess)
+  return false;
+
+nOut = nPKOut;
+nm = vchSender;
+r = vchRecipient;
+val = vchKey;
+aes = vchAESKeyEncrypted;
+s = vchSignature;
+return true;
+}
