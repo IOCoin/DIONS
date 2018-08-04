@@ -6962,7 +6962,126 @@ Value mapVertex(const Array& params, bool fHelp)
 {
     if(fHelp || params.size() != 2)
         throw runtime_error(
-                "sendPublicKey <addr> <addr>"
-                + HelpRequiringPassphrase());
+                "mapVertex <addr> <addr>"
+                );
+
+    EnsureWalletIsUnlocked();
+
+    string myAddress = params[0].get_str();
+    string f = params[1].get_str();
+
+    cba addr;
+    int r = checkAddress(myAddress, addr);
+    if(r < 0)
+        throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
+
+    cba aRecipient;
+    r = checkAddress(f, aRecipient);
+    if(r < 0)
+        throw JSONRPCError(RPC_TYPE_ERROR, "Invalid recipient address");
+
+    f = aRecipient.ToString();
+
+    CKeyID keyID;
+    if(!addr.GetKeyID(keyID))
+        throw JSONRPCError(RPC_TYPE_ERROR, "Address does not refer to key");
+
+    CKey key;
+    if(!pwalletMain->GetKey(keyID, key))
+        throw JSONRPCError(RPC_WALLET_ERROR, "Private key not available");
+
+    CPubKey vchPubKey;
+    pwalletMain->GetPubKey(keyID, vchPubKey);
+
+    string rsaPubKeyStr = "";
+    if(!pwalletMain->envCP1(key.GetPubKey(), rsaPubKeyStr))
+        throw JSONRPCError(RPC_WALLET_ERROR, "no rsa key available for address");
+
+    const vchType vchKey = vchFromValue(rsaPubKeyStr);
+    const vchType vchSender = vchFromValue(myAddress);
+    const vchType vchRecipient = vchFromValue(f);
+    vector<unsigned char> vchSig;
+    CDataStream ss(SER_GETHASH, 0);
+
+    __wx__Tx wtx;
+    wtx.nVersion = CTransaction::DION_TX_VERSION;
+
+    CScript scriptPubKeyOrig;
+    CScript scriptPubKey;
+
+    uint160 hash160;
+    bool isValid = AddressToHash160(f, hash160);
+    if(!isValid)
+      throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid dions address");
+
+    vchType recipientPubKeyVch;
+    vchType recipientAESKeyVch;
+    vchType aes256Key;
+
+    string sigBase64;
+    string encrypted;
+    if(getImportedPubKey(myAddress, f, recipientPubKeyVch, recipientAESKeyVch))
+    {
+      GenerateAESKey(aes256Key);
+
+      string aesKeyStr = EncodeBase64(&aes256Key[0], aes256Key.size());
+
+      const string publicKeyStr = stringFromVch(recipientPubKeyVch);
+      EncryptMessage(publicKeyStr, aesKeyStr, encrypted);
+
+      __wx__DB walletdb(pwalletMain->strWalletFile, "r+");
+      if(!pwalletMain->aes(vchPubKey, f, aesKeyStr))
+        throw JSONRPCError(RPC_TYPE_ERROR, "Failed to set meta data for key");
+
+      if(!walletdb.UpdateKey(vchPubKey, pwalletMain->kd[vchPubKey.GetID()]))
+        throw JSONRPCError(RPC_TYPE_ERROR, "Failed to write meta data for key");
+
+      ss <<(rsaPubKeyStr + encrypted);
+      if(!key.SignCompact(Hash(ss.begin(), ss.end()), vchSig))
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Sign failed");
+      sigBase64 = EncodeBase64(&vchSig[0], vchSig.size());
+      scriptPubKey << OP_VERTEX << vchSender << vchRecipient << vchKey
+                   << vchFromString(encrypted)
+                   << vchFromString(sigBase64)
+                   << OP_2DROP << OP_2DROP << OP_2DROP;
+    }
+    else
+    {
+      ss << rsaPubKeyStr + "I";
+      if(!key.SignCompact(Hash(ss.begin(), ss.end()), vchSig))
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Sign failed");
+      sigBase64 = EncodeBase64(&vchSig[0], vchSig.size());
+      scriptPubKey << OP_VERTEX << vchSender << vchRecipient << vchKey
+                   << vchFromString("I")
+                   << vchFromString(sigBase64)
+                   << OP_2DROP << OP_2DROP << OP_2DROP;
+    }
+
+
+    scriptPubKeyOrig.SetBitcoinAddress(f);
+
+    scriptPubKey += scriptPubKeyOrig;
+
+    ENTER_CRITICAL_SECTION(cs_main)
+    {
+        EnsureWalletIsUnlocked();
+
+       string strError = pwalletMain->SendMoney__(scriptPubKey, CTRL__, wtx, false);
+
+        if(strError != "")
+        {
+          LEAVE_CRITICAL_SECTION(cs_main)
+          throw JSONRPCError(RPC_WALLET_ERROR, strError);
+        }
+
+    }
+    LEAVE_CRITICAL_SECTION(cs_main)
+
+
+
+    vector<Value> res;
+    res.push_back(wtx.GetHash().GetHex());
+    res.push_back(sigBase64);
+    return res;
 
 }
