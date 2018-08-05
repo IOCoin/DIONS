@@ -7117,3 +7117,114 @@ bool pk(string myAddress, string fKey, vchType& recipientPubKeyVch, vchType& aes
 
   return false;
 }
+
+Value vtxtrace(const Array& params, bool fHelp)
+{
+    if(fHelp || params.size() > 1)
+        throw runtime_error(
+                "vtxtrace [<alias>]\n"
+                );
+    vchType vchNodeLocator;
+    if(params.size() == 1)
+      vchNodeLocator = vchFromValue(params[0]);
+
+    std::map<vchType, int> mapAliasVchInt;
+    std::map<vchType, Object> aliasMapVchObj;
+
+    Array oRes;
+    ENTER_CRITICAL_SECTION(cs_main)
+    {
+      ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
+      {
+        BOOST_FOREACH(PAIRTYPE(const uint256, __wx__Tx)& item,
+                      pwalletMain->mapWallet)
+          {
+            const __wx__Tx& tx = item.second;
+
+            vchType vchS, vchR, vchKey, vchAes, vchSig;
+            int nOut;
+            if(!tx.vtx(nOut, vchS, vchR, vchKey, vchAes, vchSig))
+              continue;
+
+            string keySenderAddr = stringFromVch(vchS);
+            cba r(keySenderAddr);
+            CKeyID keyID;
+            r.GetKeyID(keyID);
+            CKey key;
+            bool imported=false;
+            if(!pwalletMain->GetKey(keyID, key))
+            {
+              imported=true;
+            }
+
+            const int nHeight = tx.GetHeightInMainChain();
+            if(nHeight == -1)
+              continue;
+            assert(nHeight >= 0);
+
+            string recipient = stringFromVch(vchR);
+
+            Object aliasObj;
+            aliasObj.push_back(Pair("sender", stringFromVch(vchS)));
+
+            
+            aliasObj.push_back(Pair("recipient", recipient));
+            if(imported)
+              aliasObj.push_back(Pair("status", "imported"));
+            else
+              aliasObj.push_back(Pair("status", "exported"));
+
+            vchType k;
+            k.reserve(vchS.size() + vchR.size());
+            k.insert(k.end(), vchR.begin(), vchR.end());
+            k.insert(k.end(), vchS.begin(), vchS.end());
+            if(k1Export.count(k) && k1Export[k].size())
+            {
+              aliasObj.push_back(Pair("pending", "true"));
+            }
+            
+            aliasObj.push_back(Pair("confirmed", "false"));
+
+            aliasObj.push_back(Pair("key", stringFromVch(vchKey)));
+            aliasObj.push_back(Pair("aes256_encrypted", stringFromVch(vchAes)));
+            aliasObj.push_back(Pair("signature", stringFromVch(vchSig)));
+            string a;
+            if(atod(stringFromVch(vchS), a) == 0)
+              aliasObj.push_back(Pair("alias", a));
+            oRes.push_back(aliasObj);
+        }
+      }
+      LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    }
+    LEAVE_CRITICAL_SECTION(cs_main)
+
+    for(unsigned int i=0; i<oRes.size(); i++)
+    {
+       Object& o = oRes[i].get_obj();
+
+       string s = o[0].value_.get_str();
+       string r = o[1].value_.get_str();
+       string status = o[2].value_.get_str();
+       for(unsigned int j=i+1; j<oRes.size(); j++)
+       {
+         Object& o1 = oRes[j].get_obj();
+         if(s == o1[1].value_.get_str() && r == o1[0].value_.get_str())
+         {
+           o[3].value_ = "true";
+           o1[3].value_ = "true";
+         }
+       }
+    }
+
+    return oRes;
+}
+Value mapProject(const Array& params, bool fHelp)
+{
+    if(fHelp || params.size() != 3)
+        throw runtime_error(
+                "mapProject <addr> <project> <addr>"
+                );
+
+  vector<Value> res;
+  return res;
+}

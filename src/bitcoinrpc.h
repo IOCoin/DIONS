@@ -256,10 +256,12 @@ extern json_spirit::Value sendPublicKey(const json_spirit::Array& params, bool f
 extern json_spirit::Value sendSymmetric(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value sendPlainMessage(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value mapVertex(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value vtxtrace(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value sendMessage(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value registerAlias(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value uC(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value registerAliasGenerate(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value mapProject(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value alias(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value statusList(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value downloadDecrypt(const json_spirit::Array& params, bool fHelp);
