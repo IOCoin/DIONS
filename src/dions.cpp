@@ -6180,6 +6180,7 @@ bool aliasScript(const CScript& script, int& op, vector<vector<unsigned char> > 
        (op == OP_ALIAS_SET && vvch.size() == 5) ||
            (op == OP_MESSAGE) ||
            (op == OP_ENCRYPTED_MESSAGE) ||
+           (op == OP_MAP_PROJECT) ||
            (op == OP_PUBLIC_KEY) ||
            (op == OP_VERTEX) ||
            (op == OP_ALIAS_RELAY && vvch.size() == 2))
@@ -6613,6 +6614,7 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
         }
             break;
         case OP_ENCRYPTED_MESSAGE:
+        case OP_MAP_PROJECT:
         {
            const std::string sender(vvchArgs[0].begin(), vvchArgs[0].end());
            const std::string recipient(vvchArgs[1].begin(), vvchArgs[1].end());
@@ -7220,11 +7222,118 @@ Value vtxtrace(const Array& params, bool fHelp)
 }
 Value mapProject(const Array& params, bool fHelp)
 {
-    if(fHelp || params.size() != 3)
-        throw runtime_error(
-                "mapProject <addr> <project> <addr>"
-                );
+  if(fHelp || params.size() != 3)
+    throw runtime_error(
+      "mapProject <addr> <project> <addr>"
+  );
+  string myAddress = params[0].get_str();
+  string strMessage = params[1].get_str();
+  string f = params[2].get_str();
+
+  cba recipientAddr(f);
+  if(!recipientAddr.IsValid())
+    throw JSONRPCError(RPC_TYPE_ERROR, "Invalid recipient address");
+
+  CKeyID rkeyID;
+  if(!recipientAddr.GetKeyID(rkeyID))
+    throw JSONRPCError(RPC_TYPE_ERROR, "recipientAddr does not refer to key");
+
+  vchType recipientAddressVch = vchFromString(f);
+  vchType recipientPubKeyVch;
+  vector<unsigned char> aesRawVector;
+
+  CKey key;
+  if(params.size() == 3)
+  {
+    cba senderAddr(myAddress);
+    if(!senderAddr.IsValid())
+      throw JSONRPCError(RPC_TYPE_ERROR, "Invalid sender address");
+
+    CKeyID keyID;
+    if(!senderAddr.GetKeyID(keyID))
+      throw JSONRPCError(RPC_TYPE_ERROR, "senderAddr does not refer to key");
+
+    if(!pwalletMain->GetKey(keyID, key))
+      throw JSONRPCError(RPC_WALLET_ERROR, "Private key not available");
+
+    CPubKey vchPubKey;
+    pwalletMain->GetPubKey(keyID, vchPubKey);
+
+    string aesBase64Plain;
+    if(pwalletMain->vtx(vchPubKey, aesBase64Plain))
+    {
+      bool fInvalid = false;
+      aesRawVector = DecodeBase64(aesBase64Plain.c_str(), &fInvalid);
+    }
+    else
+    {
+      vchType aesKeyBase64EncryptedVch;
+      if(pk(myAddress, f, recipientPubKeyVch, aesKeyBase64EncryptedVch))
+      {
+        string aesKeyBase64Encrypted = stringFromVch(aesKeyBase64EncryptedVch);
+        string privRSAKey;
+        if(!pwalletMain->envCP0(vchPubKey, privRSAKey))
+          throw JSONRPCError(RPC_TYPE_ERROR, "Failed to retrieve private RSA key");
+        string decryptedAESKeyBase64;
+        DecryptMessage(privRSAKey, aesKeyBase64Encrypted, decryptedAESKeyBase64);
+        bool fInvalid = false;
+        aesRawVector = DecodeBase64(decryptedAESKeyBase64.c_str(), &fInvalid);
+      }
+      else
+      {
+        throw JSONRPCError(RPC_WALLET_ERROR, "No local symmetric key and no imported symmetric key");
+      }
+    }
+  }
+
+  string encrypted;
+  string iv128Base64;
+  EncryptMessageAES(strMessage, encrypted, aesRawVector, iv128Base64);
+
+  CDataStream ss(SER_GETHASH, 0);
+  ss << encrypted + iv128Base64;
+
+  vector<unsigned char> vchSig;
+  if(!key.SignCompact(Hash(ss.begin(), ss.end()), vchSig))
+    throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Sign failed");
+
+  string sigBase64 = EncodeBase64(&vchSig[0], vchSig.size());
+
+  __wx__Tx wtx;
+  wtx.nVersion = CTransaction::DION_TX_VERSION;
+
+  CScript scriptPubKeyOrig;
+  CScript scriptPubKey;
+
+  uint160 hash160;
+  bool isValid = AddressToHash160(f, hash160);
+  if(!isValid)
+    throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid dions address");
+  scriptPubKeyOrig.SetBitcoinAddress(f);
+
+  vchType vchEncryptedMessage = vchFromString(encrypted);
+  vchType iv128Base64Vch = vchFromString(iv128Base64);
+  scriptPubKey << OP_MAP_PROJECT << vchFromString(myAddress) << vchFromString(f) << vchEncryptedMessage << iv128Base64Vch << vchFromString(sigBase64) << OP_2DROP << OP_2DROP << OP_DROP;
+  scriptPubKey += scriptPubKeyOrig;
+
+  ENTER_CRITICAL_SECTION(cs_main)
+  {
+    EnsureWalletIsUnlocked();
+
+    string strError = pwalletMain->SendMoney__(scriptPubKey, CTRL__, wtx, false);
+
+    if(strError != "")
+    {
+    LEAVE_CRITICAL_SECTION(cs_main)
+    throw JSONRPCError(RPC_WALLET_ERROR, strError);
+    }
+    mapMyMessages[vchEncryptedMessage] = wtx.GetHash();
+  }
+  LEAVE_CRITICAL_SECTION(cs_main)
+
+
 
   vector<Value> res;
+  res.push_back(wtx.GetHash().GetHex());
   return res;
 }

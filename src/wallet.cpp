@@ -2967,6 +2967,7 @@ if (true)
       switch (op)
 	{
 	case OP_ENCRYPTED_MESSAGE:
+	case OP_MAP_PROJECT:
 	  vchSender = vvch[0];
 	  vchRecipient = vvch[1];
 	  vchKey = vvch[2];
