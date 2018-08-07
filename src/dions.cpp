@@ -6955,8 +6955,9 @@ Value vtx(const Array& params, bool fHelp)
   string s = EncodeBase64(&kAlpha[0], kAlpha.size());
   __wx__DB walletdb(pwalletMain->strWalletFile, "r+");
 
-  if(!pwalletMain->vtx_(vchPubKey, s))
+  if(!pwalletMain->vtx(vchPubKey, s))
     throw JSONRPCError(RPC_TYPE_ERROR, "Failed to set meta data for key");
+
 
   if(!walletdb.UpdateKey(vchPubKey, pwalletMain->kd[vchPubKey.GetID()]))
     throw JSONRPCError(RPC_TYPE_ERROR, "Failed to write meta data for key");
