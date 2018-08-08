@@ -781,6 +781,7 @@ public:
     bool GetMessageUpdate (int& nOut, vchType& nm, vchType& r, vchType& val, vchType& s) const;
     bool GetPublicKeyUpdate (int& nOut, vchType& nm, vchType& r, vchType& val, vchType& aes, vchType& s) const;
     bool vtx (int& nOut, vchType& nm, vchType& r, vchType& val, vchType& aes, vchType& s) const;
+    bool proj(int& nOut, vchType& nm, vchType& r, vchType& val, vchType& iv, vchType& s) const;
     bool aliasSet(int& r, int& p, vector< vector<unsigned char> >& vv) const;
     bool aliasSet(int& r, int& p, vchType& v1, vchType& val) const;
     bool aliasStream(int& r, int& p, vchType& v1, vchType& val, vchType& vchS, vchType& inV3) const;

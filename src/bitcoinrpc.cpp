@@ -356,6 +356,7 @@ static const CRPCCommand vRPCCommands[] =
     { "internFrame__",     &internFrame__,     false,  false },
     { "aliasOut",     &aliasOut,     false,  false },
     { "getNodeRecord",     &getNodeRecord,     false,  false },
+    { "projection",     &projection,     false,  false },
     { "nodeRetrieve",     &nodeRetrieve,     false,  false },
     { "nodeValidate",     &nodeValidate,     false,  false },
     { "aliasList",     &aliasList,     true,  false },

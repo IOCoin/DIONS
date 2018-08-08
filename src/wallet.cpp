@@ -195,7 +195,10 @@ bool __wx__::vtx_(const CPubKey& pubkey, string& a)
 {
     AssertLockHeld(cs_wallet); // kd
 
-    a = kd[pubkey.GetID()].q.back();
+    if(kd[pubkey.GetID()].q.size() > 0)
+      a = kd[pubkey.GetID()].q.back();
+    else 
+      return false;
     
     if(a != "")
       return true;
@@ -2967,7 +2970,6 @@ if (true)
       switch (op)
 	{
 	case OP_ENCRYPTED_MESSAGE:
-	case OP_MAP_PROJECT:
 	  vchSender = vvch[0];
 	  vchRecipient = vvch[1];
 	  vchKey = vvch[2];
@@ -3546,6 +3548,50 @@ nm = vchSender;
 r = vchRecipient;
 val = vchKey;
 aes = vchAESKeyEncrypted;
+s = vchSignature;
+return true;
+}
+bool
+__wx__Tx::proj(int& nOut, vchType& nm, vchType& r, vchType& val, vchType& iv, vchType& s) const
+{
+if (nVersion != CTransaction::DION_TX_VERSION)
+  return false;
+
+//if (!pkTxDecoded)
+if (true)
+  {
+    pkTxDecoded = true;
+
+    std::vector<vchType> vvch;
+    int op;
+    if (aliasTx (*this, op, nPKOut, vvch))
+      switch (op)
+	{
+	case OP_MAP_PROJECT:
+	  vchSender = vvch[0];
+	  vchRecipient = vvch[1];
+	  vchKey = vvch[2];
+	  iv128Base64Vch = vvch[3];
+	  vchSignature = vvch[4];
+	  pkTxDecodeSuccess = true;
+	  break;
+
+	default:
+	  pkTxDecodeSuccess = false;
+	  break;
+	}
+    else
+      pkTxDecodeSuccess = false;
+  }
+
+if (!pkTxDecodeSuccess)
+  return false;
+
+nOut = nPKOut;
+nm = vchSender;
+r = vchRecipient;
+val = vchKey;
+iv = iv128Base64Vch;
 s = vchSignature;
 return true;
 }

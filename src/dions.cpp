@@ -7029,11 +7029,12 @@ Value mapVertex(const Array& params, bool fHelp)
     if(pk(myAddress, f, recipientPubKeyVch, recipientAESKeyVch))
     {
       string s;
-      if(!pwalletMain->vtx(vchPubKey, s))
+      if(!pwalletMain->vtx_(vchPubKey, s))
         throw JSONRPCError(RPC_TYPE_ERROR, "key trace");
 
       const string publicKeyStr = stringFromVch(recipientPubKeyVch);
       EncryptMessage(publicKeyStr, s, encrypted);
+
 
       __wx__DB walletdb(pwalletMain->strWalletFile, "r+");
 
@@ -7261,7 +7262,7 @@ Value mapProject(const Array& params, bool fHelp)
     pwalletMain->GetPubKey(keyID, vchPubKey);
 
     string aesBase64Plain;
-    if(pwalletMain->vtx(vchPubKey, aesBase64Plain))
+    if(pwalletMain->vtx_(vchPubKey, aesBase64Plain))
     {
       bool fInvalid = false;
       aesRawVector = DecodeBase64(aesBase64Plain.c_str(), &fInvalid);
@@ -7337,4 +7338,131 @@ Value mapProject(const Array& params, bool fHelp)
   vector<Value> res;
   res.push_back(wtx.GetHash().GetHex());
   return res;
+}
+Value projection(const Array& params, bool fHelp)
+{
+    if(fHelp || params.size() > 1)
+        throw runtime_error(
+                "projection [<alias>]\n"
+                );
+    vchType vchNodeLocator;
+    if(params.size() == 1)
+      vchNodeLocator = vchFromValue(params[0]);
+
+    std::map<vchType, int> mapAliasVchInt;
+    std::map<vchType, Object> aliasMapVchObj;
+
+    Array oRes;
+    ENTER_CRITICAL_SECTION(cs_main)
+    {
+      ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
+      {
+        BOOST_FOREACH(PAIRTYPE(const uint256, __wx__Tx)& item,
+                      pwalletMain->mapWallet)
+        {
+            const __wx__Tx& tx = item.second;
+
+            vchType vchSender, vchRecipient, vchEncryptedMessage, ivVch, vchSig;
+            int nOut;
+            if(!tx.proj(nOut, vchSender, vchRecipient, vchEncryptedMessage, ivVch, vchSig))
+            {
+              continue;
+            }
+
+            const int nHeight = tx.GetHeightInMainChain();
+
+            string myAddr;
+            string fKey;
+            if(isMyAddress(stringFromVch(vchSender)))
+            {
+              myAddr = stringFromVch(vchSender);
+              fKey = stringFromVch(vchRecipient);
+            }
+            else
+            {
+              myAddr = stringFromVch(vchRecipient);
+              fKey = stringFromVch(vchSender);
+            }
+
+            Object aliasObj;
+            aliasObj.push_back(Pair("sender", stringFromVch(vchSender)));
+            aliasObj.push_back(Pair("recipient", stringFromVch(vchRecipient)));
+            aliasObj.push_back(Pair("encrypted_message", stringFromVch(vchEncryptedMessage)));
+            string t = DateTimeStrFormat(tx.GetTxTime());
+            aliasObj.push_back(Pair("time", t));
+
+
+            string rsaPrivKey;
+            string recipient = stringFromVch(vchRecipient);
+
+            cba r(myAddr);
+            if(!r.IsValid())
+            {
+              continue;
+            }
+
+            CKeyID keyID;
+            if(!r.GetKeyID(keyID))
+              throw JSONRPCError(RPC_TYPE_ERROR, "Address does not refer to key");
+            CKey key;
+            if(!pwalletMain->GetKey(keyID, key))
+            {
+              continue;
+            }
+
+            CPubKey pubKey = key.GetPubKey();
+
+            string aesBase64Plain;
+            vector<unsigned char> aesRawVector;
+            if(pwalletMain->vtx_(pubKey, aesBase64Plain))
+            {
+              bool fInvalid = false;
+              aesRawVector = DecodeBase64(aesBase64Plain.c_str(), &fInvalid);
+            }
+            else
+            {
+              vchType aesKeyBase64EncryptedVch;
+              vchType pub_key = pubKey.Raw();
+              if(pk(myAddr, fKey, pub_key, aesKeyBase64EncryptedVch))
+              {
+                string aesKeyBase64Encrypted = stringFromVch(aesKeyBase64EncryptedVch);
+
+                string privRSAKey;
+                if(!pwalletMain->envCP0(pubKey, privRSAKey))
+                  throw JSONRPCError(RPC_TYPE_ERROR, "Failed to retrieve private RSA key");
+
+                string decryptedAESKeyBase64;
+                DecryptMessage(privRSAKey, aesKeyBase64Encrypted, decryptedAESKeyBase64);
+                bool fInvalid = false;
+                aesRawVector = DecodeBase64(decryptedAESKeyBase64.c_str(), &fInvalid);
+              }
+              else
+              {
+                throw JSONRPCError(RPC_WALLET_ERROR, "No local symmetric key and no imported symmetric key found for recipient");
+              }
+            }
+
+            string decrypted;
+            string iv128Base64 = stringFromVch(ivVch);
+            DecryptMessageAES(stringFromVch(vchEncryptedMessage),
+                              decrypted,
+                              aesRawVector,
+                              iv128Base64);
+
+            aliasObj.push_back(Pair("plain_text", decrypted));
+            aliasObj.push_back(Pair("iv128Base64", stringFromVch(ivVch)));
+            aliasObj.push_back(Pair("signature", stringFromVch(vchSig)));
+
+            oRes.push_back(aliasObj);
+
+            mapAliasVchInt[vchSender] = nHeight;
+            aliasMapVchObj[vchSender] = aliasObj;
+        }
+      }
+      LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    }
+    LEAVE_CRITICAL_SECTION(cs_main)
+
+
+    return oRes;
 }

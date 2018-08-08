@@ -294,6 +294,7 @@ extern json_spirit::Value decryptedMessageList(const json_spirit::Array& params,
 extern json_spirit::Value plainTextMessageList(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value publicKeys(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value publicKeyExports(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value projection(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value myRSAKeys(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value node_rescan(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value nodeDebug(const json_spirit::Array& params, bool fHelp);
