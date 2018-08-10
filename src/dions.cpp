@@ -7382,8 +7382,8 @@ Value projection(const Array& params, bool fHelp)
             }
             else if(hk(v1))
             {
-              trans = stringFromVch(vchV0);
-              fKey = stringFromVch(vchV1);
+              trans = stringFromVch(vchV1);
+              fKey = stringFromVch(vchV0);
             }
             else
             {
