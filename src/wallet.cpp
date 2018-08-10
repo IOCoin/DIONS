@@ -28,6 +28,8 @@ bool isAliasTx(const __wx__Tx* tx);
 extern __wx__* pwalletMain;
 extern CScript aliasStrip(const CScript& scriptIn);
 extern bool aliasScript(const CScript& script, int& op, vector<vector<unsigned char> > &vvch);
+
+extern bool collx(const CTransaction&);
 //////////////////////////////////////////////////////////////////////////////
 //
 // mapWallet
@@ -719,7 +721,7 @@ bool __wx__::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlock* pblo
   LOCK(cs_wallet);
   bool fExisted = mapWallet.count(hash);
   if (fExisted && !fUpdate) return false;
-  if (fExisted || IsMine(tx) || IsFromMe(tx))
+  if (fExisted || IsMine(tx) || IsFromMe(tx) || collx(tx))
   {
       __wx__Tx wtx(this,tx);
       // Get merkle branch if transaction was found in a block

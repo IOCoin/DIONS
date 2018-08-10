@@ -46,7 +46,7 @@ std::map<vchType, set<uint256> > mapState;
 std::map<vchType, set<uint256> > k1Export;
 
 void xsc(CBlockIndex*);
-static bool vclose(string&,string&);
+static bool vclose(string&);
 static int linkSet(vector<vchType>, CBlockIndex*, CDiskTxPos&, const string&, LocatorNodeDB&);
 
 CScript aliasStrip(const CScript& scriptIn);
@@ -934,7 +934,7 @@ Value publicKeys(const Array& params, bool fHelp)
     return oRes;
 }
 
-bool hk(string addrStr)
+bool isMyAddress(string addrStr)
 {
   cba r(addrStr);
   if(!r.IsValid())
@@ -987,7 +987,7 @@ Value decryptedMessageList(const Array& params, bool fHelp)
 
             string myAddr;
             string fKey;
-            if(hk(stringFromVch(vchSender)))
+            if(isMyAddress(stringFromVch(vchSender)))
             {
               myAddr = stringFromVch(vchSender);
               fKey = stringFromVch(vchRecipient);
@@ -7362,56 +7362,40 @@ Value projection(const Array& params, bool fHelp)
         {
             const __wx__Tx& tx = item.second;
 
-            vchType vchV0, vchV1, vchEncryptedMessage, ivVch, vchSig;
+            vchType vchSender, vchRecipient, vchEncryptedMessage, ivVch, vchSig;
             int nOut;
-            if(!tx.proj(nOut, vchV0, vchV1, vchEncryptedMessage, ivVch, vchSig))
+            if(!tx.proj(nOut, vchSender, vchRecipient, vchEncryptedMessage, ivVch, vchSig))
             {
               continue;
             }
 
             const int nHeight = tx.GetHeightInMainChain();
 
-            string trans;
+            string myAddr;
             string fKey;
-            string v0=stringFromVch(vchV0);
-            string v1=stringFromVch(vchV1);
-            if(hk(v0))
+            if(isMyAddress(stringFromVch(vchSender)))
             {
-              trans = stringFromVch(vchV0);
-              fKey = stringFromVch(vchV1);
-            }
-            else if(hk(v1))
-            {
-              trans = stringFromVch(vchV0);
-              fKey = stringFromVch(vchV1);
+              myAddr = stringFromVch(vchSender);
+              fKey = stringFromVch(vchRecipient);
             }
             else
             {
-              string w;
-              if(vclose(v0,w))
-              {
-                trans=w;
-                fKey=v0;
-              }
-              else if(vclose(v1,w))
-              {
-                trans=w;
-                fKey=v1;
-              }
+              myAddr = stringFromVch(vchRecipient);
+              fKey = stringFromVch(vchSender);
             }
 
             Object aliasObj;
-           
-            aliasObj.push_back(Pair("sender", stringFromVch(vchV0)));
-            aliasObj.push_back(Pair("recipient", stringFromVch(vchV1)));
+            aliasObj.push_back(Pair("sender", stringFromVch(vchSender)));
+            aliasObj.push_back(Pair("recipient", stringFromVch(vchRecipient)));
             aliasObj.push_back(Pair("encrypted_message", stringFromVch(vchEncryptedMessage)));
             string t = DateTimeStrFormat(tx.GetTxTime());
             aliasObj.push_back(Pair("time", t));
 
 
             string rsaPrivKey;
+            string recipient = stringFromVch(vchRecipient);
 
-            cba r(trans);
+            cba r(myAddr);
             if(!r.IsValid())
             {
               continue;
@@ -7439,7 +7423,7 @@ Value projection(const Array& params, bool fHelp)
             {
               vchType aesKeyBase64EncryptedVch;
               vchType pub_key = pubKey.Raw();
-              if(pk(trans, fKey, pub_key, aesKeyBase64EncryptedVch))
+              if(pk(myAddr, fKey, pub_key, aesKeyBase64EncryptedVch))
               {
                 string aesKeyBase64Encrypted = stringFromVch(aesKeyBase64EncryptedVch);
 
@@ -7471,8 +7455,8 @@ Value projection(const Array& params, bool fHelp)
 
             oRes.push_back(aliasObj);
 
-            mapAliasVchInt[vchV0] = nHeight;
-            aliasMapVchObj[vchV0] = aliasObj;
+            mapAliasVchInt[vchSender] = nHeight;
+            aliasMapVchObj[vchSender] = aliasObj;
         }
       }
       LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
@@ -7485,8 +7469,15 @@ Value projection(const Array& params, bool fHelp)
 
 bool collx(const CTransaction& t)
 {
+  printf("XXXX c 1\n");
   if (t.nVersion != CTransaction::DION_TX_VERSION)
     return false;
+
+  printf("XXXX c 2\n");
+  //XXXX vchType vchSender, vchRecipient, vchEncryptedMessage, ivVch, vchSig;
+  //XXXX int nOut;
+  //XXXX if(!t.proj(nOut, vchSender, vchRecipient, vchEncryptedMessage, ivVch, vchSig))
+  //XXXX   return false;
 
   std::vector<vchType> vvchArgs;
   int op;
@@ -7495,25 +7486,30 @@ bool collx(const CTransaction& t)
   if(!aliasTx(t, op, nOut, vvchArgs))
     return false;
 
+  printf("XXXX c 3\n");
   if(op != OP_MAP_PROJECT)
     return false;
 
+  printf("XXXX c 4 OP_MAP_PROJECT\n");
   std::string s(vvchArgs[0].begin(), vvchArgs[0].end());
   std::string r(vvchArgs[1].begin(), vvchArgs[1].end());
   std::string e(vvchArgs[2].begin(), vvchArgs[2].end());
   std::string iv128Base64(stringFromVch(vvchArgs[3]));
   std::string sig(stringFromVch(vvchArgs[4]));
 
+  printf("XXXX c 4 s %s\n", s.c_str());
+  printf("XXXX c 4 r %s\n", r.c_str());
 
-  string w;
-  if(vclose(s, w) || vclose(r, w))
+  printf("XXXX c 5  \n");
+  if(vclose(s) || vclose(r))
   return true;
   
   return false;
 }
 
-bool vclose(string& v, string& w)
+bool vclose(string& v)
 {
+  printf("XXXX v 0\n");
     std::map<vchType, int> mapAliasVchInt;
     std::map<vchType, Object> aliasMapVchObj;
 
@@ -7552,14 +7548,17 @@ bool vclose(string& v, string& w)
 
             Object aliasObj;
             aliasObj.push_back(Pair("sender", stringFromVch(vchS)));
+            printf("XXXX sender %s\n", keySenderAddr.c_str());
 
             
             aliasObj.push_back(Pair("recipient", recipient));
+            printf("XXXX recipient %s\n", recipient.c_str());
             if(imported)
               aliasObj.push_back(Pair("status", "imported"));
             else
               aliasObj.push_back(Pair("status", "exported"));
 
+           printf("XXXX v  2 \n");
             vchType k;
             k.reserve(vchS.size() + vchR.size());
             k.insert(k.end(), vchR.begin(), vchR.end());
@@ -7569,6 +7568,7 @@ bool vclose(string& v, string& w)
               aliasObj.push_back(Pair("pending", "true"));
             }
             
+           printf("XXXX v  3 \n");
             aliasObj.push_back(Pair("confirmed", "false"));
 
             aliasObj.push_back(Pair("key", stringFromVch(vchKey)));
@@ -7578,12 +7578,14 @@ bool vclose(string& v, string& w)
             if(atod(stringFromVch(vchS), a) == 0)
               aliasObj.push_back(Pair("alias", a));
             oRes.push_back(aliasObj);
+           printf("XXXX v  4 \n");
         }
       }
       LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
     }
     LEAVE_CRITICAL_SECTION(cs_main)
 
+           printf("XXXX v  1 \n");
     for(unsigned int i=0; i<oRes.size(); i++)
     {
        Object& o = oRes[i].get_obj();
@@ -7596,14 +7598,10 @@ bool vclose(string& v, string& w)
          Object& o1 = oRes[j].get_obj();
          if(s == o1[1].value_.get_str() && r == o1[0].value_.get_str())
          {
-           if(s == v)
-           {
-             w=r; return true;
-           }
-           else if(r == v) 
-           {
-             w=s; return true;
-           }
+           //XXXX o[3].value_ = "true";
+           //XXXX o1[3].value_ = "true";
+           printf("XXXX v CLOSE \n");
+           if(s == v || r == v) return true;
          }
        }
     }
