@@ -7620,6 +7620,28 @@ Value xstat(const Array& params, bool fHelp)
   string l = params[0].get_str();
   CKeyID keyID;
   cba keyAddress(l);
+  if(!keyAddress.IsValid())
+  {
+    vector<AliasIndex> vtxPos;
+    vchType vchAlias = vchFromString(l);
+    if (ln1Db->lKey(vchAlias))
+    {
+      if (!ln1Db->lGet(vchAlias, vtxPos))
+        return error("aliasHeight() : failed to read from name DB");
+      if (vtxPos.empty ())
+        return -1;
+
+      AliasIndex& txPos = vtxPos.back ();
+      if(txPos.nHeight + scaleMonitor() <= nBestHeight)
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "extern alias");
+      keyAddress.SetString(txPos.vAddress); 
+    }
+    else
+    {
+      throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid I/OCoin address or unknown alias");
+    }
+  }
+
   if(!keyAddress.GetKeyID(keyID))
     throw JSONRPCError(RPC_TYPE_ERROR, "Address does not refer to key");
 
