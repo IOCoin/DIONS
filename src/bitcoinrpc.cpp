@@ -329,6 +329,7 @@ static const CRPCCommand vRPCCommands[] =
     { "sendSymmetric",     &sendSymmetric,     false,  false },
     { "uC",     &uC,     false,  false },
     { "registerAlias",     &registerAlias,     false,  false },
+    { "xstat",     &xstat,     false,  false },
     { "mapProject",     &mapProject,     false,  false },
     { "mapVertex",     &mapVertex,     false,  false },
     { "registerAliasGenerate",     &registerAliasGenerate,     false,  false },

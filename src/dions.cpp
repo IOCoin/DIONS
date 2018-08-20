@@ -6958,7 +6958,6 @@ Value vtx(const Array& params, bool fHelp)
   if(!pwalletMain->vtx(vchPubKey, s))
     throw JSONRPCError(RPC_TYPE_ERROR, "Failed to set meta data for key");
 
-
   if(!walletdb.UpdateKey(vchPubKey, pwalletMain->kd[vchPubKey.GetID()]))
     throw JSONRPCError(RPC_TYPE_ERROR, "Failed to write meta data for key");
 
@@ -7609,4 +7608,33 @@ bool vclose(string& v, string& w)
     }
 
     return false;
+}
+
+Value xstat(const Array& params, bool fHelp)
+{
+  if(fHelp || params.size() != 1)
+    throw runtime_error(
+      "xstat <addr> "
+      );
+
+  string l = params[0].get_str();
+  CKeyID keyID;
+  cba keyAddress(l);
+  if(!keyAddress.GetKeyID(keyID))
+    throw JSONRPCError(RPC_TYPE_ERROR, "Address does not refer to key");
+
+  CPubKey vchPubKey;
+  pwalletMain->GetPubKey(keyID, vchPubKey);
+
+  Array oRes;
+  string r;
+  Object o;
+  if(pwalletMain->vtx_(vchPubKey, r))
+    o.push_back(Pair("xstat", "true"));
+  else
+    o.push_back(Pair("xstat", "false"));
+  
+  oRes.push_back(o);
+
+  return oRes;
 }
