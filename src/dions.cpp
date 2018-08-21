@@ -2449,6 +2449,13 @@ Value aliasList(const Array& params, bool fHelp)
                     DecryptMessage(rsaPrivKey, stringFromVch(vvchPrevArgsRead[0]), decrypted);
                     aliasObj.push_back(Pair("alias", decrypted));
                   }
+
+                  string relay;
+                  if(pwalletMain->vtx_(pubKey, relay))
+                    aliasObj.push_back(Pair("xstat", "true"));
+                  else
+                    aliasObj.push_back(Pair("xstat", "false"));
+
                 }
 
                 break;     
