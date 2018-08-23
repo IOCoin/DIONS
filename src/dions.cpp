@@ -116,6 +116,8 @@ bool getImportedPubKey(string recipientAddress, vchType& recipientPubKeyVch);
 bool internalReference__(string recipientAddress, vchType& recipientPubKeyVch);
 bool pk(string senderAddress, string recipientAddress, vchType& recipientPubKeyVch, vchType& aesKeyBase64EncryptedVch);
 
+static bool xs(string&);
+
 bool tunnelSwitch__(int r);
 
 vchType vchFromValue(const Value& value)
@@ -2449,13 +2451,6 @@ Value aliasList(const Array& params, bool fHelp)
                     DecryptMessage(rsaPrivKey, stringFromVch(vvchPrevArgsRead[0]), decrypted);
                     aliasObj.push_back(Pair("alias", decrypted));
                   }
-
-                  string relay;
-                  if(pwalletMain->vtx_(pubKey, relay))
-                    aliasObj.push_back(Pair("xstat", "true"));
-                  else
-                    aliasObj.push_back(Pair("xstat", "false"));
-
                 }
 
                 break;     
@@ -2479,6 +2474,12 @@ Value aliasList(const Array& params, bool fHelp)
           }
           aliasObj.push_back(Pair("alias", stringFromVch(vchAlias)));
           aliasObj.push_back(Pair("encrypted", "false"));
+          string s = stringFromVch(vchAlias);
+          if(xs(s))
+          {
+
+          }
+
           mapAliasVchInt[vchAlias] = nHeight;
         }
 
@@ -7666,4 +7667,40 @@ Value xstat(const Array& params, bool fHelp)
   oRes.push_back(o);
 
   return oRes;
+}
+
+static bool xs(string& s)
+{
+  CKeyID keyID;
+  cba keyAddress(s);
+  if(!keyAddress.IsValid())
+  {
+    vector<AliasIndex> vtxPos;
+    vchType vchAlias = vchFromString(s);
+    if (ln1Db->lKey(vchAlias))
+    {
+      if (!ln1Db->lGet(vchAlias, vtxPos))
+        return error("aliasHeight() : failed to read from name DB");
+      if (vtxPos.empty ())
+        return -1;
+
+      AliasIndex& txPos = vtxPos.back ();
+      if(txPos.nHeight + scaleMonitor() <= nBestHeight)
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "extern alias");
+      keyAddress.SetString(txPos.vAddress); 
+    }
+    else
+    {
+      throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid I/OCoin address or unknown alias");
+    }
+  }
+
+  if(!keyAddress.GetKeyID(keyID))
+    throw JSONRPCError(RPC_TYPE_ERROR, "Address does not refer to key");
+
+  CPubKey vchPubKey;
+  pwalletMain->GetPubKey(keyID, vchPubKey);
+
+  string r;
+  return pwalletMain->vtx_(vchPubKey, r);
 }
