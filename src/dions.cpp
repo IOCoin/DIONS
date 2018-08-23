@@ -2477,7 +2477,7 @@ Value aliasList(const Array& params, bool fHelp)
           string s = stringFromVch(vchAlias);
           if(xs(s))
           {
-
+            aliasObj.push_back(Pair("xstat", "true"));
           }
 
           mapAliasVchInt[vchAlias] = nHeight;
