@@ -7476,6 +7476,9 @@ Value projection(const Array& params, bool fHelp)
             aliasObj.push_back(Pair("iv128Base64", stringFromVch(ivVch)));
             aliasObj.push_back(Pair("signature", stringFromVch(vchSig)));
 
+            string a;
+            if(atod(stringFromVch(vchV0), a) == 0)
+              aliasObj.push_back(Pair("alias", a));
             oRes.push_back(aliasObj);
 
             mapAliasVchInt[vchV0] = nHeight;
