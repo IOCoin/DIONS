@@ -7353,9 +7353,14 @@ Value projection(const Array& params, bool fHelp)
                 "projection [<alias>]\n"
                 );
     vchType vchNodeLocator;
+    string ref;
     if(params.size() == 1)
-      vchNodeLocator = vchFromValue(params[0]);
+      ref = params[0].get_str();
 
+    cba alpha(ref);
+    if(!alpha.IsValid())
+      throw JSONRPCError(RPC_TYPE_ERROR, "invalid reference");
+      
     std::map<vchType, int> mapAliasVchInt;
     std::map<vchType, Object> aliasMapVchObj;
 
@@ -7382,6 +7387,10 @@ Value projection(const Array& params, bool fHelp)
             string fKey;
             string v0=stringFromVch(vchV0);
             string v1=stringFromVch(vchV1);
+            
+            if(!(v0 == ref || v1 == ref))
+              continue;
+            
             if(hk(v0))
             {
               trans = stringFromVch(vchV0);
