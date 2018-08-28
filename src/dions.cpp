@@ -2295,6 +2295,10 @@ Value aliasList__(const Array& params, bool fHelp)
           Value v = xtu_url__(s); 
           aliasObj.push_back(Pair("xtu", v.get_real()));
           mapAliasVchInt[vchAlias] = nHeight;
+          if(xs(s))
+          {
+            aliasObj.push_back(Pair("xstat", "true"));
+          }
         }
 
         if(!IsMinePost(tx))
