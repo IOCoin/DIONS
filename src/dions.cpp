@@ -7363,7 +7363,25 @@ Value projection(const Array& params, bool fHelp)
 
     cba alpha(ref);
     if(!alpha.IsValid())
-      throw JSONRPCError(RPC_TYPE_ERROR, "invalid reference");
+    {
+      vector<AliasIndex> vtxPos;
+      LocatorNodeDB ln1Db("r");
+      vchType vchAlias = vchFromString(ref);
+      if (ln1Db.lKey(vchAlias))
+      {
+        if (!ln1Db.lGet(vchAlias, vtxPos))
+          return error("aliasHeight() : failed to read from name DB");
+        if (vtxPos.empty ())
+          return -1;
+
+        AliasIndex& txPos = vtxPos.back ();
+        alpha.SetString(txPos.vAddress); 
+      }
+      else
+      {
+        throw JSONRPCError(RPC_TYPE_ERROR, "invalid reference");
+      }
+    }
       
     std::map<vchType, int> mapAliasVchInt;
     std::map<vchType, Object> aliasMapVchObj;
@@ -7392,7 +7410,7 @@ Value projection(const Array& params, bool fHelp)
             string v0=stringFromVch(vchV0);
             string v1=stringFromVch(vchV1);
             
-            if(!(v0 == ref || v1 == ref))
+            if(!(v0 == alpha.ToString() || v1 == alpha.ToString()))
               continue;
             
             if(hk(v0))
