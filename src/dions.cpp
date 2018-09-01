@@ -6958,6 +6958,27 @@ Value vtx(const Array& params, bool fHelp)
   string l = params[0].get_str();
   CKeyID keyID;
   cba keyAddress(l);
+  if(!keyAddress.IsValid())
+  {
+    vector<AliasIndex> vtxPos;
+    LocatorNodeDB ln1Db("r");
+    vchType vchAlias = vchFromString(l);
+    if (ln1Db.lKey(vchAlias))
+    {
+      if (!ln1Db.lGet(vchAlias, vtxPos))
+        return error("aliasHeight() : failed to read from name DB");
+      if (vtxPos.empty ())
+        return -1;
+
+      AliasIndex& txPos = vtxPos.back ();
+      keyAddress.SetString(txPos.vAddress); 
+    }
+    else
+    {
+      throw JSONRPCError(RPC_TYPE_ERROR, "invalid reference");
+    }
+  }
+
   keyAddress.GetKeyID(keyID);
   CPubKey vchPubKey;
   pwalletMain->GetPubKey(keyID, vchPubKey);
