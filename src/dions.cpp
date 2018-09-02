@@ -7005,20 +7005,50 @@ Value mapVertex(const Array& params, bool fHelp)
 
     EnsureWalletIsUnlocked();
 
-    string myAddress = params[0].get_str();
-    string f = params[1].get_str();
+    cba addr(params[0].get_str());
+    if(!addr.IsValid())
+    {
+      vector<AliasIndex> vtxPos;
+      LocatorNodeDB ln1Db("r");
+      vchType vchAlias = vchFromString(params[0].get_str());
+      if (ln1Db.lKey(vchAlias))
+      {
+        if (!ln1Db.lGet(vchAlias, vtxPos))
+          return error("aliasHeight() : failed to read from name DB");
+        if (vtxPos.empty ())
+          return -1;
 
-    cba addr;
-    int r = checkAddress(myAddress, addr);
-    if(r < 0)
-        throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
+        AliasIndex& txPos = vtxPos.back ();
+        addr.SetString(txPos.vAddress); 
+      }
+      else
+      {
+        throw JSONRPCError(RPC_TYPE_ERROR, "invalid reference");
+      }
+    }
 
-    cba aRecipient;
-    r = checkAddress(f, aRecipient);
-    if(r < 0)
-        throw JSONRPCError(RPC_TYPE_ERROR, "Invalid recipient address");
+    cba aRecipient(params[1].get_str());
 
-    f = aRecipient.ToString();
+    if(!aRecipient.IsValid())
+    {
+      vector<AliasIndex> vtxPos;
+      LocatorNodeDB ln1Db("r");
+      vchType vchAlias = vchFromString(params[1].get_str());
+      if (ln1Db.lKey(vchAlias))
+      {
+        if (!ln1Db.lGet(vchAlias, vtxPos))
+          return error("aliasHeight() : failed to read from name DB");
+        if (vtxPos.empty ())
+          return -1;
+
+        AliasIndex& txPos = vtxPos.back ();
+        aRecipient.SetString(txPos.vAddress); 
+      }
+      else
+      {
+        throw JSONRPCError(RPC_TYPE_ERROR, "invalid reference");
+      }
+    }
 
     CKeyID keyID;
     if(!addr.GetKeyID(keyID))
@@ -7036,8 +7066,8 @@ Value mapVertex(const Array& params, bool fHelp)
         throw JSONRPCError(RPC_WALLET_ERROR, "no rsa key available for address");
 
     const vchType vchKey = vchFromValue(rsaPubKeyStr);
-    const vchType vchSender = vchFromValue(myAddress);
-    const vchType vchRecipient = vchFromValue(f);
+    const vchType vchSender = vchFromValue(addr.ToString());
+    const vchType vchRecipient = vchFromValue(aRecipient.ToString());
     vector<unsigned char> vchSig;
     CDataStream ss(SER_GETHASH, 0);
 
@@ -7047,18 +7077,13 @@ Value mapVertex(const Array& params, bool fHelp)
     CScript scriptPubKeyOrig;
     CScript scriptPubKey;
 
-    uint160 hash160;
-    bool isValid = AddressToHash160(f, hash160);
-    if(!isValid)
-      throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid dions address");
-
     vchType recipientPubKeyVch;
     vchType recipientAESKeyVch;
     vchType aes256Key;
 
     string sigBase64;
     string encrypted;
-    if(pk(myAddress, f, recipientPubKeyVch, recipientAESKeyVch))
+    if(pk(addr.ToString(), aRecipient.ToString(), recipientPubKeyVch, recipientAESKeyVch))
     {
       string s;
       if(!pwalletMain->vtx_(vchPubKey, s))
@@ -7092,7 +7117,7 @@ Value mapVertex(const Array& params, bool fHelp)
     }
 
 
-    scriptPubKeyOrig.SetBitcoinAddress(f);
+    scriptPubKeyOrig.SetBitcoinAddress(aRecipient.ToString());
 
     scriptPubKey += scriptPubKeyOrig;
 
