@@ -729,7 +729,7 @@ bool AppInit2()
     printf("Loading block index...\n");
     nStart = GetTimeMillis();
     if (!LoadBlockIndex())
-        return InitError(_("Error loading blkindex.dat"));
+      return InitError(_("Error loading blkindex.dat"));
 
 
     // as LoadBlockIndex can take several minutes, it's possible the user

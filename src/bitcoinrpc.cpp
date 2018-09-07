@@ -368,6 +368,7 @@ static const CRPCCommand vRPCCommands[] =
     { "nodeDebug",     &nodeDebug,     false,  false },
     { "nodeDebug1",     &nodeDebug1,     false,  false },
     { "vtxtrace",     &vtxtrace,     false,  false },
+    { "svtx",     &svtx,     false,  false },
     { "sendrawtransaction",     &sendrawtransaction,     false,  false },
     { "getcheckpoint",          &getcheckpoint,          true,   false },
     { "reservebalance",         &reservebalance,         false,  true},
