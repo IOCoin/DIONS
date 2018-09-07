@@ -7834,10 +7834,42 @@ Value svtx(const Array& params, bool fHelp)
                 );
   string ref = params[0].get_str();
 
+  Array oRes;
+  if(xs(ref)) return oRes;
+
+  cba k(ref);
+  if(!k.IsValid())
+  {
+    vector<AliasIndex> vtxPos;
+    vchType vchAlias = vchFromString(ref);
+    if (ln1Db->lKey(vchAlias))
+    {
+      if (!ln1Db->lGet(vchAlias, vtxPos))
+        return error("aliasHeight() : failed to read from name DB");
+      if (vtxPos.empty ())
+        return -1;
+
+      AliasIndex& txPos = vtxPos.back ();
+      if(txPos.nHeight + scaleMonitor() <= nBestHeight)
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "extern alias");
+      k.SetString(txPos.vAddress); 
+    }
+    else
+    {
+      throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid I/OCoin address or unknown alias");
+    }
+  }
+  CKeyID keyID;
+  if(!k.GetKeyID(keyID))
+    throw JSONRPCError(RPC_TYPE_ERROR, "Address does not refer to key");
+
+  CKey key;
+  if(!pwalletMain->GetKey(keyID, key))
+    throw JSONRPCError(RPC_TYPE_ERROR, "external");
+
   std::map<vchType, int> mapAliasVchInt;
   std::map<vchType, Object> aliasMapVchObj;
 
-  Array oRes;
   ENTER_CRITICAL_SECTION(cs_main)
   {
     ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
