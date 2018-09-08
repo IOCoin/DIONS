@@ -7285,16 +7285,14 @@ Value mapProject(const Array& params, bool fHelp)
     throw runtime_error(
       "mapProject <addr> <project> <addr>"
   );
-  string myAddress = params[0].get_str();
   string strMessage = params[1].get_str();
-  string f = params[2].get_str();
 
-  cba prj(f);
+  cba prj(params[2].get_str());
   if(!prj.IsValid())
   {
     vector<AliasIndex> vtxPos;
     LocatorNodeDB ln1Db("r");
-    vchType vchAlias = vchFromString(f);
+    vchType vchAlias = vchFromString(params[2].get_str());
     if (ln1Db.lKey(vchAlias))
     {
       if (!ln1Db.lGet(vchAlias, vtxPos))
@@ -7315,17 +7313,17 @@ Value mapProject(const Array& params, bool fHelp)
   if(!prj.GetKeyID(rkeyID))
     throw JSONRPCError(RPC_TYPE_ERROR, "prj does not refer to key");
 
-  vchType recipientAddressVch = vchFromString(f);
+  vchType recipientAddressVch = vchFromString(prj.ToString());
   vchType recipientPubKeyVch;
   vector<unsigned char> aesRawVector;
 
   CKey key;
-    cba node(myAddress);
+    cba node(params[0].get_str());
     if(!node.IsValid())
     {
       vector<AliasIndex> vtxPos;
       LocatorNodeDB ln1Db("r");
-      vchType vchAlias = vchFromString(myAddress);
+      vchType vchAlias = vchFromString(params[0].get_str());
       if (ln1Db.lKey(vchAlias))
       {
         if (!ln1Db.lGet(vchAlias, vtxPos))
@@ -7363,7 +7361,7 @@ Value mapProject(const Array& params, bool fHelp)
     else
     {
       vchType aesKeyBase64EncryptedVch;
-      if(pk(myAddress, f, recipientPubKeyVch, aesKeyBase64EncryptedVch))
+      if(pk(node.ToString(), prj.ToString(), recipientPubKeyVch, aesKeyBase64EncryptedVch))
       {
         string aesKeyBase64Encrypted = stringFromVch(aesKeyBase64EncryptedVch);
         string privRSAKey;
@@ -7403,7 +7401,7 @@ Value mapProject(const Array& params, bool fHelp)
   bool isValid = AddressToHash160(prj.ToString(), hash160);
   if(!isValid)
     throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid address");
-  scriptPubKeyOrig.SetBitcoinAddress(f);
+  scriptPubKeyOrig.SetBitcoinAddress(prj.ToString());
 
   vchType vchEncryptedMessage = vchFromString(encrypted);
   vchType iv128Base64Vch = vchFromString(iv128Base64);
