@@ -116,6 +116,8 @@ bool getImportedPubKey(string recipientAddress, vchType& recipientPubKeyVch);
 bool internalReference__(string recipientAddress, vchType& recipientPubKeyVch);
 bool pk(string senderAddress, string recipientAddress, vchType& recipientPubKeyVch, vchType& aesKeyBase64EncryptedVch);
 
+static bool xs(string&);
+
 bool tunnelSwitch__(int r);
 
 vchType vchFromValue(const Value& value)
@@ -1191,7 +1193,7 @@ Value externFrame__(const Array& params, bool fHelp)
       uint160 hash160;
       bool isValid = AddressToHash160(strAddress, hash160);
       if(!isValid)
-        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid dions address");
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid address");
       scriptPubKeyOrig.SetBitcoinAddress(strAddress);
 
       const __wx__Tx& wtxIn = pwalletMain->mapWallet[wtxInHash];
@@ -2293,6 +2295,10 @@ Value aliasList__(const Array& params, bool fHelp)
           Value v = xtu_url__(s); 
           aliasObj.push_back(Pair("xtu", v.get_real()));
           mapAliasVchInt[vchAlias] = nHeight;
+          if(xs(s))
+          {
+            aliasObj.push_back(Pair("xstat", "true"));
+          }
         }
 
         if(!IsMinePost(tx))
@@ -2472,6 +2478,12 @@ Value aliasList(const Array& params, bool fHelp)
           }
           aliasObj.push_back(Pair("alias", stringFromVch(vchAlias)));
           aliasObj.push_back(Pair("encrypted", "false"));
+          string s = stringFromVch(vchAlias);
+          if(xs(s))
+          {
+            aliasObj.push_back(Pair("xstat", "true"));
+          }
+
           mapAliasVchInt[vchAlias] = nHeight;
         }
 
@@ -6946,6 +6958,27 @@ Value vtx(const Array& params, bool fHelp)
   string l = params[0].get_str();
   CKeyID keyID;
   cba keyAddress(l);
+  if(!keyAddress.IsValid())
+  {
+    vector<AliasIndex> vtxPos;
+    LocatorNodeDB ln1Db("r");
+    vchType vchAlias = vchFromString(l);
+    if (ln1Db.lKey(vchAlias))
+    {
+      if (!ln1Db.lGet(vchAlias, vtxPos))
+        return error("aliasHeight() : failed to read from name DB");
+      if (vtxPos.empty ())
+        return -1;
+
+      AliasIndex& txPos = vtxPos.back ();
+      keyAddress.SetString(txPos.vAddress); 
+    }
+    else
+    {
+      throw JSONRPCError(RPC_TYPE_ERROR, "invalid reference");
+    }
+  }
+
   keyAddress.GetKeyID(keyID);
   CPubKey vchPubKey;
   pwalletMain->GetPubKey(keyID, vchPubKey);
@@ -6957,7 +6990,6 @@ Value vtx(const Array& params, bool fHelp)
 
   if(!pwalletMain->vtx(vchPubKey, s))
     throw JSONRPCError(RPC_TYPE_ERROR, "Failed to set meta data for key");
-
 
   if(!walletdb.UpdateKey(vchPubKey, pwalletMain->kd[vchPubKey.GetID()]))
     throw JSONRPCError(RPC_TYPE_ERROR, "Failed to write meta data for key");
@@ -6973,20 +7005,50 @@ Value mapVertex(const Array& params, bool fHelp)
 
     EnsureWalletIsUnlocked();
 
-    string myAddress = params[0].get_str();
-    string f = params[1].get_str();
+    cba addr(params[0].get_str());
+    if(!addr.IsValid())
+    {
+      vector<AliasIndex> vtxPos;
+      LocatorNodeDB ln1Db("r");
+      vchType vchAlias = vchFromString(params[0].get_str());
+      if (ln1Db.lKey(vchAlias))
+      {
+        if (!ln1Db.lGet(vchAlias, vtxPos))
+          return error("aliasHeight() : failed to read from name DB");
+        if (vtxPos.empty ())
+          return -1;
 
-    cba addr;
-    int r = checkAddress(myAddress, addr);
-    if(r < 0)
-        throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
+        AliasIndex& txPos = vtxPos.back ();
+        addr.SetString(txPos.vAddress); 
+      }
+      else
+      {
+        throw JSONRPCError(RPC_TYPE_ERROR, "invalid reference");
+      }
+    }
 
-    cba aRecipient;
-    r = checkAddress(f, aRecipient);
-    if(r < 0)
-        throw JSONRPCError(RPC_TYPE_ERROR, "Invalid recipient address");
+    cba aRecipient(params[1].get_str());
 
-    f = aRecipient.ToString();
+    if(!aRecipient.IsValid())
+    {
+      vector<AliasIndex> vtxPos;
+      LocatorNodeDB ln1Db("r");
+      vchType vchAlias = vchFromString(params[1].get_str());
+      if (ln1Db.lKey(vchAlias))
+      {
+        if (!ln1Db.lGet(vchAlias, vtxPos))
+          return error("aliasHeight() : failed to read from name DB");
+        if (vtxPos.empty ())
+          return -1;
+
+        AliasIndex& txPos = vtxPos.back ();
+        aRecipient.SetString(txPos.vAddress); 
+      }
+      else
+      {
+        throw JSONRPCError(RPC_TYPE_ERROR, "invalid reference");
+      }
+    }
 
     CKeyID keyID;
     if(!addr.GetKeyID(keyID))
@@ -7004,8 +7066,8 @@ Value mapVertex(const Array& params, bool fHelp)
         throw JSONRPCError(RPC_WALLET_ERROR, "no rsa key available for address");
 
     const vchType vchKey = vchFromValue(rsaPubKeyStr);
-    const vchType vchSender = vchFromValue(myAddress);
-    const vchType vchRecipient = vchFromValue(f);
+    const vchType vchSender = vchFromValue(addr.ToString());
+    const vchType vchRecipient = vchFromValue(aRecipient.ToString());
     vector<unsigned char> vchSig;
     CDataStream ss(SER_GETHASH, 0);
 
@@ -7015,18 +7077,13 @@ Value mapVertex(const Array& params, bool fHelp)
     CScript scriptPubKeyOrig;
     CScript scriptPubKey;
 
-    uint160 hash160;
-    bool isValid = AddressToHash160(f, hash160);
-    if(!isValid)
-      throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid dions address");
-
     vchType recipientPubKeyVch;
     vchType recipientAESKeyVch;
     vchType aes256Key;
 
     string sigBase64;
     string encrypted;
-    if(pk(myAddress, f, recipientPubKeyVch, recipientAESKeyVch))
+    if(pk(addr.ToString(), aRecipient.ToString(), recipientPubKeyVch, recipientAESKeyVch))
     {
       string s;
       if(!pwalletMain->vtx_(vchPubKey, s))
@@ -7060,7 +7117,7 @@ Value mapVertex(const Array& params, bool fHelp)
     }
 
 
-    scriptPubKeyOrig.SetBitcoinAddress(f);
+    scriptPubKeyOrig.SetBitcoinAddress(aRecipient.ToString());
 
     scriptPubKey += scriptPubKeyOrig;
 
@@ -7228,32 +7285,66 @@ Value mapProject(const Array& params, bool fHelp)
     throw runtime_error(
       "mapProject <addr> <project> <addr>"
   );
-  string myAddress = params[0].get_str();
   string strMessage = params[1].get_str();
-  string f = params[2].get_str();
 
-  cba recipientAddr(f);
-  if(!recipientAddr.IsValid())
-    throw JSONRPCError(RPC_TYPE_ERROR, "Invalid recipient address");
+  cba prj(params[2].get_str());
+  if(!prj.IsValid())
+  {
+    vector<AliasIndex> vtxPos;
+    LocatorNodeDB ln1Db("r");
+    vchType vchAlias = vchFromString(params[2].get_str());
+    if (ln1Db.lKey(vchAlias))
+    {
+      if (!ln1Db.lGet(vchAlias, vtxPos))
+        return error("aliasHeight() : failed to read from name DB");
+      if (vtxPos.empty ())
+        return -1;
+
+      AliasIndex& txPos = vtxPos.back ();
+      prj.SetString(txPos.vAddress); 
+    }
+    else
+    {
+      throw JSONRPCError(RPC_TYPE_ERROR, "invalid reference");
+    }
+  }
 
   CKeyID rkeyID;
-  if(!recipientAddr.GetKeyID(rkeyID))
-    throw JSONRPCError(RPC_TYPE_ERROR, "recipientAddr does not refer to key");
+  if(!prj.GetKeyID(rkeyID))
+    throw JSONRPCError(RPC_TYPE_ERROR, "prj does not refer to key");
 
-  vchType recipientAddressVch = vchFromString(f);
+  vchType recipientAddressVch = vchFromString(prj.ToString());
   vchType recipientPubKeyVch;
   vector<unsigned char> aesRawVector;
 
   CKey key;
-  if(params.size() == 3)
-  {
-    cba senderAddr(myAddress);
-    if(!senderAddr.IsValid())
+    cba node(params[0].get_str());
+    if(!node.IsValid())
+    {
+      vector<AliasIndex> vtxPos;
+      LocatorNodeDB ln1Db("r");
+      vchType vchAlias = vchFromString(params[0].get_str());
+      if (ln1Db.lKey(vchAlias))
+      {
+        if (!ln1Db.lGet(vchAlias, vtxPos))
+          return error("aliasHeight() : failed to read from name DB");
+        if (vtxPos.empty ())
+          return -1;
+
+        AliasIndex& txPos = vtxPos.back ();
+        node.SetString(txPos.vAddress); 
+      }
+      else
+      {
+        throw JSONRPCError(RPC_TYPE_ERROR, "invalid reference");
+      }
+    }
+    if(!node.IsValid())
       throw JSONRPCError(RPC_TYPE_ERROR, "Invalid sender address");
 
     CKeyID keyID;
-    if(!senderAddr.GetKeyID(keyID))
-      throw JSONRPCError(RPC_TYPE_ERROR, "senderAddr does not refer to key");
+    if(!node.GetKeyID(keyID))
+      throw JSONRPCError(RPC_TYPE_ERROR, "node does not refer to key");
 
     if(!pwalletMain->GetKey(keyID, key))
       throw JSONRPCError(RPC_WALLET_ERROR, "Private key not available");
@@ -7270,7 +7361,7 @@ Value mapProject(const Array& params, bool fHelp)
     else
     {
       vchType aesKeyBase64EncryptedVch;
-      if(pk(myAddress, f, recipientPubKeyVch, aesKeyBase64EncryptedVch))
+      if(pk(node.ToString(), prj.ToString(), recipientPubKeyVch, aesKeyBase64EncryptedVch))
       {
         string aesKeyBase64Encrypted = stringFromVch(aesKeyBase64EncryptedVch);
         string privRSAKey;
@@ -7286,7 +7377,6 @@ Value mapProject(const Array& params, bool fHelp)
         throw JSONRPCError(RPC_WALLET_ERROR, "No local symmetric key and no imported symmetric key");
       }
     }
-  }
 
   string encrypted;
   string iv128Base64;
@@ -7308,14 +7398,14 @@ Value mapProject(const Array& params, bool fHelp)
   CScript scriptPubKey;
 
   uint160 hash160;
-  bool isValid = AddressToHash160(f, hash160);
+  bool isValid = AddressToHash160(prj.ToString(), hash160);
   if(!isValid)
-    throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid dions address");
-  scriptPubKeyOrig.SetBitcoinAddress(f);
+    throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid address");
+  scriptPubKeyOrig.SetBitcoinAddress(prj.ToString());
 
   vchType vchEncryptedMessage = vchFromString(encrypted);
   vchType iv128Base64Vch = vchFromString(iv128Base64);
-  scriptPubKey << OP_MAP_PROJECT << vchFromString(myAddress) << vchFromString(f) << vchEncryptedMessage << iv128Base64Vch << vchFromString(sigBase64) << OP_2DROP << OP_2DROP << OP_DROP;
+  scriptPubKey << OP_MAP_PROJECT << vchFromString(node.ToString()) << vchFromString(prj.ToString()) << vchEncryptedMessage << iv128Base64Vch << vchFromString(sigBase64) << OP_2DROP << OP_2DROP << OP_DROP;
   scriptPubKey += scriptPubKeyOrig;
 
   ENTER_CRITICAL_SECTION(cs_main)
@@ -7346,9 +7436,32 @@ Value projection(const Array& params, bool fHelp)
                 "projection [<alias>]\n"
                 );
     vchType vchNodeLocator;
+    string ref;
     if(params.size() == 1)
-      vchNodeLocator = vchFromValue(params[0]);
+      ref = params[0].get_str();
 
+    cba alpha(ref);
+    if(!alpha.IsValid())
+    {
+      vector<AliasIndex> vtxPos;
+      LocatorNodeDB ln1Db("r");
+      vchType vchAlias = vchFromString(ref);
+      if (ln1Db.lKey(vchAlias))
+      {
+        if (!ln1Db.lGet(vchAlias, vtxPos))
+          return error("aliasHeight() : failed to read from name DB");
+        if (vtxPos.empty ())
+          return -1;
+
+        AliasIndex& txPos = vtxPos.back ();
+        alpha.SetString(txPos.vAddress); 
+      }
+      else
+      {
+        throw JSONRPCError(RPC_TYPE_ERROR, "invalid reference");
+      }
+    }
+      
     std::map<vchType, int> mapAliasVchInt;
     std::map<vchType, Object> aliasMapVchObj;
 
@@ -7375,6 +7488,10 @@ Value projection(const Array& params, bool fHelp)
             string fKey;
             string v0=stringFromVch(vchV0);
             string v1=stringFromVch(vchV1);
+            
+            if(!(v0 == alpha.ToString() || v1 == alpha.ToString()))
+              continue;
+            
             if(hk(v0))
             {
               trans = stringFromVch(vchV0);
@@ -7469,6 +7586,15 @@ Value projection(const Array& params, bool fHelp)
             aliasObj.push_back(Pair("iv128Base64", stringFromVch(ivVch)));
             aliasObj.push_back(Pair("signature", stringFromVch(vchSig)));
 
+
+            string a;
+            if(atod(stringFromVch(vchV0), a) == 0)
+              aliasObj.push_back(Pair("alias", a));
+            string tr;
+            if(atod(stringFromVch(vchV1), tr) == 0)
+              aliasObj.push_back(Pair("trans", tr));
+            else
+              aliasObj.push_back(Pair("trans", "0"));
             oRes.push_back(aliasObj);
 
             mapAliasVchInt[vchV0] = nHeight;
@@ -7609,4 +7735,232 @@ bool vclose(string& v, string& w)
     }
 
     return false;
+}
+
+Value xstat(const Array& params, bool fHelp)
+{
+  if(fHelp || params.size() != 1)
+    throw runtime_error(
+      "xstat <addr> "
+      );
+
+  string l = params[0].get_str();
+  CKeyID keyID;
+  cba keyAddress(l);
+  if(!keyAddress.IsValid())
+  {
+    vector<AliasIndex> vtxPos;
+    vchType vchAlias = vchFromString(l);
+    if (ln1Db->lKey(vchAlias))
+    {
+      if (!ln1Db->lGet(vchAlias, vtxPos))
+        return error("aliasHeight() : failed to read from name DB");
+      if (vtxPos.empty ())
+        return -1;
+
+      AliasIndex& txPos = vtxPos.back ();
+      if(txPos.nHeight + scaleMonitor() <= nBestHeight)
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "extern alias");
+      keyAddress.SetString(txPos.vAddress); 
+    }
+    else
+    {
+      throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid I/OCoin address or unknown alias");
+    }
+  }
+
+  if(!keyAddress.GetKeyID(keyID))
+    throw JSONRPCError(RPC_TYPE_ERROR, "Address does not refer to key");
+
+  CPubKey vchPubKey;
+  pwalletMain->GetPubKey(keyID, vchPubKey);
+
+  Array oRes;
+  string r;
+  Object o;
+  if(pwalletMain->vtx_(vchPubKey, r))
+    o.push_back(Pair("xstat", "true"));
+  else
+    o.push_back(Pair("xstat", "false"));
+  
+  oRes.push_back(o);
+
+  return oRes;
+}
+
+static bool xs(string& s)
+{
+  CKeyID keyID;
+  cba keyAddress(s);
+  if(!keyAddress.IsValid())
+  {
+    vector<AliasIndex> vtxPos;
+    vchType vchAlias = vchFromString(s);
+    if (ln1Db->lKey(vchAlias))
+    {
+      if (!ln1Db->lGet(vchAlias, vtxPos))
+        return error("aliasHeight() : failed to read from name DB");
+      if (vtxPos.empty ())
+        return -1;
+
+      AliasIndex& txPos = vtxPos.back ();
+      if(txPos.nHeight + scaleMonitor() <= nBestHeight)
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "extern alias");
+      keyAddress.SetString(txPos.vAddress); 
+    }
+    else
+    {
+      throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid I/OCoin address or unknown alias");
+    }
+  }
+
+  if(!keyAddress.GetKeyID(keyID))
+    throw JSONRPCError(RPC_TYPE_ERROR, "Address does not refer to key");
+
+  CPubKey vchPubKey;
+  pwalletMain->GetPubKey(keyID, vchPubKey);
+
+  string r;
+  return pwalletMain->vtx_(vchPubKey, r);
+}
+
+Value svtx(const Array& params, bool fHelp)
+{
+    if(fHelp || params.size() != 1)
+        throw runtime_error(
+                "svtx[<alias>]\n"
+                );
+  string ref = params[0].get_str();
+
+  Array oRes;
+  if(xs(ref)) return oRes;
+
+  cba k(ref);
+  if(!k.IsValid())
+  {
+    vector<AliasIndex> vtxPos;
+    vchType vchAlias = vchFromString(ref);
+    if (ln1Db->lKey(vchAlias))
+    {
+      if (!ln1Db->lGet(vchAlias, vtxPos))
+        return error("aliasHeight() : failed to read from name DB");
+      if (vtxPos.empty ())
+        return -1;
+
+      AliasIndex& txPos = vtxPos.back ();
+      if(txPos.nHeight + scaleMonitor() <= nBestHeight)
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "extern alias");
+      k.SetString(txPos.vAddress); 
+    }
+    else
+    {
+      throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid I/OCoin address or unknown alias");
+    }
+  }
+  CKeyID keyID;
+  if(!k.GetKeyID(keyID))
+    throw JSONRPCError(RPC_TYPE_ERROR, "Address does not refer to key");
+
+  CKey key;
+  if(!pwalletMain->GetKey(keyID, key))
+    throw JSONRPCError(RPC_TYPE_ERROR, "external");
+
+  std::map<vchType, int> mapAliasVchInt;
+  std::map<vchType, Object> aliasMapVchObj;
+
+  ENTER_CRITICAL_SECTION(cs_main)
+  {
+    ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    {
+      BOOST_FOREACH(PAIRTYPE(const uint256, __wx__Tx)& item,
+                    pwalletMain->mapWallet)
+        {
+          const __wx__Tx& tx = item.second;
+
+          vchType vchS, vchR, vchKey, vchAes, vchSig;
+          int nOut;
+          if(!tx.vtx(nOut, vchS, vchR, vchKey, vchAes, vchSig))
+            continue;
+
+          string keySenderAddr = stringFromVch(vchS);
+          cba r(keySenderAddr);
+          CKeyID keyID;
+          r.GetKeyID(keyID);
+          CKey key;
+          bool imported=false;
+          if(!pwalletMain->GetKey(keyID, key))
+          {
+            imported=true;
+          }
+
+          const int nHeight = tx.GetHeightInMainChain();
+          if(nHeight == -1)
+            continue;
+          assert(nHeight >= 0);
+
+          string recipient = stringFromVch(vchR);
+
+          Object aliasObj;
+          aliasObj.push_back(Pair("sender", stringFromVch(vchS)));
+
+          
+          aliasObj.push_back(Pair("recipient", recipient));
+          if(imported)
+          aliasObj.push_back(Pair("status", "imported"));
+          else
+          aliasObj.push_back(Pair("status", "exported"));
+
+          vchType k;
+          k.reserve(vchS.size() + vchR.size());
+          k.insert(k.end(), vchR.begin(), vchR.end());
+          k.insert(k.end(), vchS.begin(), vchS.end());
+          if(k1Export.count(k) && k1Export[k].size())
+          {
+          aliasObj.push_back(Pair("pending", "true"));
+          }
+          
+          aliasObj.push_back(Pair("confirmed", "false"));
+
+          aliasObj.push_back(Pair("key", stringFromVch(vchKey)));
+          aliasObj.push_back(Pair("aes256_encrypted", stringFromVch(vchAes)));
+          aliasObj.push_back(Pair("signature", stringFromVch(vchSig)));
+          string a;
+          if(atod(stringFromVch(vchS), a) == 0)
+          aliasObj.push_back(Pair("alias", a));
+          oRes.push_back(aliasObj);
+      }
+    }
+    LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+  }
+  LEAVE_CRITICAL_SECTION(cs_main)
+
+  Array res_;
+  for(unsigned int i=0; i<oRes.size(); i++)
+  {
+     Object& o = oRes[i].get_obj();
+
+     string s = o[0].value_.get_str();
+     string r = o[1].value_.get_str();
+     for(unsigned int j=i+1; j<oRes.size(); j++)
+     {
+       Object& o1 = oRes[j].get_obj();
+       if(s == o1[1].value_.get_str() && r == o1[0].value_.get_str())
+       {
+         o[3].value_ = "true";
+         o1[3].value_ = "true";
+         if(o[7].value_ == ref || o1[7].value_ == ref)
+         {
+           if(o[2].value_.get_str() == "imported")
+           {
+             res_.push_back(o[7].value_);
+           }
+           else
+           {
+             res_.push_back(o1[7].value_);
+           }
+         }
+       }
+     }
+  }
+  return res_;
 }
