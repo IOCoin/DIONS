@@ -60,6 +60,8 @@ extern std::map<uint160, vchType> mapLocatorHashes;
 #define mul_mod(a,b,m) fmod( (double) a * (double) b, m)
 #endif
 
+
+const int __AV__[] = { 0xcf, 0xfe, 0xac, 0xbf, 0xde, 0xfa, 0xcc, 0xab };
 int relay_inv(int x, int y)
 {
     int q, u, v, a, c, t;
