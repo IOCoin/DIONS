@@ -335,7 +335,7 @@ unsigned int scaleMonitor()
   if(!fTestNet)
     return 210000;
   
-  return 20;
+  return 200;
 }
 int GetTxPosHeight(AliasIndex& txPos)
 {
