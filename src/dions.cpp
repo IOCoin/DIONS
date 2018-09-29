@@ -7235,6 +7235,7 @@ Value vtxtrace(const Array& params, bool fHelp)
 
             
             aliasObj.push_back(Pair("recipient", recipient));
+
             if(imported)
               aliasObj.push_back(Pair("status", "imported"));
             else
@@ -7257,6 +7258,9 @@ Value vtxtrace(const Array& params, bool fHelp)
             string a;
             if(atod(stringFromVch(vchS), a) == 0)
               aliasObj.push_back(Pair("alias", a));
+            string tr;
+            if(atod(stringFromVch(vchR), tr) == 0)
+              aliasObj.push_back(Pair("trans", tr));
             oRes.push_back(aliasObj);
         }
       }

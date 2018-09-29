@@ -75,7 +75,7 @@ unsigned int LR_SHIFT__[] =
 
 
 int INTERN_REF0__ = 0x3520;
-int EXTERN_REF0__ = 0x0800;
+int EXTERN_REF0__ = 0x0040;
 uint256 nBestChainTrust = 0;
 uint256 nBestInvalidTrust = 0;
 
