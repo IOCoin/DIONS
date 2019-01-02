@@ -854,7 +854,7 @@ bool AppInit2()
         pwalletMain->SetMaxVersion(nMaxVersion);
     }
 
-    if (fFirstRun)
+    if (fFirstRun && !fViewWallet)
     {
         // Create new keyUser and set as default key
         RandAddSeedPerfmon();
