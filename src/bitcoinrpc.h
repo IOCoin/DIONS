@@ -272,6 +272,7 @@ extern json_spirit::Value downloadDecryptEPID(const json_spirit::Array& params, 
 extern json_spirit::Value updateEncrypt(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value transferAlias(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value transferEncryptedAlias(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value psimplex(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value transferEncryptedExtPredicate(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value decryptAlias(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value primaryCXValidate(const json_spirit::Array& params, bool fHelp);

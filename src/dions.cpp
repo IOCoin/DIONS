@@ -8088,3 +8088,69 @@ Value simplexU(const Array& params, bool fHelp) { if(fHelp || params.size() != 2
     return wtx.GetHash().GetHex();
    
 }
+Value psimplex(const Array& params, bool fHelp) { if(fHelp || params.size() != 2)
+        throw runtime_error(
+                "psimplex <base> <is>"
+                + HelpRequiringPassphrase());
+
+  string k1;
+  vchType vchNodeLocator;
+  k1 =(params[0]).get_str();
+  vchNodeLocator = vchFromValue(params[0]);
+  const char* out__ = (params[1].get_str()).c_str();
+
+  fs::path p = out__;
+  boost::filesystem::path ve = p.parent_path();
+  if(!fs::exists(ve))
+    throw runtime_error("Invalid out put path");
+
+  
+  ln1Db->filter();
+  string alias = params[0].get_str();
+  std::transform(alias.begin(), alias.end(), alias.begin(), ::tolower);
+  string address = "address not found";
+  vchType value;
+
+  vector<AliasIndex> vtxPos;
+  vchType vchAlias = vchFromString(alias);
+  if(ln1Db->lKey(vchAlias))
+  {
+    if(!ln1Db->lGet(vchAlias, vtxPos))
+      return error("aliasHeight() : failed to read from name DB");
+    if(vtxPos.empty())
+      return -1;
+
+    AliasIndex& txPos = vtxPos.back();
+    if(txPos.nHeight + scaleMonitor() <= nBestHeight)
+      throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "extern alias");
+    address = txPos.vAddress;
+    value = txPos.vValue;
+  }
+  else
+  {
+    throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "DION does not exist.");
+  }
+
+  //return address; 
+  string val = stringFromVch(value); 
+
+  bool fInvalid = false;
+  vector<unsigned char> asK = DecodeBase64(val.c_str(), &fInvalid);
+
+  string v = stringFromVch(asK);
+  try
+  {
+    stringstream is(v, ios_base::in | ios_base::binary);   
+    filtering_streambuf<input> in__;
+    in__.push(gzip_decompressor());
+    in__.push(is);
+    ofstream file__(out__, ios_base::binary);
+    boost::iostreams::copy(in__, file__);
+  }
+  catch(std::exception& e)
+  {
+    std::cerr << e.what() << std::endl; 
+  }
+
+  return true;
+}

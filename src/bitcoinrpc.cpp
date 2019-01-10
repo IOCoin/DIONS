@@ -345,6 +345,7 @@ static const CRPCCommand vRPCCommands[] =
     { "updateAliasFile",     &updateAliasFile,     false,  false },
     { "primaryCXValidate",     &primaryCXValidate,     false,  false },
     { "updateEncryptedAlias",     &updateEncryptedAlias,     false,  false },
+    { "psimplex",     &psimplex,     false,  false },
     { "updateEncryptedAliasFile",     &updateEncryptedAliasFile,     false,  false },
     { "transferAlias",     &transferAlias,     false,  false },
     { "transferEncryptedAlias",     &transferEncryptedAlias,     false,  false },
