@@ -160,6 +160,11 @@ Value getnewaddress(const Array& params, bool fHelp)
             "If [account] is specified, it is added to the address book "
             "so payments received with the address will be credited to [account].");
 
+    if(fViewWallet)
+      throw runtime_error(
+      "wallet configured as : view\n"
+      );
+
     // Parse the account first so we don't generate a key if there's an error
     string strAccount;
     if(params.size() > 0)

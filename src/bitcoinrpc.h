@@ -267,6 +267,7 @@ extern json_spirit::Value mapProject(const json_spirit::Array& params, bool fHel
 extern json_spirit::Value alias(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value statusList(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value downloadDecrypt(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value simplexU(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value downloadDecryptEPID(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value updateEncrypt(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value transferAlias(const json_spirit::Array& params, bool fHelp);

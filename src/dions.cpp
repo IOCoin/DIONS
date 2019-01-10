@@ -7976,3 +7976,115 @@ Value svtx(const Array& params, bool fHelp)
   }
   return res_;
 }
+Value simplexU(const Array& params, bool fHelp) { if(fHelp || params.size() != 2)
+        throw runtime_error(
+                "simplexU <base> <forward>"
+                + HelpRequiringPassphrase());
+    string locatorStr = params[0].get_str();
+
+    std::transform(locatorStr.begin(), locatorStr.end(), locatorStr.begin(), ::tolower);
+    const vchType vchAlias = vchFromValue(locatorStr);
+    const char* locatorFile = (params[1].get_str()).c_str();
+
+    fs::path p = locatorFile;
+    if(!fs::exists(p))
+      throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Locator file does not exist");
+
+    ifstream file(locatorFile, ios_base::in | ios_base::binary);
+    filtering_streambuf<input> in;
+    in.push(gzip_compressor());
+    in.push(file);
+
+    stringstream ss;
+    boost::iostreams::copy(in, ss);
+    string s = ss.str();
+    vchType sv = vchFromString(s);
+    string r = EncodeBase64(&sv[0], sv.size());
+
+    if(r.size() > MAX_XUNIT_LENGTH) 
+      throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "xunit size exceeded");
+
+    
+    __wx__Tx wtx;
+    wtx.nVersion = CTransaction::DION_TX_VERSION;
+    CScript scriptPubKeyOrig;
+
+    if(params.size() == 3)
+    {
+      string strAddress = params[2].get_str();
+      uint160 hash160;
+      bool isValid = AddressToHash160(strAddress, hash160);
+      if(!isValid)
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid dions address");
+      scriptPubKeyOrig.SetBitcoinAddress(strAddress);
+    }
+
+    CScript scriptPubKey;
+    scriptPubKey << OP_ALIAS_RELAY << vchAlias << vchFromString(r) << OP_2DROP << OP_DROP;
+
+    ENTER_CRITICAL_SECTION(cs_main)
+    {
+      ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
+      {
+          if(mapState.count(vchAlias) && mapState[vchAlias].size())
+          {
+            error("updateAlias() : there are %lu pending operations on that alias, including %s",
+                      mapState[vchAlias].size(),
+                      mapState[vchAlias].begin()->GetHex().c_str());
+            LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+            LEAVE_CRITICAL_SECTION(cs_main)
+            throw runtime_error("there are pending operations on that alias");
+          }
+
+          EnsureWalletIsUnlocked();
+
+          LocatorNodeDB aliasCacheDB("r");
+          CTransaction tx;
+          if(!aliasTx(aliasCacheDB, vchAlias, tx))
+          {
+              LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+              LEAVE_CRITICAL_SECTION(cs_main)
+              throw runtime_error("could not find a coin with this alias");
+          }
+
+          if(params.size() == 2)
+          {
+            string strAddress = "";
+            aliasAddress(tx, strAddress);
+            if(strAddress == "")
+              throw runtime_error("alias has no associated address");
+
+            uint160 hash160;
+            bool isValid = AddressToHash160(strAddress, hash160);
+            if(!isValid)
+              throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid dions address");
+            scriptPubKeyOrig.SetBitcoinAddress(strAddress);
+          }
+    
+          uint256 wtxInHash = tx.GetHash();
+
+          if(!pwalletMain->mapWallet.count(wtxInHash))
+          {
+            error("updateAlias() : this coin is not in your wallet %s",
+                    wtxInHash.GetHex().c_str());
+            LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+            LEAVE_CRITICAL_SECTION(cs_main)
+              throw runtime_error("this coin is not in your wallet");
+          }
+
+          __wx__Tx& wtxIn = pwalletMain->mapWallet[wtxInHash];
+          scriptPubKey += scriptPubKeyOrig;
+          string strError = txRelay(scriptPubKey, CTRL__, wtxIn, wtx, false);
+          if(strError != "")
+          {
+            LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+            LEAVE_CRITICAL_SECTION(cs_main)
+            throw JSONRPCError(RPC_WALLET_ERROR, strError);
+         }
+      }
+      LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    }
+    LEAVE_CRITICAL_SECTION(cs_main)
+    return wtx.GetHash().GetHex();
+   
+}

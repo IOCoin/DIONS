@@ -1845,6 +1845,8 @@ void StartNode(void* parg)
     // Mine proof-of-stake blocks in the background
     if (!GetBoolArg("-staking", true))
         printf("Staking disabled\n");
+    else if(fViewWallet)
+        printf("Staking disabled : view wallet only\n");
     else
         if (!NewThread(ThreadStakeMiner, pwalletMain))
             printf("Error: NewThread(ThreadStakeMiner) failed\n");
