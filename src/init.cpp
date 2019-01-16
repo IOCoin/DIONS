@@ -278,6 +278,7 @@ std::string HelpMessage()
         "  -daemon                " + _("Run in the background as a daemon and accept commands") + "\n" +
 #endif
         "  -testnet               " + _("Use the test network") + "\n" +
+        "  -viewwallet               " + _("view wallet only") + "\n" +
         "  -debug                 " + _("Output extra debugging information. Implies all other -debug* options") + "\n" +
         "  -debugnet              " + _("Output extra network debugging information") + "\n" +
         "  -logtimestamps         " + _("Prepend debug output with timestamp") + "\n" +
@@ -411,6 +412,8 @@ bool AppInit2()
     if (fTestNet) {
         SoftSetBoolArg("-irc", true);
     }
+
+    fViewWallet = GetBoolArg("-viewwallet");
 
     if (mapArgs.count("-bind")) {
         // when specifying an explicit binding address, you want to listen on it
@@ -851,12 +854,13 @@ bool AppInit2()
         pwalletMain->SetMaxVersion(nMaxVersion);
     }
 
-    if (fFirstRun)
+    if (fFirstRun && !fViewWallet)
     {
         // Create new keyUser and set as default key
         RandAddSeedPerfmon();
 
         CPubKey newDefaultKey;
+        printf("XXXX init gkfkp\n");
         if (pwalletMain->GetKeyFromPool(newDefaultKey, false)) {
             pwalletMain->SetDefaultKey(newDefaultKey);
             if (!pwalletMain->SetAddressBookName(pwalletMain->vchDefaultKey.GetID(), ""))

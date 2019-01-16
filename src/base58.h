@@ -276,7 +276,7 @@ class cba : public CBase58Data
 {
 public:
     enum
-    {
+    {   //REVERT EXP DELTA
         PUBKEY_ADDRESS = 103, // start with `i`
         SCRIPT_ADDRESS = 85,
         PUBKEY_ADDRESS_TEST = 111,

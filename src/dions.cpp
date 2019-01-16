@@ -60,6 +60,14 @@ extern std::map<uint160, vchType> mapLocatorHashes;
 #define mul_mod(a,b,m) fmod( (double) a * (double) b, m)
 #endif
 
+
+const int __AV__[] = { 
+                       0xcf, 0xfe, 0xac, 0xbf, 0xde, 0xfa, 0xcc, 0xab,
+                       0xef, 0x26, 0x10, 0xca, 0xbd, 0x45, 0x37, 0xff,
+                       0xce, 0x06, 0x34, 0xac, 0xdc, 0x29, 0x26, 0xca,
+                       0x2c, 0x19, 0xc2, 0xff, 0xef, 0x08, 0xdc, 0x2f,
+                       0xff, 0x42, 0xcd, 0xaf, 0x2d, 0x31, 0xcf, 0xff 
+                     };
 int relay_inv(int x, int y)
 {
     int q, u, v, a, c, t;
@@ -330,7 +338,7 @@ unsigned int scaleMonitor()
   if(!fTestNet)
     return 210000;
   
-  return 20;
+  return 200;
 }
 int GetTxPosHeight(AliasIndex& txPos)
 {
@@ -7230,6 +7238,7 @@ Value vtxtrace(const Array& params, bool fHelp)
 
             
             aliasObj.push_back(Pair("recipient", recipient));
+
             if(imported)
               aliasObj.push_back(Pair("status", "imported"));
             else
@@ -7252,6 +7261,9 @@ Value vtxtrace(const Array& params, bool fHelp)
             string a;
             if(atod(stringFromVch(vchS), a) == 0)
               aliasObj.push_back(Pair("alias", a));
+            string tr;
+            if(atod(stringFromVch(vchR), tr) == 0)
+              aliasObj.push_back(Pair("trans", tr));
             oRes.push_back(aliasObj);
         }
       }
@@ -7963,4 +7975,182 @@ Value svtx(const Array& params, bool fHelp)
      }
   }
   return res_;
+}
+Value simplexU(const Array& params, bool fHelp) { if(fHelp || params.size() != 2)
+        throw runtime_error(
+                "simplexU <base> <forward>"
+                + HelpRequiringPassphrase());
+    string locatorStr = params[0].get_str();
+
+    std::transform(locatorStr.begin(), locatorStr.end(), locatorStr.begin(), ::tolower);
+    const vchType vchAlias = vchFromValue(locatorStr);
+    const char* locatorFile = (params[1].get_str()).c_str();
+
+    fs::path p = locatorFile;
+    if(!fs::exists(p))
+      throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Locator file does not exist");
+
+    ifstream file(locatorFile, ios_base::in | ios_base::binary);
+    filtering_streambuf<input> in;
+    in.push(gzip_compressor());
+    in.push(file);
+
+    stringstream ss;
+    boost::iostreams::copy(in, ss);
+    string s = ss.str();
+    vchType sv = vchFromString(s);
+    string r = EncodeBase64(&sv[0], sv.size());
+
+    if(r.size() > MAX_XUNIT_LENGTH) 
+      throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "xunit size exceeded");
+
+    
+    __wx__Tx wtx;
+    wtx.nVersion = CTransaction::DION_TX_VERSION;
+    CScript scriptPubKeyOrig;
+
+    if(params.size() == 3)
+    {
+      string strAddress = params[2].get_str();
+      uint160 hash160;
+      bool isValid = AddressToHash160(strAddress, hash160);
+      if(!isValid)
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid dions address");
+      scriptPubKeyOrig.SetBitcoinAddress(strAddress);
+    }
+
+    CScript scriptPubKey;
+    scriptPubKey << OP_ALIAS_RELAY << vchAlias << vchFromString(r) << OP_2DROP << OP_DROP;
+
+    ENTER_CRITICAL_SECTION(cs_main)
+    {
+      ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
+      {
+          if(mapState.count(vchAlias) && mapState[vchAlias].size())
+          {
+            error("updateAlias() : there are %lu pending operations on that alias, including %s",
+                      mapState[vchAlias].size(),
+                      mapState[vchAlias].begin()->GetHex().c_str());
+            LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+            LEAVE_CRITICAL_SECTION(cs_main)
+            throw runtime_error("there are pending operations on that alias");
+          }
+
+          EnsureWalletIsUnlocked();
+
+          LocatorNodeDB aliasCacheDB("r");
+          CTransaction tx;
+          if(!aliasTx(aliasCacheDB, vchAlias, tx))
+          {
+              LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+              LEAVE_CRITICAL_SECTION(cs_main)
+              throw runtime_error("could not find a coin with this alias");
+          }
+
+          if(params.size() == 2)
+          {
+            string strAddress = "";
+            aliasAddress(tx, strAddress);
+            if(strAddress == "")
+              throw runtime_error("alias has no associated address");
+
+            uint160 hash160;
+            bool isValid = AddressToHash160(strAddress, hash160);
+            if(!isValid)
+              throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid dions address");
+            scriptPubKeyOrig.SetBitcoinAddress(strAddress);
+          }
+    
+          uint256 wtxInHash = tx.GetHash();
+
+          if(!pwalletMain->mapWallet.count(wtxInHash))
+          {
+            error("updateAlias() : this coin is not in your wallet %s",
+                    wtxInHash.GetHex().c_str());
+            LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+            LEAVE_CRITICAL_SECTION(cs_main)
+              throw runtime_error("this coin is not in your wallet");
+          }
+
+          __wx__Tx& wtxIn = pwalletMain->mapWallet[wtxInHash];
+          scriptPubKey += scriptPubKeyOrig;
+          string strError = txRelay(scriptPubKey, CTRL__, wtxIn, wtx, false);
+          if(strError != "")
+          {
+            LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+            LEAVE_CRITICAL_SECTION(cs_main)
+            throw JSONRPCError(RPC_WALLET_ERROR, strError);
+         }
+      }
+      LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    }
+    LEAVE_CRITICAL_SECTION(cs_main)
+    return wtx.GetHash().GetHex();
+   
+}
+Value psimplex(const Array& params, bool fHelp) { if(fHelp || params.size() != 2)
+        throw runtime_error(
+                "psimplex <base> <is>"
+                + HelpRequiringPassphrase());
+
+  string k1;
+  vchType vchNodeLocator;
+  k1 =(params[0]).get_str();
+  vchNodeLocator = vchFromValue(params[0]);
+  const char* out__ = (params[1].get_str()).c_str();
+
+  fs::path p = out__;
+  boost::filesystem::path ve = p.parent_path();
+  if(!fs::exists(ve))
+    throw runtime_error("Invalid out put path");
+
+  
+  ln1Db->filter();
+  string alias = params[0].get_str();
+  std::transform(alias.begin(), alias.end(), alias.begin(), ::tolower);
+  string address = "address not found";
+  vchType value;
+
+  vector<AliasIndex> vtxPos;
+  vchType vchAlias = vchFromString(alias);
+  if(ln1Db->lKey(vchAlias))
+  {
+    if(!ln1Db->lGet(vchAlias, vtxPos))
+      return error("aliasHeight() : failed to read from name DB");
+    if(vtxPos.empty())
+      return -1;
+
+    AliasIndex& txPos = vtxPos.back();
+    if(txPos.nHeight + scaleMonitor() <= nBestHeight)
+      throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "extern alias");
+    address = txPos.vAddress;
+    value = txPos.vValue;
+  }
+  else
+  {
+    throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "DION does not exist.");
+  }
+
+  //return address; 
+  string val = stringFromVch(value); 
+
+  bool fInvalid = false;
+  vector<unsigned char> asK = DecodeBase64(val.c_str(), &fInvalid);
+
+  string v = stringFromVch(asK);
+  try
+  {
+    stringstream is(v, ios_base::in | ios_base::binary);   
+    filtering_streambuf<input> in__;
+    in__.push(gzip_decompressor());
+    in__.push(is);
+    ofstream file__(out__, ios_base::binary);
+    boost::iostreams::copy(in__, file__);
+  }
+  catch(std::exception& e)
+  {
+    std::cerr << e.what() << std::endl; 
+  }
+
+  return true;
 }
