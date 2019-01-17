@@ -6946,6 +6946,10 @@ Value downloadDecryptEPID(const Array& params, bool fHelp)
 {
   return vEPID(params, fHelp);
 }
+Value ioget(const Array& params, bool fHelp)
+{
+  return psimplex(params, fHelp);
+}
 
 bool relaySigFrame(int i, vchType& s)
 {

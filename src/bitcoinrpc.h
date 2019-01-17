@@ -270,6 +270,7 @@ extern json_spirit::Value downloadDecrypt(const json_spirit::Array& params, bool
 extern json_spirit::Value simplexU(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value downloadDecryptEPID(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value updateEncrypt(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value ioget(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value transferAlias(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value transferEncryptedAlias(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value psimplex(const json_spirit::Array& params, bool fHelp);
