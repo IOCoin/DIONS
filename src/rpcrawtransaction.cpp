@@ -282,7 +282,6 @@ Array listunspent__(double p, double& iR)
         entry.push_back(Pair("scriptPubKey", HexStr(pk.begin(), pk.end())));
         entry.push_back(Pair("amount",ValueFromAmount(nValue)));
         i += ValueFromAmount(nValue).get_real();
-        printf("XXXX i %f\n", i);
         entry.push_back(Pair("confirmations",out.nDepth));
         results.push_back(entry);
         if(i - p >= 0.001)
@@ -290,7 +289,6 @@ Array listunspent__(double p, double& iR)
     }
 
     iR = i;
-    printf("XXXX i %f XXXX\n", i);
     if(i - p < 0.001)
     {
       Array t;
