@@ -166,6 +166,11 @@ Value importwalletRT(const Array& params, bool fHelp)
             "importwalletRT <filename>\n"
             "Imports keys from a wallet dump file (see dumpwallet).");
 
+    if(fViewWallet)
+      throw runtime_error(
+      "wallet configured as : view"
+      );
+
     EnsureWalletIsUnlocked();
 
     ifstream file;
@@ -427,6 +432,11 @@ Value importwallet(const Array& params, bool fHelp)
             "importwallet <filename>\n"
             "Imports keys from a wallet dump file (see dumpwallet).");
 
+    if(fViewWallet)
+      throw runtime_error(
+      "wallet configured as : view"
+      );
+
     EnsureWalletIsUnlocked();
 
     ifstream file;
@@ -671,5 +681,26 @@ Value dumpwallet(const Array& params, bool fHelp)
     file << "\n";
     file << "# End of dump\n";
     file.close();
+    return Value::null;
+}
+Value trc(const Array& params, bool fHelp)
+{
+    if (fHelp || params.size() != 1)
+        throw runtime_error(
+            "importwalletRT <filename>\n"
+            "Imports keys from a wallet dump file (see dumpwallet).");
+
+    if(!fViewWallet)
+      throw runtime_error(
+      "trc wallet must be configured as view"
+      );
+
+    EnsureWalletIsUnlocked();
+
+    ifstream file;
+    file.open(params[0].get_str().c_str());
+    if (!file.is_open())
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "Cannot open trc file");
+
     return Value::null;
 }
