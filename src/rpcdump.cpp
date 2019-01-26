@@ -695,7 +695,6 @@ Value trc(const Array& params, bool fHelp)
       );
 
     EnsureWalletIsUnlocked();
-
     ifstream file;
     file.open(params[0].get_str().c_str());
     if (!file.is_open())
