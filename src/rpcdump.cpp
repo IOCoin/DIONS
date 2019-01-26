@@ -687,8 +687,7 @@ Value trc(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() != 1)
         throw runtime_error(
-            "importwalletRT <filename>\n"
-            "Imports keys from a wallet dump file (see dumpwallet).");
+            "trc <filename>");
 
     if(!fViewWallet)
       throw runtime_error(
