@@ -703,3 +703,12 @@ Value trc(const Array& params, bool fHelp)
 
     return Value::null;
 }
+
+Value trcbase(const Array& params, bool fHelp)
+{
+    if (fHelp || params.size() < 1 || params.size() > 2)
+        throw runtime_error(
+            "trcbase <base>");
+
+  return Value::null;
+}
