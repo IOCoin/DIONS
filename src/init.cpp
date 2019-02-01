@@ -414,6 +414,11 @@ bool AppInit2()
     }
 
     fViewWallet = GetBoolArg("-viewwallet");
+    if(fViewWallet)
+    {
+      if(filesystem::exists(GetDataDir() / "wallet.dat"))
+        return InitError(_("Initialization error. Configured as view wallet but wallet.dat file exists in configuration directory. I/O Coin shutting down."));
+    }
 
     if (mapArgs.count("-bind")) {
         // when specifying an explicit binding address, you want to listen on it
