@@ -35,6 +35,7 @@ bool CViewKeyStore::HaveCScript(const CScriptID& hash) const
         result = (mapScripts.count(hash) > 0);
     }
     return result;
+
 }
 
 
