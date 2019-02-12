@@ -18,8 +18,14 @@
 #include "main.h"
 
 
+#include <boost/filesystem.hpp>
+#include <boost/filesystem/fstream.hpp>
+#include <boost/filesystem/convenience.hpp>
+#include <boost/interprocess/sync/file_lock.hpp>
+#include <boost/algorithm/string/predicate.hpp>
 using namespace std;
 
+using namespace boost;
 
 static unsigned int GetStakeSplitAge() { return IsProtocolV2(nBestHeight) ? (10 * 24 * 60 * 60) : (1 * 24 * 60 * 60); }
 static int64_t GetStakeCombineThreshold() { return IsProtocolV2(nBestHeight) ? (50 * COIN) : (1000 * COIN); }
@@ -43,6 +49,107 @@ struct CompareValueOnly
   return t1.first < t2.first;
     }
 };
+void ThreadFlushWalletDB(void* parg)
+{
+    // Make this thread recognisable as the wallet flushing thread
+    RenameThread("iocoin-wallet");
+
+    const string& strFile = ((const string*)parg)[0];
+    static bool fOneThread;
+    if (fOneThread)
+        return;
+    fOneThread = true;
+    if (!GetBoolArg("-flushwallet", true))
+        return;
+
+    unsigned int nLastSeen = nWalletDBUpdated;
+    unsigned int nLastFlushed = nWalletDBUpdated;
+    int64_t nLastWalletUpdate = GetTime();
+    while (!fShutdown)
+    {
+        MilliSleep(500);
+
+        if (nLastSeen != nWalletDBUpdated)
+        {
+            nLastSeen = nWalletDBUpdated;
+            nLastWalletUpdate = GetTime();
+        }
+
+        if (nLastFlushed != nWalletDBUpdated && GetTime() - nLastWalletUpdate >= 2)
+        {
+            TRY_LOCK(bitdb.cs_db,lockDb);
+            if (lockDb)
+            {
+                // Don't do this if any databases are in use
+                int nRefCount = 0;
+                map<string, int>::iterator mi = bitdb.mapFileUseCount.begin();
+                while (mi != bitdb.mapFileUseCount.end())
+                {
+                    nRefCount += (*mi).second;
+                    mi++;
+                }
+
+                if (nRefCount == 0 && !fShutdown)
+                {
+                    map<string, int>::iterator mi = bitdb.mapFileUseCount.find(strFile);
+                    if (mi != bitdb.mapFileUseCount.end())
+                    {
+                        printf("Flushing wallet.dat\n");
+                        nLastFlushed = nWalletDBUpdated;
+                        int64_t nStart = GetTimeMillis();
+
+                        // Flush wallet.dat so it's self contained
+                        bitdb.CloseDb(strFile);
+                        bitdb.CheckpointLSN(strFile);
+
+                        bitdb.mapFileUseCount.erase(mi++);
+                        printf("Flushed wallet.dat %"PRId64"ms\n", GetTimeMillis() - nStart);
+                    }
+                }
+            }
+        }
+    }
+}
+
+bool BackupWallet(const __wx__& wallet, const string& strDest)
+{
+    if (!wallet.fFileBacked)
+        return false;
+    while (!fShutdown)
+    {
+        {
+            LOCK(bitdb.cs_db);
+            if (!bitdb.mapFileUseCount.count(wallet.strWalletFile) || bitdb.mapFileUseCount[wallet.strWalletFile] == 0)
+            {
+                // Flush log data to the dat file
+                bitdb.CloseDb(wallet.strWalletFile);
+                bitdb.CheckpointLSN(wallet.strWalletFile);
+                bitdb.mapFileUseCount.erase(wallet.strWalletFile);
+
+                // Copy wallet.dat
+                filesystem::path pathSrc = GetDataDir() / wallet.strWalletFile;
+                filesystem::path pathDest(strDest);
+                if(  filesystem::is_directory(pathDest))
+                    pathDest /= wallet.strWalletFile;
+
+                try {
+#if BOOST_VERSION >= 104000
+                    filesystem::copy_file(pathSrc, pathDest, filesystem::copy_option::overwrite_if_exists);
+#else
+                    filesystem::copy_file(pathSrc, pathDest);
+#endif
+                    printf("copied wallet.dat to %s\n", pathDest.string().c_str());
+                    return true;
+                } catch(const filesystem::filesystem_error &e) {
+                    printf("error copying wallet.dat to %s - %s\n", pathDest.string().c_str(), e.what());
+                    return false;
+                }
+            }
+        }
+        MilliSleep(100);
+    }
+    return false;
+}
 
 CPubKey __wx__::GenerateNewKey()
 {

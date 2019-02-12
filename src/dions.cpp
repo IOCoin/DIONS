@@ -8135,7 +8135,6 @@ Value psimplex(const Array& params, bool fHelp) { if(fHelp || params.size() != 2
     throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "DION does not exist.");
   }
 
-  //return address; 
   string val = stringFromVch(value); 
 
   bool fInvalid = false;

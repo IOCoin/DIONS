@@ -414,6 +414,11 @@ bool AppInit2()
     }
 
     fViewWallet = GetBoolArg("-viewwallet");
+    if(fViewWallet)
+    {
+      if(filesystem::exists(GetDataDir() / "wallet.dat"))
+        return InitError(_("Initialization error. Configured as view wallet but wallet.dat file exists in configuration directory. I/O Coin shutting down."));
+    }
 
     if (mapArgs.count("-bind")) {
         // when specifying an explicit binding address, you want to listen on it
@@ -860,7 +865,6 @@ bool AppInit2()
         RandAddSeedPerfmon();
 
         CPubKey newDefaultKey;
-        printf("XXXX init gkfkp\n");
         if (pwalletMain->GetKeyFromPool(newDefaultKey, false)) {
             pwalletMain->SetDefaultKey(newDefaultKey);
             if (!pwalletMain->SetAddressBookName(pwalletMain->vchDefaultKey.GetID(), ""))
@@ -872,6 +876,17 @@ bool AppInit2()
     printf(" wallet      %15"PRId64"ms\n", GetTimeMillis() - nStart);
 
     RegisterWallet(pwalletMain);
+
+    if(GetBoolArg("-xscan"))
+    {
+      filesystem::path dc = GetDataDir() / "aliascache.dat";
+      FILE *file = fopen(dc.string().c_str(), "rb");
+      if (file) 
+      {
+        filesystem::path dc__ = GetDataDir() / "aliascache.dat.old";
+        RenameOver(dc, dc__);
+      }
+    }
 
     ln1Db = new LocatorNodeDB("cr+");
     CBlockIndex *pindexRescan = pindexBest;
@@ -899,16 +914,7 @@ bool AppInit2()
 
         if(GetBoolArg("-xscan") || GetBoolArg("-upgradewallet"))
         {
-          filesystem::path dc = GetDataDir() / "aliascache.dat";
-          FILE *file = fopen(dc.string().c_str(), "rb");
-          if (file) 
-          {
-            filesystem::path dc__ = GetDataDir() / "aliascache.dat.old";
-            RenameOver(dc, dc__);
-            dc = filesystem::path(GetDataDir())/"aliascache.dat";
-            ln1Db = new LocatorNodeDB("cr+");
-            xsc(pindexGenesisBlock);
-          }
+          xsc(pindexGenesisBlock);
         }
     }
 
