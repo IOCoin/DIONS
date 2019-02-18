@@ -147,6 +147,7 @@ public:
     CPubKey GenerateNewKey();
     // Adds a key to the store, and saves it to disk.
     bool ak(const CKey& key);
+    bool akExt(const CKeyID& key);
     // Adds a key to the store, without saving it to disk (used by LoadWallet)
     bool LoadKey(const CKey& key) { return CCryptoKeyStore::ak(key); }
     // Load metadata (used by LoadWallet)
@@ -169,6 +170,7 @@ public:
     bool sync(const CPubKey &vchPubKey, const std::vector<unsigned char> &vchCryptedSecret);
     // Adds an encrypted key to the store, without saving it to disk (used by LoadWallet)
     bool LoadCryptedKey(const CPubKey &vchPubKey, const std::vector<unsigned char> &vchCryptedSecret);
+    bool LoadViewKey(const CKeyID &vchPubKey, const std::vector<unsigned char> &vchCryptedSecret);
     bool AddCScript(const CScript& redeemScript);
     bool LoadCScript(const CScript& redeemScript);
     

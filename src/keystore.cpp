@@ -26,6 +26,19 @@ bool CBasicKeyStore::ak(const CKey& key)
     }
     return true;
 }
+bool CBasicKeyStore::akExt(const CKeyID& ckid)
+{
+    bool fCompressed = false;
+    CKey key;
+    CSecret secret;
+    vector<unsigned char> tmp; tmp.resize(0x20);
+    {
+        LOCK(cs_KeyStore);
+        mapKeys[ckid] = make_pair(secret, fCompressed);
+        mapPubKeys[ckid] = tmp;
+    }
+    return true;
+}
 
 bool CBasicKeyStore::AddCScript(const CScript& redeemScript)
 {
@@ -148,6 +161,15 @@ bool CCryptoKeyStore::ak(const CKey& key)
     }
     return true;
 }
+bool CCryptoKeyStore::akExt(const CKeyID& ckid)
+{
+    {
+      LOCK(cs_KeyStore);
+      if(!IsCrypted())
+        return CBasicKeyStore::akExt(ckid);
+    }
+    return true;
+}
 
 
 bool CCryptoKeyStore::sync(const CPubKey &vchPubKey, const std::vector<unsigned char> &vchCryptedSecret)
@@ -160,7 +182,18 @@ bool CCryptoKeyStore::sync(const CPubKey &vchPubKey, const std::vector<unsigned 
         mapCryptedKeys[vchPubKey.GetID()] = make_pair(vchPubKey, vchCryptedSecret);
     }
     return true;
-}
+} 
+bool CCryptoKeyStore::sync(const CKeyID &k, const std::vector<unsigned char> &vchCryptedSecret)
+{
+    {
+        LOCK(cs_KeyStore);
+        if (!SetCrypted())
+            return false;
+
+        CBasicKeyStore::akExt(k);
+    }
+    return true;
+} 
 
 bool CCryptoKeyStore::GetKey(const CKeyID &address, CKey& keyOut) const
 {

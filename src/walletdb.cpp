@@ -346,6 +346,20 @@ ReadKeyValue(__wx__* pwallet, CDataStream& ssKey, CDataStream& ssValue,
             if (pwallet->nMasterKeyMaxID < nID)
                 pwallet->nMasterKeyMaxID = nID;
         }
+        else if (strType == "viewkey")
+        {
+            wss.nCKeys++;
+            CKeyID k;
+            ssKey >> k;
+            vector<unsigned char> vchPrivKey;
+            ssValue >> vchPrivKey;
+            if (!pwallet->LoadViewKey(k, vchPrivKey))
+            {
+                strErr = "Error reading wallet database: LoadCryptedKey failed";
+                return false;
+            }
+            wss.fIsEncrypted = true;
+        }
         else if (strType == "ckey")
         {
             wss.nCKeys++;
