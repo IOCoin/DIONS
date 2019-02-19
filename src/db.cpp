@@ -643,7 +643,7 @@ bool CAddrDB::Read(CAddrMan& addr)
                   else if(op == OP_ALIAS_RELAY && lKey(vvchArgs[0]))
                   {
                     txPos2.vValue = vvchArgs[1];
-                  vtxPos.push_back(txPos2);
+                    vtxPos.push_back(txPos2);
                     lPut(vvchArgs[0], vtxPos);
                   }
                   else

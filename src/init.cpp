@@ -300,6 +300,7 @@ std::string HelpMessage()
         "  -alertnotify=<cmd>     " + _("Execute command when a relevant alert is received (%s in cmd is replaced by message)") + "\n" +
         "  -upgradewallet         " + _("Upgrade wallet to latest format") + "\n" +
         "  -keypool=<n>           " + _("Set key pool size to <n> (default: 100)") + "\n" +
+        "  -prune                " + _("Prune the block chain ") + "\n" +
         "  -rescan                " + _("Rescan the block chain for missing wallet transactions") + "\n" +
         "  -xscan                " + _("Rescan the block chain for aliases") + "\n" +
         "  -salvagewallet         " + _("Attempt to recover private keys from a corrupt wallet.dat") + "\n" +
@@ -890,7 +891,7 @@ bool AppInit2()
 
     ln1Db = new LocatorNodeDB("cr+");
     CBlockIndex *pindexRescan = pindexBest;
-    if(GetBoolArg("-rescan") || GetBoolArg("-xscan") || GetBoolArg("-upgradewallet"))
+    if(GetBoolArg("-prune") || GetBoolArg("-rescan") || GetBoolArg("-xscan") || GetBoolArg("-upgradewallet"))
     {
         pindexRescan = pindexGenesisBlock;
     }
@@ -904,6 +905,14 @@ bool AppInit2()
     if (pindexBest != pindexRescan && pindexBest && pindexRescan && pindexBest->nHeight > pindexRescan->nHeight)
     {
         uiInterface.InitMessage(_("Rescanning..."));
+        if(GetBoolArg("-prune"))
+        {
+          printf("Pruning last %i blocks (from block %i)...\n", pindexBest->nHeight - pindexRescan->nHeight, pindexRescan->nHeight);
+          nStart = GetTimeMillis();
+          pwalletMain->prune(pindexRescan, true);
+          printf(" prune      %15"PRId64"ms\n", GetTimeMillis() - nStart);
+        }
+
         if(GetBoolArg("-rescan"))
         {
           printf("Rescanning last %i blocks (from block %i)...\n", pindexBest->nHeight - pindexRescan->nHeight, pindexRescan->nHeight);

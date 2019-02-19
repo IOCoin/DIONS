@@ -135,7 +135,9 @@ void SyncWithWallets(const CTransaction& tx, const CBlock* pblock = NULL, bool f
 bool ProcessBlock(CNode* pfrom, CBlock* pblock);
 bool CheckDiskSpace(uint64_t nAdditionalBytes=0);
 FILE* OpenBlockFile(unsigned int nFile, unsigned int nBlockPos, const char* pszMode="rb");
+FILE* OpenBlockFilePrune(unsigned int nFile, unsigned int nBlockPos, const char* pszMode="rb");
 FILE* AppendBlockFile(unsigned int& nFileRet);
+FILE* AppendBlockFilePrune(unsigned int& nFileRet);
 bool LoadBlockIndex(bool fAllowNew=true);
 void PrintBlockTree();
 CBlockIndex* FindBlockByHeight(int nHeight);
@@ -1056,6 +1058,32 @@ public:
             nIndex >>= 1;
         }
         return hash;
+    }
+
+    bool WriteToDiskPrune(unsigned int& nFileRet, unsigned int& nBlockPosRet)
+    {
+        // Open history file to append
+        CAutoFile fileout = CAutoFile(AppendBlockFilePrune(nFileRet), SER_DISK, CLIENT_VERSION);
+        if (!fileout)
+            return error("CBlock::WriteToDisk() : AppendBlockFile failed");
+
+        // Write index header
+        unsigned int nSize = fileout.GetSerializeSize(*this);
+        fileout << FLATDATA(pchMessageStart) << nSize;
+
+        // Write block
+        long fileOutPos = ftell(fileout);
+        if (fileOutPos < 0)
+            return error("CBlock::WriteToDisk() : ftell failed");
+        nBlockPosRet = fileOutPos;
+        fileout << *this;
+
+        // Flush stdio buffers and commit to disk before returning
+        fflush(fileout);
+        if (!IsInitialBlockDownload() || (nBestHeight+1) % 500 == 0)
+            FileCommit(fileout);
+
+        return true;
     }
 
 

@@ -2887,6 +2887,29 @@ static filesystem::path BlockFilePath(unsigned int nFile)
     return GetDataDir() / strBlockFn;
 }
 
+static filesystem::path BlockFilePathPrune(unsigned int nFile)
+{
+    string strBlockFn = strprintf("blkprune%04u.dat", nFile);
+    return GetDataDir() / strBlockFn;
+}
+FILE* OpenBlockFilePrune(unsigned int nFile, unsigned int nBlockPos, const char* pszMode)
+{
+    if ((nFile < 1) || (nFile == (unsigned int) -1))
+        return NULL;
+    FILE* file = fopen(BlockFilePathPrune(nFile).string().c_str(), pszMode);
+    if (!file)
+        return NULL;
+    if (nBlockPos != 0 && !strchr(pszMode, 'a') && !strchr(pszMode, 'w'))
+    {
+        if (fseek(file, nBlockPos, SEEK_SET) != 0)
+        {
+            fclose(file);
+            return NULL;
+        }
+    }
+    return file;
+}
+
 FILE* OpenBlockFile(unsigned int nFile, unsigned int nBlockPos, const char* pszMode)
 {
     if ((nFile < 1) || (nFile == (unsigned int) -1))
@@ -2906,6 +2929,27 @@ FILE* OpenBlockFile(unsigned int nFile, unsigned int nBlockPos, const char* pszM
 }
 
 static unsigned int nCurrentBlockFile = 1;
+static unsigned int nCurrentBlockFilePrune = 1;
+FILE* AppendBlockFilePrune(unsigned int& nFileRet)
+{
+    nFileRet = 0;
+    while (true)
+    {
+        FILE* file = OpenBlockFilePrune(nCurrentBlockFile, 0, "ab");
+        if (!file)
+            return NULL;
+        if (fseek(file, 0, SEEK_END) != 0)
+            return NULL;
+        // FAT32 file size max 4GB, fseek and ftell max 2GB, so we must stay under 2GB
+        if (ftell(file) < (long)(0x7F000000 - MAX_SIZE))
+        {
+            nFileRet = nCurrentBlockFile;
+            return file;
+        }
+        fclose(file);
+        nCurrentBlockFilePrune++;
+    }
+}
 
 FILE* AppendBlockFile(unsigned int& nFileRet)
 {

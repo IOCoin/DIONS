@@ -4,6 +4,8 @@
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 #include "txdb.h"
+#include "txdbprune.h"
+#include "txdb-leveldbprune.h"
 #include "wallet.h"
 #include "walletdb.h"
 #include "crypter.h"
@@ -1163,6 +1165,38 @@ int __wx__::ScanForWalletTransactions(CBlockIndex* pindexStart, bool fUpdate)
   return ret;
 }
 
+int __wx__::prune(CBlockIndex* pindexStart, bool fUpdate)
+{
+  int ret = 0;
+
+  FILE* file = OpenBlockFilePrune(1, 0, "ab");
+
+  CBlockIndex* pindex = pindexStart;
+  {
+      LOCK2(cs_main, cs_wallet);
+      while (pindex)
+      {
+	  CBlock block;
+	  block.ReadFromDisk(pindex, true);
+
+          unsigned int nFile = -1;
+          unsigned int nBlockPos = 0;
+          if (!block.WriteToDiskPrune(nFile, nBlockPos))
+            return error("AcceptBlock() : WriteToDisk failed");
+
+          // Write to disk block index
+          CTxDB_ txdbprune;
+          if (!txdbprune.TxnBegin())
+              return false;
+          txdbprune.WriteBlockIndex(CDiskBlockIndex(pindex));
+          if (!txdbprune.TxnCommit())
+              return false;
+
+	  pindex = pindex->pnext;
+      }
+  }
+  return ret;
+}
 void __wx__::ReacceptWalletTransactions()
 {
   CTxDB txdb("r");
