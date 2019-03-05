@@ -531,3 +531,7 @@ Value gettxout(const Array& params, bool fHelp)
 
     return ret;
 }
+Value getblockchaininfo(const Array& params, bool fHelp)
+{
+  return Value::null;
+}

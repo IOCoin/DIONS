@@ -241,6 +241,7 @@ static const CRPCCommand vRPCCommands[] =
     { "gw1",          &gw1,          true,   false },
     { "getnetworkmhashps",      &getnetworkmhashps,      true,   false },
     { "getinfo",                &getinfo,                true,   false },
+    { "getblockchaininfo",                &getblockchaininfo,                true,   false },
     { "getsubsidy",             &getsubsidy,             true,   false },
     { "getmininginfo",          &getmininginfo,          true,   false },
     { "center__base__0",          &center__base__0,          true,   false },
