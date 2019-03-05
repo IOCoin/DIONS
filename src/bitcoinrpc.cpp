@@ -1160,7 +1160,7 @@ json_spirit::Value CRPCTable::execute(const std::string &strMethod, const json_s
     // Find method
     const CRPCCommand *pcmd = tableRPC[strMethod];
     if (!pcmd)
-        throw JSONRPCError(RPC_METHOD_NOT_FOUND, "Method not found" + strMethod);
+        throw JSONRPCError(RPC_METHOD_NOT_FOUND, "-- Method not found " + strMethod);
 
     // Observe safe mode
     string strWarning = GetWarnings("rpc");
