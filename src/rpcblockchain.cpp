@@ -533,5 +533,94 @@ Value gettxout(const Array& params, bool fHelp)
 }
 Value getblockchaininfo(const Array& params, bool fHelp)
 {
-  return Value::null;
+   if (fHelp || params.size() != 0)
+        throw runtime_error(
+            "getblockchaininfo\n"
+            "Returns an object containing various state info regarding block chain processing.\n"
+            "\nResult:\n"
+            "{\n"
+            "  \"chain\": \"xxxx\",        (string) current network name as defined in BIP70 (main, test, regtest)\n"
+            "  \"blocks\": xxxxxx,         (numeric) the current number of blocks processed in the server\n"
+            "  \"headers\": xxxxxx,        (numeric) the current number of headers we have validated\n"
+            "  \"bestblockhash\": \"...\", (string) the hash of the currently best block\n"
+            "  \"difficulty\": xxxxxx,     (numeric) the current difficulty\n"
+            "  \"verificationprogress\": xxxx, (numeric) estimate of verification progress [0..1]\n"
+            "  \"chainwork\": \"xxxx\"     (string) total amount of work in active chain, in hexadecimal\n"
+            "}\n"
+            "\nExamples:\n" 
+            );
+
+    Object obj;
+    if(fTestNet)
+      obj.push_back(Pair("chain", "test"));
+    else
+      obj.push_back(Pair("chain", "main"));
+
+    obj.push_back(Pair("blocks", (int)nBestHeight));
+    //XXXX obj.push_back(Pair("headers", pindexBestHeader ? pindexBestHeader->nHeight : -1));
+    //XXXX obj.push_back(Pair("bestblockhash", chainActive.Tip()->GetBlockHash().GetHex()));
+    obj.push_back(Pair("difficulty", (double)GetDifficulty()));
+    //XXXX obj.push_back(Pair("verificationprogress", Checkpoints::GuessVerificationProgress(chainActive.Tip())));
+    //XXXX obj.push_back(Pair("chainwork", chainActive.Tip()->nChainWork.GetHex()));
+    return obj;
+}
+Value getnetworkinfo(const Array& params, bool fHelp)
+{
+    if (fHelp || params.size() != 0)
+        throw runtime_error(
+            "getnetworkinfo\n"
+            "Returns an object containing various state info regarding P2P networking.\n"
+            "\nResult:\n"
+            "{\n"
+            "  \"version\": xxxxx,                      (numeric) the server version\n"
+            "  \"subversion\": \"/Pivx Core:x.x.x.x/\",     (string) the server subversion string\n"
+            "  \"protocolversion\": xxxxx,              (numeric) the protocol version\n"
+            "  \"localservices\": \"xxxxxxxxxxxxxxxx\", (string) the services we offer to the network\n"
+            "  \"timeoffset\": xxxxx,                   (numeric) the time offset\n"
+            "  \"connections\": xxxxx,                  (numeric) the number of connections\n"
+            "  \"networks\": [                          (array) information per network\n"
+            "  {\n"
+            "    \"name\": \"xxx\",                     (string) network (ipv4, ipv6 or onion)\n"
+            "    \"limited\": true|false,               (boolean) is the network limited using -onlynet?\n"
+            "    \"reachable\": true|false,             (boolean) is the network reachable?\n"
+            "    \"proxy\": \"host:port\"               (string) the proxy that is used for this network, or empty if none\n"
+            "  }\n"
+            "  ,...\n"
+            "  ],\n"
+            "  \"relayfee\": x.xxxxxxxx,                (numeric) minimum relay fee for non-free transactions in pivx/kb\n"
+            "  \"localaddresses\": [                    (array) list of local addresses\n"
+            "  {\n"
+            "    \"address\": \"xxxx\",                 (string) network address\n"
+            "    \"port\": xxx,                         (numeric) network port\n"
+            "    \"score\": xxx                         (numeric) relative score\n"
+            "  }\n"
+            "  ,...\n"
+            "  ]\n"
+            "}\n"
+            "\nExamples:\n" 
+            );
+
+    Object obj;
+    obj.push_back(Pair("version", CLIENT_VERSION));
+    obj.push_back(Pair("subversion",
+        FormatSubVersion(CLIENT_NAME, CLIENT_VERSION, std::vector<string>())));
+    obj.push_back(Pair("protocolversion", PROTOCOL_VERSION));
+    //XXXX obj.push_back(Pair("localservices", strprintf("%016x", nLocalServices)));
+    obj.push_back(Pair("timeoffset", GetTimeOffset()));
+    obj.push_back(Pair("connections", (int)vNodes.size()));
+    //XXXX obj.push_back(Pair("networks", GetNetworksInfo()));
+    //XXXX obj.push_back(Pair("relayfee", ValueFromAmount(::minRelayTxFee.GetFeePerK())));
+    //XXXX Array localAddresses;
+    //XXXX {
+    //XXXX     LOCK(cs_mapLocalHost);
+    //XXXX     BOOST_FOREACH (const PAIRTYPE(CNetAddr, LocalServiceInfo) & item, mapLocalHost) {
+    //XXXX         Object rec;
+    //XXXX         rec.push_back(Pair("address", item.first.ToString()));
+    //XXXX         rec.push_back(Pair("port", item.second.nPort));
+    //XXXX         rec.push_back(Pair("score", item.second.nScore));
+    //XXXX         localAddresses.push_back(rec);
+    //XXXX     }
+    //XXXX }
+    //XXXX obj.push_back(Pair("localaddresses", localAddresses));
+    return obj;
 }

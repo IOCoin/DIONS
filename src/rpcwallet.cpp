@@ -1972,7 +1972,6 @@ Value gettransaction(const Array& params, bool fHelp)
 
     uint256 hash;
     hash.SetHex(params[0].get_str());
-
     Object entry;
 
     if (pwalletMain->mapWallet.count(hash))
