@@ -559,7 +559,7 @@ Value getblockchaininfo(const Array& params, bool fHelp)
     obj.push_back(Pair("blocks", (int)nBestHeight));
     //XXXX obj.push_back(Pair("headers", pindexBestHeader ? pindexBestHeader->nHeight : -1));
     //XXXX obj.push_back(Pair("bestblockhash", chainActive.Tip()->GetBlockHash().GetHex()));
-    obj.push_back(Pair("proof-of-stake", GetDifficulty(GetLastBlockIndex(pindexBest, true))));
+    obj.push_back(Pair("difficulty", GetDifficulty(GetLastBlockIndex(pindexBest, true))));
     //XXXX obj.push_back(Pair("verificationprogress", Checkpoints::GuessVerificationProgress(chainActive.Tip())));
     //XXXX obj.push_back(Pair("chainwork", chainActive.Tip()->nChainWork.GetHex()));
     return obj;
