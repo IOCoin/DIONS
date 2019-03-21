@@ -24,7 +24,6 @@
 using namespace json_spirit;
 using namespace std;
 
-void EnsureWalletIsUnlocked();
 
 namespace bt = boost::posix_time;
 
@@ -171,7 +170,8 @@ Value importwalletRT(const Array& params, bool fHelp)
       "wallet configured as : view"
       );
 
-    EnsureWalletIsUnlocked();
+    if (pwalletMain->as())
+        throw JSONRPCError(RPC_WALLET_UNLOCK_NEEDED, "Error: Please enter the wallet passphrase with walletpassphrase first.");
 
     ifstream file;
     file.open(params[0].get_str().c_str());
@@ -259,7 +259,8 @@ Value dumpprivkey(const Array& params, bool fHelp)
             "dumpprivkey <iocoinaddress>\n"
             "Reveals the private key corresponding to <iocoinaddress>.");
 
-    EnsureWalletIsUnlocked();
+    if (pwalletMain->as())
+        throw JSONRPCError(RPC_WALLET_UNLOCK_NEEDED, "Error: Please enter the wallet passphrase with walletpassphrase first.");
 
     string strAddress = params[0].get_str();
     cba address;
@@ -287,7 +288,8 @@ Value dumpwalletRT(const Array& params, bool fHelp)
             "dumpwalletRT <filename>\n"
             "Dumps all wallet keys in a human-readable format.");
 
-    EnsureWalletIsUnlocked();
+    if (pwalletMain->as())
+        throw JSONRPCError(RPC_WALLET_UNLOCK_NEEDED, "Error: Please enter the wallet passphrase with walletpassphrase first.");
 
     ofstream file;
     file.open(params[0].get_str().c_str());
@@ -437,7 +439,8 @@ Value importwallet(const Array& params, bool fHelp)
       "wallet configured as : view"
       );
 
-    EnsureWalletIsUnlocked();
+    if (pwalletMain->as())
+        throw JSONRPCError(RPC_WALLET_UNLOCK_NEEDED, "Error: Please enter the wallet passphrase with walletpassphrase first.");
 
     ifstream file;
     file.open(params[0].get_str().c_str());
@@ -598,7 +601,8 @@ Value dumpwallet(const Array& params, bool fHelp)
             "dumpwallet <filename>\n"
             "Dumps all wallet keys in a human-readable format.");
 
-    EnsureWalletIsUnlocked();
+    if (pwalletMain->as())
+        throw JSONRPCError(RPC_WALLET_UNLOCK_NEEDED, "Error: Please enter the wallet passphrase with walletpassphrase first.");
 
     ofstream file;
     file.open(params[0].get_str().c_str());
@@ -694,7 +698,8 @@ Value trc(const Array& params, bool fHelp)
       "trc wallet must be configured as view"
       );
 
-    EnsureWalletIsUnlocked();
+    if (pwalletMain->as())
+        throw JSONRPCError(RPC_WALLET_UNLOCK_NEEDED, "Error: Please enter the wallet passphrase with walletpassphrase first.");
     //init track
     ifstream file;
     file.open(params[0].get_str().c_str());
