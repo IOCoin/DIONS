@@ -1441,12 +1441,28 @@ void ThreadOpenAddedConnections2(void* parg)
 {
     printf("ThreadOpenAddedConnections started\n");
 
-    if (mapArgs.count("-addnode") == 0)
+    if (mapArgs.count("-mainchainnodeamer") == 0)
+        return;
+    if (mapArgs.count("-mainchainnodeemea") == 0)
+        return;
+    if (mapArgs.count("-mainchainnodeapac") == 0)
         return;
 
     if (HaveNameProxy()) {
         while(!fShutdown) {
-            BOOST_FOREACH(string& strAddNode, mapMultiArgs["-addnode"]) {
+            BOOST_FOREACH(string& strAddNode, mapMultiArgs["-mainchainnodeamer"]) {
+                CAddress addr;
+                CSemaphoreGrant grant(*semOutbound);
+                OpenNetworkConnection(addr, &grant, strAddNode.c_str());
+                MilliSleep(500);
+            }
+            BOOST_FOREACH(string& strAddNode, mapMultiArgs["-mainchainnodeemea"]) {
+                CAddress addr;
+                CSemaphoreGrant grant(*semOutbound);
+                OpenNetworkConnection(addr, &grant, strAddNode.c_str());
+                MilliSleep(500);
+            }
+            BOOST_FOREACH(string& strAddNode, mapMultiArgs["-mainchainnodeapac"]) {
                 CAddress addr;
                 CSemaphoreGrant grant(*semOutbound);
                 OpenNetworkConnection(addr, &grant, strAddNode.c_str());
@@ -1460,7 +1476,33 @@ void ThreadOpenAddedConnections2(void* parg)
     }
 
     vector<vector<CService> > vservAddressesToAdd(0);
-    BOOST_FOREACH(string& strAddNode, mapMultiArgs["-addnode"])
+    BOOST_FOREACH(string& strAddNode, mapMultiArgs["-mainchainnodeamer"])
+    {
+        vector<CService> vservNode(0);
+        if(Lookup(strAddNode.c_str(), vservNode, GetDefaultPort(), fNameLookup, 0))
+        {
+            vservAddressesToAdd.push_back(vservNode);
+            {
+                LOCK(cs_setservAddNodeAddresses);
+                BOOST_FOREACH(CService& serv, vservNode)
+                    setservAddNodeAddresses.insert(serv);
+            }
+        }
+    }
+    BOOST_FOREACH(string& strAddNode, mapMultiArgs["-mainchainnodeemea"])
+    {
+        vector<CService> vservNode(0);
+        if(Lookup(strAddNode.c_str(), vservNode, GetDefaultPort(), fNameLookup, 0))
+        {
+            vservAddressesToAdd.push_back(vservNode);
+            {
+                LOCK(cs_setservAddNodeAddresses);
+                BOOST_FOREACH(CService& serv, vservNode)
+                    setservAddNodeAddresses.insert(serv);
+            }
+        }
+    }
+    BOOST_FOREACH(string& strAddNode, mapMultiArgs["-mainchainnodeapac"])
     {
         vector<CService> vservNode(0);
         if(Lookup(strAddNode.c_str(), vservNode, GetDefaultPort(), fNameLookup, 0))
