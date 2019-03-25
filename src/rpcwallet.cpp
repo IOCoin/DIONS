@@ -1965,11 +1965,12 @@ Value listsinceblock(const Array& params, bool fHelp)
 
 Value gettransaction(const Array& params, bool fHelp)
 {
-    if (fHelp || params.size() != 1)
-        throw runtime_error(
-            "gettransaction <txid>\n"
-            "Get detailed information about <txid>");
+    //if (fHelp || params.size() != 1)
+    //    throw runtime_error(
+    //        "gettransaction <txid>\n"
+    //        "Get detailed information about <txid>");
 
+    printf("XXXX gettransaction \n");
     uint256 hash;
     hash.SetHex(params[0].get_str());
     Object entry;

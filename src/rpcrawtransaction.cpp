@@ -215,12 +215,14 @@ Value getrawtransaction(const Array& params, bool fHelp)
             "If verbose is non-zero, returns an Object\n"
             "with information about <txid>.");
 
+  printf("XXXX getrawtransaction \n");
+
     uint256 hash;
     hash.SetHex(params[0].get_str());
 
     bool fVerbose = false;
-    if (params.size() > 1)
-        fVerbose = (params[1].get_int() != 0);
+    //if (params.size() > 1)
+    //    fVerbose = (params[1].get_int() != 0);
 
     CTransaction tx;
     uint256 hashBlock = 0;

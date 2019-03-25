@@ -160,6 +160,40 @@ Object blockToJSON(const CBlock& block, const CBlockIndex* blockindex, bool fPri
 
     return result;
 }
+Object blockToJSON_(const CBlock& block, const CBlockIndex* blockindex, bool txDetails = false)
+{
+    Object result;
+    result.push_back(Pair("hash", block.GetHash().GetHex()));
+    int confirmations = -1;
+    // Only report confirmations if the block is on the main chain
+    CMerkleTx txGen(block.vtx[0]);
+    txGen.SetMerkleBranch(&block);
+    result.push_back(Pair("confirmations", (int)txGen.GetDepthInMainChain()));
+    result.push_back(Pair("size", (int)::GetSerializeSize(block, SER_NETWORK, PROTOCOL_VERSION)));
+    result.push_back(Pair("height", blockindex->nHeight));
+    result.push_back(Pair("version", block.nVersion));
+    result.push_back(Pair("merkleroot", block.hashMerkleRoot.GetHex()));
+    Array txs;
+    BOOST_FOREACH (const CTransaction& tx, block.vtx) {
+        if (txDetails) {
+            Object objTx;
+            TxToJSON(tx, uint256(0), objTx);
+            txs.push_back(objTx);
+        } else
+            txs.push_back(tx.GetHash().GetHex());
+    }
+    result.push_back(Pair("tx", txs));
+    result.push_back(Pair("time", block.GetBlockTime()));
+    result.push_back(Pair("nonce", (uint64_t)block.nNonce));
+    result.push_back(Pair("bits", strprintf("%08x", block.nBits)));
+    result.push_back(Pair("difficulty", GetDifficulty(blockindex)));
+    result.push_back(Pair("chainwork", blockindex->nChainTrust.GetHex()));
+
+    if (blockindex->pprev)
+        result.push_back(Pair("previousblockhash", blockindex->pprev->GetBlockHash().GetHex()));
+    result.push_back(Pair("nextblockhash", blockindex->pnext->GetBlockHash().GetHex()));
+    return result;
+}
 
 Value getbestblockhash(const Array& params, bool fHelp)
 {
@@ -355,14 +389,22 @@ Value getblock(const Array& params, bool fHelp)
     std::string strHash = params[0].get_str();
     uint256 hash(strHash);
 
+    printf("XXXX getblock params.size %d\n", params.size());
+
     if (mapBlockIndex.count(hash) == 0)
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Block not found");
 
     CBlock block;
     CBlockIndex* pblockindex = mapBlockIndex[hash];
     block.ReadFromDisk(pblockindex, true);
+    if (params.size() == 2 && params[1].get_bool() == false) {
+        CDataStream ssBlock(SER_NETWORK, PROTOCOL_VERSION);
+        ssBlock << block;
+        std::string strHex = HexStr(ssBlock.begin(), ssBlock.end());
+        return strHex;
+    }
 
-    return blockToJSON(block, pblockindex, params.size() > 1 ? params[1].get_bool() : false);
+    return blockToJSON(block, pblockindex, false);
 }
 
 Value getblockbynumber(const Array& params, bool fHelp)
@@ -623,4 +665,45 @@ Value getnetworkinfo(const Array& params, bool fHelp)
     //XXXX }
     //XXXX obj.push_back(Pair("localaddresses", localAddresses));
     return obj;
+}
+Object blockHeaderToJSON(const CBlock& block, const CBlockIndex* blockindex)
+{
+    Object result;
+    result.push_back(Pair("version", block.nVersion));
+    if (blockindex->pprev)
+        result.push_back(Pair("previousblockhash", blockindex->pprev->GetBlockHash().GetHex()));
+    result.push_back(Pair("merkleroot", block.hashMerkleRoot.GetHex()));
+    result.push_back(Pair("time", block.GetBlockTime()));
+    result.push_back(Pair("bits", strprintf("%08x", block.nBits)));
+    result.push_back(Pair("nonce", (uint64_t)block.nNonce));
+    return result;
+}
+
+Value getblockheader(const Array& params, bool fHelp)
+{
+  // header
+  //  static const int CURRENT_VERSION = 8;
+  //  int nVersion;
+  //  uint256 hashPrevBlock;
+  //  uint256 hashMerkleRoot;
+  //  unsigned int nTime;
+  //  unsigned int nBits;
+  //  unsigned int nNonce;
+
+    std::string strHash = params[0].get_str();
+    uint256 hash(strHash);
+
+    bool fVerbose = true;
+    if (params.size() > 1)
+        fVerbose = params[1].get_bool();
+
+    if (mapBlockIndex.count(hash) == 0)
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Block not found");
+
+    CBlock block;
+    CBlockIndex* pblockindex = mapBlockIndex[hash];
+
+    if(!block.ReadFromDisk(pblockindex, true))
+        throw JSONRPCError(RPC_INTERNAL_ERROR, "Can't read block from disk");
+    return blockHeaderToJSON(block, pblockindex);
 }
