@@ -1970,7 +1970,6 @@ Value gettransaction(const Array& params, bool fHelp)
     //        "gettransaction <txid>\n"
     //        "Get detailed information about <txid>");
 
-    printf("XXXX gettransaction \n");
     uint256 hash;
     hash.SetHex(params[0].get_str());
     Object entry;
