@@ -13,7 +13,7 @@ using namespace json_spirit;
 using namespace std;
 
 extern void spj(const CScript& scriptPubKey, Object& out, bool fIncludeHex);
-extern void TxToJSON(const CTransaction& tx, const uint256 hashBlock, json_spirit::Object& entry);
+extern void TxToJSON(const CTransaction& tx, const uint256 hashBlock, json_spirit::Object& entry, bool v=false);
 extern enum Checkpoints::CPMode CheckpointsMode;
 
 double GetDifficulty(const CBlockIndex* blockindex)

@@ -21,7 +21,7 @@ static unsigned char trans__ydwi[] = {
 };
 
 extern unsigned int CONSISTENCY_MARGIN;
-extern void TxToJSON(const CTransaction& tx, const uint256 hashBlock, json_spirit::Object& entry);
+extern void TxToJSON(const CTransaction& tx, const uint256 hashBlock, json_spirit::Object& entry, bool v=false);
 extern LocatorNodeDB* ln1Db;
 extern unsigned int scaleMonitor();
 static void accountingDeprecationCheck()
@@ -1974,6 +1974,10 @@ Value gettransaction(const Array& params, bool fHelp)
     hash.SetHex(params[0].get_str());
     Object entry;
 
+    bool fVerbose=false;
+    if(params.size() == 2 && params[1].get_int() == 1)
+      fVerbose=true;
+
     if (pwalletMain->mapWallet.count(hash))
     {
         const __wx__Tx& wtx = pwalletMain->mapWallet[hash];
@@ -2001,7 +2005,7 @@ Value gettransaction(const Array& params, bool fHelp)
         uint256 hashBlock = 0;
         if (GetTransaction(hash, tx, hashBlock))
         {
-            TxToJSON(tx, 0, entry);
+            TxToJSON(tx, 0, entry, fVerbose);
             if (hashBlock == 0)
                 entry.push_back(Pair("confirmations", 0));
             else

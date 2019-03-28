@@ -145,7 +145,7 @@ void spj(const CScript& scriptPubKey, Object& out, bool fIncludeHex)
     out.push_back(Pair("addresses", a));
 } */
 
-void TxToJSON(const CTransaction& tx, const uint256 hashBlock, Object& entry)
+void TxToJSON(const CTransaction& tx, const uint256 hashBlock, Object& entry, bool v=false)
 {
     entry.push_back(Pair("txid", tx.GetHash().GetHex()));
     entry.push_back(Pair("version", tx.nVersion));
@@ -180,7 +180,7 @@ void TxToJSON(const CTransaction& tx, const uint256 hashBlock, Object& entry)
         out.push_back(Pair("value", ValueFromAmount(txout.nValue)));
         out.push_back(Pair("n", (int64_t)i));
         Object o;
-        spj(txout.scriptPubKey, o, false);
+        spj(txout.scriptPubKey, o, v);
         out.push_back(Pair("scriptPubKey", o));
         vout.push_back(out);
     }
@@ -221,7 +221,7 @@ Value getrawtransaction(const Array& params, bool fHelp)
 
     bool fVerbose = false;
     if (params.size() > 1)
-        fVerbose = (params[1].get_int() != 0);
+        fVerbose = (params[1].get_int() == 1);
 
     CTransaction tx;
     uint256 hashBlock = 0;
@@ -237,7 +237,7 @@ Value getrawtransaction(const Array& params, bool fHelp)
 
     Object result;
     result.push_back(Pair("hex", strHex));
-    TxToJSON(tx, hashBlock, result);
+    TxToJSON(tx, hashBlock, result, fVerbose);
     return result;
 }
 
