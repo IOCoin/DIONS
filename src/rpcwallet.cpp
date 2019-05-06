@@ -2728,3 +2728,11 @@ Value sublimateYdwi(const Array& params, bool fHelp)
     return ret;
 }
 
+Value estimatefee(const Array& params, bool fHelp)
+{
+  if (fHelp || params.size() < 1 || params.size() > 2)
+      throw runtime_error("estimatefee conf_target [estimate_mode]\n");
+
+  return ValueFromAmount(MIN_TX_FEE);
+}
+
