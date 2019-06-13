@@ -49,5 +49,6 @@ CONTRIBUTORS:
 
 YYYY/MM/DD, github id, Full name, email
 
+2019/06/12, blastdoor7, blastdoor7, 51786421+blastdoor7@users.noreply.github.com
 
 
