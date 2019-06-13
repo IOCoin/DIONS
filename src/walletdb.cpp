@@ -553,7 +553,7 @@ bool __wx__DB::Recover(CDBEnv& dbenv, std::string filename, bool fOnlyKeys)
     // Set -rescan so any missing transactions will be
     // found.
     int64_t now = GetTime();
-    std::string newFilename = strprintf("wallet.%"PRId64".bak", now);
+    std::string newFilename = strprintf("wallet.%" PRId64 ".bak", now);
 
     int result = dbenv.dbenv.dbrename(NULL, filename.c_str(), NULL,
                                       newFilename.c_str(), DB_AUTO_COMMIT);
@@ -572,7 +572,7 @@ bool __wx__DB::Recover(CDBEnv& dbenv, std::string filename, bool fOnlyKeys)
         printf("Salvage(aggressive) found no records in %s.\n", newFilename.c_str());
         return false;
     }
-    printf("Salvage(aggressive) found %"PRIszu" records\n", salvagedData.size());
+    printf("Salvage(aggressive) found %" PRIszu " records\n", salvagedData.size());
 
     bool fSuccess = allOK;
     Db* pdbCopy = new Db(&dbenv.dbenv, 0);
