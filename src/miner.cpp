@@ -110,7 +110,7 @@ public:
 CBlock* CreateNewBlock(__wx__* pwallet, bool fProofOfStake, int64_t* pFees)
 {
     // Create new block
-    auto_ptr<CBlock> pblock(new CBlock());
+    unique_ptr<CBlock> pblock(new CBlock());
     if (!pblock.get())
         return NULL;
 
@@ -569,7 +569,7 @@ void StakeMiner(__wx__ *pwallet)
         // Create new block
         //
         int64_t nFees;
-        auto_ptr<CBlock> pblock(CreateNewBlock(pwallet, true, &nFees));
+        unique_ptr<CBlock> pblock(CreateNewBlock(pwallet, true, &nFees));
         if (!pblock.get())
             return;
 

@@ -656,7 +656,7 @@ bool aliasTx(LocatorNodeDB& aliasCacheDB, const vector<unsigned char> &vchAlias,
 
     AliasIndex& txPos = vtxPos.back();
 
-    int nHeight = txPos.nHeight;
+    unsigned int nHeight = txPos.nHeight;
     if(nHeight + scaleMonitor() <= pindexBest->nHeight)
     {
         string alias = stringFromVch(vchAlias);
@@ -2244,7 +2244,7 @@ Value aliasList__(const Array& params, bool fHelp)
           }
           else
           {
-            for(int i=0; i < tx.vin.size(); i++)
+            for(unsigned int i=0; i < tx.vin.size(); i++)
             {
               COutPoint prevout = tx.vin[i].prevout;
               __wx__Tx& txPrev = pwalletMain->mapWallet[prevout.hash];
@@ -2432,7 +2432,7 @@ Value aliasList(const Array& params, bool fHelp)
           }
           else
           {
-            for(int i=0; i < tx.vin.size(); i++)
+            for(unsigned int i=0; i < tx.vin.size(); i++)
             {
               COutPoint prevout = tx.vin[i].prevout;
               __wx__Tx& txPrev = pwalletMain->mapWallet[prevout.hash];
@@ -6444,7 +6444,7 @@ AcceptToMemoryPoolPost(const CTransaction& tx)
       if(vvch[0].size() > MAX_LOCATOR_LENGTH)
         return error("locator too long");
 
-      int nPrevHeight = aliasHeight(vvch[0]);
+      unsigned int nPrevHeight = aliasHeight(vvch[0]);
       if(nPrevHeight >= 0 && nBestHeight - nPrevHeight < scaleMonitor())
         return false;
     }
@@ -6521,7 +6521,7 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
     if(tx.nVersion != CTransaction::DION_TX_VERSION)
     {
       bool found= false;
-      for(int i = 0; i < tx.vout.size(); i++)
+      for(unsigned int i = 0; i < tx.vout.size(); i++)
       {
         const CTxOut& out = tx.vout[i];
 
