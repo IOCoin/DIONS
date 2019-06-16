@@ -1550,7 +1550,7 @@ bool __wx__::SelectCoinsMinConf(int64_t nTargetValue, unsigned int nSpendTime, i
 
       if (pcoin->nTime > nSpendTime)
       {
-	  printf("pcoin->nTime %" PRId64 ", nSpendTime %" PRId64 "\n", pcoin->nTime, nSpendTime);
+	  printf("pcoin->nTime %u, nSpendTime %u\n", pcoin->nTime, nSpendTime);
 	  continue;
       }
 
@@ -1995,7 +1995,6 @@ bool __wx__::GetStakeWeight(uint64_t& nWeight)
 
   nWeight = 0;
 
-  int64_t nCurrentTime = GetTime();
   CTxDB txdb("r");
 
   LOCK2(cs_main, cs_wallet);

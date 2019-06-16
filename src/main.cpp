@@ -26,6 +26,7 @@ using namespace boost;
 // Global state
 //
 
+static unsigned int  STAKE_INTEREST_V3 = 150000;
 CCriticalSection cs_setpwalletRegistered;
 set<__wx__*> setpwalletRegistered;
 
@@ -519,20 +520,20 @@ bool CTransaction::AreInputsStandard(const MapPrevTx& mapInputs) const
     else
         rawScript = prevScript;
 
-        if (!Solver(rawScript, whichType, vSolutions))
-            return false;
-        int nArgsExpected = ScriptSigArgsExpected(whichType, vSolutions);
-        if (nArgsExpected < 0)
-            return false;
+    if (!Solver(rawScript, whichType, vSolutions))
+      return false;
+    int nArgsExpected = ScriptSigArgsExpected(whichType, vSolutions);
+    if (nArgsExpected < 0)
+      return false;
 
-        // Transactions with extra stuff in their scriptSigs are
-        // non-standard. Note that this EvalScript() call will
-        // be quick, because if there are any operations
-        // beside "push data" in the scriptSig the
-        // IsStandard() call returns false
-        vector<vector<unsigned char> > stack;
-        if(!EvalScript(stack, vin[i].scriptSig, *this, i, SCRIPT_VERIFY_NONE, 0))
-            return false;
+    // Transactions with extra stuff in their scriptSigs are
+    // non-standard. Note that this EvalScript() call will
+    // be quick, because if there are any operations
+    // beside "push data" in the scriptSig the
+    // IsStandard() call returns false
+    vector<vector<unsigned char> > stack;
+    if(!EvalScript(stack, vin[i].scriptSig, *this, i, SCRIPT_VERIFY_NONE, 0))
+      return false;
 
         if (whichType == TX_SCRIPTHASH)
         {
@@ -1252,7 +1253,6 @@ int64_t GetProofOfStakeInterestV2(int nHeight)
 
 int64_t GetProofOfStakeInterestV3(int nHeight)
 {
-    double weight = GetPoSKernelPS(nHeight-1);
 
     uint64_t rate = MIN_COIN_YEAR_REWARD;
     /*if (weight > 16384)
