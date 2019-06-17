@@ -47,7 +47,6 @@ std::map<vchType, set<uint256> > k1Export;
 
 void xsc(CBlockIndex*);
 static bool vclose(string&,string&);
-static int linkSet(vector<vchType>, CBlockIndex*, CDiskTxPos&, const string&, LocatorNodeDB&);
 
 CScript aliasStrip(const CScript& scriptIn);
 #ifdef GUI
@@ -700,7 +699,6 @@ Value myRSAKeys(const Array& params, bool fHelp)
   BOOST_FOREACH(const PAIRTYPE(cba, string)& item, pwalletMain->mapAddressBook)
   {
     const cba& a = item.first;
-    const string& aliasStr = item.second;
     Object oAddressInfo;
     oAddressInfo.push_back(Pair("address", a.ToString()));
 
@@ -748,7 +746,6 @@ Value myRSAKeys__(const Array& params, bool fHelp)
   {
 
     const cba& a = item.first;
-    const string& aliasStr = item.second;
     Object oAddressInfo;
     oAddressInfo.push_back(Pair("address", a.ToString()));
 
@@ -2253,7 +2250,6 @@ Value aliasList__(const Array& params, bool fHelp)
 
               std::vector<vchType> vvchPrevArgsRead;
               int prevOp;
-              out.scriptPubKey;
               if(aliasScript(out.scriptPubKey, prevOp, vvchPrevArgsRead))
               {
                 string a__ = "";
@@ -2783,7 +2779,7 @@ Value primaryCXValidate(const Array& params, bool fHelp)
       if(!pwalletMain->envCP0(l0id_.GetPubKey(), p0))
         throw JSONRPCError(RPC_TYPE_ERROR, "intrinsic");
       string openChannelStream;
-      bool s = DecryptMessage(p0, channelList, openChannelStream);
+      DecryptMessage(p0, channelList, openChannelStream);
       bool fl = false;
       cskVec = DecodeBase64(openChannelStream.c_str(), &fl);
       
@@ -4083,7 +4079,7 @@ Value transferEncryptedExtPredicate(const Array& params, bool fHelp)
       if(!pwalletMain->envCP0(l0id_.GetPubKey(), p0))
         throw JSONRPCError(RPC_TYPE_ERROR, "intrinsic");
       string openChannelStream;
-      bool s = DecryptMessage(p0, channelList, openChannelStream);
+      DecryptMessage(p0, channelList, openChannelStream);
       bool fl = false;
       cskVec = DecodeBase64(openChannelStream.c_str(), &fl);
       
@@ -4381,7 +4377,7 @@ Value transferEncryptedAlias(const Array& params, bool fHelp)
       if(!pwalletMain->envCP0(l0id_.GetPubKey(), p0))
         throw JSONRPCError(RPC_TYPE_ERROR, "intrinsic");
       string openChannelStream;
-      bool s = DecryptMessage(p0, channelList, openChannelStream);
+      DecryptMessage(p0, channelList, openChannelStream);
       bool fl = false;
       cskVec = DecodeBase64(openChannelStream.c_str(), &fl);
       
@@ -6263,29 +6259,6 @@ bool aliasTx(const CTransaction& tx, int& op, int& nOut, vector<vector<unsigned 
     return found;
 }
 
-int linkSet(vector<vchType> v, CBlockIndex* p, CDiskTxPos& txPos, const string& s, LocatorNodeDB& ln1)
-{
-  if(ln1.lKey(v[0]))
-  {
-    return 0;
-  }
-    vector<unsigned char> vchValue;
-    vector<AliasIndex> vtxPos;
-    int nHeight;
-    uint256 hash;
-    AliasIndex txPos2;
-    txTrace(txPos, vchValue, hash, nHeight);
-    txPos2.nHeight = p->nHeight;
-    txPos2.vValue = vchValue;
-    txPos2.vAddress = s;
-    txPos2.txPos = txPos;
-    vtxPos.push_back(txPos2);
-    if(!ln1.lPut(v[0], vtxPos))
-      return -1;
-
-  return 1;
-}
-
 bool aliasTxValue(const CTransaction& tx, vector<unsigned char>& value)
 {
     vector<vector<unsigned char> > vvch;
@@ -6444,7 +6417,7 @@ AcceptToMemoryPoolPost(const CTransaction& tx)
       if(vvch[0].size() > MAX_LOCATOR_LENGTH)
         return error("locator too long");
 
-      unsigned int nPrevHeight = aliasHeight(vvch[0]);
+      int nPrevHeight = aliasHeight(vvch[0]);
       if(nPrevHeight >= 0 && nBestHeight - nPrevHeight < scaleMonitor())
         return false;
     }
@@ -6574,7 +6547,6 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
     const CScript& s1_ = aliasStrip(s1);
     string a1 = s1_.GetBitcoinAddress();
 
-    int nPrevHeight;
     int nDepth;
 
     if(vvchArgs[0].size() > MAX_LOCATOR_LENGTH)
@@ -6715,10 +6687,10 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
             else
               script.SetBitcoinAddress(stringFromVch(vvchArgs[2]));
 
-              string encrypted = stringFromVch(vvchArgs[0]);
-              uint160 hash = uint160(vvchArgs[3]);
-              string value = stringFromVch(vvchArgs[4]);
-              string r = stringFromVch(vvchArgs[5]);
+            string encrypted = stringFromVch(vvchArgs[0]);
+            uint160 hash = uint160(vvchArgs[3]);
+            string value = stringFromVch(vvchArgs[4]);
+            string r = stringFromVch(vvchArgs[5]);
             if(!verifymessage(script.GetBitcoinAddress(), stringFromVch(vvchArgs[1]), encrypted, hash.ToString(), value, r))
             {
               return error("Dions::ConnectInputsPost: failed to verify signature for registerAlias tx %s",
