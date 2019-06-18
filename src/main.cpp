@@ -26,7 +26,7 @@ using namespace boost;
 // Global state
 //
 
-static unsigned int  STAKE_INTEREST_V3 = 150000;
+static int  STAKE_INTEREST_V3 = 150000;
 CCriticalSection cs_setpwalletRegistered;
 set<__wx__*> setpwalletRegistered;
 
@@ -51,11 +51,11 @@ unsigned int nStakeMinAge = 8 * 60 * 60; // 8 hours
 unsigned int nStakeMaxAge = -1; // unlimited
 unsigned int nModifierInterval = 10 * 60; // time to elapse before new modifier is computed
 
-unsigned int  POS_v3_DIFFICULTY_HEIGHT = 100000;
+int  POS_v3_DIFFICULTY_HEIGHT = 100000;
 
 bool FEATURE_SET_SHADE_ACTIVE = false;
 
-unsigned int CONSISTENCY_MARGIN = 100;
+int CONSISTENCY_MARGIN = 100;
 int nCoinbaseMaturity = 100;
 CBlockIndex* pindexGenesisBlock = NULL;
 CBlockIndex* p__ = NULL;
