@@ -24,6 +24,7 @@ endif
 # for boost 1.37, add -mt to the boost libraries
 LIBS += \
  -Wl,-B$(LMODE) \
+   -l boost_iostreams$(BOOST_LIB_SUFFIX) \
    -l boost_system$(BOOST_LIB_SUFFIX) \
    -l boost_filesystem$(BOOST_LIB_SUFFIX) \
    -l boost_program_options$(BOOST_LIB_SUFFIX) \
@@ -43,7 +44,6 @@ endif
 
 LIBS+= \
  -Wl,-B$(LMODE2) \
-   -l boost_iostreams \
    -l z \
    -l dl \
    -l pthread
