@@ -12,6 +12,12 @@
 class CScript;
 class cba;
 
+struct CYCLE_
+{
+  unsigned int index; 
+  void* fn_trace;
+};
+
 typedef std::set<CKeyID> ViewSet;
 class CViewKeyStore : public CKeyStore
 {
