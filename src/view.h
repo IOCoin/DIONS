@@ -18,6 +18,7 @@ struct CYCLE_
   void* fn_trace;
   unsigned int doc_trc;
   unsigned int relay_trc;
+  vector<unsigned int> vec_trc;
 };
 
 typedef std::set<CKeyID> ViewSet;
