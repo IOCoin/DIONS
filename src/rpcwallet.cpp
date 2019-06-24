@@ -93,6 +93,8 @@ Value getinfo(const Array& params, bool fHelp)
     obj.push_back(Pair("version",       FormatFullVersion()));
     obj.push_back(Pair("protocolversion",(int)PROTOCOL_VERSION));
     obj.push_back(Pair("walletversion", pwalletMain->GetVersion()));
+    if(fViewWallet)
+      obj.push_back(Pair("VIEWWALLET", "The wallet is configured for view only!");
     obj.push_back(Pair("balance",       ValueFromAmount(pwalletMain->GetBalance())));
     obj.push_back(Pair("pending",       ValueFromAmount(pwalletMain->GetUnconfirmedBalance())));
     obj.push_back(Pair("newmint",       ValueFromAmount(pwalletMain->GetNewMint())));
