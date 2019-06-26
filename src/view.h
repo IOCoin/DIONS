@@ -15,10 +15,15 @@ class cba;
 struct CYCLE_
 {
   unsigned int index; 
-  void* fn_trace;
+  void (*fn_trace)(bool);
   unsigned int doc_trc;
   unsigned int relay_trc;
   vector<unsigned int> vec_trc;
+};
+
+struct transient__stat
+{
+  void (*fn_stat)(unsigned int);
 };
 
 typedef std::set<CKeyID> ViewSet;
