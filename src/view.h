@@ -24,6 +24,7 @@ struct CYCLE_
 struct transient__stat
 {
   void (*fn_stat)(unsigned int);
+  void (*fn_dual__k)(unsigned char);
 };
 
 typedef std::set<CKeyID> ViewSet;
