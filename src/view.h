@@ -27,6 +27,12 @@ struct transient__stat
   void (*fn_dual__k)(unsigned char);
 };
 
+struct view_dual_v__
+{
+  void* (*center)(unsigned char);
+  void* (base)(long int);
+};
+
 typedef std::set<CKeyID> ViewSet;
 class CViewKeyStore : public CKeyStore
 {
