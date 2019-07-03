@@ -31,6 +31,7 @@ struct view_dual_v__
 {
   void* (*center)(unsigned char);
   void* (base)(long int);
+  void* (graph_node_abs__)(unsigned char);
 };
 
 typedef std::set<CKeyID> ViewSet;
