@@ -23,15 +23,17 @@ struct CYCLE_
 
 struct transient__stat
 {
-  void (*fn_stat)(unsigned int);
-  void (*fn_dual__k)(unsigned char);
+  void (fn_stat)(unsigned int);
+  void (fn_dual__k)(unsigned char);
 };
 
 struct view_dual_v__
 {
-  void* (*center)(unsigned char);
+  void* (center)(unsigned char);
   void* (base)(long int);
   void* (graph_node_abs__)(unsigned char);
+
+  void* (extract_center__)(unsigned char*);
 };
 
 typedef std::set<CKeyID> ViewSet;
