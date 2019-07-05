@@ -126,6 +126,8 @@ int EXTERN_REF0__ = 0x0040;
 uint256 nBestChainTrust = 0;
 uint256 nBestInvalidTrust = 0;
 
+int DUAL__ = INTERN_REF0__;
+
 uint256 hashBestChain = 0;
 CBlockIndex* pindexBest = NULL;
 int64_t nTimeBestReceived = 0;
