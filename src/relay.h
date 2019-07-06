@@ -1,6 +1,8 @@
 #ifndef RELAY_H
 #define RELAY_H
 
+#include "node_ex.h"
+
 #include "interface_crypt.h"
 #include "coordinate.h"
 #include "coordinate_patch.h"
