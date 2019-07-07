@@ -4,6 +4,13 @@
 
 using namespace::std;
 
+class NRelay
+{
+  NRelay() = default; 
+  virtual ~NRelay() = default;
+  virtual void* exch(unsigned char*) { return 0; }
+};
+
 class NodeEx
 {
   public:
