@@ -17,6 +17,7 @@ class NodeEx
     virtual void relay(unsigned char*) = 0;
     virtual int  open() = 0;
     virtual int  close() = 0;
+    virtual int  reg(const NRelay&) = 0;
 };
 
 #endif
