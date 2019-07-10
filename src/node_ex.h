@@ -1,6 +1,7 @@
 #ifndef NODE_EX
 #define NODE_EX
 
+#include <vector>
 
 using namespace::std;
 
@@ -27,6 +28,21 @@ class NodeEx
     virtual int  open() = 0;
     virtual int  close() = 0;
     virtual int  reg(const NRelay&) = 0;
+};
+
+class Outer 
+{
+  public:
+    virtual int bufRangeIndex(unsigned char* p) 
+    {
+      for(unsigned int i=0; i<buffer.size(); i++)
+      {
+        if(buffer[i] == *p)
+	  return i;	
+      }     
+    }
+  private:
+    vector<unsigned char> buffer;
 };
 
 #endif
