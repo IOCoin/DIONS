@@ -33,6 +33,8 @@ class NodeEx
 class Outer 
 {
   public:
+    Outer() = default;
+    ~Outer() = default;
     virtual int bufRangeIndex(unsigned char* p) 
     {
       for(unsigned int i=0; i<buffer.size(); i++)
