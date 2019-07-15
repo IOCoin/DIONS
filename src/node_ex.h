@@ -44,7 +44,13 @@ class Outer
 	  return i;	
       }     
     }
+
+    virtual void locator(int index) 
+    {
+      this->locatorRelay_ = index;
+    }
   private:
+    int locatorRelay_; 
     vector<unsigned char> buffer;
 };
 
