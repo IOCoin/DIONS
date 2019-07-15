@@ -15,6 +15,7 @@ class State
     static const std::string GROUND;
     static const std::string ION;
 
+    static const std::string NEUTRON;
     State()
     {
     };

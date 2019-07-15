@@ -12,6 +12,10 @@ using namespace::std;
 
 struct displ
 {
+  int sect;
+
   vector<int> coord;
 };
+
+
 #endif

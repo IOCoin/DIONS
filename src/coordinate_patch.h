@@ -30,6 +30,7 @@ class CoordinatePatch : InterfaceCrypt
     inline virtual string ctrl_() { return this->r_; }
     inline virtual void ctrl(string& c) { this->r_ = c; }
 
+
   private:
     string r_;
     string locator_;
