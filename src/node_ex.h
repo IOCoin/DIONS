@@ -38,9 +38,9 @@ class Outer
     ~Outer() = default;
     virtual int bufRangeIndex(unsigned char* p) 
     {
-      for(unsigned int i=0; i<buffer.size(); i++)
+      for(unsigned int i=0; i<buffer_.size(); i++)
       {
-        if(buffer[i] == *p)
+        if(buffer_[i] == *p)
 	  return i;	
       }     
     }
@@ -49,9 +49,13 @@ class Outer
     {
       this->locatorRelay_ = index;
     }
+
+    virtual void accept(NRelay& rel) { this->relay_ = rel; }
+
   private:
     int locatorRelay_; 
-    vector<unsigned char> buffer;
+    NRelay relay_;
+    vector<unsigned char> buffer_;
 };
 
 #endif
