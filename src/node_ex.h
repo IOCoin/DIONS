@@ -30,6 +30,7 @@ class NodeEx
     virtual int  close() = 0;
     virtual int  reg(const NRelay&) = 0;
     virtual int  accept(const NRelay&) = 0;
+    virtual int  react(const NRelay&) = 0;
 };
 
 class Outer 
