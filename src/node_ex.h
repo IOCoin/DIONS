@@ -31,6 +31,7 @@ class NodeEx
     virtual int  reg(const NRelay&) = 0;
     virtual int  accept(const NRelay&) = 0;
     virtual int  react(const NRelay&) = 0;
+    virtual void chan(__BASE__&) = 0;
 };
 
 class Outer 
