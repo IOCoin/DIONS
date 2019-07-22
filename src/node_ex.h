@@ -34,6 +34,7 @@ class NodeEx
     virtual void chan(__BASE__&) = 0;
     virtual void channel_relay(__BASE__&, NRelay&) = 0;
     virtual void record(__BASE__&, const NRelay&) = 0;
+    virtual void relayAtomic(const NRelay&) const = 0;
 };
 
 class Outer 
