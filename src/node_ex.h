@@ -58,6 +58,11 @@ class Outer
       this->locatorRelay_ = index;
     }
 
+    virtual int locator()
+    {
+      return this->locatorRelay_;
+    }
+
     virtual const NRelay& relSample() const
     {
       return this->relay_;
