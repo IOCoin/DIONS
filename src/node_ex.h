@@ -69,8 +69,10 @@ class Outer
     }
 
     virtual void accept(NRelay& rel) { this->relay_ = rel; }
-
+    virtual int lmap() { return this->lMap_; }
+    virtual void lmap(int lm) { this->lMap_ = lm; } 
   private:
+    int lMap_;
     int locatorRelay_; 
     NRelay relay_;
     vector<unsigned char> buffer_;
