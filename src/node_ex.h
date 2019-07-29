@@ -44,7 +44,15 @@ class ChiS__
   public:
     ChiS__() = default;
     ~ChiS__() = default;
+
+    int base() { return this->s_base_; }
+    void base(int b) { this->s_base_ = b; }
+    
+    int correlate() { return this->corr_; }
+    void correlate(int c) { this->corr_ = c; }
   private: 
+    int s_base_;
+    int corr_;
     vector<unsigned char> nList;
 };
 
