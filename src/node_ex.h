@@ -39,6 +39,15 @@ class NodeEx
     virtual void relayGround(const NRelay&) const = 0;
 };
 
+class ChiS__
+{
+  public:
+    ChiS__() = default;
+    ~ChiS__() = default;
+  private: 
+    vector<unsigned char> nList;
+};
+
 class Outer 
 {
   public:
