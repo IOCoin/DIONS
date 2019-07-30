@@ -39,6 +39,7 @@ class NodeEx
     virtual void relayGround(const NRelay&) const = 0;
 };
 
+
 class ChiS__
 {
   public:
@@ -50,10 +51,14 @@ class ChiS__
     
     int correlate() { return this->corr_; }
     void correlate(int c) { this->corr_ = c; }
+
+    int g_sample(NodeEx& ex) { return ex.react(this->rel_); }
   private: 
+    
     int s_base_;
     int corr_;
     vector<unsigned char> nList;
+    NRelay rel_;
 };
 
 class Outer 
