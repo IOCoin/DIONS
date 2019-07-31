@@ -53,6 +53,8 @@ class ChiS__
     void correlate(int c) { this->corr_ = c; }
 
     int g_sample(NodeEx& ex) { return ex.react(this->rel_); }
+
+    int g_resolve(NodeEx& ex) { return ex.reg(this->rel_); }
   private: 
     
     int s_base_;
