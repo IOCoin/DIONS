@@ -55,8 +55,9 @@ class ChiS__
     int g_sample(NodeEx& ex) { return ex.react(this->rel_); }
 
     int g_resolve(NodeEx& ex) { return ex.reg(this->rel_); }
+    void g_base(__BASE__& g) { this->g_ = g; }
   private: 
-    
+    __BASE__ g_;  
     int s_base_;
     int corr_;
     vector<unsigned char> nList;
