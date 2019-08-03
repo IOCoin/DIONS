@@ -57,6 +57,7 @@ class ChiS__
     int g_resolve(NodeEx& ex) { return ex.reg(this->rel_); }
     void g_base(__BASE__& g) { this->g_ = g; }
     int  indexC() { return this->indexC_; }
+    void  indexC(int iC) { this->indexC_ = iC; }
   private: 
     int indexC_;
     __BASE__ g_;  
