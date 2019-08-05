@@ -10,12 +10,16 @@
 
 using namespace::std;
 
+using namespace::boost::multiprecision;
+
 struct displ
 {
   int sect;
-
+  cpp_int offset;
+  cpp_dec_float_50 scale;
   vector<int> coord;
 };
+
 
 
 #endif
