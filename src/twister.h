@@ -18,15 +18,16 @@ typedef independent_bits_engine<mt19937, 256, cpp_int> GEN__;
 
 struct displ
 {
-  int sect;
-  cpp_int offset;
-  cpp_dec_float_50 scale;
-  vector<int> coord;
+  int sect_;
+  cpp_int offset_;
+  cpp_dec_float_50 scale_;
+  vector<int> coord_;
 };
 
 struct ex_mix
 {
-  GEN__ g;  
+  GEN__ g_;  
+  vector<displ> descTable_;
 };
 
 
