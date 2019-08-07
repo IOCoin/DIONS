@@ -24,6 +24,10 @@ struct displ
   vector<int> coord;
 };
 
+struct ex_mix
+{
+  GEN__ g;  
+};
 
 
 #endif
