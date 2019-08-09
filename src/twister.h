@@ -26,8 +26,14 @@ struct displ
 
 struct ex_mix
 {
+  int pos_;
   GEN__ g_;  
   vector<displ> descTable_;
+};
+
+struct mtx
+{
+  ex_mix disc_;
 };
 
 
