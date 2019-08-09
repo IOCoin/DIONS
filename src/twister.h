@@ -9,6 +9,8 @@
 
 #include <vector>
 
+//#include "state.h"
+
 using namespace::std;
 
 using namespace boost::multiprecision;
@@ -34,6 +36,13 @@ struct ex_mix
 struct mtx
 {
   ex_mix disc_;
+};
+
+struct FI1__
+{
+  ex_mix r;
+  ex_mix th;
+  ex_mix ph;
 };
 
 
