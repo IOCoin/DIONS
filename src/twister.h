@@ -8,6 +8,7 @@
 #include "boost/random/independent_bits.hpp"
 
 #include <vector>
+#include <map>
 
 //#include "state.h"
 
@@ -45,5 +46,10 @@ struct FI1__
   ex_mix ph;
 };
 
+struct FI2__
+{
+  ex_mix desc_;
+  map<FI1__, displ> transMap_;
+};
 
 #endif
