@@ -52,4 +52,12 @@ struct FI2__
   map<FI1__, displ> transMap_;
 };
 
+struct R1_mtx_rotate
+{
+  FI2__ alpha_;
+  FI2__ beta_;
+
+  FI1__ reference_;
+};
+
 #endif
