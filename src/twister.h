@@ -19,6 +19,8 @@ using namespace boost::random;
 
 typedef independent_bits_engine<mt19937, 256, cpp_int> GEN__;
 
+const int transition_seq[] = { 0xce, 0xab, 0xdf, 0xcf, 0xee,
+                               0xae, 0xfc, 0xdc, 0xea, 0xbd };
 struct displ
 {
   int sect_;
