@@ -62,4 +62,10 @@ struct R1_mtx_rotate
   FI1__ reference_;
 };
 
+struct TransitionElement
+{
+  FI2__ key_center_;
+  vector<R1_mtx_rotate> morph_l_;
+};
+
 #endif
