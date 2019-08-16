@@ -64,6 +64,7 @@ struct R1_mtx_rotate
 
 struct TransitionElement
 {
+  vector<double> ent_indicator_;
   FI2__ key_center_;
   vector<R1_mtx_rotate> morph_l_;
   vector<FI1__> reference_;
