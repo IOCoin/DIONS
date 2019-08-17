@@ -101,4 +101,13 @@ double s_entropy(vector<double> v)
   return -entropy;
 }
 
+class SpecExec
+{
+  SpecExec() {}
+  ~SpecExec() {}
+
+  virtual double entropy(vector<double> v);
+
+};
+
 #endif
