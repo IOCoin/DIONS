@@ -1,6 +1,8 @@
-## I/O Coin Application Based Blockchain Platform
+## I/O Coin Application Based Blockchain Platform 
+For: Data, Communications, Privacy and Payments
+  
 
-I/O Coin - DIONS (Decentralized Input Output Name Server)
+I/O Coin (IOC) - DIONS (Decentralized Input Output Name Server)
 ===========================
 
 I/O Coin is a POS CiPher-Based Blockchain
@@ -16,7 +18,7 @@ Features:
 * Enhanced API allowing registration of aliases and associated data,
   aliases may be kept encrypted or public. Aliases, encrypted or public may
   send and receive.
-* New API includes a messaging layer for encrypted communications in addition
+* New API includes a messaging layer for encrypted communications, 1MB data upload, download, transfer in addition
   to plain text messaging. Encryption uses AES 256 encryption together with RSA
   encryption (4096).
 * 2014 Fair Launch via X11 PoW/PoS
