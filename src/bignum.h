@@ -54,52 +54,54 @@ public:
 
 
 /** C++ wrapper for BIGNUM (OpenSSL bignum) */
-class CBigNum : public BIGNUM
+//class CBigNum : public BIGNUM
+class CBigNum
 {
 public:
+    BIGNUM* bn_;
     CBigNum()
     {
-        BN_init(this);
+        bn_ = BN_new();
     }
 
     CBigNum(const CBigNum& b)
     {
-        BN_init(this);
-        if (!BN_copy(this, &b))
+        bn_ = BN_new();
+        if (!BN_copy(this->bn_, b.bn_))
         {
-            BN_clear_free(this);
+            BN_clear_free(this->bn_);
             throw bignum_error("CBigNum::CBigNum(const CBigNum&) : BN_copy failed");
         }
     }
 
     CBigNum& operator=(const CBigNum& b)
     {
-        if (!BN_copy(this, &b))
+        if (!BN_copy(this->bn_, b.bn_))
             throw bignum_error("CBigNum::operator= : BN_copy failed");
         return (*this);
     }
 
     ~CBigNum()
     {
-        BN_clear_free(this);
+        BN_clear_free(this->bn_);
     }
 
     //CBigNum(char n) is not portable.  Use 'signed char' or 'unsigned char'.
-    CBigNum(signed char n)        { BN_init(this); if (n >= 0) setulong(n); else setint64(n); }
-    CBigNum(short n)              { BN_init(this); if (n >= 0) setulong(n); else setint64(n); }
-    CBigNum(int n)                { BN_init(this); if (n >= 0) setulong(n); else setint64(n); }
-    CBigNum(long n)               { BN_init(this); if (n >= 0) setulong(n); else setint64(n); }
-    CBigNum(long long n)          { BN_init(this); setint64(n); }
-    CBigNum(unsigned char n)      { BN_init(this); setulong(n); }
-    CBigNum(unsigned short n)     { BN_init(this); setulong(n); }
-    CBigNum(unsigned int n)       { BN_init(this); setulong(n); }
-    CBigNum(unsigned long n)      { BN_init(this); setulong(n); }
-    CBigNum(unsigned long long n) { BN_init(this); setuint64(n); }
-    explicit CBigNum(uint256 n)   { BN_init(this); setuint256(n); }
+    CBigNum(signed char n)        { this->bn_ = BN_new(); if (n >= 0) setulong(n); else setint64(n); }
+    CBigNum(short n)              { this->bn_ = BN_new(); if (n >= 0) setulong(n); else setint64(n); }
+    CBigNum(int n)                { this->bn_ = BN_new(); if (n >= 0) setulong(n); else setint64(n); }
+    CBigNum(long n)               { this->bn_ = BN_new(); if (n >= 0) setulong(n); else setint64(n); }
+    CBigNum(long long n)          { this->bn_ = BN_new(); setint64(n); }
+    CBigNum(unsigned char n)      { this->bn_ = BN_new(); setulong(n); }
+    CBigNum(unsigned short n)     { this->bn_ = BN_new(); setulong(n); }
+    CBigNum(unsigned int n)       { this->bn_ = BN_new(); setulong(n); }
+    CBigNum(unsigned long n)      { this->bn_ = BN_new(); setulong(n); }
+    CBigNum(unsigned long long n) { this->bn_ = BN_new(); setuint64(n); }
+    explicit CBigNum(uint256 n)   { this->bn_ = BN_new(); setuint256(n); }
 
     explicit CBigNum(const std::vector<unsigned char>& vch)
     {
-        BN_init(this);
+        this->bn_ = BN_new();
         setvch(vch);
     }
 
@@ -110,7 +112,7 @@ public:
     */
     static CBigNum  randBignum(const CBigNum& range) {
         CBigNum ret;
-        if(!BN_rand_range(&ret, &range)){
+        if(!BN_rand_range(ret.bn_, range.bn_)){
             throw bignum_error("CBigNum:rand element : BN_rand_range failed");
         }
         return ret;
@@ -122,7 +124,7 @@ public:
     */
     static CBigNum RandKBitBigum(const uint32_t k){
         CBigNum ret;
-        if(!BN_rand(&ret, k, -1, 0)){
+        if(!BN_rand(ret.bn_, k, -1, 0)){
             throw bignum_error("CBigNum:rand element : BN_rand failed");
         }
         return ret;
@@ -133,30 +135,30 @@ public:
      * @return the size
      */
     int bitSize() const{
-        return  BN_num_bits(this);
+        return  BN_num_bits(this->bn_);
     }
 
 
     void setulong(unsigned long n)
     {
-        if (!BN_set_word(this, n))
+        if (!BN_set_word(this->bn_, n))
             throw bignum_error("CBigNum conversion from unsigned long : BN_set_word failed");
     }
 
     unsigned long getulong() const
     {
-        return BN_get_word(this);
+        return BN_get_word(this->bn_);
     }
 
     unsigned int getuint() const
     {
-        return BN_get_word(this);
+        return BN_get_word(this->bn_);
     }
 
     int getint() const
     {
-        unsigned long n = BN_get_word(this);
-        if (!BN_is_negative(this))
+        unsigned long n = BN_get_word(this->bn_);
+        if (!BN_is_negative(this->bn_))
             return (n > (unsigned long)std::numeric_limits<int>::max() ? std::numeric_limits<int>::max() : n);
         else
             return (n > (unsigned long)std::numeric_limits<int>::max() ? std::numeric_limits<int>::min() : -(int)n);
@@ -202,16 +204,16 @@ public:
         pch[1] = (nSize >> 16) & 0xff;
         pch[2] = (nSize >> 8) & 0xff;
         pch[3] = (nSize) & 0xff;
-        BN_mpi2bn(pch, p - pch, this);
+        BN_mpi2bn(pch, p - pch, this->bn_);
     }
 
     uint64_t getuint64()
     {
-        unsigned int nSize = BN_bn2mpi(this, NULL);
+        unsigned int nSize = BN_bn2mpi(this->bn_, NULL);
         if (nSize < 4)
             return 0;
         std::vector<unsigned char> vch(nSize);
-        BN_bn2mpi(this, &vch[0]);
+        BN_bn2mpi(this->bn_, &vch[0]);
         if (vch.size() > 4)
             vch[4] &= 0x7f;
         uint64_t n = 0;
@@ -244,7 +246,7 @@ public:
         pch[1] = (nSize >> 16) & 0xff;
         pch[2] = (nSize >> 8) & 0xff;
         pch[3] = (nSize) & 0xff;
-        BN_mpi2bn(pch, p - pch, this);
+        BN_mpi2bn(pch, p - pch, this->bn_);
     }
 
     void setuint256(uint256 n)
@@ -272,16 +274,16 @@ public:
         pch[1] = (nSize >> 16) & 0xff;
         pch[2] = (nSize >> 8) & 0xff;
         pch[3] = (nSize >> 0) & 0xff;
-        BN_mpi2bn(pch, p - pch, this);
+        BN_mpi2bn(pch, p - pch, this->bn_);
     }
 
     uint256 getuint256() const
     {
-        unsigned int nSize = BN_bn2mpi(this, NULL);
+        unsigned int nSize = BN_bn2mpi(this->bn_, NULL);
         if (nSize < 4)
             return 0;
         std::vector<unsigned char> vch(nSize);
-        BN_bn2mpi(this, &vch[0]);
+        BN_bn2mpi(this->bn_, &vch[0]);
         if (vch.size() > 4)
             vch[4] &= 0x7f;
         uint256 n = 0;
@@ -303,16 +305,16 @@ public:
         vch2[3] = (nSize >> 0) & 0xff;
         // swap data to big endian
         reverse_copy(vch.begin(), vch.end(), vch2.begin() + 4);
-        BN_mpi2bn(&vch2[0], vch2.size(), this);
+        BN_mpi2bn(&vch2[0], vch2.size(), this->bn_);
     }
 
     std::vector<unsigned char> getvch() const
     {
-        unsigned int nSize = BN_bn2mpi(this, NULL);
+        unsigned int nSize = BN_bn2mpi(this->bn_, NULL);
         if (nSize <= 4)
             return std::vector<unsigned char>();
         std::vector<unsigned char> vch(nSize);
-        BN_bn2mpi(this, &vch[0]);
+        BN_bn2mpi(this->bn_, &vch[0]);
         vch.erase(vch.begin(), vch.begin() + 4);
         reverse(vch.begin(), vch.end());
         return vch;
@@ -326,16 +328,16 @@ public:
         if (nSize >= 1) vch[4] = (nCompact >> 16) & 0xff;
         if (nSize >= 2) vch[5] = (nCompact >> 8) & 0xff;
         if (nSize >= 3) vch[6] = (nCompact >> 0) & 0xff;
-        BN_mpi2bn(&vch[0], vch.size(), this);
+        BN_mpi2bn(&vch[0], vch.size(), this->bn_);
         return *this;
     }
 
     unsigned int GetCompact() const
     {
-        unsigned int nSize = BN_bn2mpi(this, NULL);
+        unsigned int nSize = BN_bn2mpi(this->bn_, NULL);
         std::vector<unsigned char> vch(nSize);
         nSize -= 4;
-        BN_bn2mpi(this, &vch[0]);
+        BN_bn2mpi(this->bn_, &vch[0]);
         unsigned int nCompact = nSize << 24;
         if (nSize >= 1) nCompact |= (vch[4] << 16);
         if (nSize >= 2) nCompact |= (vch[5] << 8);
@@ -362,15 +364,19 @@ public:
 
         // hex string to bignum
         static const signed char phexdigit[256] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,1,2,3,4,5,6,7,8,9,0,0,0,0,0,0, 0,0xa,0xb,0xc,0xd,0xe,0xf,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0xa,0xb,0xc,0xd,0xe,0xf,0,0,0,0,0,0,0,0,0 };
-        *this = 0;
+	BN_zero(this->bn_);
         while (isxdigit(*psz))
         {
-            *this <<= 4;
+	    BN_lshift(this->bn_, this->bn_, 4);
             int n = phexdigit[(unsigned char)*psz++];
-            *this += n;
+	    std::ostringstream os;
+	    os << n;
+	    BIGNUM* n_big = BN_new();
+	    BN_dec2bn(&n_big, os.str().c_str());
+	    BN_add(this->bn_, this->bn_, n_big);
         }
         if (fNegative)
-            *this = 0 - *this;
+            *this.bn_ = 0 - *this.bn_;
     }
 
     std::string ToString(int nBase=10) const
@@ -380,14 +386,14 @@ public:
         CBigNum bn0 = 0;
         std::string str;
         CBigNum bn = *this;
-        BN_set_negative(&bn, false);
+        BN_set_negative(bn->bn_, false);
         CBigNum dv;
         CBigNum rem;
-        if (BN_cmp(&bn, &bn0) == 0)
+        if (BN_cmp(bn.bn_, bn0.bn_) == 0)
             return "0";
-        while (BN_cmp(&bn, &bn0) > 0)
+        while (BN_cmp(bn.bn_, bn0.bn_) > 0)
         {
-            if (!BN_div(&dv, &rem, &bn, &bnBase, pctx))
+            if (!BN_div(dv.bn_, rem.bn_, bn.bn_, bnBase.bn_, pctx))
                 throw bignum_error("CBigNum::ToString() : BN_div failed");
             bn = dv;
             unsigned int c = rem.getulong();
