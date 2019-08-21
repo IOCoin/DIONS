@@ -350,7 +350,16 @@ void GenerateRSAKey(CoordinateVector& p)
 
 
     fflush(stdout);
-    RSA *keypair = RSA_generate_key(KEY_LENGTH, PUB_EXP, NULL, NULL);
+    //RSA *keypair = RSA_generate_key(KEY_LENGTH, PUB_EXP, NULL, NULL);
+    RSA *keypair = 0;
+    ostringstream os;
+    os << PUB_EXP;
+    BIGNUM* exp = BN_new();
+    BN_dec2bn(&exp, os.str().c_str());
+    if(RSA_generate_key_ex(keypair, KEY_LENGTH, exp, NULL) == 0)
+    {
+      throw runtime_error("RSA_generate_key_ex");
+    }
 
 
     BIO *pri = BIO_new(BIO_s_mem());
