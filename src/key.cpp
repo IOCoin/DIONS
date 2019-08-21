@@ -438,8 +438,8 @@ bool CKey::Sign(uint256 hash, std::vector<unsigned char>& vchSig)
     ECDSA_SIG_get0(sig, &pr, &ps);
     if (BN_cmp(ps, halforder) > 0) {
         // enforce low S values, by negating the value (modulo the order) if above order/2.
-	BIGNUM* r;
-	BIGNUM* s;
+	BIGNUM* r=0;
+	BIGNUM* s=0;
         BN_sub(r, order, ps);
 	BN_copy(s, ps);
 	ECDSA_SIG_set0(sig, r, s);
@@ -517,8 +517,8 @@ bool CKey::SetCompactSignature(uint256 hash, const std::vector<unsigned char>& v
     if (nV<27 || nV>=35)
         return false;
     ECDSA_SIG *sig = ECDSA_SIG_new();
-    BIGNUM* r;
-    BIGNUM* s;
+    BIGNUM* r=0;
+    BIGNUM* s=0;
     BN_bin2bn(&vchSig[1],32,r);
     BN_bin2bn(&vchSig[33],32,s);
 
