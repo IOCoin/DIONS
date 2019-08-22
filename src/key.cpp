@@ -422,7 +422,6 @@ bool CKey::Sign(uint256 hash, std::vector<unsigned char>& vchSig)
 {
     vchSig.clear();
 
-
     ECDSA_SIG *sig = ECDSA_do_sign((unsigned char*)&hash, sizeof(hash), pkey);
     if (sig == NULL)
         return false;
@@ -433,15 +432,16 @@ bool CKey::Sign(uint256 hash, std::vector<unsigned char>& vchSig)
     BIGNUM *halforder = BN_CTX_get(ctx);
     EC_GROUP_get_order(group, order, ctx);
     BN_rshift1(halforder, order);
-    const BIGNUM* pr;
-    const BIGNUM* ps;
+    const BIGNUM* pr=0;
+    const BIGNUM* ps=0;
     ECDSA_SIG_get0(sig, &pr, &ps);
     if (BN_cmp(ps, halforder) > 0) {
         // enforce low S values, by negating the value (modulo the order) if above order/2.
-	BIGNUM* r=0;
+   	BIGNUM* r=0;
+	r  = BN_dup(pr);
 	BIGNUM* s=0;
-        BN_sub(r, order, ps);
-	BN_copy(s, ps);
+	s = BN_new();
+        BN_sub(s, order, ps);
 	ECDSA_SIG_set0(sig, r, s);
     }
     BN_CTX_end(ctx);

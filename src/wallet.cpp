@@ -1791,7 +1791,9 @@ bool __wx__::CreateTransaction__(const vector<pair<CScript, int64_t> >& vecSend,
 		  wtxNew.vout.insert(position, CTxOut(nChange, scriptChange));
 	      }
 	      else
+	      {
 		  reservekey.ReturnKey();
+	      }
 
 	      // Fill vin
 	      BOOST_FOREACH(const PAIRTYPE(const __wx__Tx*,unsigned int)& coin, setCoins)
@@ -1930,8 +1932,12 @@ bool __wx__::CreateTransaction(const vector<pair<CScript, int64_t> >& vecSend, _
 	      // Sign
 	      int nIn = 0;
 	      BOOST_FOREACH(const PAIRTYPE(const __wx__Tx*,unsigned int)& coin, setCoins)
+	      {
 		  if (!SignSignature(*this, *coin.first, wtxNew, nIn++))
+		  {
 		      return false;
+		  }
+	      }
 
 	      // Limit size
 	      unsigned int nBytes = ::GetSerializeSize(*(CTransaction*)&wtxNew, SER_NETWORK, PROTOCOL_VERSION);
