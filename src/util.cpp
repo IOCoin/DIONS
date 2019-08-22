@@ -351,7 +351,7 @@ void GenerateRSAKey(CoordinateVector& p)
 
     fflush(stdout);
     //RSA *keypair = RSA_generate_key(KEY_LENGTH, PUB_EXP, NULL, NULL);
-    RSA *keypair = 0;
+    RSA* keypair = RSA_new();
     ostringstream os;
     os << PUB_EXP;
     BIGNUM* exp = BN_new();
