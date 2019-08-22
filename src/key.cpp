@@ -519,6 +519,7 @@ bool CKey::SetCompactSignature(uint256 hash, const std::vector<unsigned char>& v
     ECDSA_SIG *sig = ECDSA_SIG_new();
     BIGNUM* r=0;
     BIGNUM* s=0;
+    r = BN_new(); s = BN_new();
     BN_bin2bn(&vchSig[1],32,r);
     BN_bin2bn(&vchSig[33],32,s);
 
