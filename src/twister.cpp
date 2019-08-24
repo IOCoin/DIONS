@@ -30,3 +30,34 @@ double s_entropy(vector<double> v)
   }
   return -entropy;
 }
+void rms(const string& s, string& r)
+{
+  for(int i=0; i<s.size(); i++)
+  {
+    if(::isspace(s[i])) continue;
+    r+= s[i];
+  }
+}
+
+double ic(const string& t)
+{
+  string text; rms(t, text);
+  vector<double> freq(256,0);
+  for(int i=0; i<text.size(); i++)
+  {
+    if(text[i] == ' ') continue;
+    freq[text[i]] ++;
+  }
+  double sum=0;
+  for(int i=0; i<freq.size(); i++)
+  {
+    if(freq[i] != 0)
+    {
+      double c = freq[i];
+      if(c != 0)
+        sum += c * (c - 1);
+    }
+  }
+  double ic = 26 * sum / (text.size() * (text.size() - 1));
+  return ic;
+}
