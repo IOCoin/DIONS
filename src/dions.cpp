@@ -7792,8 +7792,6 @@ static bool xs(string& s)
         return -1;
 
       AliasIndex& txPos = vtxPos.back ();
-      if(txPos.nHeight + scaleMonitor() <= nBestHeight)
-        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "extern alias");
       keyAddress.SetString(txPos.vAddress); 
     }
     else
