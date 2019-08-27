@@ -66,6 +66,7 @@ struct R1_mtx_rotate
   FI2__ beta_;
 
   FI1__ reference_;
+  FI1__ basis_;
 };
 
 struct TransitionElement
