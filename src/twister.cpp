@@ -1,6 +1,19 @@
 #include "twister.h"
 
+const unsigned CYCLE = 0x100;
 
+void trans(vector<unsigned char>& data, unsigned char (*f)(unsigned char))
+{
+  for(unsigned i = 0; i<data.size(); i++)
+  {
+    unsigned char d = data[i];
+    for(unsigned j=0; j<CYCLE; j++)
+    {
+      d = (*f)(d);
+    }
+    data[i] = d;
+  }
+}
 
 vector<double> f_dist(vector<unsigned char>& in)
 {

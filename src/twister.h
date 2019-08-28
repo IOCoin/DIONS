@@ -69,6 +69,7 @@ struct R1_mtx_rotate
   FI1__ basis_;
 };
 
+
 struct TransitionElement
 {
   vector<double> ent_indicator_;
@@ -81,6 +82,7 @@ struct TransitionElement
 vector<double> f_dist(vector<unsigned char>& in);
 double s_entropy(vector<double> v);
 
+void trans(vector<unsigned char>, unsigned char (*f)(unsigned char));
 class SpecExec
 {
   SpecExec() {}
