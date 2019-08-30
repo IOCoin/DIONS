@@ -2,6 +2,8 @@
 
 const unsigned CYCLE = 0x100;
 
+const unsigned C_TRANS_ = 0xff;
+
 void trans(vector<unsigned char>& data, unsigned char (*f)(unsigned char))
 {
   for(unsigned i = 0; i<data.size(); i++)
