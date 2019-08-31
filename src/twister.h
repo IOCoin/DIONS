@@ -85,11 +85,19 @@ double s_entropy(vector<double> v);
 void trans(vector<unsigned char>, unsigned char (*f)(unsigned char));
 class SpecExec
 {
+  public:	
   SpecExec() {}
   ~SpecExec() {}
 
   virtual double entropy(vector<double> v);
 
+};
+
+class TLV
+{
+  public:  
+    TransitionElement trans;
+    SpecExec se;
 };
 
 #endif
