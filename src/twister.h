@@ -80,6 +80,10 @@ struct TransitionElement
   vector<FI1__> reference_;
 };
 
+struct Spectra
+{
+  FI1__ basis_;
+};
 
 vector<double> f_dist(vector<unsigned char>& in);
 double s_entropy(vector<double> v);
@@ -101,5 +105,7 @@ class TLV
     TransitionElement trans;
     SpecExec se;
 };
+
+
 
 #endif
