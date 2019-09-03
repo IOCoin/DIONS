@@ -83,6 +83,7 @@ struct TransitionElement
 struct Spectra
 {
   FI1__ basis_;
+  FI2__ mix_;
 };
 
 vector<double> f_dist(vector<unsigned char>& in);
