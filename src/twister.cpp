@@ -72,6 +72,23 @@ void rms(const string& s, string& r)
   }
 }
 
+void hPerm(int s, int n, void (*p)(int), void (*inv)(int, int))
+{
+  if(s == 1)
+  {
+    (*p)(n);
+    return;
+  }
+  for(int i=0; i< s; i++)
+  {
+    hPerm(s-1, n, p, inv);
+    if(s%2 == 1)
+      (*inv)(0, s-1);
+    else 
+      (*inv)(i, s-1);
+  }
+}
+
 double ic(const string& t)
 {
   string text; rms(t, text);
