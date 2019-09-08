@@ -72,6 +72,10 @@ void rms(const string& s, string& r)
   }
 }
 
+void sw(int i, int j, void (*inv)(int, int))
+{
+  (*inv)(i, j); 
+}
 void hPerm(int s, int n, void (*p)(int), void (*inv)(int, int))
 {
   if(s == 1)
