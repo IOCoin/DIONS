@@ -72,9 +72,9 @@ void rms(const string& s, string& r)
   }
 }
 
-void sw(int i, int j, void (*inv)(int, int))
+double sw(double weight, int i, int j, int (*inv)(int, int))
 {
-  (*inv)(i, j); 
+  return weight*(*inv)(i, j); 
 }
 void hPerm(int s, int n, void (*p)(int), void (*inv)(int, int))
 {
