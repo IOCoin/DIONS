@@ -80,6 +80,7 @@ vector<double> f_dist(vector<unsigned char>& in);
 double s_entropy(vector<double> v);
 
 void trans(vector<unsigned char>, unsigned char (*f)(unsigned char));
+void transHom(vector<unsigned char>, unsigned char (*f)(unsigned char), unsigned char (*g)(unsigned char));
 class SpecExec
 {
   public:	

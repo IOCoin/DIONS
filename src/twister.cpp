@@ -27,6 +27,19 @@ unsigned char base(unsigned char a, unsigned char (*s)(int), int pos)
 	return (*s)(pos)^a;
 }
 
+void transHom(vector<unsigned char>& data, unsigned char (*f)(unsigned char), unsigned char (*g)(unsigned char))
+{
+  for(unsigned i = 0; i<data.size(); i++)
+  {
+    unsigned char d = data[i];
+    for(unsigned j=0; j<CYCLE; j++)
+    {
+      d = (*f)(d)*(*g)(d);
+    }
+    data[i] = d;
+  }
+}
+
 void trans(vector<unsigned char>& data, unsigned char (*f)(unsigned char))
 {
   for(unsigned i = 0; i<data.size(); i++)
