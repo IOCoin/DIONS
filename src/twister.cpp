@@ -22,11 +22,23 @@ const int transition_seq[] = { 0xce, 0xab, 0xdf, 0xcf, 0xee,
                                0xcb, 0xbd, 0xba, 0xac, 0xdf, 
                                0xdf, 0xde, 0xcd, 0xfd, 0xca };
 
-unsigned char base(unsigned char a, unsigned char (*s)(int), int pos)
+unsigned char base(unsigned char a, unsigned char (*s)(unsigned char), int pos)
 {
 	return (*s)(pos)^a;
 }
 
+void transHomExt(vector<unsigned char>& data, unsigned char (*f)(unsigned char), unsigned char (*g)(unsigned char))
+{
+  for(unsigned i = 0; i<data.size(); i++)
+  {
+    unsigned char d = data[i];
+    for(unsigned j=0; j<CYCLE; j++)
+    {
+      d = (*f)(d)^base(d, g, d);
+    }
+    data[i] = d;
+  }
+}
 void transHom(vector<unsigned char>& data, unsigned char (*f)(unsigned char), unsigned char (*g)(unsigned char))
 {
   for(unsigned i = 0; i<data.size(); i++)
@@ -34,7 +46,7 @@ void transHom(vector<unsigned char>& data, unsigned char (*f)(unsigned char), un
     unsigned char d = data[i];
     for(unsigned j=0; j<CYCLE; j++)
     {
-      d = (*f)(d)*(*g)(d);
+      d = (*f)(d)^(*g)(d);
     }
     data[i] = d;
   }
