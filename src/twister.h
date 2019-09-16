@@ -95,8 +95,12 @@ class SpecExec
 class TLV
 {
   public:  
+    TLV() {};
+    ~TLV() {};
     TransitionElement trans;
     SpecExec se;
+  private:
+    FI1__ mix;
 };
 
 
