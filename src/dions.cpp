@@ -8066,7 +8066,6 @@ Value psimplex(const Array& params, bool fHelp) { if(fHelp || params.size() != 2
         throw runtime_error(
                 "psimplex <base> <is>"
                 + HelpRequiringPassphrase());
-
   string k1;
   vchType vchNodeLocator;
   k1 =(params[0]).get_str();
@@ -8095,8 +8094,6 @@ Value psimplex(const Array& params, bool fHelp) { if(fHelp || params.size() != 2
       return -1;
 
     AliasIndex& txPos = vtxPos.back();
-    if(txPos.nHeight + scaleMonitor() <= nBestHeight)
-      throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "extern alias");
     address = txPos.vAddress;
     value = txPos.vValue;
   }

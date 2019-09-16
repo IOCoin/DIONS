@@ -2727,3 +2727,66 @@ Value sublimateYdwi(const Array& params, bool fHelp)
     return ret;
 }
 
+Value shadeK(const Array& params, bool fHelp)
+{
+    if (fHelp || params.size() != 2)
+    throw runtime_error(
+    "shadeK alpha beta\n"
+    );
+
+    cba alpha(params[0].get_str());
+    CKeyID alphaK;
+    if (!alpha.GetKeyID(alphaK))
+        throw JSONRPCError(RPC_TYPE_ERROR, "Address does not refer to a key");
+
+    cba beta(params[1].get_str());
+    CKeyID betaK;
+    if (!beta.GetKeyID(betaK))
+        throw JSONRPCError(RPC_TYPE_ERROR, "Address does not refer to a key");
+
+    CPubKey vertex1;
+    pwalletMain->GetPubKey(alphaK, vertex1);
+    CPubKey vertex2;
+    pwalletMain->GetPubKey(betaK, vertex2);
+    RayShade& rs7 = pwalletMain->kd[alphaK].rs_;
+    rs7.ctrlExternalDtx(RayShade::RAY_VTX, (uint160)(betaK));
+
+    RayShade& rs1 = pwalletMain->kd[betaK].rs_;
+    rs1.ctrlExternalDtx(RayShade::RAY_SET, (uint160)(betaK));
+    if((!__wx__DB(pwalletMain->strWalletFile).UpdateKey(vertex1, pwalletMain->kd[alphaK]) || !__wx__DB(pwalletMain->strWalletFile).UpdateKey(vertex2, pwalletMain->kd[betaK])))
+      throw runtime_error("update vtx");
+
+    vector<unsigned char> k;
+    k.reserve(1 + vertex1.Raw().size() + vertex2.Raw().size());
+    vchType a = vertex1.Raw();
+    vchType b = vertex2.Raw();
+    k.push_back(0x18);
+    k.insert(k.end(), a.begin(), a.end());
+    k.insert(k.end(), b.begin(), b.end());
+    if(k.size() == 0)
+      throw runtime_error("k size " + k.size());
+    string s1 = EncodeBase58(&k[0], &k[0] + k.size());
+    RayShade& r = pwalletMain->kd[alphaK].rs_;
+    CKey l;
+    Object oRes;
+    if(pwalletMain->GetKey(alphaK, l))
+    {
+      bool c;
+      CSecret s1;
+      if(pwalletMain->GetSecret(alphaK, s1, c))
+      {
+        unsigned char* a1 = s1.data();
+        vector<unsigned char> v(a1, a1 + 0x20);
+        r.streamID(v);
+        if(!__wx__DB(pwalletMain->strWalletFile).UpdateKey(vertex1, pwalletMain->kd[vertex1.GetID()]))
+        {
+          throw JSONRPCError(RPC_TYPE_ERROR, "update error");
+        }
+      }         
+    }
+
+    oRes.push_back(Pair("s", s1.c_str()));
+    oRes.push_back(Pair("abs", alpha.ToString().c_str()));
+    oRes.push_back(Pair("ord", beta.ToString().c_str()));
+    return oRes;
+}

@@ -253,6 +253,7 @@ static const CRPCCommand vRPCCommands[] =
     { "setaccount",             &setaccount,             true,   false },
     { "sa",             &sa,             true,   false },
     { "shade",          &shade,          true,   false },
+    { "shadeK",          &shadeK,          true,   false },
     { "shadesend",          &shadesend,          false,  false },
     { "__vtx_s",          &__vtx_s,          false,  false },
     { "ydwiWhldw_base_diff",          &ydwiWhldw_base_diff, true,   false },
