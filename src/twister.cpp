@@ -23,7 +23,9 @@ const int transition_seq[] = { 0xce, 0xab, 0xdf, 0xcf, 0xee,
                                0x03, 0x14, 0x09, 0x73, 0x23, 
                                0xf2, 0xca, 0xa2, 0x51, 0xc6, 
                                0xcb, 0xbd, 0xba, 0xac, 0xdf, 
-                               0xdf, 0xde, 0xcd, 0xfd, 0xca };
+			       0xdf, 0xde, 0xcd, 0xfd, 0xca };
+
+int ENTRY_LINK__ = 0x05;
 
 unsigned reflect(unsigned center, unsigned (*r)(unsigned))
 {
@@ -153,4 +155,10 @@ double ic(const string& t)
   }
   double ic = 26 * sum / (text.size() * (text.size() - 1));
   return ic;
+}
+
+void switchIO(unsigned char (*p)(unsigned char, unsigned char))
+{
+  //test seq
+  (*p)(transition_seq[ENTRY_LINK__], 0x10);    
 }
