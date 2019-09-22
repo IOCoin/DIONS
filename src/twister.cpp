@@ -157,8 +157,8 @@ double ic(const string& t)
   return ic;
 }
 
-void switchIO(unsigned char (*p)(unsigned char, unsigned char))
+void switchIO(unsigned char (*p)(unsigned char, unsigned char), unsigned char m)
 {
   //test seq
-  (*p)(transition_seq[ENTRY_LINK__], 0x10);    
+  (*p)(transition_seq[ENTRY_LINK__], m);    
 }
