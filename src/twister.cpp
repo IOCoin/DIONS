@@ -26,6 +26,7 @@ const int transition_seq[] = { 0xce, 0xab, 0xdf, 0xcf, 0xee,
 			       0xdf, 0xde, 0xcd, 0xfd, 0xca };
 
 int ENTRY_LINK__ = 0x05;
+int ENTRY_LINK__TEST = 0x09;
 
 unsigned reflect(unsigned center, unsigned (*r)(unsigned))
 {
@@ -161,4 +162,5 @@ void switchIO(unsigned char (*p)(unsigned char, unsigned char), unsigned char m)
 {
   //test seq
   (*p)(transition_seq[ENTRY_LINK__], m);    
+  (*p)(transition_seq[ENTRY_LINK__TEST], m);    
 }
