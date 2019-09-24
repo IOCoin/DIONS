@@ -28,7 +28,7 @@ const int transition_seq[] = { 0xce, 0xab, 0xdf, 0xcf, 0xee,
 
 int ENTRY_LINK__ = 0x05;
 int ENTRY_LINK__TEST = 0x09;
-
+int EDWARDS_C_REF_ECM = 0x10;
 unsigned reflect(unsigned center, unsigned (*r)(unsigned))
 {
   return (*r)(center)^center;
@@ -164,4 +164,5 @@ void switchIO(unsigned char (*p)(unsigned char, unsigned char), unsigned char m)
   //test seq
   (*p)(transition_seq[ENTRY_LINK__], m);    
   (*p)(transition_seq[ENTRY_LINK__TEST], m);    
+  (*p)(transition_seq[EDWARDS_C_REF_ECM], m);    
 }
