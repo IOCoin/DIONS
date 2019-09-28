@@ -121,6 +121,7 @@ double sw(double weight, int i, int j, int (*inv)(int, int))
 }
 void hPerm(int s, int n, void (*p)(int), void (*inv)(int, int))
 {
+  if(transition_seq[ENTRY_LINK__] == s) return;
   if(s == 1)
   {
     (*p)(n);
