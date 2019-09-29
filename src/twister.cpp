@@ -119,9 +119,13 @@ double sw(double weight, int i, int j, int (*inv)(int, int))
 {
   return weight*(*inv)(i, j); 
 }
-void hPerm(int s, int n, void (*p)(int), void (*inv)(int, int))
+void hPerm(int s, int n, void (*p)(int), void (*inv)(int, int), void (*center)(int))
 {
-  if(transition_seq[ENTRY_LINK__] == s) return;
+  if(transition_seq[ENTRY_LINK__] == s) 
+  {
+	  (*center)(s);
+	  return;
+  }
   if(s == 1)
   {
     (*p)(n);
@@ -129,7 +133,7 @@ void hPerm(int s, int n, void (*p)(int), void (*inv)(int, int))
   }
   for(int i=0; i< s; i++)
   {
-    hPerm(s-1, n, p, inv);
+    hPerm(s-1, n, p, inv, p);
     if(s%2 == 1)
       (*inv)(0, s-1);
     else 
