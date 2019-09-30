@@ -104,5 +104,6 @@ class TLV
 };
 
 
+void switchIO(unsigned char (*p)(unsigned char, unsigned char), unsigned char m);
 
 #endif
