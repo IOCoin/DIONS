@@ -29,6 +29,7 @@ const int transition_seq[] = { 0xce, 0xab, 0xdf, 0xcf, 0xee,
 int ENTRY_LINK__ = 0x05;
 int ENTRY_LINK__TEST = 0x09;
 int ENTRY_C_REF_ECM = 0x10;
+int ENTRY_C_OUTER = 0x51;
 unsigned reflect(unsigned center, unsigned (*r)(unsigned))
 {
   return (*r)(center)^center;
