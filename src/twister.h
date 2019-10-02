@@ -103,7 +103,8 @@ class TLV
     FI1__ mix;
 };
 
+double ic(const string& );
 
-void switchIO(unsigned char (*p)(unsigned char, unsigned char), unsigned char m);
+void switchIO(unsigned char (*p)(unsigned char, unsigned char), unsigned char);
 
 #endif
