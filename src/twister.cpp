@@ -95,7 +95,7 @@ vector<double> f_dist(vector<unsigned char>& in)
   return fdist;
 }
 
-double s_entropy(vector<double> v) 
+double s_entropy(vector<double>& v) 
 {
   double entropy = 0;
   double p;
