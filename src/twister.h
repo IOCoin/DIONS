@@ -113,5 +113,6 @@ void hPerm(int s, int n, void (*p)(int), void (*inv)(int, int), void (*center)(i
 double sw(double weight, int i, int j, int (*inv)(int, int));
 void rms(const string& , string& );
 vector<double> f_dist(vector<unsigned char>&);
+void transHomExt(vector<unsigned char>& , unsigned char (*f)(unsigned char), unsigned char (*g)(unsigned char));
 
 #endif
