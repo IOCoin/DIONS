@@ -32,6 +32,7 @@ int ENTRY_LINK__TEST = 0x09;
 int ENTRY_C_REF_ECM = 0x10;
 int ENTRY_C_OUTER = 0x51;
 int ENTRY_C_OUTER_PROD = 0x41;
+int ENTRY_C_OUTER_PROD_TEST = 0x33;
 unsigned reflect(unsigned center, unsigned (*r)(unsigned))
 {
   return (*r)(center)^center;
