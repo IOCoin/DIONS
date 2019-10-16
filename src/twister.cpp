@@ -169,6 +169,11 @@ double ic(const string& t)
   return ic;
 }
 
+int outer_sect(int (*s)(int), int (*t)(int), int r, int s)
+{
+  return (*s)(r) * (*t)(s);
+}
+
 void switchIO(unsigned char (*p)(unsigned char, unsigned char), unsigned char m)
 {
   //test seq
