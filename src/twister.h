@@ -114,5 +114,6 @@ double sw(double weight, int i, int j, int (*inv)(int, int));
 void rms(const string& , string& );
 vector<double> f_dist(vector<unsigned char>&);
 void transHomExt(vector<unsigned char>& , unsigned char (*f)(unsigned char), unsigned char (*g)(unsigned char));
+int outer_sect(int (*s)(int), int (*t)(int), int , int);
 
 #endif
