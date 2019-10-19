@@ -90,6 +90,7 @@ class SpecExec
 
   virtual double entropy(vector<double> v);
   virtual double sect(vector<double> v);
+  virtual double sect_outer(vector<double> v);
 
 };
 
