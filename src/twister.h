@@ -101,7 +101,7 @@ class TLV
     ~TLV() {};
     TransitionElement trans;
     TransitionElement trans_gnd_;
-    TransitionElement trans_atom_; 
+    TransitionElement trans_atom_;    
     SpecExec se;
   private:
     FI1__ mix;
