@@ -100,6 +100,7 @@ class TLV
     TLV() {};
     ~TLV() {};
     TransitionElement trans;
+    TransitionElement co_dom_;
     TransitionElement trans_gnd_;
     TransitionElement trans_atom_;    
     TransitionElement trans_ion_;    
