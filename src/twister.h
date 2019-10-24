@@ -106,6 +106,7 @@ class TLV
     TransitionElement trans_ion_;    
     SpecExec se;
     SpecExec list;
+    SpecExec trans_base;
   private:
     FI1__ mix;
 };
