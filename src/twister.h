@@ -68,6 +68,7 @@ struct TransitionElement
   FI2__ key_center_;
   vector<R1_mtx_rotate> morph_l_;
   vector<FI1__> reference_;
+  vector<FI2__> cbase_;
 };
 
 struct Spectra
