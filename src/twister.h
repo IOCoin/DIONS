@@ -57,6 +57,7 @@ struct R1_mtx_rotate
   FI2__ beta_;
   FI2__ gamma_;
 
+  FI1__ res_;
   FI1__ reference_;
   FI1__ basis_;
 };
