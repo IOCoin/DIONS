@@ -49,6 +49,7 @@ struct FI2__
 {
   ex_mix desc_;
   map<FI1__, displ> transMap_;
+  map<FI2__, displ> extTransMap_;
 };
 
 struct R1_mtx_rotate
