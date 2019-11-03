@@ -48,6 +48,7 @@ struct FI1__
 struct FI2__
 {
   ex_mix desc_;
+  ex_mix path_;
   map<FI1__, displ> transMap_;
   map<FI2__, displ> extTransMap_;
 };
