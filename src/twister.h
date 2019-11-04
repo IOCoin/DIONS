@@ -45,10 +45,12 @@ struct FI1__
   ex_mix ph;
 };
 
+//Decriptor basis same as mix len optimal ?
 struct FI2__
 {
   ex_mix desc_;
   ex_mix path_;
+  ex_mix desc_;
   map<FI1__, displ> transMap_;
   map<FI2__, displ> extTransMap_;
 };
