@@ -33,9 +33,11 @@ struct ex_mix
   vector<displ> descTable_;
 };
 
+// codomain added here
 struct mtx
 {
   ex_mix disc_;
+  ex_mix codom_;
 };
 
 struct FI1__
@@ -44,6 +46,7 @@ struct FI1__
   ex_mix th;
   ex_mix ph;
 };
+
 
 //Decriptor basis same as mix len optimal ?
 struct FI2__
