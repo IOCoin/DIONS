@@ -27,6 +27,8 @@ struct displ
   vector<int> coord_;
 };
 
+// Suggestion, a second generator class would be cleaner
+// decoupling the index basis from the mix util structs. Blastdoor7
 struct ex_mix
 {
   int pos_;
