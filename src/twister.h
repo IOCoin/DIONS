@@ -23,6 +23,7 @@ struct displ
   int sect_;
   cpp_int offset_;
   cpp_dec_float_50 scale_;
+  cpp_dec_float_50 range_;
   vector<int> coord_;
 };
 
