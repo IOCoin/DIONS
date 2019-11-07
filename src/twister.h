@@ -17,6 +17,8 @@ using namespace::std;
 using namespace boost::multiprecision;
 using namespace boost::random;
 
+//Suggest abstraction of bits engine which can be given concrete
+//instantiation for each generator base
 typedef independent_bits_engine<mt19937, 256, cpp_int> GEN__;
 struct displ
 {
@@ -59,6 +61,7 @@ struct FI2__
   ex_mix desc_;
   map<FI1__, displ> transMap_;
   map<FI2__, displ> extTransMap_;
+  map<FI2__, displ> torTransMap_; //Explicit base for now .
 };
 
 struct R1_mtx_rotate
