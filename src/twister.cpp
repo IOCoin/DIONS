@@ -36,6 +36,7 @@ int ENTRY_C_OUTER = 0x51;
 int ENTRY_C_OUTER_PROD = 0x41;
 int ENTRY_C_OUTER_PROD_TEST = 0x33;
 int ENTRY_C_OUTER_PROD_TOR_TEST = 0x57;
+int ENTRY_A_OUTER_PROD_TOR_TEST = 0xc9;
 unsigned reflect(unsigned center, unsigned (*r)(unsigned))
 {
   return (*r)(center)^center;
