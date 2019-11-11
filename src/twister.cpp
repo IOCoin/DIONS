@@ -37,6 +37,7 @@ int ENTRY_C_OUTER_PROD = 0x41;
 int ENTRY_C_OUTER_PROD_TEST = 0x33;
 int ENTRY_C_OUTER_PROD_TOR_TEST = 0x57;
 int ENTRY_A_OUTER_PROD_TOR_TEST = 0xc9;
+int ENTRY_B_OUTER_PROD_EUC_TEST = 0xaf;
 unsigned reflect(unsigned center, unsigned (*r)(unsigned))
 {
   return (*r)(center)^center;
@@ -122,7 +123,7 @@ void rms(const string& s, string& r)
     r+= s[i];
   }
 }
-
+//add extended euc 
 double sw(double weight, int i, int j, int (*inv)(int, int))
 {
   return weight*(*inv)(i, j); 
