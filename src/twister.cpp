@@ -38,6 +38,9 @@ int ENTRY_C_OUTER_PROD_TEST = 0x33;
 int ENTRY_C_OUTER_PROD_TOR_TEST = 0x57;
 int ENTRY_A_OUTER_PROD_TOR_TEST = 0xc9;
 int ENTRY_B_OUTER_PROD_EUC_TEST = 0xaf;
+
+
+
 unsigned reflect(unsigned center, unsigned (*r)(unsigned))
 {
   return (*r)(center)^center;
@@ -173,9 +176,9 @@ double ic(const string& t)
   return ic;
 }
 
-int outer_sect(int (*s)(int), int (*t)(int), int r, int s)
+int outer_sect(int (*s)(int), int (*t)(int), int r, int q)
 {
-  return (*s)(r) * (*t)(s);
+  return (*s)(r) * (*t)(q);
 }
 
 void switchIO(unsigned char (*p)(unsigned char, unsigned char), unsigned char m)
@@ -186,4 +189,11 @@ void switchIO(unsigned char (*p)(unsigned char, unsigned char), unsigned char m)
   (*p)(transition_seq[ENTRY_C_REF_ECM], m);    
   (*p)(transition_seq[ENTRY_LINK__TEST], m ^ transition_seq[ENTRY_LINK__TEST]);    
   (*p)(transition_seq[ENTRY_LINK__TEST], m ^ transition_seq[ENTRY_C_REF_ECM]);    
+}
+
+tuple<int, int, int> extended_gcd(int __alpha, int __beta)
+{
+  if(__alpha == 0) return make_tuple(__beta,0,1);
+  int __com, x, y;
+  return make_tuple(__com, y-(__beta/__alpha)*x, x);
 }

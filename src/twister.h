@@ -58,7 +58,7 @@ struct FI2__
 {
   ex_mix desc_;
   ex_mix path_;
-  ex_mix desc_;
+  ex_mix desc1_;
   map<FI1__, displ> transMap_;
   map<FI2__, displ> extTransMap_;
   map<FI2__, displ> torTransMap_; //Explicit base for now .
