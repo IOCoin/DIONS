@@ -194,6 +194,9 @@ void switchIO(unsigned char (*p)(unsigned char, unsigned char), unsigned char m)
 tuple<int, int, int> extended_gcd(int __alpha, int __beta)
 {
   if(__alpha == 0) return make_tuple(__beta,0,1);
-  int __com, x, y;
+  int __com=0; 
+  int x=0; 
+  int y=0;
+  tie(__com, x, y) = extended_gcd(__beta%__alpha, __alpha);
   return make_tuple(__com, y-(__beta/__alpha)*x, x);
 }
