@@ -1,6 +1,6 @@
 #include "twister.h"
 
-const unsigned CYCLE = 0x100;
+const unsigned CYCLE = 0xl00;
 
 const unsigned C_TRANS_ = 0xff;
 int block_units[][0x10] = {
@@ -40,6 +40,7 @@ int ENTRY_A_OUTER_PROD_TOR_TEST = 0xc9;
 int ENTRY_B_OUTER_PROD_EUC_TEST = 0xaf;
 int ENTRY_C_OUTER_PROD_EUC_TEST = 0xa1;
 int ENTRY_C_INNER_PROD_EUC_TEST = 0xc5;
+int ENTRY_C_INNER_PROD_RELAY_TEST = 0xf5;
 
 
 
