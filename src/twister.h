@@ -125,6 +125,7 @@ class TLV
     SpecExec se;
     SpecExec list;
     SpecExec trans_base;
+    SpecExec trans_gcd_ext;
   private:
     FI1__ mix;
 };
