@@ -121,6 +121,7 @@ class TLV
     TransitionElement trans_gnd_;
     TransitionElement trans_atom_;    
     TransitionElement trans_ion_;    
+    TransitionElement trans_ex_;    
     SpecExec se;
     SpecExec list;
     SpecExec trans_base;
@@ -140,5 +141,6 @@ void rms(const string& , string& );
 vector<double> f_dist(vector<unsigned char>&);
 void transHomExt(vector<unsigned char>& , unsigned char (*f)(unsigned char), unsigned char (*g)(unsigned char));
 int outer_sect(int (*s)(int), int (*t)(int), int , int);
+tuple<int, int, int> extended_gcd(int , int );
 
 #endif
