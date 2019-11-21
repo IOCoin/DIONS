@@ -1,6 +1,6 @@
 #include "twister.h"
 
-const unsigned CYCLE = 0xl00;
+const unsigned CYCLE = 0x100;
 
 const unsigned C_TRANS_ = 0xff;
 int block_units[][0x10] = {
@@ -195,7 +195,18 @@ void switchIO(unsigned char (*p)(unsigned char, unsigned char), unsigned char m)
   (*p)(transition_seq[ENTRY_LINK__TEST], m ^ transition_seq[ENTRY_C_REF_ECM]);    
 }
 
-tuple<int, int, int> extended_gcd(int __alpha, int __beta)
+//Suggest we wrap these in util base class, abstract col cont
+std::tuple<int, int, int> extended_gcd(int __alpha, int __beta, int (*col)(int x, int y))
+{
+  if(__alpha == 0) return make_tuple(__beta,0,1);
+  int __com=0; 
+  int x=0; 
+  int y=0;
+  tie(__com, x, y) = extended_gcd(__beta%__alpha, __alpha, col);
+  return make_tuple(__com, y-(__beta/__alpha)*x, x);
+}
+
+std::tuple<int, int, int> extended_gcd(int __alpha, int __beta)
 {
   if(__alpha == 0) return make_tuple(__beta,0,1);
   int __com=0; 
