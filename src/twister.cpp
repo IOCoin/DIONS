@@ -195,7 +195,7 @@ void switchIO(unsigned char (*p)(unsigned char, unsigned char), unsigned char m)
   (*p)(transition_seq[ENTRY_LINK__TEST], m ^ transition_seq[ENTRY_C_REF_ECM]);    
 }
 
-//Suggest we wrap these in util base class, abstract col cont    
+//Suggest we wrap these in util base class, abstract col cont     
 std::tuple<int, int, int> extended_gcd(int __alpha, int __beta, int (*col)(int x, int y))
 {
   if(__alpha == 0) return make_tuple(__beta,0,1);
