@@ -91,6 +91,7 @@ struct Spectra
 {
   FI1__ basis_;
   FI2__ mix_;
+  FI2__ dim_;
 };
 
 vector<double> f_dist(vector<unsigned char>& in);
