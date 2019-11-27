@@ -195,7 +195,7 @@ void switchIO(unsigned char (*p)(unsigned char, unsigned char), unsigned char m)
   (*p)(transition_seq[ENTRY_LINK__], m);    
   (*p)(transition_seq[ENTRY_LINK__TEST], m);    
   (*p)(transition_seq[ENTRY_C_REF_ECM], m);    
-  (*p)(transition_seq[ENTRY_C_INNER_PROD_ELIP_TEST], m);    
+  (*p)(transition_seq[ENTRY_C_INNER_PROD_ELIP_TEST  ], m);    
   (*p)(transition_seq[ENTRY_LINK__TEST], m ^ transition_seq[ENTRY_LINK__TEST]);    
   (*p)(transition_seq[ENTRY_LINK__TEST], m ^ transition_seq[ENTRY_C_REF_ECM]);    
 }
