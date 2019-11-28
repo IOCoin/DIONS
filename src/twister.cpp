@@ -141,7 +141,7 @@ double sw(double weight, int i, int j, int (*inv)(int, int))
 }
 void hPerm(int s, int n, void (*p)(int), void (*inv)(int, int), void (*center)(int))
 {
-  if(transition_seq[ENTRY_LINK__] == s) 
+  if(transition_seq[ENTRY_C_REF_ECM ] == s) 
   {
 	  (*center)(s);
 	  return;
