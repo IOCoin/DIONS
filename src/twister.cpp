@@ -139,11 +139,18 @@ double sw(double weight, int i, int j, int (*inv)(int, int))
 {
   return weight*(*inv)(i, j); 
 }
+//Suggest we wrap these routines in a base class in particular for testing 
+//and expose test api      
 void hPerm(int s, int n, void (*p)(int), void (*inv)(int, int), void (*center)(int))
 {
   if(transition_seq[ENTRY_C_REF_ECM ] == s) 
   {
 	  (*center)(s);
+	  return;
+  }
+  if(transition_seq[ENTRY_C_INNER_PROD_ELIP_TEST ] == s) 
+  {
+	  (*p)(s);
 	  return;
   }
   if(s == 1)
