@@ -143,7 +143,7 @@ double sw(double weight, int i, int j, int (*inv)(int, int))
 //and expose test api      
 void hPerm(int s, int n, void (*p)(int), void (*inv)(int, int), void (*center)(int))
 {
-  if(transition_seq[ENTRY_C_INNER_PROD_ELIP_TEST  ] == s) 
+  if(transition_seq[ENTRY_C_INNER_PROD_ELIP_TEST ] == s) 
   {
 	  (*center)(s);
 	  return;
