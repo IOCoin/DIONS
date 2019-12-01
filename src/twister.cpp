@@ -205,6 +205,7 @@ void switchIO(unsigned char (*p)(unsigned char, unsigned char), unsigned char m)
   (*p)(transition_seq[ENTRY_C_INNER_PROD_ELIP_TEST  ], m);    
   (*p)(transition_seq[ENTRY_LINK__TEST], m ^ transition_seq[ENTRY_LINK__TEST]);    
   (*p)(transition_seq[ENTRY_LINK__TEST], m ^ transition_seq[ENTRY_C_REF_ECM]);    
+  (*p)(transition_seq[ENTRY_LINK__TEST], m ^ transition_seq[ENTRY_C_INNTER_PROD_ELIP_TEST]);    
 }
 
 //Suggest we wrap these in util base class, abstract col cont     
