@@ -22,7 +22,8 @@ using namespace boost::random;
 typedef independent_bits_engine<mt19937, 256, cpp_int> GEN__;
 struct displ
 {
-  int sect_;
+  int sect_;   
+  GEN__ strm_;
   cpp_int offset_;
   cpp_dec_float_50 scale_;
   cpp_dec_float_50 range_;
