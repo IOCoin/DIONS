@@ -202,6 +202,9 @@ void switchIO(unsigned char (*p)(unsigned char, unsigned char), unsigned char m)
   (*p)(transition_seq[ENTRY_LINK__], m);    
   (*p)(transition_seq[ENTRY_LINK__TEST], m);    
   //stream test , suggest these tests should be moved to a state transition class
+  //
+  //
+  //
   (*p)(transition_seq[ENTRY_C_REF_ECM], m ^ 0xff );    
   (*p)(transition_seq[ENTRY_C_INNER_PROD_ELIP_TEST  ], m);    
   (*p)(transition_seq[ENTRY_LINK__TEST], m ^ transition_seq[ENTRY_LINK__TEST]);    
