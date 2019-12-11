@@ -75,6 +75,7 @@ static const uint256 hashGenesisMerkleRoot("0xcd5029ac01fb6cd7da8ff00ff1e82f3aca
 
 const int SHADE_FEATURE_UPDATE = 75 * 500 + 1860837;
 
+
 const int BLOCK_REWARD_HALVING = 0x2dc6c0;
 
 inline bool IsProtocolV2(int nHeight) { return nHeight > 65000; }
