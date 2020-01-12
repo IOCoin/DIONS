@@ -222,7 +222,7 @@ std::tuple<int, int, int> extended_gcd(int __alpha, int __beta, int (*col)(int x
   tie(__com, x, y) = extended_gcd(__beta%__alpha, __alpha, col);
   return make_tuple(__com, y-(__beta/__alpha)*x, x);
 }
-
+//frmwk wrapper pending nh release, util base
 std::tuple<int, int, int> extended_gcd(int __alpha, int __beta)
 {
   if(__alpha == 0) return make_tuple(__beta,0,1);
