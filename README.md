@@ -29,7 +29,7 @@ Features:
 * Dedicated Node: 178.62.109.73
 * Shade API added. (Stealth addresses based on Diffie Hellman key exchange)
 * (Nighthawk Protocol in current code development)
-* (Chameleon Graph Ledger to come) https://www.chameleonledger.com
+* (Chameleon Graph Ledger to come) https://www.chameleongraph.com
 
 Development process
 ===========================
