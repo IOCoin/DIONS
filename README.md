@@ -12,8 +12,8 @@ Features:
 * 16 Million POW coins
 * 22 Million total coins
 *  4 MB Blocks
-*  2 MB Data Cap
-* 60 second blocktime
+*  1 MB Data Cap
+* 60 second blocktime (Up to 16 second blocktime)
 * 1.5 IOC POS reward + any tx fees in that block, based on the percentage of coins staking
 * Enhanced API allowing registration of aliases and associated data,
   aliases may be kept encrypted or public. Aliases, encrypted or public may
