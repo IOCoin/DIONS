@@ -192,6 +192,18 @@ bool __wx__::ak(const CKey& key)
   return __wx__DB(strWalletFile).WriteKey(pubkey, key.GetPrivKey(), kd[pubkey.GetID()]);
     return true;
 }
+bool __wx__::akExt(const CKeyID& key)
+{
+    AssertLockHeld(cs_wallet); // kd
+
+
+    if (!CCryptoKeyStore::akExt(key))
+    {
+  return false;
+    }
+  CPrivKey cpk;
+  return __wx__DB(strWalletFile).WriteKey(key, cpk, kd[key]);
+}
 
 bool __wx__::sync(const CPubKey &vchPubKey, const vector<unsigned char> &vchCryptedSecret)
 {
@@ -336,6 +348,10 @@ bool __wx__::SetRSAMetadata(const CPubKey &pubkey)
     }
 
     return false;
+}
+bool __wx__::LoadViewKey(const CKeyID& vchPubKey, const std::vector<unsigned char> &vchCryptedSecret)
+{
+    return CBasicKeyStore::akExt(vchPubKey);
 }
 
 bool __wx__::LoadCryptedKey(const CPubKey &vchPubKey, const std::vector<unsigned char> &vchCryptedSecret)
@@ -2630,6 +2646,7 @@ void __wx__::ReserveKeyFromKeyPool(int64_t& nIndex, CKeyPool& keypool)
 
 int64_t __wx__::AddReserveKey(const CKeyPool& keypool)
 {
+  if(fViewWallet) return -1;
   {
       LOCK2(cs_main, cs_wallet);
       __wx__DB walletdb(strWalletFile);
@@ -2710,6 +2727,7 @@ bool __wx__::GetKeyFromPool(CPubKey& r1, CPubKey& r2, bool fAllowReuse)
 
 bool __wx__::GetKeyFromPool(CPubKey& result, bool fAllowReuse)
 {
+  if(fViewWallet) return false;
   int64_t nIndex = 0;
   CKeyPool keypool;
   {

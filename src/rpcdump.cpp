@@ -111,42 +111,35 @@ public:
     }
 };
 
-Value importprivkey(const Array& params, bool fHelp)
+Value trcext(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() < 1 || params.size() > 2)
         throw runtime_error(
-            "importprivkey <iocoinprivkey> [label]\n"
-            "Adds a private key (as returned by dumpprivkey) to your wallet.");
+            "trcext <pub> [label]\n");
 
     string strSecret = params[0].get_str();
+    cba s(strSecret);
     string strLabel = "";
     if (params.size() > 1)
         strLabel = params[1].get_str();
     CBitcoinSecret vchSecret;
-    bool fGood = vchSecret.SetString(strSecret);
-
-    if (!fGood) throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid private key");
-    if (fWalletUnlockStakingOnly)
-        throw JSONRPCError(RPC_WALLET_UNLOCK_NEEDED, "Wallet is unlocked for staking only.");
-
     CKey key;
     bool fCompressed;
-    CSecret secret = vchSecret.GetSecret(fCompressed);
+    vector<unsigned char> sec;
+    sec.resize(32);
+    CSecret secret(sec.data(), sec.data() + 0x20);
     key.SetSecret(secret, fCompressed);
-    CKeyID vchAddress = key.GetPubKey().GetID();
+    CKeyID vchAddress ; s.GetKeyID(vchAddress);
     {
         LOCK2(cs_main, pwalletMain->cs_wallet);
 
         pwalletMain->MarkDirty();
         pwalletMain->SetAddressBookName(vchAddress, strLabel);
 
-        // Don't throw error in case a key is already there
-        if (pwalletMain->HaveKey(vchAddress))
-            return Value::null;
-
         pwalletMain->kd[vchAddress].nCreateTime = 1;
 
-        if (!pwalletMain->ak(key))
+        CKeyID id; s.GetKeyID(id);
+        if (!pwalletMain->akExt(id))
             throw JSONRPCError(RPC_WALLET_ERROR, "Error adding key to wallet");
 
         // whenever a key is imported, we need to scan the whole chain
@@ -711,4 +704,51 @@ Value trcbase(const Array& params, bool fHelp)
             "trcbase <base>");
 
   return Value::null;
+}
+Value importprivkey(const Array& params, bool fHelp)
+{
+    if (fHelp || params.size() < 1 || params.size() > 2)
+        throw runtime_error(
+            "importprivkey <iocoinprivkey> [label]\n"
+            "Adds a private key (as returned by dumpprivkey) to your wallet.");
+
+    string strSecret = params[0].get_str();
+    string strLabel = "";
+    if (params.size() > 1)
+        strLabel = params[1].get_str();
+    CBitcoinSecret vchSecret;
+    bool fGood = vchSecret.SetString(strSecret);
+
+    if (!fGood) throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid private key");
+    if (fWalletUnlockStakingOnly)
+        throw JSONRPCError(RPC_WALLET_UNLOCK_NEEDED, "Wallet is unlocked for staking only.");
+
+    CKey key;
+    bool fCompressed;
+    CSecret secret = vchSecret.GetSecret(fCompressed);
+    key.SetSecret(secret, fCompressed);
+    CKeyID vchAddress = key.GetPubKey().GetID();
+    {
+        LOCK2(cs_main, pwalletMain->cs_wallet);
+
+        pwalletMain->MarkDirty();
+        pwalletMain->SetAddressBookName(vchAddress, strLabel);
+
+        // Don't throw error in case a key is already there
+        if (pwalletMain->HaveKey(vchAddress))
+            return Value::null;
+
+        pwalletMain->kd[vchAddress].nCreateTime = 1;
+
+        if (!pwalletMain->ak(key))
+            throw JSONRPCError(RPC_WALLET_ERROR, "Error adding key to wallet");
+
+        // whenever a key is imported, we need to scan the whole chain
+        pwalletMain->nTimeFirstKey = 1; // 0 would be considered 'no value'
+
+        pwalletMain->ScanForWalletTransactions(pindexGenesisBlock, true);
+        pwalletMain->ReacceptWalletTransactions();
+    }
+
+    return Value::null;
 }
