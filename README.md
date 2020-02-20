@@ -2,7 +2,7 @@
 For: Data, Communications, Privacy and Payments
   
 
-I/O Coin (IOC) - DIONS (Decentralized Input Output Name Server)
+I/O Coin (iOC) - DIONS (Decentralized Input Output Name Server)
 ===========================
 
 I/O Coin is a POS CiPher-Based Blockchain
