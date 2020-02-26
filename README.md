@@ -32,7 +32,7 @@ Features:
 * (Chameleon Graph Ledger to come) https://www.chameleongraph.com
 * Bootstrap https://github.com/IOCoin/DIONS/releases/download/DIONS-SIRIUS-v5.0.0.0-g5729cf1/IOC-BOOTSRAP-2663250.zip
 
-![IOC-DIONS2020-Infographics](https://raw.githubusercontent.com/IOCoin/DIONS/master/doc/DIONS.PNG)
+![IOC-DIONS2020-Infographics](https://raw.githubusercontent.com/IOCoin/DIONS/4565d7ed3985e8a930202167fec8c15a505bf48f/doc/DIONS.PNG)
 
 Development process
 ===========================
