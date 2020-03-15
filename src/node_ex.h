@@ -1,7 +1,7 @@
 #ifndef NODE_EX
 #define NODE_EX
 
-#include "twister.h"
+#include "nighthawk/core/twister.h"
 #include <vector>
 
 using namespace::std;

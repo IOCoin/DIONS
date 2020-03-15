@@ -130,7 +130,6 @@ OBJS= \
     obj/wallet.o \
     obj/walletdb.o \
     obj/state.o \
-    obj/twister.o \
     obj/dions.o \
     obj/noui.o \
     obj/cubehash.o \
@@ -147,6 +146,7 @@ OBJS= \
     obj/skein.o \
     obj/kernel.o \
     obj/pbkdf2.o \
+    obj/nighthawk/core/twister.o \
     obj/zerocoin/Accumulator.o \
     obj/zerocoin/AccumulatorProofOfKnowledge.o \
     obj/zerocoin/Coin.o \
@@ -199,6 +199,12 @@ obj/%.o: %.c
 	      -e '/^$$/ d' -e 's/$$/ :/' < $(@:%.o=%.d) >> $(@:%.o=%.P); \
 	  rm -f $(@:%.o=%.d)
 
+obj/nighthawk/core/%.o: nighthawk/core/%.cpp
+	$(CXX) -c $(xCXXFLAGS) -MMD -MF $(@:%.o=%.d) -o $@ $<
+	@cp $(@:%.o=%.d) $(@:%.o=%.P); \
+	  sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
+	      -e '/^$$/ d' -e 's/$$/ :/' < $(@:%.o=%.d) >> $(@:%.o=%.P); \
+	  rm -f $(@:%.o=%.d)
 obj/zerocoin/%.o: zerocoin/%.cpp
 	$(CXX) -c $(xCXXFLAGS) -MMD -MF $(@:%.o=%.d) -o $@ $<
 	@cp $(@:%.o=%.d) $(@:%.o=%.P); \
@@ -213,8 +219,10 @@ clean:
 	-rm -f iocoind
 	-rm -f obj/*.o
 	-rm -f obj/zerocoin/*.o
+	-rm -f obj/nighthawk/core/*.o
 	-rm -f obj/*.P
 	-rm -f obj/zerocoin/*.P
+	-rm -f obj/nighthawk/core/*.P
 	-rm -f obj/build.h
 
 FORCE:
