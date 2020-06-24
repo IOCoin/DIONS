@@ -139,6 +139,7 @@ void trans(vector<unsigned char>& data, unsigned char (*f)(unsigned char));
 double s_entropy(vector<double>&) ;
 void switchIO(unsigned char (*p)(unsigned char, unsigned char), unsigned char);
 void transHom(vector<unsigned char>& , unsigned char (*f)(unsigned char), unsigned char (*g)(unsigned char));
+void multiChan(unsigned char* (*p)(unsigned char, unsigned char), unsigned char);
 void hPerm(int s, int n, void (*p)(int), void (*inv)(int, int), void (*center)(int));
 double sw(double weight, int i, int j, int (*inv)(int, int));
 void rms(const string& , string& );

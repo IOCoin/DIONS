@@ -196,6 +196,16 @@ int outer_sect(int (*s)(int), int (*t)(int), int r, int q)
   return (*s)(r) * (*t)(q);
 }
 
+void multiChan(unsigned char* (*p)(unsigned char, unsigned char), unsigned char m)
+{
+  unsigned char* chanIndicator = (*p)(transition_seq[ENTRY_C_REF_ECM], m);  
+  unsigned char* crossCh = (*p)(transition_seq[ENTRY_C_INNER_PROD_ELIP_TEST], m);  
+  *chanIndicator = *chanIndicator ^ *crossCh;
+  *crossCh = *chanIndicator ^ *crossCh;
+  *chanIndicator = *chanIndicator ^ *crossCh;
+
+}
+
 void switchIO(unsigned char (*p)(unsigned char, unsigned char), unsigned char m)
 {
   //test seq
@@ -210,6 +220,7 @@ void switchIO(unsigned char (*p)(unsigned char, unsigned char), unsigned char m)
   (*p)(transition_seq[ENTRY_LINK__TEST], m ^ transition_seq[ENTRY_LINK__TEST]);    
   (*p)(transition_seq[ENTRY_LINK__TEST], m ^ transition_seq[ENTRY_C_REF_ECM]);    
   (*p)(transition_seq[ENTRY_LINK__TEST], m ^ transition_seq[ENTRY_C_INNER_PROD_ELIP_TEST]);    
+  
 }
 
 //Suggest we wrap these in util base class, abstract col cont     
