@@ -195,7 +195,7 @@ int outer_sect(int (*s)(int), int (*t)(int), int r, int q)
 {
   return (*s)(r) * (*t)(q);
 }
-
+//chain cross ref - test - 
 void multiChan(unsigned char* (*p)(unsigned char, unsigned char), unsigned char m)
 {
   unsigned char* chanIndicator = (*p)(transition_seq[ENTRY_C_REF_ECM], m);  
