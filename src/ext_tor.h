@@ -14,6 +14,7 @@ class ExtTor
     virtual void aror(int) == 0; 
     virtual void arol(int) == 0; 
     virtual void streamx(vector<unsigned char>&) == 0; 
+    virtual void merge(vector<unsigned char>&) == 0; 
     ~virtual ExtTor();
   private:
 };
