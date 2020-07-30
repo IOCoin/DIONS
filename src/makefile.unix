@@ -131,6 +131,7 @@ OBJS= \
     obj/walletdb.o \
     obj/state.o \
     obj/twister.o \
+    obj/tor.o \
     obj/dions.o \
     obj/noui.o \
     obj/cubehash.o \
