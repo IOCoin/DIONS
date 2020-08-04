@@ -17,5 +17,5 @@ class Toroid : public ExtTor
     virtual void prod(std::vector<unsigned char>&,std::vector<unsigned char>&) {}; 
     virtual ~Toroid() { };
   private:
-    std::vector<unsigned char> torserial;
+     std::vector<unsigned char> torserial;
 };
