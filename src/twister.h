@@ -20,7 +20,7 @@ using namespace boost::random;
 //Suggest abstraction of bits engine which can be given concrete
 //instantiation for each generator base
 typedef independent_bits_engine<mt19937, 256, cpp_int> GEN__;
-struct displ
+typedef struct displ
 {
   int sect_;   
   GEN__ strm_;
@@ -28,34 +28,34 @@ struct displ
   cpp_dec_float_50 scale_;
   cpp_dec_float_50 range_;
   vector<int> coord_;
-};
+} view;
 
 // Suggestion, a second generator class would be cleaner
 // decoupling the index basis from the mix util structs. Blastdoor7
-struct ex_mix
+typedef struct ex_mix
 {
   int pos_;
   GEN__ g_;  
   vector<displ> descTable_;
-};
+} mix;
 
 // codomain added here
-struct mtx
+typedef struct mtx
 {
   ex_mix disc_;
   ex_mix codom_;
-};
+} mtx_co;
 
-struct FI1__
+typedef struct FI1__
 {
   ex_mix r;
   ex_mix th;
   ex_mix ph;
-};
+} fi1;
 
 
 //Decriptor basis same as mix len optimal ?
-struct FI2__
+typedef struct FI2__
 {
   ex_mix desc_;
   ex_mix path_;
@@ -64,9 +64,9 @@ struct FI2__
   map<FI1__, displ> internMap_;     
   map<FI2__, displ> extTransMap_;
   map<FI2__, displ> torTransMap_; //Explicit base for now .
-};
+} fi2;
 
-struct R1_mtx_rotate
+typedef struct R1_mtx_rotate
 {
   FI2__ alpha_;
   FI2__ beta_;
@@ -75,10 +75,10 @@ struct R1_mtx_rotate
   FI1__ res_;
   FI2__ reference_;
   FI2__ basis_;
-};
+} rot;
 
 
-struct TransitionElement
+typedef struct TransitionElement
 {
   vector<double> ent_indicator_;
   FI2__ key_center_;
@@ -86,14 +86,14 @@ struct TransitionElement
   vector<FI1__> reference_;
   vector<FI2__> cbase_;
   vector<FI2__> key_l_;
-};
+} transelt;
 
-struct Spectra
+typedef struct Spectra
 {
   FI1__ basis_;
   FI2__ mix_;
   FI2__ dim_;
-};
+} spec;
 
 vector<double> f_dist(vector<unsigned char>& in);
 double s_entropy(vector<double> v);
