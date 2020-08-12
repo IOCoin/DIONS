@@ -1,5 +1,5 @@
 #include"ext_tor.h"
-
+#include "twister.h"
 
 class Toroid : public ExtTor
 {
@@ -15,7 +15,10 @@ class Toroid : public ExtTor
     virtual void streamx(std::vector<unsigned char>&) {}; 
     virtual void merge(std::vector<unsigned char>&) {}; 
     virtual void prod(std::vector<unsigned char>&,std::vector<unsigned char>&) {}; 
+
+    virtual fi2& base() { return this->base_; } 
     virtual ~Toroid() { };
   private:
      std::vector<unsigned char> torserial;
+     fi2  base_;
 };
