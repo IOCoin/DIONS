@@ -30,7 +30,7 @@ Features:
 * Shade API added. (Stealth addresses based on Diffie Hellman key exchange)
 * (Nighthawk Protocol in current code development)
 * (Chameleon Graph Ledger to come) https://www.chameleongraph.com
-* Bootstrap https://github.com/IOCoin/DIONS/releases/download/DIONS-SIRIUS-v5.0.0.0-g5729cf1/IOC-BOOTSTRAP-2776108.zip
+* Bootstrap https://github.com/IOCoin/DIONS/releases/download/DIONS-SIRIUS-v5.0.0.0-g5729cf1/IOC-Full-Bootstrap-Block-2904141.zip
 * Windows 10 Wallet https://github.com/IOCoin/DIONS/releases/download/DIONS-SIRIUS-v5.0.0.0-g5729cf1/dions-aurora.exe 
 * OSX Catalina 10.15 Wallet https://github.com/IOCoin/DIONS/releases/download/DIONS-SIRIUS-v5.0.0.0-g5729cf1/dions-aurora.dmg 
 
