@@ -23,4 +23,5 @@ class Toroid : public ExtTor
      fi2  base_;
      rot  thetaTrans_;
      transelt translate_;
+     spec ffspec;
 };
