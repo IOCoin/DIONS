@@ -21,4 +21,5 @@ class Toroid : public ExtTor
   private:
      std::vector<unsigned char> torserial;
      fi2  base_;
+     rot  thetaTrans_;
 };
