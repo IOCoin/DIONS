@@ -59,6 +59,7 @@ BENCHMARKS = db_bench_sqlite3 db_bench_tree_db
 LIBRARY = libleveldb.a
 MEMENVLIBRARY = libmemenv.a
 
+
 default: all
 
 # Should we build shared libraries?
