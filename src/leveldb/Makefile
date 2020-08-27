@@ -60,6 +60,7 @@ LIBRARY = libleveldb.a
 MEMENVLIBRARY = libmemenv.a
 
 
+
 default: all
 
 # Should we build shared libraries?
