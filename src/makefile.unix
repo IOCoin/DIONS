@@ -91,10 +91,16 @@ ifeq (${ARCH}, i686)
 endif
 
 
+
 # CXXFLAGS can be specified on the make command line, so we use xCXXFLAGS that only
 # adds some defaults in front. Unfortunately, CXXFLAGS=... $(CXXFLAGS) does not work.
+ifeq ($(OPTIMIZE), yes)
+xCXXFLAGS=-O03 $(EXT_OPTIONS) -pthread -Wall -Wextra -Wno-ignored-qualifiers -Wformat -Wformat-security -Wno-unused-parameter \
+    $(DEFS) $(HARDENING) $(CXXFLAGS)
+else
 xCXXFLAGS=-ggdb $(EXT_OPTIONS) -pthread -Wall -Wextra -Wno-ignored-qualifiers -Wformat -Wformat-security -Wno-unused-parameter \
     $(DEBUGFLAGS) $(DEFS) $(HARDENING) $(CXXFLAGS)
+endif
 
 # LDFLAGS can be specified on the make command line, so we use xLDFLAGS that only
 # adds some defaults in front. Unfortunately, LDFLAGS=... $(LDFLAGS) does not work.
@@ -208,6 +214,9 @@ obj/zerocoin/%.o: zerocoin/%.cpp
 	  rm -f $(@:%.o=%.d)
 
 iocoind: $(OBJS:obj/%=obj/%)
+	$(LINK) $(xCXXFLAGS) -o $@ $^ $(xLDFLAGS) $(LIBS)
+
+optimize: $(OBJS:obj/%=obj/%)
 	$(LINK) $(xCXXFLAGS) -o $@ $^ $(xLDFLAGS) $(LIBS)
 
 clean:
