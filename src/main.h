@@ -10,7 +10,6 @@
 #include "net.h"
 #include "script.h"
 #include "hashblock.h"
-#include "zerocoin/Zerocoin.h"
 
 #include <list>
 
@@ -89,7 +88,6 @@ inline unsigned int GetTargetSpacing(int nHeight) { return IsProtocolV2(nHeight)
 
 
 extern unsigned int nCoinCacheSize;
-extern libzerocoin::Params* ZCParams;
 extern CScript COINBASE_FLAGS;
 extern CCriticalSection cs_main;
 extern std::map<uint256, CBlockIndex*> mapBlockIndex;
@@ -1142,7 +1140,7 @@ public:
     bool ReadFromDisk(const CBlockIndex* pindex, bool fReadTransactions=true);
     bool SetBestChain(CTxDB& txdb, CBlockIndex* pindexNew);
     bool AddToBlockIndex(unsigned int nFile, unsigned int nBlockPos, const uint256& hashProof);
-    bool CheckBlock(bool fCheckPOW=true, bool fCheckMerkleRoot=true, bool fCheckSig=true) const;
+    bool CheckBlock(bool fCheckPoW=true,bool fCheckMerkleRoot=true,bool fCheckSig=true) const;
     bool AcceptBlock();
     bool SignBlock(__wx__& keystore, int64_t nFees);
     bool CheckBlockSignature() const;
