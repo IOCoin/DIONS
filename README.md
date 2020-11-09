@@ -26,7 +26,10 @@ Features:
 * 12815 PoW block limit
 * P2P Port: 33764
 * RPC Port: 33765
-* Dedicated Node: 178.62.109.73
+* Dedicated Super Seed Nodes: 
+  amer.supernode.iocoin.io  
+  emea.supernode.iocoin.io  
+  apac.supernode.iocoin.io
 * Shade API added. (Stealth addresses based on Diffie Hellman key exchange)
 * (Nighthawk Protocol in current code development)
 * (Chameleon Graph Ledger to come) https://www.chameleongraph.com
