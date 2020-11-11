@@ -17,7 +17,7 @@ class Encode__N
     if ((n % 2) == 0)
     return 0;
 
-    r = (int) (sqrt(n));
+    r = (double) (sqrt((double)n));
     for (i = 3; i <= r; i += 2)
     if ((n % i) == 0)
     {
