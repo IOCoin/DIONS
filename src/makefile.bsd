@@ -2,8 +2,6 @@
 # Distributed under the MIT/X11 software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-USE_UPNP:=0
-
 LINK:=$(CXX)
 
 DEFS=-DBOOST_SPIRIT_THREADSAFE
@@ -31,14 +29,6 @@ LIBS += \
    -l ssl \
    -l crypto \
    -l execinfo
-
-ifndef USE_UPNP
-	override USE_UPNP = -
-endif
-ifneq (${USE_UPNP}, -)
-	LIBS += -l miniupnpc
-	DEFS += -DUSE_UPNP=$(USE_UPNP)
-endif
 
 LIBS+= \
  -Wl,-B$(LMODE2) \

@@ -5,13 +5,10 @@
 CC=x86_64-w64-mingw32-gcc -Wl,-Bstatic
 CXX=x86_64-w64-mingw32-g++ -Wl,-Bstatic
 
-#USE_UPNP:=0
-
 CROSS_BUILD=/home/ioctest/CROSS_COMPILE/
 INCLUDEPATHS= \
  -I"$(CROSS_BUILD)/x86_64-w64-mingw32/boost_1_55_0/include" \
  -I"$(CROSS_BUILD)/x86_64-w64-mingw32/db-4.8/include" \
- -I"$(CROSS_BUILD)/x86_64-w64-mingw32/miniupnpc-1.9.20140610//include" \
  -I"$(CROSS_BUILD)/x86_64-w64-mingw32/openssl-1.0/include/"
 
 LIBPATHS= \
@@ -39,16 +36,6 @@ CFLAGS=-mthreads -O3 -msse2 -w -Wall -Wextra -Wno-ignored-qualifiers -Wformat -W
 LDFLAGS=-Wl,--dynamicbase -Wl,--nxcompat
 
 TESTDEFS = -DTEST_DATA_DIR=$(abspath test/data)
-
-ifndef USE_UPNP
-	override USE_UPNP = -
-endif
-ifneq (${USE_UPNP}, -)
- INCLUDEPATHS += -I"$(CROSS_BUILD)/miniupnpc-1.9.20140610/"
- LIBPATHS += -L"$(CROSS_BUILD)/miniupnpc-1.9.20140610/"
- LIBS += -l miniupnpc -l iphlpapi
- DEFS += -DSTATICLIB -DUSE_UPNP=$(USE_UPNP)
-endif
 
 LIBS += -l kernel32 -l user32 -l gdi32 -l comdlg32 -l winspool -l winmm -l shell32 -l comctl32 -l ole32 -l oleaut32 -l uuid -l rpcrt4 -l advapi32 -l ws2_32 -l mswsock -l shlwapi
 
