@@ -65,7 +65,7 @@
 
 #include <iostream>
 
-extern CWallet* pwalletMain;
+extern __wx__* pwalletMain;
 extern int64_t nLastCoinStakeSearchInterval;
 double GetPoSKernelPS(int nHeight = -1);
 
@@ -1032,7 +1032,7 @@ void BitcoinGUI::updateStakingIcon()
     else
     {
         labelStakingIcon->setPixmap(QIcon(":/icons/staking_off").pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
-        if (pwalletMain && pwalletMain->IsLocked())
+        if (pwalletMain && pwalletMain->as())
             labelStakingIcon->setToolTip(tr("Not staking because wallet is locked"));
         else if (vNodes.empty())
             labelStakingIcon->setToolTip(tr("Not staking because wallet is offline"));

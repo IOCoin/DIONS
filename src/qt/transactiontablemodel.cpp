@@ -48,16 +48,16 @@ struct TxLessThan
 class TransactionTablePriv
 {
 public:
-    TransactionTablePriv(CWallet *wallet, TransactionTableModel *parent):
+    TransactionTablePriv(__wx__ *wallet, TransactionTableModel *parent):
             wallet(wallet),
             parent(parent)
     {
     }
-    CWallet *wallet;
+    __wx__ *wallet;
     TransactionTableModel *parent;
 
     /* Local cache of wallet.
-     * As it is in the same order as the CWallet, by definition
+     * As it is in the same order as the __wx__, by definition
      * this is sorted by sha256.
      */
     QList<TransactionRecord> cachedWallet;
@@ -70,7 +70,7 @@ public:
         cachedWallet.clear();
         {
             LOCK2(cs_main, wallet->cs_wallet);
-            for(std::map<uint256, CWalletTx>::iterator it = wallet->mapWallet.begin(); it != wallet->mapWallet.end(); ++it)
+            for(std::map<uint256, __wx__Tx>::iterator it = wallet->mapWallet.begin(); it != wallet->mapWallet.end(); ++it)
             {
                 if(TransactionRecord::showTransaction(it->second))
                     cachedWallet.append(TransactionRecord::decomposeTransaction(wallet, it->second));
@@ -90,7 +90,7 @@ public:
             LOCK2(cs_main, wallet->cs_wallet);
 
             // Find transaction in wallet
-            std::map<uint256, CWalletTx>::iterator mi = wallet->mapWallet.find(hash);
+            std::map<uint256, __wx__Tx>::iterator mi = wallet->mapWallet.find(hash);
             bool inWallet = mi != wallet->mapWallet.end();
 
             // Find bounds of this transaction in model
@@ -190,7 +190,7 @@ public:
                 TRY_LOCK(wallet->cs_wallet, lockWallet);
                 if(lockWallet && rec->statusUpdateNeeded())
                 {
-                    std::map<uint256, CWalletTx>::iterator mi = wallet->mapWallet.find(rec->hash);
+                    std::map<uint256, __wx__Tx>::iterator mi = wallet->mapWallet.find(rec->hash);
 
                     if(mi != wallet->mapWallet.end())
                     {
@@ -210,7 +210,7 @@ public:
     {
         {
             LOCK2(cs_main, wallet->cs_wallet);
-            std::map<uint256, CWalletTx>::iterator mi = wallet->mapWallet.find(rec->hash);
+            std::map<uint256, __wx__Tx>::iterator mi = wallet->mapWallet.find(rec->hash);
             if(mi != wallet->mapWallet.end())
             {
                 return TransactionDesc::toHTML(wallet, mi->second);
@@ -221,7 +221,7 @@ public:
 
 };
 
-TransactionTableModel::TransactionTableModel(CWallet* wallet, WalletModel *parent):
+TransactionTableModel::TransactionTableModel(__wx__* wallet, WalletModel *parent):
         QAbstractTableModel(parent),
         wallet(wallet),
         walletModel(parent),

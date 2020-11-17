@@ -5,7 +5,7 @@
 #include <QStringList>
 
 class AddressTablePriv;
-class CWallet;
+class __wx__;
 class WalletModel;
 
 /**
@@ -15,7 +15,7 @@ class AddressTableModel : public QAbstractTableModel
 {
     Q_OBJECT
 public:
-    explicit AddressTableModel(CWallet *wallet, WalletModel *parent = 0);
+    explicit AddressTableModel(__wx__ *wallet, WalletModel *parent = 0);
     ~AddressTableModel();
 
     enum ColumnIndex {
@@ -72,7 +72,7 @@ public:
 
 private:
     WalletModel *walletModel;
-    CWallet *wallet;
+    __wx__ *wallet;
     AddressTablePriv *priv;
     QStringList columns;
     EditStatus editStatus;

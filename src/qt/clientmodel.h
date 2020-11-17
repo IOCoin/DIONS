@@ -6,7 +6,7 @@
 class OptionsModel;
 class AddressTableModel;
 class TransactionTableModel;
-class CWallet;
+class __wx__;
 
 QT_BEGIN_NAMESPACE
 class QDateTime;

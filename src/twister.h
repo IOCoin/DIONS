@@ -19,7 +19,7 @@ using namespace boost::random;
 
 //Suggest abstraction of bits engine which can be given concrete
 //instantiation for each generator base
-typedef independent_bits_engine<mt19937, 256, cpp_int> GEN__;
+typedef boost::random::independent_bits_engine<boost::random::mt19937, 256, cpp_int> GEN__;
 typedef struct displ
 {
   int sect_;   

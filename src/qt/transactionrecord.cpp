@@ -5,7 +5,7 @@
 
 /* Return positive answer if transaction should be shown in list.
  */
-bool TransactionRecord::showTransaction(const CWalletTx &wtx)
+bool TransactionRecord::showTransaction(const __wx__Tx &wtx)
 {
     if (wtx.IsCoinBase())
     {
@@ -19,9 +19,9 @@ bool TransactionRecord::showTransaction(const CWalletTx &wtx)
 }
 
 /*
- * Decompose CWallet transaction to model transaction records.
+ * Decompose __wx__ transaction to model transaction records.
  */
-QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *wallet, const CWalletTx &wtx)
+QList<TransactionRecord> TransactionRecord::decomposeTransaction(const __wx__ *wallet, const __wx__Tx &wtx)
 {
     QList<TransactionRecord> parts;
     int64_t nTime = wtx.GetTxTime();
@@ -48,7 +48,7 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
                 {
                     // Received by Bitcoin Address
                     sub.type = TransactionRecord::RecvWithAddress;
-                    sub.address = CBitcoinAddress(address).ToString();
+                    sub.address = cba(address).ToString();
                 }
                 else
                 {
@@ -120,7 +120,7 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
                 {
                     // Sent to Bitcoin Address
                     sub.type = TransactionRecord::SendToAddress;
-                    sub.address = CBitcoinAddress(address).ToString();
+                    sub.address = cba(address).ToString();
                 }
                 else
                 {
@@ -153,7 +153,7 @@ QList<TransactionRecord> TransactionRecord::decomposeTransaction(const CWallet *
     return parts;
 }
 
-void TransactionRecord::updateStatus(const CWalletTx &wtx)
+void TransactionRecord::updateStatus(const __wx__Tx &wtx)
 {
     AssertLockHeld(cs_main);
     // Determine transaction status

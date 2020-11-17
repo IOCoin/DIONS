@@ -336,7 +336,7 @@ bool SendCoinsDialog::handleURI(const QString &uri)
     // URI has to be valid
     if (GUIUtil::parseBitcoinURI(uri, &rv))
     {
-        CBitcoinAddress address(rv.address.toStdString());
+        cba address(rv.address.toStdString());
         if (!address.IsValid())
             return false;
         pasteEntry(rv);
@@ -439,7 +439,7 @@ void SendCoinsDialog::coinControlChangeChecked(int state)
     if (model)
     {
         if (state == Qt::Checked)
-            CoinControlDialog::coinControl->destChange = CBitcoinAddress(ui->lineEditCoinControlChange->text().toStdString()).Get();
+            CoinControlDialog::coinControl->destChange = cba(ui->lineEditCoinControlChange->text().toStdString()).Get();
         else
             CoinControlDialog::coinControl->destChange = CNoDestination();
     }
@@ -453,13 +453,13 @@ void SendCoinsDialog::coinControlChangeEdited(const QString & text)
 {
     if (model)
     {
-        CoinControlDialog::coinControl->destChange = CBitcoinAddress(text.toStdString()).Get();
+        CoinControlDialog::coinControl->destChange = cba(text.toStdString()).Get();
 
         // label for the change address
         ui->labelCoinControlChangeLabel->setStyleSheet("QLabel{color:black;}");
         if (text.isEmpty())
             ui->labelCoinControlChangeLabel->setText("");
-        else if (!CBitcoinAddress(text.toStdString()).IsValid())
+        else if (!cba(text.toStdString()).IsValid())
         {
             ui->labelCoinControlChangeLabel->setStyleSheet("QLabel{color:red;}");
             ui->labelCoinControlChangeLabel->setText(tr("WARNING: Invalid I/OCoin address"));
@@ -473,7 +473,7 @@ void SendCoinsDialog::coinControlChangeEdited(const QString & text)
             {
                 CPubKey pubkey;
                 CKeyID keyid;
-                CBitcoinAddress(text.toStdString()).GetKeyID(keyid);   
+                cba(text.toStdString()).GetKeyID(keyid);   
                 if (model->getPubKey(keyid, pubkey))
                     ui->labelCoinControlChangeLabel->setText(tr("(no label)"));
                 else

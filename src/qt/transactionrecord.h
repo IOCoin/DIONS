@@ -5,8 +5,8 @@
 
 #include <QList>
 
-class CWallet;
-class CWalletTx;
+class __wx__;
+class __wx__Tx;
 
 /** UI model for transaction status. The transaction status is the part of a transaction that will change over time.
  */
@@ -95,10 +95,10 @@ public:
     {
     }
 
-    /** Decompose CWallet transaction to model transaction records.
+    /** Decompose __wx__ transaction to model transaction records.
      */
-    static bool showTransaction(const CWalletTx &wtx);
-    static QList<TransactionRecord> decomposeTransaction(const CWallet *wallet, const CWalletTx &wtx);
+    static bool showTransaction(const __wx__Tx &wtx);
+    static QList<TransactionRecord> decomposeTransaction(const __wx__ *wallet, const __wx__Tx &wtx);
 
     /** @name Immutable transaction attributes
       @{*/
@@ -121,7 +121,7 @@ public:
 
     /** Update status from core wallet tx.
      */
-    void updateStatus(const CWalletTx &wtx);
+    void updateStatus(const __wx__Tx &wtx);
 
     /** Return whether a status update is needed.
      */

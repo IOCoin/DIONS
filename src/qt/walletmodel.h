@@ -10,7 +10,7 @@
 class OptionsModel;
 class AddressTableModel;
 class TransactionTableModel;
-class CWallet;
+class __wx__;
 class CKeyID;
 class CPubKey;
 class COutput;
@@ -36,7 +36,7 @@ class WalletModel : public QObject
     Q_OBJECT
 
 public:
-    explicit WalletModel(CWallet *wallet, OptionsModel *optionsModel, QObject *parent = 0);
+    explicit WalletModel(__wx__* wallet, OptionsModel* optionsModel, QObject* parent = 0);
     ~WalletModel();
 
     enum StatusCode // Returned by sendCoins
@@ -127,7 +127,7 @@ public:
     void listLockedCoins(std::vector<COutPoint>& vOutpts);
 
 private:
-    CWallet *wallet;
+    __wx__ *wallet;
 
     // Wallet has an options model for wallet-specific options
     // (transaction fee, for example)

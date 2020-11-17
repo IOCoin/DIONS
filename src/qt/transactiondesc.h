@@ -5,8 +5,8 @@
 #include <QObject>
 #include <string>
 
-class CWallet;
-class CWalletTx;
+class __wx__;
+class __wx__Tx;
 
 /** Provide a human-readable extended HTML description of a transaction.
  */
@@ -14,11 +14,11 @@ class TransactionDesc: public QObject
 {
     Q_OBJECT
 public:
-    static QString toHTML(CWallet *wallet, CWalletTx &wtx);
+    static QString toHTML(__wx__ *wallet, __wx__Tx &wtx);
 private:
     TransactionDesc() {}
 
-    static QString FormatTxStatus(const CWalletTx& wtx);
+    static QString FormatTxStatus(const __wx__Tx& wtx);
 };
 
 #endif // TRANSACTIONDESC_H

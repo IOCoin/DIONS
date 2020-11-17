@@ -4,7 +4,7 @@
 #include <QAbstractTableModel>
 #include <QStringList>
 
-class CWallet;
+class __wx__;
 class TransactionTablePriv;
 class TransactionRecord;
 class WalletModel;
@@ -15,7 +15,7 @@ class TransactionTableModel : public QAbstractTableModel
 {
     Q_OBJECT
 public:
-    explicit TransactionTableModel(CWallet* wallet, WalletModel *parent = 0);
+    explicit TransactionTableModel(__wx__* wallet, WalletModel *parent = 0);
     ~TransactionTableModel();
 
     enum ColumnIndex {
@@ -58,7 +58,7 @@ public:
     QVariant headerData(int section, Qt::Orientation orientation, int role) const;
     QModelIndex index(int row, int column, const QModelIndex & parent = QModelIndex()) const;
 private:
-    CWallet* wallet;
+    __wx__* wallet;
     WalletModel *walletModel;
     QStringList columns;
     TransactionTablePriv *priv;

@@ -34,8 +34,6 @@ win32 {
     BDB_LIB_PATH=C:/deps/db-4.8.30.NC/build_unix
     OPENSSL_INCLUDE_PATH=C:/deps/openssl-1.0.1h/include
     OPENSSL_LIB_PATH=C:/deps/openssl-1.0.1h
-    MINIUPNPC_INCLUDE_PATH=C:/deps/
-    MINIUPNPC_LIB_PATH=C:/deps/miniupnpc
     QRENCODE_INCLUDE_PATH=C:/deps/qrencode-3.4.3
     QRENCODE_LIB_PATH=C:/deps/qrencode-3.4.3/.libs
 }
@@ -74,23 +72,6 @@ contains(USE_QRCODE, 1) {
     LIBS += -lqrencode
 }
 
-# use: qmake "USE_UPNP=1" ( enabled by default; default)
-#  or: qmake "USE_UPNP=0" (disabled by default)
-#  or: qmake "USE_UPNP=-" (not supported)
-# miniupnpc (http://miniupnp.free.fr/files/) must be installed for support
-contains(USE_UPNP, -) {
-    message(Building without UPNP support)
-} else {
-    message(Building with UPNP support)
-    count(USE_UPNP, 0) {
-        USE_UPNP=1
-    }
-    DEFINES += USE_UPNP=$$USE_UPNP STATICLIB
-    INCLUDEPATH += $$MINIUPNPC_INCLUDE_PATH
-    LIBS += $$join(MINIUPNPC_LIB_PATH,,-L,) -lminiupnpc
-    win32:LIBS += -liphlpapi
-}
-
 # use: qmake "USE_DBUS=1" or qmake "USE_DBUS=0"
 linux:count(USE_DBUS, 0) {
     USE_DBUS=1
@@ -104,6 +85,16 @@ contains(USE_DBUS, 1) {
 contains(BITCOIN_NEED_QT_PLUGINS, 1) {
     DEFINES += BITCOIN_NEED_QT_PLUGINS
     QTPLUGIN += qcncodecs qjpcodecs qtwcodecs qkrcodecs qtaccessiblewidgets
+}
+contains(USE_O3, 1) {
+    message(Building O3 optimization flag)
+    
+    QMAKE_CXXFLAGS_RELEASE -= -O2
+    QMAKE_CXXFLAGS_RELEASE += -O3
+    QMAKE_CFLAGS_RELEASE -= -O2
+    QMAKE_CFLAGS_RELEASE += -O3
+    QMAKE_CXXFLAGS -= -O2
+    QMAKE_CFLAGS -= -O2
 }
 
 INCLUDEPATH += src/leveldb/include src/leveldb/helpers
@@ -137,13 +128,6 @@ QMAKE_CLEAN += $$PWD/src/leveldb/libleveldb.a; cd $$PWD/src/leveldb ; $(MAKE) cl
     DEFINES += HAVE_BUILD_INFO
 }
 
-contains(USE_O3, 1) {
-    message(Building O3 optimization flag)
-    QMAKE_CXXFLAGS_RELEASE -= -O2
-    QMAKE_CFLAGS_RELEASE -= -O2
-    QMAKE_CXXFLAGS += -O3
-    QMAKE_CFLAGS += -O3
-}
 
 *-g++-32 {
     message("32 platform, adding -msse2 flag")
@@ -184,20 +168,11 @@ HEADERS += src/qt/bitcoingui.h \
     src/uint256.h \
     src/kernel.h \
     src/pbkdf2.h \
-    src/zerocoin/Accumulator.h \
-    src/zerocoin/AccumulatorProofOfKnowledge.h \
-    src/zerocoin/Coin.h \
-    src/zerocoin/CoinSpend.h \
-    src/zerocoin/Commitment.h \
-    src/zerocoin/ParamGeneration.h \
-    src/zerocoin/Params.h \
-    src/zerocoin/SerialNumberSignatureOfKnowledge.h \
-    src/zerocoin/SpendMetaData.h \
-    src/zerocoin/ZeroTest.h \
-    src/zerocoin/Zerocoin.h \
     src/serialize.h \
     src/strlcpy.h \
     src/main.h \
+    src/dions.h \
+    src/state.h \
     src/miner.h \
     src/net.h \
     src/key.h \
@@ -274,6 +249,8 @@ SOURCES += src/qt/bitcoin.cpp src/qt/bitcoingui.cpp \
     src/key.cpp \
     src/script.cpp \
     src/main.cpp \
+    src/dions.cpp \
+    src/state.cpp \
     src/miner.cpp \
     src/init.cpp \
     src/net.cpp \
@@ -325,21 +302,12 @@ SOURCES += src/qt/bitcoin.cpp src/qt/bitcoingui.cpp \
     src/simd.c \
     src/blake.c\
     src/bmw.c\
+    src/twister.cpp \
     src/groestl.c\
     src/jh.c\
     src/keccak.c\
     src/skein.c \
     src/pbkdf2.cpp \
-    src/zerocoin/Accumulator.cpp \
-    src/zerocoin/AccumulatorProofOfKnowledge.cpp \
-    src/zerocoin/Coin.cpp \
-    src/zerocoin/CoinSpend.cpp \
-    src/zerocoin/Commitment.cpp \
-    src/zerocoin/ParamGeneration.cpp \
-    src/zerocoin/Params.cpp \
-    src/zerocoin/SerialNumberSignatureOfKnowledge.cpp \
-    src/zerocoin/SpendMetaData.cpp \
-    src/zerocoin/ZeroTest.cpp \
     src/qt/ionspaymentprocessor.cpp \
     src/qt/ionslookupaddressprocessor.cpp
 
@@ -452,7 +420,15 @@ LIBS += $$join(BOOST_LIB_PATH,,-L,) $$join(BDB_LIB_PATH,,-L,) $$join(OPENSSL_LIB
 LIBS += -lssl -lcrypto -ldb_cxx$$BDB_LIB_SUFFIX
 # -lgdi32 has to happen after -lcrypto (see  #681)
 windows:LIBS += -lws2_32 -lshlwapi -lmswsock -lole32 -loleaut32 -luuid -lgdi32
-LIBS += -lboost_system$$BOOST_LIB_SUFFIX -lboost_filesystem$$BOOST_LIB_SUFFIX -lboost_program_options$$BOOST_LIB_SUFFIX -lboost_thread$$BOOST_THREAD_LIB_SUFFIX
+
+LIBS += -lboost_system$$BOOST_LIB_SUFFIX \
+	-lboost_iostreams$$BOOST_LIB_SUFFIX \
+	-lboost_filesystem$$BOOST_LIB_SUFFIX \
+	-lboost_serialization$$BOOST_LIB_SUFFIX \
+	-lboost_program_options$$BOOST_LIB_SUFFIX \
+	-lboost_chrono$$BOOST_LIB_SUFFIX \
+	-lboost_thread$$BOOST_THREAD_LIB_SUFFIX
+
 windows:LIBS += -lboost_chrono$$BOOST_LIB_SUFFIX
 
 contains(RELEASE, 1) {
