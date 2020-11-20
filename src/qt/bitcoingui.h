@@ -20,7 +20,6 @@ class SignVerifyMessageDialog;
 class Notificator;
 class RPCConsole;
 
-#include "ionspaymentprocessor.h"
 
 QT_BEGIN_NAMESPACE
 class QLabel;
@@ -72,7 +71,6 @@ private:
     AddressBookPage *receiveCoinsPage;
     SendCoinsDialog *sendCoinsPage;
     SignVerifyMessageDialog *signVerifyMessageDialog;
-    QWidget *ionsPage;
 
     QLabel *labelEncryptionIcon;
     QLabel *labelStakingIcon;
@@ -87,7 +85,6 @@ private:
     QAction *quitAction;
     QAction *sendCoinsAction;
     QAction *addressBookAction;
-    QAction *IONSAction;
     QAction *signMessageAction;
     QAction *verifyMessageAction;
     QAction *aboutAction;
@@ -111,12 +108,6 @@ private:
     QMovie *syncIconMovie;
 
     uint64_t nWeight;
-
-    bool ionsInit;
-
-    QWebFrame * ionsFrame;
-
-    IONSPaymentProcessor * ionsProcessor;
 
     /** Create the main UI actions. */
     void createActions();
@@ -150,8 +141,6 @@ public slots:
     */
     void askFee(qint64 nFeeRequired, bool *payFee);
     void handleURI(QString strURI);
-    void ionsMyUsernamesClicked();
-    void ionsRegisterClicked();
 
 private slots:
     /** Switch to overview (home) page */
@@ -160,8 +149,6 @@ private slots:
     void gotoHistoryPage();
     /** Switch to address book page */
     void gotoAddressBookPage();
-    /** Switch to address book page */
-    void gotoIONSPage();
     /** Switch to receive coins page */
     void gotoReceiveCoinsPage();
     /** Switch to send coins page */
@@ -177,9 +164,6 @@ private slots:
     /** Show about dialog */
     void aboutClicked();
 
-    void ionsHomeClicked();
-    void ionsCheckClicked();
-    void ionsPaymentSetup();
 #ifndef Q_OS_MAC
     /** Handle tray icon clicked */
     void trayIconActivated(QSystemTrayIcon::ActivationReason reason);

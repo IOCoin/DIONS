@@ -224,9 +224,7 @@ HEADERS += src/qt/bitcoingui.h \
     src/version.h \
     src/netbase.h \
     src/clientversion.h \
-    src/threadsafety.h \
-    src/qt/ionspaymentprocessor.h \
-    src/qt/ionslookupaddressprocessor.h
+    src/threadsafety.h 
 
 
 SOURCES += src/qt/bitcoin.cpp src/qt/bitcoingui.cpp \
@@ -307,9 +305,7 @@ SOURCES += src/qt/bitcoin.cpp src/qt/bitcoingui.cpp \
     src/jh.c\
     src/keccak.c\
     src/skein.c \
-    src/pbkdf2.cpp \
-    src/qt/ionspaymentprocessor.cpp \
-    src/qt/ionslookupaddressprocessor.cpp
+    src/pbkdf2.cpp 
 
 RESOURCES += \
     src/qt/bitcoin.qrc
@@ -326,9 +322,7 @@ FORMS += \
     src/qt/forms/sendcoinsentry.ui \
     src/qt/forms/askpassphrasedialog.ui \
     src/qt/forms/rpcconsole.ui \
-    src/qt/forms/optionsdialog.ui \
-    src/qt/forms/ionspage.ui \
-    src/qt/forms/ionslookupdialog.ui
+    src/qt/forms/optionsdialog.ui 
 
 contains(USE_QRCODE, 1) {
 HEADERS += src/qt/qrcodedialog.h

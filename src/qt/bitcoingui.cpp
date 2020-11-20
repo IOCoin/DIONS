@@ -26,8 +26,6 @@
 #include "guiutil.h"
 #include "rpcconsole.h"
 #include "wallet.h"
-#include "ui_ionspage.h"
-#include "ionspaymentprocessor.h"
 
 #ifdef Q_OS_MAC
 #include "macdockiconhandler.h"
@@ -82,8 +80,7 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
     trayIcon(0),
     notificator(0),
     rpcConsole(0),
-    nWeight(0),
-    ionsInit(false)
+    nWeight(0)
 {
     resize(850, 550);
     setWindowTitle(tr("I/OCoin") + " - " + tr("Wallet"));
@@ -733,55 +730,6 @@ void BitcoinGUI::gotoAddressBookPage()
     exportAction->setEnabled(true);
     disconnect(exportAction, SIGNAL(triggered()), 0, 0);
     connect(exportAction, SIGNAL(triggered()), addressBookPage, SLOT(exportClicked()));
-}
-
-void BitcoinGUI::gotoIONSPage()
-{
-    IONSAction->setChecked(true);
-    if (!ionsInit)
-    {
-        ionsPage->findChild<QWebView *>("webView")->load(QUrl("http://"+ionsURL+"/1"));
-        ionsInit = true;
-    }
-    centralWidget->setCurrentWidget(ionsPage);
-
-    exportAction->setEnabled(false);
-    disconnect(exportAction, SIGNAL(triggered()), 0, 0);
-}
-
-void BitcoinGUI::ionsHomeClicked()
-{
-    ionsPage->findChild<QWebView *>("webView")->load(QUrl("http://"+ionsURL+"/1"));
-}
-
-void BitcoinGUI::ionsRegisterClicked()
-{
-    QJsonArray addresses = QJsonArray::fromStringList(walletModel->getAddressTableModel()->getReceiveAddresses());
-
-    QNetworkRequest netRequest;
-    netRequest.setUrl(QUrl("http://"+ionsURL+"/register"));
-    netRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/x-www-form-urlencoded; charset=UTF-8");
-    ionsPage->findChild<QWebView *>("webView")->load(netRequest, QNetworkAccessManager::PostOperation, "addresses="+QJsonDocument(addresses).toJson());
-}
-
-void BitcoinGUI::ionsCheckClicked()
-{
-    ionsPage->findChild<QWebView *>("webView")->load(QUrl("http://"+ionsURL+"/check"));
-}
-
-void BitcoinGUI::ionsMyUsernamesClicked()
-{
-    QJsonArray addresses = QJsonArray::fromStringList(walletModel->getAddressTableModel()->getReceiveAddresses());
-
-    QNetworkRequest netRequest;
-    netRequest.setUrl(QUrl("http://"+ionsURL+"/my-usernames"));
-    netRequest.setHeader(QNetworkRequest::ContentTypeHeader, "application/json; charset=UTF-8");
-    ionsPage->findChild<QWebView *>("webView")->load(netRequest, QNetworkAccessManager::PostOperation, QJsonDocument(addresses).toJson());
-}
-
-void BitcoinGUI::ionsPaymentSetup()
-{
-    ionsFrame->addToJavaScriptWindowObject("paymentProcessor", ionsProcessor);
 }
 
 void BitcoinGUI::gotoReceiveCoinsPage()
