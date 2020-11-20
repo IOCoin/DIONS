@@ -13,14 +13,13 @@ Features:
 *  4 MB Blocks
 *  1 MB Data Cap
 * 60 second blocktime (Up to 16 second blocktime)
-* 1.5 IOC POS reward + any tx fees in that block, based on the percentage of coins staking
+* 1.5 IOC Constant POS reward per Block + any tx fees in that block. 
 * Enhanced API allowing registration of aliases and associated data,
   aliases may be kept encrypted or public. Aliases, encrypted or public may
   send and receive.
 * New API includes a messaging layer for encrypted communications, 1MB data upload, download, transfer in addition
   to plain text messaging. Encryption uses AES 256 encryption together with RSA
   encryption (4096).
-* 2014 Fair Launch via X11 PoW/PoS
 * 1250 I/O block reward, first 30 blocks half (625)
 * 12815 PoW block limit
 * P2P Port: 33764
