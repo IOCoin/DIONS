@@ -10,7 +10,6 @@ I/O Coin is a POS CiPher-Based Blockchain
 Features:
 * Symbol: IOC
 * 16 Million POW coins
-* 22 Million total coins
 *  4 MB Blocks
 *  1 MB Data Cap
 * 60 second blocktime (Up to 16 second blocktime)
