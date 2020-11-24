@@ -32,8 +32,6 @@ SendCoinsEntry::SendCoinsEntry(QWidget *parent) :
     setFocusPolicy(Qt::TabFocus);
     setFocusProxy(ui->payTo);
 
-    connect(&networkManager, SIGNAL(finished(QNetworkReply*)),
-            this, SLOT(updateIONSAddress(QNetworkReply*)));
     GUIUtil::setupAddressWidget(ui->payTo, this);
 }
 
