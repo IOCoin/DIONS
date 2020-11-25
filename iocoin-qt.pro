@@ -14,6 +14,7 @@ greaterThan(QT_MAJOR_VERSION, 4) {
     DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0
 }
 
+
 QT += webkit
 
 # for boost 1.37, add -mt to the boost libraries
