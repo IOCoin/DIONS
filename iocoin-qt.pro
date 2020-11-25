@@ -9,6 +9,7 @@ CONFIG += thread
     CONFIG += static
 }
 
+
 greaterThan(QT_MAJOR_VERSION, 4) {
     QT += widgets  webkitwidgets
     DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0
