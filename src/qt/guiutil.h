@@ -26,16 +26,15 @@ namespace GUIUtil
     QString dateTimeStr(qint64 nTime);
 
     // Render Bitcoin addresses in monospace font
-    QFont bitcoinAddressFont();
+    QFont iocoinAddressFont();
 
     // Set up widgets for address and amounts
     void setupAddressWidget(QLineEdit *widget, QWidget *parent);
     void setupAmountWidget(QLineEdit *widget, QWidget *parent);
 
     // Parse "iocoin:" URI into recipient object, return true on successful parsing
-    // See Bitcoin URI definition discussion here: https://bitcointalk.org/index.php?topic=33490.0
-    bool parseBitcoinURI(const QUrl &uri, SendCoinsRecipient *out);
-    bool parseBitcoinURI(QString uri, SendCoinsRecipient *out);
+    bool parseIocoinURI(const QUrl &uri, SendCoinsRecipient *out);
+    bool parseIocoinURI(QString uri, SendCoinsRecipient *out);
 
     // HTML escaping for rich text controls
     QString HtmlEscape(const QString& str, bool fMultiLine=false);
