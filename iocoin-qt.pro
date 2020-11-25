@@ -226,7 +226,6 @@ HEADERS += src/qt/iocoingui.h \
     src/clientversion.h \
     src/threadsafety.h 
 
-
 SOURCES += src/qt/iocoin.cpp src/qt/iocoingui.cpp \
     src/qt/transactiontablemodel.cpp \
     src/qt/addresstablemodel.cpp \
