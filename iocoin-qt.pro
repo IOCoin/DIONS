@@ -17,6 +17,7 @@ greaterThan(QT_MAJOR_VERSION, 4) {
 
 QT += webkit
 
+
 # use: qmake BOOST_LIB_SUFFIX=-mt
 # for boost thread win32 with _win32 sufix
 # use: BOOST_THREAD_LIB_SUFFIX=_win32-...
