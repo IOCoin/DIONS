@@ -1,8 +1,5 @@
 /*
- * Qt4 iocoin GUI.
- *
- * W.J. van der Laan 2011-2012
- * The Iocoin Developers 2011-2012
+ * Qt5 iocoin GUI.
  */
 #include "iocoingui.h"
 #include "transactiontablemodel.h"
