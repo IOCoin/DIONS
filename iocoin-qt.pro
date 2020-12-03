@@ -196,6 +196,7 @@ HEADERS += src/qt/iocoingui.h \
     src/json/json_spirit.h \
     src/qt/clientmodel.h \
     src/qt/guiutil.h \
+    src/qt/relayengine.h \
     src/qt/transactionrecord.h \
     src/qt/guiconstants.h \
     src/qt/optionsmodel.h \
@@ -289,6 +290,7 @@ SOURCES += src/qt/iocoin.cpp src/qt/iocoingui.cpp \
     src/protocol.cpp \
     src/qt/notificator.cpp \
     src/qt/rpcconsole.cpp \
+    src/qt/relayengine.cpp \
     src/noui.cpp \
     src/kernel.cpp \
     src/cubehash.c \
