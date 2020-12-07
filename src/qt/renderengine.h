@@ -10,6 +10,7 @@ class RenderEngine
     virtual ~RenderEngine() { }
 
     virtual void paint();
+    virtual bool opaque();
 
   private:
     std::vector<unsigned char> addr;
