@@ -2,7 +2,10 @@
 #define RENDER_ENGINE_H
 
 #include<vector>
-
+struct Frame
+{
+  std::vector<unsigned char> data;
+};
 class RenderEngine
 {
   public:
@@ -11,6 +14,7 @@ class RenderEngine
 
     virtual void paint();
     virtual bool opaque();
+    virtual const Frame& aspect() = 0;
 
   private:
     std::vector<unsigned char> addr;
