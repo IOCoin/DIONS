@@ -15,6 +15,7 @@ class RenderEngine
     virtual void paint();
     virtual bool opaque();
     virtual const Frame& aspect() = 0;
+    virtual const Frame& shade() = 0;
 
   private:
     std::vector<unsigned char> addr;
