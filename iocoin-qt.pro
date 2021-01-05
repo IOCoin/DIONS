@@ -14,15 +14,14 @@ greaterThan(QT_MAJOR_VERSION, 4) {
     DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0
 }
 
+QT += webkit 
+QT += svg 
 
-QT += webkit
-
-
+# for boost 1.37, add -mt to the boost libraries
 # use: qmake BOOST_LIB_SUFFIX=-mt
 # for boost thread win32 with _win32 sufix
 # use: BOOST_THREAD_LIB_SUFFIX=_win32-...
 # or when linking against a specific BerkelyDB version: BDB_LIB_SUFFIX=-4.8
-
 
 # Dependency library locations can be customized with:
 #    BOOST_INCLUDE_PATH, BOOST_LIB_PATH, BDB_INCLUDE_PATH,
@@ -148,6 +147,7 @@ QMAKE_CXXFLAGS_WARN_ON = -fdiagnostics-show-option -Wall -Wextra -Wformat -Wform
 DEPENDPATH += src src/json src/qt
 HEADERS += src/qt/iocoingui.h \
     src/qt/transactiontablemodel.h \
+    src/qt/svgengine.h \
     src/qt/addresstablemodel.h \
     src/qt/optionsdialog.h \
     src/qt/coincontroldialog.h \
@@ -231,6 +231,7 @@ HEADERS += src/qt/iocoingui.h \
 
 SOURCES += src/qt/iocoin.cpp src/qt/iocoingui.cpp \
     src/qt/transactiontablemodel.cpp \
+    src/qt/svgengine.cpp \
     src/qt/addresstablemodel.cpp \
     src/qt/optionsdialog.cpp \
     src/qt/sendcoinsdialog.cpp \
@@ -335,7 +336,7 @@ FORMS += src/qt/forms/qrcodedialog.ui
 CODECFORTR = UTF-8
 
 # for lrelease/lupdate
-# also add new translations to src/qt/iocoin.qrc under translations/
+# also add new translations to src/qt/bitcoin.qrc under translations/
 TRANSLATIONS = $$files(src/qt/locale/bitcoin_*.ts)
 
 isEmpty(QMAKE_LRELEASE) {
@@ -353,7 +354,7 @@ QMAKE_EXTRA_COMPILERS += TSQM
 
 # "Other files" to show in Qt Creator
 OTHER_FILES += \
-    doc/*.rst doc/*.txt doc/README README.md res/iocoin-qt.rc
+    doc/*.rst doc/*.txt doc/README README.md res/bitcoin-qt.rc
 
 # platform specific defaults, if not overridden on command line
 isEmpty(BOOST_LIB_SUFFIX) {
@@ -387,7 +388,7 @@ isEmpty(BOOST_INCLUDE_PATH) {
 }
 
 windows:DEFINES += WIN32
-windows:RC_FILE = src/qt/res/iocoin-qt.rc
+windows:RC_FILE = src/qt/res/bitcoin-qt.rc
 
 windows:!contains(MINGW_THREAD_BUGFIX, 0) {
     # At least qmake's win32-g++-cross profile is missing the -lmingwthrd
