@@ -4,6 +4,7 @@
 #include <QIconEngine>
 #include <QSvgRenderer>
 
+
 class SVGIconEngine : public QIconEngine {
 
   QByteArray data;

@@ -1,6 +1,7 @@
 #include "svgengine.h"
 #include <QPainter>
 
+
 SVGIconEngine::SVGIconEngine(const std::string &iconBuffer) {
   data = QByteArray::fromStdString(iconBuffer);
 }

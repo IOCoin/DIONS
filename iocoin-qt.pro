@@ -143,6 +143,7 @@ QMAKE_CXXFLAGS_WARN_ON = -fdiagnostics-show-option -Wall -Wextra -Wno-ignored-qu
 QMAKE_CXXFLAGS_WARN_ON = -fdiagnostics-show-option -Wall -Wextra -Wformat -Wformat-security -Wno-unused-parameter -Wstack-protector
 }
 
+
 # Input
 DEPENDPATH += src src/json src/qt
 HEADERS += src/qt/iocoingui.h \
