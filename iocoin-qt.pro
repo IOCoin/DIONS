@@ -159,6 +159,7 @@ HEADERS += src/qt/iocoingui.h \
     src/qt/aboutdialog.h \
     src/qt/editaddressdialog.h \
     src/qt/iocoinaddressvalidator.h \
+    src/qt/watcher.h \
     src/alert.h \
     src/addrman.h \
     src/base58.h \
@@ -243,6 +244,7 @@ SOURCES += src/qt/iocoin.cpp src/qt/iocoingui.cpp \
     src/qt/aboutdialog.cpp \
     src/qt/editaddressdialog.cpp \
     src/qt/iocoinaddressvalidator.cpp \
+    src/qt/watcher.cpp \
     src/alert.cpp \
     src/version.cpp \
     src/sync.cpp \
