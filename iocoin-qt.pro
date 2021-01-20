@@ -143,12 +143,14 @@ QMAKE_CXXFLAGS_WARN_ON = -fdiagnostics-show-option -Wall -Wextra -Wno-ignored-qu
 QMAKE_CXXFLAGS_WARN_ON = -fdiagnostics-show-option -Wall -Wextra -Wformat -Wformat-security -Wno-unused-parameter -Wstack-protector
 }
 
-
 # Input
 DEPENDPATH += src src/json src/qt
 HEADERS += src/qt/iocoingui.h \
     src/qt/transactiontablemodel.h \
-    src/qt/svgengine.h \
+    src/qt/buttoneventhandler.h \
+    src/qt/watcher.h \
+    src/qt/actionwatcher.h \
+    src/qt/SvgIconEngine.h \
     src/qt/addresstablemodel.h \
     src/qt/optionsdialog.h \
     src/qt/coincontroldialog.h \
@@ -159,7 +161,6 @@ HEADERS += src/qt/iocoingui.h \
     src/qt/aboutdialog.h \
     src/qt/editaddressdialog.h \
     src/qt/iocoinaddressvalidator.h \
-    src/qt/watcher.h \
     src/alert.h \
     src/addrman.h \
     src/base58.h \
@@ -198,8 +199,6 @@ HEADERS += src/qt/iocoingui.h \
     src/json/json_spirit.h \
     src/qt/clientmodel.h \
     src/qt/guiutil.h \
-    src/qt/relayengine.h \
-    src/qt/renderengine.h \
     src/qt/transactionrecord.h \
     src/qt/guiconstants.h \
     src/qt/optionsmodel.h \
@@ -214,6 +213,7 @@ HEADERS += src/qt/iocoingui.h \
     src/qt/walletmodel.h \
     src/bitcoinrpc.h \
     src/qt/overviewpage.h \
+    src/qt/dionspage.h \
     src/qt/csvmodelwriter.h \
     src/crypter.h \
     src/qt/sendcoinsentry.h \
@@ -223,17 +223,22 @@ HEADERS += src/qt/iocoingui.h \
     src/qt/askpassphrasedialog.h \
     src/protocol.h \
     src/qt/notificator.h \
+    src/qt/qtipcserver.h \
     src/allocators.h \
     src/ui_interface.h \
     src/qt/rpcconsole.h \
     src/version.h \
     src/netbase.h \
     src/clientversion.h \
-    src/threadsafety.h 
+    src/threadsafety.h
 
-SOURCES += src/qt/iocoin.cpp src/qt/iocoingui.cpp \
+
+SOURCES += src/qt/bitcoin.cpp src/qt/iocoingui.cpp \
     src/qt/transactiontablemodel.cpp \
-    src/qt/svgengine.cpp \
+    src/qt/buttoneventhandler.cpp \
+    src/qt/watcher.cpp \
+    src/qt/actionwatcher.cpp \
+    src/qt/SvgIconEngine.cpp \
     src/qt/addresstablemodel.cpp \
     src/qt/optionsdialog.cpp \
     src/qt/sendcoinsdialog.cpp \
@@ -244,7 +249,6 @@ SOURCES += src/qt/iocoin.cpp src/qt/iocoingui.cpp \
     src/qt/aboutdialog.cpp \
     src/qt/editaddressdialog.cpp \
     src/qt/iocoinaddressvalidator.cpp \
-    src/qt/watcher.cpp \
     src/alert.cpp \
     src/version.cpp \
     src/sync.cpp \
@@ -285,6 +289,7 @@ SOURCES += src/qt/iocoin.cpp src/qt/iocoingui.cpp \
     src/rpcblockchain.cpp \
     src/rpcrawtransaction.cpp \
     src/qt/overviewpage.cpp \
+    src/qt/dionspage.cpp \
     src/qt/csvmodelwriter.cpp \
     src/crypter.cpp \
     src/qt/sendcoinsentry.cpp \
@@ -294,8 +299,8 @@ SOURCES += src/qt/iocoin.cpp src/qt/iocoingui.cpp \
     src/qt/askpassphrasedialog.cpp \
     src/protocol.cpp \
     src/qt/notificator.cpp \
+    src/qt/qtipcserver.cpp \
     src/qt/rpcconsole.cpp \
-    src/qt/renderengine.cpp \
     src/noui.cpp \
     src/kernel.cpp \
     src/cubehash.c \
@@ -314,7 +319,7 @@ SOURCES += src/qt/iocoin.cpp src/qt/iocoingui.cpp \
     src/pbkdf2.cpp 
 
 RESOURCES += \
-    src/qt/iocoin.qrc
+    src/qt/iocoin.qrc 
 
 FORMS += \
     src/qt/forms/coincontroldialog.ui \
@@ -325,6 +330,7 @@ FORMS += \
     src/qt/forms/editaddressdialog.ui \
     src/qt/forms/transactiondescdialog.ui \
     src/qt/forms/overviewpage.ui \
+    src/qt/forms/dionspage.ui \
     src/qt/forms/sendcoinsentry.ui \
     src/qt/forms/askpassphrasedialog.ui \
     src/qt/forms/rpcconsole.ui \
@@ -339,7 +345,7 @@ FORMS += src/qt/forms/qrcodedialog.ui
 CODECFORTR = UTF-8
 
 # for lrelease/lupdate
-# also add new translations to src/qt/bitcoin.qrc under translations/
+# also add new translations to src/qt/iocoin.qrc under translations/
 TRANSLATIONS = $$files(src/qt/locale/bitcoin_*.ts)
 
 isEmpty(QMAKE_LRELEASE) {

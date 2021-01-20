@@ -19,7 +19,7 @@ class TxViewDelegate : public QAbstractItemDelegate
 {
     Q_OBJECT
 public:
-    TxViewDelegate(): QAbstractItemDelegate(), unit(IocoinUnits::IOC)
+    TxViewDelegate(): QAbstractItemDelegate(), unit(IocoinUnits::BTC)
     {
 
     }
@@ -172,7 +172,7 @@ void OverviewPage::setModel(WalletModel *model)
         connect(model->getOptionsModel(), SIGNAL(displayUnitChanged(int)), this, SLOT(updateDisplayUnit()));
     }
 
-    // update the display unit, to not use the default ("IOC")
+    // update the display unit, to not use the default ("BTC")
     updateDisplayUnit();
 }
 

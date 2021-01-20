@@ -15,6 +15,7 @@ namespace Ui {
 class WalletModel;
 class SendCoinsRecipient;
 
+/** A single entry in the dialog for sending bitcoins. */
 class SendCoinsEntry : public QFrame
 {
     Q_OBJECT

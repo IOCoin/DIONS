@@ -6,11 +6,11 @@
 /** Base48 entry widget validator.
    Corrects near-miss characters and refuses characters that are no part of base48.
  */
-class IocoinAddressValidator : public QValidator
+class BitcoinAddressValidator : public QValidator
 {
     Q_OBJECT
 public:
-    explicit IocoinAddressValidator(QObject *parent = 0);
+    explicit BitcoinAddressValidator(QObject *parent = 0);
 
     State validate(QString &input, int &pos) const;
 

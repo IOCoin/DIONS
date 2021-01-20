@@ -1,5 +1,5 @@
-#ifndef IOCOINUNITS_H
-#define IOCOINUNITS_H
+#ifndef BITCOINUNITS_H
+#define BITCOINUNITS_H
 
 #include <QString>
 #include <QAbstractListModel>
@@ -13,12 +13,13 @@ public:
     explicit IocoinUnits(QObject *parent);
 
     /** Iocoin units.
+      @note Source: https://en.bitcoin.it/wiki/Units . Please add only sensible ones
      */
     enum Unit
     {
-        IOC,
-        mIOC,
-        uIOC
+        BTC,
+        mBTC,
+        uBTC
     };
 
     //! @name Static API
@@ -62,4 +63,4 @@ private:
 };
 typedef IocoinUnits::Unit IocoinUnit;
 
-#endif // IOCOINUNITS_H
+#endif // BITCOINUNITS_H

@@ -8,6 +8,8 @@ class QDoubleSpinBox;
 class QValueComboBox;
 QT_END_NAMESPACE
 
+/** Widget for entering bitcoin amounts.
+  */
 class IocoinAmountField: public QWidget
 {
     Q_OBJECT

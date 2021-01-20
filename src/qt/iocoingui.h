@@ -1,9 +1,11 @@
-#ifndef IOCOINGUI_H
-#define IOCOINGUI_H
+#ifndef BITCOINGUI_H
+#define BITCOINGUI_H
 
 #include <QMainWindow>
 #include <QSystemTrayIcon>
 #include <QWebFrame>
+#include "actionwatcher.h"
+#include "buttoneventhandler.h"
 
 #include <stdint.h>
 
@@ -14,11 +16,14 @@ class ClientModel;
 class WalletModel;
 class TransactionView;
 class OverviewPage;
+class DIONSPage;
 class AddressBookPage;
 class SendCoinsDialog;
 class SignVerifyMessageDialog;
 class Notificator;
 class RPCConsole;
+class ButtonHoverWatcher;
+class QToolButton;
 
 
 QT_BEGIN_NAMESPACE
@@ -48,7 +53,7 @@ public:
     */
     void setClientModel(ClientModel *clientModel);
     /** Set the wallet model.
-        The wallet model represents a iocoin wallet, and offers access to the list of transactions, address book and sending
+        The wallet model represents a bitcoin wallet, and offers access to the list of transactions, address book and sending
         functionality.
     */
     void setWalletModel(WalletModel *walletModel);
@@ -66,6 +71,7 @@ private:
     QStackedWidget *centralWidget;
 
     OverviewPage *overviewPage;
+    DIONSPage *dionsPage;
     QWidget *transactionsPage;
     AddressBookPage *addressBookPage;
     AddressBookPage *receiveCoinsPage;
@@ -81,6 +87,7 @@ private:
 
     QMenuBar *appMenuBar;
     QAction *overviewAction;
+    QAction *dionsAction;
     QAction *historyAction;
     QAction *quitAction;
     QAction *sendCoinsAction;
@@ -100,6 +107,20 @@ private:
     QAction *aboutQtAction;
     QAction *openRPCConsoleAction;
 
+    ButtonHoverWatcher* overviewbuttonwatcher;
+    ButtonHoverWatcher* sendbuttonwatcher;
+    ButtonHoverWatcher* receivebuttonwatcher;
+    ButtonHoverWatcher* historybuttonwatcher;
+    ButtonHoverWatcher* addressbookbuttonwatcher;
+    ButtonHoverWatcher* dionsbuttonwatcher;
+    ButtonHoverWatcher* w_;
+    QToolButton* overviewbutton;
+    QToolButton* sendbutton;
+    QToolButton* receivebutton;
+    QToolButton* historybutton;
+    QToolButton* addressbookbutton;
+    QToolButton* dionsbutton;
+
     QSystemTrayIcon *trayIcon;
     Notificator *notificator;
     TransactionView *transactionView;
@@ -108,6 +129,7 @@ private:
     QMovie *syncIconMovie;
 
     uint64_t nWeight;
+
 
     /** Create the main UI actions. */
     void createActions();
@@ -153,6 +175,8 @@ private slots:
     void gotoReceiveCoinsPage();
     /** Switch to send coins page */
     void gotoSendCoinsPage();
+    /** Switch to dions page */
+    void gotoDIONSPage();
 
     /** Show Sign/Verify Message dialog and switch to sign message tab */
     void gotoSignMessageTab(QString addr = "");

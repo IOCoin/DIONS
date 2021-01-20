@@ -7,7 +7,6 @@
 #include "optionsmodel.h"
 #include "addresstablemodel.h"
 
-
 #include <QApplication>
 #include <QClipboard>
 #include <iostream>
@@ -92,7 +91,7 @@ void SendCoinsEntry::clear()
     ui->addAsLabel->clear();
     ui->payAmount->clear();
     ui->payTo->setFocus();
-    // update the display unit, to not use the default ("IOC")
+    // update the display unit, to not use the default ("BTC")
     updateDisplayUnit();
 }
 

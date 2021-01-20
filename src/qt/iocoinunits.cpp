@@ -11,9 +11,9 @@ IocoinUnits::IocoinUnits(QObject *parent):
 QList<IocoinUnits::Unit> IocoinUnits::availableUnits()
 {
     QList<IocoinUnits::Unit> unitlist;
-    unitlist.append(IOC);
-    unitlist.append(mIOC);
-    unitlist.append(uIOC);
+    unitlist.append(BTC);
+    unitlist.append(mBTC);
+    unitlist.append(uBTC);
     return unitlist;
 }
 
@@ -21,9 +21,9 @@ bool IocoinUnits::valid(int unit)
 {
     switch(unit)
     {
-    case IOC:
-    case mIOC:
-    case uIOC:
+    case BTC:
+    case mBTC:
+    case uBTC:
         return true;
     default:
         return false;
@@ -34,9 +34,9 @@ QString IocoinUnits::name(int unit)
 {
     switch(unit)
     {
-    case IOC: return QString("IOC");
-    case mIOC: return QString("mIOC");
-    case uIOC: return QString::fromUtf8("μIOC");
+    case BTC: return QString("IO");
+    case mBTC: return QString("mIO");
+    case uBTC: return QString::fromUtf8("μIO");
     default: return QString("???");
     }
 }
@@ -45,9 +45,9 @@ QString IocoinUnits::description(int unit)
 {
     switch(unit)
     {
-    case IOC: return QString("I/OCoins");
-    case mIOC: return QString("Milli-I/OCoins (1 / 1,000)");
-    case uIOC: return QString("Micro-I/OCoins (1 / 1,000,000)");
+    case BTC: return QString("I/OCoins");
+    case mBTC: return QString("Milli-I/OCoins (1 / 1,000)");
+    case uBTC: return QString("Micro-I/OCoins (1 / 1,000,000)");
     default: return QString("???");
     }
 }
@@ -56,9 +56,9 @@ qint64 IocoinUnits::factor(int unit)
 {
     switch(unit)
     {
-    case IOC:  return 100000000;
-    case mIOC: return 100000;
-    case uIOC: return 100;
+    case BTC:  return 100000000;
+    case mBTC: return 100000;
+    case uBTC: return 100;
     default:   return 100000000;
     }
 }
@@ -67,9 +67,9 @@ int IocoinUnits::amountDigits(int unit)
 {
     switch(unit)
     {
-    case IOC: return 8; // 21,000,000 (# digits, without commas)
-    case mIOC: return 11; // 21,000,000,000
-    case uIOC: return 14; // 21,000,000,000,000
+    case BTC: return 8; // 21,000,000 (# digits, without commas)
+    case mBTC: return 11; // 21,000,000,000
+    case uBTC: return 14; // 21,000,000,000,000
     default: return 0;
     }
 }
@@ -78,9 +78,9 @@ int IocoinUnits::decimals(int unit)
 {
     switch(unit)
     {
-    case IOC: return 8;
-    case mIOC: return 5;
-    case uIOC: return 2;
+    case BTC: return 8;
+    case mBTC: return 5;
+    case uBTC: return 2;
     default: return 0;
     }
 }
