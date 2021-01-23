@@ -1,5 +1,5 @@
-#ifndef BITCOINGUI_H
-#define BITCOINGUI_H
+#ifndef IOCOINGUI_H
+#define IOCOINGUI_H
 
 #include <QMainWindow>
 #include <QSystemTrayIcon>
@@ -17,6 +17,7 @@ class WalletModel;
 class TransactionView;
 class OverviewPage;
 class DIONSPage;
+class SecureChatsPage;
 class AddressBookPage;
 class SendCoinsDialog;
 class SignVerifyMessageDialog;
@@ -38,7 +39,7 @@ class QUrl;
 QT_END_NAMESPACE
 
 /**
-  Iocoin GUI main class. This class represents the main window of the Iocoin UI. It communicates with both the client and
+  Bitcoin GUI main class. This class represents the main window of the Bitcoin UI. It communicates with both the client and
   wallet models to give the user an up-to-date view of the current core state.
 */
 class IocoinGUI : public QMainWindow
@@ -72,6 +73,7 @@ private:
 
     OverviewPage *overviewPage;
     DIONSPage *dionsPage;
+    SecureChatsPage *secureChatsPage;
     QWidget *transactionsPage;
     AddressBookPage *addressBookPage;
     AddressBookPage *receiveCoinsPage;
@@ -88,6 +90,7 @@ private:
     QMenuBar *appMenuBar;
     QAction *overviewAction;
     QAction *dionsAction;
+    QAction *securegroupsAction;
     QAction *historyAction;
     QAction *quitAction;
     QAction *sendCoinsAction;
@@ -113,13 +116,14 @@ private:
     ButtonHoverWatcher* historybuttonwatcher;
     ButtonHoverWatcher* addressbookbuttonwatcher;
     ButtonHoverWatcher* dionsbuttonwatcher;
-    ButtonHoverWatcher* w_;
+    ButtonHoverWatcher* securegroupsbuttonwatcher;
     QToolButton* overviewbutton;
     QToolButton* sendbutton;
     QToolButton* receivebutton;
     QToolButton* historybutton;
     QToolButton* addressbookbutton;
     QToolButton* dionsbutton;
+    QToolButton* securegroupsbutton;
 
     QSystemTrayIcon *trayIcon;
     Notificator *notificator;
@@ -177,6 +181,8 @@ private slots:
     void gotoSendCoinsPage();
     /** Switch to dions page */
     void gotoDIONSPage();
+    /** Switch to secure chats page */
+    void gotoSecureChatsPage();
 
     /** Show Sign/Verify Message dialog and switch to sign message tab */
     void gotoSignMessageTab(QString addr = "");

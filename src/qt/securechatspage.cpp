@@ -1,4 +1,4 @@
-#include "transactionview.h"
+#include "securechatspage.h"
 
 #include "transactionfilterproxy.h"
 #include "transactionrecord.h"
@@ -29,9 +29,9 @@
 #include <QLabel>
 #include <QDateTimeEdit>
 
-TransactionView::TransactionView(QWidget *parent) :
+SecureChatsPage::SecureChatsPage(QWidget *parent) :
     QWidget(parent), model(0), transactionProxyModel(0),
-    transactionView(0)
+    secureChatsView(0)
 {
     // Build filter row
     setContentsMargins(0,0,0,0);
@@ -120,7 +120,7 @@ TransactionView::TransactionView(QWidget *parent) :
     view->setTabKeyNavigation(false);
     view->setContextMenuPolicy(Qt::CustomContextMenu);
 
-    transactionView = view;
+    secureChatsView = view;
 
     // Actions
     QAction *copyAddressAction = new QAction(tr("Copy address"), this);
@@ -155,7 +155,7 @@ TransactionView::TransactionView(QWidget *parent) :
     connect(showDetailsAction, SIGNAL(triggered()), this, SLOT(showDetails()));
 }
 
-void TransactionView::setModel(WalletModel *model)
+void SecureChatsPage::setModel(WalletModel *model)
 {
     this->model = model;
     if(model)
@@ -168,28 +168,28 @@ void TransactionView::setModel(WalletModel *model)
 
         transactionProxyModel->setSortRole(Qt::EditRole);
 
-        transactionView->setModel(transactionProxyModel);
-        transactionView->setAlternatingRowColors(true);
-        transactionView->setSelectionBehavior(QAbstractItemView::SelectRows);
-        transactionView->setSelectionMode(QAbstractItemView::ExtendedSelection);
-        transactionView->setSortingEnabled(true);
-        transactionView->sortByColumn(TransactionTableModel::Date, Qt::DescendingOrder);
-        transactionView->verticalHeader()->hide();
+        secureChatsView->setModel(transactionProxyModel);
+        secureChatsView->setAlternatingRowColors(true);
+        secureChatsView->setSelectionBehavior(QAbstractItemView::SelectRows);
+        secureChatsView->setSelectionMode(QAbstractItemView::ExtendedSelection);
+        secureChatsView->setSortingEnabled(true);
+        secureChatsView->sortByColumn(TransactionTableModel::Date, Qt::DescendingOrder);
+        secureChatsView->verticalHeader()->hide();
 
-        transactionView->horizontalHeader()->resizeSection(
+        secureChatsView->horizontalHeader()->resizeSection(
                 TransactionTableModel::Status, 23);
-        transactionView->horizontalHeader()->resizeSection(
+        secureChatsView->horizontalHeader()->resizeSection(
                 TransactionTableModel::Date, 120);
-        transactionView->horizontalHeader()->resizeSection(
+        secureChatsView->horizontalHeader()->resizeSection(
                 TransactionTableModel::Type, 120);
-        transactionView->horizontalHeader()->setResizeMode(
+        secureChatsView->horizontalHeader()->setResizeMode(
                 TransactionTableModel::ToAddress, QHeaderView::Stretch);
-        transactionView->horizontalHeader()->resizeSection(
+        secureChatsView->horizontalHeader()->resizeSection(
                 TransactionTableModel::Amount, 100);
     }
 }
 
-void TransactionView::chooseDate(int idx)
+void SecureChatsPage::chooseDate(int idx)
 {
     if(!transactionProxyModel)
         return;
@@ -237,7 +237,7 @@ void TransactionView::chooseDate(int idx)
     }
 }
 
-void TransactionView::chooseType(int idx)
+void SecureChatsPage::chooseType(int idx)
 {
     if(!transactionProxyModel)
         return;
@@ -245,14 +245,14 @@ void TransactionView::chooseType(int idx)
         typeWidget->itemData(idx).toInt());
 }
 
-void TransactionView::changedPrefix(const QString &prefix)
+void SecureChatsPage::changedPrefix(const QString &prefix)
 {
     if(!transactionProxyModel)
         return;
     transactionProxyModel->setAddressPrefix(prefix);
 }
 
-void TransactionView::changedAmount(const QString &amount)
+void SecureChatsPage::changedAmount(const QString &amount)
 {
     if(!transactionProxyModel)
         return;
@@ -267,7 +267,7 @@ void TransactionView::changedAmount(const QString &amount)
     }
 }
 
-void TransactionView::exportClicked()
+void SecureChatsPage::exportClicked()
 {
     // CSV is currently the only supported format
     QString filename = GUIUtil::getSaveFileName(
@@ -296,40 +296,40 @@ void TransactionView::exportClicked()
     }
 }
 
-void TransactionView::contextualMenu(const QPoint &point)
+void SecureChatsPage::contextualMenu(const QPoint &point)
 {
-    QModelIndex index = transactionView->indexAt(point);
+    QModelIndex index = secureChatsView->indexAt(point);
     if(index.isValid())
     {
         contextMenu->exec(QCursor::pos());
     }
 }
 
-void TransactionView::copyAddress()
+void SecureChatsPage::copyAddress()
 {
-    GUIUtil::copyEntryData(transactionView, 0, TransactionTableModel::AddressRole);
+    GUIUtil::copyEntryData(secureChatsView, 0, TransactionTableModel::AddressRole);
 }
 
-void TransactionView::copyLabel()
+void SecureChatsPage::copyLabel()
 {
-    GUIUtil::copyEntryData(transactionView, 0, TransactionTableModel::LabelRole);
+    GUIUtil::copyEntryData(secureChatsView, 0, TransactionTableModel::LabelRole);
 }
 
-void TransactionView::copyAmount()
+void SecureChatsPage::copyAmount()
 {
-    GUIUtil::copyEntryData(transactionView, 0, TransactionTableModel::FormattedAmountRole);
+    GUIUtil::copyEntryData(secureChatsView, 0, TransactionTableModel::FormattedAmountRole);
 }
 
-void TransactionView::copyTxID()
+void SecureChatsPage::copyTxID()
 {
-    GUIUtil::copyEntryData(transactionView, 0, TransactionTableModel::TxIDRole);
+    GUIUtil::copyEntryData(secureChatsView, 0, TransactionTableModel::TxIDRole);
 }
 
-void TransactionView::editLabel()
+void SecureChatsPage::editLabel()
 {
-    if(!transactionView->selectionModel() ||!model)
+    if(!secureChatsView->selectionModel() ||!model)
         return;
-    QModelIndexList selection = transactionView->selectionModel()->selectedRows();
+    QModelIndexList selection = secureChatsView->selectionModel()->selectedRows();
     if(!selection.isEmpty())
     {
         AddressTableModel *addressBook = model->getAddressTableModel();
@@ -371,11 +371,11 @@ void TransactionView::editLabel()
     }
 }
 
-void TransactionView::showDetails()
+void SecureChatsPage::showDetails()
 {
-    if(!transactionView->selectionModel())
+    if(!secureChatsView->selectionModel())
         return;
-    QModelIndexList selection = transactionView->selectionModel()->selectedRows();
+    QModelIndexList selection = secureChatsView->selectionModel()->selectedRows();
     if(!selection.isEmpty())
     {
         TransactionDescDialog dlg(selection.at(0));
@@ -383,7 +383,7 @@ void TransactionView::showDetails()
     }
 }
 
-QWidget *TransactionView::createDateRangeWidget()
+QWidget *SecureChatsPage::createDateRangeWidget()
 {
     dateRangeWidget = new QFrame();
     dateRangeWidget->setFrameStyle(QFrame::Panel | QFrame::Raised);
@@ -419,7 +419,7 @@ QWidget *TransactionView::createDateRangeWidget()
     return dateRangeWidget;
 }
 
-void TransactionView::dateRangeChanged()
+void SecureChatsPage::dateRangeChanged()
 {
     if(!transactionProxyModel)
         return;
@@ -428,12 +428,12 @@ void TransactionView::dateRangeChanged()
             QDateTime(dateTo->date()).addDays(1));
 }
 
-void TransactionView::focusTransaction(const QModelIndex &idx)
+void SecureChatsPage::focusTransaction(const QModelIndex &idx)
 {
     if(!transactionProxyModel)
         return;
     QModelIndex targetIdx = transactionProxyModel->mapFromSource(idx);
-    transactionView->scrollTo(targetIdx);
-    transactionView->setCurrentIndex(targetIdx);
-    transactionView->setFocus();
+    secureChatsView->scrollTo(targetIdx);
+    secureChatsView->setCurrentIndex(targetIdx);
+    secureChatsView->setFocus();
 }

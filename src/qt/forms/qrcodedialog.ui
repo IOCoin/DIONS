@@ -140,7 +140,7 @@
          </widget>
         </item>
         <item row="0" column="1">
-         <widget class="BitcoinAmountField" name="lnReqAmount">
+         <widget class="IocoinAmountField" name="lnReqAmount">
           <property name="enabled">
            <bool>false</bool>
           </property>
@@ -185,7 +185,7 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>BitcoinAmountField</class>
+   <class>IocoinAmountField</class>
    <extends>QSpinBox</extends>
    <header>iocoinamountfield.h</header>
   </customwidget>

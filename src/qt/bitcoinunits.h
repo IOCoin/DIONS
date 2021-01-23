@@ -4,7 +4,7 @@
 #include <QString>
 #include <QAbstractListModel>
 
-/** Iocoin unit definitions. Encapsulates parsing and formatting
+/** Bitcoin unit definitions. Encapsulates parsing and formatting
    and serves as list model for drop-down selection boxes.
 */
 class IocoinUnits: public QAbstractListModel
@@ -12,7 +12,7 @@ class IocoinUnits: public QAbstractListModel
 public:
     explicit IocoinUnits(QObject *parent);
 
-    /** Iocoin units.
+    /** Bitcoin units.
       @note Source: https://en.bitcoin.it/wiki/Units . Please add only sensible ones
      */
     enum Unit
@@ -61,6 +61,6 @@ public:
 private:
     QList<IocoinUnits::Unit> unitlist;
 };
-typedef IocoinUnits::Unit IocoinUnit;
+typedef IocoinUnits::Unit BitcoinUnit;
 
 #endif // BITCOINUNITS_H

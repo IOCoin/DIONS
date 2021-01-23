@@ -1,4 +1,4 @@
-#include "SvgIconEngine.h"
+#include "svgiconengine.h"
 #include <QPainter>
 
 SVGIconEngine::SVGIconEngine(const std::string &iconBuffer) {

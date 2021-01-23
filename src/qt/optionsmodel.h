@@ -27,7 +27,7 @@ public:
         ProxySocksVersion, // int
         Fee,               // qint64
         ReserveBalance,    // qint64
-        DisplayUnit,       // BitcoinUnits::Unit
+        DisplayUnit,       // IocoinUnits::Unit
         DisplayAddresses,  // bool
         Language,          // QString
         CoinControlFeatures, // bool

@@ -6,7 +6,7 @@
 #include "addresstablemodel.h"
 #include "addressbookpage.h"
 
-#include "iocoinunits.h"
+#include "bitcoinunits.h"
 #include "addressbookpage.h"
 #include "optionsmodel.h"
 #include "sendcoinsentry.h"

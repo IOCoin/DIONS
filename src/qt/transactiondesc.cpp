@@ -1,7 +1,7 @@
 #include "transactiondesc.h"
 
 #include "guiutil.h"
-#include "iocoinunits.h"
+#include "bitcoinunits.h"
 
 #include "main.h"
 #include "wallet.h"

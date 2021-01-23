@@ -150,7 +150,7 @@ HEADERS += src/qt/iocoingui.h \
     src/qt/buttoneventhandler.h \
     src/qt/watcher.h \
     src/qt/actionwatcher.h \
-    src/qt/SvgIconEngine.h \
+    src/qt/svgiconengine.h \
     src/qt/addresstablemodel.h \
     src/qt/optionsdialog.h \
     src/qt/coincontroldialog.h \
@@ -214,11 +214,12 @@ HEADERS += src/qt/iocoingui.h \
     src/bitcoinrpc.h \
     src/qt/overviewpage.h \
     src/qt/dionspage.h \
+    src/qt/securechatspage.h \
     src/qt/csvmodelwriter.h \
     src/crypter.h \
     src/qt/sendcoinsentry.h \
     src/qt/qvalidatedlineedit.h \
-    src/qt/iocoinunits.h \
+    src/qt/bitcoinunits.h \
     src/qt/qvaluecombobox.h \
     src/qt/askpassphrasedialog.h \
     src/protocol.h \
@@ -238,7 +239,7 @@ SOURCES += src/qt/bitcoin.cpp src/qt/iocoingui.cpp \
     src/qt/buttoneventhandler.cpp \
     src/qt/watcher.cpp \
     src/qt/actionwatcher.cpp \
-    src/qt/SvgIconEngine.cpp \
+    src/qt/svgiconengine.cpp \
     src/qt/addresstablemodel.cpp \
     src/qt/optionsdialog.cpp \
     src/qt/sendcoinsdialog.cpp \
@@ -274,7 +275,7 @@ SOURCES += src/qt/bitcoin.cpp src/qt/iocoingui.cpp \
     src/qt/monitoreddatamapper.cpp \
     src/qt/transactiondesc.cpp \
     src/qt/transactiondescdialog.cpp \
-    src/qt/iocoinstrings.cpp \
+    src/qt/bitcoinstrings.cpp \
     src/qt/iocoinamountfield.cpp \
     src/wallet.cpp \
     src/keystore.cpp \
@@ -290,11 +291,12 @@ SOURCES += src/qt/bitcoin.cpp src/qt/iocoingui.cpp \
     src/rpcrawtransaction.cpp \
     src/qt/overviewpage.cpp \
     src/qt/dionspage.cpp \
+    src/qt/securechatspage.cpp \
     src/qt/csvmodelwriter.cpp \
     src/crypter.cpp \
     src/qt/sendcoinsentry.cpp \
     src/qt/qvalidatedlineedit.cpp \
-    src/qt/iocoinunits.cpp \
+    src/qt/bitcoinunits.cpp \
     src/qt/qvaluecombobox.cpp \
     src/qt/askpassphrasedialog.cpp \
     src/protocol.cpp \
@@ -319,7 +321,7 @@ SOURCES += src/qt/bitcoin.cpp src/qt/iocoingui.cpp \
     src/pbkdf2.cpp 
 
 RESOURCES += \
-    src/qt/iocoin.qrc 
+    src/qt/bitcoin.qrc 
 
 FORMS += \
     src/qt/forms/coincontroldialog.ui \
@@ -331,6 +333,7 @@ FORMS += \
     src/qt/forms/transactiondescdialog.ui \
     src/qt/forms/overviewpage.ui \
     src/qt/forms/dionspage.ui \
+    src/qt/forms/securegroupspage.ui \
     src/qt/forms/sendcoinsentry.ui \
     src/qt/forms/askpassphrasedialog.ui \
     src/qt/forms/rpcconsole.ui \
@@ -345,7 +348,7 @@ FORMS += src/qt/forms/qrcodedialog.ui
 CODECFORTR = UTF-8
 
 # for lrelease/lupdate
-# also add new translations to src/qt/iocoin.qrc under translations/
+# also add new translations to src/qt/bitcoin.qrc under translations/
 TRANSLATIONS = $$files(src/qt/locale/bitcoin_*.ts)
 
 isEmpty(QMAKE_LRELEASE) {

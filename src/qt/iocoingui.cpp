@@ -2,7 +2,7 @@
  * Qt4 bitcoin GUI.
  *
  * W.J. van der Laan 2011-2012
- * The Iocoin Developers 2011-2012
+ * The Bitcoin Developers 2011-2012
  */
 #include "iocoingui.h"
 #include "transactiontablemodel.h"
@@ -20,7 +20,8 @@
 #include "transactionview.h"
 #include "overviewpage.h"
 #include "dionspage.h"
-#include "iocoinunits.h"
+#include "securechatspage.h"
+#include "bitcoinunits.h"
 #include "guiconstants.h"
 #include "askpassphrasedialog.h"
 #include "notificator.h"
@@ -28,7 +29,7 @@
 #include "rpcconsole.h"
 #include "wallet.h"
 
-#include "SvgIconEngine.h"
+#include "svgiconengine.h"
 
 #ifdef Q_OS_MAC
 #include "macdockiconhandler.h"
@@ -166,16 +167,21 @@ double GetPoSKernelPS(int nHeight = -1);
 "   </g> "
 "   <text x=\"0\" y=\"21\" font-size=\"27\">D</text> "
 "</svg>";
-
-
-// receive
-//        <svg x="0px" y="0px" viewBox="0 0 24 24" class="icon icon--outline"> 
- //           <g transform="translate(0, 0)"> 
- //               <line data-cap="butt" stroke-miterlimit="10" x1="12" y1="3" x2="12" y2="17" stroke-linejoin="miter" stroke-linecap="butt"></line> 
- //               <polyline stroke-linecap="square" stroke-miterlimit="10" points="7,12 12,17 17,12 " stroke-linejoin="miter"></polyline> 
- //               <line data-color="color-2" stroke-linecap="square" stroke-miterlimit="10" x1="19" y1="21" x2="5" y2="21" stroke-linejoin="miter"></line> 
- //           </g> 
- //       </svg>
+    string securegroupsSVGUnchecked = 
+"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"
+" <svg   xmlns=\"http://www.w3.org/2000/svg\""
+"   xmlns:xlink=\"http://www.w3.org/1999/xlink\""
+"        x=\"0px\" y=\"0px\" viewBox=\"0 0 24 24\" style=\"fill:#646464\"> "
+"            <g>  "
+"    <ellipse cx=\"21\" cy=\"6\" rx=\"3\" ry=\"1\" />  "
+"     <ellipse cx=\"3\" cy=\"4\" rx=\"3\" ry=\"1\" />  "
+"     <polyline stroke-linecap=\"square\" stroke-miterlimit=\"10\" rotate=\"5\" points=\"12,15 21,07 20,06\" stroke-linejoin=\"miter\"></polyline> "
+"     <polyline stroke-linecap=\"square\" stroke-miterlimit=\"10\" rotate=\"5\" points=\"12,15 01,04 02,04\" stroke-linejoin=\"miter\"></polyline>  "
+"            </g> "
+"            <g>  "
+"<path d=\"M18,10.7 V6 c0-3.3-2.7-6-6-6 S06,2.7,06,6 v4.7 C04.8,12.1,04,14,04,16 c0,4.4,3.6,8,8,8 s8-3.6,8-8 C20,14,19.2,12.1,18,10.7z M13,17.8 V19 c0,0.6-0.4,1-1,1 s-1-0.4-1-1v-1.2 c-1.2-0.4-2-1.5-2-2.8 c0-1.7,1.3-3,3-3 s3,1.3,3,3 C15,16.3,14.2,17.4,13,17.8z M16,9.1 C14.8,8.4,13.5,8,12,8 S09.2,8.4,08,9.1 V6 c0-2.2,1.8-4,4-4s4,1.8,4,4V9.1z\"></path> "
+"            </g> "
+"        </svg>";
 
 IocoinGUI::IocoinGUI(QWidget *parent):
     QMainWindow(parent),
@@ -225,6 +231,7 @@ IocoinGUI::IocoinGUI(QWidget *parent):
     // Create tabs
     overviewPage = new OverviewPage();
     dionsPage = new DIONSPage();
+    secureChatsPage = new SecureChatsPage();
 
     transactionsPage = new QWidget(this);
     QVBoxLayout *vbox = new QVBoxLayout();
@@ -248,6 +255,7 @@ IocoinGUI::IocoinGUI(QWidget *parent):
     centralWidget->addWidget(receiveCoinsPage);
     centralWidget->addWidget(sendCoinsPage);
     centralWidget->addWidget(dionsPage);
+    centralWidget->addWidget(secureChatsPage);
     setCentralWidget(centralWidget);
 
     // Create status bar
@@ -399,6 +407,15 @@ void IocoinGUI::createActions()
     dionsAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_5));
     tabGroup->addAction(dionsAction);
 
+    QIcon securegroupsicon = QIcon(new SVGIconEngine(securegroupsSVGUnchecked));
+    securegroupsAction = new QAction(this);
+    securegroupsAction->setText(tr("&Secure Chats"));
+    securegroupsAction->setIcon(securegroupsicon);
+    securegroupsAction->setToolTip(tr("DIONS management page"));
+    securegroupsAction->setCheckable(true);
+    securegroupsAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_5));
+    tabGroup->addAction(securegroupsAction);
+
 
     connect(overviewAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(overviewAction, SIGNAL(triggered()), this, SLOT(gotoOverviewPage()));
@@ -412,6 +429,9 @@ void IocoinGUI::createActions()
     connect(addressBookAction, SIGNAL(triggered()), this, SLOT(gotoAddressBookPage()));
     connect(dionsAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(dionsAction, SIGNAL(triggered()), this, SLOT(gotoDIONSPage()));
+    connect(securegroupsAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
+    connect(securegroupsAction, SIGNAL(triggered()), this, SLOT(gotoSecureChatsPage()));
+
 
     quitAction = new QAction(QIcon(":/icons/quit"), tr("E&xit"), this);
     quitAction->setToolTip(tr("Quit application"));
@@ -469,58 +489,10 @@ void IocoinGUI::createMenuBar()
     // Get the main window's menu bar on other platforms
     appMenuBar = menuBar();
 #endif
-
-    //appMenuBar->setStyleSheet("background-color: #1ee8ea ");
-    // Configure the menus
-    //XXXX QMenu *file = appMenuBar->addMenu(tr("&File"));
-    //XXXX file->addAction(backupWalletAction);
-    //XXXX file->addAction(exportAction);
-    //XXXX file->addAction(signMessageAction);
-    //XXXX file->addAction(verifyMessageAction);
-    //XXXX file->addSeparator();
-    //XXXX file->addAction(quitAction);
-
-    //XXXX QMenu *settings = appMenuBar->addMenu(tr("&Settings"));
-    //XXXX settings->addAction(encryptWalletAction);
-    //XXXX settings->addAction(changePassphraseAction);
-    //XXXX settings->addAction(unlockWalletAction);
-    //XXXX settings->addAction(lockWalletAction);
-    //XXXX settings->addSeparator();
-    //XXXX settings->addAction(optionsAction);
-
-    //XXXX QMenu *help = appMenuBar->addMenu(tr("&Help"));
-    //XXXX help->addAction(openRPCConsoleAction);
-    //XXXX help->addSeparator();
-    //XXXX help->addAction(aboutAction);
-    //XXXX help->addAction(aboutQtAction);
 }
 
 void IocoinGUI::createToolBars()
 {
-    //logo area QToolBar *toolbar0 = addToolBar("label");
-    //logo area toolbar0->setToolButtonStyle(Qt::ToolButtonIconOnly);
-    //logo area addToolBar(Qt::LeftToolBarArea,toolbar0);
-    //logo area toolbar0->setObjectName("label");
-    //logo area QIcon i1 = QIcon(new SVGIconEngine(logoSVG));
-    //logo area QToolButton* pic = new QToolButton();
-    //logo area pic->setIcon(i1);
-    //logo area toolbar0->addWidget(pic);
-    //logo area pic->setObjectName("logo");
-    //logo area pic->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
-    //logo area pic->setEnabled(false);
-
-    // profile image area QToolBar *toolbar1 = addToolBar("profile");
-    // profile image area toolbar1->setToolButtonStyle(Qt::ToolButtonIconOnly);
-    // profile image area addToolBar(Qt::LeftToolBarArea,toolbar1);
-    // profile image area toolbar1->setObjectName("profile");
-    // profile image area QIcon i2 = QIcon(new SVGIconEngine(logoSVG));
-    // profile image area QToolButton* pic1 = new QToolButton();
-    // profile image area pic1->setIcon(i2);
-    // profile image area toolbar1->addWidget(pic1);
-    // profile image area pic1->setObjectName("profileimage");
-    // profile image area pic1->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
-    //pic1->setEnabled(false);
-
     QToolBar *toolbar = addToolBar(tr("Tabs toolbar"));
     addToolBar(Qt::LeftToolBarArea,toolbar);
     toolbar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
@@ -530,6 +502,7 @@ void IocoinGUI::createToolBars()
     toolbar->addAction(historyAction);
     toolbar->addAction(addressBookAction);
     toolbar->addAction(dionsAction);
+    toolbar->addAction(securegroupsAction);
 
     overviewbutton = static_cast<QToolButton*>(toolbar->widgetForAction(overviewAction));
     overviewbutton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
@@ -561,21 +534,15 @@ void IocoinGUI::createToolBars()
     dionsbuttonwatcher = new ButtonHoverWatcher(this,dionsbutton);
     dionsbutton->installEventFilter(dionsbuttonwatcher);
 
+    securegroupsbutton = static_cast<QToolButton*>(toolbar->widgetForAction(securegroupsAction));
+    securegroupsbutton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+    securegroupsbuttonwatcher = new ButtonHoverWatcher(this,securegroupsbutton);
+    securegroupsbutton->installEventFilter(securegroupsbuttonwatcher);
+
     QLayout* tl = toolbar->layout();
     for(int i=0;i<tl->count();i++) { 
-	    //XXXX tl->itemAt(i)->setAlignment(Qt::AlignLeft);
 	    tl->itemAt(i)->setAlignment(Qt::AlignCenter);
     }
-    // profile image area QLayout* tlprofile = toolbar1->layout();
-    // profile image area for(int i=0;i<tlprofile->count();i++) { 
-// profile image area 	    tlprofile->itemAt(i)->setAlignment(Qt::AlignCenter);
-    // profile image area }
- 
-    //STYLE toolbar->setStyleSheet("QToolBar {background-color: black; color:#646464; } QToolButton { background-color:black ; font-size:18px; border: 2px; text-align: left } QToolButton:hover { color: #bebebe } QToolButton:checked { color: #1aa8ea ; } QToolButtonText { text-align: left } QToolButton#logo { background-color:#1aa8ea; color:white; border:0px; margin:0px } QToolTip { background-color:black }");
-    //logo area toolbar0->setStyleSheet("QToolBar#label {background-color: #1aa8ea; color:white; } QToolButton#logo { background-color:black }");
-    // profile image area toolbar1->setStyleSheet("QToolBar#profile {background-color: #1aa8ea; color:white; } QToolButton#profileimage { background-color:black; margin:10px; border-width:4px; border-style: solid; border-color:red; border-radius:50px ; max-width:100px; max-height:100px; min-width:100px; min-height:100px }");
-    //logo area toolbar0->setMovable(false);
-    // profile image upload  toolbar1->setMovable(false);
     toolbar->setMovable(false);
 }
 
@@ -974,6 +941,31 @@ void IocoinGUI::gotoDIONSPage()
 "</svg>"; 
     QIcon icon = QIcon(new SVGIconEngine(iconSvgDataChecked));
         dionsbutton->setIcon(icon);
+    exportAction->setEnabled(false);
+    disconnect(exportAction, SIGNAL(triggered()), 0, 0);
+}
+void IocoinGUI::gotoSecureChatsPage()
+{
+    securegroupsAction->setChecked(true);
+    centralWidget->setCurrentWidget(secureChatsPage);
+
+    string iconSvgDataChecked = 
+"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"
+" <svg   xmlns=\"http://www.w3.org/2000/svg\""
+"   xmlns:xlink=\"http://www.w3.org/1999/xlink\""
+"        x=\"0px\" y=\"0px\" viewBox=\"0 0 24 24\" style=\"fill:#1aa8ea\"> "
+"            <g>  "
+"    <ellipse cx=\"21\" cy=\"6\" rx=\"3\" ry=\"1\" />  "
+"     <ellipse cx=\"3\" cy=\"4\" rx=\"3\" ry=\"1\" />  "
+"     <polyline stroke-linecap=\"square\" stroke-miterlimit=\"10\" rotate=\"5\" points=\"12,15 21,07 20,06\" stroke-linejoin=\"miter\"></polyline> "
+"     <polyline stroke-linecap=\"square\" stroke-miterlimit=\"10\" rotate=\"5\" points=\"12,15 01,04 02,04\" stroke-linejoin=\"miter\"></polyline>  "
+"            </g> "
+"            <g>  "
+"<path d=\"M18,10.7 V6 c0-3.3-2.7-6-6-6 S06,2.7,06,6 v4.7 C04.8,12.1,04,14,04,16 c0,4.4,3.6,8,8,8 s8-3.6,8-8 C20,14,19.2,12.1,18,10.7z M13,17.8 V19 c0,0.6-0.4,1-1,1 s-1-0.4-1-1v-1.2 c-1.2-0.4-2-1.5-2-2.8 c0-1.7,1.3-3,3-3 s3,1.3,3,3 C15,16.3,14.2,17.4,13,17.8z M16,9.1 C14.8,8.4,13.5,8,12,8 S09.2,8.4,08,9.1 V6 c0-2.2,1.8-4,4-4s4,1.8,4,4V9.1z\"></path> "
+"            </g> "
+"        </svg>";
+    QIcon icon = QIcon(new SVGIconEngine(iconSvgDataChecked));
+        securegroupsbutton->setIcon(icon);
     exportAction->setEnabled(false);
     disconnect(exportAction, SIGNAL(triggered()), 0, 0);
 }

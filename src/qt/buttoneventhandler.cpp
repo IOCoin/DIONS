@@ -1,6 +1,6 @@
 
 #include "buttoneventhandler.h"
-#include "SvgIconEngine.h"
+#include "svgiconengine.h"
 #include<QToolButton>
 #include<QMouseEvent>
 #include<QMetaEnum>
@@ -10,12 +10,13 @@
 
 
 using namespace::std;
-    QString OVERVIEW_BUTTON_TEXT    = "Overview";
-    QString SEND_BUTTON_TEXT        = "Send coins";
-    QString RECEIVE_BUTTON_TEXT     = "Receive coins";
-    QString HISTORY_BUTTON_TEXT     = "Transactions";
-    QString ADDRESSBOOK_BUTTON_TEXT = "Address Book";
-    QString DIONS_BUTTON_TEXT       = "Dions";
+    QString OVERVIEW_BUTTON_TEXT     = "Overview";
+    QString SEND_BUTTON_TEXT         = "Send coins";
+    QString RECEIVE_BUTTON_TEXT      = "Receive coins";
+    QString HISTORY_BUTTON_TEXT      = "Transactions";
+    QString ADDRESSBOOK_BUTTON_TEXT  = "Address Book";
+    QString DIONS_BUTTON_TEXT        = "Dions";
+    QString SECURE_CHATS_BUTTON_TEXT = "Secure Chats";
 
     string OVERVIEW_ENTER = 
 "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"
@@ -155,6 +156,37 @@ using namespace::std;
 "   <text x=\"0\" y=\"21\" font-size=\"27\">D</text> "
 "</svg>";
 
+string SECURE_CHATS_ENTER =
+"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"
+" <svg   xmlns=\"http://www.w3.org/2000/svg\""
+"   xmlns:xlink=\"http://www.w3.org/1999/xlink\""
+"        x=\"0px\" y=\"0px\" viewBox=\"0 0 24 24\" style=\"fill:#bebebe\"> "
+"            <g>  "
+"    <ellipse cx=\"21\" cy=\"6\" rx=\"3\" ry=\"1\" />  "
+"     <ellipse cx=\"3\" cy=\"4\" rx=\"3\" ry=\"1\" />  "
+"     <polyline stroke-linecap=\"square\" stroke-miterlimit=\"10\" rotate=\"5\" points=\"12,15 21,07 20,06\" stroke-linejoin=\"miter\"></polyline> "
+"     <polyline stroke-linecap=\"square\" stroke-miterlimit=\"10\" rotate=\"5\" points=\"12,15 01,04 02,04\" stroke-linejoin=\"miter\"></polyline>  "
+"            </g> "
+"            <g>  "
+"<path d=\"M18,10.7 V6 c0-3.3-2.7-6-6-6 S06,2.7,06,6 v4.7 C04.8,12.1,04,14,04,16 c0,4.4,3.6,8,8,8 s8-3.6,8-8 C20,14,19.2,12.1,18,10.7z M13,17.8 V19 c0,0.6-0.4,1-1,1 s-1-0.4-1-1v-1.2 c-1.2-0.4-2-1.5-2-2.8 c0-1.7,1.3-3,3-3 s3,1.3,3,3 C15,16.3,14.2,17.4,13,17.8z M16,9.1 C14.8,8.4,13.5,8,12,8 S09.2,8.4,08,9.1 V6 c0-2.2,1.8-4,4-4s4,1.8,4,4V9.1z\"></path> "
+"            </g> "
+"        </svg>";
+string SECURE_CHATS_LEAVE =
+"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"
+" <svg   xmlns=\"http://www.w3.org/2000/svg\""
+"   xmlns:xlink=\"http://www.w3.org/1999/xlink\""
+"        x=\"0px\" y=\"0px\" viewBox=\"0 0 24 24\" style=\"fill:#646464\"> "
+"            <g>  "
+"    <ellipse cx=\"21\" cy=\"6\" rx=\"3\" ry=\"1\" />  "
+"     <ellipse cx=\"3\" cy=\"4\" rx=\"3\" ry=\"1\" />  "
+"     <polyline stroke-linecap=\"square\" stroke-miterlimit=\"10\" rotate=\"5\" points=\"12,15 21,07 20,06\" stroke-linejoin=\"miter\"></polyline> "
+"     <polyline stroke-linecap=\"square\" stroke-miterlimit=\"10\" rotate=\"5\" points=\"12,15 01,04 02,04\" stroke-linejoin=\"miter\"></polyline>  "
+"            </g> "
+"            <g>  "
+"<path d=\"M18,10.7 V6 c0-3.3-2.7-6-6-6 S06,2.7,06,6 v4.7 C04.8,12.1,04,14,04,16 c0,4.4,3.6,8,8,8 s8-3.6,8-8 C20,14,19.2,12.1,18,10.7z M13,17.8 V19 c0,0.6-0.4,1-1,1 s-1-0.4-1-1v-1.2 c-1.2-0.4-2-1.5-2-2.8 c0-1.7,1.3-3,3-3 s3,1.3,3,3 C15,16.3,14.2,17.4,13,17.8z M16,9.1 C14.8,8.4,13.5,8,12,8 S09.2,8.4,08,9.1 V6 c0-2.2,1.8-4,4-4s4,1.8,4,4V9.1z\"></path> "
+"            </g> "
+"        </svg>";
+
 ButtonHoverWatcher::ButtonHoverWatcher(QObject * parent, QToolButton* b) :
     QObject(parent), toolbutton_(b)
 {}
@@ -199,6 +231,12 @@ bool ButtonHoverWatcher::eventFilter(QObject * watched, QEvent * event)
               QIcon icon = QIcon(new SVGIconEngine(DIONS_ENTER));
               toolbutton_->setIcon(icon);
 	    }
+	    else
+	    if(toolbutton_->text() == SECURE_CHATS_BUTTON_TEXT)
+	    {
+              QIcon icon = QIcon(new SVGIconEngine(SECURE_CHATS_ENTER));
+              toolbutton_->setIcon(icon);
+	    }
           return true;
 	}
 
@@ -236,6 +274,12 @@ bool ButtonHoverWatcher::eventFilter(QObject * watched, QEvent * event)
 	    if(toolbutton_->text() == DIONS_BUTTON_TEXT)
 	    {
               QIcon icon = QIcon(new SVGIconEngine(DIONS_LEAVE));
+              toolbutton_->setIcon(icon);
+	    }
+	    else
+	    if(toolbutton_->text() == SECURE_CHATS_BUTTON_TEXT)
+	    {
+              QIcon icon = QIcon(new SVGIconEngine(SECURE_CHATS_LEAVE));
               toolbutton_->setIcon(icon);
 	    }
         return true;

@@ -1,6 +1,6 @@
 
 #include "actionwatcher.h"
-#include "SvgIconEngine.h"
+#include "svgiconengine.h"
 #include<QToolButton>
 #include<QMouseEvent>
 #include<QMetaEnum>

@@ -1,4 +1,4 @@
-#include "iocoinunits.h"
+#include "bitcoinunits.h"
 
 #include <QStringList>
 
@@ -79,8 +79,8 @@ int IocoinUnits::decimals(int unit)
     switch(unit)
     {
     case BTC: return 8;
-    case mBTC: return 5;
-    case uBTC: return 2;
+    case mBTC: return 8;
+    case uBTC: return 8;
     default: return 0;
     }
 }
@@ -101,7 +101,7 @@ QString IocoinUnits::format(int unit, qint64 n, bool fPlus)
 
     // Right-trim excess zeros after the decimal point
     int nTrim = 0;
-    for (int i = remainder_str.size()-1; i>=2 && (remainder_str.at(i) == '0'); --i)
+    for (int i = remainder_str.size()-1; i>=3 && (remainder_str.at(i) == '0'); --i)
         ++nTrim;
     remainder_str.chop(nTrim);
 
