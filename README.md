@@ -13,7 +13,7 @@ Features:
 *  4 MB Blocks
 *  1 MB Data Cap
 * 60 second blocktime (Up to 16 second blocktime)
-* 1.5 IOC Constant POS reward per Block + any tx fees in that block. 
+* 1.5 IOC Constant POS reward per Block + Any TX Fees per block. 
 * Enhanced API allowing registration of aliases and associated data,
   aliases may be kept encrypted or public. Aliases, encrypted or public may
   send and receive.
@@ -25,10 +25,9 @@ Features:
 * P2P Port: 33764
 * RPC Port: 33765
 * Dedicated Super Seed Node: amer.supernode.iocoin.io  
-* Shade API added. (Stealth addresses based on Diffie Hellman key exchange)
-* (Nighthawk Protocol in current code development)
+* Shade API added. (Shade based on Diffie Hellman key exchange)
 * (Chameleon Graph Ledger to come) https://www.chameleongraph.com
-* Bootstrap https://github.com/IOCoin/DIONS/releases/download/DIONS-SIRIUS-v5.0.0.0-g5729cf1/IOC-BOOTSRAP-3039547.zip
+* Bootstrap https://github.com/IOCoin/DIONS/releases/download/DIONS-SIRIUS-v5.0.0.0-g5729cf1/IOC-Bootstrap-height-3097018.zip
 * Windows 10 Wallet https://github.com/IOCoin/DIONS/releases/download/DIONS-SIRIUS-v5.0.0.0-g5729cf1/dions-aurora.exe 
 * OSX Big Sur 11 Wallet https://github.com/IOCoin/DIONS/releases/download/DIONS-SIRIUS-v5.0.0.0-g5729cf1/dions-aurora.dmg 
 
