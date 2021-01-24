@@ -25,7 +25,7 @@ Features:
 * P2P Port: 33764
 * RPC Port: 33765
 * Dedicated Super Seed Node: amer.supernode.iocoin.io  
-* Shade API added. (Shade based on Diffie Hellman key exchange)
+* Dions Pay "Shade" API added. (Shade based on Diffie Hellman key exchange)
 * (Chameleon Graph Ledger to come) https://www.chameleongraph.com
 * Bootstrap https://github.com/IOCoin/DIONS/releases/download/DIONS-SIRIUS-v5.0.0.0-g5729cf1/IOC-Bootstrap-height-3097018.zip
 * Windows 10 Wallet https://github.com/IOCoin/DIONS/releases/download/DIONS-SIRIUS-v5.0.0.0-g5729cf1/dions-aurora.exe 
