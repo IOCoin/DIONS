@@ -2974,6 +2974,102 @@ Value primaryCXValidate(const Array& params, bool fHelp)
     LEAVE_CRITICAL_SECTION(cs_main)
     return ret;
 }
+Value vextract(const Array& params, bool fHelp)
+{
+  if(fHelp || params.size() != 3)
+    throw runtime_error(
+      "vextract <epid> <pos> <op>\n"
+  );
+
+  string ep =(params[0]).get_str();
+  string pos =(params[1]).get_str();
+  int pos_ = stoi(pos);
+
+  const char* out__ = (params[2].get_str()).c_str();
+  cerr << out__ << endl;
+  fs::path op = out__;
+  boost::filesystem::path ve = op.parent_path();
+  if(!fs::exists(ve))
+    throw runtime_error("Invalid out put path");
+
+  //vex
+    Array oRes;
+    LocatorNodeDB ln1Db("r");
+
+    bool loc=false;
+    vchType intern;
+    Dbc* cursorp;
+    try 
+    {
+      cursorp = ln1Db.GetCursor(); 
+
+      Dbt key, data;
+      int ret;
+
+      while ((ret = cursorp->get(&key, &data, DB_NEXT)) == 0) 
+      {
+        CDataStream ssKey(SER_DISK, CLIENT_VERSION);
+        ssKey.write((char*)key.get_data(), key.get_size());
+
+        string k1;
+        ssKey >> k1;
+        if(k1 == "alias_")
+        {
+          Object o;
+          vchType k2;
+          ssKey >> k2; 
+          string a = stringFromVch(k2);
+
+          vector<AliasIndex> vtxPos;
+          CDataStream ssValue((char*)data.get_data(), (char*)data.get_data() + data.get_size(), SER_DISK, CLIENT_VERSION);
+          ssValue >> vtxPos;
+
+          AliasIndex i = vtxPos.back();
+          if(ep == i.vAddress && pos_ == (int)i.nHeight)
+          {
+		  loc=true;
+		  intern = i.vValue;
+		  break;
+          }
+        }
+      }
+      if (ret != DB_NOTFOUND) 
+      {
+      }
+    } 
+    catch(DbException &e) 
+    {
+      //ln1Db.err(e.get_errno(), "Error!");
+    } 
+    catch(std::exception &e) 
+    {
+      //ln1Db.errx("Error! %s", e.what());
+    }
+
+    if (cursorp != NULL) 
+      cursorp->close();
+  string val = stringFromVch(intern); 
+
+  bool fInvalid = false;
+  vector<unsigned char> asK = DecodeBase64(val.c_str(), &fInvalid);
+
+  string v = stringFromVch(asK);
+  try
+  {
+    stringstream is(v, ios_base::in | ios_base::binary);   
+    filtering_streambuf<input> in__;
+    in__.push(gzip_decompressor());
+    in__.push(is);
+    ofstream file__(out__, ios_base::binary);
+    boost::iostreams::copy(in__, file__);
+  }
+  catch(std::exception& e)
+  {
+    std::cerr << e.what() << std::endl; 
+  }
+
+  return true;
+}
 Value vEPID(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() != 2)
@@ -6927,6 +7023,10 @@ bool relaySigFrame(int i, vchType& s)
 {
   return LR_SHIFT__[i] == s[0];  
 }
+Value extract(const Array& params, bool fHelp)
+{
+  return vextract(params, fHelp);
+}
 bool frlRelay(int& i)
 {
   return true;  
@@ -8062,7 +8162,9 @@ Value simplexU(const Array& params, bool fHelp) { if(fHelp || params.size() != 2
     return wtx.GetHash().GetHex();
    
 }
-Value psimplex(const Array& params, bool fHelp) { if(fHelp || params.size() != 2)
+Value psimplex(const Array& params, bool fHelp) { 
+	
+	if(fHelp || params.size() != 2)
         throw runtime_error(
                 "psimplex <base> <is>"
                 + HelpRequiringPassphrase());

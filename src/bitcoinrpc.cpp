@@ -340,6 +340,7 @@ static const CRPCCommand vRPCCommands[] =
     { "statusList",     &statusList,     false,  false },
     { "downloadDecrypt",     &downloadDecrypt,     false,  false },
     { "downloadDecryptEPID",     &downloadDecryptEPID,     false,  false },
+    { "extract",     &extract,     false,  false },
     { "updateEncrypt",     &updateEncrypt,     false,  false },
     { "ioget",     &ioget,     false,  false },
     { "simplexU",     &simplexU,     false,  false },
