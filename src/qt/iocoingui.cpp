@@ -19,6 +19,7 @@
 #include "addresstablemodel.h"
 #include "transactionview.h"
 #include "overviewpage.h"
+#include "settingspage.h"
 #include "dionspage.h"
 #include "securechatspage.h"
 #include "bitcoinunits.h"
@@ -68,7 +69,7 @@
 #include <QWidgetAction>
 
 #include <iostream>
-
+#include<boost/filesystem.hpp>
 
 extern __wx__* pwalletMain;
 extern int64_t nLastCoinStakeSearchInterval;
@@ -86,6 +87,20 @@ double GetPoSKernelPS(int nHeight = -1);
 //            </g>
 //        </svg>
 
+string profileimageSVG =
+"<?xml version=\"1.0\" standalone=\"no\"?> "
+"<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 20010904//EN\" "
+"  \"http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd\"> "
+" <svg   xmlns=\"http://www.w3.org/2000/svg\" "
+"   xmlns:xlink=\"http://www.w3.org/1999/xlink\" "
+"        x=\"0px\" y=\"0px\" viewBox=\"0 0 24 24\" style=\"fill:#646464\"> "
+"            <g transform=\"translate(0, 0)\">  "
+"                <path data-color=\"color-2\" data-cap=\"butt\" stroke-miterlimit=\"10\" d=\"M19,20.5v-0.7c0-1.1-0.6-2.1-1.5-2.6 l-3.2-1.9\" stroke-linejoin=\"miter\" stroke-linecap=\"butt\"></path>  "
+"                <path data-color=\"color-2\" data-cap=\"butt\" stroke-miterlimit=\"10\" d=\"M9.7,15.3l-3.2,1.8 C5.6,17.7,5,18.7,5,19.7v0.7\" stroke-linejoin=\"miter\" stroke-linecap=\"butt\"></path>  "
+"                <path data-color=\"color-2\" stroke-linecap=\"square\" stroke-miterlimit=\"10\" d=\"M12,16L12,16 c-2.2,0-4-1.8-4-4v-2c0-2.2,1.8-4,4-4h0c2.2,0,4,1.8,4,4v2C16,14.2,14.2,16,12,16z\" stroke-linejoin=\"miter\"></path>  "
+"                <circle stroke-linecap=\"square\" stroke-miterlimit=\"10\" cx=\"12\" cy=\"12\" r=\"11\" stroke-linejoin=\"miter\"></circle>  "
+"            </g>  "
+"        </svg> ";
 
     string logoSVG = 
 "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"
@@ -167,6 +182,16 @@ double GetPoSKernelPS(int nHeight = -1);
 "   </g> "
 "   <text x=\"0\" y=\"21\" font-size=\"27\">D</text> "
 "</svg>";
+    string settingsSVGUnchecked = 
+"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"
+" <svg   xmlns=\"http://www.w3.org/2000/svg\""
+"   xmlns:xlink=\"http://www.w3.org/1999/xlink\""
+"       x=\"0px\" y=\"0px\" viewBox=\"0 0 24 24\" style=\"fill:#646464 \">"
+"            <g> "
+"                <path d=\"M6.5,11h11c3,0,5.5-2.5,5.5-5.5S20.5,0,17.5,0h-11C3.5,0,1,2.5,1,5.5S3.5,11,6.5,11z M6.5,2 C8.4,2,10,3.6,10,5.5S8.4,9,6.5,9S3,7.4,3,5.5S4.6,2,6.5,2z\"></path>"
+"                <path data-color=\"color-2\" d=\"M17.5,13h-11c-3,0-5.5,2.5-5.5,5.5S3.5,24,6.5,24h11c3,0,5.5-2.5,5.5-5.5S20.5,13,17.5,13z M17.5,22c-1.9,0-3.5-1.6-3.5-3.5s1.6-3.5,3.5-3.5s3.5,1.6,3.5,3.5S19.4,22,17.5,22z\"></path>"
+"            </g> "
+"        </svg>";
     string securegroupsSVGUnchecked = 
 "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"
 " <svg   xmlns=\"http://www.w3.org/2000/svg\""
@@ -230,6 +255,7 @@ IocoinGUI::IocoinGUI(QWidget *parent):
 
     // Create tabs
     overviewPage = new OverviewPage();
+    settingsPage = new SettingsPage();
     dionsPage = new DIONSPage();
     secureChatsPage = new SecureChatsPage();
 
@@ -254,6 +280,7 @@ IocoinGUI::IocoinGUI(QWidget *parent):
     centralWidget->addWidget(addressBookPage);
     centralWidget->addWidget(receiveCoinsPage);
     centralWidget->addWidget(sendCoinsPage);
+    centralWidget->addWidget(settingsPage);
     centralWidget->addWidget(dionsPage);
     centralWidget->addWidget(secureChatsPage);
     setCentralWidget(centralWidget);
@@ -350,8 +377,39 @@ IocoinGUI::~IocoinGUI()
 
 void IocoinGUI::createActions()
 {
-    QActionGroup *tabGroup = new QActionGroup(this);
+    QActionGroup *tabGroup0 = new QActionGroup(this);
 
+    //QIcon profileimageicon = QIcon(new SVGIconEngine(profileimageSVG));
+    //QIcon profileimageicon = QIcon(":/images/ioc");
+    //QIcon profileimageicon = QIcon(":/images/avatar");
+    //QString env;
+    boost::filesystem::path envPath = walletModel->getDataDir();
+    envPath /= "ui";
+    envPath /= "avatar";
+    envPath /= "profile_image";
+
+    if(!boost::filesystem::exists(envPath.branch_path()))
+    {
+      boost::filesystem::create_directories(envPath.branch_path());
+    }
+
+    string profile_image = envPath.string();
+
+    if(!boost::filesystem::exists(envPath))
+    {
+      QFile::copy(":/images/avatar", profile_image.c_str());
+    }
+
+    QIcon profileimageicon = QIcon(profile_image.c_str());
+    profileImageAction = new QAction(this);
+    //profileImageAction->setText(tr("&Overview"));
+    profileImageAction->setIcon(profileimageicon);
+    profileImageAction->setToolTip(tr("Select profile image"));
+    profileImageAction->setCheckable(true);
+    profileImageAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_1));
+    tabGroup0->addAction(profileImageAction);
+
+    QActionGroup *tabGroup = new QActionGroup(this);
     QIcon overviewicon = QIcon(new SVGIconEngine(overviewSVGUnchecked));
     overviewAction = new QAction(this);
     overviewAction->setText(tr("&Overview"));
@@ -398,6 +456,15 @@ void IocoinGUI::createActions()
     addressBookAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_5));
     tabGroup->addAction(addressBookAction);
 
+    QIcon settingsicon = QIcon(new SVGIconEngine(settingsSVGUnchecked));
+    settingsAction = new QAction(this);
+    settingsAction->setText(tr("&Settings"));
+    settingsAction->setIcon(settingsicon);
+    settingsAction->setToolTip(tr("Settings"));
+    settingsAction->setCheckable(true);
+    settingsAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_5));
+    tabGroup->addAction(settingsAction);
+
     QIcon dionsicon = QIcon(new SVGIconEngine(dionsSVGUnchecked));
     dionsAction = new QAction(this);
     dionsAction->setText(tr("&Dions"));
@@ -417,6 +484,8 @@ void IocoinGUI::createActions()
     tabGroup->addAction(securegroupsAction);
 
 
+    connect(profileImageAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
+    connect(profileImageAction, SIGNAL(triggered()), this, SLOT(gotoProfileImageChooser()));
     connect(overviewAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(overviewAction, SIGNAL(triggered()), this, SLOT(gotoOverviewPage()));
     connect(sendCoinsAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
@@ -428,6 +497,7 @@ void IocoinGUI::createActions()
     connect(addressBookAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(addressBookAction, SIGNAL(triggered()), this, SLOT(gotoAddressBookPage()));
     connect(dionsAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
+    connect(settingsAction, SIGNAL(triggered()), this, SLOT(gotoSettingsPage()));
     connect(dionsAction, SIGNAL(triggered()), this, SLOT(gotoDIONSPage()));
     connect(securegroupsAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(securegroupsAction, SIGNAL(triggered()), this, SLOT(gotoSecureChatsPage()));
@@ -493,17 +563,23 @@ void IocoinGUI::createMenuBar()
 
 void IocoinGUI::createToolBars()
 {
+    QToolBar *toolbar0 = addToolBar(tr("profile toolbar"));
+    addToolBar(Qt::LeftToolBarArea,toolbar0);
+    toolbar0->setIconSize(QSize(100,100));
+
     QToolBar *toolbar = addToolBar(tr("Tabs toolbar"));
     addToolBar(Qt::LeftToolBarArea,toolbar);
     toolbar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+    toolbar0->addAction(profileImageAction);
     toolbar->addAction(overviewAction);
     toolbar->addAction(sendCoinsAction);
-    toolbar->addAction(receiveCoinsAction);
     toolbar->addAction(historyAction);
     toolbar->addAction(addressBookAction);
-    toolbar->addAction(dionsAction);
-    toolbar->addAction(securegroupsAction);
+    toolbar->addAction(settingsAction);
 
+    profileimagebutton = static_cast<QToolButton*>(toolbar0->widgetForAction(profileImageAction));
+    profileimagebutton->setToolButtonStyle(Qt::ToolButtonIconOnly);
+    profileimagebutton->setObjectName("profileimage");
     overviewbutton = static_cast<QToolButton*>(toolbar->widgetForAction(overviewAction));
     overviewbutton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     overviewbuttonwatcher = new ButtonHoverWatcher(this,overviewbutton);
@@ -528,12 +604,15 @@ void IocoinGUI::createToolBars()
     addressbookbutton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     addressbookbuttonwatcher = new ButtonHoverWatcher(this,addressbookbutton);
     addressbookbutton->installEventFilter(addressbookbuttonwatcher);
+    settingsbutton = static_cast<QToolButton*>(toolbar->widgetForAction(settingsAction));
+    settingsbutton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+    settingsbuttonwatcher = new ButtonHoverWatcher(this,settingsbutton);
+    settingsbutton->installEventFilter(settingsbuttonwatcher);
 
     dionsbutton = static_cast<QToolButton*>(toolbar->widgetForAction(dionsAction));
     dionsbutton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     dionsbuttonwatcher = new ButtonHoverWatcher(this,dionsbutton);
     dionsbutton->installEventFilter(dionsbuttonwatcher);
-
     securegroupsbutton = static_cast<QToolButton*>(toolbar->widgetForAction(securegroupsAction));
     securegroupsbutton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     securegroupsbuttonwatcher = new ButtonHoverWatcher(this,securegroupsbutton);
@@ -543,6 +622,7 @@ void IocoinGUI::createToolBars()
     for(int i=0;i<tl->count();i++) { 
 	    tl->itemAt(i)->setAlignment(Qt::AlignCenter);
     }
+    toolbar0->setMovable(false);
     toolbar->setMovable(false);
 }
 
@@ -602,6 +682,7 @@ void IocoinGUI::setWalletModel(WalletModel *walletModel)
         addressBookPage->setModel(walletModel->getAddressTableModel());
         receiveCoinsPage->setModel(walletModel->getAddressTableModel());
         sendCoinsPage->setModel(walletModel);
+        settingsPage->setModel(walletModel);
         dionsPage->setModel(walletModel);
         signVerifyMessageDialog->setModel(walletModel);
 
@@ -640,7 +721,7 @@ void IocoinGUI::createTrayIcon()
     trayIconMenu->addAction(toggleHideAction);
     trayIconMenu->addSeparator();
     trayIconMenu->addAction(sendCoinsAction);
-    trayIconMenu->addAction(receiveCoinsAction);
+    //XXXX trayIconMenu->addAction(receiveCoinsAction);
     trayIconMenu->addSeparator();
     trayIconMenu->addAction(signMessageAction);
     trayIconMenu->addAction(verifyMessageAction);
@@ -896,6 +977,44 @@ void IocoinGUI::incomingTransaction(const QModelIndex & parent, int start, int e
                               .arg(address), icon);
     }
 }
+void IocoinGUI::gotoProfileImageChooser()
+{
+    //profileImageAction->setChecked(true);
+    //centralWidget->setCurrentWidget(overviewPage);
+
+//    string iconSvgDataChecked = 
+//"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"
+//" <svg   xmlns=\"http://www.w3.org/2000/svg\""
+//"   xmlns:xlink=\"http://www.w3.org/1999/xlink\""
+//"   width=\"16px\""
+//"   height=\"16px\""
+//"   x=\"0px\" y=\"0px\" viewBox=\"0 0 24 24\" style=\"fill:#1aa8ea \">"
+//"  <g>"
+////"    <polygon points=\"2,9.6 2,24 9,24 9,17 15,17 15,24 22,24 22,9.6 12,0.7 \"></polygon>"
+//"  </g>"
+//"</svg>"; 
+//    QIcon icon = QIcon(new SVGIconEngine(iconSvgDataChecked));
+//        overviewbutton->setIcon(icon);
+
+    //const char* filter = "All files (*.*);;BMP (*.bmp);;CUR (*.cur);;GIF (*.gif);;ICNS (*.icns);;ICO (*.ico);;JPEG (*.jpg);;PBM (*.pbm);;PGM (*.pgm);;PNG (*.png);;PPM (*.ppm);;SVG (*.svg);;SVGZ (*.svgz);;TGA (*.tga);;TIF (*.tiff);;WBMP (*.wbmp);;XBM (*.xbm);;XPM (*.xpm)";
+    const char* filter = "Images (*.bmp *.cur *.gif *.icns *.ico *.jpg *.pbm *.pgm *.png *.ppm *.svg *.svgz *.tga *.tiff *.wbmp *.xbm *.xpm)";
+    QString selectionFilter(filter);
+    QString fileName = QFileDialog::getOpenFileName(this,"Select profile image", "", tr(filter),&selectionFilter);
+    boost::filesystem::path envPath = walletModel->getDataDir();
+    envPath /= "ui";
+    envPath /= "avatar";
+    envPath /= "profile_image";
+
+
+    std::string profile_image = envPath.string();
+    if(QFile::exists(profile_image.c_str()))
+      QFile::remove(profile_image.c_str());
+    QFile::copy(fileName, profile_image.c_str());
+    QIcon profileimageicon = QIcon(profile_image.c_str());
+    profileImageAction->setIcon(profileimageicon);
+    exportAction->setEnabled(false);
+    disconnect(exportAction, SIGNAL(triggered()), 0, 0);
+}
 
 void IocoinGUI::gotoOverviewPage()
 {
@@ -920,7 +1039,29 @@ void IocoinGUI::gotoOverviewPage()
     exportAction->setEnabled(false);
     disconnect(exportAction, SIGNAL(triggered()), 0, 0);
 }
+void IocoinGUI::gotoSettingsPage()
+{
+    settingsAction->setChecked(true);
+    centralWidget->setCurrentWidget(settingsPage);
 
+    string iconSvgDataChecked = 
+"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"
+" <svg   xmlns=\"http://www.w3.org/2000/svg\""
+"   xmlns:xlink=\"http://www.w3.org/1999/xlink\""
+"   width=\"16px\""
+"   height=\"16px\""
+"   x=\"0px\" y=\"0px\" viewBox=\"0 0 24 24\" style=\"fill:#1aa8ea \">"
+"            <g> "
+"                <path d=\"M6.5,11h11c3,0,5.5-2.5,5.5-5.5S20.5,0,17.5,0h-11C3.5,0,1,2.5,1,5.5S3.5,11,6.5,11z M6.5,2 C8.4,2,10,3.6,10,5.5S8.4,9,6.5,9S3,7.4,3,5.5S4.6,2,6.5,2z\"></path>"
+"                <path data-color=\"color-2\" d=\"M17.5,13h-11c-3,0-5.5,2.5-5.5,5.5S3.5,24,6.5,24h11c3,0,5.5-2.5,5.5-5.5S20.5,13,17.5,13z M17.5,22c-1.9,0-3.5-1.6-3.5-3.5s1.6-3.5,3.5-3.5s3.5,1.6,3.5,3.5S19.4,22,17.5,22z\"></path>"
+"            </g> "
+"        </svg>";
+    QIcon icon = QIcon(new SVGIconEngine(iconSvgDataChecked));
+        settingsbutton->setIcon(icon);
+    exportAction->setEnabled(false);
+    disconnect(exportAction, SIGNAL(triggered()), 0, 0);
+}
+/*
 void IocoinGUI::gotoDIONSPage()
 {
     dionsAction->setChecked(true);
@@ -969,7 +1110,7 @@ void IocoinGUI::gotoSecureChatsPage()
     exportAction->setEnabled(false);
     disconnect(exportAction, SIGNAL(triggered()), 0, 0);
 }
-
+*/
 void IocoinGUI::gotoHistoryPage()
 {
     historyAction->setChecked(true);

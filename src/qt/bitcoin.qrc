@@ -49,6 +49,8 @@
     <qresource prefix="/images">
         <file alias="about">res/images/about.png</file>
         <file alias="splash">res/images/ioc-2019-logoCM.png</file>
+        <file alias="ioc">res/images/ioc-2019-logoCM.png</file>
+        <file alias="avatar">res/images/avatar.svg</file>
     </qresource>
     <qresource prefix="/qss">
         <file alias="stylesheet">res/qss/stylesheet.qss</file>

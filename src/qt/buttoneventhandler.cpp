@@ -17,6 +17,7 @@ using namespace::std;
     QString ADDRESSBOOK_BUTTON_TEXT  = "Address Book";
     QString DIONS_BUTTON_TEXT        = "Dions";
     QString SECURE_CHATS_BUTTON_TEXT = "Secure Chats";
+    QString SETTINGS_BUTTON_TEXT     = "Settings";
 
     string OVERVIEW_ENTER = 
 "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"
@@ -171,6 +172,16 @@ string SECURE_CHATS_ENTER =
 "<path d=\"M18,10.7 V6 c0-3.3-2.7-6-6-6 S06,2.7,06,6 v4.7 C04.8,12.1,04,14,04,16 c0,4.4,3.6,8,8,8 s8-3.6,8-8 C20,14,19.2,12.1,18,10.7z M13,17.8 V19 c0,0.6-0.4,1-1,1 s-1-0.4-1-1v-1.2 c-1.2-0.4-2-1.5-2-2.8 c0-1.7,1.3-3,3-3 s3,1.3,3,3 C15,16.3,14.2,17.4,13,17.8z M16,9.1 C14.8,8.4,13.5,8,12,8 S09.2,8.4,08,9.1 V6 c0-2.2,1.8-4,4-4s4,1.8,4,4V9.1z\"></path> "
 "            </g> "
 "        </svg>";
+string SETTINGS_ENTER =
+"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"
+" <svg   xmlns=\"http://www.w3.org/2000/svg\""
+"   xmlns:xlink=\"http://www.w3.org/1999/xlink\""
+"        x=\"0px\" y=\"0px\" viewBox=\"0 0 24 24\" style=\"fill:#bebebe\"> "
+"            <g> "
+"                <path d=\"M6.5,11h11c3,0,5.5-2.5,5.5-5.5S20.5,0,17.5,0h-11C3.5,0,1,2.5,1,5.5S3.5,11,6.5,11z M6.5,2 C8.4,2,10,3.6,10,5.5S8.4,9,6.5,9S3,7.4,3,5.5S4.6,2,6.5,2z\"></path>"
+"                <path data-color=\"color-2\" d=\"M17.5,13h-11c-3,0-5.5,2.5-5.5,5.5S3.5,24,6.5,24h11c3,0,5.5-2.5,5.5-5.5S20.5,13,17.5,13z M17.5,22c-1.9,0-3.5-1.6-3.5-3.5s1.6-3.5,3.5-3.5s3.5,1.6,3.5,3.5S19.4,22,17.5,22z\"></path>"
+"            </g> "
+"        </svg>";
 string SECURE_CHATS_LEAVE =
 "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"
 " <svg   xmlns=\"http://www.w3.org/2000/svg\""
@@ -184,6 +195,16 @@ string SECURE_CHATS_LEAVE =
 "            </g> "
 "            <g>  "
 "<path d=\"M18,10.7 V6 c0-3.3-2.7-6-6-6 S06,2.7,06,6 v4.7 C04.8,12.1,04,14,04,16 c0,4.4,3.6,8,8,8 s8-3.6,8-8 C20,14,19.2,12.1,18,10.7z M13,17.8 V19 c0,0.6-0.4,1-1,1 s-1-0.4-1-1v-1.2 c-1.2-0.4-2-1.5-2-2.8 c0-1.7,1.3-3,3-3 s3,1.3,3,3 C15,16.3,14.2,17.4,13,17.8z M16,9.1 C14.8,8.4,13.5,8,12,8 S09.2,8.4,08,9.1 V6 c0-2.2,1.8-4,4-4s4,1.8,4,4V9.1z\"></path> "
+"            </g> "
+"        </svg>";
+string SETTINGS_LEAVE =
+"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"
+" <svg   xmlns=\"http://www.w3.org/2000/svg\""
+"   xmlns:xlink=\"http://www.w3.org/1999/xlink\""
+"        x=\"0px\" y=\"0px\" viewBox=\"0 0 24 24\" style=\"fill:#646464\"> "
+"            <g> "
+"                <path d=\"M6.5,11h11c3,0,5.5-2.5,5.5-5.5S20.5,0,17.5,0h-11C3.5,0,1,2.5,1,5.5S3.5,11,6.5,11z M6.5,2 C8.4,2,10,3.6,10,5.5S8.4,9,6.5,9S3,7.4,3,5.5S4.6,2,6.5,2z\"></path>"
+"                <path data-color=\"color-2\" d=\"M17.5,13h-11c-3,0-5.5,2.5-5.5,5.5S3.5,24,6.5,24h11c3,0,5.5-2.5,5.5-5.5S20.5,13,17.5,13z M17.5,22c-1.9,0-3.5-1.6-3.5-3.5s1.6-3.5,3.5-3.5s3.5,1.6,3.5,3.5S19.4,22,17.5,22z\"></path>"
 "            </g> "
 "        </svg>";
 
@@ -237,6 +258,12 @@ bool ButtonHoverWatcher::eventFilter(QObject * watched, QEvent * event)
               QIcon icon = QIcon(new SVGIconEngine(SECURE_CHATS_ENTER));
               toolbutton_->setIcon(icon);
 	    }
+	    else
+	    if(toolbutton_->text() == SETTINGS_BUTTON_TEXT)
+	    {
+              QIcon icon = QIcon(new SVGIconEngine(SETTINGS_ENTER));
+              toolbutton_->setIcon(icon);
+	    }
           return true;
 	}
 
@@ -280,6 +307,12 @@ bool ButtonHoverWatcher::eventFilter(QObject * watched, QEvent * event)
 	    if(toolbutton_->text() == SECURE_CHATS_BUTTON_TEXT)
 	    {
               QIcon icon = QIcon(new SVGIconEngine(SECURE_CHATS_LEAVE));
+              toolbutton_->setIcon(icon);
+	    }
+	    else
+	    if(toolbutton_->text() == SETTINGS_BUTTON_TEXT)
+	    {
+              QIcon icon = QIcon(new SVGIconEngine(SETTINGS_LEAVE));
               toolbutton_->setIcon(icon);
 	    }
         return true;

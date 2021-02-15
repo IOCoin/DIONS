@@ -16,8 +16,9 @@ class ClientModel;
 class WalletModel;
 class TransactionView;
 class OverviewPage;
-class DIONSPage;
-class SecureChatsPage;
+class SettingsPage;
+//XXXX class DIONSPage;
+//XXXX class SecureChatsPage;
 class AddressBookPage;
 class SendCoinsDialog;
 class SignVerifyMessageDialog;
@@ -72,8 +73,9 @@ private:
     QStackedWidget *centralWidget;
 
     OverviewPage *overviewPage;
-    DIONSPage *dionsPage;
-    SecureChatsPage *secureChatsPage;
+    SettingsPage *settingsPage;
+    //XXXX DIONSPage *dionsPage;
+    //XXXX SecureChatsPage *secureChatsPage;
     QWidget *transactionsPage;
     AddressBookPage *addressBookPage;
     AddressBookPage *receiveCoinsPage;
@@ -88,7 +90,9 @@ private:
     QProgressBar *progressBar;
 
     QMenuBar *appMenuBar;
+    QAction *profileImageAction;
     QAction *overviewAction;
+    QAction *settingsAction;
     QAction *dionsAction;
     QAction *securegroupsAction;
     QAction *historyAction;
@@ -116,13 +120,16 @@ private:
     ButtonHoverWatcher* historybuttonwatcher;
     ButtonHoverWatcher* addressbookbuttonwatcher;
     ButtonHoverWatcher* dionsbuttonwatcher;
+    ButtonHoverWatcher* settingsbuttonwatcher;
     ButtonHoverWatcher* securegroupsbuttonwatcher;
+    QToolButton* profileimagebutton;
     QToolButton* overviewbutton;
     QToolButton* sendbutton;
     QToolButton* receivebutton;
     QToolButton* historybutton;
     QToolButton* addressbookbutton;
     QToolButton* dionsbutton;
+    QToolButton* settingsbutton;
     QToolButton* securegroupsbutton;
 
     QSystemTrayIcon *trayIcon;
@@ -170,6 +177,8 @@ public slots:
 
 private slots:
     /** Switch to overview (home) page */
+    void gotoProfileImageChooser();
+    /** Switch to overview (home) page */
     void gotoOverviewPage();
     /** Switch to history (transactions) page */
     void gotoHistoryPage();
@@ -179,10 +188,12 @@ private slots:
     void gotoReceiveCoinsPage();
     /** Switch to send coins page */
     void gotoSendCoinsPage();
+    /** Switch to settings page */
+    void gotoSettingsPage();
     /** Switch to dions page */
-    void gotoDIONSPage();
+    //XXXX void gotoDIONSPage();
     /** Switch to secure chats page */
-    void gotoSecureChatsPage();
+    //XXXX void gotoSecureChatsPage();
 
     /** Show Sign/Verify Message dialog and switch to sign message tab */
     void gotoSignMessageTab(QString addr = "");

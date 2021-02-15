@@ -3027,6 +3027,7 @@ Value vextract(const Array& params, bool fHelp)
           AliasIndex i = vtxPos.back();
           if(ep == i.vAddress && pos_ == (int)i.nHeight)
           {
+		  cout << "FOUND" << endl;
 		  loc=true;
 		  intern = i.vValue;
 		  break;
