@@ -3,13 +3,14 @@
 
 #include <QMainWindow>
 #include <QSystemTrayIcon>
-#include <QWebFrame>
 #include "actionwatcher.h"
 #include "buttoneventhandler.h"
+#include "clickablelabel.h"
+#include "intro.h"
 
 #include <stdint.h>
 
-
+class Intro;
 class IocoinGUI;
 class TransactionTableModel;
 class ClientModel;
@@ -17,8 +18,6 @@ class WalletModel;
 class TransactionView;
 class OverviewPage;
 class SettingsPage;
-//XXXX class DIONSPage;
-//XXXX class SecureChatsPage;
 class AddressBookPage;
 class SendCoinsDialog;
 class SignVerifyMessageDialog;
@@ -26,6 +25,7 @@ class Notificator;
 class RPCConsole;
 class ButtonHoverWatcher;
 class QToolButton;
+class QRoundButton;
 
 
 QT_BEGIN_NAMESPACE
@@ -43,6 +43,7 @@ QT_END_NAMESPACE
   Bitcoin GUI main class. This class represents the main window of the Bitcoin UI. It communicates with both the client and
   wallet models to give the user an up-to-date view of the current core state.
 */
+
 class IocoinGUI : public QMainWindow
 {
     Q_OBJECT
@@ -59,12 +60,14 @@ public:
         functionality.
     */
     void setWalletModel(WalletModel *walletModel);
+    void complete_init(QString&);
 
 protected:
     void changeEvent(QEvent *e);
     void closeEvent(QCloseEvent *event);
     void dragEnterEvent(QDragEnterEvent *event);
     void dropEvent(QDropEvent *event);
+    //bool eventFilter(QObject*,QEvent*);
 
 private:
     ClientModel *clientModel;
@@ -72,22 +75,28 @@ private:
 
     QStackedWidget *centralWidget;
 
+    Intro        *intro;
     OverviewPage *overviewPage;
     SettingsPage *settingsPage;
-    //XXXX DIONSPage *dionsPage;
-    //XXXX SecureChatsPage *secureChatsPage;
     QWidget *transactionsPage;
     AddressBookPage *addressBookPage;
     AddressBookPage *receiveCoinsPage;
     SendCoinsDialog *sendCoinsPage;
     SignVerifyMessageDialog *signVerifyMessageDialog;
 
-    QLabel *labelEncryptionIcon;
+    ClickableLabel *labelEncryptionIcon;
+    ClickableLabel *labelMinimizeIcon;
+    ClickableLabel *labelMaximizeIcon;
+    ClickableLabel *labelCloseIcon;
     QLabel *labelStakingIcon;
     QLabel *labelConnectionsIcon;
     QLabel *labelBlocksIcon;
     QLabel *progressBarLabel;
     QProgressBar *progressBar;
+
+    QIcon* unlockedUnencryptedIcon;
+    QIcon* unlockedEncryptedIcon;
+    QIcon* lockedEncryptedIcon;
 
     QMenuBar *appMenuBar;
     QAction *profileImageAction;
@@ -131,6 +140,13 @@ private:
     QToolButton* dionsbutton;
     QToolButton* settingsbutton;
     QToolButton* securegroupsbutton;
+    QToolBar* toolbar0;
+    QToolBar* toolbar;
+    QWidget*  qw;
+
+   //OptionsModel* optionsModel_;
+   //ClientModel* clientModel_;
+   //WalletModel* walletModel_;
 
     QSystemTrayIcon *trayIcon;
     Notificator *notificator;
@@ -179,6 +195,7 @@ private slots:
     /** Switch to overview (home) page */
     void gotoProfileImageChooser();
     /** Switch to overview (home) page */
+    void gotoIntroPage();
     void gotoOverviewPage();
     /** Switch to history (transactions) page */
     void gotoHistoryPage();
@@ -190,10 +207,6 @@ private slots:
     void gotoSendCoinsPage();
     /** Switch to settings page */
     void gotoSettingsPage();
-    /** Switch to dions page */
-    //XXXX void gotoDIONSPage();
-    /** Switch to secure chats page */
-    //XXXX void gotoSecureChatsPage();
 
     /** Show Sign/Verify Message dialog and switch to sign message tab */
     void gotoSignMessageTab(QString addr = "");
@@ -205,10 +218,10 @@ private slots:
     /** Show about dialog */
     void aboutClicked();
 
-#ifndef Q_OS_MAC
+//#ifndef Q_OS_MAC
     /** Handle tray icon clicked */
     void trayIconActivated(QSystemTrayIcon::ActivationReason reason);
-#endif
+//#endif
     /** Show incoming transaction notification for new transactions.
 
         The new items are those between start and end inclusive, under the given parent item.
@@ -216,6 +229,7 @@ private slots:
     void incomingTransaction(const QModelIndex & parent, int start, int end);
     /** Encrypt the wallet */
     void encryptWallet(bool status);
+    void encryptWalletTest(bool status);
     /** Backup the wallet */
     void backupWallet();
     /** Change encrypted wallet passphrase */
@@ -232,6 +246,10 @@ private slots:
 
     void updateWeight();
     void updateStakingIcon();
+
+    void minimizeApp();
+    void maximizeApp();
+    void closeApp();
 };
 
 #endif

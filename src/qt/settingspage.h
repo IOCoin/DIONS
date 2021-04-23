@@ -1,5 +1,5 @@
-#ifndef DIONSVIEW_H
-#define DIONSVIEW_H
+#ifndef SETTINGSVIEW_H
+#define SETTINGSVIEW_H
 
 #include <QWidget>
 
@@ -16,6 +16,10 @@ class QFrame;
 class QDateTimeEdit;
 QT_END_NAMESPACE
 
+namespace Ui {
+    class SettingsPage;
+}
+
 /** Widget showing the transaction list for a wallet, including a filter row.
     Using the filter row, the user can view or export a subset of the transactions.
   */
@@ -24,6 +28,7 @@ class SettingsPage : public QWidget
     Q_OBJECT
 public:
     explicit SettingsPage(QWidget *parent = 0);
+    ~SettingsPage();
 
     void setModel(WalletModel *model);
 
@@ -40,6 +45,7 @@ public:
     };
 
 private:
+    Ui::SettingsPage *ui;
     WalletModel *model;
     TransactionFilterProxy *transactionProxyModel;
     QTableView *settingsView;
@@ -80,4 +86,4 @@ public slots:
 
 };
 
-#endif // TRANSACTIONVIEW_H
+#endif

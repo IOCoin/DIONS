@@ -299,9 +299,6 @@ Value gw1(const Array& params, bool fHelp)
       CTxIndex txI;
       if(!txdb.ReadTxIndex(tx.GetHash(), txI))
         continue;
-     
-      //printf("XXXX read txI\n");
-      //linkSet(vvchArgs, p, txI.pos, s, l);
     }
   }
 

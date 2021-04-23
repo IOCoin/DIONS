@@ -2,6 +2,7 @@
 #define OVERVIEWPAGE_H
 
 #include <QWidget>
+#include "transactionview.h"
 
 QT_BEGIN_NAMESPACE
 class QModelIndex;
@@ -39,7 +40,8 @@ private:
     qint64 currentStake;
     qint64 currentUnconfirmedBalance;
     qint64 currentImmatureBalance;
-
+    
+    TransactionView* txv_;
     TxViewDelegate *txdelegate;
     TransactionFilterProxy *filter;
 

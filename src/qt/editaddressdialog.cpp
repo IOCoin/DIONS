@@ -3,6 +3,7 @@
 #include "addresstablemodel.h"
 #include "guiutil.h"
 
+#include <iostream>
 #include <QDataWidgetMapper>
 #include <QMessageBox>
 

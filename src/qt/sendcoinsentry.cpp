@@ -14,9 +14,7 @@
 SendCoinsEntry::SendCoinsEntry(QWidget *parent) :
     QFrame(parent),
     ui(new Ui::SendCoinsEntry),
-    model(0),
-    networkManager(),
-    currentReply(0)
+    model(0)
 {
     ui->setupUi(this);
 

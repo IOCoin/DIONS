@@ -1,19 +1,25 @@
-QMainWindow { background-color:#f8f8ff ;  }
+QMainWindow { background-color:#f5f5f5 ; }
 
-QWidget#statusbar { background-color: #1aa8ea }
+QWidget#statusbar { background-color: #f5f5f5; border-bottom: 1px solid #e3e3e3 }
 
 QProgressBar { background-color: #e8e8e8; border: 1px solid grey; border-radius: 7px; padding: 1px; text-align: center; } 
 QProgressBar::chunk { background: QLinearGradient(x1: 0, y1: 0, x2: 1, y2: 0, stop: 0 #FF8000, stop: 1 orange); border-radius: 7px; margin: 0px; }
 
-QToolBar {background-color: #262626; color:#646464; } 
-QToolButton { background-color:#262626 ; color:#646464; font-size:18px; border: 2px; text-align: left; font-weight:700; } 
-QToolButton:hover { color: #bebebe } 
-QToolButton:checked { color: #1aa8ea ; } 
-QToolButtonText { text-align: left } 
+QMenuBar {background-color: #262626; color:#646464; } 
+QToolBar {background-color: #262626; border:none; color:#646464; } 
 QToolButton#logo { background-color:#1aa8ea; color:white; border:0px; margin:0px } 
-QToolTip { background-color:#262626 ; border-radius: 10px ; margin: 1px; border: 2px solid white; border-color: 646464; font-size: 18px; font-weight: 700; color: #bebebe; }
+QToolTip { padding:0; background-color:#262626 ; border-radius: 0px ; margin: 0px; border: 1px solid white; border-color: 646464; font-size: 18px; font-weight: 700; color: #bebebe; }
 
-QFrame { border: none }
+QToolButton { background-color:#262626 ; color:#646464; font-size:18px; border: 2px; text-align: left; font-weight:500; } 
+QToolButton#obutton:hover, #sbutton:hover, #hbutton:hover, #abutton:hover, #settingsbutton:hover { color: #bebebe } 
+QToolButton#obutton:checked, #sbutton:checked, #hbutton:checked, #abutton:checked, #settingsbutton:checked { color: #1aa8ea } 
+QToolButton#obutton:pressed, #sbutton:pressed, #hbutton:pressed, #abutton:pressed, #settingsbutton:pressed { color: #1aa8ea } 
+QToolButton#profileimage { background-color:#262626; padding: 0; margin-bottom:20px; margin-top: 10px; }
+
+QVBoxLayout { margin: 0 0 0 0 ; padding:0 }
+QHBoxLayout { margin: 0 0 0 0; padding:0 }
+QHBoxLayout#availableAmountLayout { margin: 0 0 0 0; padding:0 }
+QFrame { border: none; padding:0 }
 QFrame#walletbalance > QLabel { 
  font-size: 16px; font-weight: 700; 
  qproperty-alignment: left; font-size: 16px; font-weight: 700; }
@@ -27,3 +33,46 @@ QFrame#transactions > QLabel {
  font-size: 24px; font-weight: 700; 
  }
 
+QFrame#control { background-color:white; min-height:75px; max-height:100px; border: none ; min-width:100% ; margin: 0 0 4 0 }
+QFrame#recenttransactions { background-color:white; border: none ; min-width:100% ; padding:5px; margin-top: 18px; max-height:44px}
+QFrame#recenttransactions > QLabel { color: #b3b3b3; background-color:white; font-size: 28px; font-weight: 300; margin: 0; border: none ; padding-left: 5px}
+QFrame#control > QLabel { color: #b3b3b3; background-color:white; font-size: 34px; font-weight: 300; margin: 0; border: none ; padding-left:5px}
+QFrame#status { min-height:60px; max-height:100px; border: none ; min-width:100% }
+/*QFrame#available { border: 2px solid #b3b3b3; background-color:white; margin: 10 20 10 20; font-size: 34px }*/
+QFrame#available { border-width:5px; border-style:solid; border-color: white white white #45e283 ; border-radius:3px;background-color:white; margin: 10 20 10 20; min-height:80px }
+QFrame#pending { border-width:5px; border-style:solid; border-color: white white white #ffcd9d; border-radius:3px;background-color:white; margin: 10 20 10 20; }
+QFrame#staked { border-width:5px; border-style:solid; border-color:white white white #ffcd9d;border-radius:3px;background-color:white; margin: 10 20 10 20; }
+
+QLabel#labelTextBalance, #labelTextUnconfirmed, #labelTextStaked { min-height:43; color: #ccc; font-size: 16px; font-weight: 700 }
+QLabel#labelBalance, #labelUnconfirmed, #labelStaked { font-size: 22px; }
+
+
+QVBoxLayout#vl { margin:none ;padding:0 }
+QVBoxLayout#vl0 { margin:none ;padding:0 }
+QWidget#OverviewPage { padding:0 }
+OverviewPage { margin:none; }
+
+QPushButton#sendbutton, #stakingbutton { border: 2px solid #e3e3e3; color:#b3b3b3; background-color: white; border-radius: 15px; font-size: 15px; padding:8px; padding-left:10px; padding-right:10px; }
+QPushButton#sendbutton:hover, #stakingbutton:hover { background-color: #d8446c; color:white }
+
+QLabel#labelIntBalance {color:#646464; text-indent:0 ; border:none; font-size: 32px ; font-weight:700;padding: 0 0 0 0}
+QLabel#labelFracBalance { border:none; font-size: 32px; color: #b3b3b3; padding: 0 0 0 0}
+QLabel#labelBalanceUnit, #labelUnconfirmedUnit, #labelStakedUnit {border:none; font-size: 32px ; padding: 5 0 0 0; color:#ccc}
+
+QLabel#labelIntUnconfirmed {color:#646464; text-indent:0 ; border:none; font-size: 32px ; font-weight:700; padding: 0 0 0 0}
+QLabel#labelFracUnconfirmed { border:none; font-size: 32px; color: #b3b3b3; padding: 0 0 0 0}
+QLabel#labelIntStaked {color:#646464; text-indent:0 ; border:none; font-size: 32px ; font-weight:700; padding: 0 0 0 0}
+QLabel#labelFracStaked { border:none; font-size: 32px; color: #b3b3b3; padding: 0 0 0 0}
+
+QToolBar#t0, #t1 { border-right:5px solid #1aa8ea; }
+
+QFrame#test { color:#1aa8ea; background-color: #1aa8ea }
+QLabel#logoicon { padding:8px } 
+
+QLabel#blockslabel { padding-right:15px }
+ClickableLabel#maximizelabel, #minimizelabel, #padlocklabel, #closelabel { padding-right:5px }
+
+TableView::item:hover { background-color:lightgrey }
+TransactionView#txv { font: "Arial"; font-size: 30px }
+
+/*QPushButton#sendbutton:hover, #stakingbutton:hover { border: 3px solid #b3b3b3; color:#b3b3b3; background-color: #d8446c; border-radius: 35px; font-size: 24px; padding:8px; padding-left:10px; padding-right:10px; }*/

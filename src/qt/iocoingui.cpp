@@ -20,8 +20,6 @@
 #include "transactionview.h"
 #include "overviewpage.h"
 #include "settingspage.h"
-#include "dionspage.h"
-#include "securechatspage.h"
 #include "bitcoinunits.h"
 #include "guiconstants.h"
 #include "askpassphrasedialog.h"
@@ -29,14 +27,15 @@
 #include "guiutil.h"
 #include "rpcconsole.h"
 #include "wallet.h"
+#ifdef __APPLE__
+  #include"minimizeOSX.h"
+#endif
 
 #include "svgiconengine.h"
 
-#ifdef Q_OS_MAC
-#include "macdockiconhandler.h"
-#endif
-
 #include <QApplication>
+#include <QPainter>
+#include <QPainterPath>
 #include <QMainWindow>
 #include <QMenuBar>
 #include <QMenu>
@@ -64,28 +63,16 @@
 #include <QStyle>
 #include <QJsonArray>
 #include <QJsonDocument>
-#include <QNetworkRequest>
-#include <QWebFrame>
 #include <QWidgetAction>
+#include <QFontDatabase>
 
 #include <iostream>
 #include<boost/filesystem.hpp>
 
+extern "C" { int setup_application(IocoinGUI&,std::string); }
 extern __wx__* pwalletMain;
 extern int64_t nLastCoinStakeSearchInterval;
 double GetPoSKernelPS(int nHeight = -1);
-
-//        <svg  x="0px" y="0px" width="119.185px" height="116.22px" viewBox="14.148 6.833 119.185 116.22" enable-background="new 14.148 6.833 119.185 116.22" class="icon icon--glyph">
-//            <g>
-//                <path d="M133.333,67.107c0,41.16-41.473,52.983-41.473,52.983V99.03c0,0,21.06-7.611,21.873-31.923
-//                    c0,0,1.293-24.458-21.873-36.281V10.079C91.86,10.079,133.333,20.129,133.333,67.107z"/>
-//                <path d="M14.148,63.062c0-41.16,41.494-52.983,41.494-52.983v21.06c0,0-21.06,7.611-21.873,31.923
-//                    c0,0-1.293,24.458,21.873,36.281v20.747C55.642,120.09,14.148,110.04,14.148,63.062z"/>
-//                <path d="M87.148,46.214v74.689c-12.406,4.837-27.065,0-27.065,0V46.214C60.104,46.214,72.907,40.71,87.148,46.214z"
-//                    />
-//                <path d="M87.148,9.308v20.372c-12.469-6.235-27.065,0-27.065,0V9.308C60.104,9.308,73.866,3.74,87.148,9.308z"/>
-//            </g>
-//        </svg>
 
 string profileimageSVG =
 "<?xml version=\"1.0\" standalone=\"no\"?> "
@@ -169,7 +156,6 @@ string profileimageSVG =
 "  <g>"
 "                <path d=\"M15.6,8L12,0.2L8.4,8H0.2l6,6.2l-2.3,9.3l8.1-4.6l8.1,4.6l-2.3-9.3l6-6.2H15.6z\"></path>"
 "  </g>"
-"  <text x=\"10\" y=\"10\">Dions</text> "
 "</svg>";
     string dionsSVGUnchecked = 
 "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"
@@ -222,48 +208,84 @@ IocoinGUI::IocoinGUI(QWidget *parent):
     rpcConsole(0),
     nWeight(0)
 {
-    resize(850, 550);
     setWindowTitle(tr("I/OCoin") + " - " + tr("Wallet"));
-#ifndef Q_OS_MAC
-    qApp->setWindowIcon(QIcon(":icons/bitcoin"));
-    setWindowIcon(QIcon(":icons/bitcoin"));
-    //setStyleSheet("background-color:#fffdd0"); //cream
-    //setStyleSheet("background-color:#f8f8ff ; QToolTip { background-color:black }");
-    QFile qssFile(":qss/stylesheet");
+    setWindowFlags(Qt::FramelessWindowHint);
+    setGeometry(20,10,200,700);
+
+
+    int id = QFontDatabase::addApplicationFont(":/font/regular");
+
+    QFontDatabase::addApplicationFont(":/font/light");
+    QFontDatabase::addApplicationFont(":/font/semibold");
+    QFontDatabase::addApplicationFont(":/font/bold");
+    QFontDatabase::addApplicationFont(":/font/extrabold");
+
+    QString family = QFontDatabase::applicationFontFamilies(id).at(0);
+    QFont font(family);
+    font.setStyleHint(QFont::Monospace);
+    QApplication::setFont(font);
+    qApp->setWindowIcon(QIcon(":/images/newlogosmall"));
+    setWindowIcon(QIcon(":/images/newlogosmall"));
+    QFile qssFile(":/qss/stylesheet");
     qssFile.open(QFile::ReadOnly);
     QString styleSheet = QLatin1String(qssFile.readAll());
     setStyleSheet(styleSheet);
-    //setStyleSheet("background-color:#1aa8ea ");
-#else
-    setUnifiedTitleAndToolBarOnMac(true);
-    QApplication::setAttribute(Qt::AA_DontShowIconsInMenus);
-#endif
     // Accept D&D of URIs
     setAcceptDrops(true);
 
-    // Create actions for the toolbar, menu bar and tray/dock icon
+    centralWidget = new QStackedWidget(this);
+    intro = new Intro();
+    intro->callbackobj(this);
+    centralWidget->addWidget(intro);
+    centralWidget->setCurrentWidget(intro);
+    setCentralWidget(centralWidget);
+    labelEncryptionIcon = new ClickableLabel();
+    labelEncryptionIcon->setObjectName("padlocklabel");
+    labelMinimizeIcon = new ClickableLabel();
+    labelMinimizeIcon->setObjectName("minimizelabel");
+    labelMinimizeIcon->setCursor(QCursor(Qt::PointingHandCursor));
+    QString svg; 
+    QFile qssFile1(":/icons/minimize");
+    qssFile1.open(QFile::ReadOnly);
+    svg = QLatin1String(qssFile1.readAll());
+    QIcon* minIc = new QIcon(new SVGIconEngine(svg.toStdString()));
+    labelMinimizeIcon->setPixmap(minIc->pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
+    labelMaximizeIcon = new ClickableLabel();
+    labelMaximizeIcon->setObjectName("maximizelabel");
+    labelMaximizeIcon->setCursor(QCursor(Qt::PointingHandCursor));
+    QFile qssFile2(":/icons/maximize");
+    qssFile2.open(QFile::ReadOnly);
+    svg = QLatin1String(qssFile2.readAll());
+    QIcon* maxIc = new QIcon(new SVGIconEngine(svg.toStdString()));
+    labelMaximizeIcon->setPixmap(maxIc->pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
+    labelCloseIcon = new ClickableLabel();
+    labelCloseIcon->setCursor(QCursor(Qt::PointingHandCursor));
+    labelCloseIcon->setObjectName("closelabel");
+    QFile qssFile3(":/icons/close");
+    qssFile3.open(QFile::ReadOnly);
+    svg = QLatin1String(qssFile3.readAll());
+    QIcon* closeIc = new QIcon(new SVGIconEngine(svg.toStdString()));
+    labelCloseIcon->setPixmap(closeIc->pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
+    connect(labelMinimizeIcon,SIGNAL(clicked(bool)),this, SLOT(minimizeApp()));
+    connect(labelMaximizeIcon,SIGNAL(clicked(bool)),this, SLOT(maximizeApp()));
+    connect(labelCloseIcon,SIGNAL(clicked(bool)),this, SLOT(closeApp()));
     createActions();
 
-    // Create application menu bar
     createMenuBar();
 
-    // Create the toolbars
     createToolBars();
 
-    // Create the tray icon (or setup the dock icon)
     createTrayIcon();
 
-    // Create tabs
     overviewPage = new OverviewPage();
     settingsPage = new SettingsPage();
-    dionsPage = new DIONSPage();
-    secureChatsPage = new SecureChatsPage();
 
     transactionsPage = new QWidget(this);
     QVBoxLayout *vbox = new QVBoxLayout();
     transactionView = new TransactionView(this);
     vbox->addWidget(transactionView);
     transactionsPage->setLayout(vbox);
+
 
     addressBookPage = new AddressBookPage(AddressBookPage::ForEditing, AddressBookPage::SendingTab);
 
@@ -274,20 +296,12 @@ IocoinGUI::IocoinGUI(QWidget *parent):
     signVerifyMessageDialog = new SignVerifyMessageDialog(this);
 
 
-    centralWidget = new QStackedWidget(this);
     centralWidget->addWidget(overviewPage);
     centralWidget->addWidget(transactionsPage);
     centralWidget->addWidget(addressBookPage);
     centralWidget->addWidget(receiveCoinsPage);
     centralWidget->addWidget(sendCoinsPage);
     centralWidget->addWidget(settingsPage);
-    centralWidget->addWidget(dionsPage);
-    centralWidget->addWidget(secureChatsPage);
-    setCentralWidget(centralWidget);
-
-    // Create status bar
-    //statusBar();
-
     // Status bar notification icons
     QFrame *frameBlocks = new QFrame(this);
     frameBlocks->setContentsMargins(0,0,0,0);
@@ -295,24 +309,46 @@ IocoinGUI::IocoinGUI(QWidget *parent):
     QHBoxLayout *frameBlocksLayout = new QHBoxLayout(frameBlocks);
     frameBlocksLayout->setContentsMargins(3,0,3,0);
     frameBlocksLayout->setSpacing(3);
-    labelEncryptionIcon = new QLabel();
+
     labelStakingIcon = new QLabel();
     labelConnectionsIcon = new QLabel();
     labelBlocksIcon = new QLabel();
-    frameBlocksLayout->addStretch();
-    frameBlocksLayout->addWidget(labelEncryptionIcon);
-    frameBlocksLayout->addStretch();
-    frameBlocksLayout->addWidget(labelStakingIcon);
+    labelBlocksIcon->setObjectName("blockslabel");
     frameBlocksLayout->addStretch();
     frameBlocksLayout->addWidget(labelConnectionsIcon);
     frameBlocksLayout->addStretch();
+    frameBlocksLayout->addWidget(labelStakingIcon);
+    frameBlocksLayout->addStretch();
+    frameBlocksLayout->addWidget(labelEncryptionIcon);
+    frameBlocksLayout->addStretch();
     frameBlocksLayout->addWidget(labelBlocksIcon);
     frameBlocksLayout->addStretch();
+    frameBlocksLayout->addWidget(labelMinimizeIcon);
+    frameBlocksLayout->addStretch();
+    frameBlocksLayout->addWidget(labelMaximizeIcon);
+    frameBlocksLayout->addStretch();
+    frameBlocksLayout->addWidget(labelCloseIcon);
+    frameBlocksLayout->addStretch();
     frameBlocksLayout->setAlignment(Qt::AlignRight);
-    QWidget* qw = new QWidget(this);
+    qw = new QWidget(this);
+    qw->hide();
     qw->setObjectName("statusbar");
-    //STYLE qw->setStyleSheet("background-color:#1aa8ea ; QToolTip { background-color:black } ");
     QHBoxLayout* l = new QHBoxLayout(qw);
+    l->setContentsMargins(0,0,0,0);
+    QFrame *test= new QFrame(this);
+    QVBoxLayout* iconLayout = new QVBoxLayout(test);
+    iconLayout->setContentsMargins(0,0,0,0);
+    QIcon* tmp = new QIcon(new SVGIconEngine(logoSVG));
+    QPixmap logoPixmap = tmp->pixmap(tmp->actualSize(QSize(48,48)));
+    QLabel* logo = new QLabel(this); logo->setPixmap(logoPixmap);
+    logo->setObjectName("logoicon");
+    iconLayout->addWidget(logo);
+    logo->setAlignment(Qt::AlignCenter);
+
+    test->setObjectName("test");
+    test->setStyleSheet("color:#1aa8ea");
+    test->setFixedWidth(250);
+    l->addWidget(test);
     l->addWidget(appMenuBar);
     l->addWidget(frameBlocks);
     l->insertStretch(1,100);
@@ -337,14 +373,6 @@ IocoinGUI::IocoinGUI(QWidget *parent):
     // as they make the text unreadable (workaround for issue #1071)
     // See https://qt-project.org/doc/qt-4.8/gallery.html
     QString curStyle = qApp->style()->metaObject()->className();
-    if(curStyle == "QWindowsStyle" || curStyle == "QWindowsXPStyle")
-    {
-        //STYLE progressBar->setStyleSheet("QProgressBar { background-color: #e8e8e8; border: 1px solid grey; border-radius: 7px; padding: 1px; text-align: center; } QProgressBar::chunk { background: QLinearGradient(x1: 0, y1: 0, x2: 1, y2: 0, stop: 0 #FF8000, stop: 1 orange); border-radius: 7px; margin: 0px; }");
-    }
-
-    //statusBar()->addWidget(progressBarLabel);
-    //statusBar()->addWidget(progressBar);
-    //statusBar()->addPermanentWidget(frameBlocks);
 
     syncIconMovie = new QMovie(":/movies/update_spinner", "mng", this);
 
@@ -357,32 +385,44 @@ IocoinGUI::IocoinGUI(QWidget *parent):
 
     rpcConsole = new RPCConsole(this);
     connect(openRPCConsoleAction, SIGNAL(triggered()), rpcConsole, SLOT(show()));
-
     // Clicking on "Verify Message" in the address book sends you to the verify message tab
     connect(addressBookPage, SIGNAL(verifyMessage(QString)), this, SLOT(gotoVerifyMessageTab(QString)));
     // Clicking on "Sign Message" in the receive coins page sends you to the sign message tab
     connect(receiveCoinsPage, SIGNAL(signMessage(QString)), this, SLOT(gotoSignMessageTab(QString)));
-
-    gotoOverviewPage();
+    gotoIntroPage();
 }
 
 IocoinGUI::~IocoinGUI()
 {
     if(trayIcon) // Hide tray icon, as deleting will let it linger until quit (on Ubuntu)
         trayIcon->hide();
-#ifdef Q_OS_MAC
-    delete appMenuBar;
+}
+
+void IocoinGUI::closeApp()
+{
+  qApp->quit();
+}
+void IocoinGUI::minimizeApp()
+{
+#ifndef __APPLE__
+  this->showMinimized();
+#else
+  MinimizeOSX::min(this);
 #endif
+}
+void IocoinGUI::maximizeApp()
+{
+	if(!this->isMaximized())
+	  this->showMaximized();
+	else
+	  this->showNormal();
 }
 
 void IocoinGUI::createActions()
 {
     QActionGroup *tabGroup0 = new QActionGroup(this);
 
-    //QIcon profileimageicon = QIcon(new SVGIconEngine(profileimageSVG));
-    //QIcon profileimageicon = QIcon(":/images/ioc");
-    //QIcon profileimageicon = QIcon(":/images/avatar");
-    //QString env;
+    /*
     boost::filesystem::path envPath = walletModel->getDataDir();
     envPath /= "ui";
     envPath /= "avatar";
@@ -399,11 +439,29 @@ void IocoinGUI::createActions()
     {
       QFile::copy(":/images/avatar", profile_image.c_str());
     }
+    QPixmap pixmap1(":/images/gradient");
+    int size1=qMax(pixmap1.width(),pixmap1.height());
+    QPixmap round1 = QPixmap(size1,size1);
+    round1.fill(Qt::transparent);
+    QPainterPath path1; path1.addEllipse(round1.rect());
+    QPainter painter1(&round1);
+    painter1.setClipPath(path1);
+    painter1.fillRect(round1.rect(), Qt::black);
+    painter1.drawPixmap(0,0,size1,size1, pixmap1);
 
-    QIcon profileimageicon = QIcon(profile_image.c_str());
+    QPixmap pixmap(profile_image.c_str());
+    int size=qMax(pixmap.width(),pixmap.height());
+    QPixmap round = QPixmap(size,size);
+    round.fill(Qt::transparent);
+    QPainterPath path; path.addEllipse(round.rect());
+    QPainter painter(&round);
+    painter.setClipPath(path);
+    painter.fillRect(round.rect(), Qt::black);
+    painter.drawPixmap(0,0,size,size, pixmap);
+
+    painter1.drawPixmap(50,50,size1-100,size1-100, round);
+*/
     profileImageAction = new QAction(this);
-    //profileImageAction->setText(tr("&Overview"));
-    profileImageAction->setIcon(profileimageicon);
     profileImageAction->setToolTip(tr("Select profile image"));
     profileImageAction->setCheckable(true);
     profileImageAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_1));
@@ -412,7 +470,7 @@ void IocoinGUI::createActions()
     QActionGroup *tabGroup = new QActionGroup(this);
     QIcon overviewicon = QIcon(new SVGIconEngine(overviewSVGUnchecked));
     overviewAction = new QAction(this);
-    overviewAction->setText(tr("&Overview"));
+    overviewAction->setText(tr("&OVERVIEW"));
     overviewAction->setIcon(overviewicon);
     overviewAction->setToolTip(tr("Show general overview of wallet"));
     overviewAction->setCheckable(true);
@@ -421,26 +479,16 @@ void IocoinGUI::createActions()
 
     QIcon sendicon = QIcon(new SVGIconEngine(sendSVGUnchecked));
     sendCoinsAction = new QAction(this);
-    sendCoinsAction->setText(tr("&Send coins"));
+    sendCoinsAction->setText(tr("&SEND COINS"));
     sendCoinsAction->setIcon(sendicon);
     sendCoinsAction->setToolTip(tr("Send coins to a I/OCoin address"));
     sendCoinsAction->setCheckable(true);
     sendCoinsAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_2));
     tabGroup->addAction(sendCoinsAction);
 
-    QIcon receiveicon = QIcon(new SVGIconEngine(receiveSVGUnchecked));
-    receiveCoinsAction = new QAction(this);
-    receiveCoinsAction->setText(tr("&Receive coins"));
-    receiveCoinsAction->setIcon(receiveicon);
-    receiveCoinsAction->setToolTip(tr("Show the list of addresses for receiving payments"));
-    receiveCoinsAction->setCheckable(true);
-    receiveCoinsAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_3));
-    tabGroup->addAction(receiveCoinsAction);
-
-    
     QIcon historyicon = QIcon(new SVGIconEngine(historySVGUnchecked));
     historyAction = new QAction(this);
-    historyAction->setText(tr("&Transactions"));
+    historyAction->setText(tr("&TRANSACTIONS"));
     historyAction->setIcon(historyicon);
     historyAction->setToolTip(tr("Browse transaction history"));
     historyAction->setCheckable(true);
@@ -449,7 +497,7 @@ void IocoinGUI::createActions()
 
     QIcon addressbookicon = QIcon(new SVGIconEngine(addressbookSVGUnchecked));
     addressBookAction = new QAction(this);
-    addressBookAction->setText(tr("&Address Book"));
+    addressBookAction->setText(tr("&ADDRESS BOOK"));
     addressBookAction->setIcon(addressbookicon);
     addressBookAction->setToolTip(tr("Edit the list of stored addresses and labels"));
     addressBookAction->setCheckable(true);
@@ -458,31 +506,12 @@ void IocoinGUI::createActions()
 
     QIcon settingsicon = QIcon(new SVGIconEngine(settingsSVGUnchecked));
     settingsAction = new QAction(this);
-    settingsAction->setText(tr("&Settings"));
+    settingsAction->setText(tr("&SETTINGS"));
     settingsAction->setIcon(settingsicon);
-    settingsAction->setToolTip(tr("Settings"));
+    settingsAction->setToolTip(tr("Enter settings"));
     settingsAction->setCheckable(true);
     settingsAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_5));
     tabGroup->addAction(settingsAction);
-
-    QIcon dionsicon = QIcon(new SVGIconEngine(dionsSVGUnchecked));
-    dionsAction = new QAction(this);
-    dionsAction->setText(tr("&Dions"));
-    dionsAction->setIcon(dionsicon);
-    dionsAction->setToolTip(tr("DIONS management page"));
-    dionsAction->setCheckable(true);
-    dionsAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_5));
-    tabGroup->addAction(dionsAction);
-
-    QIcon securegroupsicon = QIcon(new SVGIconEngine(securegroupsSVGUnchecked));
-    securegroupsAction = new QAction(this);
-    securegroupsAction->setText(tr("&Secure Chats"));
-    securegroupsAction->setIcon(securegroupsicon);
-    securegroupsAction->setToolTip(tr("DIONS management page"));
-    securegroupsAction->setCheckable(true);
-    securegroupsAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_5));
-    tabGroup->addAction(securegroupsAction);
-
 
     connect(profileImageAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(profileImageAction, SIGNAL(triggered()), this, SLOT(gotoProfileImageChooser()));
@@ -490,24 +519,32 @@ void IocoinGUI::createActions()
     connect(overviewAction, SIGNAL(triggered()), this, SLOT(gotoOverviewPage()));
     connect(sendCoinsAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(sendCoinsAction, SIGNAL(triggered()), this, SLOT(gotoSendCoinsPage()));
-    connect(receiveCoinsAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
-    connect(receiveCoinsAction, SIGNAL(triggered()), this, SLOT(gotoReceiveCoinsPage()));
     connect(historyAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(historyAction, SIGNAL(triggered()), this, SLOT(gotoHistoryPage()));
     connect(addressBookAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(addressBookAction, SIGNAL(triggered()), this, SLOT(gotoAddressBookPage()));
-    connect(dionsAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(settingsAction, SIGNAL(triggered()), this, SLOT(gotoSettingsPage()));
-    connect(dionsAction, SIGNAL(triggered()), this, SLOT(gotoDIONSPage()));
-    connect(securegroupsAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
-    connect(securegroupsAction, SIGNAL(triggered()), this, SLOT(gotoSecureChatsPage()));
 
+    QString svg; 
+    QFile qssFile1(":/icons/unlocked");
+    qssFile1.open(QFile::ReadOnly);
+    svg = QLatin1String(qssFile1.readAll());
+    unlockedUnencryptedIcon = new QIcon(new SVGIconEngine(svg.toStdString()));
+    QFile qssFile2(":/icons/locked");
+    qssFile2.open(QFile::ReadOnly);
+    svg = QLatin1String(qssFile2.readAll());
+    unlockedEncryptedIcon = new QIcon(new SVGIconEngine(svg.toStdString()));
+    QFile qssFile3(":/icons/locked");
+    qssFile3.open(QFile::ReadOnly);
+    svg = QLatin1String(qssFile3.readAll());
+    lockedEncryptedIcon = new QIcon(new SVGIconEngine(svg.toStdString()));
+    
 
     quitAction = new QAction(QIcon(":/icons/quit"), tr("E&xit"), this);
     quitAction->setToolTip(tr("Quit application"));
     quitAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Q));
     quitAction->setMenuRole(QAction::QuitRole);
-    aboutAction = new QAction(QIcon(":/icons/bitcoin"), tr("&About I/OCoin"), this);
+    aboutAction = new QAction(QIcon(":/images/newlogosmall"), tr("&About I/OCoin"), this);
     aboutAction->setToolTip(tr("Show information about I/OCoin"));
     aboutAction->setMenuRole(QAction::AboutRole);
     aboutQtAction = new QAction(QIcon(":/trolltech/qmessagebox/images/qtlogo-64.png"), tr("About &Qt"), this);
@@ -516,8 +553,8 @@ void IocoinGUI::createActions()
     optionsAction = new QAction(QIcon(":/icons/options"), tr("&Options..."), this);
     optionsAction->setToolTip(tr("Modify configuration options for I/OCoin"));
     optionsAction->setMenuRole(QAction::PreferencesRole);
-    toggleHideAction = new QAction(QIcon(":/icons/bitcoin"), tr("&Show / Hide"), this);
-    encryptWalletAction = new QAction(QIcon(":/icons/lock_closed"), tr("&Encrypt Wallet..."), this);
+    toggleHideAction = new QAction(QIcon(":/images/newlogosmall"), tr("&Show / Hide"), this);
+    encryptWalletAction = new QAction(tr("&Encrypt Wallet..."), this);
     encryptWalletAction->setToolTip(tr("Encrypt or decrypt wallet"));
     encryptWalletAction->setCheckable(true);
     backupWalletAction = new QAction(QIcon(":/icons/filesave"), tr("&Backup Wallet..."), this);
@@ -535,6 +572,8 @@ void IocoinGUI::createActions()
     exportAction->setToolTip(tr("Export the data in the current tab to a file"));
     openRPCConsoleAction = new QAction(QIcon(":/icons/debugwindow"), tr("&Debug window"), this);
     openRPCConsoleAction->setToolTip(tr("Open debugging and diagnostic console"));
+    //openRPCConsoleAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_6));
+    openRPCConsoleAction->setShortcut(QKeySequence(Qt::Key_Escape));
 
     connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
     connect(aboutAction, SIGNAL(triggered()), this, SLOT(aboutClicked()));
@@ -542,6 +581,7 @@ void IocoinGUI::createActions()
     connect(optionsAction, SIGNAL(triggered()), this, SLOT(optionsClicked()));
     connect(toggleHideAction, SIGNAL(triggered()), this, SLOT(toggleHidden()));
     connect(encryptWalletAction, SIGNAL(triggered(bool)), this, SLOT(encryptWallet(bool)));
+    connect(labelEncryptionIcon, SIGNAL(clicked(bool)), this, SLOT(encryptWalletTest(bool)));
     connect(backupWalletAction, SIGNAL(triggered()), this, SLOT(backupWallet()));
     connect(changePassphraseAction, SIGNAL(triggered()), this, SLOT(changePassphrase()));
     connect(unlockWalletAction, SIGNAL(triggered()), this, SLOT(unlockWallet()));
@@ -552,22 +592,22 @@ void IocoinGUI::createActions()
 
 void IocoinGUI::createMenuBar()
 {
-#ifdef Q_OS_MAC
-    // Create a decoupled menu bar on Mac which stays even if the window is closed
-    appMenuBar = new QMenuBar();
-#else
-    // Get the main window's menu bar on other platforms
     appMenuBar = menuBar();
+    QMenu *help = appMenuBar->addMenu(tr("&Help"));
+    help->addAction(openRPCConsoleAction);
+#ifndef __APPLE__
+    help->menuAction()->setVisible(false);
 #endif
+
 }
 
 void IocoinGUI::createToolBars()
 {
-    QToolBar *toolbar0 = addToolBar(tr("profile toolbar"));
+    toolbar0 = addToolBar(tr("profile toolbar"));
     addToolBar(Qt::LeftToolBarArea,toolbar0);
     toolbar0->setIconSize(QSize(100,100));
 
-    QToolBar *toolbar = addToolBar(tr("Tabs toolbar"));
+    toolbar = addToolBar(tr("Tabs toolbar"));
     addToolBar(Qt::LeftToolBarArea,toolbar);
     toolbar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
     toolbar0->addAction(profileImageAction);
@@ -577,46 +617,51 @@ void IocoinGUI::createToolBars()
     toolbar->addAction(addressBookAction);
     toolbar->addAction(settingsAction);
 
+    toolbar0->setMinimumWidth(250);
+    toolbar->setMinimumWidth(250);
+
+    toolbar0->setObjectName("t0");
+    toolbar->setObjectName("t1");
+
     profileimagebutton = static_cast<QToolButton*>(toolbar0->widgetForAction(profileImageAction));
     profileimagebutton->setToolButtonStyle(Qt::ToolButtonIconOnly);
     profileimagebutton->setObjectName("profileimage");
+    profileimagebutton->setCursor(QCursor(Qt::PointingHandCursor));
+
     overviewbutton = static_cast<QToolButton*>(toolbar->widgetForAction(overviewAction));
     overviewbutton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+    overviewbutton->setObjectName("obutton");
+    overviewbutton->setStyleSheet("QToolButton:checked { color: #1aa8ea }");
     overviewbuttonwatcher = new ButtonHoverWatcher(this,overviewbutton);
     overviewbutton->installEventFilter(overviewbuttonwatcher);
+    overviewbutton->setCursor(QCursor(Qt::PointingHandCursor));
 
     sendbutton = static_cast<QToolButton*>(toolbar->widgetForAction(sendCoinsAction));
     sendbutton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+    sendbutton->setObjectName("sbutton");
     sendbuttonwatcher = new ButtonHoverWatcher(this,sendbutton);
     sendbutton->installEventFilter(sendbuttonwatcher);
-
-    receivebutton = static_cast<QToolButton*>(toolbar->widgetForAction(receiveCoinsAction));
-    receivebutton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-    receivebuttonwatcher = new ButtonHoverWatcher(this,receivebutton);
-    receivebutton->installEventFilter(receivebuttonwatcher);
+    sendbutton->setCursor(QCursor(Qt::PointingHandCursor));
 
     historybutton = static_cast<QToolButton*>(toolbar->widgetForAction(historyAction));
     historybutton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+    historybutton->setObjectName("hbutton");
     historybuttonwatcher = new ButtonHoverWatcher(this,historybutton);
     historybutton->installEventFilter(historybuttonwatcher);
+    historybutton->setCursor(QCursor(Qt::PointingHandCursor));
 
     addressbookbutton = static_cast<QToolButton*>(toolbar->widgetForAction(addressBookAction));
     addressbookbutton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+    addressbookbutton->setObjectName("abutton");
     addressbookbuttonwatcher = new ButtonHoverWatcher(this,addressbookbutton);
     addressbookbutton->installEventFilter(addressbookbuttonwatcher);
+    addressbookbutton->setCursor(QCursor(Qt::PointingHandCursor));
     settingsbutton = static_cast<QToolButton*>(toolbar->widgetForAction(settingsAction));
+    settingsbutton->setObjectName("settingsbutton");
     settingsbutton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     settingsbuttonwatcher = new ButtonHoverWatcher(this,settingsbutton);
     settingsbutton->installEventFilter(settingsbuttonwatcher);
-
-    dionsbutton = static_cast<QToolButton*>(toolbar->widgetForAction(dionsAction));
-    dionsbutton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-    dionsbuttonwatcher = new ButtonHoverWatcher(this,dionsbutton);
-    dionsbutton->installEventFilter(dionsbuttonwatcher);
-    securegroupsbutton = static_cast<QToolButton*>(toolbar->widgetForAction(securegroupsAction));
-    securegroupsbutton->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-    securegroupsbuttonwatcher = new ButtonHoverWatcher(this,securegroupsbutton);
-    securegroupsbutton->installEventFilter(securegroupsbuttonwatcher);
+    settingsbutton->setCursor(QCursor(Qt::PointingHandCursor));
 
     QLayout* tl = toolbar->layout();
     for(int i=0;i<tl->count();i++) { 
@@ -624,6 +669,10 @@ void IocoinGUI::createToolBars()
     }
     toolbar0->setMovable(false);
     toolbar->setMovable(false);
+    
+    toolbar0->hide();
+    toolbar->hide();
+    appMenuBar->hide();
 }
 
 void IocoinGUI::setClientModel(ClientModel *clientModel)
@@ -635,12 +684,8 @@ void IocoinGUI::setClientModel(ClientModel *clientModel)
         if(clientModel->isTestNet())
         {
             setWindowTitle(windowTitle() + QString(" ") + tr("[testnet]"));
-#ifndef Q_OS_MAC
-            qApp->setWindowIcon(QIcon(":icons/bitcoin_testnet"));
-            setWindowIcon(QIcon(":icons/bitcoin_testnet"));
-#else
-            MacDockIconHandler::instance()->setIcon(QIcon(":icons/bitcoin_testnet"));
-#endif
+            qApp->setWindowIcon(QIcon(":/images/newlogosmall"));
+            setWindowIcon(QIcon(":/images/newlogosmall"));
             if(trayIcon)
             {
                 trayIcon->setToolTip(tr("I/OCoin client") + QString(" ") + tr("[testnet]"));
@@ -648,6 +693,7 @@ void IocoinGUI::setClientModel(ClientModel *clientModel)
                 toggleHideAction->setIcon(QIcon(":/icons/toolbar_testnet"));
             }
 
+            aboutAction->setIcon(QIcon(":/icons/toolbar_testnet"));
             aboutAction->setIcon(QIcon(":/icons/toolbar_testnet"));
         }
 
@@ -663,13 +709,14 @@ void IocoinGUI::setClientModel(ClientModel *clientModel)
 
         rpcConsole->setClientModel(clientModel);
         addressBookPage->setOptionsModel(clientModel->getOptionsModel());
-        receiveCoinsPage->setOptionsModel(clientModel->getOptionsModel());
     }
 }
 
 void IocoinGUI::setWalletModel(WalletModel *walletModel)
 {
+	//std::cout << "iocoingui setwalletmodel" << std::endl;
     this->walletModel = walletModel;
+	//std::cout << "iocoingui setwalletmodel 1" << std::endl;
     if(walletModel)
     {
         // Report errors from wallet thread
@@ -679,11 +726,10 @@ void IocoinGUI::setWalletModel(WalletModel *walletModel)
         transactionView->setModel(walletModel);
 
         overviewPage->setModel(walletModel);
-        addressBookPage->setModel(walletModel->getAddressTableModel());
+        //addressBookPage->setModel(walletModel->getAddressTableModel());
         receiveCoinsPage->setModel(walletModel->getAddressTableModel());
         sendCoinsPage->setModel(walletModel);
         settingsPage->setModel(walletModel);
-        dionsPage->setModel(walletModel);
         signVerifyMessageDialog->setModel(walletModel);
 
         setEncryptionStatus(walletModel->getEncryptionStatus());
@@ -701,7 +747,6 @@ void IocoinGUI::setWalletModel(WalletModel *walletModel)
 void IocoinGUI::createTrayIcon()
 {
     QMenu *trayIconMenu;
-#ifndef Q_OS_MAC
     trayIcon = new QSystemTrayIcon(this);
     trayIconMenu = new QMenu(this);
     trayIcon->setContextMenu(trayIconMenu);
@@ -710,33 +755,23 @@ void IocoinGUI::createTrayIcon()
     connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
             this, SLOT(trayIconActivated(QSystemTrayIcon::ActivationReason)));
     trayIcon->show();
-#else
-    // Note: On Mac, the dock icon is used to provide the tray's functionality.
-    MacDockIconHandler *dockIconHandler = MacDockIconHandler::instance();
-    dockIconHandler->setMainWindow((QMainWindow *)this);
-    trayIconMenu = dockIconHandler->dockMenu();
-#endif
 
     // Configuration of the tray icon (or dock icon) icon menu
     trayIconMenu->addAction(toggleHideAction);
     trayIconMenu->addSeparator();
     trayIconMenu->addAction(sendCoinsAction);
-    //XXXX trayIconMenu->addAction(receiveCoinsAction);
     trayIconMenu->addSeparator();
     trayIconMenu->addAction(signMessageAction);
     trayIconMenu->addAction(verifyMessageAction);
     trayIconMenu->addSeparator();
     trayIconMenu->addAction(optionsAction);
     trayIconMenu->addAction(openRPCConsoleAction);
-#ifndef Q_OS_MAC // This is built-in on Mac
     trayIconMenu->addSeparator();
     trayIconMenu->addAction(quitAction);
-#endif
 
     notificator = new Notificator(qApp->applicationName(), trayIcon);
 }
 
-#ifndef Q_OS_MAC
 void IocoinGUI::trayIconActivated(QSystemTrayIcon::ActivationReason reason)
 {
     if(reason == QSystemTrayIcon::Trigger)
@@ -745,7 +780,6 @@ void IocoinGUI::trayIconActivated(QSystemTrayIcon::ActivationReason reason)
         toggleHideAction->trigger();
     }
 }
-#endif
 
 void IocoinGUI::optionsClicked()
 {
@@ -768,13 +802,16 @@ void IocoinGUI::setNumConnections(int count)
     QString icon;
     switch(count)
     {
-    case 0: icon = ":/icons/connect_0"; break;
-    case 1: case 2: case 3: icon = ":/icons/connect_1"; break;
-    case 4: case 5: case 6: icon = ":/icons/connect_2"; break;
-    case 7: case 8: case 9: icon = ":/icons/connect_3"; break;
-    default: icon = ":/icons/connect_4"; break;
+    case 0: icon = ":/icons/signal_0"; break;
+    case 1: case 2: case 3: icon = ":/icons/signal_1"; break;
+    case 4: case 5: case 6: icon = ":/icons/signal_2"; break;
+    case 7: case 8: case 9: icon = ":/icons/signal_3"; break;
+    default: icon = ":/icons/signal_3"; break;
     }
-    labelConnectionsIcon->setPixmap(QIcon(icon).pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
+    QFile qssFile(icon);
+    qssFile.open(QFile::ReadOnly);
+    QString svg = QLatin1String(qssFile.readAll());
+    labelConnectionsIcon->setPixmap(QIcon(new SVGIconEngine(svg.toStdString())).pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
     labelConnectionsIcon->setToolTip(tr("%n active connection(s) to I/OCoin network", "", count));
 }
 
@@ -856,7 +893,11 @@ void IocoinGUI::setNumBlocks(int count, int nTotalBlocks)
     if(secs < 90*60 && count >= nTotalBlocks)
     {
         tooltip = tr("Up to date") + QString(".<br>") + tooltip;
-        labelBlocksIcon->setPixmap(QIcon(":/icons/synced").pixmap(STATUSBAR_ICONSIZE, STATUSBAR_ICONSIZE));
+        QFile qssFile(":/icons/check_glyph");
+        qssFile.open(QFile::ReadOnly);
+        QString svg = QLatin1String(qssFile.readAll());
+        labelBlocksIcon->setPixmap(QIcon(new SVGIconEngine(svg.toStdString())).pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
+        //labelBlocksIcon->setPixmap(QIcon(":/icons/synced").pixmap(STATUSBAR_ICONSIZE, STATUSBAR_ICONSIZE));
 
         overviewPage->showOutOfSyncWarning(false);
     }
@@ -899,7 +940,7 @@ void IocoinGUI::error(const QString &title, const QString &message, bool modal)
 void IocoinGUI::changeEvent(QEvent *e)
 {
     QMainWindow::changeEvent(e);
-#ifndef Q_OS_MAC // Ignored on Mac
+//XMAC #ifndef Q_OS_MAC // Ignored on Mac
     if(e->type() == QEvent::WindowStateChange)
     {
         if(clientModel && clientModel->getOptionsModel()->getMinimizeToTray())
@@ -912,20 +953,20 @@ void IocoinGUI::changeEvent(QEvent *e)
             }
         }
     }
-#endif
+//XMAC #endif
 }
 
 void IocoinGUI::closeEvent(QCloseEvent *event)
 {
     if(clientModel)
     {
-#ifndef Q_OS_MAC // Ignored on Mac
+//XMAC #ifndef Q_OS_MAC // Ignored on Mac
         if(!clientModel->getOptionsModel()->getMinimizeToTray() &&
            !clientModel->getOptionsModel()->getMinimizeOnClose())
         {
             qApp->quit();
         }
-#endif
+//XMAC #endif
     }
     QMainWindow::closeEvent(event);
 }
@@ -979,45 +1020,49 @@ void IocoinGUI::incomingTransaction(const QModelIndex & parent, int start, int e
 }
 void IocoinGUI::gotoProfileImageChooser()
 {
-    //profileImageAction->setChecked(true);
-    //centralWidget->setCurrentWidget(overviewPage);
-
-//    string iconSvgDataChecked = 
-//"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"
-//" <svg   xmlns=\"http://www.w3.org/2000/svg\""
-//"   xmlns:xlink=\"http://www.w3.org/1999/xlink\""
-//"   width=\"16px\""
-//"   height=\"16px\""
-//"   x=\"0px\" y=\"0px\" viewBox=\"0 0 24 24\" style=\"fill:#1aa8ea \">"
-//"  <g>"
-////"    <polygon points=\"2,9.6 2,24 9,24 9,17 15,17 15,24 22,24 22,9.6 12,0.7 \"></polygon>"
-//"  </g>"
-//"</svg>"; 
-//    QIcon icon = QIcon(new SVGIconEngine(iconSvgDataChecked));
-//        overviewbutton->setIcon(icon);
-
-    //const char* filter = "All files (*.*);;BMP (*.bmp);;CUR (*.cur);;GIF (*.gif);;ICNS (*.icns);;ICO (*.ico);;JPEG (*.jpg);;PBM (*.pbm);;PGM (*.pgm);;PNG (*.png);;PPM (*.ppm);;SVG (*.svg);;SVGZ (*.svgz);;TGA (*.tga);;TIF (*.tiff);;WBMP (*.wbmp);;XBM (*.xbm);;XPM (*.xpm)";
     const char* filter = "Images (*.bmp *.cur *.gif *.icns *.ico *.jpg *.pbm *.pgm *.png *.ppm *.svg *.svgz *.tga *.tiff *.wbmp *.xbm *.xpm)";
     QString selectionFilter(filter);
     QString fileName = QFileDialog::getOpenFileName(this,"Select profile image", "", tr(filter),&selectionFilter);
+    if(!fileName.isEmpty())
+    {
     boost::filesystem::path envPath = walletModel->getDataDir();
     envPath /= "ui";
     envPath /= "avatar";
     envPath /= "profile_image";
 
+    QPixmap pixmap1(":/images/gradient");
+    int size1=qMax(pixmap1.width(),pixmap1.height());
+    QPixmap round1 = QPixmap(size1,size1);
+    round1.fill(Qt::transparent);
+    QPainterPath path1; path1.addEllipse(round1.rect());
+    QPainter painter1(&round1);
+    painter1.setClipPath(path1);
+    painter1.fillRect(round1.rect(), Qt::black);
+    painter1.drawPixmap(0,0,size1,size1, pixmap1);
 
     std::string profile_image = envPath.string();
     if(QFile::exists(profile_image.c_str()))
       QFile::remove(profile_image.c_str());
     QFile::copy(fileName, profile_image.c_str());
-    QIcon profileimageicon = QIcon(profile_image.c_str());
-    profileImageAction->setIcon(profileimageicon);
+    QPixmap pixmap(profile_image.c_str());
+    int size=qMax(pixmap.width(),pixmap.height());
+    QPixmap round = QPixmap(size,size);
+    round.fill(Qt::transparent);
+    QPainterPath path; path.addEllipse(round.rect());
+    QPainter painter(&round);
+    painter.setClipPath(path);
+    painter.fillRect(round.rect(), Qt::black);
+    painter.drawPixmap(0,0,size,size, pixmap);
+    painter1.drawPixmap(50,50,size1-100,size1-100, round);
+    profileimagebutton->setIcon(round1);
+    }
     exportAction->setEnabled(false);
     disconnect(exportAction, SIGNAL(triggered()), 0, 0);
 }
 
 void IocoinGUI::gotoOverviewPage()
 {
+	//std::cout << "goto overview" << std::endl;
     overviewAction->setChecked(true);
     centralWidget->setCurrentWidget(overviewPage);
 
@@ -1035,6 +1080,11 @@ void IocoinGUI::gotoOverviewPage()
     QIcon icon = QIcon(new SVGIconEngine(iconSvgDataChecked));
         overviewbutton->setIcon(icon);
 
+        settingsbutton->setStyleSheet("color:#646464");
+        addressbookbutton->setStyleSheet("color:#646464");
+        historybutton->setStyleSheet("color:#646464");
+        sendbutton->setStyleSheet("color:#646464");
+        overviewbutton->setStyleSheet("color:#1aa8ea");
 
     exportAction->setEnabled(false);
     disconnect(exportAction, SIGNAL(triggered()), 0, 0);
@@ -1057,60 +1107,15 @@ void IocoinGUI::gotoSettingsPage()
 "            </g> "
 "        </svg>";
     QIcon icon = QIcon(new SVGIconEngine(iconSvgDataChecked));
-        settingsbutton->setIcon(icon);
+      settingsbutton->setIcon(icon);
+        addressbookbutton->setStyleSheet("color:#646464");
+        historybutton->setStyleSheet("color:#646464");
+        sendbutton->setStyleSheet("color:#646464");
+        overviewbutton->setStyleSheet("color:#646464");
+        settingsbutton->setStyleSheet("color:#1aa8ea");
     exportAction->setEnabled(false);
     disconnect(exportAction, SIGNAL(triggered()), 0, 0);
 }
-/*
-void IocoinGUI::gotoDIONSPage()
-{
-    dionsAction->setChecked(true);
-    centralWidget->setCurrentWidget(dionsPage);
-
-    string iconSvgDataChecked = 
-"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"
-" <svg   xmlns=\"http://www.w3.org/2000/svg\""
-"   xmlns:xlink=\"http://www.w3.org/1999/xlink\""
-"   width=\"16px\""
-"   height=\"16px\""
-"   x=\"0px\" y=\"0px\" viewBox=\"0 0 24 24\" style=\"fill:#1aa8ea \">"
-"   <g> "
-"                <polyline stroke-linecap=\"square\" stroke-miterlimit=\"10\" rotate=\"5\" points=\"7.5,0 10,0 9.5,24 7,24\" stroke-linejoin=\"miter\"></polyline>  "
-"                <polyline stroke-linecap=\"square\" stroke-miterlimit=\"10\" rotate=\"5\" points=\"10.5,0 13,0 12.5,24 10,24\" stroke-linejoin=\"miter\"></polyline>  "
-"   </g> "
-"   <text x=\"0\" y=\"21\" font-size=\"27\">D</text> "
-"</svg>"; 
-    QIcon icon = QIcon(new SVGIconEngine(iconSvgDataChecked));
-        dionsbutton->setIcon(icon);
-    exportAction->setEnabled(false);
-    disconnect(exportAction, SIGNAL(triggered()), 0, 0);
-}
-void IocoinGUI::gotoSecureChatsPage()
-{
-    securegroupsAction->setChecked(true);
-    centralWidget->setCurrentWidget(secureChatsPage);
-
-    string iconSvgDataChecked = 
-"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"
-" <svg   xmlns=\"http://www.w3.org/2000/svg\""
-"   xmlns:xlink=\"http://www.w3.org/1999/xlink\""
-"        x=\"0px\" y=\"0px\" viewBox=\"0 0 24 24\" style=\"fill:#1aa8ea\"> "
-"            <g>  "
-"    <ellipse cx=\"21\" cy=\"6\" rx=\"3\" ry=\"1\" />  "
-"     <ellipse cx=\"3\" cy=\"4\" rx=\"3\" ry=\"1\" />  "
-"     <polyline stroke-linecap=\"square\" stroke-miterlimit=\"10\" rotate=\"5\" points=\"12,15 21,07 20,06\" stroke-linejoin=\"miter\"></polyline> "
-"     <polyline stroke-linecap=\"square\" stroke-miterlimit=\"10\" rotate=\"5\" points=\"12,15 01,04 02,04\" stroke-linejoin=\"miter\"></polyline>  "
-"            </g> "
-"            <g>  "
-"<path d=\"M18,10.7 V6 c0-3.3-2.7-6-6-6 S06,2.7,06,6 v4.7 C04.8,12.1,04,14,04,16 c0,4.4,3.6,8,8,8 s8-3.6,8-8 C20,14,19.2,12.1,18,10.7z M13,17.8 V19 c0,0.6-0.4,1-1,1 s-1-0.4-1-1v-1.2 c-1.2-0.4-2-1.5-2-2.8 c0-1.7,1.3-3,3-3 s3,1.3,3,3 C15,16.3,14.2,17.4,13,17.8z M16,9.1 C14.8,8.4,13.5,8,12,8 S09.2,8.4,08,9.1 V6 c0-2.2,1.8-4,4-4s4,1.8,4,4V9.1z\"></path> "
-"            </g> "
-"        </svg>";
-    QIcon icon = QIcon(new SVGIconEngine(iconSvgDataChecked));
-        securegroupsbutton->setIcon(icon);
-    exportAction->setEnabled(false);
-    disconnect(exportAction, SIGNAL(triggered()), 0, 0);
-}
-*/
 void IocoinGUI::gotoHistoryPage()
 {
     historyAction->setChecked(true);
@@ -1127,6 +1132,11 @@ void IocoinGUI::gotoHistoryPage()
 "</svg>";
     QIcon icon = QIcon(new SVGIconEngine(iconSvgDataChecked));
         historybutton->setIcon(icon);
+        addressbookbutton->setStyleSheet("color:#646464");
+        sendbutton->setStyleSheet("color:#646464");
+        overviewbutton->setStyleSheet("color:#646464");
+        settingsbutton->setStyleSheet("color:#646464");
+        historybutton->setStyleSheet("color:#1aa8ea");
     exportAction->setEnabled(true);
     disconnect(exportAction, SIGNAL(triggered()), 0, 0);
     connect(exportAction, SIGNAL(triggered()), transactionView, SLOT(exportClicked()));
@@ -1135,7 +1145,8 @@ void IocoinGUI::gotoHistoryPage()
 void IocoinGUI::gotoAddressBookPage()
 {
     addressBookAction->setChecked(true);
-    centralWidget->setCurrentWidget(addressBookPage);
+    //centralWidget->setCurrentWidget(addressBookPage);
+    centralWidget->setCurrentWidget(receiveCoinsPage);
     string iconSvgDataChecked = 
 "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"
 " <svg   xmlns=\"http://www.w3.org/2000/svg\""
@@ -1149,6 +1160,11 @@ void IocoinGUI::gotoAddressBookPage()
 "</svg>"; 
     QIcon icon = QIcon(new SVGIconEngine(iconSvgDataChecked));
         addressbookbutton->setIcon(icon);
+        sendbutton->setStyleSheet("color:#646464");
+        overviewbutton->setStyleSheet("color:#646464");
+        settingsbutton->setStyleSheet("color:#646464");
+        historybutton->setStyleSheet("color:#646464");
+        addressbookbutton->setStyleSheet("color:#1aa8ea");
     exportAction->setEnabled(true);
     disconnect(exportAction, SIGNAL(triggered()), 0, 0);
     connect(exportAction, SIGNAL(triggered()), addressBookPage, SLOT(exportClicked()));
@@ -1194,6 +1210,11 @@ void IocoinGUI::gotoSendCoinsPage()
 "</svg>"; 
     QIcon icon = QIcon(new SVGIconEngine(iconSvgDataChecked));
         sendbutton->setIcon(icon);
+        overviewbutton->setStyleSheet("color:#646464");
+        settingsbutton->setStyleSheet("color:#646464");
+        historybutton->setStyleSheet("color:#646464");
+        addressbookbutton->setStyleSheet("color:#646464");
+        sendbutton->setStyleSheet("color:#1aa8ea");
     exportAction->setEnabled(false);
     disconnect(exportAction, SIGNAL(triggered()), 0, 0);
 }
@@ -1259,16 +1280,22 @@ void IocoinGUI::handleURI(QString strURI)
 
 void IocoinGUI::setEncryptionStatus(int status)
 {
+	QString svg;
     switch(status)
     {
     case WalletModel::Unencrypted:
-        labelEncryptionIcon->hide();
+	    {
+        //labelEncryptionIcon->hide();
+        labelEncryptionIcon->show();
+        labelEncryptionIcon->setPixmap(unlockedUnencryptedIcon->pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
+        labelEncryptionIcon->setToolTip(tr("Wallet is <b>not encrypted</b> click padlock to set password and encrypt wallet</b>"));
         encryptWalletAction->setChecked(false);
         changePassphraseAction->setEnabled(false);
         unlockWalletAction->setVisible(false);
         lockWalletAction->setVisible(false);
         encryptWalletAction->setEnabled(true);
         break;
+	    }
     case WalletModel::Unlocked:
         labelEncryptionIcon->show();
         labelEncryptionIcon->setPixmap(QIcon(":/icons/lock_open").pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
@@ -1302,6 +1329,10 @@ void IocoinGUI::encryptWallet(bool status)
     dlg.exec();
 
     setEncryptionStatus(walletModel->getEncryptionStatus());
+}
+void IocoinGUI::encryptWalletTest(bool status)
+{
+	//std::cout << "encryptWallet" << std::endl;
 }
 
 void IocoinGUI::backupWallet()
@@ -1421,12 +1452,18 @@ void IocoinGUI::updateStakingIcon()
             nNetworkWeight /= COIN;
         }
 
-        labelStakingIcon->setPixmap(QIcon(":/icons/staking_on").pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
+        QFile qssFile(":/icons/staking_on");
+        qssFile.open(QFile::ReadOnly);
+        QString svg = QLatin1String(qssFile.readAll());
+        labelStakingIcon->setPixmap(QIcon(new SVGIconEngine(svg.toStdString())).pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
         labelStakingIcon->setToolTip(tr("Staking.<br>Your weight is %1<br>Network weight is %2<br>Expected time to earn reward is %3").arg(nWeight).arg(nNetworkWeight).arg(text));
     }
     else
     {
-        labelStakingIcon->setPixmap(QIcon(":/icons/staking_off").pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
+        QFile qssFile(":/icons/staking_off");
+        qssFile.open(QFile::ReadOnly);
+        QString svg = QLatin1String(qssFile.readAll());
+        labelStakingIcon->setPixmap(QIcon(new SVGIconEngine(svg.toStdString())).pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
         if (pwalletMain && pwalletMain->as())
             labelStakingIcon->setToolTip(tr("Not staking because wallet is locked"));
         else if (vNodes.empty())
@@ -1439,4 +1476,72 @@ void IocoinGUI::updateStakingIcon()
             labelStakingIcon->setToolTip(tr("Not staking"));
     }
 }
+void IocoinGUI::gotoIntroPage()
+{
+    centralWidget->setCurrentWidget(intro);
+}
 
+void IocoinGUI::complete_init(QString& dir)
+{
+   
+	//std::cout << "call setup app" << std::endl;	
+    setup_application(*this, dir.toStdString());
+	//std::cout << "called setup app" << std::endl;	
+   OptionsModel* optionsModel_ = new OptionsModel();
+   ClientModel* clientModel_ = new ClientModel(optionsModel_);
+   WalletModel* walletModel_= new WalletModel(pwalletMain, optionsModel_);
+
+   this->setClientModel(clientModel_);
+   this->setWalletModel(walletModel_);
+	
+	//if(this->walletModel == 0)
+	  //std::cout << "walletModel == 0" << std::endl;	
+    boost::filesystem::path envPath = this->walletModel->getDataDir();
+	//std::cout << "env path" << envPath.string() << std::endl;	
+    envPath /= "ui";
+    envPath /= "avatar";
+    envPath /= "profile_image";
+
+    if(!boost::filesystem::exists(envPath.branch_path()))
+    {
+      boost::filesystem::create_directories(envPath.branch_path());
+    }
+
+    string profile_image = envPath.string();
+
+    if(!boost::filesystem::exists(envPath))
+    {
+      QFile::copy(":/images/avatar", profile_image.c_str());
+    }
+    QPixmap pixmap1(":/images/gradient");
+    int size1=qMax(pixmap1.width(),pixmap1.height());
+    QPixmap round1 = QPixmap(size1,size1);
+    round1.fill(Qt::transparent);
+    QPainterPath path1; path1.addEllipse(round1.rect());
+    QPainter painter1(&round1);
+    painter1.setClipPath(path1);
+    painter1.fillRect(round1.rect(), Qt::black);
+    painter1.drawPixmap(0,0,size1,size1, pixmap1);
+
+    QPixmap pixmap(profile_image.c_str());
+    int size=qMax(pixmap.width(),pixmap.height());
+    QPixmap round = QPixmap(size,size);
+    round.fill(Qt::transparent);
+    QPainterPath path; path.addEllipse(round.rect());
+    QPainter painter(&round);
+    painter.setClipPath(path);
+    painter.fillRect(round.rect(), Qt::black);
+    painter.drawPixmap(0,0,size,size, pixmap);
+
+    painter1.drawPixmap(50,50,size1-100,size1-100, round);
+
+
+    profileImageAction->setIcon(QIcon(round1));
+    
+
+    toolbar0->show();
+    toolbar->show();
+    qw->show();
+    appMenuBar->show();
+    gotoOverviewPage();
+}

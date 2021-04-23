@@ -35,11 +35,11 @@ bool ActionWatcher::eventFilter(QObject * watched, QEvent * event)
     QAction * action = qobject_cast<QAction*>(watched);
 
 
-    cout << "action" << endl;
-    if(event->type() == QEvent::ActionChanged)
-	    cout << "action changed" << endl;
+    //cout << "action" << endl;
+    //if(event->type() == QEvent::ActionChanged)
+//	    cout << "action changed" << endl;
 
-    cout << action->isChecked() << endl;
+    //cout << action->isChecked() << endl;
 
     string iconSvgDataHover = 
 "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"

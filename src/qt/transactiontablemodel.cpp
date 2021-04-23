@@ -227,7 +227,8 @@ TransactionTableModel::TransactionTableModel(__wx__* wallet, WalletModel *parent
         walletModel(parent),
         priv(new TransactionTablePriv(wallet, this))
 {
-    columns << QString() << tr("Date") << tr("Type") << tr("Address") << tr("Amount");
+    //COL columns << QString() << tr("Date") << tr("Type") << tr("Address") << tr("Amount");
+    columns << QString() << tr("Type") << tr("Address") << tr("Date") << tr("Amount");
 
     priv->refreshWallet();
 
@@ -335,7 +336,8 @@ QString TransactionTableModel::lookupAddress(const std::string &address, bool to
     }
     if(label.isEmpty() || walletModel->getOptionsModel()->getDisplayAddresses() || tooltip)
     {
-        description += QString("(") + QString::fromStdString(address) + QString(")");
+        //description += QString("(") + QString::fromStdString(address) + QString(")");
+        description += QString("") + QString::fromStdString(address) + QString("");
     }
     return description;
 }
@@ -354,7 +356,7 @@ QString TransactionTableModel::formatTxType(const TransactionRecord *wtx) const
     case TransactionRecord::SendToSelf:
         return tr("Payment to yourself");
     case TransactionRecord::Generated:
-        return tr("Mined");
+        return tr("Staked");
     default:
         return QString();
     }
@@ -365,7 +367,7 @@ QVariant TransactionTableModel::txAddressDecoration(const TransactionRecord *wtx
     switch(wtx->type)
     {
     case TransactionRecord::Generated:
-        return QIcon(":/icons/tx_mined");
+        return QIcon(":/icons/staking_on");
     case TransactionRecord::RecvWithAddress:
     case TransactionRecord::RecvFromOther:
         return QIcon(":/icons/tx_input");

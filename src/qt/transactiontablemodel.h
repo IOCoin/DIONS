@@ -19,10 +19,15 @@ public:
     ~TransactionTableModel();
 
     enum ColumnIndex {
+        //Status = 0,
+        //Date = 1,
+        //Type = 2,
+        //ToAddress = 3,
+        //Amount = 4
         Status = 0,
-        Date = 1,
-        Type = 2,
-        ToAddress = 3,
+        Type = 1,
+        ToAddress = 2,
+        Date = 3,
         Amount = 4
     };
 

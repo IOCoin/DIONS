@@ -2,9 +2,6 @@
 #define SENDCOINSENTRY_H
 
 #include <QFrame>
-#include <QWebFrame>
-#include <QNetworkAccessManager>
-#include <QNetworkReply>
 
 class SendCoinsEntry;
 
@@ -59,8 +56,6 @@ private slots:
 private:
     Ui::SendCoinsEntry *ui;
     WalletModel *model;
-    QNetworkAccessManager networkManager;
-    QNetworkReply * currentReply;
 };
 
 #endif // SENDCOINSENTRY_H

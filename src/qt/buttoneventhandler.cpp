@@ -10,14 +10,14 @@
 
 
 using namespace::std;
-    QString OVERVIEW_BUTTON_TEXT     = "Overview";
-    QString SEND_BUTTON_TEXT         = "Send coins";
-    QString RECEIVE_BUTTON_TEXT      = "Receive coins";
-    QString HISTORY_BUTTON_TEXT      = "Transactions";
-    QString ADDRESSBOOK_BUTTON_TEXT  = "Address Book";
-    QString DIONS_BUTTON_TEXT        = "Dions";
-    QString SECURE_CHATS_BUTTON_TEXT = "Secure Chats";
-    QString SETTINGS_BUTTON_TEXT     = "Settings";
+    QString OVERVIEW_BUTTON_TEXT     = "OVERVIEW";
+    QString SEND_BUTTON_TEXT         = "SEND COINS";
+    QString RECEIVE_BUTTON_TEXT      = "RECEIVE COINS";
+    QString HISTORY_BUTTON_TEXT      = "TRANSACTIONS";
+    QString ADDRESSBOOK_BUTTON_TEXT  = "ADDRESS BOOK";
+    QString DIONS_BUTTON_TEXT        = "DIONS";
+    QString SECURE_CHATS_BUTTON_TEXT = "SECURE CHATS";
+    QString SETTINGS_BUTTON_TEXT     = "SETTINGS";
 
     string OVERVIEW_ENTER = 
 "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"
@@ -217,6 +217,7 @@ bool ButtonHoverWatcher::eventFilter(QObject * watched, QEvent * event)
     QAction * action = qobject_cast<QAction*>(watched);
     
     if (!toolbutton_->isChecked() && event->type() == QEvent::Enter) {
+	    toolbutton_->setStyleSheet("color:#bebebe");
 	    if(toolbutton_->text() == OVERVIEW_BUTTON_TEXT)
 	    {
               QIcon icon = QIcon(new SVGIconEngine(OVERVIEW_ENTER));
@@ -268,6 +269,7 @@ bool ButtonHoverWatcher::eventFilter(QObject * watched, QEvent * event)
 	}
 
     if (!toolbutton_->isChecked() && event->type() == QEvent::Leave) {
+	    toolbutton_->setStyleSheet("color:#646464");
 	    if(toolbutton_->text() == OVERVIEW_BUTTON_TEXT)
 	    {
               QIcon icon = QIcon(new SVGIconEngine(OVERVIEW_LEAVE));
