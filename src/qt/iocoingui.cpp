@@ -28,12 +28,13 @@
 #include "rpcconsole.h"
 #include "wallet.h"
 #ifdef __APPLE__
-  #include"minimizeOSX.h"
+  #include"OSXHideTitleBar.h"
 #endif
 
 #include "svgiconengine.h"
 
 #include <QApplication>
+#include <QPoint>
 #include <QPainter>
 #include <QPainterPath>
 #include <QMainWindow>
@@ -407,7 +408,7 @@ void IocoinGUI::minimizeApp()
 #ifndef __APPLE__
   this->showMinimized();
 #else
-  MinimizeOSX::min(this);
+  OSXHideTitleBar::min(this);
 #endif
 }
 void IocoinGUI::maximizeApp()
@@ -1544,4 +1545,15 @@ void IocoinGUI::complete_init(QString& dir)
     qw->show();
     appMenuBar->show();
     gotoOverviewPage();
+}
+
+void IocoinGUI::mousePressEvent(QMouseEvent* e)
+{
+  basePos_ = e->globalPos();	
+}
+void IocoinGUI::mouseMoveEvent(QMouseEvent* e)
+{
+  const QPoint  delta  = e->globalPos() - basePos_;
+  move(x()+delta.x(),y()+delta.y());
+  basePos_ = e->globalPos();
 }

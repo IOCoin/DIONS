@@ -2,6 +2,7 @@
 #define IOCOINGUI_H
 
 #include <QMainWindow>
+#include <QMouseEvent>
 #include <QSystemTrayIcon>
 #include "actionwatcher.h"
 #include "buttoneventhandler.h"
@@ -67,7 +68,8 @@ protected:
     void closeEvent(QCloseEvent *event);
     void dragEnterEvent(QDragEnterEvent *event);
     void dropEvent(QDropEvent *event);
-    //bool eventFilter(QObject*,QEvent*);
+    void mousePressEvent(QMouseEvent*);
+    void mouseMoveEvent(QMouseEvent*);
 
 private:
     ClientModel *clientModel;
@@ -144,9 +146,8 @@ private:
     QToolBar* toolbar;
     QWidget*  qw;
 
-   //OptionsModel* optionsModel_;
-   //ClientModel* clientModel_;
-   //WalletModel* walletModel_;
+
+    QPoint basePos_;
 
     QSystemTrayIcon *trayIcon;
     Notificator *notificator;
