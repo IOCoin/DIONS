@@ -550,7 +550,10 @@ bool __wx__::EncryptWallet(const SecureString& strWalletPassphrase)
     if (!crypter.SetKeyFromPassphrase(strWalletPassphrase, kMasterKey.vchSalt, kMasterKey.nDeriveIterations, kMasterKey.nDerivationMethod))
   return false;
     if (!crypter.Encrypt(vMasterKey, kMasterKey.vchCryptedKey))
+    {
   return false;
+    }
+
 
     {
   LOCK(cs_wallet);
