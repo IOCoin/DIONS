@@ -52,7 +52,6 @@ Intro::Intro(QWidget *parent) :
     QIcon* tmp = new QIcon(new SVGIconEngine(logoSVG1));
     QPixmap logoPixmap = tmp->pixmap(tmp->actualSize(QSize(200,200)));
     ui->logoleft->setPixmap(logoPixmap);
-    //ui->logoright->setPixmap(logoPixmap);
     ui->title->setStyleSheet("color:white; font-size:48px; font-weight:300");
     ui->title->setAttribute(Qt::WA_TranslucentBackground, true);
     ui->closeicon->setAttribute(Qt::WA_TranslucentBackground, true);
@@ -62,10 +61,8 @@ Intro::Intro(QWidget *parent) :
     QGraphicsOpacityEffect* e = new QGraphicsOpacityEffect(this);
     e->setOpacity(0.6);
     ui->logolefttext->setGraphicsEffect(e);
-    //ui->vlconfigselect->setAttribute(Qt::WA_TranslucentBackground, true);
     ui->vlconfigselect->setContentsMargins(0,0,340,200);
     ui->logoright->setAttribute(Qt::WA_TranslucentBackground, true);
-    //ui->logoright->setStyleSheet("color:white; font-size:24px ; margin:0 0 0 0");
     QString importLabelText = "<p style=\"font-size:24pt; color:white\">"
 	                      "New / Import wallet"
 			      "</p>"
@@ -80,7 +77,6 @@ Intro::Intro(QWidget *parent) :
     qssFile3.open(QFile::ReadOnly);
     QString svg = QLatin1String(qssFile3.readAll());
     QIcon* closeIc = new QIcon(new SVGIconEngine(svg.toStdString()));
-    //ui->closeicon->setPixmap(closeIc->pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
     QIcon* tmp1 = new QIcon(new SVGIconEngine(closeSVG));
     QPixmap closePixmap = tmp1->pixmap(tmp1->actualSize(QSize(30,30)));
     ui->closeicon->setPixmap(closePixmap);
@@ -92,28 +88,23 @@ Intro::Intro(QWidget *parent) :
 
 Intro::~Intro()
 {
-    delete ui;
+  delete ui;
 }
 
 void Intro::closesplash()
 {
-	//std::cout << "close clicked" << std::endl;
-            qApp->quit();
+  qApp->quit();
 }
 void Intro::config()
 {
-	//std::cout << "choose config" << std::endl;
-    //const char* filter = "Images (*.bmp *.cur *.gif *.icns *.ico *.jpg *.pbm *.pgm *.png *.ppm *.svg *.svgz *.tga *.tiff *.wbmp *.xbm *.xpm)";
-    //QString selectionFilter(filter);
-    //QString fileName = QFileDialog::getOpenFileName(this,"Choose wallet directory", "", tr(filter),&selectionFilter);
     QString dir = QFileDialog::getExistingDirectory(this, tr("Choose wallet directory"),
                                              "",
                                              QFileDialog::ShowDirsOnly
                                              | QFileDialog::DontResolveSymlinks);
 
-    //std::cout << "selected " << dir.toStdString() << std::endl;
+    std::cout << "selected " << dir.toStdString() << std::endl;
+    if(dir.toStdString() == "") return;
 
-    //test open gui panel
     obj->complete_init(dir);
 }
 
