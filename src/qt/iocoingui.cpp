@@ -715,9 +715,7 @@ void IocoinGUI::setClientModel(ClientModel *clientModel)
 
 void IocoinGUI::setWalletModel(WalletModel *walletModel)
 {
-	//std::cout << "iocoingui setwalletmodel" << std::endl;
     this->walletModel = walletModel;
-	//std::cout << "iocoingui setwalletmodel 1" << std::endl;
     if(walletModel)
     {
         // Report errors from wallet thread
@@ -1063,7 +1061,6 @@ void IocoinGUI::gotoProfileImageChooser()
 
 void IocoinGUI::gotoOverviewPage()
 {
-	//std::cout << "goto overview" << std::endl;
     overviewAction->setChecked(true);
     centralWidget->setCurrentWidget(overviewPage);
 
@@ -1331,10 +1328,6 @@ void IocoinGUI::encryptWallet(bool status)
 
     setEncryptionStatus(walletModel->getEncryptionStatus());
 }
-void IocoinGUI::encryptWalletTest(bool status)
-{
-	//std::cout << "encryptWallet" << std::endl;
-}
 
 void IocoinGUI::backupWallet()
 {
@@ -1485,9 +1478,7 @@ void IocoinGUI::gotoIntroPage()
 void IocoinGUI::complete_init(QString& dir)
 {
    
-	//std::cout << "call setup app" << std::endl;	
-    setup_application(*this, dir.toStdString());
-	//std::cout << "called setup app" << std::endl;	
+   setup_application(*this, dir.toStdString());
    OptionsModel* optionsModel_ = new OptionsModel();
    ClientModel* clientModel_ = new ClientModel(optionsModel_);
    WalletModel* walletModel_= new WalletModel(pwalletMain, optionsModel_);
@@ -1495,10 +1486,7 @@ void IocoinGUI::complete_init(QString& dir)
    this->setClientModel(clientModel_);
    this->setWalletModel(walletModel_);
 	
-	//if(this->walletModel == 0)
-	  //std::cout << "walletModel == 0" << std::endl;	
     boost::filesystem::path envPath = this->walletModel->getDataDir();
-	//std::cout << "env path" << envPath.string() << std::endl;	
     envPath /= "ui";
     envPath /= "avatar";
     envPath /= "profile_image";

@@ -1,6 +1,3 @@
-/*
- * W.J. van der Laan 2011-2012
- */
 #include "iocoingui.h"
 #include "clientmodel.h"
 #include "walletmodel.h"
@@ -16,6 +13,7 @@
 #include <QMessageBox>
 #include <QTextCodec>
 #include <QLocale>
+#include <QThread>
 #include <QTranslator>
 #include <QSplashScreen>
 #include <QLibraryInfo>
@@ -117,53 +115,43 @@ static int argc_;
 static char** argv_;
 extern "C" int setup_application(IocoinGUI& window, std::string directory)
 {
-    //ParseParameters(argc_, argv_);
-
-    // ... then bitcoin.conf:
-    //if (!boost::filesystem::is_directory(GetDataDir(false)))
-    if (!boost::filesystem::is_directory(directory))
+  bool init = true;
+  boost::filesystem::path p(directory);
+  boost::filesystem::directory_iterator end_itr;
+  boost::filesystem::directory_iterator it(p);
+  for(; it != end_itr; it++)
+  {
+    if(boost::filesystem::is_regular_file(it->path()))
     {
-        // This message can not be translated, as translation is not initialized yet
-        // (which not yet possible because lang=XX can be overridden in bitcoin.conf in the data directory)
-        QMessageBox::critical(0, "I/OCoin",
-                              QString("Error: Specified data directory \"%1\" does not exist.").arg(QString::fromStdString(mapArgs["-datadir"])));
-        return 1;
+      string f = it->path().string();
+      if(f == "iocoin.conf")
+        init=false;
     }
-    else
-    {
-	    bool empty = true;
-	    boost::filesystem::path p(directory);
-	    boost::filesystem::directory_iterator end_itr;
-	    boost::filesystem::directory_iterator it(p);
-	    for(; it != end_itr; it++)
-		    if(boost::filesystem::is_regular_file(it->path()))
-		    {
-		      string f = it->path().string();
-		      //cout << f << endl;
-		      if(f == ".lock") continue;
-		      empty = false;
-		    }
+  }
 
-      if(empty)
-      {
-	      //cout << p.filename() << endl;
-        //std::cout << "selected directory is empty, initialising config - connect to supernodes" << std::endl;
-        boost::filesystem::ofstream ofs(p / "iocoin.conf"); 	
-	ofs << "testnet=1" << endl;
-	ofs << "rpcuser=kjkjkjkjkjk" << endl;
-	ofs << "rpcpassword=kjkjkjkjkjkjhjhjhjhjhjhj" << endl;
-	ofs << endl;
-	ofs << endl;
-	ofs << "addnode=amer.supernode.iocoin.io" << endl;
-	ofs << "addnode=emea.supernode.iocoin.io" << endl;
-	ofs << "addnode=apac.supernode.iocoin.io" << endl;
-      }
-    }
+  if(init)
+  {
+    boost::filesystem::ofstream ofs(p / "iocoin.conf");   
+    ofs << "rpcuser=" << endl;
+    ofs << "rpcpassword=" << endl;
+    ofs << endl;
+    ofs << endl;
+    ofs << "addnode=amer.supernode.iocoin.io" << endl;
+    ofs << "addnode=emea.supernode.iocoin.io" << endl;
+    ofs << "addnode=apac.supernode.iocoin.io" << endl;
+  }
 
-    mapArgs["-datadir"] = directory.c_str();
-    ReadConfigFile(mapArgs, mapMultiArgs);
-    AppInit2();
+  mapArgs["-datadir"] = directory.c_str();
+  ReadConfigFile(mapArgs, mapMultiArgs);
 
+  AppInit2();
+
+  return 0;
+}
+
+extern "C" int app_init()
+{
+  AppInit2();
   return 0;
 }
 

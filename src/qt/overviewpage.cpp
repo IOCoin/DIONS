@@ -245,7 +245,6 @@ void OverviewPage::setBalance(qint64 balance, qint64 stake, qint64 unconfirmedBa
 
 void OverviewPage::setModel(WalletModel *model)
 {
-	//std::cout << "overviewpage setmodel" << std::endl;
     this->model = model;
 
     if(model && model->getOptionsModel())
