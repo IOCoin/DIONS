@@ -123,7 +123,7 @@ extern "C" int setup_application(IocoinGUI& window, std::string directory)
   {
     if(boost::filesystem::is_regular_file(it->path()))
     {
-      string f = it->path().string();
+      string f = it->path().filename().string();
       if(f == "iocoin.conf")
         init=false;
     }
