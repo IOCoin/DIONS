@@ -86,7 +86,10 @@ private:
     SendCoinsDialog *sendCoinsPage;
     SignVerifyMessageDialog *signVerifyMessageDialog;
 
-    ClickableLabel *labelEncryptionIcon;
+    ClickableLabel *labelUnencryptedIcon;
+    ClickableLabel *labelLockedIcon;
+    ClickableLabel *labelUnlockedIcon;
+
     ClickableLabel *labelMinimizeIcon;
     ClickableLabel *labelMaximizeIcon;
     ClickableLabel *labelCloseIcon;
@@ -248,6 +251,7 @@ private slots:
     void updateWeight();
     void updateStakingIcon();
 
+    void toggleLock();
     void minimizeApp();
     void maximizeApp();
     void closeApp();
