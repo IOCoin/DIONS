@@ -15,7 +15,9 @@
 #include "walletmodel.h"
 #include "editaddressdialog.h"
 #include "optionsmodel.h"
-#include "lockstatuslabel.h"
+#include "lockedstatuslabel.h"
+#include "unlockedstatuslabel.h"
+#include "unencryptedstatuslabel.h"
 #include "transactiondescdialog.h"
 #include "addresstablemodel.h"
 #include "transactionview.h"
@@ -241,8 +243,14 @@ IocoinGUI::IocoinGUI(QWidget *parent):
     centralWidget->addWidget(intro);
     centralWidget->setCurrentWidget(intro);
     setCentralWidget(centralWidget);
-    labelEncryptionIcon = new LockStatusLabel();
-    labelEncryptionIcon->setObjectName("padlocklabel");
+
+    labelUnencryptedIcon = new UnencryptedStatusLabel();
+    labelUnencryptedIcon->setObjectName("padlocklabel");
+    labelLockedIcon      = new LockedStatusLabel();
+    labelLockedIcon->setObjectName("padlocklabel");
+    labelUnlockedIcon    = new UnlockedStatusLabel();
+    labelUnlockedIcon->setObjectName("padlocklabel");
+
     labelMinimizeIcon = new ClickableLabel();
     labelMinimizeIcon->setObjectName("minimizelabel");
     labelMinimizeIcon->setCursor(QCursor(Qt::PointingHandCursor));
@@ -268,7 +276,11 @@ IocoinGUI::IocoinGUI(QWidget *parent):
     svg = QLatin1String(qssFile3.readAll());
     QIcon* closeIc = new QIcon(new SVGIconEngine(svg.toStdString()));
     labelCloseIcon->setPixmap(closeIc->pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
-    connect(labelEncryptionIcon,SIGNAL(unlock(bool)),this, SLOT(unlockWallet()));
+
+    connect(labelLockedIcon,SIGNAL(unlock(bool)),this,SLOT(unlockWallet()));
+    connect(labelUnlockedIcon,SIGNAL(lock(bool)),this,SLOT(lockWallet()));
+    connect(labelUnencryptedIcon,SIGNAL(encrypt(bool)),this,SLOT(encryptWallet(bool)));
+
     connect(labelMinimizeIcon,SIGNAL(clicked(bool)),this, SLOT(minimizeApp()));
     connect(labelMaximizeIcon,SIGNAL(clicked(bool)),this, SLOT(maximizeApp()));
     connect(labelCloseIcon,SIGNAL(clicked(bool)),this, SLOT(closeApp()));
@@ -322,8 +334,14 @@ IocoinGUI::IocoinGUI(QWidget *parent):
     frameBlocksLayout->addStretch();
     frameBlocksLayout->addWidget(labelStakingIcon);
     frameBlocksLayout->addStretch();
-    frameBlocksLayout->addWidget(labelEncryptionIcon);
+
+    frameBlocksLayout->addWidget(labelLockedIcon);
     frameBlocksLayout->addStretch();
+    frameBlocksLayout->addWidget(labelUnlockedIcon);
+    frameBlocksLayout->addStretch();
+    frameBlocksLayout->addWidget(labelUnencryptedIcon);
+    frameBlocksLayout->addStretch();
+
     frameBlocksLayout->addWidget(labelBlocksIcon);
     frameBlocksLayout->addStretch();
     frameBlocksLayout->addWidget(labelMinimizeIcon);
@@ -407,6 +425,7 @@ void IocoinGUI::closeApp()
 }
 void IocoinGUI::toggleLock()
 {
+  std::cout << "toggle lock" << std::endl;
 }
 void IocoinGUI::minimizeApp()
 {
@@ -587,7 +606,7 @@ void IocoinGUI::createActions()
     connect(optionsAction, SIGNAL(triggered()), this, SLOT(optionsClicked()));
     connect(toggleHideAction, SIGNAL(triggered()), this, SLOT(toggleHidden()));
     connect(encryptWalletAction, SIGNAL(triggered(bool)), this, SLOT(encryptWallet(bool)));
-    connect(labelEncryptionIcon, SIGNAL(clicked(bool)), this, SLOT(encryptWalletTest(bool)));
+    //connect(labelEncryptionIcon, SIGNAL(clicked(bool)), this, SLOT(encryptWalletTest(bool)));
     connect(backupWalletAction, SIGNAL(triggered()), this, SLOT(backupWallet()));
     connect(changePassphraseAction, SIGNAL(triggered()), this, SLOT(changePassphrase()));
     connect(unlockWalletAction, SIGNAL(triggered()), this, SLOT(unlockWallet()));
@@ -720,7 +739,9 @@ void IocoinGUI::setClientModel(ClientModel *clientModel)
 
 void IocoinGUI::setWalletModel(WalletModel *walletModel)
 {
+	//std::cout << "iocoingui setwalletmodel" << std::endl;
     this->walletModel = walletModel;
+	//std::cout << "iocoingui setwalletmodel 1" << std::endl;
     if(walletModel)
     {
         // Report errors from wallet thread
@@ -1066,6 +1087,7 @@ void IocoinGUI::gotoProfileImageChooser()
 
 void IocoinGUI::gotoOverviewPage()
 {
+	//std::cout << "goto overview" << std::endl;
     overviewAction->setChecked(true);
     centralWidget->setCurrentWidget(overviewPage);
 
@@ -1288,10 +1310,11 @@ void IocoinGUI::setEncryptionStatus(int status)
     {
     case WalletModel::Unencrypted:
 	    {
-        //labelEncryptionIcon->hide();
-        labelEncryptionIcon->show();
-        labelEncryptionIcon->setPixmap(unlockedUnencryptedIcon->pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
-        labelEncryptionIcon->setToolTip(tr("Wallet is <b>not encrypted</b> click padlock to set password and encrypt wallet</b>"));
+        labelLockedIcon->hide();
+        labelUnlockedIcon->hide();
+        labelUnencryptedIcon->show();
+        labelUnencryptedIcon->setPixmap(unlockedUnencryptedIcon->pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
+        labelUnencryptedIcon->setToolTip(tr("Wallet is <b>not encrypted</b> click padlock to set password and encrypt wallet</b>"));
         encryptWalletAction->setChecked(false);
         changePassphraseAction->setEnabled(false);
         unlockWalletAction->setVisible(false);
@@ -1300,9 +1323,11 @@ void IocoinGUI::setEncryptionStatus(int status)
         break;
 	    }
     case WalletModel::Unlocked:
-        labelEncryptionIcon->show();
-        labelEncryptionIcon->setPixmap(QIcon(":/icons/lock_open").pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
-        labelEncryptionIcon->setToolTip(tr("Wallet is <b>encrypted</b> and currently <b>unlocked</b>"));
+        labelUnencryptedIcon->hide();
+        labelLockedIcon->hide();
+        labelUnlockedIcon->show();
+        labelUnlockedIcon->setPixmap(QIcon(":/icons/lock_open").pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
+        labelUnlockedIcon->setToolTip(tr("Wallet is <b>encrypted</b> and currently <b>unlocked</b>"));
         encryptWalletAction->setChecked(true);
         changePassphraseAction->setEnabled(true);
         unlockWalletAction->setVisible(false);
@@ -1310,9 +1335,11 @@ void IocoinGUI::setEncryptionStatus(int status)
         encryptWalletAction->setEnabled(false); // TODO: decrypt currently not supported
         break;
     case WalletModel::Locked:
-        labelEncryptionIcon->show();
-        labelEncryptionIcon->setPixmap(QIcon(":/icons/lock_closed").pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
-        labelEncryptionIcon->setToolTip(tr("Wallet is <b>encrypted</b> and currently <b>locked</b>"));
+        labelUnencryptedIcon->hide();
+        labelUnlockedIcon->hide();
+        labelLockedIcon->show();
+        labelLockedIcon->setPixmap(QIcon(":/icons/lock_closed").pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
+        labelLockedIcon->setToolTip(tr("Wallet is <b>encrypted</b> and currently <b>locked</b>"));
         encryptWalletAction->setChecked(true);
         changePassphraseAction->setEnabled(true);
         unlockWalletAction->setVisible(true);
@@ -1335,6 +1362,7 @@ void IocoinGUI::encryptWallet(bool status)
 }
 void IocoinGUI::encryptWalletTest(bool status)
 {
+	//std::cout << "encryptWallet" << std::endl;
 }
 
 void IocoinGUI::backupWallet()
@@ -1519,6 +1547,7 @@ void IocoinGUI::complete_init(QString& dir)
     painter1.setClipPath(path1);
     painter1.fillRect(round1.rect(), Qt::black);
     painter1.drawPixmap(0,0,size1,size1, pixmap1);
+	std::cout << "complete_init 9" << std::endl;	
 
     QPixmap pixmap(profile_image.c_str());
     int size=qMax(pixmap.width(),pixmap.height());
