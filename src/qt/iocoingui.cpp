@@ -15,6 +15,7 @@
 #include "walletmodel.h"
 #include "editaddressdialog.h"
 #include "optionsmodel.h"
+#include "lockstatuslabel.h"
 #include "transactiondescdialog.h"
 #include "addresstablemodel.h"
 #include "transactionview.h"
@@ -240,7 +241,7 @@ IocoinGUI::IocoinGUI(QWidget *parent):
     centralWidget->addWidget(intro);
     centralWidget->setCurrentWidget(intro);
     setCentralWidget(centralWidget);
-    labelEncryptionIcon = new ClickableLabel();
+    labelEncryptionIcon = new LockStatusLabel();
     labelEncryptionIcon->setObjectName("padlocklabel");
     labelMinimizeIcon = new ClickableLabel();
     labelMinimizeIcon->setObjectName("minimizelabel");
@@ -267,6 +268,7 @@ IocoinGUI::IocoinGUI(QWidget *parent):
     svg = QLatin1String(qssFile3.readAll());
     QIcon* closeIc = new QIcon(new SVGIconEngine(svg.toStdString()));
     labelCloseIcon->setPixmap(closeIc->pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
+    connect(labelEncryptionIcon,SIGNAL(unlock(bool)),this, SLOT(unlockWallet()));
     connect(labelMinimizeIcon,SIGNAL(clicked(bool)),this, SLOT(minimizeApp()));
     connect(labelMaximizeIcon,SIGNAL(clicked(bool)),this, SLOT(maximizeApp()));
     connect(labelCloseIcon,SIGNAL(clicked(bool)),this, SLOT(closeApp()));
@@ -402,6 +404,9 @@ IocoinGUI::~IocoinGUI()
 void IocoinGUI::closeApp()
 {
   qApp->quit();
+}
+void IocoinGUI::toggleLock()
+{
 }
 void IocoinGUI::minimizeApp()
 {
@@ -1327,6 +1332,9 @@ void IocoinGUI::encryptWallet(bool status)
     dlg.exec();
 
     setEncryptionStatus(walletModel->getEncryptionStatus());
+}
+void IocoinGUI::encryptWalletTest(bool status)
+{
 }
 
 void IocoinGUI::backupWallet()
