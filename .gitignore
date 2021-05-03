@@ -1,4 +1,5 @@
 src/*.exe
+src/quazip/libquazip.a
 src/iocoin
 src/iocoind
 src/test_iocoin
