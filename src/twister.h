@@ -25,6 +25,7 @@ typedef struct displ
   int sect_;   
   GEN__ strm_;
   cpp_int offset_;
+  cpp_int gen_mat_test_;
   cpp_dec_float_50 scale_;
   cpp_dec_float_50 range_;
   vector<int> coord_;
@@ -44,6 +45,7 @@ typedef struct mtx
 {
   ex_mix disc_;
   ex_mix codom_;
+  ex_mix codom_mtx_;
 } mtx_co;
 
 typedef struct FI1__
@@ -51,6 +53,7 @@ typedef struct FI1__
   ex_mix r;
   ex_mix th;
   ex_mix ph;
+  ex_mix t;
 } fi1;
 
 
