@@ -1202,7 +1202,9 @@ void IocoinGUI::gotoSignMessageTab(QString addr)
     signVerifyMessageDialog->showTab_SM(true);
 
     if(!addr.isEmpty())
+    {
         signVerifyMessageDialog->setAddress_SM(addr);
+    }
 }
 
 void IocoinGUI::gotoVerifyMessageTab(QString addr)
