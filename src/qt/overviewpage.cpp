@@ -256,7 +256,9 @@ void OverviewPage::updateDisplayUnit()
     if(model && model->getOptionsModel())
     {
         if(currentBalance != -1)
+	{
             setBalance(currentBalance, model->getStake(), currentUnconfirmedBalance, currentImmatureBalance);
+	}
 
         // Update txdelegate->unit with the current unit
         txdelegate->unit = model->getOptionsModel()->getDisplayUnit();
