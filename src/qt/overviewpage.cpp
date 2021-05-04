@@ -105,13 +105,6 @@ OverviewPage::OverviewPage(QWidget *parent) :
 
     txv_ = new TransactionView(this);
     txv_->setObjectName("txv");
-    // Recent transactions
-    //TRANS ui->listTransactions->setItemDelegate(txdelegate);
-    //TRANS ui->listTransactions->setIconSize(QSize(DECORATION_SIZE, DECORATION_SIZE));
-    //TRANS ui->listTransactions->setMinimumHeight(NUM_ITEMS * (DECORATION_SIZE + 2));
-    //TRANS ui->listTransactions->setAttribute(Qt::WA_MacShowFocusRect, false);
-
-    //TRANS connect(ui->listTransactions, SIGNAL(clicked(QModelIndex)), this, SLOT(handleTransactionClicked(QModelIndex)));
 
     QGraphicsDropShadowEffect* ef = new QGraphicsDropShadowEffect();
     ef->setBlurRadius(10);
