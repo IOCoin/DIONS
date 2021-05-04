@@ -329,8 +329,6 @@ void Intro::updateDownloadProgress(qint64 bytesRead, qint64 totalBytes)
 
     double ratio = static_cast<double>(bytesRead) / static_cast<double>(totalBytes);
     ui->progressbar->setValue(ratio * 1000000);
-    //ui->progressbar->setMaximum(totalBytes);
-    //ui->progressbar->setValue(bytesRead);
 
     // calculate the download speed
     currentSpeed = bytesRead * 1000.0 / downloadTime.elapsed();
