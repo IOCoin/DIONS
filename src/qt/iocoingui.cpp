@@ -1388,7 +1388,9 @@ void IocoinGUI::showNormalIfMinimized(bool fToggleHidden)
         activateWindow();
     }
     else if(fToggleHidden)
+    {
         hide();
+    }
 }
 
 void IocoinGUI::toggleHidden()
