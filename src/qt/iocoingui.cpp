@@ -433,10 +433,10 @@ void IocoinGUI::minimizeApp()
 }
 void IocoinGUI::maximizeApp()
 {
-	if(!this->isMaximized())
-	  this->showMaximized();
-	else
-	  this->showNormal();
+  if(!this->isMaximized())
+    this->showMaximized();
+  else
+    this->showNormal();
 }
 
 void IocoinGUI::createActions()
@@ -645,7 +645,7 @@ void IocoinGUI::createToolBars()
 
     QLayout* tl = toolbar->layout();
     for(int i=0;i<tl->count();i++) { 
-	    tl->itemAt(i)->setAlignment(Qt::AlignCenter);
+      tl->itemAt(i)->setAlignment(Qt::AlignCenter);
     }
     toolbar0->setMovable(false);
     toolbar->setMovable(false);
@@ -1250,11 +1250,11 @@ void IocoinGUI::handleURI(QString strURI)
 
 void IocoinGUI::setEncryptionStatus(int status)
 {
-	QString svg;
+  QString svg;
     switch(status)
     {
     case WalletModel::Unencrypted:
-	    {
+      {
         labelLockedIcon->hide();
         labelUnlockedIcon->hide();
         labelUnencryptedIcon->show();
@@ -1266,7 +1266,7 @@ void IocoinGUI::setEncryptionStatus(int status)
         lockWalletAction->setVisible(false);
         encryptWalletAction->setEnabled(true);
         break;
-	    }
+      }
     case WalletModel::Unlocked:
         labelUnencryptedIcon->hide();
         labelLockedIcon->hide();
@@ -1465,7 +1465,7 @@ void IocoinGUI::complete_init(QString& dir)
 
    this->setClientModel(clientModel_);
    this->setWalletModel(walletModel_);
-	
+  
     boost::filesystem::path envPath = this->walletModel->getDataDir();
     envPath /= "ui";
     envPath /= "avatar";
@@ -1517,7 +1517,7 @@ void IocoinGUI::complete_init(QString& dir)
 
 void IocoinGUI::mousePressEvent(QMouseEvent* e)
 {
-  basePos_ = e->globalPos();	
+  basePos_ = e->globalPos();  
 }
 void IocoinGUI::mouseMoveEvent(QMouseEvent* e)
 {
