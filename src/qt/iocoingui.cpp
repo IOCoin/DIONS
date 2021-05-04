@@ -433,9 +433,13 @@ void IocoinGUI::minimizeApp()
 void IocoinGUI::maximizeApp()
 {
   if(!this->isMaximized())
+  { 
     this->showMaximized();
+  }
   else
+  {
     this->showNormal();
+  }
 }
 
 void IocoinGUI::createActions()
