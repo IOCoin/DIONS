@@ -153,15 +153,6 @@ OverviewPage::OverviewPage(QWidget *parent) :
     ui->labelIntStaked->setContentsMargins(0,0,0,0);
     ui->labelFracStaked->setMargin(0);
 
-    //ui->availableAmountLayout->setMargin(0);
-    //ui->availableAmountLayout->setSpacing(0);
-    //QVBoxLayout *vbox = new QVBoxLayout();
-    //QLabel* tmp = new QLabel();
-    //tmp->setText("hello");
-    //vbox->addWidget(txv_);
-    //vbox->addWidget(tmp);
-    //ui->txv->setLayout(vbox);
-
     // start with displaying the "out of sync" warnings
     showOutOfSyncWarning(true);
 }
