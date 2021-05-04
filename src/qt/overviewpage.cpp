@@ -261,9 +261,3 @@ void OverviewPage::updateDisplayUnit()
 
     }
 }
-
-void OverviewPage::showOutOfSyncWarning(bool fShow)
-{
-    //ui->labelWalletStatus->setVisible(fShow);
-    //ui->labelTransactionsStatus->setVisible(fShow);
-}
