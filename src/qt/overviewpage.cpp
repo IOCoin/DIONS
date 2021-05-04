@@ -110,9 +110,7 @@ OverviewPage::OverviewPage(QWidget *parent) :
     ef->setBlurRadius(10);
     ef->setXOffset(2);
     ef->setYOffset(2);
-    //ef->setColor(Qt::black);
     QColor col = QColor("#d3d3d3");
-    //ef->setColor(Qt::gray);
     ef->setColor(col);
     ui->available->setGraphicsEffect(ef);
     QGraphicsDropShadowEffect* ef2 = new QGraphicsDropShadowEffect();
