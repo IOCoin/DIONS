@@ -251,7 +251,6 @@ private slots:
     void updateWeight();
     void updateStakingIcon();
 
-    void toggleLock();
     void minimizeApp();
     void maximizeApp();
     void closeApp();
