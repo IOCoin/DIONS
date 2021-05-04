@@ -554,7 +554,6 @@ void IocoinGUI::createActions()
     exportAction->setToolTip(tr("Export the data in the current tab to a file"));
     openRPCConsoleAction = new QAction(QIcon(":/icons/debugwindow"), tr("&Debug window"), this);
     openRPCConsoleAction->setToolTip(tr("Open debugging and diagnostic console"));
-    //openRPCConsoleAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_6));
     openRPCConsoleAction->setShortcut(QKeySequence(Qt::Key_Escape));
 
     connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
