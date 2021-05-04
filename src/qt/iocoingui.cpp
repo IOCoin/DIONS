@@ -1310,7 +1310,9 @@ void IocoinGUI::setEncryptionStatus(int status)
 void IocoinGUI::encryptWallet(bool status)
 {
     if(!walletModel)
+    {
         return;
+    }
     AskPassphraseDialog dlg(status ? AskPassphraseDialog::Encrypt:
                                      AskPassphraseDialog::Decrypt, this);
     dlg.setModel(walletModel);
