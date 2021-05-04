@@ -874,7 +874,6 @@ void IocoinGUI::setNumBlocks(int count, int nTotalBlocks)
         qssFile.open(QFile::ReadOnly);
         QString svg = QLatin1String(qssFile.readAll());
         labelBlocksIcon->setPixmap(QIcon(new SVGIconEngine(svg.toStdString())).pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
-        //labelBlocksIcon->setPixmap(QIcon(":/icons/synced").pixmap(STATUSBAR_ICONSIZE, STATUSBAR_ICONSIZE));
 
         overviewPage->showOutOfSyncWarning(false);
     }
