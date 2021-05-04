@@ -1362,7 +1362,9 @@ void IocoinGUI::unlockWallet()
 void IocoinGUI::lockWallet()
 {
     if(!walletModel)
+    {
         return;
+    }
 
     walletModel->setWalletLocked(true);
 }
