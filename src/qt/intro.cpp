@@ -20,13 +20,13 @@
 #include<boost/iostreams/filter/zlib.hpp>
 #include<boost/iostreams/filter/gzip.hpp>
 
-const char* TESTNET_BOOTSTRAP_URL =
+const char* BOOTSTRAP_ZIP_DATA_URL =
 //"https://github.com/blastdoor7/qttest/raw/main/bootstrap-testnet/bootstrap.dat";
 //"https://iobootstrap.s3.amazonaws.com/bootstrap.zip";
 "https://iobootstrap.s3.amazonaws.com/Bootstrap.zip";
 //"http://localhost/bootstrap/bootstrap.dat.gz";
 //"http://localhost/bootstrap/bootstrap.zip";
-//const char* TESTNET_BOOTSTRAP_URL =
+//const char* BOOTSTRAP_ZIP_DATA_URL =
 //"https://github.com/blastdoor7/qttest/raw/main/semaphore/test";
 
 std::string logoSVG1 = 
@@ -66,7 +66,7 @@ void extract(QFileInfo fileDest,Ui::Intro** ui)
 }
 Intro::Intro(QWidget *parent) :
     QWidget(parent),
-    url(TESTNET_BOOTSTRAP_URL),
+    url(BOOTSTRAP_ZIP_DATA_URL),
     ui(new Ui::Intro)
 {
     setWindowFlags(Qt::FramelessWindowHint | Qt::WindowSystemMenuHint);
