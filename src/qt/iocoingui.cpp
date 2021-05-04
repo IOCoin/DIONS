@@ -443,45 +443,6 @@ void IocoinGUI::createActions()
 {
     QActionGroup *tabGroup0 = new QActionGroup(this);
 
-    /*
-    boost::filesystem::path envPath = walletModel->getDataDir();
-    envPath /= "ui";
-    envPath /= "avatar";
-    envPath /= "profile_image";
-
-    if(!boost::filesystem::exists(envPath.branch_path()))
-    {
-      boost::filesystem::create_directories(envPath.branch_path());
-    }
-
-    string profile_image = envPath.string();
-
-    if(!boost::filesystem::exists(envPath))
-    {
-      QFile::copy(":/images/avatar", profile_image.c_str());
-    }
-    QPixmap pixmap1(":/images/gradient");
-    int size1=qMax(pixmap1.width(),pixmap1.height());
-    QPixmap round1 = QPixmap(size1,size1);
-    round1.fill(Qt::transparent);
-    QPainterPath path1; path1.addEllipse(round1.rect());
-    QPainter painter1(&round1);
-    painter1.setClipPath(path1);
-    painter1.fillRect(round1.rect(), Qt::black);
-    painter1.drawPixmap(0,0,size1,size1, pixmap1);
-
-    QPixmap pixmap(profile_image.c_str());
-    int size=qMax(pixmap.width(),pixmap.height());
-    QPixmap round = QPixmap(size,size);
-    round.fill(Qt::transparent);
-    QPainterPath path; path.addEllipse(round.rect());
-    QPainter painter(&round);
-    painter.setClipPath(path);
-    painter.fillRect(round.rect(), Qt::black);
-    painter.drawPixmap(0,0,size,size, pixmap);
-
-    painter1.drawPixmap(50,50,size1-100,size1-100, round);
-*/
     profileImageAction = new QAction(this);
     profileImageAction->setToolTip(tr("Select profile image"));
     profileImageAction->setCheckable(true);
