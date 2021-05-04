@@ -456,7 +456,7 @@ void IocoinGUI::createActions()
     overviewAction->setIcon(overviewicon);
     overviewAction->setToolTip(tr("Show general overview of wallet"));
     overviewAction->setCheckable(true);
-    overviewAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_1));
+    overviewAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_2));
     tabGroup->addAction(overviewAction);
 
     QIcon sendicon = QIcon(new SVGIconEngine(sendSVGUnchecked));
@@ -465,7 +465,7 @@ void IocoinGUI::createActions()
     sendCoinsAction->setIcon(sendicon);
     sendCoinsAction->setToolTip(tr("Send coins to a I/OCoin address"));
     sendCoinsAction->setCheckable(true);
-    sendCoinsAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_2));
+    sendCoinsAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_3));
     tabGroup->addAction(sendCoinsAction);
 
     QIcon historyicon = QIcon(new SVGIconEngine(historySVGUnchecked));
@@ -492,7 +492,7 @@ void IocoinGUI::createActions()
     settingsAction->setIcon(settingsicon);
     settingsAction->setToolTip(tr("Enter settings"));
     settingsAction->setCheckable(true);
-    settingsAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_5));
+    settingsAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_6));
     tabGroup->addAction(settingsAction);
 
     connect(profileImageAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
