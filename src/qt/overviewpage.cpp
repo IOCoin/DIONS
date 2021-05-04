@@ -259,7 +259,6 @@ void OverviewPage::updateDisplayUnit()
         // Update txdelegate->unit with the current unit
         txdelegate->unit = model->getOptionsModel()->getDisplayUnit();
 
-        //TRANS ui->listTransactions->update();
     }
 }
 
