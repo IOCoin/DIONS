@@ -1222,7 +1222,9 @@ void IocoinGUI::dragEnterEvent(QDragEnterEvent *event)
 {
     // Accept only URIs
     if(event->mimeData()->hasUrls())
+    {
         event->acceptProposedAction();
+    }
 }
 
 void IocoinGUI::dropEvent(QDropEvent *event)
