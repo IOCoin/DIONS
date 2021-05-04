@@ -235,9 +235,6 @@ void OverviewPage::setModel(WalletModel *model)
         filter->setShowInactive(false);
         filter->sort(TransactionTableModel::Status, Qt::DescendingOrder);
 
-        //TRANS ui->listTransactions->setModel(filter);
-        //TRANS ui->listTransactions->setModelColumn(TransactionTableModel::ToAddress);
-
         // Keep up to date with wallet
         setBalance(model->getBalance(), model->getStake(), model->getUnconfirmedBalance(), model->getImmatureBalance());
         connect(model, SIGNAL(balanceChanged(qint64, qint64, qint64, qint64)), this, SLOT(setBalance(qint64, qint64, qint64, qint64)));
