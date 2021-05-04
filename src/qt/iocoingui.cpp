@@ -292,7 +292,7 @@ IocoinGUI::IocoinGUI(QWidget *parent):
 
     createTrayIcon();
 
-    overviewPage = new OverviewPage();
+    overviewPage = new OverviewPage(this);
     settingsPage = new SettingsPage();
 
     transactionsPage = new QWidget(this);
