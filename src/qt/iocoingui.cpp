@@ -1213,7 +1213,9 @@ void IocoinGUI::gotoVerifyMessageTab(QString addr)
     signVerifyMessageDialog->showTab_VM(true);
 
     if(!addr.isEmpty())
+    {
         signVerifyMessageDialog->setAddress_VM(addr);
+    }
 }
 
 void IocoinGUI::dragEnterEvent(QDragEnterEvent *event)
