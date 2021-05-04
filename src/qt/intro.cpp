@@ -521,4 +521,3 @@ void Intro::extractioncomplete()
             ui->next->show();
             ui->next->setText(tr("Successfully extracted. Click to continue..."));
 }
-//#https://iobootstrap.s3.amazonaws.com/IOC-BOOTSTRAP-3242602.zip
