@@ -425,7 +425,6 @@ void IocoinGUI::closeApp()
 }
 void IocoinGUI::toggleLock()
 {
-  std::cout << "toggle lock" << std::endl;
 }
 void IocoinGUI::minimizeApp()
 {
@@ -739,9 +738,7 @@ void IocoinGUI::setClientModel(ClientModel *clientModel)
 
 void IocoinGUI::setWalletModel(WalletModel *walletModel)
 {
-	//std::cout << "iocoingui setwalletmodel" << std::endl;
     this->walletModel = walletModel;
-	//std::cout << "iocoingui setwalletmodel 1" << std::endl;
     if(walletModel)
     {
         // Report errors from wallet thread
@@ -1087,7 +1084,6 @@ void IocoinGUI::gotoProfileImageChooser()
 
 void IocoinGUI::gotoOverviewPage()
 {
-	//std::cout << "goto overview" << std::endl;
     overviewAction->setChecked(true);
     centralWidget->setCurrentWidget(overviewPage);
 
@@ -1362,7 +1358,6 @@ void IocoinGUI::encryptWallet(bool status)
 }
 void IocoinGUI::encryptWalletTest(bool status)
 {
-	//std::cout << "encryptWallet" << std::endl;
 }
 
 void IocoinGUI::backupWallet()
@@ -1390,7 +1385,7 @@ void IocoinGUI::unlockWallet()
     // Unlock wallet when requested by wallet model
     if(walletModel->getEncryptionStatus() == WalletModel::Locked)
     {
-        AskPassphraseDialog::Mode mode = sender() == unlockWalletAction ?
+        AskPassphraseDialog::Mode mode = sender() ==  labelLockedIcon ?
               AskPassphraseDialog::UnlockStaking : AskPassphraseDialog::Unlock;
         AskPassphraseDialog dlg(mode, this);
         dlg.setModel(walletModel);
@@ -1547,7 +1542,6 @@ void IocoinGUI::complete_init(QString& dir)
     painter1.setClipPath(path1);
     painter1.fillRect(round1.rect(), Qt::black);
     painter1.drawPixmap(0,0,size1,size1, pixmap1);
-	std::cout << "complete_init 9" << std::endl;	
 
     QPixmap pixmap(profile_image.c_str());
     int size=qMax(pixmap.width(),pixmap.height());
