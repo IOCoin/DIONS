@@ -916,7 +916,6 @@ void IocoinGUI::error(const QString &title, const QString &message, bool modal)
 void IocoinGUI::changeEvent(QEvent *e)
 {
     QMainWindow::changeEvent(e);
-//XMAC #ifndef Q_OS_MAC // Ignored on Mac
     if(e->type() == QEvent::WindowStateChange)
     {
         if(clientModel && clientModel->getOptionsModel()->getMinimizeToTray())
@@ -929,20 +928,17 @@ void IocoinGUI::changeEvent(QEvent *e)
             }
         }
     }
-//XMAC #endif
 }
 
 void IocoinGUI::closeEvent(QCloseEvent *event)
 {
     if(clientModel)
     {
-//XMAC #ifndef Q_OS_MAC // Ignored on Mac
         if(!clientModel->getOptionsModel()->getMinimizeToTray() &&
            !clientModel->getOptionsModel()->getMinimizeOnClose())
         {
             qApp->quit();
         }
-//XMAC #endif
     }
     QMainWindow::closeEvent(event);
 }
