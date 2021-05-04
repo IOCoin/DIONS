@@ -964,7 +964,9 @@ void IocoinGUI::askFee(qint64 nFeeRequired, bool *payFee)
 void IocoinGUI::incomingTransaction(const QModelIndex & parent, int start, int end)
 {
     if(!walletModel || !clientModel)
+    {
         return;
+    }
     TransactionTableModel *ttm = walletModel->getTransactionTableModel();
     qint64 amount = ttm->index(start, TransactionTableModel::Amount, parent)
                     .data(Qt::EditRole).toULongLong();
