@@ -423,9 +423,6 @@ void IocoinGUI::closeApp()
 {
   qApp->quit();
 }
-void IocoinGUI::toggleLock()
-{
-}
 void IocoinGUI::minimizeApp()
 {
 #ifndef __APPLE__
