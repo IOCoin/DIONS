@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include "transactionview.h"
+#include "iocoingui.h"
 
 QT_BEGIN_NAMESPACE
 class QModelIndex;
@@ -21,7 +22,7 @@ class OverviewPage : public QWidget
     Q_OBJECT
 
 public:
-    explicit OverviewPage(QWidget *parent = 0);
+    explicit OverviewPage(IocoinGUI*,QWidget *parent = 0);
     ~OverviewPage();
 
     void setModel(WalletModel *model);
