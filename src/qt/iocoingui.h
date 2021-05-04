@@ -195,6 +195,9 @@ public slots:
     void askFee(qint64 nFeeRequired, bool *payFee);
     void handleURI(QString strURI);
 
+public slots:
+    /** Switch to send coins page */
+    void gotoSendCoinsPage();
 private slots:
     /** Switch to overview (home) page */
     void gotoProfileImageChooser();
@@ -207,8 +210,6 @@ private slots:
     void gotoAddressBookPage();
     /** Switch to receive coins page */
     void gotoReceiveCoinsPage();
-    /** Switch to send coins page */
-    void gotoSendCoinsPage();
     /** Switch to settings page */
     void gotoSettingsPage();
 
