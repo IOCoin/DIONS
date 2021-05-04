@@ -413,7 +413,9 @@ IocoinGUI::IocoinGUI(QWidget *parent):
 IocoinGUI::~IocoinGUI()
 {
     if(trayIcon) // Hide tray icon, as deleting will let it linger until quit (on Ubuntu)
-        trayIcon->hide();
+    {
+      trayIcon->hide();
+    }
 }
 
 void IocoinGUI::closeApp()
