@@ -126,10 +126,6 @@ OverviewPage::OverviewPage(QWidget *parent) :
     ef3->setColor(col);
     ui->staked->setGraphicsEffect(ef3);
 
-    // init "out of sync" warning labels
-    //ui->labelWalletStatus->setText("(" + tr("out of sync") + ")");
-    //ui->labelTransactionsStatus->setText("(" + tr("out of sync") + ")");
-
     ui->vl->setContentsMargins(0 , 0, 0, 0);
     ui->statusGL->setSpacing(0);
     ui->statusGL->setContentsMargins(10 , 0, 10, 0);
