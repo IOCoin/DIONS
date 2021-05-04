@@ -1116,7 +1116,6 @@ void IocoinGUI::gotoHistoryPage()
 void IocoinGUI::gotoAddressBookPage()
 {
     addressBookAction->setChecked(true);
-    //centralWidget->setCurrentWidget(addressBookPage);
     centralWidget->setCurrentWidget(receiveCoinsPage);
     string iconSvgDataChecked = 
 "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"
