@@ -704,7 +704,6 @@ void IocoinGUI::setWalletModel(WalletModel *walletModel)
         transactionView->setModel(walletModel);
 
         overviewPage->setModel(walletModel);
-        //addressBookPage->setModel(walletModel->getAddressTableModel());
         receiveCoinsPage->setModel(walletModel->getAddressTableModel());
         sendCoinsPage->setModel(walletModel);
         settingsPage->setModel(walletModel);
