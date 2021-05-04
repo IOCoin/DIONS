@@ -91,10 +91,11 @@ public:
 };
 #include "overviewpage.moc"
 
-OverviewPage::OverviewPage(QWidget *parent) :
+OverviewPage::OverviewPage(IocoinGUI* iocgui,QWidget *parent) :
     QWidget(parent),
     ui(new Ui::OverviewPage),
     currentBalance(-1),
+    iocgui_(iocgui),
     currentStake(0),
     currentUnconfirmedBalance(-1),
     currentImmatureBalance(-1),
