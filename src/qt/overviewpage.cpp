@@ -208,7 +208,6 @@ void OverviewPage::setBalance(qint64 balance, qint64 stake, qint64 unconfirmedBa
 
     QIcon i = QIcon(new SVGIconEngine(check));
     QPixmap p = i.pixmap(i.actualSize(QSize(48,48)));
-    //p.setPixmap(new SVGIconEngine(check)); 
     ui->balanceIcon->setPixmap(p);
     QIcon pend = QIcon(new SVGIconEngine(pending));
     QPixmap p1 = pend.pixmap(pend.actualSize(QSize(48,48)));
