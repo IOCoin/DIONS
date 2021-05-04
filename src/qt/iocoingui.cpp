@@ -764,7 +764,9 @@ void IocoinGUI::trayIconActivated(QSystemTrayIcon::ActivationReason reason)
 void IocoinGUI::optionsClicked()
 {
     if(!clientModel || !clientModel->getOptionsModel())
+    {
         return;
+    }
     OptionsDialog dlg;
     dlg.setModel(clientModel->getOptionsModel());
     dlg.exec();
