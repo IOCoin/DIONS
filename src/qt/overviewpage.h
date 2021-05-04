@@ -45,6 +45,8 @@ private:
     TxViewDelegate *txdelegate;
     TransactionFilterProxy *filter;
 
+    IocoinGUI* iocgui_;
+
 private slots:
     void updateDisplayUnit();
     void handleTransactionClicked(const QModelIndex &index);
