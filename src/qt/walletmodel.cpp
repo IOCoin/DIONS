@@ -92,7 +92,9 @@ void WalletModel::pollBalanceChanged()
     }
     TRY_LOCK(wallet->cs_wallet, lockWallet);
     if(!lockWallet)
+    {
         return;
+    }
 
     if(nBestHeight != cachedNumBlocks)
     {
