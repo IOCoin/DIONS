@@ -75,7 +75,9 @@ void WalletModel::updateStatus()
     EncryptionStatus newEncryptionStatus = getEncryptionStatus();
 
     if(cachedEncryptionStatus != newEncryptionStatus)
+    {
         emit encryptionStatusChanged(newEncryptionStatus);
+    }
 }
 
 void WalletModel::pollBalanceChanged()
