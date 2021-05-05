@@ -103,7 +103,9 @@ void WalletModel::pollBalanceChanged()
 
         checkBalanceChanged();
         if(transactionTableModel)
+	{
             transactionTableModel->updateConfirmations();
+	}
     }
 }
 
