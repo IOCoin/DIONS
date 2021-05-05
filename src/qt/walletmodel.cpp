@@ -87,7 +87,9 @@ void WalletModel::pollBalanceChanged()
     // for example, during a wallet rescan.
     TRY_LOCK(cs_main, lockMain);
     if(!lockMain)
+    {
         return;
+    }
     TRY_LOCK(wallet->cs_wallet, lockWallet);
     if(!lockWallet)
         return;
