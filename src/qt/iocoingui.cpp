@@ -214,8 +214,6 @@ IocoinGUI::IocoinGUI(QWidget *parent):
 {
     setWindowTitle(tr("I/OCoin") + " - " + tr("Wallet"));
     setWindowFlags(Qt::FramelessWindowHint);
-    setGeometry(20,10,200,700);
-
 
     int id = QFontDatabase::addApplicationFont(":/font/regular");
 
@@ -390,6 +388,9 @@ IocoinGUI::IocoinGUI(QWidget *parent):
     progressBar->setAlignment(Qt::AlignCenter);
     progressBar->setVisible(false);
 
+    // Override style sheet for progress bar for styles that have a segmented progress bar,
+    // as they make the text unreadable (workaround for issue #1071)
+    // See https://qt-project.org/doc/qt-4.8/gallery.html
     QString curStyle = qApp->style()->metaObject()->className();
 
     syncIconMovie = new QMovie(":/movies/update_spinner", "mng", this);
@@ -413,14 +414,16 @@ IocoinGUI::IocoinGUI(QWidget *parent):
 IocoinGUI::~IocoinGUI()
 {
     if(trayIcon) // Hide tray icon, as deleting will let it linger until quit (on Ubuntu)
-    {
-      trayIcon->hide();
-    }
+        trayIcon->hide();
 }
 
 void IocoinGUI::closeApp()
 {
   qApp->quit();
+}
+void IocoinGUI::toggleLock()
+{
+  std::cout << "toggle lock" << std::endl;
 }
 void IocoinGUI::minimizeApp()
 {
@@ -432,20 +435,55 @@ void IocoinGUI::minimizeApp()
 }
 void IocoinGUI::maximizeApp()
 {
-  if(!this->isMaximized())
-  { 
-    this->showMaximized();
-  }
-  else
-  {
-    this->showNormal();
-  }
+	if(!this->isMaximized())
+	  this->showMaximized();
+	else
+	  this->showNormal();
 }
 
 void IocoinGUI::createActions()
 {
     QActionGroup *tabGroup0 = new QActionGroup(this);
 
+    /*
+    boost::filesystem::path envPath = walletModel->getDataDir();
+    envPath /= "ui";
+    envPath /= "avatar";
+    envPath /= "profile_image";
+
+    if(!boost::filesystem::exists(envPath.branch_path()))
+    {
+      boost::filesystem::create_directories(envPath.branch_path());
+    }
+
+    string profile_image = envPath.string();
+
+    if(!boost::filesystem::exists(envPath))
+    {
+      QFile::copy(":/images/avatar", profile_image.c_str());
+    }
+    QPixmap pixmap1(":/images/gradient");
+    int size1=qMax(pixmap1.width(),pixmap1.height());
+    QPixmap round1 = QPixmap(size1,size1);
+    round1.fill(Qt::transparent);
+    QPainterPath path1; path1.addEllipse(round1.rect());
+    QPainter painter1(&round1);
+    painter1.setClipPath(path1);
+    painter1.fillRect(round1.rect(), Qt::black);
+    painter1.drawPixmap(0,0,size1,size1, pixmap1);
+
+    QPixmap pixmap(profile_image.c_str());
+    int size=qMax(pixmap.width(),pixmap.height());
+    QPixmap round = QPixmap(size,size);
+    round.fill(Qt::transparent);
+    QPainterPath path; path.addEllipse(round.rect());
+    QPainter painter(&round);
+    painter.setClipPath(path);
+    painter.fillRect(round.rect(), Qt::black);
+    painter.drawPixmap(0,0,size,size, pixmap);
+
+    painter1.drawPixmap(50,50,size1-100,size1-100, round);
+*/
     profileImageAction = new QAction(this);
     profileImageAction->setToolTip(tr("Select profile image"));
     profileImageAction->setCheckable(true);
@@ -459,7 +497,7 @@ void IocoinGUI::createActions()
     overviewAction->setIcon(overviewicon);
     overviewAction->setToolTip(tr("Show general overview of wallet"));
     overviewAction->setCheckable(true);
-    overviewAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_2));
+    overviewAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_1));
     tabGroup->addAction(overviewAction);
 
     QIcon sendicon = QIcon(new SVGIconEngine(sendSVGUnchecked));
@@ -468,7 +506,7 @@ void IocoinGUI::createActions()
     sendCoinsAction->setIcon(sendicon);
     sendCoinsAction->setToolTip(tr("Send coins to a I/OCoin address"));
     sendCoinsAction->setCheckable(true);
-    sendCoinsAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_3));
+    sendCoinsAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_2));
     tabGroup->addAction(sendCoinsAction);
 
     QIcon historyicon = QIcon(new SVGIconEngine(historySVGUnchecked));
@@ -495,7 +533,7 @@ void IocoinGUI::createActions()
     settingsAction->setIcon(settingsicon);
     settingsAction->setToolTip(tr("Enter settings"));
     settingsAction->setCheckable(true);
-    settingsAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_6));
+    settingsAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_5));
     tabGroup->addAction(settingsAction);
 
     connect(profileImageAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
@@ -557,6 +595,7 @@ void IocoinGUI::createActions()
     exportAction->setToolTip(tr("Export the data in the current tab to a file"));
     openRPCConsoleAction = new QAction(QIcon(":/icons/debugwindow"), tr("&Debug window"), this);
     openRPCConsoleAction->setToolTip(tr("Open debugging and diagnostic console"));
+    //openRPCConsoleAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_6));
     openRPCConsoleAction->setShortcut(QKeySequence(Qt::Key_Escape));
 
     connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
@@ -565,6 +604,7 @@ void IocoinGUI::createActions()
     connect(optionsAction, SIGNAL(triggered()), this, SLOT(optionsClicked()));
     connect(toggleHideAction, SIGNAL(triggered()), this, SLOT(toggleHidden()));
     connect(encryptWalletAction, SIGNAL(triggered(bool)), this, SLOT(encryptWallet(bool)));
+    //connect(labelEncryptionIcon, SIGNAL(clicked(bool)), this, SLOT(encryptWalletTest(bool)));
     connect(backupWalletAction, SIGNAL(triggered()), this, SLOT(backupWallet()));
     connect(changePassphraseAction, SIGNAL(triggered()), this, SLOT(changePassphrase()));
     connect(unlockWalletAction, SIGNAL(triggered()), this, SLOT(unlockWallet()));
@@ -648,7 +688,7 @@ void IocoinGUI::createToolBars()
 
     QLayout* tl = toolbar->layout();
     for(int i=0;i<tl->count();i++) { 
-      tl->itemAt(i)->setAlignment(Qt::AlignCenter);
+	    tl->itemAt(i)->setAlignment(Qt::AlignCenter);
     }
     toolbar0->setMovable(false);
     toolbar->setMovable(false);
@@ -697,7 +737,9 @@ void IocoinGUI::setClientModel(ClientModel *clientModel)
 
 void IocoinGUI::setWalletModel(WalletModel *walletModel)
 {
+	//std::cout << "iocoingui setwalletmodel" << std::endl;
     this->walletModel = walletModel;
+	//std::cout << "iocoingui setwalletmodel 1" << std::endl;
     if(walletModel)
     {
         // Report errors from wallet thread
@@ -707,6 +749,7 @@ void IocoinGUI::setWalletModel(WalletModel *walletModel)
         transactionView->setModel(walletModel);
 
         overviewPage->setModel(walletModel);
+        //addressBookPage->setModel(walletModel->getAddressTableModel());
         receiveCoinsPage->setModel(walletModel->getAddressTableModel());
         sendCoinsPage->setModel(walletModel);
         settingsPage->setModel(walletModel);
@@ -764,9 +807,7 @@ void IocoinGUI::trayIconActivated(QSystemTrayIcon::ActivationReason reason)
 void IocoinGUI::optionsClicked()
 {
     if(!clientModel || !clientModel->getOptionsModel())
-    {
         return;
-    }
     OptionsDialog dlg;
     dlg.setModel(clientModel->getOptionsModel());
     dlg.exec();
@@ -879,6 +920,7 @@ void IocoinGUI::setNumBlocks(int count, int nTotalBlocks)
         qssFile.open(QFile::ReadOnly);
         QString svg = QLatin1String(qssFile.readAll());
         labelBlocksIcon->setPixmap(QIcon(new SVGIconEngine(svg.toStdString())).pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
+        //labelBlocksIcon->setPixmap(QIcon(":/icons/synced").pixmap(STATUSBAR_ICONSIZE, STATUSBAR_ICONSIZE));
 
         overviewPage->showOutOfSyncWarning(false);
     }
@@ -921,6 +963,7 @@ void IocoinGUI::error(const QString &title, const QString &message, bool modal)
 void IocoinGUI::changeEvent(QEvent *e)
 {
     QMainWindow::changeEvent(e);
+//XMAC #ifndef Q_OS_MAC // Ignored on Mac
     if(e->type() == QEvent::WindowStateChange)
     {
         if(clientModel && clientModel->getOptionsModel()->getMinimizeToTray())
@@ -933,17 +976,20 @@ void IocoinGUI::changeEvent(QEvent *e)
             }
         }
     }
+//XMAC #endif
 }
 
 void IocoinGUI::closeEvent(QCloseEvent *event)
 {
     if(clientModel)
     {
+//XMAC #ifndef Q_OS_MAC // Ignored on Mac
         if(!clientModel->getOptionsModel()->getMinimizeToTray() &&
            !clientModel->getOptionsModel()->getMinimizeOnClose())
         {
             qApp->quit();
         }
+//XMAC #endif
     }
     QMainWindow::closeEvent(event);
 }
@@ -964,9 +1010,7 @@ void IocoinGUI::askFee(qint64 nFeeRequired, bool *payFee)
 void IocoinGUI::incomingTransaction(const QModelIndex & parent, int start, int end)
 {
     if(!walletModel || !clientModel)
-    {
         return;
-    }
     TransactionTableModel *ttm = walletModel->getTransactionTableModel();
     qint64 amount = ttm->index(start, TransactionTableModel::Amount, parent)
                     .data(Qt::EditRole).toULongLong();
@@ -1041,6 +1085,7 @@ void IocoinGUI::gotoProfileImageChooser()
 
 void IocoinGUI::gotoOverviewPage()
 {
+	//std::cout << "goto overview" << std::endl;
     overviewAction->setChecked(true);
     centralWidget->setCurrentWidget(overviewPage);
 
@@ -1123,6 +1168,7 @@ void IocoinGUI::gotoHistoryPage()
 void IocoinGUI::gotoAddressBookPage()
 {
     addressBookAction->setChecked(true);
+    //centralWidget->setCurrentWidget(addressBookPage);
     centralWidget->setCurrentWidget(receiveCoinsPage);
     string iconSvgDataChecked = 
 "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"
@@ -1202,9 +1248,7 @@ void IocoinGUI::gotoSignMessageTab(QString addr)
     signVerifyMessageDialog->showTab_SM(true);
 
     if(!addr.isEmpty())
-    {
         signVerifyMessageDialog->setAddress_SM(addr);
-    }
 }
 
 void IocoinGUI::gotoVerifyMessageTab(QString addr)
@@ -1213,18 +1257,14 @@ void IocoinGUI::gotoVerifyMessageTab(QString addr)
     signVerifyMessageDialog->showTab_VM(true);
 
     if(!addr.isEmpty())
-    {
         signVerifyMessageDialog->setAddress_VM(addr);
-    }
 }
 
 void IocoinGUI::dragEnterEvent(QDragEnterEvent *event)
 {
     // Accept only URIs
     if(event->mimeData()->hasUrls())
-    {
         event->acceptProposedAction();
-    }
 }
 
 void IocoinGUI::dropEvent(QDropEvent *event)
@@ -1263,11 +1303,11 @@ void IocoinGUI::handleURI(QString strURI)
 
 void IocoinGUI::setEncryptionStatus(int status)
 {
-  QString svg;
+	QString svg;
     switch(status)
     {
     case WalletModel::Unencrypted:
-      {
+	    {
         labelLockedIcon->hide();
         labelUnlockedIcon->hide();
         labelUnencryptedIcon->show();
@@ -1279,7 +1319,7 @@ void IocoinGUI::setEncryptionStatus(int status)
         lockWalletAction->setVisible(false);
         encryptWalletAction->setEnabled(true);
         break;
-      }
+	    }
     case WalletModel::Unlocked:
         labelUnencryptedIcon->hide();
         labelLockedIcon->hide();
@@ -1310,9 +1350,7 @@ void IocoinGUI::setEncryptionStatus(int status)
 void IocoinGUI::encryptWallet(bool status)
 {
     if(!walletModel)
-    {
         return;
-    }
     AskPassphraseDialog dlg(status ? AskPassphraseDialog::Encrypt:
                                      AskPassphraseDialog::Decrypt, this);
     dlg.setModel(walletModel);
@@ -1322,6 +1360,7 @@ void IocoinGUI::encryptWallet(bool status)
 }
 void IocoinGUI::encryptWalletTest(bool status)
 {
+	//std::cout << "encryptWallet" << std::endl;
 }
 
 void IocoinGUI::backupWallet()
@@ -1345,9 +1384,7 @@ void IocoinGUI::changePassphrase()
 void IocoinGUI::unlockWallet()
 {
     if(!walletModel)
-    {
         return;
-    }
     // Unlock wallet when requested by wallet model
     if(walletModel->getEncryptionStatus() == WalletModel::Locked)
     {
@@ -1362,9 +1399,7 @@ void IocoinGUI::unlockWallet()
 void IocoinGUI::lockWallet()
 {
     if(!walletModel)
-    {
         return;
-    }
 
     walletModel->setWalletLocked(true);
 }
@@ -1388,9 +1423,7 @@ void IocoinGUI::showNormalIfMinimized(bool fToggleHidden)
         activateWindow();
     }
     else if(fToggleHidden)
-    {
         hide();
-    }
 }
 
 void IocoinGUI::toggleHidden()
@@ -1486,7 +1519,7 @@ void IocoinGUI::complete_init(QString& dir)
 
    this->setClientModel(clientModel_);
    this->setWalletModel(walletModel_);
-  
+	
     boost::filesystem::path envPath = this->walletModel->getDataDir();
     envPath /= "ui";
     envPath /= "avatar";
@@ -1512,6 +1545,7 @@ void IocoinGUI::complete_init(QString& dir)
     painter1.setClipPath(path1);
     painter1.fillRect(round1.rect(), Qt::black);
     painter1.drawPixmap(0,0,size1,size1, pixmap1);
+	std::cout << "complete_init 9" << std::endl;	
 
     QPixmap pixmap(profile_image.c_str());
     int size=qMax(pixmap.width(),pixmap.height());
@@ -1538,7 +1572,7 @@ void IocoinGUI::complete_init(QString& dir)
 
 void IocoinGUI::mousePressEvent(QMouseEvent* e)
 {
-  basePos_ = e->globalPos();  
+  basePos_ = e->globalPos();	
 }
 void IocoinGUI::mouseMoveEvent(QMouseEvent* e)
 {
