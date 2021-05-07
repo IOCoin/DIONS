@@ -1570,13 +1570,273 @@ void IocoinGUI::complete_init(QString& dir)
     gotoOverviewPage();
 }
 
-void IocoinGUI::mousePressEvent(QMouseEvent* e)
-{
-  basePos_ = e->globalPos();	
-}
 void IocoinGUI::mouseMoveEvent(QMouseEvent* e)
 {
   const QPoint  delta  = e->globalPos() - basePos_;
   move(x()+delta.x(),y()+delta.y());
   basePos_ = e->globalPos();
+}
+void IocoinGUI::mouseMoveEvent(QMouseEvent* e)
+{
+  std::cout << "mouse move event" << std::endl;
+  const QPoint  delta  = e->globalPos() - basePos_;
+  move(x()+delta.x(),y()+delta.y());
+  basePos_ = e->globalPos();
+}
+
+void IocoinGUI::checkBorderDragging(QMouseEvent *event) {
+  if (isMaximized()) {
+    return;
+  }
+
+  QPoint globalMousePos = event->globalPos();
+  if (m_bMousePressed) {
+	std::cout << "checkborderdragging mouse pressed" << std::endl;
+    QScreen *screen = QGuiApplication::primaryScreen();
+	// available geometry excludes taskbar
+    QRect availGeometry = screen->availableGeometry();
+    int h = availGeometry.height();
+    int w = availGeometry.width();
+    QList<QScreen *> screenlist = screen->virtualSiblings();
+    if (screenlist.contains(screen)) {
+      QSize sz = QApplication::desktop()->size();
+      h = sz.height();
+      w = sz.width();
+    }
+
+    // top right corner
+    if (m_bDragTop && m_bDragRight) {
+	std::cout << "checkborderdragging drag top drag right" << std::endl;
+      int diff =
+          globalMousePos.x() - (m_StartGeometry.x() + m_StartGeometry.width());
+      int neww = m_StartGeometry.width() + diff;
+      diff = globalMousePos.y() - m_StartGeometry.y();
+      int newy = m_StartGeometry.y() + diff;
+      if (neww > 0 && newy > 0 && newy < h - 50) {
+        QRect newg = m_StartGeometry;
+        newg.setWidth(neww);
+        newg.setX(m_StartGeometry.x());
+        newg.setY(newy);
+        setGeometry(newg);
+      }
+    }
+    // top left corner
+    else if (m_bDragTop && m_bDragLeft) {
+	std::cout << "checkborderdragging drag top drag left" << std::endl;
+      int diff = globalMousePos.y() - m_StartGeometry.y();
+      int newy = m_StartGeometry.y() + diff;
+      diff = globalMousePos.x() - m_StartGeometry.x();
+      int newx = m_StartGeometry.x() + diff;
+      if (newy > 0 && newx > 0) {
+        QRect newg = m_StartGeometry;
+        newg.setY(newy);
+        newg.setX(newx);
+        setGeometry(newg);
+      }
+    }
+    // bottom right corner
+    else if (m_bDragBottom && m_bDragLeft) {
+	std::cout << "checkborderdragging drag bottom drag left" << std::endl;
+      int diff =
+          globalMousePos.y() - (m_StartGeometry.y() + m_StartGeometry.height());
+      int newh = m_StartGeometry.height() + diff;
+      diff = globalMousePos.x() - m_StartGeometry.x();
+      int newx = m_StartGeometry.x() + diff;
+      if (newh > 0 && newx > 0) {
+        QRect newg = m_StartGeometry;
+        newg.setX(newx);
+        newg.setHeight(newh);
+        setGeometry(newg);
+      }
+    } else if (m_bDragTop) {
+	std::cout << "checkborderdragging drag top" << std::endl;
+      int diff = globalMousePos.y() - m_StartGeometry.y();
+      int newy = m_StartGeometry.y() + diff;
+      if (newy > 0 && newy < h - 50) {
+        QRect newg = m_StartGeometry;
+        newg.setY(newy);
+        setGeometry(newg);
+      }
+    } else if (m_bDragLeft) {
+	std::cout << "checkborderdragging drag left" << std::endl;
+      int diff = globalMousePos.x() - m_StartGeometry.x();
+      int newx = m_StartGeometry.x() + diff;
+      if (newx > 0 && newx < w - 50) {
+        QRect newg = m_StartGeometry;
+        newg.setX(newx);
+        setGeometry(newg);
+      }
+    } else if (m_bDragRight) {
+	std::cout << "checkborderdragging drag right" << std::endl;
+      int diff =
+          globalMousePos.x() - (m_StartGeometry.x() + m_StartGeometry.width());
+      int neww = m_StartGeometry.width() + diff;
+      if (neww > 0) {
+        QRect newg = m_StartGeometry;
+        newg.setWidth(neww);
+        newg.setX(m_StartGeometry.x());
+        setGeometry(newg);
+      }
+    } else if (m_bDragBottom) {
+	std::cout << "checkborderdragging drag bottom" << std::endl;
+      int diff =
+          globalMousePos.y() - (m_StartGeometry.y() + m_StartGeometry.height());
+      int newh = m_StartGeometry.height() + diff;
+      if (newh > 0) {
+        QRect newg = m_StartGeometry;
+        newg.setHeight(newh);
+        newg.setY(m_StartGeometry.y());
+        setGeometry(newg);
+      }
+    }
+  } else {
+    // no mouse pressed
+    if (leftBorderHit(globalMousePos) && topBorderHit(globalMousePos)) {
+      setCursor(Qt::SizeFDiagCursor);
+    } else if (rightBorderHit(globalMousePos) && topBorderHit(globalMousePos)) {
+      setCursor(Qt::SizeBDiagCursor);
+    } else if (leftBorderHit(globalMousePos) &&
+               bottomBorderHit(globalMousePos)) {
+      setCursor(Qt::SizeBDiagCursor);
+    } else {
+      if (topBorderHit(globalMousePos)) {
+        setCursor(Qt::SizeVerCursor);
+      } else if (leftBorderHit(globalMousePos)) {
+        setCursor(Qt::SizeHorCursor);
+      } else if (rightBorderHit(globalMousePos)) {
+        setCursor(Qt::SizeHorCursor);
+      } else if (bottomBorderHit(globalMousePos)) {
+        setCursor(Qt::SizeVerCursor);
+      } else {
+        m_bDragTop = false;
+        m_bDragLeft = false;
+        m_bDragRight = false;
+        m_bDragBottom = false;
+        setCursor(Qt::ArrowCursor);
+      }
+    }
+  }
+}
+
+// pos in global virtual desktop coordinates
+bool IocoinGUI::leftBorderHit(const QPoint &pos) {
+  const QRect &rect = this->geometry();
+  if (pos.x() >= rect.x() && pos.x() <= rect.x() + CONST_DRAG_BORDER_SIZE) {
+    return true;
+  }
+  return false;
+}
+
+bool IocoinGUI::rightBorderHit(const QPoint &pos) {
+  const QRect &rect = this->geometry();
+  int tmp = rect.x() + rect.width();
+  if (pos.x() <= tmp && pos.x() >= (tmp - CONST_DRAG_BORDER_SIZE)) {
+    return true;
+  }
+  return false;
+}
+
+bool IocoinGUI::topBorderHit(const QPoint &pos) {
+  const QRect &rect = this->geometry();
+  if (pos.y() >= rect.y() && pos.y() <= rect.y() + CONST_DRAG_BORDER_SIZE) {
+    return true;
+  }
+  return false;
+}
+
+bool IocoinGUI::bottomBorderHit(const QPoint &pos) {
+  const QRect &rect = this->geometry();
+  int tmp = rect.y() + rect.height();
+  if (pos.y() <= tmp && pos.y() >= (tmp - CONST_DRAG_BORDER_SIZE)) {
+    return true;
+  }
+  return false;
+}
+
+void IocoinGUI::mousePressEvent(QMouseEvent *event) {
+  if (isMaximized()) {
+    return;
+  }
+
+  basePos_ = event->globalPos();	
+  m_bMousePressed = true;
+  m_StartGeometry = this->geometry();
+
+  QPoint globalMousePos = mapToGlobal(QPoint(event->x(), event->y()));
+
+  if (leftBorderHit(globalMousePos) && topBorderHit(globalMousePos)) {
+    m_bDragTop = true;
+    m_bDragLeft = true;
+    setCursor(Qt::SizeFDiagCursor);
+  } else if (rightBorderHit(globalMousePos) && topBorderHit(globalMousePos)) {
+    m_bDragRight = true;
+    m_bDragTop = true;
+    setCursor(Qt::SizeBDiagCursor);
+  } else if (leftBorderHit(globalMousePos) && bottomBorderHit(globalMousePos)) {
+    m_bDragLeft = true;
+    m_bDragBottom = true;
+    setCursor(Qt::SizeBDiagCursor);
+  } else {
+    if (topBorderHit(globalMousePos)) {
+      m_bDragTop = true;
+      setCursor(Qt::SizeVerCursor);
+    } else if (leftBorderHit(globalMousePos)) {
+      m_bDragLeft = true;
+      setCursor(Qt::SizeHorCursor);
+    } else if (rightBorderHit(globalMousePos)) {
+      m_bDragRight = true;
+      setCursor(Qt::SizeHorCursor);
+    } else if (bottomBorderHit(globalMousePos)) {
+      m_bDragBottom = true;
+      setCursor(Qt::SizeVerCursor);
+    }
+  }
+}
+
+void IocoinGUI::mouseReleaseEvent(QMouseEvent *event) {
+  Q_UNUSED(event);
+  if (isMaximized()) {
+    return;
+  }
+
+  m_bMousePressed = false;
+  bool bSwitchBackCursorNeeded =
+      m_bDragTop || m_bDragLeft || m_bDragRight || m_bDragBottom;
+  m_bDragTop = false;
+  m_bDragLeft = false;
+  m_bDragRight = false;
+  m_bDragBottom = false;
+  if (bSwitchBackCursorNeeded) {
+    setCursor(Qt::ArrowCursor);
+  }
+}
+
+bool IocoinGUI::eventFilter(QObject *obj, QEvent *event) {
+  if (isMaximized()) {
+    return QWidget::eventFilter(obj, event);
+  }
+
+  // check mouse move event when mouse is moved on any object
+  if (event->type() == QEvent::MouseMove) {
+    QMouseEvent *pMouse = dynamic_cast<QMouseEvent *>(event);
+    if (pMouse) {
+      checkBorderDragging(pMouse);
+    }
+  }
+  // press is triggered only on frame window
+  else if (event->type() == QEvent::MouseButtonPress && obj == this) {
+    QMouseEvent *pMouse = dynamic_cast<QMouseEvent *>(event);
+    if (pMouse) {
+      mousePressEvent(pMouse);
+    }
+  } else if (event->type() == QEvent::MouseButtonRelease) {
+    if (m_bMousePressed) {
+      QMouseEvent *pMouse = dynamic_cast<QMouseEvent *>(event);
+      if (pMouse) {
+        mouseReleaseEvent(pMouse);
+      }
+    }
+  }
+
+  return QWidget::eventFilter(obj, event);
 }
