@@ -256,8 +256,7 @@ int main(int argc, char *argv[])
       {
         {
           if (splashref)
-            //splash.finish(window);
-            splash.finish(&framelessWindow);
+            splash.finish(window);
 
           // If -min option passed, start window minimized.
           if(GetBoolArg("-min"))
