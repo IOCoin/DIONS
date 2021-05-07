@@ -275,8 +275,7 @@ int main(int argc, char *argv[])
           }
           else
           {
-            //XXXX window.show();
-            framelessWindow.show();
+            window.show();
           }
 
           app.exec();
