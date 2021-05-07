@@ -1765,7 +1765,8 @@ void IocoinGUI::mousePressEvent(QMouseEvent *event) {
 
   QPoint globalMousePos = mapToGlobal(QPoint(event->x(), event->y()));
 
-  if (leftBorderHit(globalMousePos) && topBorderHit(globalMousePos)) {
+  if (leftBorderHit(globalMousePos) && topBorderHit(globalMousePos)) 
+  {
     m_bDragTop = true;
     m_bDragLeft = true;
     setCursor(Qt::SizeFDiagCursor);
