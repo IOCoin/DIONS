@@ -1754,7 +1754,8 @@ bool IocoinGUI::bottomBorderHit(const QPoint &pos) {
 }
 
 void IocoinGUI::mousePressEvent(QMouseEvent *event) {
-  if (isMaximized()) {
+  if (isMaximized()) 
+  {
     return;
   }
 
