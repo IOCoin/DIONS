@@ -252,9 +252,6 @@ int main(int argc, char *argv[])
     {
       IocoinGUI* window = new IocoinGUI();
       FramelessWindow framelessWindow;
-	    std::cout << "init 3" << std::endl;
-      //framelessWindow.setWindowState(Qt::WindowFullScreen);
-	    std::cout << "init 4" << std::endl;
       framelessWindow.setContent(window);
 	    std::cout << "init 5" << std::endl;
 
