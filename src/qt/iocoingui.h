@@ -198,6 +198,13 @@ public slots:
 public slots:
     /** Switch to send coins page */
     void gotoSendCoinsPage();
+protected:
+    void changeEvent(QEvent *event);
+    void mouseDoubleClickEvent(QMouseEvent *event);
+    void checkBorderDragging(QMouseEvent *event);
+    void mousePressEvent(QMouseEvent *event);
+    void mouseReleaseEvent(QMouseEvent *event);
+    bool eventFilter(QObject *obj, QEvent *event);
 private slots:
     /** Switch to overview (home) page */
     void gotoProfileImageChooser();
