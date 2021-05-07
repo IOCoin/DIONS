@@ -251,9 +251,6 @@ int main(int argc, char *argv[])
     try
     {
       IocoinGUI* window = new IocoinGUI();
-      FramelessWindow framelessWindow;
-      framelessWindow.setContent(window);
-	    std::cout << "init 5" << std::endl;
 
       guiref = window;
       {
