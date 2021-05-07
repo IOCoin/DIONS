@@ -250,7 +250,6 @@ int main(int argc, char *argv[])
 
     try
     {
-	    std::cout << "init 1" << std::endl;
       IocoinGUI* window = new IocoinGUI();
 	    std::cout << "init 2" << std::endl;
       FramelessWindow framelessWindow;
