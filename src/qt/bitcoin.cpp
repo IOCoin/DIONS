@@ -8,7 +8,6 @@
 #include "init.h"
 #include "ui_interface.h"
 #include "qtipcserver.h"
-#include "framelesswindow.h"
 
 #include <QApplication>
 #include <QMessageBox>
