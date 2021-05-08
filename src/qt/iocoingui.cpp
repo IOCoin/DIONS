@@ -236,6 +236,12 @@ IocoinGUI::IocoinGUI(QWidget *parent):
     setAcceptDrops(true);
     //Construct custom drag cursors
     QString svgtl; 
+    QFile qssFiletl(":/icons/dragtopleft");
+    qssFiletl.open(QFile::ReadOnly);
+    svgtl = QLatin1String(qssFiletl.readAll());
+    QIcon tl = QIcon(new SVGIconEngine(svgtl.toStdString()));
+    QPixmap ptl = tl.pixmap(tl.actualSize(QSize(48,48)));
+    dragtopleft = new QCursor(ptl);
 
     centralWidget = new QStackedWidget(this);
     intro = new Intro();
