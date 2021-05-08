@@ -264,6 +264,7 @@ private slots:
     void closeApp();
 private:
     //Custom drag cursors
+    QCursor* dragtopleft;
 };
 
 #endif
