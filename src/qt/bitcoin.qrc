@@ -32,6 +32,7 @@
         <file alias="toolbar_testnet">res/images/IOC-QT100PX.svg</file>
         <file alias="dragtopleft">res/icons/circle-arrow-top-left.svg</file>
         <file alias="dragtopright">res/icons/circle-arrow-top-right.svg</file>
+        <file alias="dragbottomright">res/icons/circle-arrow-bottom-right.svg</file>
         <file alias="edit">res/icons/edit.png</file>
         <file alias="history">res/icons/history.png</file>
         <file alias="overview">res/icons/overview.png</file>
