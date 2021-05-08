@@ -1651,7 +1651,8 @@ void IocoinGUI::checkBorderDragging(QMouseEvent *event)
       int newh = m_StartGeometry.height() + diff;
       diff = globalMousePos.x() - m_StartGeometry.x();
       int newx = m_StartGeometry.x() + diff;
-      if (newh > 0 && newx > 0) {
+      if (newh > 0 && newx > 0) 
+      {
         QRect newg = m_StartGeometry;
         newg.setX(newx);
         newg.setHeight(newh);
