@@ -265,6 +265,7 @@ private slots:
 private:
     //Custom drag cursors
     QCursor* dragtopleft;
+    QCursor* dragtopright;
 };
 
 #endif
