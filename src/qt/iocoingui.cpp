@@ -1601,7 +1601,8 @@ void IocoinGUI::checkBorderDragging(QMouseEvent *event)
     int h = availGeometry.height();
     int w = availGeometry.width();
     QList<QScreen *> screenlist = screen->virtualSiblings();
-    if (screenlist.contains(screen)) {
+    if (screenlist.contains(screen)) 
+    {
       QSize sz = QApplication::desktop()->size();
       h = sz.height();
       w = sz.width();
