@@ -242,6 +242,13 @@ IocoinGUI::IocoinGUI(QWidget *parent):
     QIcon tl = QIcon(new SVGIconEngine(svgtl.toStdString()));
     QPixmap ptl = tl.pixmap(tl.actualSize(QSize(48,48)));
     dragtopleft = new QCursor(ptl);
+    QString svgtr; 
+    QFile qssFiletr(":/icons/dragtopright");
+    qssFiletr.open(QFile::ReadOnly);
+    svgtr = QLatin1String(qssFiletr.readAll());
+    QIcon tr = QIcon(new SVGIconEngine(svgtr.toStdString()));
+    QPixmap ptr = tr.pixmap(tr.actualSize(QSize(48,48)));
+    dragtopright = new QCursor(ptr);
 
     centralWidget = new QStackedWidget(this);
     intro = new Intro();
