@@ -234,6 +234,8 @@ IocoinGUI::IocoinGUI(QWidget *parent):
     setStyleSheet(styleSheet);
     // Accept D&D of URIs
     setAcceptDrops(true);
+    //Construct custom drag cursors
+    QString svgtl; 
 
     centralWidget = new QStackedWidget(this);
     intro = new Intro();
