@@ -262,6 +262,8 @@ private slots:
     void minimizeApp();
     void maximizeApp();
     void closeApp();
+private:
+    //Custom drag cursors
 };
 
 #endif
