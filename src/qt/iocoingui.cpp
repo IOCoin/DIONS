@@ -1592,7 +1592,8 @@ void IocoinGUI::checkBorderDragging(QMouseEvent *event)
   }
 
   QPoint globalMousePos = event->globalPos();
-  if (m_bMousePressed) {
+  if (m_bMousePressed) 
+  {
 	std::cout << "checkborderdragging mouse pressed" << std::endl;
     QScreen *screen = QGuiApplication::primaryScreen();
 	// available geometry excludes taskbar
