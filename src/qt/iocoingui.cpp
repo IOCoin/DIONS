@@ -1746,7 +1746,9 @@ void IocoinGUI::checkBorderDragging(QMouseEvent *event)
       else if (bottomBorderHit(globalMousePos)) 
       {
         setCursor(Qt::SizeVerCursor);
-      } else {
+      } 
+      else 
+      {
         m_bDragTop = false;
         m_bDragLeft = false;
         m_bDragRight = false;
