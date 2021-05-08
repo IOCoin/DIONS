@@ -267,6 +267,7 @@ private:
     QCursor* dragtopleft;
     QCursor* dragtopright;
     QCursor* dragbottomright;
+    QCursor* dragbottomleft;
 };
 
 #endif
