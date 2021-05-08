@@ -1584,7 +1584,8 @@ void IocoinGUI::mouseMoveEvent(QMouseEvent* e)
   basePos_ = e->globalPos();
 }
 
-void IocoinGUI::checkBorderDragging(QMouseEvent *event) {
+void IocoinGUI::checkBorderDragging(QMouseEvent *event) 
+{
   if (isMaximized()) {
     return;
   }
