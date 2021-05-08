@@ -1643,7 +1643,8 @@ void IocoinGUI::checkBorderDragging(QMouseEvent *event)
       }
     }
     // bottom right corner
-    else if (m_bDragBottom && m_bDragLeft) {
+    else if (m_bDragBottom && m_bDragLeft) 
+    {
 	std::cout << "checkborderdragging drag bottom drag left" << std::endl;
       int diff =
           globalMousePos.y() - (m_StartGeometry.y() + m_StartGeometry.height());
