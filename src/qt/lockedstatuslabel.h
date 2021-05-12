@@ -15,7 +15,6 @@ class LockedStatusLabel : public ClickableLabel
 
   signals:
     void unlock(bool);
-    void unenc(bool);
 
   protected:
     void mousePressEvent(QMouseEvent* e);

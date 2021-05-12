@@ -26,9 +26,11 @@ public:
     ~OverviewPage();
 
     void setModel(WalletModel *model);
+    void showOutOfSyncWarning(bool fShow);
 
 public slots:
     void setBalance(qint64 balance, qint64 stake, qint64 unconfirmedBalance, qint64 immatureBalance);
+    void gotoSendPage();
 
 signals:
     void transactionClicked(const QModelIndex &index);
@@ -45,11 +47,11 @@ private:
     TxViewDelegate *txdelegate;
     TransactionFilterProxy *filter;
 
-    IocoinGUI* iocgui_;
-
 private slots:
     void updateDisplayUnit();
     void handleTransactionClicked(const QModelIndex &index);
+private:
+    IocoinGUI* iocgui_;
 };
 
 #endif // OVERVIEWPAGE_H

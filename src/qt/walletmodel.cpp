@@ -75,9 +75,7 @@ void WalletModel::updateStatus()
     EncryptionStatus newEncryptionStatus = getEncryptionStatus();
 
     if(cachedEncryptionStatus != newEncryptionStatus)
-    {
         emit encryptionStatusChanged(newEncryptionStatus);
-    }
 }
 
 void WalletModel::pollBalanceChanged()
@@ -87,14 +85,10 @@ void WalletModel::pollBalanceChanged()
     // for example, during a wallet rescan.
     TRY_LOCK(cs_main, lockMain);
     if(!lockMain)
-    {
         return;
-    }
     TRY_LOCK(wallet->cs_wallet, lockWallet);
     if(!lockWallet)
-    {
         return;
-    }
 
     if(nBestHeight != cachedNumBlocks)
     {
@@ -103,9 +97,7 @@ void WalletModel::pollBalanceChanged()
 
         checkBalanceChanged();
         if(transactionTableModel)
-	{
             transactionTableModel->updateConfirmations();
-	}
     }
 }
 
@@ -129,9 +121,7 @@ void WalletModel::checkBalanceChanged()
 void WalletModel::updateTransaction(const QString &hash, int status)
 {
     if(transactionTableModel)
-    {
         transactionTableModel->updateTransaction(hash, status);
-    }
 
     // Balance and number of transactions might have changed
     checkBalanceChanged();
@@ -147,9 +137,7 @@ void WalletModel::updateTransaction(const QString &hash, int status)
 void WalletModel::updateAddressBook(const QString &address, const QString &label, bool isMine, int status)
 {
     if(addressTableModel)
-    {
         addressTableModel->updateEntry(address, label, isMine, status);
-    }
 }
 
 bool WalletModel::validateAddress(const QString &address)

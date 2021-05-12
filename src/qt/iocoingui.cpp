@@ -38,7 +38,9 @@
 
 #include <QApplication>
 #include <QPoint>
+#include <QScreen>
 #include <QPainter>
+#include <QDesktopWidget>
 #include <QPainterPath>
 #include <QMainWindow>
 #include <QMenuBar>
@@ -74,6 +76,7 @@
 #include<boost/filesystem.hpp>
 
 extern "C" { int setup_application(IocoinGUI&,std::string); }
+extern "C" { int handle_shutdown(IocoinGUI*); }
 extern __wx__* pwalletMain;
 extern int64_t nLastCoinStakeSearchInterval;
 double GetPoSKernelPS(int nHeight = -1);
@@ -213,7 +216,9 @@ IocoinGUI::IocoinGUI(QWidget *parent):
     nWeight(0)
 {
     setWindowTitle(tr("I/OCoin") + " - " + tr("Wallet"));
-    setWindowFlags(Qt::FramelessWindowHint);
+    setWindowFlags(Qt::FramelessWindowHint|Qt::WindowCloseButtonHint);
+    setGeometry(20,10,200,700);
+
 
     int id = QFontDatabase::addApplicationFont(":/font/regular");
 
@@ -234,6 +239,7 @@ IocoinGUI::IocoinGUI(QWidget *parent):
     setStyleSheet(styleSheet);
     // Accept D&D of URIs
     setAcceptDrops(true);
+
     //Construct custom drag cursors
     QString svgtl; 
     QFile qssFiletl(":/icons/dragtopleft");
@@ -263,6 +269,10 @@ IocoinGUI::IocoinGUI(QWidget *parent):
     QIcon bl = QIcon(new SVGIconEngine(svgbl.toStdString()));
     QPixmap pbl = bl.pixmap(bl.actualSize(QSize(48,48)));
     dragbottomleft = new QCursor(pbl);
+
+
+  
+    QApplication::instance()->installEventFilter(this);
 
     centralWidget = new QStackedWidget(this);
     intro = new Intro();
@@ -448,11 +458,7 @@ IocoinGUI::~IocoinGUI()
 
 void IocoinGUI::closeApp()
 {
-  qApp->quit();
-}
-void IocoinGUI::toggleLock()
-{
-  std::cout << "toggle lock" << std::endl;
+	this->close();
 }
 void IocoinGUI::minimizeApp()
 {
@@ -474,45 +480,6 @@ void IocoinGUI::createActions()
 {
     QActionGroup *tabGroup0 = new QActionGroup(this);
 
-    /*
-    boost::filesystem::path envPath = walletModel->getDataDir();
-    envPath /= "ui";
-    envPath /= "avatar";
-    envPath /= "profile_image";
-
-    if(!boost::filesystem::exists(envPath.branch_path()))
-    {
-      boost::filesystem::create_directories(envPath.branch_path());
-    }
-
-    string profile_image = envPath.string();
-
-    if(!boost::filesystem::exists(envPath))
-    {
-      QFile::copy(":/images/avatar", profile_image.c_str());
-    }
-    QPixmap pixmap1(":/images/gradient");
-    int size1=qMax(pixmap1.width(),pixmap1.height());
-    QPixmap round1 = QPixmap(size1,size1);
-    round1.fill(Qt::transparent);
-    QPainterPath path1; path1.addEllipse(round1.rect());
-    QPainter painter1(&round1);
-    painter1.setClipPath(path1);
-    painter1.fillRect(round1.rect(), Qt::black);
-    painter1.drawPixmap(0,0,size1,size1, pixmap1);
-
-    QPixmap pixmap(profile_image.c_str());
-    int size=qMax(pixmap.width(),pixmap.height());
-    QPixmap round = QPixmap(size,size);
-    round.fill(Qt::transparent);
-    QPainterPath path; path.addEllipse(round.rect());
-    QPainter painter(&round);
-    painter.setClipPath(path);
-    painter.fillRect(round.rect(), Qt::black);
-    painter.drawPixmap(0,0,size,size, pixmap);
-
-    painter1.drawPixmap(50,50,size1-100,size1-100, round);
-*/
     profileImageAction = new QAction(this);
     profileImageAction->setToolTip(tr("Select profile image"));
     profileImageAction->setCheckable(true);
@@ -624,7 +591,6 @@ void IocoinGUI::createActions()
     exportAction->setToolTip(tr("Export the data in the current tab to a file"));
     openRPCConsoleAction = new QAction(QIcon(":/icons/debugwindow"), tr("&Debug window"), this);
     openRPCConsoleAction->setToolTip(tr("Open debugging and diagnostic console"));
-    //openRPCConsoleAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_6));
     openRPCConsoleAction->setShortcut(QKeySequence(Qt::Key_Escape));
 
     connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
@@ -633,7 +599,6 @@ void IocoinGUI::createActions()
     connect(optionsAction, SIGNAL(triggered()), this, SLOT(optionsClicked()));
     connect(toggleHideAction, SIGNAL(triggered()), this, SLOT(toggleHidden()));
     connect(encryptWalletAction, SIGNAL(triggered(bool)), this, SLOT(encryptWallet(bool)));
-    //connect(labelEncryptionIcon, SIGNAL(clicked(bool)), this, SLOT(encryptWalletTest(bool)));
     connect(backupWalletAction, SIGNAL(triggered()), this, SLOT(backupWallet()));
     connect(changePassphraseAction, SIGNAL(triggered()), this, SLOT(changePassphrase()));
     connect(unlockWalletAction, SIGNAL(triggered()), this, SLOT(unlockWallet()));
@@ -766,9 +731,7 @@ void IocoinGUI::setClientModel(ClientModel *clientModel)
 
 void IocoinGUI::setWalletModel(WalletModel *walletModel)
 {
-	//std::cout << "iocoingui setwalletmodel" << std::endl;
     this->walletModel = walletModel;
-	//std::cout << "iocoingui setwalletmodel 1" << std::endl;
     if(walletModel)
     {
         // Report errors from wallet thread
@@ -949,7 +912,6 @@ void IocoinGUI::setNumBlocks(int count, int nTotalBlocks)
         qssFile.open(QFile::ReadOnly);
         QString svg = QLatin1String(qssFile.readAll());
         labelBlocksIcon->setPixmap(QIcon(new SVGIconEngine(svg.toStdString())).pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
-        //labelBlocksIcon->setPixmap(QIcon(":/icons/synced").pixmap(STATUSBAR_ICONSIZE, STATUSBAR_ICONSIZE));
 
         overviewPage->showOutOfSyncWarning(false);
     }
@@ -992,7 +954,6 @@ void IocoinGUI::error(const QString &title, const QString &message, bool modal)
 void IocoinGUI::changeEvent(QEvent *e)
 {
     QMainWindow::changeEvent(e);
-//XMAC #ifndef Q_OS_MAC // Ignored on Mac
     if(e->type() == QEvent::WindowStateChange)
     {
         if(clientModel && clientModel->getOptionsModel()->getMinimizeToTray())
@@ -1005,22 +966,21 @@ void IocoinGUI::changeEvent(QEvent *e)
             }
         }
     }
-//XMAC #endif
 }
 
 void IocoinGUI::closeEvent(QCloseEvent *event)
 {
-    if(clientModel)
-    {
-//XMAC #ifndef Q_OS_MAC // Ignored on Mac
-        if(!clientModel->getOptionsModel()->getMinimizeToTray() &&
-           !clientModel->getOptionsModel()->getMinimizeOnClose())
-        {
-            qApp->quit();
-        }
-//XMAC #endif
+ QMessageBox::StandardButton resBtn = QMessageBox::question( this, "I/O Coin",
+                                                                tr("Are you sure?"),
+                                                                QMessageBox::Cancel | QMessageBox::No | QMessageBox::Yes,
+                                                                QMessageBox::Yes);
+    if (resBtn != QMessageBox::Yes) {
+        event->ignore();
+    } else {
+	//handle_shutdown(this);
+        uiInterface.QueueShutdown();
+        event->accept();
     }
-    QMainWindow::closeEvent(event);
 }
 
 void IocoinGUI::askFee(qint64 nFeeRequired, bool *payFee)
@@ -1114,7 +1074,6 @@ void IocoinGUI::gotoProfileImageChooser()
 
 void IocoinGUI::gotoOverviewPage()
 {
-	//std::cout << "goto overview" << std::endl;
     overviewAction->setChecked(true);
     centralWidget->setCurrentWidget(overviewPage);
 
@@ -1387,10 +1346,6 @@ void IocoinGUI::encryptWallet(bool status)
 
     setEncryptionStatus(walletModel->getEncryptionStatus());
 }
-void IocoinGUI::encryptWalletTest(bool status)
-{
-	//std::cout << "encryptWallet" << std::endl;
-}
 
 void IocoinGUI::backupWallet()
 {
@@ -1574,7 +1529,6 @@ void IocoinGUI::complete_init(QString& dir)
     painter1.setClipPath(path1);
     painter1.fillRect(round1.rect(), Qt::black);
     painter1.drawPixmap(0,0,size1,size1, pixmap1);
-	std::cout << "complete_init 9" << std::endl;	
 
     QPixmap pixmap(profile_image.c_str());
     int size=qMax(pixmap.width(),pixmap.height());
@@ -1598,6 +1552,9 @@ void IocoinGUI::complete_init(QString& dir)
     appMenuBar->show();
     gotoOverviewPage();
 }
+void IocoinGUI::mouseDoubleClickEvent(QMouseEvent *event) {
+  Q_UNUSED(event);
+}
 
 void IocoinGUI::mouseMoveEvent(QMouseEvent* e)
 {
@@ -1605,49 +1562,34 @@ void IocoinGUI::mouseMoveEvent(QMouseEvent* e)
   move(x()+delta.x(),y()+delta.y());
   basePos_ = e->globalPos();
 }
-void IocoinGUI::mouseMoveEvent(QMouseEvent* e)
-{
-  std::cout << "mouse move event" << std::endl;
-  const QPoint  delta  = e->globalPos() - basePos_;
-  move(x()+delta.x(),y()+delta.y());
-  basePos_ = e->globalPos();
-}
 
-void IocoinGUI::checkBorderDragging(QMouseEvent *event) 
-{
-  if (isMaximized()) 
-  {
+void IocoinGUI::checkBorderDragging(QMouseEvent *event) {
+  if (isMaximized()) {
     return;
   }
 
   QPoint globalMousePos = event->globalPos();
-  if (m_bMousePressed) 
-  {
-	std::cout << "checkborderdragging mouse pressed" << std::endl;
+  if (m_bMousePressed) {
     QScreen *screen = QGuiApplication::primaryScreen();
 	// available geometry excludes taskbar
     QRect availGeometry = screen->availableGeometry();
     int h = availGeometry.height();
     int w = availGeometry.width();
     QList<QScreen *> screenlist = screen->virtualSiblings();
-    if (screenlist.contains(screen)) 
-    {
+    if (screenlist.contains(screen)) {
       QSize sz = QApplication::desktop()->size();
       h = sz.height();
       w = sz.width();
     }
 
     // top right corner
-    if (m_bDragTop && m_bDragRight) 
-    {
-	std::cout << "checkborderdragging drag top drag right" << std::endl;
+    if (m_bDragTop && m_bDragRight) {
       int diff =
           globalMousePos.x() - (m_StartGeometry.x() + m_StartGeometry.width());
       int neww = m_StartGeometry.width() + diff;
       diff = globalMousePos.y() - m_StartGeometry.y();
       int newy = m_StartGeometry.y() + diff;
-      if (neww > 0 && newy > 0 && newy < h - 50) 
-      {
+      if (neww > 0 && newy > 0 && newy < h - 50) {
         QRect newg = m_StartGeometry;
         newg.setWidth(neww);
         newg.setX(m_StartGeometry.x());
@@ -1656,15 +1598,12 @@ void IocoinGUI::checkBorderDragging(QMouseEvent *event)
       }
     }
     // top left corner
-    else if (m_bDragTop && m_bDragLeft) 
-    {
-	std::cout << "checkborderdragging drag top drag left" << std::endl;
+    else if (m_bDragTop && m_bDragLeft) {
       int diff = globalMousePos.y() - m_StartGeometry.y();
       int newy = m_StartGeometry.y() + diff;
       diff = globalMousePos.x() - m_StartGeometry.x();
       int newx = m_StartGeometry.x() + diff;
-      if (newy > 0 && newx > 0) 
-      {
+      if (newy > 0 && newx > 0) {
         QRect newg = m_StartGeometry;
         newg.setY(newy);
         newg.setX(newx);
@@ -1672,35 +1611,27 @@ void IocoinGUI::checkBorderDragging(QMouseEvent *event)
       }
     }
     // bottom right corner
-    else if (m_bDragBottom && m_bDragLeft) 
-    {
-	std::cout << "checkborderdragging drag bottom drag left" << std::endl;
+    else if (m_bDragBottom && m_bDragLeft) {
       int diff =
           globalMousePos.y() - (m_StartGeometry.y() + m_StartGeometry.height());
       int newh = m_StartGeometry.height() + diff;
       diff = globalMousePos.x() - m_StartGeometry.x();
       int newx = m_StartGeometry.x() + diff;
-      if (newh > 0 && newx > 0) 
-      {
+      if (newh > 0 && newx > 0) {
         QRect newg = m_StartGeometry;
         newg.setX(newx);
         newg.setHeight(newh);
         setGeometry(newg);
       }
-    } 
-    else if (m_bDragTop) 
-    {
-	std::cout << "checkborderdragging drag top" << std::endl;
+    } else if (m_bDragTop) {
       int diff = globalMousePos.y() - m_StartGeometry.y();
       int newy = m_StartGeometry.y() + diff;
-      if (newy > 0 && newy < h - 50) 
-      {
+      if (newy > 0 && newy < h - 50) {
         QRect newg = m_StartGeometry;
         newg.setY(newy);
         setGeometry(newg);
       }
     } else if (m_bDragLeft) {
-	std::cout << "checkborderdragging drag left" << std::endl;
       int diff = globalMousePos.x() - m_StartGeometry.x();
       int newx = m_StartGeometry.x() + diff;
       if (newx > 0 && newx < w - 50) {
@@ -1708,76 +1639,49 @@ void IocoinGUI::checkBorderDragging(QMouseEvent *event)
         newg.setX(newx);
         setGeometry(newg);
       }
-    } 
-    else if (m_bDragRight) 
-    {
-	std::cout << "checkborderdragging drag right" << std::endl;
+    } else if (m_bDragRight) {
       int diff =
           globalMousePos.x() - (m_StartGeometry.x() + m_StartGeometry.width());
       int neww = m_StartGeometry.width() + diff;
-      if (neww > 0) 
-      {
+      if (neww > 0) {
         QRect newg = m_StartGeometry;
         newg.setWidth(neww);
         newg.setX(m_StartGeometry.x());
         setGeometry(newg);
       }
-    } 
-    else if (m_bDragBottom) 
-    {
-	std::cout << "checkborderdragging drag bottom" << std::endl;
+    } else if (m_bDragBottom) {
       int diff =
           globalMousePos.y() - (m_StartGeometry.y() + m_StartGeometry.height());
       int newh = m_StartGeometry.height() + diff;
-      if (newh > 0) 
-      {
+      if (newh > 0) {
         QRect newg = m_StartGeometry;
         newg.setHeight(newh);
         newg.setY(m_StartGeometry.y());
         setGeometry(newg);
       }
     }
-  } 
-  else 
-  {
+  } else {
     // no mouse pressed
-    if (leftBorderHit(globalMousePos) && topBorderHit(globalMousePos)) 
-    {
-      setCursor(Qt::SizeFDiagCursor);
-    } 
-    else if (rightBorderHit(globalMousePos) && topBorderHit(globalMousePos)) 
-    {
-      setCursor(Qt::SizeBDiagCursor);
-    } 
-    else if (leftBorderHit(globalMousePos) &&
-               bottomBorderHit(globalMousePos)) 
-    {
-      setCursor(Qt::SizeBDiagCursor);
-    } 
-    else if (rightBorderHit(globalMousePos) &&
+    if (leftBorderHit(globalMousePos) && topBorderHit(globalMousePos)) {
+      setCursor(*dragtopleft);
+    } else if (rightBorderHit(globalMousePos) && topBorderHit(globalMousePos)) {
+      setCursor(*dragtopright);
+    } else if (leftBorderHit(globalMousePos) &&
                bottomBorderHit(globalMousePos)) {
-      setCursor(Qt::SizeFDiagCursor);
-    } 
-    else 
-    {
-      if (topBorderHit(globalMousePos)) 
-      {
+      setCursor(*dragbottomleft);
+    } else if (rightBorderHit(globalMousePos) &&
+               bottomBorderHit(globalMousePos)) {
+      setCursor(*dragbottomright);
+    } else {
+      if (topBorderHit(globalMousePos)) {
         setCursor(Qt::SizeVerCursor);
-      } 
-      else if (leftBorderHit(globalMousePos)) 
-      {
+      } else if (leftBorderHit(globalMousePos)) {
         setCursor(Qt::SizeHorCursor);
-      } 
-      else if (rightBorderHit(globalMousePos)) 
-      {
+      } else if (rightBorderHit(globalMousePos)) {
         setCursor(Qt::SizeHorCursor);
-      } 
-      else if (bottomBorderHit(globalMousePos)) 
-      {
+      } else if (bottomBorderHit(globalMousePos)) {
         setCursor(Qt::SizeVerCursor);
-      } 
-      else 
-      {
+      } else {
         m_bDragTop = false;
         m_bDragLeft = false;
         m_bDragRight = false;
@@ -1824,8 +1728,7 @@ bool IocoinGUI::bottomBorderHit(const QPoint &pos) {
 }
 
 void IocoinGUI::mousePressEvent(QMouseEvent *event) {
-  if (isMaximized()) 
-  {
+  if (isMaximized()) {
     return;
   }
 
@@ -1835,43 +1738,33 @@ void IocoinGUI::mousePressEvent(QMouseEvent *event) {
 
   QPoint globalMousePos = mapToGlobal(QPoint(event->x(), event->y()));
 
-  if (leftBorderHit(globalMousePos) && topBorderHit(globalMousePos)) 
-  {
+  if (leftBorderHit(globalMousePos) && topBorderHit(globalMousePos)) {
     m_bDragTop = true;
     m_bDragLeft = true;
-    setCursor(Qt::SizeFDiagCursor);
-  } 
-  else if (rightBorderHit(globalMousePos) && topBorderHit(globalMousePos)) 
-  {
+    setCursor(*dragtopleft);
+  } else if (rightBorderHit(globalMousePos) && topBorderHit(globalMousePos)) {
     m_bDragRight = true;
     m_bDragTop = true;
-    setCursor(Qt::SizeBDiagCursor);
-  } 
-  else if (leftBorderHit(globalMousePos) && bottomBorderHit(globalMousePos)) 
-  {
+    setCursor(*dragtopright);
+  } else if (leftBorderHit(globalMousePos) && bottomBorderHit(globalMousePos)) {
     m_bDragLeft = true;
     m_bDragBottom = true;
-    setCursor(Qt::SizeBDiagCursor);
-  } 
-  else 
-  {
-    if (topBorderHit(globalMousePos)) 
-    {
+    setCursor(*dragbottomleft);
+  } else if (rightBorderHit(globalMousePos) && bottomBorderHit(globalMousePos)) {
+    m_bDragRight = true;
+    m_bDragBottom = true;
+    setCursor(*dragbottomright);
+  } else {
+    if (topBorderHit(globalMousePos)) {
       m_bDragTop = true;
       setCursor(Qt::SizeVerCursor);
-    } 
-    else if (leftBorderHit(globalMousePos)) 
-    {
+    } else if (leftBorderHit(globalMousePos)) {
       m_bDragLeft = true;
       setCursor(Qt::SizeHorCursor);
-    } 
-    else if (rightBorderHit(globalMousePos)) 
-    {
+    } else if (rightBorderHit(globalMousePos)) {
       m_bDragRight = true;
       setCursor(Qt::SizeHorCursor);
-    } 
-    else if (bottomBorderHit(globalMousePos)) 
-    {
+    } else if (bottomBorderHit(globalMousePos)) {
       m_bDragBottom = true;
       setCursor(Qt::SizeVerCursor);
     }

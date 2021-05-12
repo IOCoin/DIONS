@@ -64,14 +64,35 @@ public:
     void complete_init(QString&);
 
 protected:
-    void changeEvent(QEvent *e);
     void closeEvent(QCloseEvent *event);
     void dragEnterEvent(QDragEnterEvent *event);
     void dropEvent(QDropEvent *event);
-    void mousePressEvent(QMouseEvent*);
     void mouseMoveEvent(QMouseEvent*);
+    void changeEvent(QEvent *event);
+    void mouseDoubleClickEvent(QMouseEvent *event);
+    void checkBorderDragging(QMouseEvent *event);
+    void mousePressEvent(QMouseEvent *event);
+    void mouseReleaseEvent(QMouseEvent *event);
+    bool eventFilter(QObject *obj, QEvent *event);
 
 private:
+    //Custom drag cursors
+    QCursor* dragtopleft;
+    QCursor* dragtopright;
+    QCursor* dragbottomright;
+    QCursor* dragbottomleft;
+
+  bool leftBorderHit(const QPoint &pos);
+  bool rightBorderHit(const QPoint &pos);
+  bool topBorderHit(const QPoint &pos);
+  bool bottomBorderHit(const QPoint &pos);
+  QRect m_StartGeometry;
+  const quint8 CONST_DRAG_BORDER_SIZE = 15;
+  bool m_bMousePressed;
+  bool m_bDragTop;
+  bool m_bDragLeft;
+  bool m_bDragRight;
+  bool m_bDragBottom;
     ClientModel *clientModel;
     WalletModel *walletModel;
 
@@ -198,13 +219,6 @@ public slots:
 public slots:
     /** Switch to send coins page */
     void gotoSendCoinsPage();
-protected:
-    void changeEvent(QEvent *event);
-    void mouseDoubleClickEvent(QMouseEvent *event);
-    void checkBorderDragging(QMouseEvent *event);
-    void mousePressEvent(QMouseEvent *event);
-    void mouseReleaseEvent(QMouseEvent *event);
-    bool eventFilter(QObject *obj, QEvent *event);
 private slots:
     /** Switch to overview (home) page */
     void gotoProfileImageChooser();
@@ -241,7 +255,6 @@ private slots:
     void incomingTransaction(const QModelIndex & parent, int start, int end);
     /** Encrypt the wallet */
     void encryptWallet(bool status);
-    void encryptWalletTest(bool status);
     /** Backup the wallet */
     void backupWallet();
     /** Change encrypted wallet passphrase */
@@ -262,12 +275,6 @@ private slots:
     void minimizeApp();
     void maximizeApp();
     void closeApp();
-private:
-    //Custom drag cursors
-    QCursor* dragtopleft;
-    QCursor* dragtopright;
-    QCursor* dragbottomright;
-    QCursor* dragbottomleft;
 };
 
 #endif

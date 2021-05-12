@@ -1,7 +1,9 @@
 #include "overviewpage.h"
 #include "ui_overviewpage.h"
 
+#include "clickablelabel.h"
 #include "walletmodel.h"
+#include "iocoingui.h"
 #include "bitcoinunits.h"
 #include "optionsmodel.h"
 #include "transactiontablemodel.h"
@@ -91,11 +93,11 @@ public:
 };
 #include "overviewpage.moc"
 
-OverviewPage::OverviewPage(IocoinGUI* iocgui,QWidget *parent) :
+OverviewPage::OverviewPage(IocoinGUI* i,QWidget *parent) :
     QWidget(parent),
     ui(new Ui::OverviewPage),
     currentBalance(-1),
-    iocgui_(iocgui),
+    iocgui_(i),
     currentStake(0),
     currentUnconfirmedBalance(-1),
     currentImmatureBalance(-1),
@@ -106,6 +108,8 @@ OverviewPage::OverviewPage(IocoinGUI* iocgui,QWidget *parent) :
 
     txv_ = new TransactionView(this);
     txv_->setObjectName("txv");
+
+    connect(ui->sendbutton,SIGNAL(clicked()),SLOT(gotoSendPage()));
 
     QGraphicsDropShadowEffect* ef = new QGraphicsDropShadowEffect();
     ef->setBlurRadius(10);
@@ -126,6 +130,10 @@ OverviewPage::OverviewPage(IocoinGUI* iocgui,QWidget *parent) :
     ef3->setYOffset(2);
     ef3->setColor(col);
     ui->staked->setGraphicsEffect(ef3);
+
+    // init "out of sync" warning labels
+    //ui->labelWalletStatus->setText("(" + tr("out of sync") + ")");
+    //ui->labelTransactionsStatus->setText("(" + tr("out of sync") + ")");
 
     ui->vl->setContentsMargins(0 , 0, 0, 0);
     ui->statusGL->setSpacing(0);
@@ -154,16 +162,28 @@ OverviewPage::OverviewPage(IocoinGUI* iocgui,QWidget *parent) :
     ui->labelIntStaked->setContentsMargins(0,0,0,0);
     ui->labelFracStaked->setMargin(0);
 
+    //ui->availableAmountLayout->setMargin(0);
+    //ui->availableAmountLayout->setSpacing(0);
+    //QVBoxLayout *vbox = new QVBoxLayout();
+    //QLabel* tmp = new QLabel();
+    //tmp->setText("hello");
+    //vbox->addWidget(txv_);
+    //vbox->addWidget(tmp);
+    //ui->txv->setLayout(vbox);
+
     // start with displaying the "out of sync" warnings
     showOutOfSyncWarning(true);
+}
+
+void OverviewPage::gotoSendPage()
+{
+  iocgui_->gotoSendCoinsPage();
 }
 
 void OverviewPage::handleTransactionClicked(const QModelIndex &index)
 {
     if(filter)
-    {
         emit transactionClicked(filter->mapToSource(index));
-    }
 }
 
 OverviewPage::~OverviewPage()
@@ -211,6 +231,7 @@ void OverviewPage::setBalance(qint64 balance, qint64 stake, qint64 unconfirmedBa
 
     QIcon i = QIcon(new SVGIconEngine(check));
     QPixmap p = i.pixmap(i.actualSize(QSize(48,48)));
+    //p.setPixmap(new SVGIconEngine(check)); 
     ui->balanceIcon->setPixmap(p);
     QIcon pend = QIcon(new SVGIconEngine(pending));
     QPixmap p1 = pend.pixmap(pend.actualSize(QSize(48,48)));
@@ -238,6 +259,9 @@ void OverviewPage::setModel(WalletModel *model)
         filter->setShowInactive(false);
         filter->sort(TransactionTableModel::Status, Qt::DescendingOrder);
 
+        //TRANS ui->listTransactions->setModel(filter);
+        //TRANS ui->listTransactions->setModelColumn(TransactionTableModel::ToAddress);
+
         // Keep up to date with wallet
         setBalance(model->getBalance(), model->getStake(), model->getUnconfirmedBalance(), model->getImmatureBalance());
         connect(model, SIGNAL(balanceChanged(qint64, qint64, qint64, qint64)), this, SLOT(setBalance(qint64, qint64, qint64, qint64)));
@@ -256,13 +280,16 @@ void OverviewPage::updateDisplayUnit()
 {
     if(model && model->getOptionsModel())
     {
-  if(currentBalance != -1)
-  {
-    setBalance(currentBalance, model->getStake(), currentUnconfirmedBalance, currentImmatureBalance);
-  }
+        if(currentBalance != -1)
+            setBalance(currentBalance, model->getStake(), currentUnconfirmedBalance, currentImmatureBalance);
 
         // Update txdelegate->unit with the current unit
         txdelegate->unit = model->getOptionsModel()->getDisplayUnit();
-
     }
+}
+
+void OverviewPage::showOutOfSyncWarning(bool fShow)
+{
+    ui->labelWalletStatus->setVisible(fShow);
+    ui->labelTransactionsStatus->setVisible(fShow);
 }

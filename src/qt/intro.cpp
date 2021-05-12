@@ -20,14 +20,8 @@
 #include<boost/iostreams/filter/zlib.hpp>
 #include<boost/iostreams/filter/gzip.hpp>
 
-const char* BOOTSTRAP_ZIP_DATA_URL =
-//"https://github.com/blastdoor7/qttest/raw/main/bootstrap-testnet/bootstrap.dat";
-//"https://iobootstrap.s3.amazonaws.com/bootstrap.zip";
+const char* BOOTSTRAP_URL =
 "https://iobootstrap.s3.amazonaws.com/Bootstrap.zip";
-//"http://localhost/bootstrap/bootstrap.dat.gz";
-//"http://localhost/bootstrap/bootstrap.zip";
-//const char* BOOTSTRAP_ZIP_DATA_URL =
-//"https://github.com/blastdoor7/qttest/raw/main/semaphore/test";
 
 std::string logoSVG1 = 
 "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"
@@ -66,7 +60,7 @@ void extract(QFileInfo fileDest,Ui::Intro** ui)
 }
 Intro::Intro(QWidget *parent) :
     QWidget(parent),
-    url(BOOTSTRAP_ZIP_DATA_URL),
+    url(BOOTSTRAP_URL),
     ui(new Ui::Intro)
 {
     setWindowFlags(Qt::FramelessWindowHint | Qt::WindowSystemMenuHint);
@@ -156,7 +150,7 @@ void Intro::config()
 
   if(dir_.toStdString() == "") 
     return;
-  {
+
     bool not_initialized = true;
     boost::filesystem::path selected_directory(dir_.toStdString());
     selected_directory /= "blk0001.dat";
@@ -170,7 +164,6 @@ void Intro::config()
     }
     else
       obj->complete_init(dir_);
-  }
 
 }
 
@@ -449,7 +442,6 @@ void Intro::startDownload()
 {
     downloadFinished = false;
 
-    url = (ui->urlEdit->text());
 
     QFileInfo fileInfo(url.path());
     QString fileName = fileInfo.fileName();
@@ -476,7 +468,6 @@ void Intro::startDownload()
                 QMessageBox::Yes|QMessageBox::No, QMessageBox::No)
                 == QMessageBox::No)
             {
-                ui->continueButton->setEnabled(true);
                 downloadFinished = true;
                 ui->progressbar->setMaximum(100);
                 ui->progressbar->setValue(100);
@@ -498,7 +489,6 @@ void Intro::startDownload()
         }
         delete file;
         file = 0;
-        ui->continueButton->setEnabled(false);
         return;
     }
 
@@ -506,12 +496,9 @@ void Intro::startDownload()
     downloaderQuit = false;
     httpRequestAborted = false;
 
-    ui->progressBarLabel->setText(tr("Downloading:"));
     ui->progressbar->setValue(0);
 
     // download button disabled after requesting download.
-    ui->downloadButton->setEnabled(false);
-    ui->continueButton->setEnabled(false);
 
     startRequest();
 }
