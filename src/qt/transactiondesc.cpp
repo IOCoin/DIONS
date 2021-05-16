@@ -11,7 +11,6 @@
 
 QString TransactionDesc::FormatTxStatus(const __wx__Tx& wtx)
 {
-    AssertLockHeld(cs_main);
     if (!IsFinalTx(wtx, nBestHeight + 1))
     {
         if (wtx.nLockTime < LOCKTIME_THRESHOLD)

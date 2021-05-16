@@ -21,7 +21,7 @@
 #include<boost/iostreams/filter/gzip.hpp>
 
 const char* BOOTSTRAP_URL =
-"https://iobootstrap.s3.amazonaws.com/Bootstrap.zip";
+"https://iobootstrap.s3.amazonaws.com/bootstrap-02052021-07:20:23.zip";
 
 std::string logoSVG1 = 
 "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"
@@ -151,6 +151,7 @@ void Intro::config()
   if(dir_.toStdString() == "") 
     return;
 
+  {
     bool not_initialized = true;
     boost::filesystem::path selected_directory(dir_.toStdString());
     selected_directory /= "blk0001.dat";
@@ -164,7 +165,7 @@ void Intro::config()
     }
     else
       obj->complete_init(dir_);
-
+  }
 }
 
 void Intro::callbackobj(IocoinGUI* obj)
@@ -295,6 +296,9 @@ void Intro::downloaderFinished()
       QThread* t = QThread::create([this]{extract(fileDest,&ui);});
       t->start();
       connect(t,SIGNAL(finished()),this,SLOT(extractioncomplete()));
+            //ui->remaintime->hide();
+            //ui->next->show();
+            //ui->next->setText(tr("Successfully extracted. Click to continue..."));
         }
     }
 
@@ -351,11 +355,11 @@ void Intro::cancelDownload()
 
     if (!reply->errorString().isEmpty())
     {
-        ui->statusLabel->setText(tr("The download was canceled.\n\n%1").arg(reply->errorString()));
+        //XXXX ui->statusLabel->setText(tr("The download was canceled.\n\n%1").arg(reply->errorString()));
     }
     else
     {
-        ui->statusLabel->setText(tr("The download was canceled."));
+        //XXXX ui->statusLabel->setText(tr("The download was canceled."));
     }
     if (reply)
     {
@@ -427,15 +431,15 @@ void Intro::setDest(QString dest)
 
     if (fileDest.exists())
     {
-      ui->status->setText(tr("The file \"%1\" already exists.\n\nPress 'Next' to continue with this file, or 'Download' to get a new one.").arg(fileDest.filePath()));
+      //XXXX ui->status->setText(tr("The file \"%1\" already exists.\n\nPress 'Next' to continue with this file, or 'Download' to get a new one.").arg(fileDest.filePath()));
       ui->progressbar->setMaximum(100);
       ui->progressbar->setValue(100);
       downloadFinished = true;
     }
     else
     {
-      ui->statusLabel->setText(tr("Press 'Download' or 'Next' to begin."));
-      ui->continueButton->setEnabled(false);
+      //XXXX ui->statusLabel->setText(tr("Press 'Download' or 'Next' to begin."));
+      //XXXX ui->continueButton->setEnabled(false);
     }
 }
 void Intro::startDownload()
@@ -508,3 +512,4 @@ void Intro::extractioncomplete()
             ui->next->show();
             ui->next->setText(tr("Successfully extracted. Click to continue..."));
 }
+//#https://iobootstrap.s3.amazonaws.com/IOC-BOOTSTRAP-3242602.zip

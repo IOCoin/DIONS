@@ -912,6 +912,7 @@ void IocoinGUI::setNumBlocks(int count, int nTotalBlocks)
         qssFile.open(QFile::ReadOnly);
         QString svg = QLatin1String(qssFile.readAll());
         labelBlocksIcon->setPixmap(QIcon(new SVGIconEngine(svg.toStdString())).pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
+        //labelBlocksIcon->setPixmap(QIcon(":/icons/synced").pixmap(STATUSBAR_ICONSIZE, STATUSBAR_ICONSIZE));
 
         overviewPage->showOutOfSyncWarning(false);
     }
@@ -1662,26 +1663,43 @@ void IocoinGUI::checkBorderDragging(QMouseEvent *event) {
     }
   } else {
     // no mouse pressed
-    if (leftBorderHit(globalMousePos) && topBorderHit(globalMousePos)) {
+    if (leftBorderHit(globalMousePos) && topBorderHit(globalMousePos)) 
+    {
       setCursor(*dragtopleft);
-    } else if (rightBorderHit(globalMousePos) && topBorderHit(globalMousePos)) {
+    } 
+    else if (rightBorderHit(globalMousePos) && topBorderHit(globalMousePos)) 
+    {
       setCursor(*dragtopright);
-    } else if (leftBorderHit(globalMousePos) &&
-               bottomBorderHit(globalMousePos)) {
+    } 
+    else if (leftBorderHit(globalMousePos) &&
+               bottomBorderHit(globalMousePos)) 
+    {
       setCursor(*dragbottomleft);
-    } else if (rightBorderHit(globalMousePos) &&
-               bottomBorderHit(globalMousePos)) {
+    } 
+    else if (rightBorderHit(globalMousePos) &&
+               bottomBorderHit(globalMousePos)) 
+    {
       setCursor(*dragbottomright);
-    } else {
-      if (topBorderHit(globalMousePos)) {
+    } 
+    else 
+    {
+      if (topBorderHit(globalMousePos)) 
+      {
         setCursor(Qt::SizeVerCursor);
-      } else if (leftBorderHit(globalMousePos)) {
+      } 
+      else if (leftBorderHit(globalMousePos)) 
+      {
         setCursor(Qt::SizeHorCursor);
-      } else if (rightBorderHit(globalMousePos)) {
+      } 
+      else if (rightBorderHit(globalMousePos)) 
+      {
         setCursor(Qt::SizeHorCursor);
-      } else if (bottomBorderHit(globalMousePos)) {
+      } 
+      else if (bottomBorderHit(globalMousePos)) 
+      {
         setCursor(Qt::SizeVerCursor);
-      } else {
+      } else 
+      {
         m_bDragTop = false;
         m_bDragLeft = false;
         m_bDragRight = false;
@@ -1727,8 +1745,10 @@ bool IocoinGUI::bottomBorderHit(const QPoint &pos) {
   return false;
 }
 
-void IocoinGUI::mousePressEvent(QMouseEvent *event) {
-  if (isMaximized()) {
+void IocoinGUI::mousePressEvent(QMouseEvent *event) 
+{
+  if (isMaximized()) 
+  {
     return;
   }
 
@@ -1738,42 +1758,60 @@ void IocoinGUI::mousePressEvent(QMouseEvent *event) {
 
   QPoint globalMousePos = mapToGlobal(QPoint(event->x(), event->y()));
 
-  if (leftBorderHit(globalMousePos) && topBorderHit(globalMousePos)) {
+  if (leftBorderHit(globalMousePos) && topBorderHit(globalMousePos)) 
+  {
     m_bDragTop = true;
     m_bDragLeft = true;
     setCursor(*dragtopleft);
-  } else if (rightBorderHit(globalMousePos) && topBorderHit(globalMousePos)) {
+  } 
+  else if (rightBorderHit(globalMousePos) && topBorderHit(globalMousePos)) 
+  {
     m_bDragRight = true;
     m_bDragTop = true;
     setCursor(*dragtopright);
-  } else if (leftBorderHit(globalMousePos) && bottomBorderHit(globalMousePos)) {
+  } 
+  else if (leftBorderHit(globalMousePos) && bottomBorderHit(globalMousePos)) 
+  {
     m_bDragLeft = true;
     m_bDragBottom = true;
     setCursor(*dragbottomleft);
-  } else if (rightBorderHit(globalMousePos) && bottomBorderHit(globalMousePos)) {
+  } 
+  else if (rightBorderHit(globalMousePos) && bottomBorderHit(globalMousePos)) 
+  {
     m_bDragRight = true;
     m_bDragBottom = true;
     setCursor(*dragbottomright);
-  } else {
-    if (topBorderHit(globalMousePos)) {
+  } 
+  else 
+  {
+    if (topBorderHit(globalMousePos)) 
+    {
       m_bDragTop = true;
       setCursor(Qt::SizeVerCursor);
-    } else if (leftBorderHit(globalMousePos)) {
+    } 
+    else if (leftBorderHit(globalMousePos)) 
+    {
       m_bDragLeft = true;
       setCursor(Qt::SizeHorCursor);
-    } else if (rightBorderHit(globalMousePos)) {
+    } 
+    else if (rightBorderHit(globalMousePos)) 
+    {
       m_bDragRight = true;
       setCursor(Qt::SizeHorCursor);
-    } else if (bottomBorderHit(globalMousePos)) {
+    } 
+    else if (bottomBorderHit(globalMousePos)) 
+    {
       m_bDragBottom = true;
       setCursor(Qt::SizeVerCursor);
     }
   }
 }
 
-void IocoinGUI::mouseReleaseEvent(QMouseEvent *event) {
+void IocoinGUI::mouseReleaseEvent(QMouseEvent *event) 
+{
   Q_UNUSED(event);
-  if (isMaximized()) {
+  if (isMaximized()) 
+  {
     return;
   }
 
@@ -1784,33 +1822,44 @@ void IocoinGUI::mouseReleaseEvent(QMouseEvent *event) {
   m_bDragLeft = false;
   m_bDragRight = false;
   m_bDragBottom = false;
-  if (bSwitchBackCursorNeeded) {
+  if (bSwitchBackCursorNeeded) 
+  {
     setCursor(Qt::ArrowCursor);
   }
 }
 
-bool IocoinGUI::eventFilter(QObject *obj, QEvent *event) {
-  if (isMaximized()) {
+bool IocoinGUI::eventFilter(QObject *obj, QEvent *event) 
+{
+  if (isMaximized()) 
+  {
     return QWidget::eventFilter(obj, event);
   }
 
   // check mouse move event when mouse is moved on any object
-  if (event->type() == QEvent::MouseMove) {
+  if (event->type() == QEvent::MouseMove) 
+  {
     QMouseEvent *pMouse = dynamic_cast<QMouseEvent *>(event);
-    if (pMouse) {
+    if (pMouse) 
+    {
       checkBorderDragging(pMouse);
     }
   }
   // press is triggered only on frame window
-  else if (event->type() == QEvent::MouseButtonPress && obj == this) {
+  else if (event->type() == QEvent::MouseButtonPress && obj == this) 
+  {
     QMouseEvent *pMouse = dynamic_cast<QMouseEvent *>(event);
-    if (pMouse) {
+    if (pMouse) 
+    {
       mousePressEvent(pMouse);
     }
-  } else if (event->type() == QEvent::MouseButtonRelease) {
-    if (m_bMousePressed) {
+  } 
+  else if (event->type() == QEvent::MouseButtonRelease) 
+  {
+    if (m_bMousePressed) 
+    {
       QMouseEvent *pMouse = dynamic_cast<QMouseEvent *>(event);
-      if (pMouse) {
+      if (pMouse) 
+      {
         mouseReleaseEvent(pMouse);
       }
     }

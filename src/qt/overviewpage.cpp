@@ -111,11 +111,21 @@ OverviewPage::OverviewPage(IocoinGUI* i,QWidget *parent) :
 
     connect(ui->sendbutton,SIGNAL(clicked()),SLOT(gotoSendPage()));
 
+    // Recent transactions
+    //TRANS ui->listTransactions->setItemDelegate(txdelegate);
+    //TRANS ui->listTransactions->setIconSize(QSize(DECORATION_SIZE, DECORATION_SIZE));
+    //TRANS ui->listTransactions->setMinimumHeight(NUM_ITEMS * (DECORATION_SIZE + 2));
+    //TRANS ui->listTransactions->setAttribute(Qt::WA_MacShowFocusRect, false);
+
+    //TRANS connect(ui->listTransactions, SIGNAL(clicked(QModelIndex)), this, SLOT(handleTransactionClicked(QModelIndex)));
+
     QGraphicsDropShadowEffect* ef = new QGraphicsDropShadowEffect();
     ef->setBlurRadius(10);
     ef->setXOffset(2);
     ef->setYOffset(2);
+    //ef->setColor(Qt::black);
     QColor col = QColor("#d3d3d3");
+    //ef->setColor(Qt::gray);
     ef->setColor(col);
     ui->available->setGraphicsEffect(ef);
     QGraphicsDropShadowEffect* ef2 = new QGraphicsDropShadowEffect();
@@ -285,11 +295,13 @@ void OverviewPage::updateDisplayUnit()
 
         // Update txdelegate->unit with the current unit
         txdelegate->unit = model->getOptionsModel()->getDisplayUnit();
+
+        //TRANS ui->listTransactions->update();
     }
 }
 
 void OverviewPage::showOutOfSyncWarning(bool fShow)
 {
-    ui->labelWalletStatus->setVisible(fShow);
-    ui->labelTransactionsStatus->setVisible(fShow);
+    //ui->labelWalletStatus->setVisible(fShow);
+    //ui->labelTransactionsStatus->setVisible(fShow);
 }
