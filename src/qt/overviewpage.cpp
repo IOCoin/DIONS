@@ -172,6 +172,12 @@ OverviewPage::OverviewPage(IocoinGUI* i,QWidget *parent) :
     ui->labelIntStaked->setContentsMargins(0,0,0,0);
     ui->labelFracStaked->setMargin(0);
 
+    ui->hl4->setContentsMargins(10 , 0, 10, 0);
+
+    ui->available->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
+    ui->pending->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
+    ui->staked->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
+
     //ui->availableAmountLayout->setMargin(0);
     //ui->availableAmountLayout->setSpacing(0);
     //QVBoxLayout *vbox = new QVBoxLayout();
