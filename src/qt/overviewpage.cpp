@@ -174,6 +174,7 @@ OverviewPage::OverviewPage(IocoinGUI* i,QWidget *parent) :
 
     ui->hl4->setContentsMargins(10 , 0, 10, 0);
 
+    ui->status_frame->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
     ui->available->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
     ui->pending->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
     ui->staked->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
