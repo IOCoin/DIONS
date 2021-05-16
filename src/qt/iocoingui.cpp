@@ -974,11 +974,13 @@ void IocoinGUI::closeEvent(QCloseEvent *event)
  QMessageBox::StandardButton resBtn = QMessageBox::question( this, "I/O Coin",
                                                                 tr("Are you sure?"),
                                                                 QMessageBox::Cancel | QMessageBox::No | QMessageBox::Yes,
-                                                                QMessageBox::Yes);
-    if (resBtn != QMessageBox::Yes) {
+                                                                QMessageBox::No);
+    if (resBtn != QMessageBox::Yes) 
+    {
         event->ignore();
-    } else {
-	//handle_shutdown(this);
+    } 
+    else 
+    {
         uiInterface.QueueShutdown();
         event->accept();
     }
