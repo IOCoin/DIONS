@@ -81,6 +81,8 @@ private:
     QCursor* dragtopright;
     QCursor* dragbottomright;
     QCursor* dragbottomleft;
+    QCursor* draghorizontal;
+    QCursor* dragvertical;
 
   bool leftBorderHit(const QPoint &pos);
   bool rightBorderHit(const QPoint &pos);

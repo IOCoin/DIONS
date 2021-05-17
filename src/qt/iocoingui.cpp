@@ -270,6 +270,20 @@ IocoinGUI::IocoinGUI(QWidget *parent):
     QPixmap pbl = bl.pixmap(bl.actualSize(QSize(48,48)));
     dragbottomleft = new QCursor(pbl);
 
+    QString svgh; 
+    QFile qssFileh(":/icons/draghorizontal");
+    qssFileh.open(QFile::ReadOnly);
+    svgh = QLatin1String(qssFileh.readAll());
+    QIcon h = QIcon(new SVGIconEngine(svgh.toStdString()));
+    QPixmap ph = h.pixmap(h.actualSize(QSize(48,48)));
+    draghorizontal = new QCursor(ph);
+    QString svgv; 
+    QFile qssFilev(":/icons/dragvertical");
+    qssFilev.open(QFile::ReadOnly);
+    svgv = QLatin1String(qssFilev.readAll());
+    QIcon v = QIcon(new SVGIconEngine(svgv.toStdString()));
+    QPixmap pv = v.pixmap(v.actualSize(QSize(48,48)));
+    dragvertical = new QCursor(pv);
 
   
     QApplication::instance()->installEventFilter(this);
@@ -1687,20 +1701,21 @@ void IocoinGUI::checkBorderDragging(QMouseEvent *event) {
     {
       if (topBorderHit(globalMousePos)) 
       {
-        setCursor(Qt::SizeVerCursor);
+        setCursor(*dragvertical);
       } 
       else if (leftBorderHit(globalMousePos)) 
       {
-        setCursor(Qt::SizeHorCursor);
+        setCursor(*draghorizontal);
       } 
       else if (rightBorderHit(globalMousePos)) 
       {
-        setCursor(Qt::SizeHorCursor);
+        setCursor(*draghorizontal);
       } 
       else if (bottomBorderHit(globalMousePos)) 
       {
-        setCursor(Qt::SizeVerCursor);
-      } else 
+        setCursor(*dragvertical);
+      } 
+      else 
       {
         m_bDragTop = false;
         m_bDragLeft = false;

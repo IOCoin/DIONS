@@ -134,8 +134,8 @@ extern "C" int setup_application(IocoinGUI& window, std::string directory)
   if(init)
   {
     boost::filesystem::ofstream ofs(p / "iocoin.conf");   
-    ofs << "rpcuser=kjkjkjkjkjk" << endl;
-    ofs << "rpcpassword=kjkjkjkjkjkjhjhjhjhjhjhj" << endl;
+    ofs << "rpcuser=" << endl;
+    ofs << "rpcpassword=" << endl;
     ofs << endl;
     ofs << endl;
     ofs << "addnode=amer.supernode.iocoin.io" << endl;
