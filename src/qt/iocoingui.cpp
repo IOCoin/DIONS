@@ -1510,10 +1510,8 @@ void IocoinGUI::gotoIntroPage()
     centralWidget->setCurrentWidget(intro);
 }
 
-void IocoinGUI::complete_init(QString& dir)
+void IocoinGUI::initModel()
 {
-   
-   setup_application(*this, dir.toStdString());
    OptionsModel* optionsModel_ = new OptionsModel();
    ClientModel* clientModel_ = new ClientModel(optionsModel_);
    WalletModel* walletModel_= new WalletModel(pwalletMain, optionsModel_);
@@ -1569,7 +1567,14 @@ void IocoinGUI::complete_init(QString& dir)
     appMenuBar->show();
     gotoOverviewPage();
 }
-void IocoinGUI::mouseDoubleClickEvent(QMouseEvent *event) {
+
+void IocoinGUI::complete_init(QString& dir)
+{
+   setup_application(*this, dir.toStdString());
+}
+
+void IocoinGUI::mouseDoubleClickEvent(QMouseEvent *event) 
+{
   Q_UNUSED(event);
 }
 

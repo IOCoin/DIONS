@@ -61,6 +61,7 @@ public:
         functionality.
     */
     void setWalletModel(WalletModel *walletModel);
+    void initModel();
     void complete_init(QString&);
 
 protected:

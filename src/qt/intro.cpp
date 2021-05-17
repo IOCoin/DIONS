@@ -5,6 +5,7 @@
 #include "svgiconengine.h"
 #include "clickablelabel.h"
 #include "guiconstants.h"
+#include "initworker.h"
 #include <boost/filesystem.hpp>
 #include "JlCompress.h"
 #include<QIcon>
@@ -58,6 +59,11 @@ void extract(QFileInfo fileDest,Ui::Intro** ui)
     std::cout << "Bootstrap extract successful." << std::endl;
   }
 }
+void initialize(IocoinGUI* obj,QString dir)
+{
+  obj->complete_init(dir);
+}
+
 Intro::Intro(QWidget *parent) :
     QWidget(parent),
     url(BOOTSTRAP_URL),
@@ -164,8 +170,24 @@ void Intro::config()
       ui->bootstrapdialog->show();
     }
     else
-      obj->complete_init(dir_);
+    {
+      InitWorker* worker = new InitWorker();
+      worker->object(this->obj,dir_);
+      QThread* thread = new QThread();
+      worker->moveToThread(thread);
+
+      connect(thread,SIGNAL(started()),worker,SLOT(initialize()));
+      connect(worker,SIGNAL(completed()),this,SLOT(initModel()));
+      connect(worker,SIGNAL(completed()),worker,SLOT(deleteLater()));
+      connect(thread,SIGNAL(finished()),thread,SLOT(deleteLater()));
+      thread->start();
+    }
   }
+}
+
+void Intro::initModel()
+{
+  this->obj->initModel();
 }
 
 void Intro::callbackobj(IocoinGUI* obj)

@@ -35,6 +35,7 @@ class Intro : public QWidget
     void config();
     void closesplash();
     void fileUnzipped();
+    void initModel();
 
     //bootstrap download handling
     void setDest(std::string);
