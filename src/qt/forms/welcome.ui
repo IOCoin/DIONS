@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Welcome</class>
+ <widget class="QWidget" name="Welcome">
+  <layout class="QVBoxLayout" name="vl">
+   <item>
+    <widget class="QFrame" name="splashframe">
+     <layout class="QVBoxLayout" name="vl">
+      <item>
+       <widget class="QLabel" name="movie">
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

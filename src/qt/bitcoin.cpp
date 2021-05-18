@@ -219,7 +219,7 @@ int main(int argc, char *argv[])
     QSplashScreen splash(QPixmap(":/images/splash"), 0);
     if (GetBoolArg("-splash", true) && !GetBoolArg("-min"))
     {
-        splash.show();
+        //XXXX splash.show();
         splashref = &splash;
     }
 

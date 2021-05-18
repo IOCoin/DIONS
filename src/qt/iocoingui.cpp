@@ -44,6 +44,7 @@
 #include <QPainterPath>
 #include <QMainWindow>
 #include <QMenuBar>
+#include <QSettings>
 #include <QMenu>
 #include <QIcon>
 #include <QTabWidget>
@@ -289,10 +290,15 @@ IocoinGUI::IocoinGUI(QWidget *parent):
     QApplication::instance()->installEventFilter(this);
 
     centralWidget = new QStackedWidget(this);
+
+    welcome = new Welcome();
+    welcome->setWindowFlags(Qt::FramelessWindowHint|Qt::WindowStaysOnTopHint);
+    welcome->callbackobj(this);
+    welcome->hide();
+
     intro = new Intro();
     intro->callbackobj(this);
     centralWidget->addWidget(intro);
-    centralWidget->setCurrentWidget(intro);
     setCentralWidget(centralWidget);
 
     labelUnencryptedIcon = new UnencryptedStatusLabel();
@@ -461,7 +467,7 @@ IocoinGUI::IocoinGUI(QWidget *parent):
     connect(addressBookPage, SIGNAL(verifyMessage(QString)), this, SLOT(gotoVerifyMessageTab(QString)));
     // Clicking on "Sign Message" in the receive coins page sends you to the sign message tab
     connect(receiveCoinsPage, SIGNAL(signMessage(QString)), this, SLOT(gotoSignMessageTab(QString)));
-    gotoIntroPage();
+    gotoWelcomePage();
 }
 
 IocoinGUI::~IocoinGUI()
@@ -1505,11 +1511,25 @@ void IocoinGUI::updateStakingIcon()
             labelStakingIcon->setToolTip(tr("Not staking"));
     }
 }
+void IocoinGUI::gotoWelcomePage()
+{
+	QSettings settings("ioc","ioc");
+	settings.setValue("geometry",saveGeometry());
+	settings.setValue("windowState",saveState());
+	welcome->show();
+}
 void IocoinGUI::gotoIntroPage()
 {
     centralWidget->setCurrentWidget(intro);
 }
-
+void IocoinGUI::showIntroScreen()
+{
+	std::cout << "showIntroScreen" << std::endl;
+	welcome->hide();
+	welcome->setVisible(false);
+	welcome->deleteLater();
+  centralWidget->setCurrentWidget(intro);
+}
 void IocoinGUI::initModel()
 {
    OptionsModel* optionsModel_ = new OptionsModel();

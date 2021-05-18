@@ -29,6 +29,7 @@ class Intro : public QWidget
     void callbackobj(IocoinGUI* obj);
 
   public slots:
+    void hidewelcome();
     void extractioncomplete();
     void next();
     void downloadbootstrap();

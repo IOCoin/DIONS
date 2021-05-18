@@ -9,6 +9,7 @@
 #include <boost/filesystem.hpp>
 #include "JlCompress.h"
 #include<QIcon>
+#include<QMovie>
 #include<QSize>
 #include<QFile>
 #include<QThread>
@@ -73,6 +74,7 @@ Intro::Intro(QWidget *parent) :
     setWindowFlags(windowFlags() | Qt::WindowMinimizeButtonHint);
     this->resize(1000,900);
     ui->setupUi(this);
+
     ui->vl->setContentsMargins(0,0,0,0);
     ui->vl2->setContentsMargins(280,0,0,0);
     ui->hl->setContentsMargins(0,0,0,0);
@@ -82,10 +84,13 @@ Intro::Intro(QWidget *parent) :
     ui->logoleft->setPixmap(logoPixmap);
     ui->title->setStyleSheet("color:white; font-size:48px; font-weight:300");
     ui->title->setAttribute(Qt::WA_TranslucentBackground, true);
+    ui->comets->setAttribute(Qt::WA_TranslucentBackground, true);
     ui->closeicon->setAttribute(Qt::WA_TranslucentBackground, true);
     ui->logoleft->setAttribute(Qt::WA_TranslucentBackground, true);
     ui->logolefttext->setAttribute(Qt::WA_TranslucentBackground, true);
     ui->logolefttext->setStyleSheet("color:white; font-size:48px; font-weight:400");
+    ui->initializing->setAttribute(Qt::WA_TranslucentBackground, true);
+    ui->initializing->setStyleSheet("color:white; font-size:24px; font-weight:300");
     QGraphicsOpacityEffect* e = new QGraphicsOpacityEffect(this);
     e->setOpacity(0.6);
     ui->logolefttext->setGraphicsEffect(e);
@@ -124,6 +129,9 @@ Intro::Intro(QWidget *parent) :
     ui->progressbar->hide();
     ui->remaintime->hide();
 
+    ui->initializing->hide();
+    ui->comets->hide();
+
     ui->progressbar->setRange(0,1000000);
     ui->progressbar->setFixedWidth(300);
 
@@ -157,7 +165,7 @@ void Intro::config()
   if(dir_.toStdString() == "") 
     return;
 
-  {
+  { 
     bool not_initialized = true;
     boost::filesystem::path selected_directory(dir_.toStdString());
     selected_directory /= "blk0001.dat";
@@ -169,7 +177,7 @@ void Intro::config()
       ui->logoright->hide();
       ui->bootstrapdialog->show();
     }
-    else
+    else 
     {
       InitWorker* worker = new InitWorker();
       worker->object(this->obj,dir_);
@@ -181,6 +189,15 @@ void Intro::config()
       connect(worker,SIGNAL(completed()),worker,SLOT(deleteLater()));
       connect(thread,SIGNAL(finished()),thread,SLOT(deleteLater()));
       thread->start();
+
+      ui->logoright->hide();
+      ui->progressbar->hide();
+      ui->initializing->show();
+
+      QMovie* movie = new QMovie(":/movies/comets", "gif", this);
+      ui->comets->setMovie(movie);
+      movie->start();
+      ui->comets->show();
     }
   }
 }
@@ -197,7 +214,24 @@ void Intro::callbackobj(IocoinGUI* obj)
 
 void Intro::next()
 {
-  obj->complete_init(dir_);
+  InitWorker* worker = new InitWorker();
+  worker->object(this->obj,dir_);
+  QThread* thread = new QThread();
+  worker->moveToThread(thread);
+
+  connect(thread,SIGNAL(started()),worker,SLOT(initialize()));
+  connect(worker,SIGNAL(completed()),this,SLOT(initModel()));
+  connect(worker,SIGNAL(completed()),worker,SLOT(deleteLater()));
+  connect(thread,SIGNAL(finished()),thread,SLOT(deleteLater()));
+  thread->start();
+
+  ui->next->hide();
+  ui->progressbar->hide();
+  ui->initializing->show();
+  QMovie* movie = new QMovie(":/movies/comets", "gif", this);
+  ui->comets->setMovie(movie);
+  movie->start();
+  ui->comets->show();
 }
 
 void Intro::downloadbootstrap()
@@ -534,4 +568,9 @@ void Intro::extractioncomplete()
             ui->next->show();
             ui->next->setText(tr("Successfully extracted. Click to continue..."));
 }
+void Intro::hidewelcome()
+{
+    //ui->movie->hide();
+}
+
 //#https://iobootstrap.s3.amazonaws.com/IOC-BOOTSTRAP-3242602.zip

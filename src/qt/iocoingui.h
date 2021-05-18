@@ -7,10 +7,12 @@
 #include "actionwatcher.h"
 #include "buttoneventhandler.h"
 #include "clickablelabel.h"
+#include "welcome.h"
 #include "intro.h"
 
 #include <stdint.h>
 
+class Welcome;
 class Intro;
 class IocoinGUI;
 class TransactionTableModel;
@@ -62,6 +64,7 @@ public:
     */
     void setWalletModel(WalletModel *walletModel);
     void initModel();
+    void showIntroScreen();
     void complete_init(QString&);
 
 protected:
@@ -101,6 +104,7 @@ private:
 
     QStackedWidget *centralWidget;
 
+    Welcome      *welcome;
     Intro        *intro;
     OverviewPage *overviewPage;
     SettingsPage *settingsPage;
@@ -226,6 +230,7 @@ private slots:
     /** Switch to overview (home) page */
     void gotoProfileImageChooser();
     /** Switch to overview (home) page */
+    void gotoWelcomePage();
     void gotoIntroPage();
     void gotoOverviewPage();
     /** Switch to history (transactions) page */

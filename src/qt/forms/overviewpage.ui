@@ -334,7 +334,7 @@
        <property name="lineWidth">
         <number>3</number>
        </property>
-       <layout class="QHBoxLayout" name="horizontalLayout_4">
+       <layout class="QHBoxLayout" name="hl4">
         <item>
          <widget class="QLabel" name="textRecentTrans">
           <property name="text">
