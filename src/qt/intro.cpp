@@ -253,13 +253,13 @@ void Intro::next()
   connect(thread,SIGNAL(finished()),thread,SLOT(deleteLater()));
   thread->start();
 
-  ui->next->hide();
-  ui->progressbar->hide();
-  ui->initializing->show();
-  QMovie* movie = new QMovie(":/movies/comets", "gif", this);
-  ui->comets->setMovie(movie);
-  movie->start();
-  ui->comets->show();
+  hideall();
+  movie_ = new QMovie(":/movies/welcome", "gif", this);
+  QTimer* timer_ = new QTimer(this);
+  connect(timer_,SIGNAL(timeout()),this,SLOT(gotoIntroScreen()));
+  ui->movie->setMovie(movie_);
+  movie_->start();
+  ui->movie->show();
 }
 
 void Intro::downloadbootstrap()
