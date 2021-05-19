@@ -10,6 +10,7 @@
 #include "JlCompress.h"
 #include<QIcon>
 #include<QMovie>
+#include<QTimer>
 #include<QSize>
 #include<QFile>
 #include<QThread>
@@ -75,6 +76,7 @@ Intro::Intro(QWidget *parent) :
     this->resize(1000,900);
     ui->setupUi(this);
 
+    ui->movie->hide();
     ui->vl->setContentsMargins(0,0,0,0);
     ui->vl2->setContentsMargins(280,0,0,0);
     ui->hl->setContentsMargins(0,0,0,0);
@@ -194,16 +196,42 @@ void Intro::config()
       ui->progressbar->hide();
       ui->initializing->show();
 
-      QMovie* movie = new QMovie(":/movies/comets", "gif", this);
-      ui->comets->setMovie(movie);
-      movie->start();
-      ui->comets->show();
+      hideall();
+      movie_ = new QMovie(":/movies/welcome", "gif", this);
+      QTimer* timer_ = new QTimer(this);
+      connect(timer_,SIGNAL(timeout()),this,SLOT(gotoIntroScreen()));
+      ui->movie->setMovie(movie_);
+      movie_->start();
+      ui->movie->show();
     }
   }
 }
 
+void Intro::hideall()
+{
+  ui->closeicon->hide();
+  ui->title->hide();
+  ui->logoleft->hide();
+  ui->logoright->hide();
+  ui->logolefttext->hide();
+  ui->bootstrapdialog->hide();
+  ui->initializing->hide();
+  ui->progressbar->hide();
+  ui->remaintime->hide();
+  ui->next->hide();
+  ui->vs1->changeSize(0,0);
+  ui->vs2->changeSize(0,0);
+  ui->vs3->changeSize(0,0);
+  ui->vs4->changeSize(0,0);
+  ui->hs1->changeSize(0,0);
+  ui->splashframe->hide();
+}
+
 void Intro::initModel()
 {
+	this->movie_->stop();
+	ui->movie->hide();
+	this->setVisible(false);
   this->obj->initModel();
 }
 

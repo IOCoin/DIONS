@@ -102,6 +102,7 @@ private:
     ClientModel *clientModel;
     WalletModel *walletModel;
 
+    QStackedWidget *introWidget;
     QStackedWidget *centralWidget;
 
     Welcome      *welcome;

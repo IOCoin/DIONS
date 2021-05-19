@@ -1,8 +1,8 @@
 /*
- * Qt4 bitcoin GUI.
+ * Qt5 iocoin GUI.
  *
- * W.J. van der Laan 2011-2012
- * The Bitcoin Developers 2011-2012
+ * blastdoor7 2020-2021
+ * The iocoin Developers 2020-2021
  */
 #include "iocoingui.h"
 #include "transactiontablemodel.h"
@@ -289,17 +289,18 @@ IocoinGUI::IocoinGUI(QWidget *parent):
   
     QApplication::instance()->installEventFilter(this);
 
+    introWidget = new QStackedWidget(this);
     centralWidget = new QStackedWidget(this);
-
-    welcome = new Welcome();
-    welcome->setWindowFlags(Qt::FramelessWindowHint|Qt::WindowStaysOnTopHint);
-    welcome->callbackobj(this);
-    welcome->hide();
+    centralWidget->setVisible(false);
 
     intro = new Intro();
+    intro->setWindowFlags(Qt::FramelessWindowHint|Qt::WindowStaysOnTopHint);
     intro->callbackobj(this);
-    centralWidget->addWidget(intro);
-    setCentralWidget(centralWidget);
+    intro->hide();
+    intro->callbackobj(this);
+    introWidget->addWidget(intro);
+
+    setCentralWidget(introWidget);
 
     labelUnencryptedIcon = new UnencryptedStatusLabel();
     labelUnencryptedIcon->setObjectName("padlocklabel");
@@ -358,7 +359,6 @@ IocoinGUI::IocoinGUI(QWidget *parent):
     vbox->addWidget(transactionView);
     transactionsPage->setLayout(vbox);
 
-
     addressBookPage = new AddressBookPage(AddressBookPage::ForEditing, AddressBookPage::SendingTab);
 
     receiveCoinsPage = new AddressBookPage(AddressBookPage::ForEditing, AddressBookPage::ReceivingTab);
@@ -367,13 +367,13 @@ IocoinGUI::IocoinGUI(QWidget *parent):
 
     signVerifyMessageDialog = new SignVerifyMessageDialog(this);
 
-
     centralWidget->addWidget(overviewPage);
     centralWidget->addWidget(transactionsPage);
     centralWidget->addWidget(addressBookPage);
     centralWidget->addWidget(receiveCoinsPage);
     centralWidget->addWidget(sendCoinsPage);
     centralWidget->addWidget(settingsPage);
+
     // Status bar notification icons
     QFrame *frameBlocks = new QFrame(this);
     frameBlocks->setContentsMargins(0,0,0,0);
@@ -761,7 +761,6 @@ void IocoinGUI::setWalletModel(WalletModel *walletModel)
         transactionView->setModel(walletModel);
 
         overviewPage->setModel(walletModel);
-        //addressBookPage->setModel(walletModel->getAddressTableModel());
         receiveCoinsPage->setModel(walletModel->getAddressTableModel());
         sendCoinsPage->setModel(walletModel);
         settingsPage->setModel(walletModel);
@@ -1099,7 +1098,6 @@ void IocoinGUI::gotoOverviewPage()
 {
     overviewAction->setChecked(true);
     centralWidget->setCurrentWidget(overviewPage);
-
     string iconSvgDataChecked = 
 "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"
 " <svg   xmlns=\"http://www.w3.org/2000/svg\""
@@ -1513,10 +1511,7 @@ void IocoinGUI::updateStakingIcon()
 }
 void IocoinGUI::gotoWelcomePage()
 {
-	QSettings settings("ioc","ioc");
-	settings.setValue("geometry",saveGeometry());
-	settings.setValue("windowState",saveState());
-	welcome->show();
+	intro->show();
 }
 void IocoinGUI::gotoIntroPage()
 {
@@ -1585,6 +1580,16 @@ void IocoinGUI::initModel()
     toolbar->show();
     qw->show();
     appMenuBar->show();
+
+    introWidget->setVisible(false);
+    introWidget->deleteLater();
+
+    setCentralWidget(centralWidget);
+    centralWidget->setVisible(true);
+    this->adjustSize();
+    
+    overviewAction->setChecked(true);
+    centralWidget->setCurrentWidget(overviewPage);
     gotoOverviewPage();
 }
 

@@ -4,6 +4,10 @@
  <widget class="QWidget" name="Intro">
   <layout class="QVBoxLayout" name="vl">
    <item>
+    <widget class="QLabel" name="movie">
+    </widget>
+   </item>
+   <item>
     <widget class="QFrame" name="splashframe">
   <layout class="QVBoxLayout" name="vl">
    <item>
@@ -14,7 +18,7 @@
     </widget>
    </item>
    <item>
-      <spacer name="verticalSpacer_2">
+      <spacer name="vs1">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
        </property>
@@ -37,7 +41,7 @@
      </widget>
     </item>
    <item>
-      <spacer name="verticalSpacer_2">
+      <spacer name="vs2">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
        </property>
@@ -108,7 +112,7 @@
    <item>
     <layout class="QHBoxLayout" name="hldialog2">
      <item>
-      <spacer name="horizontalSpacer_2">
+      <spacer name="hs1">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
@@ -130,7 +134,7 @@
          <item>
           <layout class="QVBoxLayout" name="verticalLayout_2">
            <item>
-            <spacer name="verticalSpacer">
+            <spacer name="vs3">
              <property name="orientation">
               <enum>Qt::Vertical</enum>
              </property>
@@ -205,7 +209,7 @@
      </layout>
    </item>
    <item>
-      <spacer name="verticalSpacer_2">
+      <spacer name="vs4">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
        </property>

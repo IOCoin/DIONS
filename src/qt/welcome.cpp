@@ -38,7 +38,7 @@ Welcome::Welcome(QWidget *parent) :
     connect(timer_,SIGNAL(timeout()),this,SLOT(gotoIntroScreen()));
     ui->movie->show();
     movie->start();
-    timer_->start(8000);
+    timer_->start(1000);
 }
 
 Welcome::~Welcome()
@@ -57,4 +57,3 @@ void Welcome::callbackobj(IocoinGUI* obj)
   this->obj = obj;
 }
 
-//#https://iobootstrap.s3.amazonaws.com/IOC-BOOTSTRAP-3242602.zip

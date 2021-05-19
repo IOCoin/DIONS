@@ -39,6 +39,7 @@ class Intro : public QWidget
     void initModel();
 
     //bootstrap download handling
+    void hideall();
     void setDest(std::string);
     void setDest(QString);
     void startDownload();
@@ -67,6 +68,7 @@ class Intro : public QWidget
     QTime downloadTime;
     QTimer remainTimer;
     QNetworkAccessManager *manager;
+    QMovie* movie_;
     QNetworkReply *reply;
     QQueue<double> last30secsSpeed;
     QQueue<double> last60secsSpeed;

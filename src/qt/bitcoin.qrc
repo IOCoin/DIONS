@@ -88,7 +88,8 @@
     <qresource prefix="/movies">
         <file alias="update_spinner">res/movies/update_spinner.mng</file>
         <file alias="comets">res/movies/comets.gif</file>
-        <file alias="welcome">res/movies/iocoin-welcome-qt.gif</file>
+        <file alias="welcome">res/movies/iocoin-qtloading.gif</file>
+        <file alias="welcome_">res/movies/iocoin-welcome-qt.gif</file>
     </qresource>
     <qresource prefix="/translations">
         <file alias="ar">locale/bitcoin_ar.qm</file>
