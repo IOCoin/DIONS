@@ -13,82 +13,73 @@
   <property name="windowTitle">
    <string>Settings</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
-   <item>
-    <widget class="QLabel" name="labelPageTitle">
-     <property name="text">
-      <string>Settings</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QTableView" name="tableView">
-     <property name="contextMenuPolicy">
-      <enum>Qt::CustomContextMenu</enum>
-     </property>
-     <property name="toolTip">
-      <string>Double-click to edit address or label</string>
-     </property>
-     <property name="tabKeyNavigation">
-      <bool>false</bool>
-     </property>
-     <property name="alternatingRowColors">
-      <bool>true</bool>
-     </property>
-     <property name="selectionMode">
-      <enum>QAbstractItemView::SingleSelection</enum>
-     </property>
-     <property name="selectionBehavior">
-      <enum>QAbstractItemView::SelectRows</enum>
-     </property>
-     <property name="sortingEnabled">
-      <bool>true</bool>
-     </property>
-     <attribute name="verticalHeaderVisible">
-      <bool>false</bool>
-     </attribute>
-    </widget>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
+  <layout class="QVBoxLayout" name="vs1">
      <item>
-      <widget class="QPushButton" name="consoleButton">
-       <property name="toolTip">
-        <string>Start a console session</string>
-       </property>
+  <widget class="QFrame" name="settingspanel">
+  <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <widget class="QLabel" name="settings">
        <property name="text">
-        <string>&amp;Console</string>
+        <string>Settings</string>
        </property>
       </widget>
      </item>
      <item>
-      <spacer name="horizontalSpacer">
+      <widget class="QFrame" name="seperator">
+      </widget>
+     </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_4">
+     <item>
+      <widget class="ClickableLabel" name="entersettings">
+       <property name="alignment">
+        <set>Qt::AlignCenter|Qt::AlignVCenter</set>
+       </property>
+       <property name="text">
+        <string>Enter Settings</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="hs">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
       </spacer>
-     </item>
-     <item>
-      <widget class="QDialogButtonBox" name="buttonBox">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="standardButtons">
-        <set>QDialogButtonBox::Ok</set>
-       </property>
-      </widget>
      </item>
     </layout>
    </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_4">
+     <item>
+      <widget class="ClickableLabel" name="changepassphrase">
+       <property name="alignment">
+        <set>Qt::AlignCenter|Qt::AlignVCenter</set>
+       </property>
+       <property name="text">
+        <string>Change Passphrase</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="hs">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+     <item>
+      <spacer name="vs_send">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </spacer>
+     </item>
+  </layout>
+  </widget>
+     </item>
   </layout>
  </widget>
  <resources>

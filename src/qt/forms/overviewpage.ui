@@ -62,9 +62,16 @@
            </widget>
           </item>
 	  <item>
-           <widget class="QPushButton" name="stakingbutton">
+           <widget class="QPushButton" name="disablestaking">
             <property name="text">
              <string>Disable Staking</string>
+            </property>
+           </widget>
+          </item>
+	  <item>
+           <widget class="QPushButton" name="enablestaking">
+            <property name="text">
+             <string>Enable Staking</string>
             </property>
            </widget>
           </item>

@@ -2,6 +2,7 @@
 #define SETTINGSVIEW_H
 
 #include <QWidget>
+#include "iocoingui.h"
 
 class WalletModel;
 class TransactionFilterProxy;
@@ -27,7 +28,7 @@ class SettingsPage : public QWidget
 {
     Q_OBJECT
 public:
-    explicit SettingsPage(QWidget *parent = 0);
+    explicit SettingsPage(IocoinGUI*,QWidget *parent = 0);
     ~SettingsPage();
 
     void setModel(WalletModel *model);
@@ -49,6 +50,7 @@ private:
     WalletModel *model;
     TransactionFilterProxy *transactionProxyModel;
     QTableView *settingsView;
+    IocoinGUI* iocgui_;
 
     QComboBox *dateWidget;
     QComboBox *typeWidget;
@@ -64,6 +66,8 @@ private:
     QWidget *createDateRangeWidget();
 
 private slots:
+    void enterSettings(); 
+    void changePassphrase(); 
     void contextualMenu(const QPoint &);
     void dateRangeChanged();
     void showDetails();

@@ -214,6 +214,11 @@ IocoinGUI::IocoinGUI(QWidget *parent):
     trayIcon(0),
     notificator(0),
     rpcConsole(0),
+    m_bMousePressed(false),
+    m_bDragTop(false),
+    m_bDragLeft(false),
+    m_bDragRight(false),
+    m_bDragBottom(false),
     nWeight(0)
 {
     setWindowTitle(tr("I/OCoin") + " - " + tr("Wallet"));
@@ -351,7 +356,7 @@ IocoinGUI::IocoinGUI(QWidget *parent):
     createTrayIcon();
 
     overviewPage = new OverviewPage(this);
-    settingsPage = new SettingsPage();
+    settingsPage = new SettingsPage(this);
 
     transactionsPage = new QWidget(this);
     QVBoxLayout *vbox = new QVBoxLayout();
@@ -452,7 +457,7 @@ IocoinGUI::IocoinGUI(QWidget *parent):
     // See https://qt-project.org/doc/qt-4.8/gallery.html
     QString curStyle = qApp->style()->metaObject()->className();
 
-    syncIconMovie = new QMovie(":/movies/update_spinner", "mng", this);
+    syncIconMovie = new QMovie(":/movies/update_spinner", "gif", this);
 
     // Clicking on a transaction on the overview page simply sends you to transaction history page
     connect(overviewPage, SIGNAL(transactionClicked(QModelIndex)), this, SLOT(gotoHistoryPage()));
@@ -931,7 +936,6 @@ void IocoinGUI::setNumBlocks(int count, int nTotalBlocks)
         qssFile.open(QFile::ReadOnly);
         QString svg = QLatin1String(qssFile.readAll());
         labelBlocksIcon->setPixmap(QIcon(new SVGIconEngine(svg.toStdString())).pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
-        //labelBlocksIcon->setPixmap(QIcon(":/icons/synced").pixmap(STATUSBAR_ICONSIZE, STATUSBAR_ICONSIZE));
 
         overviewPage->showOutOfSyncWarning(false);
     }
@@ -1327,6 +1331,8 @@ void IocoinGUI::setEncryptionStatus(int status)
         unlockWalletAction->setVisible(false);
         lockWalletAction->setVisible(false);
         encryptWalletAction->setEnabled(true);
+
+	overviewPage->unencrypted();
         break;
 	    }
     case WalletModel::Unlocked:
@@ -1340,6 +1346,8 @@ void IocoinGUI::setEncryptionStatus(int status)
         unlockWalletAction->setVisible(false);
         lockWalletAction->setVisible(true);
         encryptWalletAction->setEnabled(false); // TODO: decrypt currently not supported
+
+	  overviewPage->unlockedstakingonly();
         break;
     case WalletModel::Locked:
         labelUnencryptedIcon->hide();
@@ -1352,6 +1360,7 @@ void IocoinGUI::setEncryptionStatus(int status)
         unlockWalletAction->setVisible(true);
         lockWalletAction->setVisible(false);
         encryptWalletAction->setEnabled(false); // TODO: decrypt currently not supported
+	overviewPage->locked();
         break;
     }
 }
@@ -1395,6 +1404,20 @@ void IocoinGUI::unlockWallet()
     {
         AskPassphraseDialog::Mode mode = sender() ==  labelLockedIcon ?
               AskPassphraseDialog::UnlockStaking : AskPassphraseDialog::Unlock;
+        AskPassphraseDialog dlg(mode, this);
+        dlg.setModel(walletModel);
+        dlg.exec();
+    }
+}
+void IocoinGUI::unlockWalletDefaultStaking()
+{
+    if(!walletModel)
+        return;
+    // Unlock wallet when requested by wallet model
+    if(walletModel->getEncryptionStatus() == WalletModel::Locked)
+    {
+        AskPassphraseDialog::Mode mode = 
+              AskPassphraseDialog::UnlockStaking;
         AskPassphraseDialog dlg(mode, this);
         dlg.setModel(walletModel);
         dlg.exec();
@@ -1519,7 +1542,6 @@ void IocoinGUI::gotoIntroPage()
 }
 void IocoinGUI::showIntroScreen()
 {
-	std::cout << "showIntroScreen" << std::endl;
 	welcome->hide();
 	welcome->setVisible(false);
 	welcome->deleteLater();
@@ -1603,40 +1625,38 @@ void IocoinGUI::mouseDoubleClickEvent(QMouseEvent *event)
   Q_UNUSED(event);
 }
 
-void IocoinGUI::mouseMoveEvent(QMouseEvent* e)
-{
-  const QPoint  delta  = e->globalPos() - basePos_;
-  move(x()+delta.x(),y()+delta.y());
-  basePos_ = e->globalPos();
-}
-
 void IocoinGUI::checkBorderDragging(QMouseEvent *event) {
-  if (isMaximized()) {
+  if (isMaximized()) 
+  {
     return;
   }
 
   QPoint globalMousePos = event->globalPos();
-  if (m_bMousePressed) {
+  if (m_bMousePressed) 
+  {
     QScreen *screen = QGuiApplication::primaryScreen();
 	// available geometry excludes taskbar
     QRect availGeometry = screen->availableGeometry();
     int h = availGeometry.height();
     int w = availGeometry.width();
     QList<QScreen *> screenlist = screen->virtualSiblings();
-    if (screenlist.contains(screen)) {
+    if (screenlist.contains(screen)) 
+    {
       QSize sz = QApplication::desktop()->size();
       h = sz.height();
       w = sz.width();
     }
 
     // top right corner
-    if (m_bDragTop && m_bDragRight) {
+    if (m_bDragTop && m_bDragRight) 
+    {
       int diff =
           globalMousePos.x() - (m_StartGeometry.x() + m_StartGeometry.width());
       int neww = m_StartGeometry.width() + diff;
       diff = globalMousePos.y() - m_StartGeometry.y();
       int newy = m_StartGeometry.y() + diff;
-      if (neww > 0 && newy > 0 && newy < h - 50) {
+      if (neww > 0 && newy > 0 && newy < h - 50) 
+      {
         QRect newg = m_StartGeometry;
         newg.setWidth(neww);
         newg.setX(m_StartGeometry.x());
@@ -1645,12 +1665,15 @@ void IocoinGUI::checkBorderDragging(QMouseEvent *event) {
       }
     }
     // top left corner
-    else if (m_bDragTop && m_bDragLeft) {
+    else if (m_bDragTop && m_bDragLeft) 
+    {
+	    std::cout << "drag 6" << std::endl;
       int diff = globalMousePos.y() - m_StartGeometry.y();
       int newy = m_StartGeometry.y() + diff;
       diff = globalMousePos.x() - m_StartGeometry.x();
       int newx = m_StartGeometry.x() + diff;
-      if (newy > 0 && newx > 0) {
+      if (newy > 0 && newx > 0) 
+      {
         QRect newg = m_StartGeometry;
         newg.setY(newy);
         newg.setX(newx);
@@ -1658,45 +1681,61 @@ void IocoinGUI::checkBorderDragging(QMouseEvent *event) {
       }
     }
     // bottom right corner
-    else if (m_bDragBottom && m_bDragLeft) {
+    else if (m_bDragBottom && m_bDragLeft) 
+    {
+	    std::cout << "drag 5" << std::endl;
       int diff =
           globalMousePos.y() - (m_StartGeometry.y() + m_StartGeometry.height());
       int newh = m_StartGeometry.height() + diff;
       diff = globalMousePos.x() - m_StartGeometry.x();
       int newx = m_StartGeometry.x() + diff;
-      if (newh > 0 && newx > 0) {
+      if (newh > 0 && newx > 0) 
+      {
         QRect newg = m_StartGeometry;
         newg.setX(newx);
         newg.setHeight(newh);
         setGeometry(newg);
       }
-    } else if (m_bDragTop) {
+    } 
+    else if (m_bDragTop) 
+    {
+	    std::cout << "drag 4" << std::endl;
       int diff = globalMousePos.y() - m_StartGeometry.y();
       int newy = m_StartGeometry.y() + diff;
-      if (newy > 0 && newy < h - 50) {
+      if (newy > 0 && newy < h - 50) 
+      {
         QRect newg = m_StartGeometry;
         newg.setY(newy);
         setGeometry(newg);
       }
-    } else if (m_bDragLeft) {
+    } 
+    else if (m_bDragLeft) 
+    {
+	    std::cout << "drag 3" << std::endl;
       int diff = globalMousePos.x() - m_StartGeometry.x();
       int newx = m_StartGeometry.x() + diff;
-      if (newx > 0 && newx < w - 50) {
+      if (newx > 0 && newx < w - 50) 
+      {
         QRect newg = m_StartGeometry;
         newg.setX(newx);
         setGeometry(newg);
       }
-    } else if (m_bDragRight) {
+    } 
+    else if (m_bDragRight) 
+    {
       int diff =
           globalMousePos.x() - (m_StartGeometry.x() + m_StartGeometry.width());
       int neww = m_StartGeometry.width() + diff;
-      if (neww > 0) {
+      if (neww > 0) 
+      {
         QRect newg = m_StartGeometry;
         newg.setWidth(neww);
         newg.setX(m_StartGeometry.x());
         setGeometry(newg);
       }
-    } else if (m_bDragBottom) {
+    } 
+    else if (m_bDragBottom)
+    {
       int diff =
           globalMousePos.y() - (m_StartGeometry.y() + m_StartGeometry.height());
       int newh = m_StartGeometry.height() + diff;
@@ -1913,4 +1952,10 @@ bool IocoinGUI::eventFilter(QObject *obj, QEvent *event)
   }
 
   return QWidget::eventFilter(obj, event);
+}
+void IocoinGUI::mouseMoveEvent(QMouseEvent* e)
+{
+  const QPoint  delta  = e->globalPos() - basePos_;
+  move(x()+delta.x(),y()+delta.y());
+  basePos_ = e->globalPos();
 }

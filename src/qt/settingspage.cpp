@@ -12,6 +12,8 @@
 #include "editaddressdialog.h"
 #include "optionsmodel.h"
 #include "guiutil.h"
+#include "iocoingui.h"
+#include <iostream>
 
 #include <QScrollBar>
 #include <QComboBox>
@@ -30,14 +32,20 @@
 #include <QLabel>
 #include <QDateTimeEdit>
 
-SettingsPage::SettingsPage(QWidget *parent) :
+SettingsPage::SettingsPage(IocoinGUI* i,QWidget *parent) :
     QWidget(parent), model(0), transactionProxyModel(0),
+    iocgui_(i),
     ui(new Ui::SettingsPage),
     settingsView(0)
 {
     ui->setupUi(this);
-    ui->verticalLayout->setContentsMargins(0 , 0, 0, 0);
-    ui->labelPageTitle->setStyleSheet("background-color: white; font-size: 34px; color:#b3b3b3; font-weight:300");
+    ui->vs1->setContentsMargins(0, 0, 0, 0);
+    ui->verticalLayout->setContentsMargins(0, 0, 0, 0);
+    ui->seperator->setFrameShape(QFrame::HLine);
+    ui->seperator->setFrameShadow(QFrame::Sunken);
+    ui->seperator->setStyleSheet("background-color: #bebebe;");
+   connect(ui->entersettings, SIGNAL(clicked(bool)), this, SLOT(enterSettings()));
+   connect(ui->changepassphrase, SIGNAL(clicked(bool)), this, SLOT(changePassphrase()));
 }
 
 void SettingsPage::setModel(WalletModel *model)
@@ -296,4 +304,12 @@ void SettingsPage::focusTransaction(const QModelIndex &idx)
 SettingsPage::~SettingsPage()
 {
     delete ui;
+}
+void SettingsPage::enterSettings()
+{ 
+  iocgui_->optionsClicked();
+}
+void SettingsPage::changePassphrase()
+{ 
+  iocgui_->changePassphrase();
 }

@@ -28,6 +28,10 @@ public:
     void setModel(WalletModel *model);
     void showOutOfSyncWarning(bool fShow);
 
+    void unencrypted(); 
+    void locked() ;
+    void unlockedstakingonly() ;
+
 public slots:
     void setBalance(qint64 balance, qint64 stake, qint64 unconfirmedBalance, qint64 immatureBalance);
     void gotoSendPage();
@@ -36,12 +40,16 @@ signals:
     void transactionClicked(const QModelIndex &index);
 
 private:
-    Ui::OverviewPage *ui;
     WalletModel *model;
     qint64 currentBalance;
     qint64 currentStake;
     qint64 currentUnconfirmedBalance;
     qint64 currentImmatureBalance;
+
+    bool unencrypted_;
+    bool locked_;
+    bool unlockedstakeonly_;
+
     
     TransactionView* txv_;
     TxViewDelegate *txdelegate;
@@ -51,6 +59,7 @@ private slots:
     void updateDisplayUnit();
     void handleTransactionClicked(const QModelIndex &index);
 private:
+    Ui::OverviewPage *ui;
     IocoinGUI* iocgui_;
 };
 

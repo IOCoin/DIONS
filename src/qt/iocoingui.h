@@ -71,12 +71,12 @@ protected:
     void closeEvent(QCloseEvent *event);
     void dragEnterEvent(QDragEnterEvent *event);
     void dropEvent(QDropEvent *event);
-    void mouseMoveEvent(QMouseEvent*);
     void changeEvent(QEvent *event);
     void mouseDoubleClickEvent(QMouseEvent *event);
     void checkBorderDragging(QMouseEvent *event);
     void mousePressEvent(QMouseEvent *event);
     void mouseReleaseEvent(QMouseEvent *event);
+    void mouseMoveEvent(QMouseEvent*);
     bool eventFilter(QObject *obj, QEvent *event);
 
 private:
@@ -99,6 +99,7 @@ private:
   bool m_bDragLeft;
   bool m_bDragRight;
   bool m_bDragBottom;
+
     ClientModel *clientModel;
     WalletModel *walletModel;
 
@@ -227,6 +228,10 @@ public slots:
 public slots:
     /** Switch to send coins page */
     void gotoSendCoinsPage();
+    /** Show configuration dialog */
+    void optionsClicked();
+    /** Change encrypted wallet passphrase */
+    void changePassphrase();
 private slots:
     /** Switch to overview (home) page */
     void gotoProfileImageChooser();
@@ -248,8 +253,6 @@ private slots:
     /** Show Sign/Verify Message dialog and switch to verify message tab */
     void gotoVerifyMessageTab(QString addr = "");
 
-    /** Show configuration dialog */
-    void optionsClicked();
     /** Show about dialog */
     void aboutClicked();
 
@@ -266,10 +269,9 @@ private slots:
     void encryptWallet(bool status);
     /** Backup the wallet */
     void backupWallet();
-    /** Change encrypted wallet passphrase */
-    void changePassphrase();
     /** Ask for passphrase to unlock wallet temporarily */
     void unlockWallet();
+    void unlockWalletDefaultStaking();
 
     void lockWallet();
 

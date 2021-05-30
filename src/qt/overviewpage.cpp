@@ -109,15 +109,9 @@ OverviewPage::OverviewPage(IocoinGUI* i,QWidget *parent) :
     txv_ = new TransactionView(this);
     txv_->setObjectName("txv");
 
-    connect(ui->sendbutton,SIGNAL(clicked()),SLOT(gotoSendPage()));
-
-    // Recent transactions
-    //TRANS ui->listTransactions->setItemDelegate(txdelegate);
-    //TRANS ui->listTransactions->setIconSize(QSize(DECORATION_SIZE, DECORATION_SIZE));
-    //TRANS ui->listTransactions->setMinimumHeight(NUM_ITEMS * (DECORATION_SIZE + 2));
-    //TRANS ui->listTransactions->setAttribute(Qt::WA_MacShowFocusRect, false);
-
-    //TRANS connect(ui->listTransactions, SIGNAL(clicked(QModelIndex)), this, SLOT(handleTransactionClicked(QModelIndex)));
+    connect(ui->sendbutton,SIGNAL(clicked()),this,SLOT(gotoSendPage()));
+    connect(ui->disablestaking,SIGNAL(clicked()),iocgui_,SLOT(lockWallet()));
+    connect(ui->enablestaking,SIGNAL(clicked()),iocgui_,SLOT(unlockWalletDefaultStaking()));
 
     QGraphicsDropShadowEffect* ef = new QGraphicsDropShadowEffect();
     ef->setBlurRadius(10);
@@ -178,16 +172,11 @@ OverviewPage::OverviewPage(IocoinGUI* i,QWidget *parent) :
     ui->available->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
     ui->pending->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
     ui->staked->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
+  
+    //ui->disablestaking->setVisible(false);
+    //ui->enablestaking->setVisible(false);
 
-    //ui->availableAmountLayout->setMargin(0);
-    //ui->availableAmountLayout->setSpacing(0);
-    //QVBoxLayout *vbox = new QVBoxLayout();
-    //QLabel* tmp = new QLabel();
-    //tmp->setText("hello");
-    //vbox->addWidget(txv_);
-    //vbox->addWidget(tmp);
-    //ui->txv->setLayout(vbox);
-
+      
     // start with displaying the "out of sync" warnings
     showOutOfSyncWarning(true);
 }
@@ -311,4 +300,23 @@ void OverviewPage::showOutOfSyncWarning(bool fShow)
 {
     //ui->labelWalletStatus->setVisible(fShow);
     //ui->labelTransactionsStatus->setVisible(fShow);
+}
+void OverviewPage::unencrypted()
+{
+  ui->disablestaking->setVisible(false);
+  ui->enablestaking->setVisible(false);
+}
+void OverviewPage::locked()
+{
+  ui->disablestaking->hide();
+  ui->disablestaking->setVisible(false);
+  ui->enablestaking->show();
+  ui->enablestaking->setVisible(true);
+}
+void OverviewPage::unlockedstakingonly()
+{
+  ui->disablestaking->show();
+  ui->disablestaking->setVisible(true);
+  ui->enablestaking->hide();
+  ui->enablestaking->setVisible(false);
 }

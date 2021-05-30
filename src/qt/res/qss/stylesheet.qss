@@ -52,8 +52,13 @@ QVBoxLayout#vl0 { margin:none ;padding:0 }
 QWidget#OverviewPage { padding:0 }
 OverviewPage { margin:none; }
 
-QPushButton#sendbutton, #stakingbutton { border: 2px solid #e3e3e3; color:#b3b3b3; background-color: white; border-radius: 15px; font-size: 15px; padding:8px; padding-left:10px; padding-right:10px; }
-QPushButton#sendbutton:hover, #stakingbutton:hover { background-color: #d8446c; color:white }
+QLabel#settings { background-color: white; font-size: 34px; color:#b3b3b3; font-weight:300; }
+QPushButton#sendbutton, #disablestaking, #enablestaking { border: 2px solid #e3e3e3; color:#b3b3b3; background-color: white; border-radius: 15px; font-size: 15px; padding:8px; padding-left:10px; padding-right:10px; }
+QPushButton#sendbutton:hover, #disablestaking:hover, #enablestaking:hover { background-color: #d8446c; color:white }
+
+QFrame#settingspanel { background-color: white; font-size: 34px; color:#b3b3b3; font-weight:300; }
+ClickableLabel#entersettings, #changepassphrase { margin-left:30px; border: 2px solid #e3e3e3; color:#b3b3b3; background-color: white; border-radius: 15px; font-size: 15px; padding:8px; padding-left:10px; padding-right:10px; min-width:150px; max-width:150px }
+ClickableLabel#entersettings:hover, #changepassphrase:hover { background-color: #d8446c; color:white }
 
 QLabel#labelIntBalance {color:#646464; text-indent:0 ; border:none; font-size: 32px ; font-weight:700;padding: 0 0 0 0}
 QLabel#labelFracBalance { border:none; font-size: 32px; color: #b3b3b3; padding: 0 0 0 0}

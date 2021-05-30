@@ -19,6 +19,7 @@
 #include <QLibraryInfo>
 #include <QDesktopWidget>
 #include <QVBoxLayout>
+#include "stdlib.h" 
 
 #if defined(BITCOIN_NEED_QT_PLUGINS) && !defined(_BITCOIN_QT_PLUGINS_INCLUDED)
 #define _BITCOIN_QT_PLUGINS_INCLUDED
@@ -36,6 +37,21 @@ const string BOOTSTRAP_LOCATION = "/home/argon/bootstrap.dat";
 static IocoinGUI *guiref;
 static QSplashScreen *splashref;
 //static SplashScreen *splashref;
+//
+static string sha256(const string str)
+{
+    unsigned char hash[SHA256_DIGEST_LENGTH];
+    SHA256_CTX sha256;
+    SHA256_Init(&sha256);
+    SHA256_Update(&sha256, str.c_str(), str.size());
+    SHA256_Final(hash, &sha256);
+    stringstream ss;
+    for(int i = 0; i < SHA256_DIGEST_LENGTH; i++)
+    {
+        ss << hex << setw(2) << setfill('0') << (int)hash[i];
+    }
+    return ss.str();
+}
 
 static void ThreadSafeMessageBox(const std::string& message, const std::string& caption, int style)
 {
@@ -134,8 +150,16 @@ extern "C" int setup_application(IocoinGUI& window, std::string directory)
   if(init)
   {
     boost::filesystem::ofstream ofs(p / "iocoin.conf");   
-    ofs << "rpcuser=" << endl;
-    ofs << "rpcpassword=" << endl;
+
+    srand(time(NULL));
+    unsigned int r = rand();
+    string rStr = std::to_string(r);
+    string defaultUser = sha256(rStr);
+    r = rand();
+    string passStr = std::to_string(r);
+    string pass = sha256(passStr);
+    ofs << "rpcuser=" << defaultUser << endl;
+    ofs << "rpcpassword=" << pass << endl;
     ofs << endl;
     ofs << endl;
     ofs << "addnode=amer.supernode.iocoin.io" << endl;
@@ -159,6 +183,7 @@ extern "C" int app_init()
 
 int main(int argc, char *argv[])
 {
+
     Q_INIT_RESOURCE(bitcoin);
     QApplication app(argc, argv);
 

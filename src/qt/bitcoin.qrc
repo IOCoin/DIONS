@@ -86,7 +86,8 @@
         <file alias="semibold">res/font/OpenSans-Semibold.ttf</file>
     </qresource>
     <qresource prefix="/movies">
-        <file alias="update_spinner">res/movies/update_spinner.mng</file>
+        <file alias="update_spinner_">res/movies/update_spinner.mng</file>
+        <file alias="update_spinner">res/movies/hourglass.gif</file>
         <file alias="comets">res/movies/comets.gif</file>
         <file alias="welcome">res/movies/iocoin-qtloading.gif</file>
         <file alias="welcome_">res/movies/iocoin-welcome-qt.gif</file>

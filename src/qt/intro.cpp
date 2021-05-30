@@ -24,7 +24,7 @@
 #include<boost/iostreams/filter/gzip.hpp>
 
 const char* BOOTSTRAP_URL =
-"https://iobootstrap.s3.amazonaws.com/bootstrap-02052021-07:20:23.zip";
+"https://iobootstrap.s3.amazonaws.com/bootstrap.zip";
 
 std::string logoSVG1 = 
 "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"
@@ -56,9 +56,9 @@ std::string closeSVG =
 void extract(QFileInfo fileDest,Ui::Intro** ui)
 {
   QStringList zextracted = JlCompress::extractDir(fileDest.filePath(), fileDest.path(), (*ui)->progressbar);
-  if(!zextracted.isEmpty())
+  if(zextracted.isEmpty())
   {
-    std::cout << "Bootstrap extract successful." << std::endl;
+
   }
 }
 void initialize(IocoinGUI* obj,QString dir)
@@ -199,7 +199,7 @@ void Intro::config()
       hideall();
       movie_ = new QMovie(":/movies/welcome", "gif", this);
       QTimer* timer_ = new QTimer(this);
-      connect(timer_,SIGNAL(timeout()),this,SLOT(gotoIntroScreen()));
+      //connect(timer_,SIGNAL(timeout()),this,SLOT(gotoIntroScreen()));
       ui->movie->setMovie(movie_);
       movie_->start();
       ui->movie->show();
@@ -256,7 +256,7 @@ void Intro::next()
   hideall();
   movie_ = new QMovie(":/movies/welcome", "gif", this);
   QTimer* timer_ = new QTimer(this);
-  connect(timer_,SIGNAL(timeout()),this,SLOT(gotoIntroScreen()));
+  //connect(timer_,SIGNAL(timeout()),this,SLOT(gotoIntroScreen()));
   ui->movie->setMovie(movie_);
   movie_->start();
   ui->movie->show();

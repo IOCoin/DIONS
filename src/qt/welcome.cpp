@@ -26,7 +26,6 @@ Welcome::Welcome(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::Welcome)
 {
-	std::cout << "Welcone" << std::endl;
     setWindowFlags(Qt::FramelessWindowHint | Qt::WindowSystemMenuHint);
     setWindowFlags(windowFlags() | Qt::WindowMinimizeButtonHint);
     this->resize(1000,900);
