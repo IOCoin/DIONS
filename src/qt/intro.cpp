@@ -25,8 +25,7 @@
 #include<boost/iostreams/filter/gzip.hpp>
 
 const char* BOOTSTRAP_URL =
-"http://localhost/bootstrap/bootstrap.zip";
-//XXXX "https://iobootstrap.s3.amazonaws.com/bootstrap.zip";
+"https://iobootstrap.s3.amazonaws.com/bootstrap.zip";
 
 std::string logoSVG1 = 
 "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"
