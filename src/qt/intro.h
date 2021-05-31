@@ -58,6 +58,7 @@ class Intro : public QWidget
     IocoinGUI* obj;
     QString dir_;
 
+    QThread* thread_;
     bool httpRequestAborted;
     bool downloaderQuit;
     bool downloadFinished;

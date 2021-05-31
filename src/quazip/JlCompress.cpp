@@ -26,6 +26,7 @@ see quazip/(un)zip.h files for details. Basically it's the zlib license.
 #include "JlCompress.h"
 #include <QDebug>
 #include <QLabel>
+#include <iostream>
 
 static bool copyData(QIODevice &inFile, QIODevice &outFile)
 {
@@ -478,8 +479,8 @@ QStringList JlCompress::extractFiles(QIODevice *ioDevice, QStringList files, QSt
     QuaZip zip(ioDevice);
     return extractFiles(zip, files, dir);
 } 
-QStringList JlCompress::extractDir(QString fileCompressed, QString dir, QProgressBar *progressBar) {
-
+QStringList JlCompress::extractDir(QObject* obj, QString fileCompressed, QString dir, QProgressBar* progressBar) 
+{
     int progress = 0;
 
     QuaZip zip(fileCompressed);
@@ -487,9 +488,9 @@ QStringList JlCompress::extractDir(QString fileCompressed, QString dir, QProgres
         return QStringList();
     }
 
-    progressBar->setMinimum(0);
-    progressBar->setMaximum(zip.getEntriesCount());
-    progressBar->setValue(0);
+    emit ((ExtractionWorker*)obj)->min(0);
+    emit ((ExtractionWorker*)obj)->max(zip.getEntriesCount());
+    emit ((ExtractionWorker*)obj)->progress(0);
 
     QDir directory(dir);
     QStringList extracted;
@@ -502,7 +503,7 @@ QStringList JlCompress::extractDir(QString fileCompressed, QString dir, QProgres
         do {
             QString name = zip.getCurrentFileName();
             QString absFilePath = directory.absoluteFilePath(name);
-            progressBar->setValue(++progress);
+	    emit ((ExtractionWorker*)obj)->progress(++progress);
             if (!extractFile(&zip, "", absFilePath)) {
                 removeFile(extracted);
                 return QStringList();

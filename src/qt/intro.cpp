@@ -6,6 +6,7 @@
 #include "clickablelabel.h"
 #include "guiconstants.h"
 #include "initworker.h"
+#include "extractionworker.h"
 #include <boost/filesystem.hpp>
 #include "JlCompress.h"
 #include<QIcon>
@@ -24,7 +25,8 @@
 #include<boost/iostreams/filter/gzip.hpp>
 
 const char* BOOTSTRAP_URL =
-"https://iobootstrap.s3.amazonaws.com/bootstrap.zip";
+"http://localhost/bootstrap/bootstrap.zip";
+//XXXX "https://iobootstrap.s3.amazonaws.com/bootstrap.zip";
 
 std::string logoSVG1 = 
 "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"
@@ -53,14 +55,6 @@ std::string closeSVG =
 "            </g>"
 "        </svg>";
 
-void extract(QFileInfo fileDest,Ui::Intro** ui)
-{
-  QStringList zextracted = JlCompress::extractDir(fileDest.filePath(), fileDest.path(), (*ui)->progressbar);
-  if(zextracted.isEmpty())
-  {
-
-  }
-}
 void initialize(IocoinGUI* obj,QString dir)
 {
   obj->complete_init(dir);
@@ -376,13 +370,19 @@ void Intro::downloaderFinished()
         }
         else
         {
-            ui->remaintime->setText("bootstrap.zip download successful, extracting...");
-      QThread* t = QThread::create([this]{extract(fileDest,&ui);});
-      t->start();
-      connect(t,SIGNAL(finished()),this,SLOT(extractioncomplete()));
-            //ui->remaintime->hide();
-            //ui->next->show();
-            //ui->next->setText(tr("Successfully extracted. Click to continue..."));
+          ui->remaintime->setText("bootstrap.zip download successful, extracting...");
+          ExtractionWorker* worker = new ExtractionWorker();
+          worker->init(fileDest,ui->progressbar);
+          thread_ = new QThread();
+          worker->moveToThread(thread_);
+          connect(thread_,SIGNAL(started()),worker,SLOT(extract()));
+          connect(worker,SIGNAL(min(int)),ui->progressbar,SLOT(setMinimum(int)));
+          connect(worker,SIGNAL(max(int)),ui->progressbar,SLOT(setMaximum(int)));
+          connect(worker,SIGNAL(progress(int)),ui->progressbar,SLOT(setValue(int)));
+          connect(worker,SIGNAL(completed()),this,SLOT(extractioncomplete()));
+          connect(worker,SIGNAL(completed()),worker,SLOT(deleteLater()));
+          connect(thread_,SIGNAL(finished()),thread_,SLOT(deleteLater()));
+          thread_->start();
         }
     }
 

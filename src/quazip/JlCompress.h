@@ -35,6 +35,7 @@ see quazip/(un)zip.h files for details. Basically it's the zlib license.
 #include <QtCore/QFileInfo>
 #include <QtCore/QFile>
 #include <QProgressBar>
+#include "../qt/extractionworker.h"
 
 /// Utility class for typical operations.
 /**
@@ -179,7 +180,7 @@ public:
       \return The list of the full paths of the files extracted, empty on failure.
       */
     static QString extractFile(QIODevice *ioDevice, QString fileName, QString fileDest = QString());
-    static QStringList extractDir(QString fileCompressed, QString dir = QString(), QProgressBar *progressBar = 0);
+    static QStringList extractDir(QObject* obj, QString fileCompressed, QString dir = QString(),QProgressBar* bar=0);
     /// Extract a list of files.
     /**
       \param ioDevice pointer to device with compressed data.
