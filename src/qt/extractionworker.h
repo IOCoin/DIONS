@@ -22,6 +22,7 @@ class ExtractionWorker : public QObject
     void progress(int);
     void min(int);
     void max(int);
+    void extractionempty();
     void completed();
 
   private:

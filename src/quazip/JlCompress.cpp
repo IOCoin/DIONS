@@ -401,10 +401,10 @@ QStringList JlCompress::extractDir(QuaZip &zip, const QString &dir)
             removeFile(extracted);
             return QStringList();
         }
+	if(QThread::currentThread()->isInterruptionRequested()) { return QStringList(); }
         extracted.append(absFilePath);
     } while (zip.goToNextFile());
 
-    // Chiudo il file zip
     zip.close();
     if(zip.getZipError()!=0) {
         removeFile(extracted);
@@ -415,7 +415,6 @@ QStringList JlCompress::extractDir(QuaZip &zip, const QString &dir)
 }
 
 QStringList JlCompress::getFileList(QString fileCompressed) {
-    // Apro lo zip
     QuaZip* zip = new QuaZip(QFileInfo(fileCompressed).absoluteFilePath());
     return getFileList(zip);
 }
@@ -504,6 +503,9 @@ QStringList JlCompress::extractDir(QObject* obj, QString fileCompressed, QString
             QString name = zip.getCurrentFileName();
             QString absFilePath = directory.absoluteFilePath(name);
 	    emit ((ExtractionWorker*)obj)->progress(++progress);
+
+	    if(QThread::currentThread()->isInterruptionRequested()) { removeFile(extracted); return QStringList(); }
+
             if (!extractFile(&zip, "", absFilePath)) {
                 removeFile(extracted);
                 return QStringList();

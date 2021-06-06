@@ -1,4 +1,5 @@
 #include "intro.h"
+#include "init.h"
 #include "downloader.h"
 #include "archiveextractor.h"
 #include "ui_intro.h"
@@ -7,6 +8,7 @@
 #include "guiconstants.h"
 #include "initworker.h"
 #include "extractionworker.h"
+#include "deleteworker.h"
 #include <boost/filesystem.hpp>
 #include "JlCompress.h"
 #include<QIcon>
@@ -26,6 +28,7 @@
 
 const char* BOOTSTRAP_URL =
 "https://iobootstrap.s3.amazonaws.com/bootstrap.zip";
+//"http://localhost/bootstrap/bootstrap.zip";
 
 std::string logoSVG1 = 
 "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"
@@ -54,13 +57,19 @@ std::string closeSVG =
 "            </g>"
 "        </svg>";
 
+static std::atomic<bool> downloadTerminatedOnClose;
+
+extern std::atomic<bool> extractionCompleted;
 void initialize(IocoinGUI* obj,QString dir)
 {
   obj->complete_init(dir);
 }
 
-Intro::Intro(QWidget *parent) :
+Intro::Intro(IocoinGUI* i, QWidget *parent) :
     QWidget(parent),
+    iocgui_(i),
+    downloaderQuit(false),
+    downloadFinished(true),
     url(BOOTSTRAP_URL),
     ui(new Ui::Intro)
 {
@@ -100,20 +109,50 @@ Intro::Intro(QWidget *parent) :
     
     ui->logoright->setText(importLabelText);
     ui->logoright->setCursor(QCursor(Qt::PointingHandCursor));
+
     ui->closeicon->setObjectName("closelabel");
     QFile qssFile3(":/icons/closesplash");
     qssFile3.open(QFile::ReadOnly);
     QString svg = QLatin1String(qssFile3.readAll());
     QIcon* closeIc = new QIcon(new SVGIconEngine(svg.toStdString()));
-    QIcon* tmp1 = new QIcon(new SVGIconEngine(closeSVG));
-    QPixmap closePixmap = tmp1->pixmap(tmp1->actualSize(QSize(30,30)));
+    QPixmap closePixmap = closeIc->pixmap(closeIc->actualSize(QSize(30,30)));
     ui->closeicon->setPixmap(closePixmap);
     ui->closeicon->setCursor(QCursor(Qt::PointingHandCursor));
-    ui->bootstrapdialog->setAttribute(Qt::WA_TranslucentBackground, true);
-    ui->bootstrapdialog->setStyleSheet("color:white; font-size: 14pt");
-    ui->bootstrapdialog->setText("Chosen wallet directory empty,\n download bootstrap.dat now?");
-    ui->bootstrapdialog->setCursor(QCursor(Qt::PointingHandCursor));
-    ui->bootstrapdialog->hide();
+
+    ui->maximize->setObjectName("maximize");
+    ui->maximize->setAttribute(Qt::WA_TranslucentBackground, true);
+    QFile qssFileMax(":/icons/maximize_white");
+    qssFileMax.open(QFile::ReadOnly);
+    QString svgMax = QLatin1String(qssFileMax.readAll());
+    QIcon* maxIc = new QIcon(new SVGIconEngine(svgMax.toStdString()));
+    QPixmap maxPixmap = maxIc->pixmap(maxIc->actualSize(QSize(30,30)));
+    ui->maximize->setPixmap(maxPixmap);
+    ui->maximize->setCursor(QCursor(Qt::PointingHandCursor));
+
+    ui->minimize->setObjectName("minimize");
+    ui->minimize->setAttribute(Qt::WA_TranslucentBackground, true);
+    QFile qssFileMin(":/icons/minimize_white");
+    qssFileMin.open(QFile::ReadOnly);
+    QString svgMin = QLatin1String(qssFileMin.readAll());
+    QIcon* minIc = new QIcon(new SVGIconEngine(svgMin.toStdString()));
+    QPixmap minPixmap = minIc->pixmap(minIc->actualSize(QSize(30,30)));
+    ui->minimize->setPixmap(minPixmap);
+    ui->minimize->setCursor(QCursor(Qt::PointingHandCursor));
+
+    connect(ui->minimize,SIGNAL(clicked(bool)),this, SLOT(minimizeApp()));
+    connect(ui->maximize,SIGNAL(clicked(bool)),this, SLOT(maximizeApp()));
+
+    ui->directoryempty->setAttribute(Qt::WA_TranslucentBackground, true);
+    ui->directoryempty1->setAttribute(Qt::WA_TranslucentBackground, true);
+    ui->directoryempty2->setAttribute(Qt::WA_TranslucentBackground, true);
+    ui->directoryempty3->setAttribute(Qt::WA_TranslucentBackground, true);
+    ui->directoryempty2->setCursor(QCursor(Qt::PointingHandCursor));
+    ui->directoryempty3->setCursor(QCursor(Qt::PointingHandCursor));
+    ui->directoryempty->setStyleSheet("color:white; font-size: 14pt; min-width:200px");
+    ui->directoryempty1->setStyleSheet("color:white; font-size: 14pt; min-width:150px");
+    ui->directoryempty2->setStyleSheet("color:white; font-size: 14pt; min-width:150px");
+    ui->directoryempty3->setStyleSheet("color:white; font-size: 14pt; min-width:150px");
+    ui->directoryempty->hide();
     ui->next->setCursor(QCursor(Qt::PointingHandCursor));
     ui->next->hide();
     ui->progressbar->setAttribute(Qt::WA_TranslucentBackground, true);
@@ -123,6 +162,10 @@ Intro::Intro(QWidget *parent) :
     ui->next->setStyleSheet("color:white; font-size: 12pt");
     ui->progressbar->hide();
     ui->remaintime->hide();
+    ui->canceldownload->hide();
+    ui->canceldownload->setAttribute(Qt::WA_TranslucentBackground, true);
+    ui->canceldownload->setCursor(QCursor(Qt::PointingHandCursor));
+    ui->canceldownload->setStyleSheet("color:white; font-size: 12pt");
 
     ui->initializing->hide();
     ui->comets->hide();
@@ -130,7 +173,9 @@ Intro::Intro(QWidget *parent) :
     ui->progressbar->setRange(0,1000000);
     ui->progressbar->setFixedWidth(300);
 
-    connect(ui->bootstrapdialog,SIGNAL(clicked(bool)),this, SLOT(downloadbootstrap()));
+    connect(ui->canceldownload,SIGNAL(clicked(bool)),this, SLOT(cancelDownload()));
+    connect(ui->directoryempty2,SIGNAL(clicked(bool)),this, SLOT(downloadbootstrap()));
+    connect(ui->directoryempty3,SIGNAL(clicked(bool)),this, SLOT(next()));
     connect(ui->next,SIGNAL(clicked(bool)),this, SLOT(next()));
     connect(ui->logoright,SIGNAL(clicked(bool)),this, SLOT(config()));
     connect(ui->closeicon,SIGNAL(clicked(bool)),this, SLOT(closesplash()));
@@ -143,12 +188,58 @@ Intro::Intro(QWidget *parent) :
 
 Intro::~Intro()
 {
+  if(extractionCompleted == false && downloadTerminatedOnClose == false)
+  {
+    boost::filesystem::remove(((this->fileBase).filePath().toStdString() + "/blk0001.dat").c_str());
+    boost::filesystem::remove_all(((this->fileBase).filePath().toStdString() + "/txleveldb").c_str());
+  }
+
   delete ui;
+}
+
+void Intro::closeEvent(QCloseEvent *event)
+{
+  QMessageBox::StandardButton resBtn = QMessageBox::question( this, "I/O Coin",
+                                                                tr("Cancel wallet load, you sure?"),
+                                                                QMessageBox::Cancel | QMessageBox::Yes,
+                                                                QMessageBox::Cancel);
+
+  if (resBtn == QMessageBox::Cancel)
+  {
+    event->ignore();
+  }
+  else 
+  {
+    downloaderQuit = true;
+    if (!downloadFinished)
+    {
+      // Clean-up
+      if(!httpRequestAborted)
+      {
+        if(reply)
+        {
+          reply->abort();
+        }
+        httpRequestAborted = true;
+      }
+      downloaderFinished();
+
+    if(!downloadTerminatedOnClose && thread_->isFinished() == false)
+    {
+      //thread_->quit();
+      //thread_->requestInterruption();
+      thread_->requestInterruption();
+    }
+
+    }
+    uiInterface.QueueShutdown();
+    event->accept();
+  }
 }
 
 void Intro::closesplash()
 {
-  qApp->quit();
+  this->close();
 }
 void Intro::config()
 {
@@ -167,10 +258,11 @@ void Intro::config()
     if(!boost::filesystem::exists(selected_directory))
     {
       boost::filesystem::path p(dir_.toStdString());
+      this->setBase(p.string());
       p /= "bootstrap.zip";
       this->setDest(p.string());
       ui->logoright->hide();
-      ui->bootstrapdialog->show();
+      ui->directoryempty->show();
     }
     else 
     {
@@ -207,7 +299,6 @@ void Intro::hideall()
   ui->logoleft->hide();
   ui->logoright->hide();
   ui->logolefttext->hide();
-  ui->bootstrapdialog->hide();
   ui->initializing->hide();
   ui->progressbar->hide();
   ui->remaintime->hide();
@@ -255,11 +346,19 @@ void Intro::next()
   ui->movie->show();
 }
 
+void Intro::directoryemptydialog()
+{
+  ui->directoryempty->show();
+}
+
 void Intro::downloadbootstrap()
 {
-  ui->bootstrapdialog->hide();
+  ui->directoryempty1->hide();
+  ui->directoryempty2->hide();
+  ui->directoryempty3->hide();
   ui->progressbar->show();
   ui->remaintime->show();
+  ui->canceldownload->show();
   startDownload();
 }
 void Intro::startRequest()
@@ -320,6 +419,7 @@ void Intro::httpReadyRead()
 }
 void Intro::downloaderFinished()
 {
+	if(downloadTerminatedOnClose==true) return;
     // Finished with timer
     if (downloadTimer->isActive())
     {
@@ -351,8 +451,10 @@ void Intro::downloaderFinished()
     {
         file->remove();
         {
+            ui->remaintime->setText("The download was terminated");
             QMessageBox::information(this, tr("Downloader"),
                                  tr("Download terminated: %1.").arg(reply->errorString()));
+	    downloadTerminatedOnClose=true;
         }
     }
     else
@@ -369,6 +471,7 @@ void Intro::downloaderFinished()
         }
         else
         {
+		ui->canceldownload->hide();
           ui->remaintime->setText("bootstrap.zip download successful, extracting...");
           ExtractionWorker* worker = new ExtractionWorker();
           worker->init(fileDest,ui->progressbar);
@@ -379,6 +482,7 @@ void Intro::downloaderFinished()
           connect(worker,SIGNAL(max(int)),ui->progressbar,SLOT(setMaximum(int)));
           connect(worker,SIGNAL(progress(int)),ui->progressbar,SLOT(setValue(int)));
           connect(worker,SIGNAL(completed()),this,SLOT(extractioncomplete()));
+          connect(worker,SIGNAL(extractionempty()),this,SLOT(extractionempty()));
           connect(worker,SIGNAL(completed()),worker,SLOT(deleteLater()));
           connect(thread_,SIGNAL(finished()),thread_,SLOT(deleteLater()));
           thread_->start();
@@ -390,12 +494,12 @@ void Intro::downloaderFinished()
     delete file;
     file = 0;
     manager = 0;
-    downloadFinished = true;
 
 }
 void Intro::fileUnzipped()
 {
   ui->remaintime->hide();
+  ui->canceldownload->hide();
   ui->next->show();
   ui->next->setText(tr("Successfully extracted. Click to continue..."));
 }
@@ -422,14 +526,17 @@ void Intro::timerCheckDownloadProgress()
   }
 }
 void Intro::networkError()
-{
+{ 
     QNetworkReply *reply = static_cast<QNetworkReply*>(sender());
     qDebug()<<__PRETTY_FUNCTION__<<':'<<reply->error();
     if (!downloaderQuit)
+    {
         cancelDownload();
+    }
 }
 void Intro::cancelDownload()
 {
+    downloaderQuit = true;
     if (downloadTimer->isActive())
     {
         downloadTimer->stop();
@@ -437,18 +544,29 @@ void Intro::cancelDownload()
     }
 
     if (!reply->errorString().isEmpty())
-    {
-        //XXXX ui->statusLabel->setText(tr("The download was canceled.\n\n%1").arg(reply->errorString()));
+    { 
+        ui->remaintime->setText(tr("Download was canceled.\n\n%1").arg(reply->errorString()));
     }
     else
-    {
-        //XXXX ui->statusLabel->setText(tr("The download was canceled."));
+    { 
+        ui->remaintime->setText(tr("Download was canceled."));
     }
+
     if (reply)
     {
         reply->abort();
     }
     httpRequestAborted = true;
+    ui->progressbar->hide();
+    ui->remaintime->hide();
+    ui->canceldownload->hide();
+    ui->directoryempty->show();
+    ui->directoryempty1->show();
+    ui->directoryempty2->show();
+    ui->directoryempty3->show();
+    downloaderQuit=false;
+    downloadFinished=true;
+    downloadTerminatedOnClose=false;
 }
 void Intro::calculateRemainTime()
 {
@@ -503,10 +621,19 @@ void Intro::calculateRemainTime()
   else
     ui->remaintime->setText(tr("%1 %2 downloading, %3 mins remaining").arg(s, 3, 'f', 1).arg(unit).arg(time.toString("mm:ss")));
 }
+void Intro::setBase(std::string dest)
+{
+  QString d = QString::fromStdString(dest);
+  this->setBase(d);
+}
 void Intro::setDest(std::string dest)
 {
   QString d = QString::fromStdString(dest);
   this->setDest(d);
+}
+void Intro::setBase(QString dest)
+{
+  fileBase = QFileInfo(dest);
 }
 void Intro::setDest(QString dest)
 {
@@ -558,6 +685,20 @@ void Intro::startDownload()
                 downloadFinished = true;
                 ui->progressbar->setMaximum(100);
                 ui->progressbar->setValue(100);
+		ui->canceldownload->hide();
+          ui->remaintime->setText("extracting existing bootstrap zip archive...");
+          ExtractionWorker* worker = new ExtractionWorker();
+          worker->init(fileDest,ui->progressbar);
+          thread_ = new QThread();
+          worker->moveToThread(thread_);
+          connect(thread_,SIGNAL(started()),worker,SLOT(extract()));
+          connect(worker,SIGNAL(min(int)),ui->progressbar,SLOT(setMinimum(int)));
+          connect(worker,SIGNAL(max(int)),ui->progressbar,SLOT(setMaximum(int)));
+          connect(worker,SIGNAL(progress(int)),ui->progressbar,SLOT(setValue(int)));
+          connect(worker,SIGNAL(completed()),this,SLOT(extractioncomplete()));
+          connect(worker,SIGNAL(completed()),worker,SLOT(deleteLater()));
+          connect(thread_,SIGNAL(finished()),thread_,SLOT(deleteLater()));
+          thread_->start();
                 return;
             }
         }
@@ -591,13 +732,29 @@ void Intro::startDownload()
 }
 void Intro::extractioncomplete() 
 {
-            ui->remaintime->hide();
-            ui->next->show();
-            ui->next->setText(tr("Successfully extracted. Click to continue..."));
+  ui->remaintime->hide();
+  ui->next->show();
+  ui->next->setText(tr("Successfully extracted. Click to continue..."));
+  extractionCompleted=true;
 }
-void Intro::hidewelcome()
+void Intro::extractionempty() 
 {
-    //ui->movie->hide();
+  extractionCompleted=false;
+}
+void Intro::minimizeApp()
+{
+#ifndef __APPLE__
+  iocgui_->showMinimized();
+#else
+  OSXHideTitleBar::min(iocgui_);
+#endif
+}
+void Intro::maximizeApp()
+{
+	if(!iocgui_->isMaximized())
+	  iocgui_->showMaximized();
+	else
+	  iocgui_->showNormal();
 }
 
 //#https://iobootstrap.s3.amazonaws.com/IOC-BOOTSTRAP-3242602.zip

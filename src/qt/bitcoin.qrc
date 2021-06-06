@@ -59,7 +59,9 @@
         <file alias="locked">res/icons/locked.svg</file>
         <file alias="unlocked">res/icons/unlocked.svg</file>
         <file alias="minimize">res/icons/minimize.svg</file>
+        <file alias="minimize_white">res/icons/minimize_white.svg</file>
         <file alias="maximize">res/icons/maximize.svg</file>
+        <file alias="maximize_white">res/icons/maximize_white.svg</file>
         <file alias="close">res/icons/close.svg</file>
         <file alias="closesplash">res/icons/closesplash.svg</file>
         <file alias="newlogosmall">res/images/IOC-QT100PX.svg</file>

@@ -9,6 +9,9 @@
 #include<QNetworkReply>
 #include<QFileInfo>
 #include<QTimer>
+#ifdef __APPLE__
+  #include"OSXHideTitleBar.h"
+#endif
 
 class IocoinGUI;
 
@@ -16,31 +19,37 @@ namespace Ui {
   class Intro;
 }
 
+
 //class SplashScreen : public QWidget 
 class Intro : public QWidget 
 {
   Q_OBJECT 
   
   public:
-    explicit Intro(QWidget* parent=0);
+    explicit Intro(IocoinGUI*,QWidget* parent=0);
     void setPixmap(QPixmap& p) { p_=p; }
     ~Intro();
 
     void callbackobj(IocoinGUI* obj);
 
   public slots:
-    void hidewelcome();
     void extractioncomplete();
+    void extractionempty();
     void next();
     void downloadbootstrap();
+    void directoryemptydialog();
     void config();
     void closesplash();
     void fileUnzipped();
     void initModel();
+    void minimizeApp();
+    void maximizeApp();
 
     //bootstrap download handling
     void hideall();
+    void setBase(std::string);
     void setDest(std::string);
+    void setBase(QString);
     void setDest(QString);
     void startDownload();
     void startRequest();
@@ -52,11 +61,16 @@ class Intro : public QWidget
     void cancelDownload();
     void calculateRemainTime();
 
+  protected:
+    void closeEvent(QCloseEvent *event);
+
   private:
     Ui::Intro* ui;
     QPixmap p_;
     IocoinGUI* obj;
     QString dir_;
+    IocoinGUI* iocgui_;
+
 
     QThread* thread_;
     bool httpRequestAborted;
@@ -64,6 +78,7 @@ class Intro : public QWidget
     bool downloadFinished;
     double currentSpeed;
     QUrl url;
+    QFileInfo fileBase;
     QFileInfo fileDest;
     QTimer *downloadTimer;
     QTime downloadTime;

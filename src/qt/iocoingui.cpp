@@ -298,7 +298,7 @@ IocoinGUI::IocoinGUI(QWidget *parent):
     centralWidget = new QStackedWidget(this);
     centralWidget->setVisible(false);
 
-    intro = new Intro();
+    intro = new Intro(this);
     intro->setWindowFlags(Qt::FramelessWindowHint|Qt::WindowStaysOnTopHint);
     intro->callbackobj(this);
     intro->hide();
@@ -880,7 +880,7 @@ void IocoinGUI::setNumBlocks(int count, int nTotalBlocks)
             progressBar->setFormat(tr("~%n block(s) remaining", "", nRemainingBlocks));
             progressBar->setMaximum(nTotalBlocks);
             progressBar->setValue(count);
-            progressBar->setVisible(true);
+            progressBar->setVisible(false);
         }
 
         tooltip = tr("Downloaded %1 of %2 blocks of transaction history (%3% done).").arg(count).arg(nTotalBlocks).arg(nPercentageDone, 0, 'f', 2);
@@ -996,8 +996,8 @@ void IocoinGUI::closeEvent(QCloseEvent *event)
 {
  QMessageBox::StandardButton resBtn = QMessageBox::question( this, "I/O Coin",
                                                                 tr("Are you sure?"),
-                                                                QMessageBox::Cancel | QMessageBox::No | QMessageBox::Yes,
-                                                                QMessageBox::No);
+                                                                QMessageBox::Cancel | QMessageBox::Yes,
+                                                                QMessageBox::Cancel);
     if (resBtn != QMessageBox::Yes) 
     {
         event->ignore();
