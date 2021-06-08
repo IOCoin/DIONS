@@ -114,6 +114,26 @@
              </widget>
             </item>
             <item>
+             <widget class="QFrame" name="conf">
+              <layout class="QVBoxLayout" name="vlconf">
+               <item>
+                <widget class="ClickableLabel" name="prev">
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                 <property name="text">
+      	          <string>or choose from previous</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QComboBox" name="combo">
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
              <widget class="QFrame" name="directoryempty">
               <layout class="QVBoxLayout" name="vlconfigselect">
                <item>

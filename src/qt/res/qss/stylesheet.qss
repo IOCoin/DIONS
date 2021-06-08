@@ -80,4 +80,27 @@ ClickableLabel#maximizelabel, #minimizelabel, #padlocklabel, #closelabel { paddi
 TableView::item:hover { background-color:lightgrey }
 TransactionView#txv { font: "Arial"; font-size: 30px }
 
-/*QPushButton#sendbutton:hover, #stakingbutton:hover { border: 3px solid #b3b3b3; color:#b3b3b3; background-color: #d8446c; border-radius: 35px; font-size: 24px; padding:8px; padding-left:10px; padding-right:10px; }*/
+QComboBox 
+{
+  border: 1px solid #455364;
+  border-radius: 4px;
+  selection-background-color: #346792;
+  padding-left: 4px;
+  padding-right: 4px;
+  min-height: 1.5em;
+}
+QComboBox QAbstractView::item 
+{ 
+  min-height:1.5em; 
+}
+QComboBox::drop-down 
+{
+  subcontrol-origin: padding;
+  subcontrol-position: top right;
+  width: 12px;
+}
+
+QListView
+{
+  min-height:40px;
+}

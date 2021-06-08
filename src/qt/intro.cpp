@@ -12,9 +12,11 @@
 #include <boost/filesystem.hpp>
 #include "JlCompress.h"
 #include<QIcon>
+#include<QListWidget>
 #include<QMovie>
 #include<QTimer>
 #include<QSize>
+#include<QStyledItemDelegate>
 #include<QFile>
 #include<QThread>
 #include<QFileDialog>
@@ -78,16 +80,33 @@ Intro::Intro(IocoinGUI* i, QWidget *parent) :
     this->resize(1000,900);
     ui->setupUi(this);
 
+    ui->conf->hide();
+    ui->conf->setVisible(false);
+    ui->combo->hide();
+    ui->combo->setVisible(false);
+
+    ui->combo->setItemDelegate(new QStyledItemDelegate());
+    style()->unpolish(ui->combo);
+    style()->polish(ui->combo);
+
+    loadImportCache();
+
+    connect(ui->combo,SIGNAL(currentIndexChanged(const QString&)), this, SLOT(directoryConf(const QString&)));
+
     ui->movie->hide();
     ui->vl->setContentsMargins(0,0,0,0);
     ui->vl2->setContentsMargins(280,0,0,0);
     ui->hl->setContentsMargins(0,0,0,0);
-    ui->splashframe->setStyleSheet("border-image: url(:/images/splashgradient); background-repeat:no-repeat;");
+    ui->splashframe->setObjectName("splash");
+    ui->splashframe->setStyleSheet("QFrame#splash {border-image: url(:/images/splashgradient); background-repeat:no-repeat;}");
     QIcon* tmp = new QIcon(new SVGIconEngine(logoSVG1));
     QPixmap logoPixmap = tmp->pixmap(tmp->actualSize(QSize(200,200)));
     ui->logoleft->setPixmap(logoPixmap);
     ui->title->setStyleSheet("color:white; font-size:48px; font-weight:300");
     ui->title->setAttribute(Qt::WA_TranslucentBackground, true);
+
+    ui->conf->setAttribute(Qt::WA_TranslucentBackground, true);
+
     ui->comets->setAttribute(Qt::WA_TranslucentBackground, true);
     ui->closeicon->setAttribute(Qt::WA_TranslucentBackground, true);
     ui->logoleft->setAttribute(Qt::WA_TranslucentBackground, true);
@@ -106,7 +125,14 @@ Intro::Intro(IocoinGUI* i, QWidget *parent) :
                               "<p style=\"font-size:12pt; color:rgba(255,255,255,100)\">"
                         "Select new wallet directory to load from"
             "</p>";
+
+    QString prevLabelText = "<p style=\"font-size:12pt; color:rgba(255,255,255,100)\">"
+                        "or select from among previous..."
+            "</p>";
+                              
     
+    ui->prev->setText(prevLabelText);
+
     ui->logoright->setText(importLabelText);
     ui->logoright->setCursor(QCursor(Qt::PointingHandCursor));
 
@@ -173,6 +199,7 @@ Intro::Intro(IocoinGUI* i, QWidget *parent) :
     ui->progressbar->setRange(0,1000000);
     ui->progressbar->setFixedWidth(300);
 
+    
     connect(ui->canceldownload,SIGNAL(clicked(bool)),this, SLOT(cancelDownload()));
     connect(ui->directoryempty2,SIGNAL(clicked(bool)),this, SLOT(downloadbootstrap()));
     connect(ui->directoryempty3,SIGNAL(clicked(bool)),this, SLOT(next()));
@@ -241,8 +268,58 @@ void Intro::closesplash()
 {
   this->close();
 }
+void Intro::directoryConf(const QString& dir)
+{
+    ui->conf->hide();
+    ui->conf->setVisible(false);
+    ui->combo->hide();
+    ui->combo->setVisible(false);
+    this->dir_=dir;
+  { 
+    bool not_initialized = true;
+    boost::filesystem::path selected_directory(dir.toStdString());
+    selected_directory /= "blk0001.dat";
+    if(!boost::filesystem::exists(selected_directory))
+    {
+      boost::filesystem::path p(dir.toStdString());
+      this->setBase(p.string());
+      p /= "bootstrap.zip";
+      this->setDest(p.string());
+      ui->logoright->hide();
+      ui->directoryempty->show();
+    }
+    else 
+    {
+      InitWorker* worker = new InitWorker();
+      worker->object(this->obj,dir);
+      QThread* thread = new QThread();
+      worker->moveToThread(thread);
+
+      connect(thread,SIGNAL(started()),worker,SLOT(initialize()));
+      connect(worker,SIGNAL(completed()),this,SLOT(initModel()));
+      connect(worker,SIGNAL(completed()),worker,SLOT(deleteLater()));
+      connect(thread,SIGNAL(finished()),thread,SLOT(deleteLater()));
+      thread->start();
+
+      ui->logoright->hide();
+      ui->progressbar->hide();
+      ui->initializing->show();
+
+      hideall();
+      movie_ = new QMovie(":/movies/welcome", "gif", this);
+      QTimer* timer_ = new QTimer(this);
+      ui->movie->setMovie(movie_);
+      movie_->start();
+      ui->movie->show();
+    }
+  }
+}
 void Intro::config()
 {
+    ui->conf->hide();
+    ui->conf->setVisible(false);
+    ui->combo->hide();
+    ui->combo->setVisible(false);
   dir_ = QFileDialog::getExistingDirectory(this, tr("Choose wallet directory"),
     "",
     QFileDialog::ShowDirsOnly
@@ -254,6 +331,7 @@ void Intro::config()
   { 
     bool not_initialized = true;
     boost::filesystem::path selected_directory(dir_.toStdString());
+    cacheImportDir(dir_.toStdString());
     selected_directory /= "blk0001.dat";
     if(!boost::filesystem::exists(selected_directory))
     {
@@ -311,11 +389,81 @@ void Intro::hideall()
   ui->splashframe->hide();
 }
 
+void Intro::loadImportCache()
+{
+  boost::filesystem::path userConf = boost::filesystem::path((QDir::homePath()).toStdString());
+  userConf /= ".iocoinqt";
+  if(!boost::filesystem::exists(userConf))
+  {
+    boost::filesystem::create_directories(userConf);
+  }
+
+  userConf /= "previmports";
+  if(!boost::filesystem::exists(userConf))
+  {
+    return;
+  }
+  else
+  {
+      ui->combo->addItem("");
+    ifstream prevfile(userConf.string());
+    string dir;
+    while(prevfile >> dir)
+    {
+      ui->combo->addItem(dir.c_str());
+      prevImports.push_back(dir);
+    }
+    prevfile.close();
+  }
+
+  if(this->prevImports.size() != 0)
+  {
+    ui->conf->show();
+    ui->conf->setVisible(true);
+    ui->combo->show();
+    ui->combo->setVisible(true);
+  }
+}
+
+void Intro::cacheImportDir(std::string dirname)
+{
+  boost::filesystem::path userConf = boost::filesystem::path((QDir::homePath()).toStdString());
+  userConf /= ".iocoinqt";
+  if(!boost::filesystem::exists(userConf))
+  {
+    boost::filesystem::create_directories(userConf);
+  }
+
+  userConf /= "previmports";
+  
+  string chosenDir = (this->fileBase).filePath().toStdString();
+  bool cached=false;
+  if(boost::filesystem::exists(userConf))
+  {
+    ifstream prevfile(userConf.string());
+    string dir;
+    while(prevfile >> dir)
+    {
+      if(dir == dirname) cached=true;
+      prevImports.push_back(dir);
+    }
+    prevfile.close();
+  }
+
+  if(cached == false)
+  {
+    ofstream file;
+    file.open(userConf.string(), ofstream::out|ofstream::app);
+    file << dirname << "\n";
+    file.close();
+  }
+}
+
 void Intro::initModel()
 {
-	this->movie_->stop();
-	ui->movie->hide();
-	this->setVisible(false);
+  this->movie_->stop();
+  ui->movie->hide();
+  this->setVisible(false);
   this->obj->initModel();
 }
 

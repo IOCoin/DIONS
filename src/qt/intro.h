@@ -33,6 +33,7 @@ class Intro : public QWidget
     void callbackobj(IocoinGUI* obj);
 
   public slots:
+    void directoryConf(const QString&);
     void extractioncomplete();
     void extractionempty();
     void next();
@@ -71,6 +72,10 @@ class Intro : public QWidget
     QString dir_;
     IocoinGUI* iocgui_;
 
+    void loadImportCache();
+    void cacheImportDir(std::string);
+
+    std::vector<std::string> prevImports;
 
     QThread* thread_;
     bool httpRequestAborted;
