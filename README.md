@@ -27,7 +27,7 @@ Features:
 * Dedicated Super Seed Node: amer.supernode.iocoin.io  
 * Dions Pay "Shade" API added. (Shade based on Diffie Hellman key exchange)
 * (Chameleon Graph Ledger to come) https://www.chameleongraph.com
-* Bootstrap Block height 3264419 https://iobootstrap.s3.amazonaws.com/bootstrap-02052021-07%3A20%3A23.zip
+* Bootstrap Block height 3341914 https://iobootstrap.s3.amazonaws.com/bootstrap.zip
 * Windows 10 Wallet https://github.com/IOCoin/DIONS/releases/download/DIONS-SIRIUS-v5.0.0.0-g5729cf1/dions-aurora.exe 
 * OSX Big Sur 11 Wallet https://github.com/IOCoin/DIONS/releases/download/DIONS-SIRIUS-v5.0.0.0-g5729cf1/dions-aurora.dmg 
 
