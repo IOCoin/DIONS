@@ -37,6 +37,7 @@ class NodeEx
     virtual void relayAtomic(const NRelay&) const = 0;
     virtual void relayIon(const NRelay&) const = 0;
     virtual void relayGround(const NRelay&) const = 0;
+    virtual void relayCont(__BASE__&) const = 0;
 };
 
 
