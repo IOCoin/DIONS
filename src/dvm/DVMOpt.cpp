@@ -94,7 +94,7 @@ void DVM::optimize()
 #endif
 	}
 	
-#ifdef EVM_DO_FIRST_PASS_OPTIMIZATION
+#ifdef DVM_DO_FIRST_PASS_OPTIMIZATION
 	
 	TRACE_STR(1, "Do first pass optimizations")
 	for (size_t pc = 0; pc < nBytes; ++pc)
@@ -112,7 +112,7 @@ void DVM::optimize()
 				val = (val << 8) | m_code[i];
 			}
 
-		#if EVM_USE_CONSTANT_POOL
+		#if DVM_USE_CONSTANT_POOL
 
 			// add value to constant pool and replace PUSHn with PUSHC
 			// place offset in code as 2 bytes MSB-first
@@ -134,7 +134,7 @@ void DVM::optimize()
 
 		#endif
 
-		#if EVM_REPLACE_CONST_JUMP	
+		#if DVM_REPLACE_CONST_JUMP	
 			// replace JUMP or JUMPI to constant location with JUMPC or JUMPCI
 			// verifyJumpDest is M = log(number of jump destinations)
 			// outer loop is N = number of bytes in code array

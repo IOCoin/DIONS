@@ -1469,7 +1469,7 @@ void DVM::interpretCases()
 
         CASE(PUSHC)
         {
-#if EVM_USE_CONSTANT_POOL
+#if DVM_USE_CONSTANT_POOL
             auto const originalOp = static_cast<byte>(Instruction::PUSH1) + m_code[m_PC + 3] + 1;
             onOperation(static_cast<Instruction>(originalOp));
             updateIOGas();
@@ -1565,7 +1565,7 @@ void DVM::interpretCases()
 
         CASE(JUMPC)
         {
-#if EVM_REPLACE_CONST_JUMP
+#if DVM_REPLACE_CONST_JUMP
             onOperation(Instruction::JUMP);
             updateIOGas();
 
@@ -1578,7 +1578,7 @@ void DVM::interpretCases()
 
         CASE(JUMPCI)
         {
-#if EVM_REPLACE_CONST_JUMP
+#if DVM_REPLACE_CONST_JUMP
             onOperation(Instruction::JUMPI);
             updateIOGas();
 

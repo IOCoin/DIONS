@@ -42,7 +42,7 @@ private:
     MemFnPtr m_bounce = 0;
     MemFnPtr m_onFail = 0;
     uint64_t m_nSteps = 0;
-    EVMSchedule const* m_schedule = nullptr;
+    DVMSchedule const* m_schedule = nullptr;
 
     // return bytes
     owning_bytes_ref m_output;
@@ -57,6 +57,7 @@ private:
     bytes m_returnData;
 
     // space for data stack, grows towards smaller addresses from the end
+    vector<byte> d_stack;
     u256 m_stack[1024];
     u256 *m_stackEnd = &m_stack[1024];
     size_t stackSize() { return m_stackEnd - m_SP; }
@@ -187,7 +188,7 @@ private:
     void xget    (uint8_t, uint8_t);
     void xswizzle(uint8_t);
     void xshuffle(uint8_t);
-    
+   
     u256 vtow(uint8_t _b, const u256& _in);
     void wtov(uint8_t _b, u256 _in, u256& _o_out);
 
