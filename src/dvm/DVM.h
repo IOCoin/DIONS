@@ -9,6 +9,20 @@ namespace dev
 namespace dvm
 {
 
+//f and g supplied transforms
+void mapStack(vector<unsigned char>& data, unsigned char (*f)(unsigned char), unsigned char (*g)(unsigned char))
+{
+  for(unsigned i = 0; i<data.size(); i++)
+  {
+    unsigned char d = data[i];
+    for(unsigned j=0; j<256; j++)
+    {
+      d = (*f)(d)^(*g)(d);
+    }
+    data[i] = d;
+  }
+}
+
 class DVM: public VMFace
 {
 public:
