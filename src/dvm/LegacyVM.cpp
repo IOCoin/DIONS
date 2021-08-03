@@ -1,10 +1,14 @@
-#include "DVM.h"
+// Aldvm: Ethereum C++ client, tools and libraries.
+// Copyright 2014-2019 Aldvm Authors.
+// Licensed under the GNU General Public License, Version 3.
+
+#include "LegacyVM.h"
 
 using namespace std;
 using namespace dev;
 using namespace dev::dvm;
 
-uint64_t DVM::memNeed(u256 const& _offset, u256 const& _size)
+uint64_t LegacyVM::memNeed(u256 const& _offset, u256 const& _size)
 {
     return toInt63(_size ? u512(_offset) + _size : u512(0));
 }
@@ -24,7 +28,7 @@ template <class S> S modWorkaround(S const& _a, S const& _b)
 // for decoding destinations of JUMPTO, JUMPV, JUMPSUB and JUMPSUBV
 //
 
-uint64_t DVM::decodeJumpDest(const byte* const _code, uint64_t& _pc)
+uint64_t LegacyVM::decodeJumpDest(const byte* const _code, uint64_t& _pc)
 {
     // turn 2 MSB-first bytes in the code into a native-order integer
     uint64_t dest      = _code[_pc++];
@@ -32,7 +36,7 @@ uint64_t DVM::decodeJumpDest(const byte* const _code, uint64_t& _pc)
     return dest;
 }
 
-uint64_t DVM::decodeJumpvDest(const byte* const _code, uint64_t& _pc, byte _voff)
+uint64_t LegacyVM::decodeJumpvDest(const byte* const _code, uint64_t& _pc, byte _voff)
 {
     // Layout of jump table in bytecode...
     //     byte opcode
@@ -54,7 +58,7 @@ uint64_t DVM::decodeJumpvDest(const byte* const _code, uint64_t& _pc, byte _voff
 //
 // for tracing, checking, metering, measuring ...
 //
-void DVM::onOperation(Instruction _instr)
+void LegacyVM::onOperation(Instruction _instr)
 {
     if (m_onOp)
         (m_onOp)(++m_nSteps, m_PC, _instr,
@@ -65,7 +69,7 @@ void DVM::onOperation(Instruction _instr)
 //
 // set current SP to SP', adjust SP' per _removed and _added items
 //
-void DVM::adjustStack(unsigned _removed, unsigned _added)
+void LegacyVM::adjustStack(unsigned _removed, unsigned _added)
 {
     m_SP = m_SPP;
 
@@ -78,7 +82,7 @@ void DVM::adjustStack(unsigned _removed, unsigned _added)
         throwBadStack(_removed, _added);
 }
 
-void DVM::updateSSGas()
+void LegacyVM::updateSSGas()
 {
     if (m_schedule->sstoreThrowsIfGasBelowCallStipend() && m_io_gas <= m_schedule->callStipend)
         throwOutOfGas();
@@ -92,7 +96,7 @@ void DVM::updateSSGas()
         updateSSGasPreEIP1283(currentValue, newValue);
 }
 
-void DVM::updateSSGasPreEIP1283(u256 const& _currentValue, u256 const& _newValue)
+void LegacyVM::updateSSGasPreEIP1283(u256 const& _currentValue, u256 const& _newValue)
 {
     if (!_currentValue && _newValue)
         m_runGas = toInt63(m_schedule->sstoreSetGas);
@@ -105,7 +109,7 @@ void DVM::updateSSGasPreEIP1283(u256 const& _currentValue, u256 const& _newValue
         m_runGas = toInt63(m_schedule->sstoreResetGas);
 }
 
-void DVM::updateSSGasEIP1283(u256 const& _currentValue, u256 const& _newValue)
+void LegacyVM::updateSSGasEIP1283(u256 const& _currentValue, u256 const& _newValue)
 {
     if (_currentValue == _newValue)
         m_runGas = m_schedule->sstoreUnchangedGas;
@@ -146,20 +150,20 @@ void DVM::updateSSGasEIP1283(u256 const& _currentValue, u256 const& _newValue)
 }
 
 
-uint64_t DVM::gasForMem(u512 const& _size)
+uint64_t LegacyVM::gasForMem(u512 const& _size)
 {
     u512 s = _size / 32;
     return toInt63((u512)m_schedule->memoryGas * s + s * s / m_schedule->quadCoeffDiv);
 }
 
-void DVM::updateIOGas()
+void LegacyVM::updateIOGas()
 {
     if (m_io_gas < m_runGas)
         throwOutOfGas();
     m_io_gas -= m_runGas;
 }
 
-void DVM::updateGas()
+void LegacyVM::updateGas()
 {
     if (m_newMemSize > m_mem.size())
         m_runGas += toInt63(gasForMem(m_newMemSize) - gasForMem(m_mem.size()));
@@ -168,7 +172,7 @@ void DVM::updateGas()
         throwOutOfGas();
 }
 
-void DVM::updateMem(uint64_t _newMem)
+void LegacyVM::updateMem(uint64_t _newMem)
 {
     m_newMemSize = (_newMem + 31) / 32 * 32;
     updateGas();
@@ -176,14 +180,14 @@ void DVM::updateMem(uint64_t _newMem)
         m_mem.resize(m_newMemSize);
 }
 
-void DVM::logGasMem()
+void LegacyVM::logGasMem()
 {
     unsigned n = (unsigned)m_OP - (unsigned)Instruction::LOG0;
     m_runGas = toInt63(m_schedule->logGas + m_schedule->logTopicGas * n + u512(m_schedule->logDataGas) * m_SP[1]);
     updateMem(memNeed(m_SP[0], m_SP[1]));
 }
 
-void DVM::fetchInstruction()
+void LegacyVM::fetchInstruction()
 {
     m_OP = Instruction(m_code[m_PC]);
     const InstructionMetric& metric = c_metrics[static_cast<size_t>(m_OP)];
@@ -200,20 +204,20 @@ void DVM::fetchInstruction()
 //
 // interpreter entry point
 
-owning_bytes_ref DVM::exec(u256& _io_gas, ExtVMFace& _ext, OnOpFunc const& _onOp)
+owning_bytes_ref LegacyVM::exec(u256& _io_gas, ExtVMFace& _ext, OnOpFunc const& _onOp)
 {
     m_io_gas_p = &_io_gas;
     m_io_gas = uint64_t(_io_gas);
     m_ext = &_ext;
     m_schedule = &m_ext->dvmSchedule();
     m_onOp = _onOp;
-    m_onFail = &DVM::onOperation; // this results in operations that fail being logged twice in the trace
+    m_onFail = &LegacyVM::onOperation; // this results in operations that fail being logged twice in the trace
     m_PC = 0;
 
     try
     {
         // trampoline to minimize depth of call stack when calling out
-        m_bounce = &DVM::initEntry;
+        m_bounce = &LegacyVM::initEntry;
         do
             (this->*m_bounce)();
         while (m_bounce);
@@ -232,7 +236,7 @@ owning_bytes_ref DVM::exec(u256& _io_gas, ExtVMFace& _ext, OnOpFunc const& _onOp
 //
 // main interpreter loop and switch
 //
-void DVM::interpretCases()
+void LegacyVM::interpretCases()
 {
     INIT_CASES
     DO_CASES
@@ -249,7 +253,7 @@ void DVM::interpretCases()
             if (m_ext->staticCall)
                 throwDisallowedStateChange();
 
-            m_bounce = &DVM::caseCreate;
+            m_bounce = &LegacyVM::caseCreate;
         }
         BREAK
 
@@ -259,7 +263,7 @@ void DVM::interpretCases()
             if (m_ext->staticCall)
                 throwDisallowedStateChange();
 
-            m_bounce = &DVM::caseCreate;
+            m_bounce = &LegacyVM::caseCreate;
         }
         BREAK
 
@@ -275,7 +279,7 @@ void DVM::interpretCases()
                 throwBadInstruction();
             if (m_OP == Instruction::CALL && m_ext->staticCall && m_SP[2] != 0)
                 throwDisallowedStateChange();
-            m_bounce = &DVM::caseCall;
+            m_bounce = &LegacyVM::caseCall;
         }
         BREAK
 
