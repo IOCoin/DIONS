@@ -278,10 +278,10 @@ public:
     bool staticCall = false;  ///< Throw on state changing.
 };
 
-class EvmCHost : public dvmc::Host
+class DvmCHost : public dvmc::Host
 {
 public:
-    explicit EvmCHost(ExtVMFace& _extVM) : m_extVM{_extVM} {}
+    explicit DvmCHost(ExtVMFace& _extVM) : m_extVM{_extVM} {}
 
     bool account_exists(const dvmc::address& _addr) const noexcept override;
 
@@ -319,22 +319,22 @@ private:
     ExtVMFace& m_extVM;
 };
 
-inline dvmc::address toEvmC(Address const& _addr)
+inline dvmc::address toDvmC(Address const& _addr)
 {
     return reinterpret_cast<dvmc_address const&>(_addr);
 }
 
-inline dvmc_uint256be toEvmC(h256 const& _h)
+inline dvmc_uint256be toDvmC(h256 const& _h)
 {
     return reinterpret_cast<dvmc_uint256be const&>(_h);
 }
 
-inline u256 fromEvmC(dvmc_uint256be const& _n)
+inline u256 fromDvmC(dvmc_uint256be const& _n)
 {
     return fromBigEndian<u256>(_n.bytes);
 }
 
-inline Address fromEvmC(dvmc::address const& _addr)
+inline Address fromDvmC(dvmc::address const& _addr)
 {
     return reinterpret_cast<Address const&>(_addr);
 }

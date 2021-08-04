@@ -15,26 +15,26 @@ static_assert(alignof(Address) == alignof(dvmc_address), "Address types alignmen
 static_assert(sizeof(h256) == sizeof(dvmc_uint256be), "Hash types size mismatch");
 static_assert(alignof(h256) == alignof(dvmc_uint256be), "Hash types alignment mismatch");
 
-bool EvmCHost::account_exists(dvmc::address const& _addr) const noexcept
+bool DvmCHost::account_exists(dvmc::address const& _addr) const noexcept
 {
-    return m_extVM.exists(fromEvmC(_addr));
+    return m_extVM.exists(fromDvmC(_addr));
 }
 
-dvmc::bytes32 EvmCHost::get_storage(dvmc::address const& _addr, dvmc::bytes32 const& _key) const
+dvmc::bytes32 DvmCHost::get_storage(dvmc::address const& _addr, dvmc::bytes32 const& _key) const
     noexcept
 {
     (void)_addr;
-    assert(fromEvmC(_addr) == m_extVM.myAddress);
-    return toEvmC(m_extVM.store(fromEvmC(_key)));
+    assert(fromDvmC(_addr) == m_extVM.myAddress);
+    return toDvmC(m_extVM.store(fromDvmC(_key)));
 }
 
-dvmc_storage_status EvmCHost::set_storage(
+dvmc_storage_status DvmCHost::set_storage(
     dvmc::address const& _addr, dvmc::bytes32 const& _key, dvmc::bytes32 const& _value) noexcept
 {
     (void)_addr;
-    assert(fromEvmC(_addr) == m_extVM.myAddress);
-    u256 const index = fromEvmC(_key);
-    u256 const newValue = fromEvmC(_value);
+    assert(fromDvmC(_addr) == m_extVM.myAddress);
+    u256 const index = fromDvmC(_key);
+    u256 const newValue = fromDvmC(_value);
     u256 const currentValue = m_extVM.store(index);
 
     if (newValue == currentValue)
@@ -77,25 +77,25 @@ dvmc_storage_status EvmCHost::set_storage(
     return status;
 }
 
-dvmc::uint256be EvmCHost::get_balance(dvmc::address const& _addr) const noexcept
+dvmc::uint256be DvmCHost::get_balance(dvmc::address const& _addr) const noexcept
 {
-    return toEvmC(m_extVM.balance(fromEvmC(_addr)));
+    return toDvmC(m_extVM.balance(fromDvmC(_addr)));
 }
 
-size_t EvmCHost::get_code_size(dvmc::address const& _addr) const noexcept
+size_t DvmCHost::get_code_size(dvmc::address const& _addr) const noexcept
 {
-    return m_extVM.codeSizeAt(fromEvmC(_addr));
+    return m_extVM.codeSizeAt(fromDvmC(_addr));
 }
 
-dvmc::bytes32 EvmCHost::get_code_hash(dvmc::address const& _addr) const noexcept
+dvmc::bytes32 DvmCHost::get_code_hash(dvmc::address const& _addr) const noexcept
 {
-    return toEvmC(m_extVM.codeHashAt(fromEvmC(_addr)));
+    return toDvmC(m_extVM.codeHashAt(fromDvmC(_addr)));
 }
 
-size_t EvmCHost::copy_code(dvmc::address const& _addr, size_t _codeOffset, byte* _bufferData,
+size_t DvmCHost::copy_code(dvmc::address const& _addr, size_t _codeOffset, byte* _bufferData,
     size_t _bufferSize) const noexcept
 {
-    Address addr = fromEvmC(_addr);
+    Address addr = fromDvmC(_addr);
     bytes const& c = m_extVM.codeAt(addr);
 
     // Handle "big offset" edge case.
@@ -108,54 +108,54 @@ size_t EvmCHost::copy_code(dvmc::address const& _addr, size_t _codeOffset, byte*
     return numToCopy;
 }
 
-void EvmCHost::selfdestruct(dvmc::address const& _addr, dvmc::address const& _beneficiary) noexcept
+void DvmCHost::selfdestruct(dvmc::address const& _addr, dvmc::address const& _beneficiary) noexcept
 {
     (void)_addr;
-    assert(fromEvmC(_addr) == m_extVM.myAddress);
-    m_extVM.selfdestruct(fromEvmC(_beneficiary));
+    assert(fromDvmC(_addr) == m_extVM.myAddress);
+    m_extVM.selfdestruct(fromDvmC(_beneficiary));
 }
 
 
-void EvmCHost::emit_log(dvmc::address const& _addr, uint8_t const* _data, size_t _dataSize,
+void DvmCHost::emit_log(dvmc::address const& _addr, uint8_t const* _data, size_t _dataSize,
     dvmc::bytes32 const _topics[], size_t _numTopics) noexcept
 {
     (void)_addr;
-    assert(fromEvmC(_addr) == m_extVM.myAddress);
+    assert(fromDvmC(_addr) == m_extVM.myAddress);
     h256 const* pTopics = reinterpret_cast<h256 const*>(_topics);
     m_extVM.log(h256s{pTopics, pTopics + _numTopics}, bytesConstRef{_data, _dataSize});
 }
 
-dvmc_tx_context EvmCHost::get_tx_context() const noexcept
+dvmc_tx_context DvmCHost::get_tx_context() const noexcept
 {
     dvmc_tx_context result = {};
-    result.tx_gas_price = toEvmC(m_extVM.gasPrice);
-    result.tx_origin = toEvmC(m_extVM.origin);
+    result.tx_gas_price = toDvmC(m_extVM.gasPrice);
+    result.tx_origin = toDvmC(m_extVM.origin);
 
     auto const& envInfo = m_extVM.envInfo();
-    result.block_coinbase = toEvmC(envInfo.author());
+    result.block_coinbase = toDvmC(envInfo.author());
     result.block_number = envInfo.number();
     result.block_timestamp = envInfo.timestamp();
     result.block_gas_limit = static_cast<int64_t>(envInfo.gasLimit());
-    result.block_difficulty = toEvmC(envInfo.difficulty());
-    result.chain_id = toEvmC(envInfo.chainID());
+    result.block_difficulty = toDvmC(envInfo.difficulty());
+    result.chain_id = toDvmC(envInfo.chainID());
     return result;
 }
 
-dvmc::bytes32 EvmCHost::get_block_hash(int64_t _number) const noexcept
+dvmc::bytes32 DvmCHost::get_block_hash(int64_t _number) const noexcept
 {
-    return toEvmC(m_extVM.blockHash(_number));
+    return toDvmC(m_extVM.blockHash(_number));
 }
 
-dvmc::result EvmCHost::create(dvmc_message const& _msg) noexcept
+dvmc::result DvmCHost::create(dvmc_message const& _msg) noexcept
 {
     u256 gas = _msg.gas;
-    u256 value = fromEvmC(_msg.value);
+    u256 value = fromDvmC(_msg.value);
     bytesConstRef init = {_msg.input_data, _msg.input_size};
-    u256 salt = fromEvmC(_msg.create2_salt);
+    u256 salt = fromDvmC(_msg.create2_salt);
     Instruction opcode = _msg.kind == DVMC_CREATE ? Instruction::CREATE : Instruction::CREATE2;
 
     // ExtVM::create takes the sender address from .myAddress.
-    assert(fromEvmC(_msg.sender) == m_extVM.myAddress);
+    assert(fromDvmC(_msg.sender) == m_extVM.myAddress);
 
     CreateResult result = m_extVM.create(value, gas, init, opcode, salt, {});
     dvmc_result dvmcResult = {};
@@ -163,7 +163,7 @@ dvmc::result EvmCHost::create(dvmc_message const& _msg) noexcept
     dvmcResult.gas_left = static_cast<int64_t>(gas);
 
     if (result.status == DVMC_SUCCESS)
-        dvmcResult.create_address = toEvmC(result.address);
+        dvmcResult.create_address = toDvmC(result.address);
     else
     {
         // Pass the output to the DVM without a copy. The DVM will delete it
@@ -190,7 +190,7 @@ dvmc::result EvmCHost::create(dvmc_message const& _msg) noexcept
     return dvmc::result{dvmcResult};
 }
 
-dvmc::result EvmCHost::call(dvmc_message const& _msg) noexcept
+dvmc::result DvmCHost::call(dvmc_message const& _msg) noexcept
 {
     assert(_msg.gas >= 0 && "Invalid gas value");
     assert(_msg.depth == static_cast<int>(m_extVM.depth) + 1);
@@ -201,10 +201,10 @@ dvmc::result EvmCHost::call(dvmc_message const& _msg) noexcept
 
     CallParameters params;
     params.gas = _msg.gas;
-    params.apparentValue = fromEvmC(_msg.value);
+    params.apparentValue = fromDvmC(_msg.value);
     params.valueTransfer = _msg.kind == DVMC_DELEGATECALL ? 0 : params.apparentValue;
-    params.senderAddress = fromEvmC(_msg.sender);
-    params.codeAddress = fromEvmC(_msg.destination);
+    params.senderAddress = fromDvmC(_msg.sender);
+    params.codeAddress = fromDvmC(_msg.destination);
     params.receiveAddress = _msg.kind == DVMC_CALL ? params.codeAddress : m_extVM.myAddress;
     params.data = {_msg.input_data, _msg.input_size};
     params.staticCall = (_msg.flags & DVMC_STATIC) != 0;

@@ -106,7 +106,7 @@ const char c_dvmcPrefix[] = "dvmc ";
 /// `--dvmc name=value` or `--dvmc=name=value`. The boost pass the strings
 /// of `name=value` here. This function splits the name and value or reports
 /// the syntax error if the `=` character is missing.
-void parseEvmcOptions(const std::vector<std::string>& _opts)
+void parseDvmcOptions(const std::vector<std::string>& _opts)
 {
     for (auto& s : _opts)
     {
@@ -149,7 +149,7 @@ po::options_description vmProgramOptions(unsigned _lineLength)
         po::value<std::vector<std::string>>()
             ->multitoken()
             ->value_name("<option>=<value>")
-            ->notifier(parseEvmcOptions),
+            ->notifier(parseDvmcOptions),
         "DVMC option\n");
 
     return opts;

@@ -78,10 +78,10 @@ owning_bytes_ref DVMC::exec(u256& io_gas, ExtVMFace& _ext, const OnOpFunc& _onOp
     dvmc_call_kind kind = _ext.isCreate ? DVMC_CREATE : DVMC_CALL;
     uint32_t flags = _ext.staticCall ? DVMC_STATIC : 0;
     assert(flags != DVMC_STATIC || kind == DVMC_CALL);  // STATIC implies a CALL.
-    dvmc_message msg = {kind, flags, static_cast<int32_t>(_ext.depth), gas, toEvmC(_ext.myAddress),
-        toEvmC(_ext.caller), _ext.data.data(), _ext.data.size(), toEvmC(_ext.value),
-        toEvmC(0x0_cppui256)};
-    EvmCHost host{_ext};
+    dvmc_message msg = {kind, flags, static_cast<int32_t>(_ext.depth), gas, toDvmC(_ext.myAddress),
+        toDvmC(_ext.caller), _ext.data.data(), _ext.data.size(), toDvmC(_ext.value),
+        toDvmC(0x0_cppui256)};
+    DvmCHost host{_ext};
     auto r = execute(host, mode, msg, _ext.code.data(), _ext.code.size());
     // FIXME: Copy the output for now, but copyless version possible.
     auto output = owning_bytes_ref{{&r.output_data[0], &r.output_data[r.output_size]}, 0, r.output_size};

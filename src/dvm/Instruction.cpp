@@ -12,6 +12,7 @@ namespace dvm
 static const std::map<Instruction,  InstructionInfo> c_instructionInfo =
 { //                                                   Args,  Ret,  GasPriceTier
     { Instruction::STOP,         { "STOP",                0,    0,  Tier::Zero } },
+    { Instruction::STOP,         { "RDR",                 0,    0,  Tier::Zero } },
     { Instruction::ADD,          { "ADD",                 2,    1,  Tier::VeryLow } },
     { Instruction::SUB,          { "SUB",                 2,    1,  Tier::VeryLow } },
     { Instruction::MUL,          { "MUL",                 2,    1,  Tier::Low } },
