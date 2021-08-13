@@ -149,6 +149,9 @@ public:
 // after how many failed attempts we give up on a new node
 #define ADDRMAN_RETRIES 3
 
+// after how many failed attempts we give up on a new node
+#define MAX_RETRIES 12 
+
 // how many successive failures are allowed ...
 #define ADDRMAN_MAX_FAILURES 10
 
