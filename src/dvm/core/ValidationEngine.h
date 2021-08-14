@@ -90,7 +90,8 @@ public:
     enum
     {
         MixHashField = 0,
-        NonceField = 1
+        NonceField = 1,
+        ValidatedField = 2
     };
     void onValidationGenerated(std::function<void(bytes const&)> const& _f) override { m_onValidationGenerated = _f; }
     DVMSchedule const& dvmSchedule(u256 const& _blockNumber) const override;
