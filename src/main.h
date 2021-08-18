@@ -889,6 +889,7 @@ public:
     int nVersion;
     uint256 hashPrevBlock;
     uint256 hashMerkleRoot;
+    uint256 storageRoot;
     unsigned int nTime;
     unsigned int nBits;
     unsigned int nNonce;
