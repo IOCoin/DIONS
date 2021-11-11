@@ -2,7 +2,7 @@
 For: Data, Communications, Privacy and Payments
   
 
-I/O Coin (iOC) - DIONS (Decentralized Input Output Name Server)
+I/O Coin (iOC) - DIONS (Decentralized Input Output Name Server) & DVM (Dions Virtual Machine) 
 ===========================
 
 I/O Coin is a POS CiPher-Based Blockchain
@@ -25,6 +25,7 @@ Features:
 * P2P Port: 33764
 * RPC Port: 33765
 * Dedicated Super Seed Node: amer.supernode.iocoin.io  
+* DVM (Dions Virtual Machine) Coming Soon with (Solidity Compatability)
 * Dions Pay "Shade" API added. (Shade based on Diffie Hellman key exchange)
 * (Chameleon Graph Ledger to come) https://www.chameleongraph.com
 * Bootstrap Block height 3513830 https://iobootstrap.s3.amazonaws.com/bootstrap.zip
