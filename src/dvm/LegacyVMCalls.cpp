@@ -1,6 +1,3 @@
-// Aldvm: Ethereum C++ client, tools and libraries.
-// Copyright 2016-2019 Aldvm Authors.
-// Licensed under the GNU General Public License, Version 3.
 #include "LegacyVM.h"
 
 using namespace std;
