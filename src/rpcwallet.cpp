@@ -695,7 +695,6 @@ Value sendtodion(const Array& params, bool fHelp)
 
     ln1Db->filter();
     string alias = params[0].get_str();
-    std::transform(alias.begin(), alias.end(), alias.begin(), ::tolower);
     string address = "address not found";
 
     vector<AliasIndex> vtxPos;
@@ -898,7 +897,6 @@ Value verifymessage(const Array& params, bool fHelp)
 Value xtu_url__(const string& s)
 {
     string url=s;
-    std::transform(url.begin(), url.end(), url.begin(), ::tolower);
     string target = "state-0";
 
     ln1Db->filter();
@@ -956,7 +954,6 @@ Value xtu_url(const Array& params, bool fHelp)
             "return xtu eval url");
 
     string url = params[0].get_str();
-    std::transform(url.begin(), url.end(), url.begin(), ::tolower);
     string target = "state-0";
 
     ln1Db->filter();

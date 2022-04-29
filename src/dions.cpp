@@ -1142,7 +1142,6 @@ Value externFrame__(const Array& params, bool fHelp)
   string k1;
   vchType vchNodeLocator;
   k1=(params[0]).get_str();
-  std::transform(k1.begin(), k1.end(), k1.begin(), ::tolower);
   vchNodeLocator = vchFromString(k1);
 
   __wx__Tx wtx;
@@ -1234,7 +1233,6 @@ Value internFrame__(const Array& params, bool fHelp)
   vchType vchNodeLocator;
   k1=(params[0]).get_str();
 
-  std::transform(k1.begin(), k1.end(), k1.begin(), ::tolower);
   vchNodeLocator = vchFromString(k1);
 
   __wx__Tx wtx;
@@ -2022,7 +2020,6 @@ Value getNodeRecord(const Array& params, bool fHelp)
 
 bool searchAliasEncrypted2(string alias, uint256& wtxInHash)
 {
-  std::transform(alias.begin(), alias.end(), alias.begin(), ::tolower);
   bool found=false;
   ENTER_CRITICAL_SECTION(cs_main)
   {
@@ -2080,7 +2077,6 @@ bool searchAliasEncrypted2(string alias, uint256& wtxInHash)
           }
 
           DecryptMessage(rsaPrivKey, stringFromVch(vchAlias), decrypted);
-          std::transform(decrypted.begin(), decrypted.end(), decrypted.begin(), ::tolower);
           if(decrypted == alias)
           {
             found=true;
@@ -2615,7 +2611,6 @@ Value transform(const Array& params, bool fHelp)
               );
   string locatorStr = params[0].get_str();
 
-  std::transform(locatorStr.begin(), locatorStr.end(), locatorStr.begin(), ::tolower);
   const vchType vchAlias = vchFromValue(locatorStr);
   const char* locatorFile = (params[1].get_str()).c_str();
 
@@ -2670,7 +2665,6 @@ Value primaryCXValidate(const Array& params, bool fHelp)
           + HelpRequiringPassphrase());
 
     string locatorStr = params[0].get_str();
-    std::transform(locatorStr.begin(), locatorStr.end(), locatorStr.begin(), ::tolower);
     vchType vchLocator = vchFromString(locatorStr);
 
     cba predicate((params[1]).get_str());
@@ -3464,7 +3458,6 @@ Value transientStatus__C(const Array& params, bool fHelp)
 
     string locatorStr = params[0].get_str();
 
-    std::transform(locatorStr.begin(), locatorStr.end(), locatorStr.begin(), ::tolower);
     const vchType vchAlias = vchFromString(locatorStr);
 
     Object ret;
@@ -3648,7 +3641,6 @@ Value updateEncryptedAliasFile(const Array& params, bool fHelp)
 
     string locatorStr = params[0].get_str();
 
-    std::transform(locatorStr.begin(), locatorStr.end(), locatorStr.begin(), ::tolower);
     const vchType vchAlias = vchFromString(locatorStr);
 
     const char* locatorFile = (params[1].get_str()).c_str();
@@ -3930,7 +3922,6 @@ Value decryptAlias(const Array& params, bool fHelp)
                 + HelpRequiringPassphrase());
 
     string locatorStr = params[0].get_str();
-    std::transform(locatorStr.begin(), locatorStr.end(), locatorStr.begin(), ::tolower);
     const vchType vchAlias = vchFromValue(locatorStr);
     const std::string addressOfOwner = params[1].get_str();
 
@@ -4089,7 +4080,6 @@ Value transferEncryptedExtPredicate(const Array& params, bool fHelp)
           + HelpRequiringPassphrase());
 
     string locatorStr = params[0].get_str();
-    std::transform(locatorStr.begin(), locatorStr.end(), locatorStr.begin(), ::tolower);
     vchType vchLocator = vchFromString(locatorStr);
 
     cba predicate((params[1]).get_str());
@@ -4365,7 +4355,6 @@ Value transferEncryptedAlias(const Array& params, bool fHelp)
           + HelpRequiringPassphrase());
 
     string locatorStr = params[0].get_str();
-    std::transform(locatorStr.begin(), locatorStr.end(), locatorStr.begin(), ::tolower);
     vchType vchLocator = vchFromString(locatorStr);
 
     cba predicate((params[1]).get_str());
@@ -4769,7 +4758,6 @@ Value uC(const Array& params, bool fHelp) { if(fHelp || params.size() != 2)
                 + HelpRequiringPassphrase());
     string locatorStr = params[0].get_str();
 
-    std::transform(locatorStr.begin(), locatorStr.end(), locatorStr.begin(), ::tolower);
     const vchType vchAlias = vchFromValue(locatorStr);
     const char* locatorFile = (params[1].get_str()).c_str();
 
@@ -4949,7 +4937,6 @@ Value transientStatus__(const Array& params, bool fHelp)
     Object ret;
     string locatorStr = params[0].get_str();
 
-    std::transform(locatorStr.begin(), locatorStr.end(), locatorStr.begin(), ::tolower);
     const vchType vchAlias = vchFromValue(locatorStr);
     const char* locatorFile = (params[1].get_str()).c_str();
     fs::path p = locatorFile;
@@ -5074,7 +5061,6 @@ Value updateAliasFile(const Array& params, bool fHelp)
                 + HelpRequiringPassphrase());
     string locatorStr = params[0].get_str();
 
-    std::transform(locatorStr.begin(), locatorStr.end(), locatorStr.begin(), ::tolower);
     const vchType vchAlias = vchFromValue(locatorStr);
     const char* locatorFile = (params[1].get_str()).c_str();
     fs::path p = locatorFile;
@@ -5186,7 +5172,6 @@ Value updateAlias(const Array& params, bool fHelp)
                 "updateAlias <alias> <value> [<toaddress>]\nUpdate and possibly transfer a alias"
                 + HelpRequiringPassphrase());
     string locatorStr = params[0].get_str();
-    std::transform(locatorStr.begin(), locatorStr.end(), locatorStr.begin(), ::tolower);
     const vchType vchAlias = vchFromValue(locatorStr);
     const vchType vchValue = vchFromValue(params[1]);
 
@@ -5562,7 +5547,6 @@ int checkAddress(string addr, cba& a)
   {
     vector<AliasIndex> vtxPos;
     LocatorNodeDB ln1Db("r");
-    std::transform(addr.begin(), addr.end(), addr.begin(), ::tolower);
     vchType vchAlias = vchFromString(addr);
     if(ln1Db.lKey(vchAlias))
     {
@@ -5979,7 +5963,6 @@ Value registerAliasGenerate(const Array& params, bool fHelp)
       throw JSONRPCError(RPC_WALLET_ERROR, err);
     }
 
-    std::transform(locatorStr.begin(), locatorStr.end(), locatorStr.begin(), ::tolower);
     uint256 wtxInHash__;
     if(searchAliasEncrypted2(locatorStr, wtxInHash__) == true)
     {
@@ -6128,7 +6111,6 @@ Value registerAlias(const Array& params, bool fHelp)
     }
 
 
-    std::transform(locatorStr.begin(), locatorStr.end(), locatorStr.begin(), ::tolower);
     uint256 wtxInHash__;
     if(searchAliasEncrypted2(locatorStr, wtxInHash__) == true)
     {
@@ -6943,7 +6925,6 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
         {
 
           string locatorStr = stringFromVch(vvchArgs[0]);
-          std::transform(locatorStr.begin(), locatorStr.end(), locatorStr.begin(), ::tolower);
             
           if(op == OP_ALIAS_SET)
           {
@@ -8054,7 +8035,6 @@ Value simplexU(const Array& params, bool fHelp) { if(fHelp || params.size() != 2
                 + HelpRequiringPassphrase());
     string locatorStr = params[0].get_str();
 
-    std::transform(locatorStr.begin(), locatorStr.end(), locatorStr.begin(), ::tolower);
     const vchType vchAlias = vchFromValue(locatorStr);
     const char* locatorFile = (params[1].get_str()).c_str();
 
@@ -8180,7 +8160,6 @@ Value psimplex(const Array& params, bool fHelp) {
   
   ln1Db->filter();
   string alias = params[0].get_str();
-  std::transform(alias.begin(), alias.end(), alias.begin(), ::tolower);
   string address = "address not found";
   vchType value;
 

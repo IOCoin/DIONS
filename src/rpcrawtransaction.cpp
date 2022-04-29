@@ -421,7 +421,6 @@ Value crawgen(const Array& params, bool fHelp)
       {
         vector<AliasIndex> vtxPos;
         string aliasStr = s.name_;
-        std::transform(aliasStr.begin(), aliasStr.end(), aliasStr.begin(), ::tolower);
         vchType vchAlias = vchFromString(aliasStr);
         if (ln1Db->lKey(vchAlias))
         {
@@ -536,7 +535,6 @@ Value createrawtransaction(const Array& params, bool fHelp)
       {
         vector<AliasIndex> vtxPos;
         string aliasStr = s.name_;
-        std::transform(aliasStr.begin(), aliasStr.end(), aliasStr.begin(), ::tolower);
         vchType vchAlias = vchFromString(aliasStr);
         if (ln1Db->lKey (vchAlias))
         {
