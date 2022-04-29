@@ -11,6 +11,7 @@ class InterfaceCrypt
     virtual int    sig() = 0;
     virtual bool   burstRelay(BurstBuffer& data) = 0;
     virtual bool   transientRelay(BurstBuffer& data) = 0;
+    virtual bool   internRelay(BurstBuffer& data) = 0;
     virtual void   burstTx(BurstBuffer& data) = 0;
     virtual void   open() = 0;
     virtual void   close() = 0;
