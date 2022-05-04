@@ -209,10 +209,6 @@ public:
     bool __transient();
     int64_t GetStake() const;
     int64_t GetNewMint() const;
-    const boost::filesystem::path& dataDir() const
-    {
-      return GetDataDir();
-    }
     bool CreateTransaction(const std::vector<std::pair<CScript, int64_t> >& vecSend, __wx__Tx& wtxNew, CReserveKey& reservekey, int64_t& nFeeRet, std::string strTxInfo, const CCoinControl *coinControl=NULL);
     bool CreateTransaction__(const std::vector<std::pair<CScript, int64_t> >& vecSend, __wx__Tx& wtxNew, CReserveKey& reservekey, int64_t& nFeeRet, std::string strTxInfo, const CCoinControl *coinControl=NULL);
     bool CreateTransaction(CScript scriptPubKey, int64_t nValue, __wx__Tx& wtxNew, CReserveKey& reservekey, int64_t& nFeeRet, std::string strTxInfo, const CCoinControl *coinControl=NULL);
@@ -225,6 +221,7 @@ public:
 
     std::string SendMoney(CScript scriptPubKey, int64_t nValue, __wx__Tx& wtxNew, bool fAskFee=false,std::string strTx="");
     std::string SendMoney__(CScript scriptPubKey, int64_t nValue, __wx__Tx& wtxNew, bool fAskFee=false,std::string strTx="");
+    std::string generateSM__(CScript scriptPubKey, int64_t nValue, __wx__Tx& wtxNew, bool fAskFee=false,std::string strTx="");
     std::string SendMoneyToDestination(const CTxDestination &address, int64_t nValue, __wx__Tx& wtxNew, bool fAskFee=false,std::string strTx="");
 
     bool NewKeyPool();
@@ -273,8 +270,10 @@ public:
         bool s = __xfa(tx.vout);
         BOOST_FOREACH(const CTxOut& txout, tx.vout)
         {
-            if (IsMine(txout) && tx.nVersion == CTransaction::DION_TX_VERSION && txout.nValue >= nMinimumInputValue)
+            if (IsMine(txout) && (tx.nVersion == CTransaction::DION_TX_VERSION || tx.nVersion == CTransaction::CYCLE_TX_VERSION) && txout.nValue >= nMinimumInputValue)
+            {
                 return true;
+            }
             else if (IsMine(txout) && txout.nValue > nMinimumInputValue)
                 return true;
 
@@ -455,8 +454,8 @@ public:
     mutable int64_t nAvailableCreditCached;
     mutable int64_t nChangeCached;
 
-    mutable int nAliasOut;
-    mutable vchType vchAlias;
+    mutable int nPathOut;
+    mutable vchType vchPath;
     mutable vchType vchValue;
     mutable int     op__;
     mutable bool    s__;

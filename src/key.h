@@ -1,3 +1,6 @@
+
+
+
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2012 The Bitcoin developers
 // Distributed under the MIT/X11 software license, see the accompanying
@@ -68,12 +71,18 @@ private:
     friend class CKey;
 
 public:
-    uint160 sync_; 
+    uint160 sync_;
     CPubKey() { }
     CPubKey(const std::vector<unsigned char> &vchPubKeyIn) : vchPubKey(vchPubKeyIn) { }
-    friend bool operator==(const CPubKey &a, const CPubKey &b) { return a.vchPubKey == b.vchPubKey; }
-    friend bool operator!=(const CPubKey &a, const CPubKey &b) { return a.vchPubKey != b.vchPubKey; }
-    friend bool operator<(const CPubKey &a, const CPubKey &b) { return a.vchPubKey < b.vchPubKey; }
+    friend bool operator==(const CPubKey &a, const CPubKey &b) {
+        return a.vchPubKey == b.vchPubKey;
+    }
+    friend bool operator!=(const CPubKey &a, const CPubKey &b) {
+        return a.vchPubKey != b.vchPubKey;
+    }
+    friend bool operator<(const CPubKey &a, const CPubKey &b) {
+        return a.vchPubKey < b.vchPubKey;
+    }
 
     IMPLEMENT_SERIALIZE(
         READWRITE(vchPubKey);
@@ -120,7 +129,7 @@ bool __intersect(CPubKey&,CPubKey&);
 class CKey
 {
 
-  public:
+public:
 
     void Reset();
 
@@ -162,13 +171,13 @@ class CKey
 
     // Check whether an element of a signature (r or s) is valid.
     static bool CheckSignatureElement(const unsigned char *vch, int len, bool half);
-  protected:
+protected:
     EC_KEY* pkey;
     bool fSet;
     bool fCompressedPubKey;
 
     void SetCompressedPubKey();
-      
+
 };
 
 /** Check that required EC support is available at runtime */

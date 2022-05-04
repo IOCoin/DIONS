@@ -1,3 +1,6 @@
+
+
+
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2012 The Bitcoin developers
 // Distributed under the MIT/X11 software license, see the accompanying
@@ -197,7 +200,9 @@ struct secure_allocator : public std::allocator<T>
     secure_allocator(const secure_allocator<U>& a) throw() : base(a) {}
     ~secure_allocator() throw() {}
     template<typename _Other> struct rebind
-    { typedef secure_allocator<_Other> other; };
+    {
+        typedef secure_allocator<_Other> other;
+    };
 
     T* allocate(std::size_t n, const void *hint = 0)
     {
@@ -241,7 +246,9 @@ struct zero_after_free_allocator : public std::allocator<T>
     zero_after_free_allocator(const zero_after_free_allocator<U>& a) throw() : base(a) {}
     ~zero_after_free_allocator() throw() {}
     template<typename _Other> struct rebind
-    { typedef zero_after_free_allocator<_Other> other; };
+    {
+        typedef zero_after_free_allocator<_Other> other;
+    };
 
     void deallocate(T* p, std::size_t n)
     {

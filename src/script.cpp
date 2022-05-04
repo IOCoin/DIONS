@@ -1,3 +1,6 @@
+
+
+
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2012 The Bitcoin developers
 // Distributed under the MIT/X11 software license, see the accompanying
@@ -100,12 +103,18 @@ const char* GetTxnOutputType(txnouttype t)
 {
     switch (t)
     {
-    case TX_NONSTANDARD: return "nonstandard";
-    case TX_PUBKEY: return "pubkey";
-    case TX_PUBKEYHASH: return "pubkeyhash";
-    case TX_SCRIPTHASH: return "scripthash";
-    case TX_MULTISIG: return "multisig";
-    case TX_NULL_DATA: return "nulldata";
+    case TX_NONSTANDARD:
+        return "nonstandard";
+    case TX_PUBKEY:
+        return "pubkey";
+    case TX_PUBKEYHASH:
+        return "pubkeyhash";
+    case TX_SCRIPTHASH:
+        return "scripthash";
+    case TX_MULTISIG:
+        return "multisig";
+    case TX_NULL_DATA:
+        return "nulldata";
     }
     return NULL;
 }
@@ -116,133 +125,245 @@ const char* GetOpName(opcodetype opcode)
     switch (opcode)
     {
     // push value
-    case OP_0                      : return "0";
-    case OP_PUSHDATA1              : return "OP_PUSHDATA1";
-    case OP_PUSHDATA2              : return "OP_PUSHDATA2";
-    case OP_PUSHDATA4              : return "OP_PUSHDATA4";
-    case OP_1NEGATE                : return "-1";
-    case OP_RESERVED               : return "OP_RESERVED";
-    case OP_1                      : return "1";
-    case OP_2                      : return "2";
-    case OP_3                      : return "3";
-    case OP_4                      : return "4";
-    case OP_5                      : return "5";
-    case OP_6                      : return "6";
-    case OP_7                      : return "7";
-    case OP_8                      : return "8";
-    case OP_9                      : return "9";
-    case OP_10                     : return "10";
-    case OP_11                     : return "11";
-    case OP_12                     : return "12";
-    case OP_13                     : return "13";
-    case OP_14                     : return "14";
-    case OP_15                     : return "15";
-    case OP_16                     : return "16";
+    case OP_0                      :
+        return "0";
+    case OP_PUSHDATA1              :
+        return "OP_PUSHDATA1";
+    case OP_PUSHDATA2              :
+        return "OP_PUSHDATA2";
+    case OP_PUSHDATA4              :
+        return "OP_PUSHDATA4";
+    case OP_1NEGATE                :
+        return "-1";
+    case OP_RESERVED               :
+        return "OP_RESERVED";
+    case OP_1                      :
+        return "1";
+    case OP_2                      :
+        return "2";
+    case OP_3                      :
+        return "3";
+    case OP_4                      :
+        return "4";
+    case OP_5                      :
+        return "5";
+    case OP_6                      :
+        return "6";
+    case OP_7                      :
+        return "7";
+    case OP_8                      :
+        return "8";
+    case OP_9                      :
+        return "9";
+    case OP_10                     :
+        return "10";
+    case OP_11                     :
+        return "11";
+    case OP_12                     :
+        return "12";
+    case OP_13                     :
+        return "13";
+    case OP_14                     :
+        return "14";
+    case OP_15                     :
+        return "15";
+    case OP_16                     :
+        return "16";
 
     // control
-    case OP_NOP                    : return "OP_NOP";
-    case OP_VER                    : return "OP_VER";
-    case OP_IF                     : return "OP_IF";
-    case OP_NOTIF                  : return "OP_NOTIF";
-    case OP_VERIF                  : return "OP_VERIF";
-    case OP_VERNOTIF               : return "OP_VERNOTIF";
-    case OP_ELSE                   : return "OP_ELSE";
-    case OP_ENDIF                  : return "OP_ENDIF";
-    case OP_VERIFY                 : return "OP_VERIFY";
-    case OP_RETURN                 : return "OP_RETURN";
+    case OP_NOP                    :
+        return "OP_NOP";
+    case OP_VER                    :
+        return "OP_VER";
+    case OP_IF                     :
+        return "OP_IF";
+    case OP_NOTIF                  :
+        return "OP_NOTIF";
+    case OP_VERIF                  :
+        return "OP_VERIF";
+    case OP_VERNOTIF               :
+        return "OP_VERNOTIF";
+    case OP_ELSE                   :
+        return "OP_ELSE";
+    case OP_ENDIF                  :
+        return "OP_ENDIF";
+    case OP_VERIFY                 :
+        return "OP_VERIFY";
+    case OP_RETURN                 :
+        return "OP_RETURN";
 
     // stack ops
-    case OP_TOALTSTACK             : return "OP_TOALTSTACK";
-    case OP_FROMALTSTACK           : return "OP_FROMALTSTACK";
-    case OP_2DROP                  : return "OP_2DROP";
-    case OP_2DUP                   : return "OP_2DUP";
-    case OP_3DUP                   : return "OP_3DUP";
-    case OP_2OVER                  : return "OP_2OVER";
-    case OP_2ROT                   : return "OP_2ROT";
-    case OP_2SWAP                  : return "OP_2SWAP";
-    case OP_IFDUP                  : return "OP_IFDUP";
-    case OP_DEPTH                  : return "OP_DEPTH";
-    case OP_DROP                   : return "OP_DROP";
-    case OP_DUP                    : return "OP_DUP";
-    case OP_NIP                    : return "OP_NIP";
-    case OP_OVER                   : return "OP_OVER";
-    case OP_PICK                   : return "OP_PICK";
-    case OP_ROLL                   : return "OP_ROLL";
-    case OP_ROT                    : return "OP_ROT";
-    case OP_SWAP                   : return "OP_SWAP";
-    case OP_TUCK                   : return "OP_TUCK";
+    case OP_TOALTSTACK             :
+        return "OP_TOALTSTACK";
+    case OP_FROMALTSTACK           :
+        return "OP_FROMALTSTACK";
+    case OP_2DROP                  :
+        return "OP_2DROP";
+    case OP_2DUP                   :
+        return "OP_2DUP";
+    case OP_3DUP                   :
+        return "OP_3DUP";
+    case OP_2OVER                  :
+        return "OP_2OVER";
+    case OP_2ROT                   :
+        return "OP_2ROT";
+    case OP_2SWAP                  :
+        return "OP_2SWAP";
+    case OP_IFDUP                  :
+        return "OP_IFDUP";
+    case OP_DEPTH                  :
+        return "OP_DEPTH";
+    case OP_DROP                   :
+        return "OP_DROP";
+    case OP_DUP                    :
+        return "OP_DUP";
+    case OP_NIP                    :
+        return "OP_NIP";
+    case OP_OVER                   :
+        return "OP_OVER";
+    case OP_PICK                   :
+        return "OP_PICK";
+    case OP_ROLL                   :
+        return "OP_ROLL";
+    case OP_ROT                    :
+        return "OP_ROT";
+    case OP_SWAP                   :
+        return "OP_SWAP";
+    case OP_TUCK                   :
+        return "OP_TUCK";
 
     // splice ops
-    case OP_CAT                    : return "OP_CAT";
-    case OP_SUBSTR                 : return "OP_SUBSTR";
-    case OP_LEFT                   : return "OP_LEFT";
-    case OP_RIGHT                  : return "OP_RIGHT";
-    case OP_SIZE                   : return "OP_SIZE";
+    case OP_CAT                    :
+        return "OP_CAT";
+    case OP_SUBSTR                 :
+        return "OP_SUBSTR";
+    case OP_LEFT                   :
+        return "OP_LEFT";
+    case OP_RIGHT                  :
+        return "OP_RIGHT";
+    case OP_SIZE                   :
+        return "OP_SIZE";
 
     // bit logic
-    case OP_INVERT                 : return "OP_INVERT";
-    case OP_AND                    : return "OP_AND";
-    case OP_OR                     : return "OP_OR";
-    case OP_XOR                    : return "OP_XOR";
-    case OP_EQUAL                  : return "OP_EQUAL";
-    case OP_EQUALVERIFY            : return "OP_EQUALVERIFY";
-    case OP_RESERVED1              : return "OP_RESERVED1";
-    case OP_RESERVED2              : return "OP_RESERVED2";
+    case OP_INVERT                 :
+        return "OP_INVERT";
+    case OP_AND                    :
+        return "OP_AND";
+    case OP_OR                     :
+        return "OP_OR";
+    case OP_XOR                    :
+        return "OP_XOR";
+    case OP_EQUAL                  :
+        return "OP_EQUAL";
+    case OP_EQUALVERIFY            :
+        return "OP_EQUALVERIFY";
+    case OP_RESERVED1              :
+        return "OP_RESERVED1";
+    case OP_RESERVED2              :
+        return "OP_RESERVED2";
 
     // numeric
-    case OP_1ADD                   : return "OP_1ADD";
-    case OP_1SUB                   : return "OP_1SUB";
-    case OP_2MUL                   : return "OP_2MUL";
-    case OP_2DIV                   : return "OP_2DIV";
-    case OP_NEGATE                 : return "OP_NEGATE";
-    case OP_ABS                    : return "OP_ABS";
-    case OP_NOT                    : return "OP_NOT";
-    case OP_0NOTEQUAL              : return "OP_0NOTEQUAL";
-    case OP_ADD                    : return "OP_ADD";
-    case OP_SUB                    : return "OP_SUB";
-    case OP_MUL                    : return "OP_MUL";
-    case OP_DIV                    : return "OP_DIV";
-    case OP_MOD                    : return "OP_MOD";
-    case OP_LSHIFT                 : return "OP_LSHIFT";
-    case OP_RSHIFT                 : return "OP_RSHIFT";
-    case OP_BOOLAND                : return "OP_BOOLAND";
-    case OP_BOOLOR                 : return "OP_BOOLOR";
-    case OP_NUMEQUAL               : return "OP_NUMEQUAL";
-    case OP_NUMEQUALVERIFY         : return "OP_NUMEQUALVERIFY";
-    case OP_NUMNOTEQUAL            : return "OP_NUMNOTEQUAL";
-    case OP_LESSTHAN               : return "OP_LESSTHAN";
-    case OP_GREATERTHAN            : return "OP_GREATERTHAN";
-    case OP_LESSTHANOREQUAL        : return "OP_LESSTHANOREQUAL";
-    case OP_GREATERTHANOREQUAL     : return "OP_GREATERTHANOREQUAL";
-    case OP_MIN                    : return "OP_MIN";
-    case OP_MAX                    : return "OP_MAX";
-    case OP_WITHIN                 : return "OP_WITHIN";
+    case OP_1ADD                   :
+        return "OP_1ADD";
+    case OP_1SUB                   :
+        return "OP_1SUB";
+    case OP_2MUL                   :
+        return "OP_2MUL";
+    case OP_2DIV                   :
+        return "OP_2DIV";
+    case OP_NEGATE                 :
+        return "OP_NEGATE";
+    case OP_ABS                    :
+        return "OP_ABS";
+    case OP_NOT                    :
+        return "OP_NOT";
+    case OP_0NOTEQUAL              :
+        return "OP_0NOTEQUAL";
+    case OP_ADD                    :
+        return "OP_ADD";
+    case OP_SUB                    :
+        return "OP_SUB";
+    case OP_MUL                    :
+        return "OP_MUL";
+    case OP_DIV                    :
+        return "OP_DIV";
+    case OP_MOD                    :
+        return "OP_MOD";
+    case OP_LSHIFT                 :
+        return "OP_LSHIFT";
+    case OP_RSHIFT                 :
+        return "OP_RSHIFT";
+    case OP_BOOLAND                :
+        return "OP_BOOLAND";
+    case OP_BOOLOR                 :
+        return "OP_BOOLOR";
+    case OP_NUMEQUAL               :
+        return "OP_NUMEQUAL";
+    case OP_NUMEQUALVERIFY         :
+        return "OP_NUMEQUALVERIFY";
+    case OP_NUMNOTEQUAL            :
+        return "OP_NUMNOTEQUAL";
+    case OP_LESSTHAN               :
+        return "OP_LESSTHAN";
+    case OP_GREATERTHAN            :
+        return "OP_GREATERTHAN";
+    case OP_LESSTHANOREQUAL        :
+        return "OP_LESSTHANOREQUAL";
+    case OP_GREATERTHANOREQUAL     :
+        return "OP_GREATERTHANOREQUAL";
+    case OP_MIN                    :
+        return "OP_MIN";
+    case OP_MAX                    :
+        return "OP_MAX";
+    case OP_WITHIN                 :
+        return "OP_WITHIN";
 
     // crypto
-    case OP_RIPEMD160              : return "OP_RIPEMD160";
-    case OP_SHA1                   : return "OP_SHA1";
-    case OP_SHA256                 : return "OP_SHA256";
-    case OP_HASH160                : return "OP_HASH160";
-    case OP_HASH256                : return "OP_HASH256";
-    case OP_CODESEPARATOR          : return "OP_CODESEPARATOR";
-    case OP_CHECKSIG               : return "OP_CHECKSIG";
-    case OP_CHECKSIGVERIFY         : return "OP_CHECKSIGVERIFY";
-    case OP_CHECKMULTISIG          : return "OP_CHECKMULTISIG";
-    case OP_CHECKMULTISIGVERIFY    : return "OP_CHECKMULTISIGVERIFY";
+    case OP_RIPEMD160              :
+        return "OP_RIPEMD160";
+    case OP_SHA1                   :
+        return "OP_SHA1";
+    case OP_SHA256                 :
+        return "OP_SHA256";
+    case OP_HASH160                :
+        return "OP_HASH160";
+    case OP_HASH256                :
+        return "OP_HASH256";
+    case OP_CODESEPARATOR          :
+        return "OP_CODESEPARATOR";
+    case OP_CHECKSIG               :
+        return "OP_CHECKSIG";
+    case OP_CHECKSIGVERIFY         :
+        return "OP_CHECKSIGVERIFY";
+    case OP_CHECKMULTISIG          :
+        return "OP_CHECKMULTISIG";
+    case OP_CHECKMULTISIGVERIFY    :
+        return "OP_CHECKMULTISIGVERIFY";
 
     // expanson
-    case OP_NOP1                   : return "OP_NOP1";
-    case OP_CHECKLOCKTIMEVERIFY    : return "OP_CHECKLOCKTIMEVERIFY";
-    case OP_NOP3                   : return "OP_NOP3";
-    case OP_NOP4                   : return "OP_NOP4";
-    case OP_NOP5                   : return "OP_NOP5";
-    case OP_NOP6                   : return "OP_NOP6";
-    case OP_NOP7                   : return "OP_NOP7";
-    case OP_NOP8                   : return "OP_NOP8";
-    case OP_NOP9                   : return "OP_NOP9";
-    case OP_NOP10                  : return "OP_NOP10";
+    case OP_NOP1                   :
+        return "OP_NOP1";
+    case OP_CHECKLOCKTIMEVERIFY    :
+        return "OP_CHECKLOCKTIMEVERIFY";
+    case OP_NOP3                   :
+        return "OP_NOP3";
+    case OP_NOP4                   :
+        return "OP_NOP4";
+    case OP_NOP5                   :
+        return "OP_NOP5";
+    case OP_NOP6                   :
+        return "OP_NOP6";
+    case OP_NOP7                   :
+        return "OP_NOP7";
+    case OP_NOP8                   :
+        return "OP_NOP8";
+    case OP_NOP9                   :
+        return "OP_NOP9";
+    case OP_NOP10                  :
+        return "OP_NOP10";
 
-    case OP_INVALIDOPCODE          : return "OP_INVALIDOPCODE";
+    case OP_INVALIDOPCODE          :
+        return "OP_INVALIDOPCODE";
 
     // Note:
     //  The template matching params OP_SMALLDATA/etc are defined in opcodetype enum
@@ -333,7 +454,7 @@ bool EvalScript(vector<vector<unsigned char> >& stack, const CScript& script, co
     vector<bool> vfExec;
     vector<valtype> altstack;
     if (script.size() > 1000000)
-      return false;
+        return false;
     int nOpCount = 0;
 
 
@@ -354,27 +475,27 @@ bool EvalScript(vector<vector<unsigned char> >& stack, const CScript& script, co
                 return false;
 
             if (opcode == OP_CAT ||
-                opcode == OP_SUBSTR ||
-                opcode == OP_LEFT ||
-                opcode == OP_RIGHT ||
-                opcode == OP_INVERT ||
-                opcode == OP_AND ||
-                opcode == OP_OR ||
-                opcode == OP_XOR ||
-                opcode == OP_2MUL ||
-                opcode == OP_2DIV ||
-                opcode == OP_MUL ||
-                opcode == OP_DIV ||
-                opcode == OP_MOD ||
-                opcode == OP_LSHIFT ||
-                opcode == OP_RSHIFT)
+                    opcode == OP_SUBSTR ||
+                    opcode == OP_LEFT ||
+                    opcode == OP_RIGHT ||
+                    opcode == OP_INVERT ||
+                    opcode == OP_AND ||
+                    opcode == OP_OR ||
+                    opcode == OP_XOR ||
+                    opcode == OP_2MUL ||
+                    opcode == OP_2DIV ||
+                    opcode == OP_MUL ||
+                    opcode == OP_DIV ||
+                    opcode == OP_MOD ||
+                    opcode == OP_LSHIFT ||
+                    opcode == OP_RSHIFT)
                 return false;
 
             if (fExec && 0 <= opcode && opcode <= OP_PUSHDATA4)
                 stack.push_back(vchPushValue);
             else if (fExec || (OP_IF <= opcode && opcode <= OP_ENDIF))
-            switch (opcode)
-            {
+                switch (opcode)
+                {
                 //
                 // Push value
                 //
@@ -407,79 +528,86 @@ bool EvalScript(vector<vector<unsigned char> >& stack, const CScript& script, co
                 // Control
                 //
                 case OP_NOP:
-                  break;
+                    break;
 
                 case OP_NOP2:
-    {
-        // CHECKLOCKTIMEVERIFY
-        //
-        // (nLockTime -- nLockTime )
-    
-        if (!(flags & SCRIPT_VERIFY_CHECKLOCKTIMEVERIFY))
-            break; // not enabled; treat as a NOP
-    
-        if (stack.size() < 1)
-            return false;
-    
-        // Note that elsewhere numeric opcodes are limited to
-        // operands in the range -2**31+1 to 2**31-1, however it is
-        // legal for opcodes to produce results exceeding that
-        // range. This limitation is implemented by CScriptNum's
-        // default 4-byte limit.
-        //
-        // If we kept to that limit we'd have a year 2038 problem,
-        // even though the nLockTime field in transactions
-        // themselves is uint32 which only becomes meaningless
-        // after the year 2106.
-        //
-        // Thus as a special case we tell CScriptNum to accept up
-        // to 5-byte bignums, which are good until 2**32-1, the
-        // same limit as the nLockTime field itself.
-        const CScriptNum nLockTime(stacktop(-1), 5);
-    
-        // In the rare event that the argument may be < 0 due to
-        // some arithmetic being done first, you can always use
-        // 0 MAX CHECKLOCKTIMEVERIFY.
-        if(nLockTime < 0)
-            return false;
-    
-        // There are two types of nLockTime: lock-by-blockheight
-        // and lock-by-blocktime, distinguished by whether
-        // nLockTime < LOCKTIME_THRESHOLD.
-        //
-        // We want to compare apples to apples, so fail the script
-        // unless the type of nLockTime being tested is the same as
-        // the nLockTime in the transaction.
-        if (!(
-              (txTo.nLockTime <  LOCKTIME_THRESHOLD && nLockTime <  LOCKTIME_THRESHOLD) ||
-              (txTo.nLockTime >= LOCKTIME_THRESHOLD && nLockTime >= LOCKTIME_THRESHOLD)
-             ))
-            return false;
-    
-        // Now that we know we're comparing apples-to-apples, the
-        // comparison is a simple numeric one.
-        if (nLockTime > (int64_t)txTo.nLockTime)
-            return false;
-    
-        // Finally the nLockTime feature can be disabled and thus
-        // CHECKLOCKTIMEVERIFY bypassed if every txin has been
-        // finalized by setting nSequence to maxint. The
-        // transaction would be allowed into the blockchain, making
-        // the opcode ineffective.
-        //
-        // Testing if this vin is not final is sufficient to
-        // prevent this condition. Alternatively we could test all
-        // inputs, but testing just this input minimizes the data
-        // required to prove correct CHECKLOCKTIMEVERIFY execution.
-        if (txTo.vin[nIn].IsFinal())
-            return false;
-    
-        break;
-    }
+                {
+                    // CHECKLOCKTIMEVERIFY
+                    //
+                    // (nLockTime -- nLockTime )
 
-                case OP_NOP1: case OP_NOP3: case OP_NOP4: case OP_NOP5:
-                case OP_NOP6: case OP_NOP7: case OP_NOP8: case OP_NOP9: case OP_NOP10:
-                break;
+                    if (!(flags & SCRIPT_VERIFY_CHECKLOCKTIMEVERIFY))
+                        break; // not enabled; treat as a NOP
+
+                    if (stack.size() < 1)
+                        return false;
+
+                    // Note that elsewhere numeric opcodes are limited to
+                    // operands in the range -2**31+1 to 2**31-1, however it is
+                    // legal for opcodes to produce results exceeding that
+                    // range. This limitation is implemented by CScriptNum's
+                    // default 4-byte limit.
+                    //
+                    // If we kept to that limit we'd have a year 2038 problem,
+                    // even though the nLockTime field in transactions
+                    // themselves is uint32 which only becomes meaningless
+                    // after the year 2106.
+                    //
+                    // Thus as a special case we tell CScriptNum to accept up
+                    // to 5-byte bignums, which are good until 2**32-1, the
+                    // same limit as the nLockTime field itself.
+                    const CScriptNum nLockTime(stacktop(-1), 5);
+
+                    // In the rare event that the argument may be < 0 due to
+                    // some arithmetic being done first, you can always use
+                    // 0 MAX CHECKLOCKTIMEVERIFY.
+                    if(nLockTime < 0)
+                        return false;
+
+                    // There are two types of nLockTime: lock-by-blockheight
+                    // and lock-by-blocktime, distinguished by whether
+                    // nLockTime < LOCKTIME_THRESHOLD.
+                    //
+                    // We want to compare apples to apples, so fail the script
+                    // unless the type of nLockTime being tested is the same as
+                    // the nLockTime in the transaction.
+                    if (!(
+                                (txTo.nLockTime <  LOCKTIME_THRESHOLD && nLockTime <  LOCKTIME_THRESHOLD) ||
+                                (txTo.nLockTime >= LOCKTIME_THRESHOLD && nLockTime >= LOCKTIME_THRESHOLD)
+                            ))
+                        return false;
+
+                    // Now that we know we're comparing apples-to-apples, the
+                    // comparison is a simple numeric one.
+                    if (nLockTime > (int64_t)txTo.nLockTime)
+                        return false;
+
+                    // Finally the nLockTime feature can be disabled and thus
+                    // CHECKLOCKTIMEVERIFY bypassed if every txin has been
+                    // finalized by setting nSequence to maxint. The
+                    // transaction would be allowed into the blockchain, making
+                    // the opcode ineffective.
+                    //
+                    // Testing if this vin is not final is sufficient to
+                    // prevent this condition. Alternatively we could test all
+                    // inputs, but testing just this input minimizes the data
+                    // required to prove correct CHECKLOCKTIMEVERIFY execution.
+                    if (txTo.vin[nIn].IsFinal())
+                        return false;
+
+                    break;
+                }
+
+                case OP_NOP1:
+                case OP_NOP3:
+                case OP_NOP4:
+                case OP_NOP5:
+                case OP_NOP6:
+                case OP_NOP7:
+                case OP_NOP8:
+                case OP_NOP9:
+                case OP_NOP10:
+                    break;
 
                 case OP_IF:
                 case OP_NOTIF:
@@ -855,7 +983,7 @@ bool EvalScript(vector<vector<unsigned char> >& stack, const CScript& script, co
 
                 case OP_EQUAL:
                 case OP_EQUALVERIFY:
-                //case OP_NOTEQUAL: // use OP_NUMNOTEQUAL
+                    //case OP_NOTEQUAL: // use OP_NUMNOTEQUAL
                 {
                     // (x1 x2 - bool)
                     if (stack.size() < 2)
@@ -900,15 +1028,33 @@ bool EvalScript(vector<vector<unsigned char> >& stack, const CScript& script, co
                     CBigNum bn = CastToBigNum(stacktop(-1));
                     switch (opcode)
                     {
-                    case OP_1ADD:       bn += bnOne; break;
-                    case OP_1SUB:       bn -= bnOne; break;
-                    case OP_2MUL:       bn <<= 1; break;
-                    case OP_2DIV:       bn >>= 1; break;
-                    case OP_NEGATE:     bn = -bn; break;
-                    case OP_ABS:        if (bn < bnZero) bn = -bn; break;
-                    case OP_NOT:        bn = (bn == bnZero); break;
-                    case OP_0NOTEQUAL:  bn = (bn != bnZero); break;
-                    default:            assert(!"invalid opcode"); break;
+                    case OP_1ADD:
+                        bn += bnOne;
+                        break;
+                    case OP_1SUB:
+                        bn -= bnOne;
+                        break;
+                    case OP_2MUL:
+                        bn <<= 1;
+                        break;
+                    case OP_2DIV:
+                        bn >>= 1;
+                        break;
+                    case OP_NEGATE:
+                        bn = -bn;
+                        break;
+                    case OP_ABS:
+                        if (bn < bnZero) bn = -bn;
+                        break;
+                    case OP_NOT:
+                        bn = (bn == bnZero);
+                        break;
+                    case OP_0NOTEQUAL:
+                        bn = (bn != bnZero);
+                        break;
+                    default:
+                        assert(!"invalid opcode");
+                        break;
                     }
                     popstack(stack);
                     stack.push_back(bn.getvch());
@@ -977,18 +1123,42 @@ bool EvalScript(vector<vector<unsigned char> >& stack, const CScript& script, co
                         bn = bn1 >> bn2.getulong();
                         break;
 
-                    case OP_BOOLAND:             bn = (bn1 != bnZero && bn2 != bnZero); break;
-                    case OP_BOOLOR:              bn = (bn1 != bnZero || bn2 != bnZero); break;
-                    case OP_NUMEQUAL:            bn = (bn1 == bn2); break;
-                    case OP_NUMEQUALVERIFY:      bn = (bn1 == bn2); break;
-                    case OP_NUMNOTEQUAL:         bn = (bn1 != bn2); break;
-                    case OP_LESSTHAN:            bn = (bn1 < bn2); break;
-                    case OP_GREATERTHAN:         bn = (bn1 > bn2); break;
-                    case OP_LESSTHANOREQUAL:     bn = (bn1 <= bn2); break;
-                    case OP_GREATERTHANOREQUAL:  bn = (bn1 >= bn2); break;
-                    case OP_MIN:                 bn = (bn1 < bn2 ? bn1 : bn2); break;
-                    case OP_MAX:                 bn = (bn1 > bn2 ? bn1 : bn2); break;
-                    default:                     assert(!"invalid opcode"); break;
+                    case OP_BOOLAND:
+                        bn = (bn1 != bnZero && bn2 != bnZero);
+                        break;
+                    case OP_BOOLOR:
+                        bn = (bn1 != bnZero || bn2 != bnZero);
+                        break;
+                    case OP_NUMEQUAL:
+                        bn = (bn1 == bn2);
+                        break;
+                    case OP_NUMEQUALVERIFY:
+                        bn = (bn1 == bn2);
+                        break;
+                    case OP_NUMNOTEQUAL:
+                        bn = (bn1 != bn2);
+                        break;
+                    case OP_LESSTHAN:
+                        bn = (bn1 < bn2);
+                        break;
+                    case OP_GREATERTHAN:
+                        bn = (bn1 > bn2);
+                        break;
+                    case OP_LESSTHANOREQUAL:
+                        bn = (bn1 <= bn2);
+                        break;
+                    case OP_GREATERTHANOREQUAL:
+                        bn = (bn1 >= bn2);
+                        break;
+                    case OP_MIN:
+                        bn = (bn1 < bn2 ? bn1 : bn2);
+                        break;
+                    case OP_MAX:
+                        bn = (bn1 > bn2 ? bn1 : bn2);
+                        break;
+                    default:
+                        assert(!"invalid opcode");
+                        break;
                     }
                     popstack(stack);
                     popstack(stack);
@@ -1080,7 +1250,7 @@ bool EvalScript(vector<vector<unsigned char> >& stack, const CScript& script, co
                     scriptCode.FindAndDelete(CScript(vchSig));
 
                     bool fSuccess = IsCanonicalSignature(vchSig) && IsCanonicalPubKey(vchPubKey) &&
-                        CheckSig(vchSig, vchPubKey, scriptCode, txTo, nIn, nHashType);
+                                    CheckSig(vchSig, vchPubKey, scriptCode, txTo, nIn, nHashType);
 
                     popstack(stack);
                     popstack(stack);
@@ -1141,7 +1311,7 @@ bool EvalScript(vector<vector<unsigned char> >& stack, const CScript& script, co
 
                         // Check signature
                         bool fOk = IsCanonicalSignature(vchSig) && IsCanonicalPubKey(vchPubKey) &&
-                            CheckSig(vchSig, vchPubKey, scriptCode, txTo, nIn, nHashType);
+                                   CheckSig(vchSig, vchPubKey, scriptCode, txTo, nIn, nHashType);
 
                         if (fOk)
                         {
@@ -1173,7 +1343,7 @@ bool EvalScript(vector<vector<unsigned char> >& stack, const CScript& script, co
 
                 default:
                     return false;
-            }
+                }
 
             // Size limits
             if (stack.size() + altstack.size() > 1000)
@@ -1270,7 +1440,7 @@ uint256 SignatureHash(CScript scriptCode, const CTransaction& txTo, unsigned int
 class CSignatureCache
 {
 private:
-     // sigdata_type is (signature hash, signature, public key):
+    // sigdata_type is (signature hash, signature, public key):
     typedef boost::tuple<uint256, std::vector<unsigned char>, std::vector<unsigned char> > sigdata_type;
     std::set< sigdata_type> setValid;
     CCriticalSection cs_sigcache;
@@ -1513,7 +1683,7 @@ bool Solver(const CScript& scriptPubKey, txnouttype& typeRet, vector<vector<unsi
             else if (opcode2 == OP_SMALLINTEGER)
             {   // Single-byte small integer pushed onto vSolutions
                 if (opcode1 == OP_0 ||
-                    (opcode1 >= OP_1 && opcode1 <= OP_16))
+                        (opcode1 >= OP_1 && opcode1 <= OP_16))
                 {
                     char n = (char)CScript::DecodeOP_N(opcode1);
                     vSolutionsRet.push_back(valtype(1, n));
@@ -1577,14 +1747,16 @@ bool SignN(const vector<valtype>& multisigdata, const CKeyStore& keystore, uint2
 // Returns false if scriptPubKey could not be completely satisfied.
 //
 bool Solver(const CKeyStore& keystore, const CScript& scriptPubKey, uint256 hash, int nHashType,
-                  CScript& scriptSigRet, txnouttype& whichTypeRet)
+            CScript& scriptSigRet, txnouttype& whichTypeRet)
 {
+    printf("XXX solver 1\n");
     scriptSigRet.clear();
 
     vector<valtype> vSolutions;
     if (!Solver(scriptPubKey, whichTypeRet, vSolutions))
         return false;
 
+    printf("XXX solver 2\n");
     CKeyID keyID;
     switch (whichTypeRet)
     {
@@ -1592,15 +1764,20 @@ bool Solver(const CKeyStore& keystore, const CScript& scriptPubKey, uint256 hash
     case TX_NULL_DATA:
         return false;
     case TX_PUBKEY:
+        printf("XXX solver 3\n");
         keyID = CPubKey(vSolutions[0]).GetID();
+        printf("XXX solver 4\n");
         return Sign1(keyID, keystore, hash, nHashType, scriptSigRet);
     case TX_PUBKEYHASH:
+        printf("XXX solver 5\n");
         keyID = CKeyID(uint160(vSolutions[0]));
+        printf("XXX solver 6\n");
         keyID = CKeyID(uint160(vSolutions[0]));
         if (!Sign1(keyID, keystore, hash, nHashType, scriptSigRet))
             return false;
         else
         {
+            printf("XXX solver 7\n");
             CPubKey vch;
             keystore.GetPubKey(keyID, vch);
             scriptSigRet << vch;
@@ -1613,6 +1790,7 @@ bool Solver(const CKeyStore& keystore, const CScript& scriptPubKey, uint256 hash
         scriptSigRet << OP_0; // workaround CHECKMULTISIG bug
         return (SignN(vSolutions, keystore, hash, nHashType, scriptSigRet));
     }
+    printf("XXX solver 8\n");
     return false;
 }
 
@@ -1677,9 +1855,15 @@ private:
     const CKeyStore *keystore;
 public:
     CKeyStoreIsMineVisitor(const CKeyStore *keystoreIn) : keystore(keystoreIn) { }
-    bool operator()(const CNoDestination &dest) const { return false; }
-    bool operator()(const CKeyID &keyID) const { return keystore->HaveKey(keyID); }
-    bool operator()(const CScriptID &scriptID) const { return keystore->HaveCScript(scriptID); }
+    bool operator()(const CNoDestination &dest) const {
+        return false;
+    }
+    bool operator()(const CKeyID &keyID) const {
+        return keystore->HaveKey(keyID);
+    }
+    bool operator()(const CScriptID &scriptID) const {
+        return keystore->HaveCScript(scriptID);
+    }
 };
 
 bool IsMine(const CKeyStore &keystore, const CTxDestination &dest)
@@ -1693,6 +1877,7 @@ bool IsMine(const CKeyStore &keystore, const CScript& scriptPubKey)
     std::vector<vchType> vvch;
     CScript::const_iterator pc = scriptPubKey.begin ();
     CScript rawScript;
+    printf("ismine 1\n");
     if (aliasScript (scriptPubKey, op, vvch, pc))
         rawScript = CScript(pc, scriptPubKey.end ());
     else
@@ -1777,7 +1962,7 @@ public:
         int nRequired;
         if (ExtractDestinations(script, type, vDest, nRequired)) {
             BOOST_FOREACH(const CTxDestination &dest, vDest)
-                boost::apply_visitor(*this, dest);
+            boost::apply_visitor(*this, dest);
         }
     }
 
@@ -1807,7 +1992,7 @@ bool ExtractDestinations(const CScript& scriptPubKey, txnouttype& typeRet, vecto
     vector<valtype> vSolutions;
     if (!Solver(scriptPubKey, typeRet, vSolutions))
         return false;
-    if (typeRet == TX_NULL_DATA){
+    if (typeRet == TX_NULL_DATA) {
         // This is data, not addresses
         return false;
     }
@@ -1826,7 +2011,7 @@ bool ExtractDestinations(const CScript& scriptPubKey, txnouttype& typeRet, vecto
         nRequiredRet = 1;
         CTxDestination address;
         if (!ExtractDestination(scriptPubKey, address))
-           return false;
+            return false;
         addressRet.push_back(address);
     }
 
@@ -1873,11 +2058,11 @@ bool VerifyScript(const CScript& scriptSig, const CScript& scriptPubKey, const C
         if (!EvalScript(stackCopy, pubKey2, txTo, nIn, flags, nHashType))
         {
             return false;
-         }
+        }
         if (stackCopy.empty())
-         {
+        {
             return false;
-        } 
+        }
         return CastToBool(stackCopy.back());
     }
 
@@ -1894,6 +2079,7 @@ bool SignSignature(const CKeyStore &keystore, const CScript& fromPubKey, CTransa
     std::vector<vchType> vvch;
     CScript::const_iterator pc = fromPubKey.begin ();
     CScript rawScript;
+    printf("signsig 1\n");
     if (aliasScript (fromPubKey, op, vvch, pc))
         rawScript = CScript(pc, fromPubKey.end ());
     else
@@ -1905,10 +2091,10 @@ bool SignSignature(const CKeyStore &keystore, const CScript& fromPubKey, CTransa
 
     txnouttype whichType;
     if (!Solver(keystore, rawScript, hash, nHashType, txin.scriptSig, whichType))
-   { 
-     printf("SignSignature, Solver return false\n");
+    {
+        printf("SignSignature, Solver return false\n");
         return false;
-   }
+    }
 
     if (whichType == TX_SCRIPTHASH)
     {
@@ -1925,10 +2111,10 @@ bool SignSignature(const CKeyStore &keystore, const CScript& fromPubKey, CTransa
             Solver(keystore, subscript, hash2, nHashType, txin.scriptSig, subType) && subType != TX_SCRIPTHASH;
         // Append serialized subscript whether or not it is completely signed:
         txin.scriptSig << static_cast<valtype>(subscript);
-        if (!fSolved) 
+        if (!fSolved)
         {
-     printf("SignSignature, fSolved return false\n");
-          return false;
+            printf("SignSignature, fSolved return false\n");
+            return false;
         }
     }
 
@@ -1965,7 +2151,7 @@ static CScript PushAll(const vector<valtype>& values)
 {
     CScript result;
     BOOST_FOREACH(const valtype& v, values)
-        result << v;
+    result << v;
     return result;
 }
 
@@ -2008,7 +2194,8 @@ static CScript CombineMultisig(CScript scriptPubKey, const CTransaction& txTo, u
     }
     // Now build a merged CScript:
     unsigned int nSigsHave = 0;
-    CScript result; result << OP_0; // pop-one-too-many workaround
+    CScript result;
+    result << OP_0; // pop-one-too-many workaround
     for (unsigned int i = 0; i < nPubKeys && nSigsHave < nSigsRequired; i++)
     {
         if (sigs.count(vSolutions[i+1]))
@@ -2173,7 +2360,9 @@ class CScriptVisitor : public boost::static_visitor<bool>
 private:
     CScript *script;
 public:
-    CScriptVisitor(CScript *scriptin) { script = scriptin; }
+    CScriptVisitor(CScript *scriptin) {
+        script = scriptin;
+    }
 
     bool operator()(const CNoDestination &dest) const {
         script->clear();
@@ -2204,7 +2393,7 @@ void CScript::SetMultisig(int nRequired, const std::vector<CKey>& keys)
 
     *this << EncodeOP_N(nRequired);
     BOOST_FOREACH(const CKey& key, keys)
-        *this << key.GetPubKey();
+    *this << key.GetPubKey();
     *this << EncodeOP_N(keys.size()) << OP_CHECKMULTISIG;
 }
 bool ExtractPubKey(const CScript& scriptPubKey, const CKeyStore* keystore, vector<unsigned char>& vchPubKeyRet)

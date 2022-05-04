@@ -1,3 +1,6 @@
+
+
+
 // Copyright (c) 2013 NovaCoin Developers
 
 #ifndef PBKDF2_H
@@ -22,6 +25,6 @@ HMAC_SHA256_Final(unsigned char digest[32], HMAC_SHA256_CTX * ctx);
 
 void
 PBKDF2_SHA256(const uint8_t * passwd, size_t passwdlen, const uint8_t * salt,
-    size_t saltlen, uint64_t c, uint8_t * buf, size_t dkLen);
+              size_t saltlen, uint64_t c, uint8_t * buf, size_t dkLen);
 
 #endif // PBKDF2_H

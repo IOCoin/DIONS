@@ -1,3 +1,6 @@
+
+
+
 // Copyright (c) 2013 NovaCoin Developers
 
 #include <string.h>
@@ -9,7 +12,7 @@ be32dec(const void *pp)
     const uint8_t *p = (uint8_t const *)pp;
 
     return ((uint32_t)(p[3]) + ((uint32_t)(p[2]) << 8) +
-        ((uint32_t)(p[1]) << 16) + ((uint32_t)(p[0]) << 24));
+            ((uint32_t)(p[1]) << 16) + ((uint32_t)(p[0]) << 24));
 }
 
 static inline void
@@ -96,7 +99,7 @@ HMAC_SHA256_Final(unsigned char digest[32], HMAC_SHA256_CTX * ctx)
  */
 void
 PBKDF2_SHA256(const uint8_t * passwd, size_t passwdlen, const uint8_t * salt,
-    size_t saltlen, uint64_t c, uint8_t * buf, size_t dkLen)
+              size_t saltlen, uint64_t c, uint8_t * buf, size_t dkLen)
 {
     HMAC_SHA256_CTX PShctx, hctx;
     size_t i;

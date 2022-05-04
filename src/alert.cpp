@@ -1,3 +1,6 @@
+
+
+
 //
 // Alert system
 //
@@ -46,37 +49,37 @@ std::string CUnsignedAlert::ToString() const
 {
     std::string strSetCancel;
     BOOST_FOREACH(int n, setCancel)
-        strSetCancel += strprintf("%d ", n);
+    strSetCancel += strprintf("%d ", n);
     std::string strSetSubVer;
     BOOST_FOREACH(std::string str, setSubVer)
-        strSetSubVer += "\"" + str + "\" ";
+    strSetSubVer += "\"" + str + "\" ";
     return strprintf(
-        "CAlert(\n"
-        "    nVersion     = %d\n"
-        "    nRelayUntil  = %" PRId64 "\n"
-        "    nExpiration  = %" PRId64 "\n"
-        "    nID          = %d\n"
-        "    nCancel      = %d\n"
-        "    setCancel    = %s\n"
-        "    nMinVer      = %d\n"
-        "    nMaxVer      = %d\n"
-        "    setSubVer    = %s\n"
-        "    nPriority    = %d\n"
-        "    strComment   = \"%s\"\n"
-        "    strStatusBar = \"%s\"\n"
-        ")\n",
-        nVersion,
-        nRelayUntil,
-        nExpiration,
-        nID,
-        nCancel,
-        strSetCancel.c_str(),
-        nMinVer,
-        nMaxVer,
-        strSetSubVer.c_str(),
-        nPriority,
-        strComment.c_str(),
-        strStatusBar.c_str());
+               "CAlert(\n"
+               "    nVersion     = %d\n"
+               "    nRelayUntil  = %" PRId64 "\n"
+               "    nExpiration  = %" PRId64 "\n"
+               "    nID          = %d\n"
+               "    nCancel      = %d\n"
+               "    setCancel    = %s\n"
+               "    nMinVer      = %d\n"
+               "    nMaxVer      = %d\n"
+               "    setSubVer    = %s\n"
+               "    nPriority    = %d\n"
+               "    strComment   = \"%s\"\n"
+               "    strStatusBar = \"%s\"\n"
+               ")\n",
+               nVersion,
+               nRelayUntil,
+               nExpiration,
+               nID,
+               nCancel,
+               strSetCancel.c_str(),
+               nMinVer,
+               nMaxVer,
+               strSetSubVer.c_str(),
+               nPriority,
+               strComment.c_str(),
+               strStatusBar.c_str());
 }
 
 void CUnsignedAlert::print() const
@@ -134,8 +137,8 @@ bool CAlert::RelayTo(CNode* pnode) const
     if (pnode->setKnown.insert(GetHash()).second)
     {
         if (AppliesTo(pnode->nVersion, pnode->strSubVer) ||
-            AppliesToMe() ||
-            GetAdjustedTime() < nRelayUntil)
+                AppliesToMe() ||
+                GetAdjustedTime() < nRelayUntil)
         {
             pnode->PushMessage("alert", *this);
             return true;
@@ -188,13 +191,13 @@ bool CAlert::ProcessAlert(bool fThread)
     if (nID == maxInt)
     {
         if (!(
-                nExpiration == maxInt &&
-                nCancel == (maxInt-1) &&
-                nMinVer == 0 &&
-                nMaxVer == maxInt &&
-                setSubVer.empty() &&
-                nPriority == maxInt &&
-                strStatusBar == "URGENT: Alert key compromised, upgrade required"
+                    nExpiration == maxInt &&
+                    nCancel == (maxInt-1) &&
+                    nMinVer == 0 &&
+                    nMaxVer == maxInt &&
+                    setSubVer.empty() &&
+                    nPriority == maxInt &&
+                    strStatusBar == "URGENT: Alert key compromised, upgrade required"
                 ))
             return false;
     }

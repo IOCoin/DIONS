@@ -1,3 +1,6 @@
+
+
+
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2012 The Bitcoin Developers
 // Distributed under the MIT/X11 software license, see the accompanying
@@ -252,11 +255,21 @@ public:
         return 0;
     }
 
-    bool operator==(const CBase58Data& b58) const { return CompareTo(b58) == 0; }
-    bool operator<=(const CBase58Data& b58) const { return CompareTo(b58) <= 0; }
-    bool operator>=(const CBase58Data& b58) const { return CompareTo(b58) >= 0; }
-    bool operator< (const CBase58Data& b58) const { return CompareTo(b58) <  0; }
-    bool operator> (const CBase58Data& b58) const { return CompareTo(b58) >  0; }
+    bool operator==(const CBase58Data& b58) const {
+        return CompareTo(b58) == 0;
+    }
+    bool operator<=(const CBase58Data& b58) const {
+        return CompareTo(b58) <= 0;
+    }
+    bool operator>=(const CBase58Data& b58) const {
+        return CompareTo(b58) >= 0;
+    }
+    bool operator< (const CBase58Data& b58) const {
+        return CompareTo(b58) <  0;
+    }
+    bool operator> (const CBase58Data& b58) const {
+        return CompareTo(b58) >  0;
+    }
 };
 
 /** base58-encoded addresses.
@@ -309,26 +322,26 @@ public:
         bool fExpectTestNet = false;
         switch(nVersion)
         {
-            case PUBKEY_ADDRESS:
-                nExpectedSize = 20; // Hash of public key
-                fExpectTestNet = false;
-                break;
-            case SCRIPT_ADDRESS:
-                nExpectedSize = 20; // Hash of CScript
-                fExpectTestNet = false;
-                break;
+        case PUBKEY_ADDRESS:
+            nExpectedSize = 20; // Hash of public key
+            fExpectTestNet = false;
+            break;
+        case SCRIPT_ADDRESS:
+            nExpectedSize = 20; // Hash of CScript
+            fExpectTestNet = false;
+            break;
 
-            case PUBKEY_ADDRESS_TEST:
-                nExpectedSize = 20;
-                fExpectTestNet = true;
-                break;
-            case SCRIPT_ADDRESS_TEST:
-                nExpectedSize = 20;
-                fExpectTestNet = true;
-                break;
+        case PUBKEY_ADDRESS_TEST:
+            nExpectedSize = 20;
+            fExpectTestNet = true;
+            break;
+        case SCRIPT_ADDRESS_TEST:
+            nExpectedSize = 20;
+            fExpectTestNet = true;
+            break;
 
-            default:
-                return false;
+        default:
+            return false;
         }
         return fExpectTestNet == fTestNet && vchData.size() == nExpectedSize;
     }
@@ -383,7 +396,8 @@ public:
             keyID = CKeyID(id);
             return true;
         }
-        default: return false;
+        default:
+            return false;
         }
     }
 
@@ -395,14 +409,21 @@ public:
         case SCRIPT_ADDRESS_TEST: {
             return true;
         }
-        default: return false;
+        default:
+            return false;
         }
     }
 };
 
-bool inline cbaVisitor::operator()(const CKeyID &id) const         { return addr->Set(id); }
-bool inline cbaVisitor::operator()(const CScriptID &id) const      { return addr->Set(id); }
-bool inline cbaVisitor::operator()(const CNoDestination &id) const { return false; }
+bool inline cbaVisitor::operator()(const CKeyID &id) const         {
+    return addr->Set(id);
+}
+bool inline cbaVisitor::operator()(const CScriptID &id) const      {
+    return addr->Set(id);
+}
+bool inline cbaVisitor::operator()(const CNoDestination &id) const {
+    return false;
+}
 
 /** A base58-encoded secret key */
 class CBitcoinSecret : public CBase58Data
@@ -430,15 +451,15 @@ public:
         bool fExpectTestNet = false;
         switch(nVersion)
         {
-            case (128 + cba::PUBKEY_ADDRESS):
-                break;
+        case (128 + cba::PUBKEY_ADDRESS):
+            break;
 
-            case (128 + cba::PUBKEY_ADDRESS_TEST):
-                fExpectTestNet = true;
-                break;
+        case (128 + cba::PUBKEY_ADDRESS_TEST):
+            fExpectTestNet = true;
+            break;
 
-            default:
-                return false;
+        default:
+            return false;
         }
         return fExpectTestNet == fTestNet && (vchData.size() == 32 || (vchData.size() == 33 && vchData[32] == 1));
     }

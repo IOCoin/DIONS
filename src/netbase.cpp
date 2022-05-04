@@ -1,3 +1,6 @@
+
+
+
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2012 The Bitcoin developers
 // Distributed under the MIT/X11 software license, see the accompanying
@@ -230,7 +233,8 @@ bool static Socks5(string strDest, int port, SOCKET& hSocket)
         return error("Proxy failed to initialize");
     }
     string strSocks5("\5\1");
-    strSocks5 += '\000'; strSocks5 += '\003';
+    strSocks5 += '\000';
+    strSocks5 += '\003';
     strSocks5 += static_cast<char>(std::min((int)strDest.size(), 255));
     strSocks5 += strDest;
     strSocks5 += static_cast<char>((port >> 8) & 0xFF);
@@ -257,15 +261,24 @@ bool static Socks5(string strDest, int port, SOCKET& hSocket)
         closesocket(hSocket);
         switch (pchRet2[1])
         {
-            case 0x01: return error("Proxy error: general failure");
-            case 0x02: return error("Proxy error: connection not allowed");
-            case 0x03: return error("Proxy error: network unreachable");
-            case 0x04: return error("Proxy error: host unreachable");
-            case 0x05: return error("Proxy error: connection refused");
-            case 0x06: return error("Proxy error: TTL expired");
-            case 0x07: return error("Proxy error: protocol error");
-            case 0x08: return error("Proxy error: address type not supported");
-            default:   return error("Proxy error: unknown");
+        case 0x01:
+            return error("Proxy error: general failure");
+        case 0x02:
+            return error("Proxy error: connection not allowed");
+        case 0x03:
+            return error("Proxy error: network unreachable");
+        case 0x04:
+            return error("Proxy error: host unreachable");
+        case 0x05:
+            return error("Proxy error: connection refused");
+        case 0x06:
+            return error("Proxy error: TTL expired");
+        case 0x07:
+            return error("Proxy error: protocol error");
+        case 0x08:
+            return error("Proxy error: address type not supported");
+        default:
+            return error("Proxy error: unknown");
         }
     }
     if (pchRet2[2] != 0x00)
@@ -276,20 +289,26 @@ bool static Socks5(string strDest, int port, SOCKET& hSocket)
     char pchRet3[256];
     switch (pchRet2[3])
     {
-        case 0x01: ret = recv(hSocket, pchRet3, 4, 0) != 4; break;
-        case 0x04: ret = recv(hSocket, pchRet3, 16, 0) != 16; break;
-        case 0x03:
-        {
-            ret = recv(hSocket, pchRet3, 1, 0) != 1;
-            if (ret) {
-                closesocket(hSocket);
-                return error("Error reading from proxy");
-            }
-            int nRecv = pchRet3[0];
-            ret = recv(hSocket, pchRet3, nRecv, 0) != nRecv;
-            break;
+    case 0x01:
+        ret = recv(hSocket, pchRet3, 4, 0) != 4;
+        break;
+    case 0x04:
+        ret = recv(hSocket, pchRet3, 16, 0) != 16;
+        break;
+    case 0x03:
+    {
+        ret = recv(hSocket, pchRet3, 1, 0) != 1;
+        if (ret) {
+            closesocket(hSocket);
+            return error("Error reading from proxy");
         }
-        default: closesocket(hSocket); return error("Error: malformed proxy response");
+        int nRecv = pchRet3[0];
+        ret = recv(hSocket, pchRet3, nRecv, 0) != nRecv;
+        break;
+    }
+    default:
+        closesocket(hSocket);
+        return error("Error: malformed proxy response");
     }
     if (ret)
     {
@@ -519,14 +538,14 @@ bool ConnectSocketByName(CService &addr, SOCKET& hSocketRet, const char *pszDest
         return false;
 
     switch(nameproxy.second) {
-        default:
-        case 4:
-            closesocket(hSocket);
+    default:
+    case 4:
+        closesocket(hSocket);
+        return false;
+    case 5:
+        if (!Socks5(strDest, port, hSocket))
             return false;
-        case 5:
-            if (!Socks5(strDest, port, hSocket))
-                return false;
-            break;
+        break;
     }
 
     hSocketRet = hSocket;
@@ -619,9 +638,9 @@ bool CNetAddr::IsIPv6() const
 bool CNetAddr::IsRFC1918() const
 {
     return IsIPv4() && (
-        GetByte(3) == 10 ||
-        (GetByte(3) == 192 && GetByte(2) == 168) ||
-        (GetByte(3) == 172 && (GetByte(2) >= 16 && GetByte(2) <= 31)));
+               GetByte(3) == 10 ||
+               (GetByte(3) == 192 && GetByte(2) == 168) ||
+               (GetByte(3) == 172 && (GetByte(2) >= 16 && GetByte(2) <= 31)));
 }
 
 bool CNetAddr::IsRFC3927() const
@@ -685,21 +704,21 @@ bool CNetAddr::IsI2P() const
 bool CNetAddr::IsLocal() const
 {
     // IPv4 loopback
-   if (IsIPv4() && (GetByte(3) == 127 || GetByte(3) == 0))
-       return true;
+    if (IsIPv4() && (GetByte(3) == 127 || GetByte(3) == 0))
+        return true;
 
-   // IPv6 loopback (::1/128)
-   static const unsigned char pchLocal[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1};
-   if (memcmp(ip, pchLocal, 16) == 0)
-       return true;
+    // IPv6 loopback (::1/128)
+    static const unsigned char pchLocal[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1};
+    if (memcmp(ip, pchLocal, 16) == 0)
+        return true;
 
-   return false;
+    return false;
 }
 
 bool CNetAddr::IsMulticast() const
 {
     return    (IsIPv4() && (GetByte(3) & 0xF0) == 0xE0)
-           || (GetByte(15) == 0xFF);
+              || (GetByte(15) == 0xFF);
 }
 
 bool CNetAddr::IsValid() const
@@ -942,44 +961,65 @@ int CNetAddr::GetReachabilityFrom(const CNetAddr *paddrPartner) const
     switch(theirNet) {
     case NET_IPV4:
         switch(ourNet) {
-        default:       return REACH_DEFAULT;
-        case NET_IPV4: return REACH_IPV4;
+        default:
+            return REACH_DEFAULT;
+        case NET_IPV4:
+            return REACH_IPV4;
         }
     case NET_IPV6:
         switch(ourNet) {
-        default:         return REACH_DEFAULT;
-        case NET_TEREDO: return REACH_TEREDO;
-        case NET_IPV4:   return REACH_IPV4;
-        case NET_IPV6:   return fTunnel ? REACH_IPV6_WEAK : REACH_IPV6_STRONG; // only prefer giving our IPv6 address if it's not tunnelled
+        default:
+            return REACH_DEFAULT;
+        case NET_TEREDO:
+            return REACH_TEREDO;
+        case NET_IPV4:
+            return REACH_IPV4;
+        case NET_IPV6:
+            return fTunnel ? REACH_IPV6_WEAK : REACH_IPV6_STRONG; // only prefer giving our IPv6 address if it's not tunnelled
         }
     case NET_TOR:
         switch(ourNet) {
-        default:         return REACH_DEFAULT;
-        case NET_IPV4:   return REACH_IPV4; // Tor users can connect to IPv4 as well
-        case NET_TOR:    return REACH_PRIVATE;
+        default:
+            return REACH_DEFAULT;
+        case NET_IPV4:
+            return REACH_IPV4; // Tor users can connect to IPv4 as well
+        case NET_TOR:
+            return REACH_PRIVATE;
         }
     case NET_I2P:
         switch(ourNet) {
-        default:         return REACH_DEFAULT;
-        case NET_I2P:    return REACH_PRIVATE;
+        default:
+            return REACH_DEFAULT;
+        case NET_I2P:
+            return REACH_PRIVATE;
         }
     case NET_TEREDO:
         switch(ourNet) {
-        default:          return REACH_DEFAULT;
-        case NET_TEREDO:  return REACH_TEREDO;
-        case NET_IPV6:    return REACH_IPV6_WEAK;
-        case NET_IPV4:    return REACH_IPV4;
+        default:
+            return REACH_DEFAULT;
+        case NET_TEREDO:
+            return REACH_TEREDO;
+        case NET_IPV6:
+            return REACH_IPV6_WEAK;
+        case NET_IPV4:
+            return REACH_IPV4;
         }
     case NET_UNKNOWN:
     case NET_UNROUTABLE:
     default:
         switch(ourNet) {
-        default:          return REACH_DEFAULT;
-        case NET_TEREDO:  return REACH_TEREDO;
-        case NET_IPV6:    return REACH_IPV6_WEAK;
-        case NET_IPV4:    return REACH_IPV4;
-        case NET_I2P:     return REACH_PRIVATE; // assume connections from unroutable addresses are
-        case NET_TOR:     return REACH_PRIVATE; // either from Tor/I2P, or don't care about our address
+        default:
+            return REACH_DEFAULT;
+        case NET_TEREDO:
+            return REACH_TEREDO;
+        case NET_IPV6:
+            return REACH_IPV6_WEAK;
+        case NET_IPV4:
+            return REACH_IPV4;
+        case NET_I2P:
+            return REACH_PRIVATE; // assume connections from unroutable addresses are
+        case NET_TOR:
+            return REACH_PRIVATE; // either from Tor/I2P, or don't care about our address
         }
     }
 }
@@ -1013,7 +1053,7 @@ CService::CService(const struct sockaddr_in& addr) : CNetAddr(addr.sin_addr), po
 
 CService::CService(const struct sockaddr_in6 &addr) : CNetAddr(addr.sin6_addr), port(ntohs(addr.sin6_port))
 {
-   assert(addr.sin6_family == AF_INET6);
+    assert(addr.sin6_family == AF_INET6);
 }
 
 bool CService::SetSockAddr(const struct sockaddr *paddr)
@@ -1113,12 +1153,12 @@ bool CService::GetSockAddr(struct sockaddr* paddr, socklen_t *addrlen) const
 
 std::vector<unsigned char> CService::GetKey() const
 {
-     std::vector<unsigned char> vKey;
-     vKey.resize(18);
-     memcpy(&vKey[0], ip, 16);
-     vKey[16] = port / 0x100;
-     vKey[17] = port & 0x0FF;
-     return vKey;
+    std::vector<unsigned char> vKey;
+    vKey.resize(18);
+    memcpy(&vKey[0], ip, 16);
+    vKey[16] = port / 0x100;
+    vKey[17] = port & 0x0FF;
+    return vKey;
 }
 
 std::string CService::ToStringPort() const

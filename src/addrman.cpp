@@ -1,3 +1,6 @@
+
+
+
 // Copyright (c) 2012 Pieter Wuille
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
@@ -138,8 +141,8 @@ int CAddrMan::SelectTried(int nKBucket)
         vTried[i] = nTemp;
         assert(nOldest == -1 || mapInfo.count(nTemp) == 1);
         if (nOldest == -1 || mapInfo[nTemp].nLastSuccess < mapInfo[nOldest].nLastSuccess) {
-           nOldest = nTemp;
-           nOldestPos = nPos;
+            nOldest = nTemp;
+            nOldestPos = nPos;
         }
     }
 

@@ -1,3 +1,6 @@
+
+
+
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2012 The Bitcoin developers
 // Distributed under the MIT/X11 software license, see the accompanying
@@ -150,11 +153,11 @@ bool AppInit(int argc, char* argv[])
         {
             // First part of help message is specific to bitcoind / RPC client
             std::string strUsage = _("I/OCoin version") + " " + FormatFullVersion() + "\n\n" +
-                _("Usage:") + "\n" +
-                  "  iocoind [options]                     " + "\n" +
-                  "  iocoind [options] <command> [params]  " + _("Send command to -server or iocoind") + "\n" +
-                  "  iocoind [options] help                " + _("List commands") + "\n" +
-                  "  iocoind [options] help <command>      " + _("Get help for a command") + "\n";
+                                   _("Usage:") + "\n" +
+                                   "  iocoind [options]                     " + "\n" +
+                                   "  iocoind [options] <command> [params]  " + _("Send command to -server or iocoind") + "\n" +
+                                   "  iocoind [options] help                " + _("List commands") + "\n" +
+                                   "  iocoind [options] help <command>      " + _("Get help for a command") + "\n";
 
             strUsage += "\n" + HelpMessage();
 
@@ -231,84 +234,84 @@ bool static Bind(const CService &addr, bool fError = true) {
 std::string HelpMessage()
 {
     string strUsage = _("Options:") + "\n" +
-        "  -?                     " + _("This help message") + "\n" +
-        "  -conf=<file>           " + _("Specify configuration file (default: iocoin.conf)") + "\n" +
-        "  -pid=<file>            " + _("Specify pid file (default: iocoind.pid)") + "\n" +
-        "  -datadir=<dir>         " + _("Specify data directory") + "\n" +
-        "  -wallet=<dir>          " + _("Specify wallet file (within data directory)") + "\n" +
-        "  -dbcache=<n>           " + _("Set database cache size in megabytes (default: 25)") + "\n" +
-        "  -dblogsize=<n>         " + _("Set database disk log size in megabytes (default: 100)") + "\n" +
-        "  -timeout=<n>           " + _("Specify connection timeout in milliseconds (default: 5000)") + "\n" +
-        "  -proxy=<ip:port>       " + _("Connect through socks proxy") + "\n" +
-        "  -socks=<n>             " + _("Select the version of socks proxy to use (4-5, default: 5)") + "\n" +
-        "  -tor=<ip:port>         " + _("Use proxy to reach tor hidden services (default: same as -proxy)") + "\n"
-        "  -dns                   " + _("Allow DNS lookups for -addnode, -seednode and -connect") + "\n" +
-        "  -port=<port>           " + _("Listen for connections on <port> (default: 33764 or testnet: 1901)") + "\n" +
-        "  -maxconnections=<n>    " + _("Maintain at most <n> connections to peers (default: 125)") + "\n" +
-        "  -addnode=<ip>          " + _("Add a node to connect to and attempt to keep the connection open") + "\n" +
-        "  -connect=<ip>          " + _("Connect only to the specified node(s)") + "\n" +
-        "  -seednode=<ip>         " + _("Connect to a node to retrieve peer addresses, and disconnect") + "\n" +
-        "  -externalip=<ip>       " + _("Specify your own public address") + "\n" +
-        "  -onlynet=<net>         " + _("Only connect to nodes in network <net> (IPv4, IPv6 or Tor)") + "\n" +
-        "  -discover              " + _("Discover own IP address (default: 1 when listening and no -externalip)") + "\n" +
-        "  -irc                   " + _("Find peers using internet relay chat (default: 0)") + "\n" +
-        "  -listen                " + _("Accept connections from outside (default: 1 if no -proxy or -connect)") + "\n" +
-        "  -bind=<addr>           " + _("Bind to given address. Use [host]:port notation for IPv6") + "\n" +
-        "  -dnsseed               " + _("Find peers using DNS lookup (default: 1)") + "\n" +
-        "  -synctime              " + _("Sync time with other nodes. Disable if time on your system is precise e.g. syncing with NTP (default: 1)") + "\n" +
-        "  -cppolicy              " + _("Sync checkpoints policy (default: strict)") + "\n" +
-        "  -banscore=<n>          " + _("Threshold for disconnecting misbehaving peers (default: 100)") + "\n" +
-        "  -bantime=<n>           " + _("Number of seconds to keep misbehaving peers from reconnecting (default: 86400)") + "\n" +
-        "  -maxreceivebuffer=<n>  " + _("Maximum per-connection receive buffer, <n>*1000 bytes (default: 5000)") + "\n" +
-        "  -maxsendbuffer=<n>     " + _("Maximum per-connection send buffer, <n>*1000 bytes (default: 1000)") + "\n" +
-        "  -paytxfee=<amt>        " + _("Fee per KB to add to transactions you send") + "\n" +
-        "  -mininput=<amt>        " + _("When creating transactions, ignore inputs with value less than this (default: 0.01)") + "\n" +
+                      "  -?                     " + _("This help message") + "\n" +
+                      "  -conf=<file>           " + _("Specify configuration file (default: iocoin.conf)") + "\n" +
+                      "  -pid=<file>            " + _("Specify pid file (default: iocoind.pid)") + "\n" +
+                      "  -datadir=<dir>         " + _("Specify data directory") + "\n" +
+                      "  -wallet=<dir>          " + _("Specify wallet file (within data directory)") + "\n" +
+                      "  -dbcache=<n>           " + _("Set database cache size in megabytes (default: 25)") + "\n" +
+                      "  -dblogsize=<n>         " + _("Set database disk log size in megabytes (default: 100)") + "\n" +
+                      "  -timeout=<n>           " + _("Specify connection timeout in milliseconds (default: 5000)") + "\n" +
+                      "  -proxy=<ip:port>       " + _("Connect through socks proxy") + "\n" +
+                      "  -socks=<n>             " + _("Select the version of socks proxy to use (4-5, default: 5)") + "\n" +
+                      "  -tor=<ip:port>         " + _("Use proxy to reach tor hidden services (default: same as -proxy)") + "\n"
+                      "  -dns                   " + _("Allow DNS lookups for -addnode, -seednode and -connect") + "\n" +
+                      "  -port=<port>           " + _("Listen for connections on <port> (default: 33764 or testnet: 43764)") + "\n" +
+                      "  -maxconnections=<n>    " + _("Maintain at most <n> connections to peers (default: 125)") + "\n" +
+                      "  -addnode=<ip>          " + _("Add a node to connect to and attempt to keep the connection open") + "\n" +
+                      "  -connect=<ip>          " + _("Connect only to the specified node(s)") + "\n" +
+                      "  -seednode=<ip>         " + _("Connect to a node to retrieve peer addresses, and disconnect") + "\n" +
+                      "  -externalip=<ip>       " + _("Specify your own public address") + "\n" +
+                      "  -onlynet=<net>         " + _("Only connect to nodes in network <net> (IPv4, IPv6 or Tor)") + "\n" +
+                      "  -discover              " + _("Discover own IP address (default: 1 when listening and no -externalip)") + "\n" +
+                      "  -irc                   " + _("Find peers using internet relay chat (default: 0)") + "\n" +
+                      "  -listen                " + _("Accept connections from outside (default: 1 if no -proxy or -connect)") + "\n" +
+                      "  -bind=<addr>           " + _("Bind to given address. Use [host]:port notation for IPv6") + "\n" +
+                      "  -dnsseed               " + _("Find peers using DNS lookup (default: 1)") + "\n" +
+                      "  -synctime              " + _("Sync time with other nodes. Disable if time on your system is precise e.g. syncing with NTP (default: 1)") + "\n" +
+                      "  -cppolicy              " + _("Sync checkpoints policy (default: strict)") + "\n" +
+                      "  -banscore=<n>          " + _("Threshold for disconnecting misbehaving peers (default: 100)") + "\n" +
+                      "  -bantime=<n>           " + _("Number of seconds to keep misbehaving peers from reconnecting (default: 86400)") + "\n" +
+                      "  -maxreceivebuffer=<n>  " + _("Maximum per-connection receive buffer, <n>*1000 bytes (default: 5000)") + "\n" +
+                      "  -maxsendbuffer=<n>     " + _("Maximum per-connection send buffer, <n>*1000 bytes (default: 1000)") + "\n" +
+                      "  -paytxfee=<amt>        " + _("Fee per KB to add to transactions you send") + "\n" +
+                      "  -mininput=<amt>        " + _("When creating transactions, ignore inputs with value less than this (default: 0.01)") + "\n" +
 #ifdef QT_GUI
-        "  -server                " + _("Accept command line and JSON-RPC commands") + "\n" +
+                      "  -server                " + _("Accept command line and JSON-RPC commands") + "\n" +
 #endif
 #if !defined(WIN32) && !defined(QT_GUI)
-        "  -daemon                " + _("Run in the background as a daemon and accept commands") + "\n" +
+                      "  -daemon                " + _("Run in the background as a daemon and accept commands") + "\n" +
 #endif
-        "  -testnet               " + _("Use the test network") + "\n" +
-        "  -viewwallet               " + _("view wallet only") + "\n" +
-        "  -debug                 " + _("Output extra debugging information. Implies all other -debug* options") + "\n" +
-        "  -debugnet              " + _("Output extra network debugging information") + "\n" +
-        "  -logtimestamps         " + _("Prepend debug output with timestamp") + "\n" +
-        "  -shrinkdebugfile       " + _("Shrink debug.log file on client startup (default: 1 when no -debug)") + "\n" +
-        "  -printtoconsole        " + _("Send trace/debug info to console instead of debug.log file") + "\n" +
+                      "  -testnet               " + _("Use the test network") + "\n" +
+                      "  -viewwallet               " + _("view wallet only") + "\n" +
+                      "  -debug                 " + _("Output extra debugging information. Implies all other -debug* options") + "\n" +
+                      "  -debugnet              " + _("Output extra network debugging information") + "\n" +
+                      "  -logtimestamps         " + _("Prepend debug output with timestamp") + "\n" +
+                      "  -shrinkdebugfile       " + _("Shrink debug.log file on client startup (default: 1 when no -debug)") + "\n" +
+                      "  -printtoconsole        " + _("Send trace/debug info to console instead of debug.log file") + "\n" +
 #ifdef WIN32
-        "  -printtodebugger       " + _("Send trace/debug info to debugger") + "\n" +
+                      "  -printtodebugger       " + _("Send trace/debug info to debugger") + "\n" +
 #endif
-        "  -rpcuser=<user>        " + _("Username for JSON-RPC connections") + "\n" +
-        "  -rpcpassword=<pw>      " + _("Password for JSON-RPC connections") + "\n" +
-        "  -rpcport=<port>        " + _("Listen for JSON-RPC connections on <port> (default: 33765 or testnet: 43765)") + "\n" +
-        "  -rpcallowip=<ip>       " + _("Allow JSON-RPC connections from specified IP address") + "\n" +
-        "  -rpcconnect=<ip>       " + _("Send commands to node running on <ip> (default: 127.0.0.1)") + "\n" +
-        "  -blocknotify=<cmd>     " + _("Execute command when the best block changes (%s in cmd is replaced by block hash)") + "\n" +
-        "  -walletnotify=<cmd>    " + _("Execute command when a wallet transaction changes (%s in cmd is replaced by TxID)") + "\n" +
-         "  -zapwallettxes=<mode>" +  _("Delete all wallet transactions and only recover those parts of the blockchain through -rescan on startup") +
-        "  -confchange            " + _("Require a confirmations for change (default: 0)") + "\n" +
-        "  -enforcecanonical      " + _("Enforce transaction scripts to use canonical PUSH operators (default: 1)") + "\n" +
-        "  -alertnotify=<cmd>     " + _("Execute command when a relevant alert is received (%s in cmd is replaced by message)") + "\n" +
-        "  -upgradewallet         " + _("Upgrade wallet to latest format") + "\n" +
-        "  -keypool=<n>           " + _("Set key pool size to <n> (default: 100)") + "\n" +
-        "  -rescan                " + _("Rescan the block chain for missing wallet transactions") + "\n" +
-        "  -xscan                " + _("Rescan the block chain for aliases") + "\n" +
-        "  -salvagewallet         " + _("Attempt to recover private keys from a corrupt wallet.dat") + "\n" +
-        "  -checkblocks=<n>       " + _("How many blocks to check at startup (default: 2500, 0 = all)") + "\n" +
-        "  -checklevel=<n>        " + _("How thorough the block verification is (0-6, default: 1)") + "\n" +
-        "  -loadblock=<file>      " + _("Imports blocks from external blk000?.dat file") + "\n" +
+                      "  -rpcuser=<user>        " + _("Username for JSON-RPC connections") + "\n" +
+                      "  -rpcpassword=<pw>      " + _("Password for JSON-RPC connections") + "\n" +
+                      "  -rpcport=<port>        " + _("Listen for JSON-RPC connections on <port> (default: 33765 or testnet: 43765)") + "\n" +
+                      "  -rpcallowip=<ip>       " + _("Allow JSON-RPC connections from specified IP address") + "\n" +
+                      "  -rpcconnect=<ip>       " + _("Send commands to node running on <ip> (default: 127.0.0.1)") + "\n" +
+                      "  -blocknotify=<cmd>     " + _("Execute command when the best block changes (%s in cmd is replaced by block hash)") + "\n" +
+                      "  -walletnotify=<cmd>    " + _("Execute command when a wallet transaction changes (%s in cmd is replaced by TxID)") + "\n" +
+                      "  -zapwallettxes=<mode>" +  _("Delete all wallet transactions and only recover those parts of the blockchain through -rescan on startup") +
+                      "  -confchange            " + _("Require a confirmations for change (default: 0)") + "\n" +
+                      "  -enforcecanonical      " + _("Enforce transaction scripts to use canonical PUSH operators (default: 1)") + "\n" +
+                      "  -alertnotify=<cmd>     " + _("Execute command when a relevant alert is received (%s in cmd is replaced by message)") + "\n" +
+                      "  -upgradewallet         " + _("Upgrade wallet to latest format") + "\n" +
+                      "  -keypool=<n>           " + _("Set key pool size to <n> (default: 100)") + "\n" +
+                      "  -rescan                " + _("Rescan the block chain for missing wallet transactions") + "\n" +
+                      "  -xscan                " + _("Rescan the block chain for aliases") + "\n" +
+                      "  -salvagewallet         " + _("Attempt to recover private keys from a corrupt wallet.dat") + "\n" +
+                      "  -checkblocks=<n>       " + _("How many blocks to check at startup (default: 2500, 0 = all)") + "\n" +
+                      "  -checklevel=<n>        " + _("How thorough the block verification is (0-6, default: 1)") + "\n" +
+                      "  -loadblock=<file>      " + _("Imports blocks from external blk000?.dat file") + "\n" +
 
-        "\n" + _("Block creation options:") + "\n" +
-        "  -blockminsize=<n>      "   + _("Set minimum block size in bytes (default: 0)") + "\n" +
-        "  -blockmaxsize=<n>      "   + _("Set maximum block size in bytes (default: 250000)") + "\n" +
-        "  -blockprioritysize=<n> "   + _("Set maximum size of high-priority/low-fee transactions in bytes (default: 27000)") + "\n" +
+                      "\n" + _("Block creation options:") + "\n" +
+                      "  -blockminsize=<n>      "   + _("Set minimum block size in bytes (default: 0)") + "\n" +
+                      "  -blockmaxsize=<n>      "   + _("Set maximum block size in bytes (default: 250000)") + "\n" +
+                      "  -blockprioritysize=<n> "   + _("Set maximum size of high-priority/low-fee transactions in bytes (default: 27000)") + "\n" +
 
-        "\n" + _("SSL options: (see the Bitcoin Wiki for SSL setup instructions)") + "\n" +
-        "  -rpcssl                                  " + _("Use OpenSSL (https) for JSON-RPC connections") + "\n" +
-        "  -rpcsslcertificatechainfile=<file.cert>  " + _("Server certificate file (default: server.cert)") + "\n" +
-        "  -rpcsslprivatekeyfile=<file.pem>         " + _("Server private key (default: server.pem)") + "\n" +
-        "  -rpcsslciphers=<ciphers>                 " + _("Acceptable ciphers (default: TLSv1+HIGH:!SSLv2:!aNULL:!eNULL:!AH:!3DES:@STRENGTH)") + "\n";
+                      "\n" + _("SSL options: (see the Bitcoin Wiki for SSL setup instructions)") + "\n" +
+                      "  -rpcssl                                  " + _("Use OpenSSL (https) for JSON-RPC connections") + "\n" +
+                      "  -rpcsslcertificatechainfile=<file.cert>  " + _("Server certificate file (default: server.cert)") + "\n" +
+                      "  -rpcsslprivatekeyfile=<file.pem>         " + _("Server private key (default: server.pem)") + "\n" +
+                      "  -rpcsslciphers=<ciphers>                 " + _("Acceptable ciphers (default: TLSv1+HIGH:!SSLv2:!aNULL:!eNULL:!AH:!3DES:@STRENGTH)") + "\n";
 
     return strUsage;
 }
@@ -408,13 +411,13 @@ bool AppInit2()
     fViewWallet = GetBoolArg("-viewwallet");
     if(fViewWallet)
     {
-      if(filesystem::exists(GetDataDir() / "wallet.dat"))
-        return InitError(_("Initialization error. Configured as view wallet but wallet.dat file exists in configuration directory. I/O Coin shutting down."));
+        if(filesystem::exists(GetDataDir() / "wallet.dat"))
+            return InitError(_("Initialization error. Configured as view wallet but wallet.dat file exists in configuration directory. I/O Coin shutting down."));
     }
     else
     {
-      if(filesystem::exists(GetDataDir() / "view.dat"))
-        return InitError(_("Initialization error. Configured as default wallet but view.dat file exists in configuration directory. I/O Coin shutting down."));
+        if(filesystem::exists(GetDataDir() / "view.dat"))
+            return InitError(_("Initialization error. Configured as default wallet but view.dat file exists in configuration directory. I/O Coin shutting down."));
     }
 
     if (mapArgs.count("-bind")) {
@@ -448,12 +451,12 @@ bool AppInit2()
         // Rewrite just private keys: rescan to find transactions
         SoftSetBoolArg("-rescan", true);
     }
-    
-     // -zapwallettx implies a rescan
-     if (GetBoolArg("-zapwallettxes", false)) {
-       if (SoftSetBoolArg("-rescan", true))
-       printf("AppInit2 : parameter interaction: -zapwallettxes=1 -> setting -rescan=1\n");
-     }
+
+    // -zapwallettx implies a rescan
+    if (GetBoolArg("-zapwallettxes", false)) {
+        if (SoftSetBoolArg("-rescan", true))
+            printf("AppInit2 : parameter interaction: -zapwallettxes=1 -> setting -rescan=1\n");
+    }
 
     // ********************************************************* Step 3: parameter-to-internal-flags
 
@@ -706,7 +709,7 @@ bool AppInit2()
     }
 
     BOOST_FOREACH(string strDest, mapMultiArgs["-seednode"])
-        AddOneShot(strDest);
+    AddOneShot(strDest);
 
     // ********************************************************* Step 7: load blockchain
 
@@ -730,7 +733,7 @@ bool AppInit2()
     printf("Loading block index...\n");
     nStart = GetTimeMillis();
     if (!LoadBlockIndex())
-      return InitError(_("Error loading blkindex.dat"));
+        return InitError(_("Error loading blkindex.dat"));
 
 
     // as LoadBlockIndex can take several minutes, it's possible the user
@@ -774,21 +777,21 @@ bool AppInit2()
 
     // ********************************************************* Step 8: load wallet
 
-      if (GetBoolArg("-zapwallettxes", false)) 
-      {
+    if (GetBoolArg("-zapwallettxes", false))
+    {
         printf("Zapping all transactions from wallet...");
 
         pwalletMain = new __wx__("wallet.dat");
         DBErrors nZapWalletRet = pwalletMain->ZapWalletTx();
-        if (nZapWalletRet != DB_LOAD_OK) 
+        if (nZapWalletRet != DB_LOAD_OK)
         {
-          printf("Error loading wallet.dat: Wallet corrupted");
-          return false;
+            printf("Error loading wallet.dat: Wallet corrupted");
+            return false;
         }
 
         delete pwalletMain;
         pwalletMain = NULL;
-      }
+    }
 
     uiInterface.InitMessage(_("Loading wallet..."));
     printf("Loading wallet...\n");
@@ -831,8 +834,8 @@ bool AppInit2()
 
             for(std::map<CKeyID, int64_t>::const_iterator it = mk.begin(); it != mk.end(); it++)
             {
-              CKeyID ck = it->first;
-              pwalletMain->kd[ck].nVersion = CKeyMetadata::CURRENT_VERSION;
+                CKeyID ck = it->first;
+                pwalletMain->kd[ck].nVersion = CKeyMetadata::CURRENT_VERSION;
             }
         }
         else
@@ -862,13 +865,13 @@ bool AppInit2()
 
     if(GetBoolArg("-xscan"))
     {
-      filesystem::path dc = GetDataDir() / "aliascache.dat";
-      FILE *file = fopen(dc.string().c_str(), "rb");
-      if (file) 
-      {
-        filesystem::path dc__ = GetDataDir() / "aliascache.dat.old";
-        RenameOver(dc, dc__);
-      }
+        filesystem::path dc = GetDataDir() / "aliascache.dat";
+        FILE *file = fopen(dc.string().c_str(), "rb");
+        if (file)
+        {
+            filesystem::path dc__ = GetDataDir() / "aliascache.dat.old";
+            RenameOver(dc, dc__);
+        }
     }
 
     ln1Db = new LocatorNodeDB("cr+");
@@ -889,15 +892,15 @@ bool AppInit2()
         uiInterface.InitMessage(_("Rescanning..."));
         if(GetBoolArg("-rescan"))
         {
-          printf("Rescanning last %i blocks (from block %i)...\n", pindexBest->nHeight - pindexRescan->nHeight, pindexRescan->nHeight);
-          nStart = GetTimeMillis();
-          pwalletMain->ScanForWalletTransactions(pindexRescan, true);
-          printf(" rescan      %15" PRId64 "ms\n", GetTimeMillis() - nStart);
+            printf("Rescanning last %i blocks (from block %i)...\n", pindexBest->nHeight - pindexRescan->nHeight, pindexRescan->nHeight);
+            nStart = GetTimeMillis();
+            pwalletMain->ScanForWalletTransactions(pindexRescan, true);
+            printf(" rescan      %15" PRId64 "ms\n", GetTimeMillis() - nStart);
         }
 
         if(GetBoolArg("-xscan") || GetBoolArg("-upgradewallet"))
         {
-          xsc(pindexGenesisBlock);
+            xsc(pindexGenesisBlock);
         }
     }
 
@@ -971,7 +974,7 @@ bool AppInit2()
     if (!strErrors.str().empty())
         return InitError(strErrors.str());
 
-     // Add wallet transactions that aren't already in a block to mapTransactions
+    // Add wallet transactions that aren't already in a block to mapTransactions
     pwalletMain->ReacceptWalletTransactions();
 
 #if !defined(QT_GUI)

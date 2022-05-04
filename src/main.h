@@ -1,3 +1,6 @@
+
+
+
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2012 The Bitcoin developers
 // Distributed under the MIT/X11 software license, see the accompanying
@@ -58,9 +61,11 @@ static const int64_t MIN_TX_FEE = 10000;
 /** Fees smaller than this (in satoshi) are considered zero fee (for relaying) */
 static const int64_t MIN_RELAY_TX_FEE = MIN_TX_FEE;
 static const int64_t S_MIN_TX_FEE = 100000;
-/** (in satoshi) no additional restriction */
-static const int64_t MAX_MONEY = std::numeric_limits<int64_t>::max();
-inline bool MoneyRange(int64_t nValue) { return (nValue >= 0 && nValue <= MAX_MONEY); }
+/** No amount larger than this (in satoshi) is valid */
+static const int64_t MAX_MONEY = 22000000 * COIN;
+inline bool MoneyRange(int64_t nValue) {
+    return (nValue >= 0 && nValue <= MAX_MONEY);
+}
 /** Threshold for nLockTime: below this value it is interpreted as block number, otherwise as UNIX timestamp. */
 static const unsigned int LOCKTIME_THRESHOLD = 500000000; // Tue Nov  5 00:53:20 1985 UTC
 static const unsigned int MAX_TX_INFO_LEN = 140; // Like Twitter
@@ -73,18 +78,32 @@ static const uint256 hashGenesisBlockTestNet("5f97300cd3dc3d2215dd38ce6d99bf7d59
 static const uint256 hashGenesisMerkleRoot("0xcd5029ac01fb6cd7da8ff00ff1e82f3aca6bf3ecce5fb60623ee807fa83d1795");
 
 const int SHADE_FEATURE_UPDATE = 75 * 500 + 1860837;
- const int BASELINE_LOCK = 0x00ff0;      
+const int BASELINE_LOCK = 0x00ff0;
 const int BLOCK_REWARD_HALVING = 0x2dc6c0;
-        
-inline bool IsProtocolV2(int nHeight) { return nHeight > 65000; }
-inline bool V3(int nHeight) { return fTestNet ? nHeight >= 0x0a : nHeight >= 1625000; }
-inline bool V4(int nHeight) { return fTestNet ? nHeight >= 0x10 : nHeight >= SHADE_FEATURE_UPDATE; }
-inline bool V5(int nHeight) { return fTestNet ? nHeight >= 0x20 : nHeight >= BLOCK_REWARD_HALVING; }
 
-inline int64_t PastDrift(int64_t nTime, int nHeight)   { return IsProtocolV2(nHeight) ? nTime      : nTime - 10 * 60; }
-inline int64_t FutureDrift(int64_t nTime, int nHeight) { return IsProtocolV2(nHeight) ? nTime + 15 : nTime + 10 * 60; }
+inline bool IsProtocolV2(int nHeight) {
+    return nHeight > 65000;
+}
+inline bool V3(int nHeight) {
+    return fTestNet ? nHeight >= 0x0a : nHeight >= 1625000;
+}
+inline bool V4(int nHeight) {
+    return fTestNet ? nHeight >= 0x10 : nHeight >= SHADE_FEATURE_UPDATE;
+}
+inline bool V5(int nHeight) {
+    return fTestNet ? nHeight >= 0x20 : nHeight >= BLOCK_REWARD_HALVING;
+}
 
-inline unsigned int GetTargetSpacing(int nHeight) { return IsProtocolV2(nHeight) ? 64 : 60; }
+inline int64_t PastDrift(int64_t nTime, int nHeight)   {
+    return IsProtocolV2(nHeight) ? nTime      : nTime - 10 * 60;
+}
+inline int64_t FutureDrift(int64_t nTime, int nHeight) {
+    return IsProtocolV2(nHeight) ? nTime + 15 : nTime + 10 * 60;
+}
+
+inline unsigned int GetTargetSpacing(int nHeight) {
+    return IsProtocolV2(nHeight) ? 64 : 60;
+}
 
 
 extern unsigned int nCoinCacheSize;
@@ -196,8 +215,14 @@ public:
     }
 
     IMPLEMENT_SERIALIZE( READWRITE(FLATDATA(*this)); )
-    void SetNull() { nFile = (unsigned int) -1; nBlockPos = 0; nTxPos = 0; }
-    bool IsNull() const { return (nFile == (unsigned int) -1); }
+    void SetNull() {
+        nFile = (unsigned int) -1;
+        nBlockPos = 0;
+        nTxPos = 0;
+    }
+    bool IsNull() const {
+        return (nFile == (unsigned int) -1);
+    }
 
     friend bool operator==(const CDiskTxPos& a, const CDiskTxPos& b)
     {
@@ -235,10 +260,20 @@ public:
     CTransaction* ptx;
     unsigned int n;
 
-    CInPoint() { SetNull(); }
-    CInPoint(CTransaction* ptxIn, unsigned int nIn) { ptx = ptxIn; n = nIn; }
-    void SetNull() { ptx = NULL; n = (unsigned int) -1; }
-    bool IsNull() const { return (ptx == NULL && n == (unsigned int) -1); }
+    CInPoint() {
+        SetNull();
+    }
+    CInPoint(CTransaction* ptxIn, unsigned int nIn) {
+        ptx = ptxIn;
+        n = nIn;
+    }
+    void SetNull() {
+        ptx = NULL;
+        n = (unsigned int) -1;
+    }
+    bool IsNull() const {
+        return (ptx == NULL && n == (unsigned int) -1);
+    }
 };
 
 
@@ -250,14 +285,28 @@ public:
     uint256 hash;
     unsigned int n;
 
-    COutPoint() { SetNull(); }
-    COutPoint(uint256 hashIn, unsigned int nIn) { hash = hashIn; n = nIn; }
+    COutPoint() {
+        SetNull();
+    }
+    COutPoint(uint256 hashIn, unsigned int nIn) {
+        hash = hashIn;
+        n = nIn;
+    }
     IMPLEMENT_SERIALIZE( READWRITE(FLATDATA(*this)); )
-    void SetNull() { hash = 0; n = (unsigned int) -1; }
-    bool IsNull() const { return (hash == 0 && n == (unsigned int) -1); }
+    void SetNull() {
+        hash = 0;
+        n = (unsigned int) -1;
+    }
+    bool IsNull() const {
+        return (hash == 0 && n == (unsigned int) -1);
+    }
 
-    unsigned int GetIndex() const { return n; }
-    const char* GetHash() const { return hash.ToString().c_str(); };
+    unsigned int GetIndex() const {
+        return n;
+    }
+    const char* GetHash() const {
+        return hash.ToString().c_str();
+    };
 
     friend bool operator<(const COutPoint& a, const COutPoint& b)
     {
@@ -480,7 +529,8 @@ public:
     static const int CURRENT_VERSION=1;
     static const int VERSION_WITH_INFO=3;
     static const int DION_TX_VERSION=5;
-    int nVersion; 
+    static const int CYCLE_TX_VERSION=7;
+    int nVersion;
     unsigned int nTime;
     std::vector<CTxIn> vin;
     std::vector<CTxOut> vout;
@@ -488,7 +538,10 @@ public:
     std::string strTxInfo;
     // Denial-of-service detection:
     mutable int nDoS;
-    bool DoS(int nDoSIn, bool fIn) const { nDoS += nDoSIn; return fIn; }
+    bool DoS(int nDoSIn, bool fIn) const {
+        nDoS += nDoSIn;
+        return fIn;
+    }
 
     CTransaction()
     {
@@ -504,7 +557,9 @@ public:
         READWRITE(vout);
         READWRITE(nLockTime);
         if (this->nVersion >= VERSION_WITH_INFO)
-           {  READWRITE(strTxInfo); }
+{
+    READWRITE(strTxInfo);
+    }
     )
 
     void SetNull()
@@ -672,13 +727,13 @@ public:
         std::string str;
         str += IsCoinBase()? "Coinbase" : (IsCoinStake()? "Coinstake" : "CTransaction");
         str += strprintf("(hash=%s, nTime=%d, ver=%d, vin.size=%" PRIszu ", vout.size=%" PRIszu ", nLockTime=%d, strTxInfo=%s)\n",
-            GetHash().ToString().substr(0,10).c_str(),
-            nTime,
-            nVersion,
-            vin.size(),
-            vout.size(),
-            nLockTime,
-            strTxInfo.substr(0,16).c_str());
+                         GetHash().ToString().substr(0,10).c_str(),
+                         nTime,
+                         nVersion,
+                         vin.size(),
+                         vout.size(),
+                         nLockTime,
+                         strTxInfo.substr(0,16).c_str());
 
         for (unsigned int i = 0; i < vin.size(); i++)
             str += "    " + vin[i].ToString() + "\n";
@@ -793,21 +848,27 @@ public:
     //  0  : in memory pool, waiting to be included in a block
     // >=1 : this many blocks deep in the main chain
     int GetDepthInMainChain(CBlockIndex* &pindexRet) const;
-    int GetDepthInMainChain() const { CBlockIndex *pindexRet; return GetDepthInMainChain(pindexRet); }
+    int GetDepthInMainChain() const {
+        CBlockIndex *pindexRet;
+        return GetDepthInMainChain(pindexRet);
+    }
     int GetDepthInMainChain(int& nHeightRet) const;
-    bool IsInMainChain() const { CBlockIndex *pindexRet; return GetDepthInMainChainINTERNAL(pindexRet) > 0; }
+    bool IsInMainChain() const {
+        CBlockIndex *pindexRet;
+        return GetDepthInMainChainINTERNAL(pindexRet) > 0;
+    }
     int GetBlocksToMaturity() const;
     bool AcceptToMemoryPool();
 
-  inline int
-  GetHeightInMainChain() const
-  {
-    int nHeight;
-    if (GetDepthInMainChain (nHeight) == 0)
-      return -1;
+    inline int
+    GetHeightInMainChain() const
+    {
+        int nHeight;
+        if (GetDepthInMainChain (nHeight) == 0)
+            return -1;
 
-    return nHeight;
-  }
+        return nHeight;
+    }
 };
 
 
@@ -837,12 +898,12 @@ public:
     IMPLEMENT_SERIALIZE
     (
         if (!(nType & SER_GETHASH))
-            READWRITE(nVersion);
+        READWRITE(nVersion);
         READWRITE(pos);
         READWRITE(vSpent);
     )
 
-    void SetNull()
+        void SetNull()
     {
         pos.SetNull();
         vSpent.clear();
@@ -904,7 +965,10 @@ public:
 
     // Denial-of-service detection:
     mutable int nDoS;
-    bool DoS(int nDoSIn, bool fIn) const { nDoS += nDoSIn; return fIn; }
+    bool DoS(int nDoSIn, bool fIn) const {
+        nDoS += nDoSIn;
+        return fIn;
+    }
 
     CBlock()
     {
@@ -923,15 +987,15 @@ public:
 
         // ConnectBlock depends on vtx following header to generate CDiskTxPos
         if (!(nType & (SER_GETHASH|SER_BLOCKHEADERONLY)))
-        {
-            READWRITE(vtx);
-            READWRITE(vchBlockSig);
-        }
-        else if (fRead)
-        {
-            const_cast<CBlock*>(this)->vtx.clear();
-            const_cast<CBlock*>(this)->vchBlockSig.clear();
-        }
+{
+    READWRITE(vtx);
+        READWRITE(vchBlockSig);
+    }
+    else if (fRead)
+{
+    const_cast<CBlock*>(this)->vtx.clear();
+        const_cast<CBlock*>(this)->vchBlockSig.clear();
+    }
     )
 
     void SetNull()
@@ -1004,7 +1068,7 @@ public:
     {
         int64_t maxTransactionTime = 0;
         BOOST_FOREACH(const CTransaction& tx, vtx)
-            maxTransactionTime = std::max(maxTransactionTime, (int64_t)tx.nTime);
+        maxTransactionTime = std::max(maxTransactionTime, (int64_t)tx.nTime);
         return maxTransactionTime;
     }
 
@@ -1012,7 +1076,7 @@ public:
     {
         vMerkleTree.clear();
         BOOST_FOREACH(const CTransaction& tx, vtx)
-            vMerkleTree.push_back(tx.GetHash());
+        vMerkleTree.push_back(tx.GetHash());
         int j = 0;
         for (int nSize = vtx.size(); nSize > 1; nSize = (nSize + 1) / 2)
         {
@@ -1116,13 +1180,13 @@ public:
     void print() const
     {
         printf("CBlock(hash=%s, ver=%d, hashPrevBlock=%s, hashMerkleRoot=%s, nTime=%u, nBits=%08x, nNonce=%u, vtx=%" PRIszu ", vchBlockSig=%s)\n",
-            GetHash().ToString().c_str(),
-            nVersion,
-            hashPrevBlock.ToString().c_str(),
-            hashMerkleRoot.ToString().c_str(),
-            nTime, nBits, nNonce,
-            vtx.size(),
-            HexStr(vchBlockSig.begin(), vchBlockSig.end()).c_str());
+               GetHash().ToString().c_str(),
+               nVersion,
+               hashPrevBlock.ToString().c_str(),
+               hashMerkleRoot.ToString().c_str(),
+               nTime, nBits, nNonce,
+               vtx.size(),
+               HexStr(vchBlockSig.begin(), vchBlockSig.end()).c_str());
         for (unsigned int i = 0; i < vtx.size(); i++)
         {
             printf("  ");
@@ -1368,14 +1432,14 @@ public:
     std::string ToString() const
     {
         return strprintf("CBlockIndex(nprev=%p, pnext=%p, nFile=%u, nBlockPos=%-6d nHeight=%d, nMint=%s, nMoneySupply=%s, nFlags=(%s)(%d)(%s), nStakeModifier=%016" PRIx64 ", nStakeModifierChecksum=%08x, hashProof=%s, prevoutStake=(%s), nStakeTime=%d merkle=%s, hashBlock=%s)",
-            pprev, pnext, nFile, nBlockPos, nHeight,
-            FormatMoney(nMint).c_str(), FormatMoney(nMoneySupply).c_str(),
-            GeneratedStakeModifier() ? "MOD" : "-", GetStakeEntropyBit(), IsProofOfStake()? "PoS" : "PoW",
-            nStakeModifier, nStakeModifierChecksum,
-            hashProof.ToString().c_str(),
-            prevoutStake.ToString().c_str(), nStakeTime,
-            hashMerkleRoot.ToString().c_str(),
-            GetBlockHash().ToString().c_str());
+                         pprev, pnext, nFile, nBlockPos, nHeight,
+                         FormatMoney(nMint).c_str(), FormatMoney(nMoneySupply).c_str(),
+                         GeneratedStakeModifier() ? "MOD" : "-", GetStakeEntropyBit(), IsProofOfStake()? "PoS" : "PoW",
+                         nStakeModifier, nStakeModifierChecksum,
+                         hashProof.ToString().c_str(),
+                         prevoutStake.ToString().c_str(), nStakeTime,
+                         hashMerkleRoot.ToString().c_str(),
+                         GetBlockHash().ToString().c_str());
     }
 
     void print() const
@@ -1412,7 +1476,7 @@ public:
     IMPLEMENT_SERIALIZE
     (
         if (!(nType & SER_GETHASH))
-            READWRITE(nVersion);
+        READWRITE(nVersion);
 
         READWRITE(hashNext);
         READWRITE(nFile);
@@ -1423,25 +1487,25 @@ public:
         READWRITE(nFlags);
         READWRITE(nStakeModifier);
         if (IsProofOfStake())
-        {
-            READWRITE(prevoutStake);
+    {
+        READWRITE(prevoutStake);
             READWRITE(nStakeTime);
         }
         else if (fRead)
-        {
-            const_cast<CDiskBlockIndex*>(this)->prevoutStake.SetNull();
+    {
+        const_cast<CDiskBlockIndex*>(this)->prevoutStake.SetNull();
             const_cast<CDiskBlockIndex*>(this)->nStakeTime = 0;
         }
-        READWRITE(hashProof);
+    READWRITE(hashProof);
 
-        // block header
-        READWRITE(this->nVersion);
-        READWRITE(hashPrev);
-        READWRITE(hashMerkleRoot);
-        READWRITE(nTime);
-        READWRITE(nBits);
-        READWRITE(nNonce);
-        READWRITE(blockHash);
+    // block header
+    READWRITE(this->nVersion);
+    READWRITE(hashPrev);
+    READWRITE(hashMerkleRoot);
+    READWRITE(nTime);
+    READWRITE(nBits);
+    READWRITE(nNonce);
+    READWRITE(blockHash);
     )
 
     uint256 GetBlockHash() const
@@ -1467,9 +1531,9 @@ public:
         std::string str = "CDiskBlockIndex(";
         str += CBlockIndex::ToString();
         str += strprintf("\n                hashBlock=%s, hashPrev=%s, hashNext=%s)",
-            GetBlockHash().ToString().c_str(),
-            hashPrev.ToString().c_str(),
-            hashNext.ToString().c_str());
+                         GetBlockHash().ToString().c_str(),
+                         hashPrev.ToString().c_str(),
+                         hashNext.ToString().c_str());
         return str;
     }
 
@@ -1520,11 +1584,11 @@ public:
     IMPLEMENT_SERIALIZE
     (
         if (!(nType & SER_GETHASH))
-            READWRITE(nVersion);
+        READWRITE(nVersion);
         READWRITE(vHave);
     )
 
-    void SetNull()
+        void SetNull()
     {
         vHave.clear();
     }

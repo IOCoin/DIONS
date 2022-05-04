@@ -1,3 +1,6 @@
+
+
+
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2012 The Bitcoin developers
 // Distributed under the MIT/X11 software license, see the accompanying
@@ -343,54 +346,54 @@ bool GetMyExternalIP(CNetAddr& ipRet)
     const char* pszKeyword;
 
     for (int nLookup = 0; nLookup <= 1; nLookup++)
-    for (int nHost = 1; nHost <= 2; nHost++)
-    {
-        // We should be phasing out our use of sites like these.  If we need
-        // replacements, we should ask for volunteers to put this simple
-        // php file on their web server that prints the client IP:
-        //  <?php echo $_SERVER["REMOTE_ADDR"]; ?>
-        if (nHost == 1)
+        for (int nHost = 1; nHost <= 2; nHost++)
         {
-            addrConnect = CService("91.198.22.70",80); // checkip.dyndns.org
-
-            if (nLookup == 1)
+            // We should be phasing out our use of sites like these.  If we need
+            // replacements, we should ask for volunteers to put this simple
+            // php file on their web server that prints the client IP:
+            //  <?php echo $_SERVER["REMOTE_ADDR"]; ?>
+            if (nHost == 1)
             {
-                CService addrIP("checkip.dyndns.org", 80, true);
-                if (addrIP.IsValid())
-                    addrConnect = addrIP;
+                addrConnect = CService("91.198.22.70",80); // checkip.dyndns.org
+
+                if (nLookup == 1)
+                {
+                    CService addrIP("checkip.dyndns.org", 80, true);
+                    if (addrIP.IsValid())
+                        addrConnect = addrIP;
+                }
+
+                pszGet = "GET / HTTP/1.1\r\n"
+                         "Host: checkip.dyndns.org\r\n"
+                         "User-Agent: I/OCoin\r\n"
+                         "Connection: close\r\n"
+                         "\r\n";
+
+                pszKeyword = "Address:";
+            }
+            else if (nHost == 2)
+            {
+                addrConnect = CService("74.208.43.192", 80); // www.showmyip.com
+
+                if (nLookup == 1)
+                {
+                    CService addrIP("www.showmyip.com", 80, true);
+                    if (addrIP.IsValid())
+                        addrConnect = addrIP;
+                }
+
+                pszGet = "GET /simple/ HTTP/1.1\r\n"
+                         "Host: www.showmyip.com\r\n"
+                         "User-Agent: I/OCoin\r\n"
+                         "Connection: close\r\n"
+                         "\r\n";
+
+                pszKeyword = NULL; // Returns just IP address
             }
 
-            pszGet = "GET / HTTP/1.1\r\n"
-                     "Host: checkip.dyndns.org\r\n"
-                     "User-Agent: I/OCoin\r\n"
-                     "Connection: close\r\n"
-                     "\r\n";
-
-            pszKeyword = "Address:";
+            if (GetMyExternalIP2(addrConnect, pszGet, pszKeyword, ipRet))
+                return true;
         }
-        else if (nHost == 2)
-        {
-            addrConnect = CService("74.208.43.192", 80); // www.showmyip.com
-
-            if (nLookup == 1)
-            {
-                CService addrIP("www.showmyip.com", 80, true);
-                if (addrIP.IsValid())
-                    addrConnect = addrIP;
-            }
-
-            pszGet = "GET /simple/ HTTP/1.1\r\n"
-                     "Host: www.showmyip.com\r\n"
-                     "User-Agent: I/OCoin\r\n"
-                     "Connection: close\r\n"
-                     "\r\n";
-
-            pszKeyword = NULL; // Returns just IP address
-        }
-
-        if (GetMyExternalIP2(addrConnect, pszGet, pszKeyword, ipRet))
-            return true;
-    }
 
     return false;
 }
@@ -428,8 +431,8 @@ CNode* FindNode(const CNetAddr& ip)
     {
         LOCK(cs_vNodes);
         BOOST_FOREACH(CNode* pnode, vNodes)
-            if ((CNetAddr)pnode->addr == ip)
-                return (pnode);
+        if ((CNetAddr)pnode->addr == ip)
+            return (pnode);
     }
     return NULL;
 }
@@ -438,8 +441,8 @@ CNode* FindNode(std::string addrName)
 {
     LOCK(cs_vNodes);
     BOOST_FOREACH(CNode* pnode, vNodes)
-        if (pnode->addrName == addrName)
-            return (pnode);
+    if (pnode->addrName == addrName)
+        return (pnode);
     return NULL;
 }
 
@@ -448,8 +451,8 @@ CNode* FindNode(const CService& addr)
     {
         LOCK(cs_vNodes);
         BOOST_FOREACH(CNode* pnode, vNodes)
-            if ((CService)pnode->addr == addr)
-                return (pnode);
+        if ((CService)pnode->addr == addr)
+            return (pnode);
     }
     return NULL;
 }
@@ -472,8 +475,8 @@ CNode* ConnectNode(CAddress addrConnect, const char *pszDest)
 
     /// debug print
     printf("trying connection %s lastseen=%.1fhrs\n",
-        pszDest ? pszDest : addrConnect.ToString().c_str(),
-        pszDest ? 0 : (double)(GetAdjustedTime() - addrConnect.nTime)/3600.0);
+           pszDest ? pszDest : addrConnect.ToString().c_str(),
+           pszDest ? 0 : (double)(GetAdjustedTime() - addrConnect.nTime)/3600.0);
 
     // Connect
     SOCKET hSocket;
@@ -617,7 +620,7 @@ bool CNode::ReceiveMsgBytes(const char *pch, unsigned int nBytes)
 
         // get current incomplete message, or create a new one
         if (vRecvMsg.empty() ||
-            vRecvMsg.back().complete())
+                vRecvMsg.back().complete())
             vRecvMsg.push_back(CNetMessage(SER_NETWORK, nRecvVersion));
 
         CNetMessage& msg = vRecvMsg.back();
@@ -630,7 +633,7 @@ bool CNode::ReceiveMsgBytes(const char *pch, unsigned int nBytes)
             handled = msg.readData(pch, nBytes);
 
         if (handled < 0)
-                return false;
+            return false;
 
         pch += handled;
         nBytes -= handled;
@@ -662,7 +665,7 @@ int CNetMessage::readHeader(const char *pch, unsigned int nBytes)
 
     // reject messages larger than MAX_SIZE
     if (hdr.nMessageSize > MAX_SIZE)
-            return -1;
+        return -1;
 
     // switch state to reading message data
     in_data = true;
@@ -775,7 +778,7 @@ void ThreadSocketHandler2(void* parg)
             BOOST_FOREACH(CNode* pnode, vNodesCopy)
             {
                 if (pnode->fDisconnect ||
-                    (pnode->GetRefCount() <= 0 && pnode->vRecvMsg.empty() && pnode->nSendSize == 0 && pnode->ssSend.empty()))
+                        (pnode->GetRefCount() <= 0 && pnode->vRecvMsg.empty() && pnode->nSendSize == 0 && pnode->ssSend.empty()))
                 {
                     // remove from vNodes
                     vNodes.erase(remove(vNodes.begin(), vNodes.end(), pnode), vNodes.end());
@@ -916,8 +919,8 @@ void ThreadSocketHandler2(void* parg)
             {
                 LOCK(cs_vNodes);
                 BOOST_FOREACH(CNode* pnode, vNodes)
-                    if (pnode->fInbound)
-                        nInbound++;
+                if (pnode->fInbound)
+                    nInbound++;
             }
 
             if (hSocket == INVALID_SOCKET)
@@ -956,7 +959,7 @@ void ThreadSocketHandler2(void* parg)
             LOCK(cs_vNodes);
             vNodesCopy = vNodes;
             BOOST_FOREACH(CNode* pnode, vNodesCopy)
-                pnode->AddRef();
+            pnode->AddRef();
         }
         BOOST_FOREACH(CNode* pnode, vNodesCopy)
         {
@@ -1049,7 +1052,7 @@ void ThreadSocketHandler2(void* parg)
         {
             LOCK(cs_vNodes);
             BOOST_FOREACH(CNode* pnode, vNodesCopy)
-                pnode->Release();
+            pnode->Release();
         }
 
         MilliSleep(10);
@@ -1313,7 +1316,7 @@ void ThreadOpenAddedConnections2(void* parg)
             {
                 LOCK(cs_setservAddNodeAddresses);
                 BOOST_FOREACH(CService& serv, vservNode)
-                    setservAddNodeAddresses.insert(serv);
+                setservAddNodeAddresses.insert(serv);
             }
         }
     }
@@ -1325,14 +1328,14 @@ void ThreadOpenAddedConnections2(void* parg)
         {
             LOCK(cs_vNodes);
             BOOST_FOREACH(CNode* pnode, vNodes)
-                for (vector<vector<CService> >::iterator it = vservConnectAddresses.begin(); it != vservConnectAddresses.end(); it++)
-                    BOOST_FOREACH(CService& addrNode, *(it))
-                        if (pnode->addr == addrNode)
-                        {
-                            it = vservConnectAddresses.erase(it);
-                            it--;
-                            break;
-                        }
+            for (vector<vector<CService> >::iterator it = vservConnectAddresses.begin(); it != vservConnectAddresses.end(); it++)
+                BOOST_FOREACH(CService& addrNode, *(it))
+                if (pnode->addr == addrNode)
+                {
+                    it = vservConnectAddresses.erase(it);
+                    it--;
+                    break;
+                }
         }
         BOOST_FOREACH(vector<CService>& vserv, vservConnectAddresses)
         {
@@ -1362,8 +1365,8 @@ bool OpenNetworkConnection(const CAddress& addrConnect, CSemaphoreGrant *grantOu
         return false;
     if (!strDest)
         if (IsLocal(addrConnect) ||
-            FindNode((CNetAddr)addrConnect) || CNode::IsBanned(addrConnect) ||
-            FindNode(addrConnect.ToStringIPPort().c_str()))
+                FindNode((CNetAddr)addrConnect) || CNode::IsBanned(addrConnect) ||
+                FindNode(addrConnect.ToStringIPPort().c_str()))
             return false;
     if (strDest && FindNode(strDest))
         return false;
@@ -1423,7 +1426,7 @@ void ThreadMessageHandler2(void* parg)
             LOCK(cs_vNodes);
             vNodesCopy = vNodes;
             BOOST_FOREACH(CNode* pnode, vNodesCopy)
-                pnode->AddRef();
+            pnode->AddRef();
         }
 
         // Poll the connected nodes for messages
@@ -1458,7 +1461,7 @@ void ThreadMessageHandler2(void* parg)
         {
             LOCK(cs_vNodes);
             BOOST_FOREACH(CNode* pnode, vNodesCopy)
-                pnode->Release();
+            pnode->Release();
         }
 
         // Wait and allow messages to bunch up.
@@ -1691,9 +1694,8 @@ void StartNode(void* parg)
         printf("Staking disabled\n");
     else if(fViewWallet)
         printf("Staking disabled : view wallet only\n");
-    else
-        if (!NewThread(ThreadStakeMiner, pwalletMain))
-            printf("Error: NewThread(ThreadStakeMiner) failed\n");
+    else if (!NewThread(ThreadStakeMiner, pwalletMain))
+        printf("Error: NewThread(ThreadStakeMiner) failed\n");
 }
 
 bool StopNode()
@@ -1742,12 +1744,12 @@ public:
     {
         // Close sockets
         BOOST_FOREACH(CNode* pnode, vNodes)
-            if (pnode->hSocket != INVALID_SOCKET)
-                closesocket(pnode->hSocket);
+        if (pnode->hSocket != INVALID_SOCKET)
+            closesocket(pnode->hSocket);
         BOOST_FOREACH(SOCKET hListenSocket, vhListenSocket)
-            if (hListenSocket != INVALID_SOCKET)
-                if (closesocket(hListenSocket) == SOCKET_ERROR)
-                    printf("closesocket(hListenSocket) failed with error %d\n", WSAGetLastError());
+        if (hListenSocket != INVALID_SOCKET)
+            if (closesocket(hListenSocket) == SOCKET_ERROR)
+                printf("closesocket(hListenSocket) failed with error %d\n", WSAGetLastError());
 
 #ifdef WIN32
         // Shutdown Windows Sockets

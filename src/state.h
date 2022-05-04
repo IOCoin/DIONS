@@ -1,3 +1,6 @@
+
+
+
 #ifndef STATE_H
 #define STATE_H
 
@@ -10,7 +13,7 @@ extern unsigned int LR_SHIFT__[LR_R];
 
 class State
 {
-  public:
+public:
     static const std::string ATOMIC;
     static const std::string GROUND;
     static const std::string ION;
@@ -20,30 +23,30 @@ class State
     {
     };
 
-    State(std::string k) 
-    { 
-      STATE_.push_back(State::ATOMIC);
-      STATE_.push_back(State::GROUND); 
-      STATE_.push_back(State::ION);
+    State(std::string k)
+    {
+        STATE_.push_back(State::ATOMIC);
+        STATE_.push_back(State::GROUND);
+        STATE_.push_back(State::ION);
 
-      this->m_ = k; 
+        this->m_ = k;
     }
 
-    const std::string operator()() 
-    { 
-      for(unsigned int i=0; i<STATE_.size(); i++)
-      {
-        if(this->m_ == STATE_[i])
+    const std::string operator()()
+    {
+        for(unsigned int i=0; i<STATE_.size(); i++)
         {
-          return STATE_[i];
+            if(this->m_ == STATE_[i])
+            {
+                return STATE_[i];
+            }
         }
-      }
-      
-      return State::ION;
+
+        return State::ION;
     }
 
-  private:
-    std::vector<std::string> STATE_;  
+private:
+    std::vector<std::string> STATE_;
     std::string m_;
     int delta_;
 };

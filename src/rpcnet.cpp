@@ -1,3 +1,6 @@
+
+
+
 // Copyright (c) 2009-2012 Bitcoin Developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
@@ -122,7 +125,7 @@ Value sendalert(const Array& params, bool fHelp)
     {
         LOCK(cs_vNodes);
         BOOST_FOREACH(CNode* pnode, vNodes)
-            alert.RelayTo(pnode);
+        alert.RelayTo(pnode);
     }
 
     Object result;

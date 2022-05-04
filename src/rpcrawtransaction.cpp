@@ -1,3 +1,6 @@
+
+
+
 // Copyright (c) 2010 Satoshi Nakamoto
 // Copyright (c) 2009-2012 The Bitcoin developers
 // Distributed under the MIT/X11 software license, see the accompanying
@@ -43,7 +46,7 @@ void spj(const CScript& scriptPubKey, Object& out, bool fIncludeHex)
 
     Array a;
     BOOST_FOREACH(const CTxDestination& addr, addresses)
-        a.push_back(cba(addr).ToString());
+    a.push_back(cba(addr).ToString());
     out.push_back(Pair("addresses", a));
 }
 /*
@@ -152,7 +155,9 @@ void TxToJSON(const CTransaction& tx, const uint256 hashBlock, Object& entry)
     entry.push_back(Pair("time", (int64_t)tx.nTime));
     entry.push_back(Pair("locktime", (int64_t)tx.nLockTime));
     if(tx.nVersion>1)
-      {entry.push_back(Pair("TxInfo", tx.strTxInfo));}
+    {
+        entry.push_back(Pair("TxInfo", tx.strTxInfo));
+    }
     Array vin;
     BOOST_FOREACH(const CTxIn& txin, tx.vin)
     {
@@ -285,14 +290,14 @@ Array listunspent__(double p, double& iR)
         entry.push_back(Pair("confirmations",out.nDepth));
         results.push_back(entry);
         if(i - p >= 0.001)
-          break;
+            break;
     }
 
     iR = i;
     if(i - p < 0.001)
     {
-      Array t;
-      return t;
+        Array t;
+        return t;
     }
 
     return results;
@@ -330,7 +335,7 @@ Value listunspent(const Array& params, bool fHelp)
                 throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, string("Invalid I/OCoin address: ")+input.get_str());
             if (setAddress.count(address))
                 throw JSONRPCError(RPC_INVALID_PARAMETER, string("Invalid parameter, duplicated address: ")+input.get_str());
-           setAddress.insert(address);
+            setAddress.insert(address);
         }
     }
 
@@ -382,13 +387,13 @@ Value crawgen(const Array& params, bool fHelp)
     double i;
     Array inputs = listunspent__(p, i);
     if(inputs.size() == 0)
-      throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter p");
-   
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter p");
+
     Object sendTo = params[1].get_obj();
     string c = params[2].get_str();
     cba cAddr(c);
     if(!cAddr.IsValid())
-      throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter");
+        throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter");
 
     CTransaction rawTx;
     BOOST_FOREACH(Value& input, inputs)
@@ -416,30 +421,30 @@ Value crawgen(const Array& params, bool fHelp)
     set<cba> setAddress;
     BOOST_FOREACH(const Pair& s, sendTo)
     {
-      cba address(s.name_);
-      if(!address.IsValid())
-      {
-        vector<AliasIndex> vtxPos;
-        string aliasStr = s.name_;
-        vchType vchAlias = vchFromString(aliasStr);
-        if (ln1Db->lKey(vchAlias))
+        cba address(s.name_);
+        if(!address.IsValid())
         {
-          if (!ln1Db->lGet (vchAlias, vtxPos))
-            return error("crawgen : failed to read from alias DB");
-          if (vtxPos.empty ())
-            return -1;
+            vector<PathIndex> vtxPos;
+            string aliasStr = s.name_;
+            vchType vchPath = vchFromString(aliasStr);
+            if (ln1Db->lKey(vchPath))
+            {
+                if (!ln1Db->lGet (vchPath, vtxPos))
+                    return error("crawgen : failed to read from alias DB");
+                if (vtxPos.empty ())
+                    return -1;
 
-          AliasIndex& txPos = vtxPos.back ();
-          if(txPos.nHeight + scaleMonitor() <= nBestHeight)
-            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "extern alias");
-  
-          address.SetString(txPos.vAddress); 
+                PathIndex& txPos = vtxPos.back ();
+                if(txPos.nHeight + scaleMonitor() <= nBestHeight)
+                    throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "extern alias");
+
+                address.SetString(txPos.vAddress);
+            }
+            else
+            {
+                throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid I/OCoin address or unknown alias");
+            }
         }
-        else
-        {
-          throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid I/OCoin address or unknown alias");
-        }
-      }
 
         if (setAddress.count(address))
             throw JSONRPCError(RPC_INVALID_PARAMETER, string("Invalid parameter, duplicated address: ")+s.name_);
@@ -458,7 +463,7 @@ Value crawgen(const Array& params, bool fHelp)
     double f = 0.001 * n__;
 
     if (setAddress.count(cAddr))
-      throw JSONRPCError(RPC_INVALID_PARAMETER, string("Invalid parameter, duplicated address "));
+        throw JSONRPCError(RPC_INVALID_PARAMETER, string("Invalid parameter, duplicated address "));
 
     CScript scriptPubKey;
     scriptPubKey.SetDestination(cAddr.Get());
@@ -470,12 +475,12 @@ Value crawgen(const Array& params, bool fHelp)
 
     CDataStream ss(SER_NETWORK, PROTOCOL_VERSION);
     ss << rawTx;
-    
+
 
     Object result;
     result.push_back(Pair("hex", HexStr(ss.begin(), ss.end())));
     result.push_back(Pair("fee", f));
-  return result;
+    return result;
 }
 Value createrawtransaction(const Array& params, bool fHelp)
 {
@@ -496,15 +501,15 @@ Value createrawtransaction(const Array& params, bool fHelp)
 
     ln1Db->filter();
     CTransaction rawTx;
-    if (params.size() == 3) 
+    if (params.size() == 3)
+    {
+        std::string txinfo = params[2].get_str();
+        if (txinfo.length() > MAX_TX_INFO_LEN)
         {
-               std::string txinfo = params[2].get_str();
-               if (txinfo.length() > MAX_TX_INFO_LEN)
-                     {
-                        txinfo.resize(140);
-                     }
-               rawTx.strTxInfo = txinfo;
+            txinfo.resize(140);
         }
+        rawTx.strTxInfo = txinfo;
+    }
     BOOST_FOREACH(Value& input, inputs)
     {
         const Object& o = input.get_obj();
@@ -530,29 +535,29 @@ Value createrawtransaction(const Array& params, bool fHelp)
     set<cba> setAddress;
     BOOST_FOREACH(const Pair& s, sendTo)
     {
-      cba address(s.name_);
-      if(!address.IsValid())
-      {
-        vector<AliasIndex> vtxPos;
-        string aliasStr = s.name_;
-        vchType vchAlias = vchFromString(aliasStr);
-        if (ln1Db->lKey (vchAlias))
+        cba address(s.name_);
+        if(!address.IsValid())
         {
-          if (!ln1Db->lGet (vchAlias, vtxPos))
-            return error("aliasHeight() : failed to read from alias DB");
-          if (vtxPos.empty ())
-            return -1;
+            vector<PathIndex> vtxPos;
+            string aliasStr = s.name_;
+            vchType vchPath = vchFromString(aliasStr);
+            if (ln1Db->lKey (vchPath))
+            {
+                if (!ln1Db->lGet (vchPath, vtxPos))
+                    return error("aliasHeight() : failed to read from alias DB");
+                if (vtxPos.empty ())
+                    return -1;
 
-          AliasIndex& txPos = vtxPos.back ();
-          if(txPos.nHeight + scaleMonitor() <= nBestHeight)
-            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "extern alias");
-          address.SetString(txPos.vAddress); 
+                PathIndex& txPos = vtxPos.back ();
+                if(txPos.nHeight + scaleMonitor() <= nBestHeight)
+                    throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "extern alias");
+                address.SetString(txPos.vAddress);
+            }
+            else
+            {
+                throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid I/OCoin address or unknown alias");
+            }
         }
-        else
-        {
-          throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid I/OCoin address or unknown alias");
-        }
-      }
 
         if (setAddress.count(address))
             throw JSONRPCError(RPC_INVALID_PARAMETER, string("Invalid parameter, duplicated address: ")+s.name_);
@@ -609,7 +614,7 @@ Value decodescript(const Array& params, bool fHelp)
 
     Object r;
     CScript script;
-    if (params[0].get_str().size() > 0){
+    if (params[0].get_str().size() > 0) {
         vector<unsigned char> scriptData(ParseHexV(params[0], "argument"));
         script = CScript(scriptData.begin(), scriptData.end());
     } else {
@@ -723,7 +728,7 @@ Value signrawtransaction(const Array& params, bool fHelp)
                 {
                     string err("Previous output scriptPubKey mismatch:\n");
                     err = err + mapPrevOut[outpoint].ToString() + "\nvs:\n"+
-                        scriptPubKey.ToString();
+                          scriptPubKey.ToString();
                     throw JSONRPCError(RPC_DESERIALIZATION_ERROR, err);
                 }
             }

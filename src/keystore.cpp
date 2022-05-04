@@ -1,3 +1,6 @@
+
+
+
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2012 The Bitcoin developers
 // Distributed under the MIT/X11 software license, see the accompanying
@@ -72,7 +75,7 @@ bool CCryptoKeyStore::SetCrypted()
         {
             return true;
         }
-        
+
         if (!mapKeys.empty())
             return false;
         fUseCrypto = true;
@@ -140,7 +143,7 @@ bool CCryptoKeyStore::ak(const CKey& key)
         if (!EncryptSecret(vMasterKey, key.GetSecret(fCompressed), vchPubKey.GetHash(), vchCryptedSecret))
             return false;
 
-         
+
         if (!sync(key.GetPubKey(), vchCryptedSecret))
         {
             return false;

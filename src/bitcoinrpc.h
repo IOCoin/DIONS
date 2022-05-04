@@ -1,3 +1,6 @@
+
+
+
 // Copyright (c) 2010 Satoshi Nakamoto
 // Copyright (c) 2009-2012 The Bitcoin developers
 // Distributed under the MIT/X11 software license, see the accompanying
@@ -263,33 +266,40 @@ extern json_spirit::Value mapVertex(const json_spirit::Array& params, bool fHelp
 extern json_spirit::Value vtxtrace(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value svtx(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value sendMessage(const json_spirit::Array& params, bool fHelp);
-extern json_spirit::Value registerAlias(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value registerPath(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value uC(const json_spirit::Array& params, bool fHelp);
-extern json_spirit::Value registerAliasGenerate(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value registerPathGenerate(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value registerPathGenerate_cycle(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value mapProject(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value alias(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value statusList(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value downloadDecrypt(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value simplexU(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value simplexU_cycle(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value downloadDecryptEPID(const json_spirit::Array& params, bool fHelp);
-extern json_spirit::Value extract(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value updateEncrypt(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value ioget(const json_spirit::Array& params, bool fHelp);
-extern json_spirit::Value transferAlias(const json_spirit::Array& params, bool fHelp);
-extern json_spirit::Value transferEncryptedAlias(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value ioget_cycle(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value transferPath(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value transferEncryptedPath(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value psimplex(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value psimplex_cycle(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value transferEncryptedExtPredicate(const json_spirit::Array& params, bool fHelp);
-extern json_spirit::Value decryptAlias(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value lookupStoragePath(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value createDataNode(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value updateDataNode(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value decryptPath(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value decryptPath_cycle(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value primaryCXValidate(const json_spirit::Array& params, bool fHelp);
-extern json_spirit::Value updateAlias(const json_spirit::Array& params, bool fHelp);
-extern json_spirit::Value updateAliasFile(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value updatePath(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value updatePathFile(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value transientStatus__(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value transientStatus__C(const json_spirit::Array& params, bool fHelp);
-extern json_spirit::Value updateEncryptedAlias(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value updateEncryptedPath(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value validate(const json_spirit::Array& params, bool fHelp);
-extern json_spirit::Value updateEncryptedAliasFile(const json_spirit::Array& params, bool fHelp);
-extern json_spirit::Value transferAlias(const json_spirit::Array& params, bool fHelp);
-extern json_spirit::Value transferEncryptedAlias(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value updateEncryptedPathFile(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value transferPath(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value transferEncryptedPath(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value aliasOut(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value externFrame__(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value internFrame__(const json_spirit::Array& params, bool fHelp);
@@ -298,6 +308,7 @@ extern json_spirit::Value sr71(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value nodeRetrieve(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value nodeValidate(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value aliasList(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value aliasList_cycle(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value aliasList__(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value decryptedMessageList(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value plainTextMessageList(const json_spirit::Array& params, bool fHelp);

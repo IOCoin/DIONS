@@ -1,3 +1,6 @@
+
+
+
 // Copyright (c) 2010 Satoshi Nakamoto
 // Copyright (c) 2009-2012 The Bitcoin developers
 // Distributed under the MIT/X11 software license, see the accompanying
@@ -196,9 +199,9 @@ Value help(const Array& params, bool fHelp)
 
     if(params.size() == 1)
     {
-      string strCommand = params[0].get_str();
+        string strCommand = params[0].get_str();
 
-      return tableRPC.help(strCommand);
+        return tableRPC.help(strCommand);
     }
 
     return tableRPC();
@@ -225,8 +228,8 @@ Value stop(const Array& params, bool fHelp)
 
 
 static const CRPCCommand vRPCCommands[] =
-{ //  name                      function                 safemd  unlocked
-  //  ------------------------  -----------------------  ------  --------
+{   //  name                      function                 safemd  unlocked
+    //  ------------------------  -----------------------  ------  --------
     { "help",                   &help,                   true,   true },
     { "stop",                   &stop,                   true,   true },
     { "getbestblockhash",       &getbestblockhash,       true,   false },
@@ -331,29 +334,35 @@ static const CRPCCommand vRPCCommands[] =
     { "sendPublicKey",     &sendPublicKey,     false,  false },
     { "sendSymmetric",     &sendSymmetric,     false,  false },
     { "uC",     &uC,     false,  false },
-    { "registerAlias",     &registerAlias,     false,  false },
+    { "registerPath",     &registerPath,     false,  false },
     { "xstat",     &xstat,     false,  false },
     { "mapProject",     &mapProject,     false,  false },
     { "mapVertex",     &mapVertex,     false,  false },
-    { "registerAliasGenerate",     &registerAliasGenerate,     false,  false },
+    { "registerPathGenerate",     &registerPathGenerate,     false,  false },
+    { "createDataNode",     &createDataNode,     false,  false },
+    { "updateDataNode",     &updateDataNode,     false,  false },
+    { "registerPathGenerate_cycle",     &registerPathGenerate_cycle,     false,  false },
     { "alias",     &alias,     false,  false },
     { "statusList",     &statusList,     false,  false },
     { "downloadDecrypt",     &downloadDecrypt,     false,  false },
     { "downloadDecryptEPID",     &downloadDecryptEPID,     false,  false },
-    { "extract",     &extract,     false,  false },
     { "updateEncrypt",     &updateEncrypt,     false,  false },
     { "ioget",     &ioget,     false,  false },
+    { "ioget_cycle",     &ioget_cycle,     false,  false },
     { "simplexU",     &simplexU,     false,  false },
-    { "decryptAlias",     &decryptAlias,     false,  false },
-    { "transferAlias",     &transferAlias,     false,  false },
-    { "updateAlias",     &updateAlias,     false,  false },
-    { "updateAliasFile",     &updateAliasFile,     false,  false },
+    { "simplexU_cycle",     &simplexU_cycle,     false,  false },
+    { "decryptPath",     &decryptPath,     false,  false },
+    { "decryptPath_cycle",     &decryptPath_cycle,     false,  false },
+    { "lookupStoragePath",     &lookupStoragePath,     false,  false },
+    { "transferPath",     &transferPath,     false,  false },
+    { "updatePath",     &updatePath,     false,  false },
+    { "updatePathFile",     &updatePathFile,     false,  false },
     { "primaryCXValidate",     &primaryCXValidate,     false,  false },
-    { "updateEncryptedAlias",     &updateEncryptedAlias,     false,  false },
-    { "psimplex",     &psimplex,     false,  false },
-    { "updateEncryptedAliasFile",     &updateEncryptedAliasFile,     false,  false },
-    { "transferAlias",     &transferAlias,     false,  false },
-    { "transferEncryptedAlias",     &transferEncryptedAlias,     false,  false },
+    { "updateEncryptedPath",     &updateEncryptedPath,     false,  false },
+    { "psimplex_cycle",     &psimplex_cycle,     false,  false },
+    { "updateEncryptedPathFile",     &updateEncryptedPathFile,     false,  false },
+    { "transferPath",     &transferPath,     false,  false },
+    { "transferEncryptedPath",     &transferEncryptedPath,     false,  false },
     { "transferEncryptedExtPredicate",     &transferEncryptedExtPredicate,     false,  false },
     { "transientStatus__",     &transientStatus__,     false,  false },
     { "transientStatus__C",     &transientStatus__C,     false,  false },
@@ -412,10 +421,10 @@ const json_spirit::Value CRPCTable::operator()() const
     map<string, const CRPCCommand*>::const_iterator it = mapCommands.begin();
     while(it != mapCommands.end())
     {
-      Value o;
-      o = (*it).first;
-      v.push_back(o);
-      it++;
+        Value o;
+        o = (*it).first;
+        v.push_back(o);
+        it++;
     }
 
     return v;
@@ -439,7 +448,7 @@ string HTTPPost(const string& strMsg, const map<string,string>& mapRequestHeader
       << "Connection: close\r\n"
       << "Accept: application/json\r\n";
     BOOST_FOREACH(const PAIRTYPE(string, string)& item, mapRequestHeaders)
-        s << item.first << ": " << item.second << "\r\n";
+    s << item.first << ": " << item.second << "\r\n";
     s << "\r\n" << strMsg;
 
     return s.str();
@@ -462,44 +471,44 @@ static string HTTPReply(int nStatus, const string& strMsg, bool keepalive)
 {
     if (nStatus == HTTP_UNAUTHORIZED)
         return strprintf("HTTP/1.0 401 Authorization Required\r\n"
-            "Date: %s\r\n"
-            "Server: iocoin-json-rpc/%s\r\n"
-            "WWW-Authenticate: Basic realm=\"jsonrpc\"\r\n"
-            "Content-Type: text/html\r\n"
-            "Content-Length: 296\r\n"
-            "\r\n"
-            "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\"\r\n"
-            "\"http://www.w3.org/TR/1999/REC-html401-19991224/loose.dtd\">\r\n"
-            "<HTML>\r\n"
-            "<HEAD>\r\n"
-            "<TITLE>Error</TITLE>\r\n"
-            "<META HTTP-EQUIV='Content-Type' CONTENT='text/html; charset=ISO-8859-1'>\r\n"
-            "</HEAD>\r\n"
-            "<BODY><H1>401 Unauthorized.</H1></BODY>\r\n"
-            "</HTML>\r\n", rfc1123Time().c_str(), FormatFullVersion().c_str());
+                         "Date: %s\r\n"
+                         "Server: iocoin-json-rpc/%s\r\n"
+                         "WWW-Authenticate: Basic realm=\"jsonrpc\"\r\n"
+                         "Content-Type: text/html\r\n"
+                         "Content-Length: 296\r\n"
+                         "\r\n"
+                         "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\"\r\n"
+                         "\"http://www.w3.org/TR/1999/REC-html401-19991224/loose.dtd\">\r\n"
+                         "<HTML>\r\n"
+                         "<HEAD>\r\n"
+                         "<TITLE>Error</TITLE>\r\n"
+                         "<META HTTP-EQUIV='Content-Type' CONTENT='text/html; charset=ISO-8859-1'>\r\n"
+                         "</HEAD>\r\n"
+                         "<BODY><H1>401 Unauthorized.</H1></BODY>\r\n"
+                         "</HTML>\r\n", rfc1123Time().c_str(), FormatFullVersion().c_str());
     const char *cStatus;
-         if (nStatus == HTTP_OK) cStatus = "OK";
+    if (nStatus == HTTP_OK) cStatus = "OK";
     else if (nStatus == HTTP_BAD_REQUEST) cStatus = "Bad Request";
     else if (nStatus == HTTP_FORBIDDEN) cStatus = "Forbidden";
     else if (nStatus == HTTP_NOT_FOUND) cStatus = "Not Found";
     else if (nStatus == HTTP_INTERNAL_SERVER_ERROR) cStatus = "Internal Server Error";
     else cStatus = "";
     return strprintf(
-            "HTTP/1.1 %d %s\r\n"
-            "Date: %s\r\n"
-            "Connection: %s\r\n"
-            "Content-Length: %" PRIszu "\r\n"
-            "Content-Type: application/json\r\n"
-            "Server: iocoin-json-rpc/%s\r\n"
-            "\r\n"
-            "%s",
-        nStatus,
-        cStatus,
-        rfc1123Time().c_str(),
-        keepalive ? "keep-alive" : "close",
-        strMsg.size(),
-        FormatFullVersion().c_str(),
-        strMsg.c_str());
+               "HTTP/1.1 %d %s\r\n"
+               "Date: %s\r\n"
+               "Connection: %s\r\n"
+               "Content-Length: %" PRIszu "\r\n"
+               "Content-Type: application/json\r\n"
+               "Server: iocoin-json-rpc/%s\r\n"
+               "\r\n"
+               "%s",
+               nStatus,
+               cStatus,
+               rfc1123Time().c_str(),
+               keepalive ? "keep-alive" : "close",
+               strMsg.size(),
+               FormatFullVersion().c_str(),
+               strMsg.c_str());
 }
 
 int ReadHTTPStatus(std::basic_istream<char>& stream, int &proto)
@@ -582,7 +591,8 @@ bool HTTPAuthorized(map<string, string>& mapHeaders)
     string strAuth = mapHeaders["authorization"];
     if (strAuth.substr(0,6) != "Basic ")
         return false;
-    string strUserPass64 = strAuth.substr(6); boost::trim(strUserPass64);
+    string strUserPass64 = strAuth.substr(6);
+    boost::trim(strUserPass64);
     string strUserPass = DecodeBase64(strUserPass64);
     return TimingResistantEqual(strUserPass, strRPCUserColonPass);
 }
@@ -639,22 +649,22 @@ bool ClientAllowed(const boost::asio::ip::address& address)
 {
     // Make sure that IPv4-compatible and IPv4-mapped IPv6 addresses are treated as IPv4 addresses
     if (address.is_v6()
-     && (address.to_v6().is_v4_compatible()
-      || address.to_v6().is_v4_mapped()))
+            && (address.to_v6().is_v4_compatible()
+                || address.to_v6().is_v4_mapped()))
         return ClientAllowed(address.to_v6().to_v4());
 
     if (address == asio::ip::address_v4::loopback()
-     || address == asio::ip::address_v6::loopback()
-     || (address.is_v4()
-         // Check whether IPv4 addresses match 127.0.0.0/8 (loopback subnet)
-      && (address.to_v4().to_ulong() & 0xff000000) == 0x7f000000))
+            || address == asio::ip::address_v6::loopback()
+            || (address.is_v4()
+                // Check whether IPv4 addresses match 127.0.0.0/8 (loopback subnet)
+                && (address.to_v4().to_ulong() & 0xff000000) == 0x7f000000))
         return true;
 
     const string strAddress = address.to_string();
     const vector<string>& vAllow = mapMultiArgs["-rpcallowip"];
     BOOST_FOREACH(string strAllow, vAllow)
-        if (WildcardMatch(strAddress, strAllow))
-            return true;
+    if (WildcardMatch(strAddress, strAllow))
+        return true;
     return false;
 }
 
@@ -726,9 +736,9 @@ class AcceptedConnectionImpl : public AcceptedConnection
 {
 public:
     AcceptedConnectionImpl(
-            asio::io_context& io_context,
-            ssl::context &context,
-            bool fUseSSL) :
+        asio::io_context& io_context,
+        ssl::context &context,
+        bool fUseSSL) :
         sslStream(io_context, context),
         _d(sslStream, fUseSSL),
         _stream(_d)
@@ -793,23 +803,23 @@ static void RPCAcceptHandler(boost::shared_ptr< basic_socket_acceptor<Protocol, 
  */
 template <typename Protocol, typename SocketAcceptorService>
 static void RPCListen(boost::shared_ptr< basic_socket_acceptor<Protocol, SocketAcceptorService> > acceptor,
-                   asio::io_context& io_context,
-                   ssl::context& context,
-                   const bool fUseSSL)
+                      asio::io_context& io_context,
+                      ssl::context& context,
+                      const bool fUseSSL)
 {
     // Accept connection
     AcceptedConnectionImpl<Protocol>* conn = new AcceptedConnectionImpl<Protocol>(io_context, context, fUseSSL);
 
     acceptor->async_accept(
-            conn->sslStream.lowest_layer(),
-            conn->peer,
-            boost::bind(&RPCAcceptHandler<Protocol, SocketAcceptorService>,
-                acceptor,
-		boost::ref(io_context),
-                boost::ref(context),
-                fUseSSL,
-                conn,
-                boost::asio::placeholders::error));
+        conn->sslStream.lowest_layer(),
+        conn->peer,
+        boost::bind(&RPCAcceptHandler<Protocol, SocketAcceptorService>,
+                    acceptor,
+                    boost::ref(io_context),
+                    boost::ref(context),
+                    fUseSSL,
+                    conn,
+                    boost::asio::placeholders::error));
 }
 
 /**
@@ -826,7 +836,7 @@ static void RPCAcceptHandler(boost::shared_ptr< basic_socket_acceptor<Protocol, 
     vnThreadsRunning[THREAD_RPCLISTENER]++;
     // Immediately start accepting new connections, except when we're cancelled or our socket is closed.
     if (error != asio::error::operation_aborted
-     && acceptor->is_open())
+            && acceptor->is_open())
         RPCListen(acceptor, io_context, context, fUseSSL);
 
     AcceptedConnectionImpl<ip::tcp>* tcp_conn = dynamic_cast< AcceptedConnectionImpl<ip::tcp>* >(conn);
@@ -841,7 +851,7 @@ static void RPCAcceptHandler(boost::shared_ptr< basic_socket_acceptor<Protocol, 
     // do this before starting client thread, to filter out
     // certain DoS and misbehaving clients.
     else if (tcp_conn
-          && !ClientAllowed(tcp_conn->peer.address()))
+             && !ClientAllowed(tcp_conn->peer.address()))
     {
         // Only send a 403 if we're not using SSL to prevent a DoS during the SSL handshake.
         if (!fUseSSL)
@@ -864,7 +874,7 @@ void ThreadRPCServer2(void* parg)
 
     strRPCUserColonPass = mapArgs["-rpcuser"] + ":" + mapArgs["-rpcpassword"];
     if ((mapArgs["-rpcpassword"] == "") ||
-        (mapArgs["-rpcuser"] == mapArgs["-rpcpassword"]))
+            (mapArgs["-rpcuser"] == mapArgs["-rpcpassword"]))
     {
         unsigned char rand_pwd[32];
         RAND_bytes(rand_pwd, 32);
@@ -874,19 +884,19 @@ void ThreadRPCServer2(void* parg)
         else if (mapArgs.count("-daemon"))
             strWhatAmI = strprintf(_("To use the %s option"), "\"-daemon\"");
         uiInterface.ThreadSafeMessageBox(strprintf(
-            _("%s, you must set a rpcpassword in the configuration file:\n %s\n"
-              "It is recommended you use the following random password:\n"
-              "rpcuser=iocoinrpc\n"
-              "rpcpassword=%s\n"
-              "(you do not need to remember this password)\n"
-              "The username and password MUST NOT be the same.\n"
-              "If the file does not exist, create it with owner-readable-only file permissions.\n"
-              "It is also recommended to set alertnotify so you are notified of problems;\n"
-              "for example: alertnotify=echo %%s | mail -s \"I/OCoin Alert\" admin@foo.com\n"),
-                strWhatAmI.c_str(),
-                GetConfigFile().string().c_str(),
-                EncodeBase58(&rand_pwd[0],&rand_pwd[0]+32).c_str()),
-            _("Error"), CClientUIInterface::OK | CClientUIInterface::MODAL);
+                                             _("%s, you must set a rpcpassword in the configuration file:\n %s\n"
+                                               "It is recommended you use the following random password:\n"
+                                               "rpcuser=iocoinrpc\n"
+                                               "rpcpassword=%s\n"
+                                               "(you do not need to remember this password)\n"
+                                               "The username and password MUST NOT be the same.\n"
+                                               "If the file does not exist, create it with owner-readable-only file permissions.\n"
+                                               "It is also recommended to set alertnotify so you are notified of problems;\n"
+                                               "for example: alertnotify=echo %%s | mail -s \"I/OCoin Alert\" admin@foo.com\n"),
+                                             strWhatAmI.c_str(),
+                                             GetConfigFile().string().c_str(),
+                                             EncodeBase58(&rand_pwd[0],&rand_pwd[0]+32).c_str()),
+                                         _("Error"), CClientUIInterface::OK | CClientUIInterface::MODAL);
         StartShutdown();
         return;
     }
@@ -937,8 +947,8 @@ void ThreadRPCServer2(void* parg)
         RPCListen(acceptor, io_context, context, fUseSSL);
         // Cancel outstanding listen-requests for this acceptor when shutting down
         StopRequests.connect(signals2::slot<void ()>(
-                    static_cast<void (ip::tcp::acceptor::*)()>(&ip::tcp::acceptor::close), acceptor.get())
-                .track(acceptor));
+                                 static_cast<void (ip::tcp::acceptor::*)()>(&ip::tcp::acceptor::close), acceptor.get())
+                             .track(acceptor));
 
         fListening = true;
     }
@@ -963,8 +973,8 @@ void ThreadRPCServer2(void* parg)
             RPCListen(acceptor, io_context, context, fUseSSL);
             // Cancel outstanding listen-requests for this acceptor when shutting down
             StopRequests.connect(signals2::slot<void ()>(
-                        static_cast<void (ip::tcp::acceptor::*)()>(&ip::tcp::acceptor::close), acceptor.get())
-                    .track(acceptor));
+                                     static_cast<void (ip::tcp::acceptor::*)()>(&ip::tcp::acceptor::close), acceptor.get())
+                                 .track(acceptor));
 
             fListening = true;
         }
@@ -994,7 +1004,9 @@ public:
     string strMethod;
     Array params;
 
-    JSONRequest() { id = Value::null; }
+    JSONRequest() {
+        id = Value::null;
+    }
     void parse(const Value& valRequest);
 };
 
@@ -1130,7 +1142,7 @@ void ThreadRPCServer3(void* parg)
                 // Send reply
                 strReply = JSONRPCReply(result, Value::null, jreq.id);
 
-            // array of requests
+                // array of requests
             } else if (valRequest.type() == array_type)
                 strReply = JSONRPCExecBatch(valRequest.get_array());
             else
@@ -1167,7 +1179,7 @@ json_spirit::Value CRPCTable::execute(const std::string &strMethod, const json_s
     // Observe safe mode
     string strWarning = GetWarnings("rpc");
     if (strWarning != "" && !GetBoolArg("-disablesafemode") &&
-        !pcmd->okSafeMode)
+            !pcmd->okSafeMode)
         throw JSONRPCError(RPC_FORBIDDEN_BY_SAFE_MODE, string("Safe mode: ") + strWarning);
 
     try
@@ -1195,9 +1207,9 @@ Object CallRPC(const string& strMethod, const Array& params)
 {
     if (mapArgs["-rpcuser"] == "" && mapArgs["-rpcpassword"] == "")
         throw runtime_error(strprintf(
-            _("You must set rpcpassword=<password> in the configuration file:\n%s\n"
-              "If the file does not exist, create it with owner-readable-only file permissions."),
-                GetConfigFile().string().c_str()));
+                                _("You must set rpcpassword=<password> in the configuration file:\n%s\n"
+                                  "If the file does not exist, create it with owner-readable-only file permissions."),
+                                GetConfigFile().string().c_str()));
 
     // Connect to localhost
     bool fUseSSL = GetBoolArg("-rpcssl");
@@ -1271,7 +1283,7 @@ Array RPCConvertValues(const std::string &strMethod, const std::vector<std::stri
 {
     Array params;
     BOOST_FOREACH(const std::string &param, strParams)
-        params.push_back(param);
+    params.push_back(param);
 
     int n = params.size();
 
@@ -1299,7 +1311,10 @@ Array RPCConvertValues(const std::string &strMethod, const std::vector<std::stri
     if (strMethod == "getblockbynumber"       && n > 1) ConvertTo<bool>(params[1]);
     if (strMethod == "getblockhash"           && n > 0) ConvertTo<int64_t>(params[0]);
     if (strMethod == "gettxout"           && n == 2) ConvertTo<int64_t>(params[1]);
-    if (strMethod == "gettxout"           && n == 3) { ConvertTo<int64_t>(params[1]); ConvertTo<bool>(params[2]); }
+    if (strMethod == "gettxout"           && n == 3) {
+        ConvertTo<int64_t>(params[1]);
+        ConvertTo<bool>(params[2]);
+    }
     if (strMethod == "getnetworkmhashps"      && n > 0) ConvertTo<int64_t>(params[0]);
     if (strMethod == "getnetworkmhashps"      && n > 1) ConvertTo<int64_t>(params[1]);
     if (strMethod == "move"                   && n > 2) ConvertTo<double>(params[2]);
@@ -1329,7 +1344,10 @@ Array RPCConvertValues(const std::string &strMethod, const std::vector<std::stri
     if (strMethod == "listunspent"            && n > 0) ConvertTo<int64_t>(params[0]);
     if (strMethod == "listunspent"            && n > 1) ConvertTo<int64_t>(params[1]);
     if (strMethod == "listunspent"            && n > 2) ConvertTo<Array>(params[2]);
-    if (strMethod == "crawgen") { ConvertTo<double>(params[0]); ConvertTo<Object>(params[1]); }
+    if (strMethod == "crawgen") {
+        ConvertTo<double>(params[0]);
+        ConvertTo<Object>(params[1]);
+    }
     if (strMethod == "getrawtransaction"      && n > 1) ConvertTo<int64_t>(params[1]);
     if (strMethod == "createrawtransaction"   && n > 0) ConvertTo<Array>(params[0]);
     if (strMethod == "createrawtransaction"   && n > 1) ConvertTo<Object>(params[1]);

@@ -1,3 +1,6 @@
+
+
+
 #ifndef BBUFFER_H
 #define BBUFFER_H
 
@@ -7,7 +10,7 @@ typedef char Burst;
 
 class BurstBuffer
 {
-  public:
+public:
     BurstBuffer();
     BurstBuffer(const BurstBuffer& other);
     virtual ~BurstBuffer();
@@ -20,33 +23,33 @@ class BurstBuffer
 
     Burst* array()
     {
-      return this->b_;
+        return this->b_;
     }
 
     int size() const
     {
-      return this->limit_;
+        return this->limit_;
     }
 
     int resize(int limit);
 
     int position() const
     {
-      return this->delta_;
+        return this->delta_;
     }
 
     int rewind();
 
     BurstBuffer& clear()
     {
-      if(this->b_ != NULL)
-        delete[] this->b_;
+        if(this->b_ != NULL)
+            delete[] this->b_;
 
-      b_=NULL;
-      delta_=0;
-      limit_=0;
+        b_=NULL;
+        delta_=0;
+        limit_=0;
 
-      return *this;
+        return *this;
     }
 
     int prepend(const BurstBuffer& other);
@@ -55,7 +58,7 @@ class BurstBuffer
 
     void dump();
 
-  private:
+private:
     Burst* b_;
     int   limit_;
     int   delta_;

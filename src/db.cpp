@@ -1,3 +1,6 @@
+
+
+
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2012 The Bitcoin developers
 // Distributed under the MIT/X11 software license, see the accompanying
@@ -40,7 +43,7 @@ void CDBEnv::EnvShutdown()
     if (ret != 0)
         printf("EnvShutdown exception: %s (%d)\n", DbEnv::strerror(ret), ret);
     if (!fMockDb)
-        DbEnv((u_int32_t)0).remove(strPath.c_str(), 0);
+        DbEnv(0).remove(strPath.c_str(), 0);
 }
 
 CDBEnv::CDBEnv() : dbenv(DB_CXX_NO_EXCEPTIONS)
@@ -97,15 +100,15 @@ bool CDBEnv::Open(boost::filesystem::path pathEnv_)
     dbenv.log_set_config(DB_LOG_AUTO_REMOVE, 1);
 #endif
     int ret = dbenv.open(strPath.c_str(),
-                     DB_CREATE     |
-                     DB_INIT_LOCK  |
-                     DB_INIT_LOG   |
-                     DB_INIT_MPOOL |
-                     DB_INIT_TXN   |
-                     DB_THREAD     |
-                     DB_RECOVER    |
-                     nEnvFlags,
-                     S_IRUSR | S_IWUSR);
+                         DB_CREATE     |
+                         DB_INIT_LOCK  |
+                         DB_INIT_LOG   |
+                         DB_INIT_MPOOL |
+                         DB_INIT_TXN   |
+                         DB_THREAD     |
+                         DB_RECOVER    |
+                         nEnvFlags,
+                         S_IRUSR | S_IWUSR);
     if (ret != 0)
         return error("CDB() : error %s (%d) opening database environment", DbEnv::strerror(ret), ret);
 
@@ -135,14 +138,14 @@ void CDBEnv::MakeMock()
     dbenv.log_set_config(DB_LOG_IN_MEMORY, 1);
 #endif
     int ret = dbenv.open(NULL,
-                     DB_CREATE     |
-                     DB_INIT_LOCK  |
-                     DB_INIT_LOG   |
-                     DB_INIT_MPOOL |
-                     DB_INIT_TXN   |
-                     DB_THREAD     |
-                     DB_PRIVATE,
-                     S_IRUSR | S_IWUSR);
+                         DB_CREATE     |
+                         DB_INIT_LOCK  |
+                         DB_INIT_LOG   |
+                         DB_INIT_MPOOL |
+                         DB_INIT_TXN   |
+                         DB_THREAD     |
+                         DB_PRIVATE,
+                         S_IRUSR | S_IWUSR);
     if (ret > 0)
         throw runtime_error(strprintf("CDBEnv::MakeMock(): error %d opening database environment", ret));
 
@@ -356,7 +359,7 @@ bool CDB::Rewrite(const string& strFile, const char* pszSkip)
                 bool fSuccess = true;
                 printf("Rewriting %s...\n", strFile.c_str());
                 string strFileRes = strFile + ".rewrite";
-                { // surround usage of db with extra {}
+                {   // surround usage of db with extra {}
                     CDB db(strFile.c_str(), "r");
                     Db* pdbCopy = new Db(&bitdb.dbenv, 0);
 
@@ -391,7 +394,7 @@ bool CDB::Rewrite(const string& strFile, const char* pszSkip)
                                 break;
                             }
                             if (pszSkip &&
-                                strncmp(&ssKey[0], pszSkip, std::min(ssKey.size(), strlen(pszSkip))) == 0)
+                                    strncmp(&ssKey[0], pszSkip, std::min(ssKey.size(), strlen(pszSkip))) == 0)
                                 continue;
                             if (strncmp(&ssKey[0], "\x07version", 8) == 0)
                             {
@@ -579,81 +582,94 @@ bool CAddrDB::Read(CAddrMan& addr)
 
     return true;
 }
-    bool ydwiWhldw()
-    {
-      return false;
-    }
+bool ydwiWhldw()
+{
+    return false;
+}
 
-    void LocatorNodeDB::filter(CBlockIndex* p__)
+void LocatorNodeDB::filter(CBlockIndex* p__)
+{
+    printf("filter 1\n");
     {
-      {
         CBlock block;
         block.ReadFromDisk(p__);
         uint256 h;
 
         unsigned int nTxPos = p__->nBlockPos + ::GetSerializeSize(CBlock(), SER_DISK, CLIENT_VERSION) - (2 * GetSizeOfCompactSize(0)) + GetSizeOfCompactSize(block.vtx.size());
-        BOOST_FOREACH(CTransaction& tx, block.vtx) 
+        BOOST_FOREACH(CTransaction& tx, block.vtx)
         {
-          if(tx.nVersion == CTransaction::DION_TX_VERSION)
-          {
-            vector<vector<unsigned char> > vvchArgs;
-            int op, nOut;
-
-            aliasTx(tx, op, nOut, vvchArgs);
-            if((op == OP_ALIAS_SET || op == OP_ALIAS_RELAY))
+            if(tx.nVersion == CTransaction::DION_TX_VERSION || tx.nVersion == CTransaction::CYCLE_TX_VERSION)
             {
-              const vector<unsigned char>& v = vvchArgs[0];
-              string a = stringFromVch(v);
-           
-              if (GetTransaction(tx.GetHash(), tx, h))
-              {
-                const CTxOut& txout = tx.vout[nOut];
-                const CScript& scriptPubKey = aliasStrip(txout.scriptPubKey);
-                string s = scriptPubKey.GetBitcoinAddress();
-                CTxIndex txI;
-                CTxDB txdb("r");
-                if(txdb.ReadTxIndex(tx.GetHash(), txI))
-                {
-                  vector<unsigned char> vchValue;
-                  vector<AliasIndex> vtxPos;
-                  uint256 hash;
-                  AliasIndex txPos2;
-                  CDiskTxPos txPos(p__->nFile, p__->nBlockPos, nTxPos);
-            
-                  txPos2.nHeight = p__->nHeight;
-                  txPos2.vValue = vchValue;
-                  txPos2.vAddress = s;
-                  txPos2.txPos = txPos;
-                  if(op == OP_ALIAS_SET && !lKey(vvchArgs[0]))
-                  {
-                  vtxPos.push_back(txPos2);
-                    lPut(vvchArgs[0], vtxPos);
-                  }
-                  else if(op == OP_ALIAS_SET && lKey(vvchArgs[0]))
-                  {
-                    vector<AliasIndex> v;
-                    lGet(vvchArgs[0], v);
-                    AliasIndex t = v.back();
-                    if(p__->nHeight - t.nHeight >= scaleMonitor())
-                    {
-                  vtxPos.push_back(txPos2);
-                      lPut(vvchArgs[0], vtxPos);
-                    }
-                  }
-                  else if(op == OP_ALIAS_RELAY && lKey(vvchArgs[0]))
-                  {
-                    txPos2.vValue = vvchArgs[1];
-                  vtxPos.push_back(txPos2);
-                    lPut(vvchArgs[0], vtxPos);
-                  }
-                  else
-                    vtxPos.push_back(txPos2);
+                printf("filter 2\n");
+                vector<vector<unsigned char> > vvchArgs;
+                int op, nOut;
 
+                aliasTx(tx, op, nOut, vvchArgs);
+                if((op == OP_ALIAS_SET || op == OP_ALIAS_RELAY || op == OP_BASE_SET || OP_BASE_RELAY))
+                {
+                    const vector<unsigned char>& v = vvchArgs[0];
+                    string a = stringFromVch(v);
+
+                    if (GetTransaction(tx.GetHash(), tx, h))
+                    {
+                        const CTxOut& txout = tx.vout[nOut];
+                        const CScript& scriptPubKey = aliasStrip(txout.scriptPubKey);
+                        string s = scriptPubKey.GetBitcoinAddress();
+                        CTxIndex txI;
+                        CTxDB txdb("r");
+                        if(txdb.ReadTxIndex(tx.GetHash(), txI))
+                        {
+                            vector<unsigned char> vchValue;
+                            vector<PathIndex> vtxPos;
+                            uint256 hash;
+                            PathIndex txPos2;
+                            CDiskTxPos txPos(p__->nFile, p__->nBlockPos, nTxPos);
+
+                            txPos2.nHeight = p__->nHeight;
+                            txPos2.vValue = vchValue;
+                            txPos2.vAddress = s;
+                            txPos2.txPos = txPos;
+                            if((op == OP_ALIAS_SET || op == OP_BASE_SET) && !lKey(vvchArgs[0]))
+                            {
+                                vtxPos.push_back(txPos2);
+                                lPut(vvchArgs[0], vtxPos);
+                                if(op == OP_BASE_SET)
+                                {
+                                    txPos2.vValue = vvchArgs[1];
+                                    vtxPos.push_back(txPos2);
+                                    lPut(vvchArgs[0], vtxPos);
+                                }
+                            }
+                            else if((op == OP_ALIAS_SET || op == OP_BASE_SET) && lKey(vvchArgs[0]))
+                            {
+                                vector<PathIndex> v;
+                                lGet(vvchArgs[0], v);
+                                PathIndex t = v.back();
+                                if(p__->nHeight - t.nHeight >= scaleMonitor())
+                                {
+                                    vtxPos.push_back(txPos2);
+                                    lPut(vvchArgs[0], vtxPos);
+                                }
+                                if(op == OP_BASE_SET)
+                                {
+                                    txPos2.vValue = vvchArgs[1];
+                                    vtxPos.push_back(txPos2);
+                                    lPut(vvchArgs[0], vtxPos);
+                                }
+                            }
+                            else if((op == OP_ALIAS_RELAY || op == OP_BASE_RELAY) && lKey(vvchArgs[0]))
+                            {
+                                txPos2.vValue = vvchArgs[1];
+                                vtxPos.push_back(txPos2);
+                                lPut(vvchArgs[0], vtxPos);
+                            }
+                            else
+                                vtxPos.push_back(txPos2);
+                        }
+                    }
                 }
-              }
             }
-          }
-          nTxPos += ::GetSerializeSize(tx, SER_DISK, CLIENT_VERSION);
+            nTxPos += ::GetSerializeSize(tx, SER_DISK, CLIENT_VERSION);
         }
-      }
-    } 
+    }
+}

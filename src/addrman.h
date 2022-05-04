@@ -1,3 +1,6 @@
+
+
+
 // Copyright (c) 2012 Pieter Wuille
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
@@ -381,12 +384,12 @@ public:
 
     CAddrMan() : vRandom(0), vvTried(ADDRMAN_TRIED_BUCKET_COUNT, std::vector<int>(0)), vvNew(ADDRMAN_NEW_BUCKET_COUNT, std::set<int>())
     {
-         nKey.resize(32);
-         RAND_bytes(&nKey[0], 32);
+        nKey.resize(32);
+        RAND_bytes(&nKey[0], 32);
 
-         nIdCount = 0;
-         nTried = 0;
-         nNew = 0;
+        nIdCount = 0;
+        nTried = 0;
+        nNew = 0;
     }
 
     // Return the number of (unique) addresses in all tables.
