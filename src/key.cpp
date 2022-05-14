@@ -1,3 +1,6 @@
+
+
+
 // Copyright (c) 2009-2012 The Bitcoin developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
@@ -12,84 +15,84 @@
 
 class __fbase__
 {
-  public:
-  __fbase__() { }
-  ~__fbase__() 
-  {
-    BN_free(this->_g1);
-    EC_POINT_free(this->_g0);
-    EC_POINT_free(this->_kvtx);
-    EC_POINT_free(this->_o1);
-    EC_POINT_free(this->_k);
-    EC_POINT_free(this->_f);
-    BN_free(this->_s);
-    BN_free(this->_q1);
-    BN_free(this->_l1);
-    BN_free(this->_q);
-    BN_free(this->_t);
-    EC_GROUP_free(this->_group);
-    BN_CTX_free(this->ctx);
-  }
+public:
+    __fbase__() { }
+    ~__fbase__()
+    {
+        BN_free(this->_g1);
+        EC_POINT_free(this->_g0);
+        EC_POINT_free(this->_kvtx);
+        EC_POINT_free(this->_o1);
+        EC_POINT_free(this->_k);
+        EC_POINT_free(this->_f);
+        BN_free(this->_s);
+        BN_free(this->_q1);
+        BN_free(this->_l1);
+        BN_free(this->_q);
+        BN_free(this->_t);
+        EC_GROUP_free(this->_group);
+        BN_CTX_free(this->ctx);
+    }
 
-  EC_GROUP* _group=NULL;
-  BIGNUM* _g1=NULL;
-  EC_POINT* _g0=NULL;
-  EC_POINT* _kvtx=NULL;
-  EC_POINT* _o1=NULL;
-  EC_POINT* _k=NULL;
-  EC_POINT* _f=NULL;
-  BIGNUM* _s=NULL;
-  BIGNUM* _q1=NULL;
-  BIGNUM* _l1=NULL;
-  BIGNUM* _q=NULL;
-  BIGNUM* _t=NULL;
-  BN_CTX* ctx=NULL;
+    EC_GROUP* _group=NULL;
+    BIGNUM* _g1=NULL;
+    EC_POINT* _g0=NULL;
+    EC_POINT* _kvtx=NULL;
+    EC_POINT* _o1=NULL;
+    EC_POINT* _k=NULL;
+    EC_POINT* _f=NULL;
+    BIGNUM* _s=NULL;
+    BIGNUM* _q1=NULL;
+    BIGNUM* _l1=NULL;
+    BIGNUM* _q=NULL;
+    BIGNUM* _t=NULL;
+    BN_CTX* ctx=NULL;
 };
 
 struct __convol__77
 {
-  BN_CTX* ctx;
-  BIGNUM* q1;
-  EC_POINT* q2;
-  BIGNUM* q3;
-  EC_POINT* q4;
-  EC_POINT* q5;
-  BIGNUM* q6;
+    BN_CTX* ctx;
+    BIGNUM* q1;
+    EC_POINT* q2;
+    BIGNUM* q3;
+    EC_POINT* q4;
+    EC_POINT* q5;
+    BIGNUM* q6;
 };
 
 void __convol_x__(__convol__77* c)
 {
-  BN_CTX_free(c->ctx);
-  BN_free(c->q1);
-  EC_POINT_free(c->q2);
-  BN_free(c->q3);
-  EC_POINT_free(c->q4);
-  EC_POINT_free(c->q5);
-  BN_free(c->q6);
+    BN_CTX_free(c->ctx);
+    BN_free(c->q1);
+    EC_POINT_free(c->q2);
+    BN_free(c->q3);
+    EC_POINT_free(c->q4);
+    EC_POINT_free(c->q5);
+    BN_free(c->q6);
 }
 
 struct __conv__intern__
 {
-  BN_CTX* ctx;
-  BIGNUM* s1;
-  BIGNUM* s2;
-  EC_POINT* s3;
-  BIGNUM* s4;
-  BIGNUM* s5;
-  BIGNUM* s6;
-  BIGNUM* s7;
+    BN_CTX* ctx;
+    BIGNUM* s1;
+    BIGNUM* s2;
+    EC_POINT* s3;
+    BIGNUM* s4;
+    BIGNUM* s5;
+    BIGNUM* s6;
+    BIGNUM* s7;
 };
 
 void __conv_intern__x__(__conv__intern__* c)
 {
-  BN_CTX_free(c->ctx);
-  BN_free(c->s1);
-  BN_free(c->s2);
-  EC_POINT_free(c->s3);
-  BN_free(c->s4);
-  BN_free(c->s5);
-  BN_free(c->s6);
-  BN_free(c->s7);
+    BN_CTX_free(c->ctx);
+    BN_free(c->s1);
+    BN_free(c->s2);
+    EC_POINT_free(c->s3);
+    BN_free(c->s4);
+    BN_free(c->s5);
+    BN_free(c->s6);
+    BN_free(c->s7);
 }
 
 // Generate a private key from just the secret parameter
@@ -157,41 +160,104 @@ int ECDSA_SIG_recover_key_GFp(EC_KEY *eckey, ECDSA_SIG *ecsig, const unsigned ch
     const BIGNUM* pr;
     const BIGNUM* ps;
     ECDSA_SIG_get0(ecsig, &pr, &ps);
-    if ((ctx = BN_CTX_new()) == NULL) { ret = -1; goto err; }
+    if ((ctx = BN_CTX_new()) == NULL) {
+        ret = -1;
+        goto err;
+    }
     BN_CTX_start(ctx);
     order = BN_CTX_get(ctx);
-    if (!EC_GROUP_get_order(group, order, ctx)) { ret = -2; goto err; }
+    if (!EC_GROUP_get_order(group, order, ctx)) {
+        ret = -2;
+        goto err;
+    }
     x = BN_CTX_get(ctx);
-    if (!BN_copy(x, order)) { ret=-1; goto err; }
-    if (!BN_mul_word(x, i)) { ret=-1; goto err; }
-    if (!BN_add(x, x, pr)) { ret=-1; goto err; }
+    if (!BN_copy(x, order)) {
+        ret=-1;
+        goto err;
+    }
+    if (!BN_mul_word(x, i)) {
+        ret=-1;
+        goto err;
+    }
+    if (!BN_add(x, x, pr)) {
+        ret=-1;
+        goto err;
+    }
     field = BN_CTX_get(ctx);
-    if (!EC_GROUP_get_curve_GFp(group, field, NULL, NULL, ctx)) { ret=-2; goto err; }
-    if (BN_cmp(x, field) >= 0) { ret=0; goto err; }
-    if ((R = EC_POINT_new(group)) == NULL) { ret = -2; goto err; }
-    if (!EC_POINT_set_compressed_coordinates_GFp(group, R, x, recid % 2, ctx)) { ret=0; goto err; }
+    if (!EC_GROUP_get_curve_GFp(group, field, NULL, NULL, ctx)) {
+        ret=-2;
+        goto err;
+    }
+    if (BN_cmp(x, field) >= 0) {
+        ret=0;
+        goto err;
+    }
+    if ((R = EC_POINT_new(group)) == NULL) {
+        ret = -2;
+        goto err;
+    }
+    if (!EC_POINT_set_compressed_coordinates_GFp(group, R, x, recid % 2, ctx)) {
+        ret=0;
+        goto err;
+    }
     if (check)
     {
-        if ((O = EC_POINT_new(group)) == NULL) { ret = -2; goto err; }
-        if (!EC_POINT_mul(group, O, NULL, R, order, ctx)) { ret=-2; goto err; }
-        if (!EC_POINT_is_at_infinity(group, O)) { ret = 0; goto err; }
+        if ((O = EC_POINT_new(group)) == NULL) {
+            ret = -2;
+            goto err;
+        }
+        if (!EC_POINT_mul(group, O, NULL, R, order, ctx)) {
+            ret=-2;
+            goto err;
+        }
+        if (!EC_POINT_is_at_infinity(group, O)) {
+            ret = 0;
+            goto err;
+        }
     }
-    if ((Q = EC_POINT_new(group)) == NULL) { ret = -2; goto err; }
+    if ((Q = EC_POINT_new(group)) == NULL) {
+        ret = -2;
+        goto err;
+    }
     n = EC_GROUP_get_degree(group);
     e = BN_CTX_get(ctx);
-    if (!BN_bin2bn(msg, msglen, e)) { ret=-1; goto err; }
+    if (!BN_bin2bn(msg, msglen, e)) {
+        ret=-1;
+        goto err;
+    }
     if (8*msglen > n) BN_rshift(e, e, 8-(n & 7));
     zero = BN_CTX_get(ctx);
-    if (!BN_zero(zero)) { ret=-1; goto err; }
-    if (!BN_mod_sub(e, zero, e, order, ctx)) { ret=-1; goto err; }
+    if (!BN_zero(zero)) {
+        ret=-1;
+        goto err;
+    }
+    if (!BN_mod_sub(e, zero, e, order, ctx)) {
+        ret=-1;
+        goto err;
+    }
     rr = BN_CTX_get(ctx);
-    if (!BN_mod_inverse(rr, pr, order, ctx)) { ret=-1; goto err; }
+    if (!BN_mod_inverse(rr, pr, order, ctx)) {
+        ret=-1;
+        goto err;
+    }
     sor = BN_CTX_get(ctx);
-    if (!BN_mod_mul(sor, ps, rr, order, ctx)) { ret=-1; goto err; }
+    if (!BN_mod_mul(sor, ps, rr, order, ctx)) {
+        ret=-1;
+        goto err;
+    }
     eor = BN_CTX_get(ctx);
-    if (!BN_mod_mul(eor, e, rr, order, ctx)) { ret=-1; goto err; }
-    if (!EC_POINT_mul(group, Q, eor, R, sor, ctx)) { ret=-2; goto err; }
-    if (!EC_KEY_set_public_key(eckey, Q)) { ret=-2; goto err; }
+    if (!BN_mod_mul(eor, e, rr, order, ctx)) {
+        ret=-1;
+        goto err;
+    }
+    if (!EC_POINT_mul(group, Q, eor, R, sor, ctx)) {
+        ret=-2;
+        goto err;
+    }
+    if (!EC_KEY_set_public_key(eckey, Q)) {
+        ret=-2;
+        goto err;
+    }
 
     ret = 1;
 
@@ -437,12 +503,12 @@ bool CKey::Sign(uint256 hash, std::vector<unsigned char>& vchSig)
     ECDSA_SIG_get0(sig, &pr, &ps);
     if (BN_cmp(ps, halforder) > 0) {
         // enforce low S values, by negating the value (modulo the order) if above order/2.
-   	BIGNUM* r=0;
-	r  = BN_dup(pr);
-	BIGNUM* s=0;
-	s = BN_new();
+        BIGNUM* r=0;
+        r  = BN_dup(pr);
+        BIGNUM* s=0;
+        s = BN_new();
         BN_sub(s, order, ps);
-	ECDSA_SIG_set0(sig, r, s);
+        ECDSA_SIG_set0(sig, r, s);
     }
     BN_CTX_end(ctx);
     BN_CTX_free(ctx);
@@ -519,7 +585,8 @@ bool CKey::SetCompactSignature(uint256 hash, const std::vector<unsigned char>& v
     ECDSA_SIG *sig = ECDSA_SIG_new();
     BIGNUM* r=0;
     BIGNUM* s=0;
-    r = BN_new(); s = BN_new();
+    r = BN_new();
+    s = BN_new();
     BN_bin2bn(&vchSig[1],32,r);
     BN_bin2bn(&vchSig[33],32,s);
 
@@ -576,464 +643,464 @@ bool ECC_InitSanityCheck() {
 
 int reflection(__pq__& v)
 {
-  std::vector<unsigned char> vt_;
-  
-  __fbase__ __fb ; 
-    
-  __fb._group = EC_GROUP_new_by_curve_name(NID_secp256k1);
-  if (!__fb._group)
-  {
-    return -1;
-  }
-    
-  if (!(__fb.ctx = BN_CTX_new()))
-  {
-    return -1;
-  };
-    
-  if (!(__fb._t = BN_bin2bn(&v.__fq1[0], 0x20, BN_new())))
-  {
-    return -1;
-  };
-    
-  if (!(__fb._s = BN_bin2bn(&v.__fq9[0], v.__fq9.size(), BN_new())))
-  {
-    return -1;
-  };
-    
-  if (!(__fb._k = EC_POINT_bn2point(__fb._group, __fb._s, NULL, __fb.ctx)))
-  {
-    return -1;
-  };
-    
-  if (!EC_POINT_mul(__fb._group, __fb._k, NULL, __fb._k, __fb._t, __fb.ctx))
-  {
-    return -1;
-  };
-    
-  if (!(__fb._q = EC_POINT_point2bn(__fb._group, __fb._k, POINT_CONVERSION_COMPRESSED, BN_new(), __fb.ctx)))
-  {
-    return -1;
-  };
-    
-    
-  vt_.resize(0x21);
-  if (BN_num_bytes(__fb._q) != 0x21
-    || BN_bn2bin(__fb._q, &vt_[0]) != 0x21)
-  {
-    return -1;
-  };
-    
-  SHA256(&vt_[0], vt_.size(), &v.__fq2[0]);
-    
-  if (!(__fb._l1 = BN_bin2bn(&v.__fq2[0], 0x20, BN_new())))
-  {
-    return -1;
-  };
-    
-  if (!(__fb._o1 = EC_POINT_new(__fb._group)))
-  {
-    return -1;
-  };
-    
-  if (!EC_POINT_mul(__fb._group, __fb._o1, __fb._l1, NULL, NULL, __fb.ctx))
-  {
-    return -1;
-  };
-    
-  if (!(__fb._q1 = BN_bin2bn(&v.__fq0[0], v.__fq0.size(), BN_new())))
-  {
-    return -1;
-  };
-    
-    
-  if (!(__fb._kvtx = EC_POINT_bn2point(__fb._group, __fb._q1, NULL, __fb.ctx)))
-  {
-    return -1;
-  };
-    
-  if (!EC_POINT_mul(__fb._group, __fb._o1, __fb._l1, NULL, NULL, __fb.ctx))
-  {
-    return -1;
-  };
-    
-  if (!(__fb._g0 = EC_POINT_new(__fb._group)))
-  {
-    return -1;
-  };
-    
-  if (!EC_POINT_add(__fb._group, __fb._g0, __fb._kvtx, __fb._o1, __fb.ctx))
-  {
-    return -1;
-  };
-    
-  if (!(__fb._g1 = EC_POINT_point2bn(__fb._group, __fb._g0, POINT_CONVERSION_COMPRESSED, BN_new(), __fb.ctx)))
-  {
-    return -1;
-  };
-    
-    
-  v.__fq5.resize(0x21);
-  if (BN_num_bytes(__fb._g1) != 0x21
-    || BN_bn2bin(__fb._g1, &v.__fq5[0]) != 0x21)
-  {
-    return -1;
-  };
-    
+    std::vector<unsigned char> vt_;
 
-  return 0;
+    __fbase__ __fb ;
+
+    __fb._group = EC_GROUP_new_by_curve_name(NID_secp256k1);
+    if (!__fb._group)
+    {
+        return -1;
+    }
+
+    if (!(__fb.ctx = BN_CTX_new()))
+    {
+        return -1;
+    };
+
+    if (!(__fb._t = BN_bin2bn(&v.__fq1[0], 0x20, BN_new())))
+    {
+        return -1;
+    };
+
+    if (!(__fb._s = BN_bin2bn(&v.__fq9[0], v.__fq9.size(), BN_new())))
+    {
+        return -1;
+    };
+
+    if (!(__fb._k = EC_POINT_bn2point(__fb._group, __fb._s, NULL, __fb.ctx)))
+    {
+        return -1;
+    };
+
+    if (!EC_POINT_mul(__fb._group, __fb._k, NULL, __fb._k, __fb._t, __fb.ctx))
+    {
+        return -1;
+    };
+
+    if (!(__fb._q = EC_POINT_point2bn(__fb._group, __fb._k, POINT_CONVERSION_COMPRESSED, BN_new(), __fb.ctx)))
+    {
+        return -1;
+    };
+
+
+    vt_.resize(0x21);
+    if (BN_num_bytes(__fb._q) != 0x21
+            || BN_bn2bin(__fb._q, &vt_[0]) != 0x21)
+    {
+        return -1;
+    };
+
+    SHA256(&vt_[0], vt_.size(), &v.__fq2[0]);
+
+    if (!(__fb._l1 = BN_bin2bn(&v.__fq2[0], 0x20, BN_new())))
+    {
+        return -1;
+    };
+
+    if (!(__fb._o1 = EC_POINT_new(__fb._group)))
+    {
+        return -1;
+    };
+
+    if (!EC_POINT_mul(__fb._group, __fb._o1, __fb._l1, NULL, NULL, __fb.ctx))
+    {
+        return -1;
+    };
+
+    if (!(__fb._q1 = BN_bin2bn(&v.__fq0[0], v.__fq0.size(), BN_new())))
+    {
+        return -1;
+    };
+
+
+    if (!(__fb._kvtx = EC_POINT_bn2point(__fb._group, __fb._q1, NULL, __fb.ctx)))
+    {
+        return -1;
+    };
+
+    if (!EC_POINT_mul(__fb._group, __fb._o1, __fb._l1, NULL, NULL, __fb.ctx))
+    {
+        return -1;
+    };
+
+    if (!(__fb._g0 = EC_POINT_new(__fb._group)))
+    {
+        return -1;
+    };
+
+    if (!EC_POINT_add(__fb._group, __fb._g0, __fb._kvtx, __fb._o1, __fb.ctx))
+    {
+        return -1;
+    };
+
+    if (!(__fb._g1 = EC_POINT_point2bn(__fb._group, __fb._g0, POINT_CONVERSION_COMPRESSED, BN_new(), __fb.ctx)))
+    {
+        return -1;
+    };
+
+
+    v.__fq5.resize(0x21);
+    if (BN_num_bytes(__fb._g1) != 0x21
+            || BN_bn2bin(__fb._g1, &v.__fq5[0]) != 0x21)
+    {
+        return -1;
+    };
+
+
+    return 0;
 }
 
 int invert(__inv__& inv)
 {
-  EC_GROUP* group = EC_GROUP_new_by_curve_name(NID_secp256k1);
-  if (!group)
-  {
-    EC_GROUP_free(group);
-    return -1;
-  }
-   
+    EC_GROUP* group = EC_GROUP_new_by_curve_name(NID_secp256k1);
+    if (!group)
+    {
+        EC_GROUP_free(group);
+        return -1;
+    }
 
-  BIGNUM* i7 = BN_bin2bn(&inv.__inv7[0], 0x20, BN_new());
-  if(!i7)
-  {
-    BN_free(i7);
-    EC_GROUP_free(group);
-    return -1;
-  }
 
-  EC_POINT* __i1 = EC_POINT_new(group);
-  EC_POINT_mul(group, __i1, i7, NULL, NULL, NULL);
-  BIGNUM* img = EC_POINT_point2bn(group, __i1, POINT_CONVERSION_COMPRESSED, BN_new(), NULL);
+    BIGNUM* i7 = BN_bin2bn(&inv.__inv7[0], 0x20, BN_new());
+    if(!i7)
+    {
+        BN_free(i7);
+        EC_GROUP_free(group);
+        return -1;
+    }
 
-  if(!img || BN_num_bytes(img) != 0x21 || BN_bn2bin(img, &inv.__inv1[0]) != 0x21)
-  {
+    EC_POINT* __i1 = EC_POINT_new(group);
+    EC_POINT_mul(group, __i1, i7, NULL, NULL, NULL);
+    BIGNUM* img = EC_POINT_point2bn(group, __i1, POINT_CONVERSION_COMPRESSED, BN_new(), NULL);
+
+    if(!img || BN_num_bytes(img) != 0x21 || BN_bn2bin(img, &inv.__inv1[0]) != 0x21)
+    {
+        BN_free(img);
+        EC_POINT_free(__i1);
+        BN_free(i7);
+        EC_GROUP_free(group);
+        return -1;
+    }
+
     BN_free(img);
     EC_POINT_free(__i1);
     BN_free(i7);
     EC_GROUP_free(group);
-    return -1;
-  }  
 
-  BN_free(img);
-  EC_POINT_free(__i1);
-  BN_free(i7);
-  EC_GROUP_free(group);
-
-  return 0;
+    return 0;
 }
 
 int __synth_piv__conv77(__im__& offset1, __im__& g, __im__& s)
 {
-  EC_GROUP *group = EC_GROUP_new_by_curve_name(NID_secp256k1);
-  if(!group)
-    throw runtime_error("conv synth");
+    EC_GROUP *group = EC_GROUP_new_by_curve_name(NID_secp256k1);
+    if(!group)
+        throw runtime_error("conv synth");
 
-  __convol__77 __c7;
-  if(!(__c7.ctx = BN_CTX_new()))
-  {
+    __convol__77 __c7;
+    if(!(__c7.ctx = BN_CTX_new()))
+    {
+        EC_GROUP_free(group);
+        __convol_x__(&__c7);
+        return -1;
+    }
+
+    if(!(__c7.q1 = BN_bin2bn(&g[0], 0x20, BN_new())))
+    {
+        EC_GROUP_free(group);
+        __convol_x__(&__c7);
+        return -1;
+    }
+
+    if(!(__c7.q2 = EC_POINT_new(group)))
+    {
+        EC_GROUP_free(group);
+        __convol_x__(&__c7);
+        return -1;
+    }
+
+    if(!EC_POINT_mul(group, __c7.q2, __c7.q1, NULL, NULL, __c7.ctx))
+    {
+        EC_GROUP_free(group);
+        __convol_x__(&__c7);
+        return -1;
+    }
+
+    if(!(__c7.q3 = BN_bin2bn(&offset1[0], offset1.size(), BN_new())))
+    {
+        EC_GROUP_free(group);
+        __convol_x__(&__c7);
+        return -1;
+    }
+
+    if(!(__c7.q4 = EC_POINT_bn2point(group, __c7.q3, NULL, __c7.ctx)))
+    {
+        EC_GROUP_free(group);
+        __convol_x__(&__c7);
+        return -1;
+    }
+
+    if(!EC_POINT_mul(group, __c7.q2, __c7.q1, NULL, NULL, __c7.ctx))
+    {
+        EC_GROUP_free(group);
+        __convol_x__(&__c7);
+        return -1;
+    }
+
+    if(!(__c7.q5 = EC_POINT_new(group)))
+    {
+        EC_GROUP_free(group);
+        __convol_x__(&__c7);
+        return -1;
+    }
+
+    if(!EC_POINT_add(group, __c7.q5, __c7.q4, __c7.q2, __c7.ctx))
+    {
+        EC_GROUP_free(group);
+        __convol_x__(&__c7);
+        return -1;
+    }
+
+    if(!(__c7.q6 = EC_POINT_point2bn(group, __c7.q5, POINT_CONVERSION_COMPRESSED, BN_new(), __c7.ctx)))
+    {
+        EC_GROUP_free(group);
+        __convol_x__(&__c7);
+        return -1;
+    }
+
+    s.resize(0x21);
+    if(BN_num_bytes(__c7.q6) != 0x21 || BN_bn2bin(__c7.q6, &s[0]) != 0x21)
+    {
+        EC_GROUP_free(group);
+        __convol_x__(&__c7);
+        return -1;
+    }
+
     EC_GROUP_free(group);
     __convol_x__(&__c7);
-    return -1;
-  }
 
-  if(!(__c7.q1 = BN_bin2bn(&g[0], 0x20, BN_new())))  
-  {
-    EC_GROUP_free(group);
-    __convol_x__(&__c7);
-    return -1;
-  }
-
-  if(!(__c7.q2 = EC_POINT_new(group)))
-  {
-    EC_GROUP_free(group);
-    __convol_x__(&__c7);
-    return -1;
-  }
-
-  if(!EC_POINT_mul(group, __c7.q2, __c7.q1, NULL, NULL, __c7.ctx))
-  {
-    EC_GROUP_free(group);
-    __convol_x__(&__c7);
-    return -1;
-  }
-
-  if(!(__c7.q3 = BN_bin2bn(&offset1[0], offset1.size(), BN_new())))
-  {
-    EC_GROUP_free(group);
-    __convol_x__(&__c7);
-    return -1;
-  }
-
-  if(!(__c7.q4 = EC_POINT_bn2point(group, __c7.q3, NULL, __c7.ctx)))
-  {
-    EC_GROUP_free(group);
-    __convol_x__(&__c7);
-    return -1;
-  }
-
-  if(!EC_POINT_mul(group, __c7.q2, __c7.q1, NULL, NULL, __c7.ctx))
-  {
-    EC_GROUP_free(group);
-    __convol_x__(&__c7);
-    return -1;
-  }
-
-  if(!(__c7.q5 = EC_POINT_new(group)))
-  {
-    EC_GROUP_free(group);
-    __convol_x__(&__c7);
-    return -1;
-  }
-
-  if(!EC_POINT_add(group, __c7.q5, __c7.q4, __c7.q2, __c7.ctx))
-  {
-    EC_GROUP_free(group);
-    __convol_x__(&__c7);
-    return -1;
-  }
-
-  if(!(__c7.q6 = EC_POINT_point2bn(group, __c7.q5, POINT_CONVERSION_COMPRESSED, BN_new(), __c7.ctx)))
-  {
-    EC_GROUP_free(group);
-    __convol_x__(&__c7);
-    return -1;
-  }
-
-  s.resize(0x21);
-  if(BN_num_bytes(__c7.q6) != 0x21 || BN_bn2bin(__c7.q6, &s[0]) != 0x21)
-  {
-    EC_GROUP_free(group);
-    __convol_x__(&__c7);
-    return -1;
-  }
-
-  EC_GROUP_free(group);
-  __convol_x__(&__c7);
-
-  return 0;
+    return 0;
 }
 
-int __synth_piv__conv71__intern(__im__& x_intern, __im__& im, 
+int __synth_piv__conv71__intern(__im__& x_intern, __im__& im,
                                 __im__& y_intern, __im__& p_intern)
 {
-  EC_GROUP* group = EC_GROUP_new_by_curve_name(NID_secp256k1);
-  if(!group)
-    throw runtime_error("synth conv, group");
+    EC_GROUP* group = EC_GROUP_new_by_curve_name(NID_secp256k1);
+    if(!group)
+        throw runtime_error("synth conv, group");
 
-  __conv__intern__ conv;
-  if(!(conv.ctx = BN_CTX_new()))
-  {
+    __conv__intern__ conv;
+    if(!(conv.ctx = BN_CTX_new()))
+    {
+        __conv_intern__x__(&conv);
+        EC_GROUP_free(group);
+        return -1;
+    }
+
+    if(!(conv.s1 = BN_bin2bn(&x_intern[0], 0x20, BN_new())))
+    {
+        __conv_intern__x__(&conv);
+        EC_GROUP_free(group);
+        return -1;
+    }
+
+    if(!(conv.s2 = BN_bin2bn(&im[0], im.size(), BN_new())))
+    {
+        __conv_intern__x__(&conv);
+        EC_GROUP_free(group);
+        return -1;
+    }
+
+    if(!(conv.s3 = EC_POINT_bn2point(group, conv.s2, NULL, conv.ctx)))
+    {
+        __conv_intern__x__(&conv);
+        EC_GROUP_free(group);
+        return -1;
+    }
+
+    if(!EC_POINT_mul(group, conv.s3, NULL, conv.s3, conv.s1, conv.ctx))
+    {
+        __conv_intern__x__(&conv);
+        EC_GROUP_free(group);
+        return -1;
+    }
+
+
+    if(!(conv.s4 = EC_POINT_point2bn(group, conv.s3, POINT_CONVERSION_COMPRESSED, BN_new(), conv.ctx)))
+    {
+        __conv_intern__x__(&conv);
+        EC_GROUP_free(group);
+        return -1;
+    }
+
+    vector<unsigned char> v;
+    v.resize(0x21);
+
+    if(BN_num_bytes(conv.s4) != 0x21 || BN_bn2bin(conv.s4, &v[0]) != 0x21)
+    {
+        __conv_intern__x__(&conv);
+        EC_GROUP_free(group);
+        return -1;
+    }
+
+    vector<unsigned char> v__f;
+    v__f.resize(0x20);
+    SHA256(&v[0], v.size(), &v__f[0]);
+
+    if(!(conv.s5 = BN_bin2bn(&v__f[0], 0x20, BN_new())))
+    {
+        __conv_intern__x__(&conv);
+        EC_GROUP_free(group);
+        return -1;
+    }
+
+    if(!(conv.s6 = BN_new()) || !EC_GROUP_get_order(group, conv.s6, conv.ctx))
+    {
+        __conv_intern__x__(&conv);
+        EC_GROUP_free(group);
+        return -1;
+    }
+
+    if(!(conv.s7 = BN_bin2bn(&y_intern[0], 0x20, BN_new())))
+    {
+        __conv_intern__x__(&conv);
+        EC_GROUP_free(group);
+        return -1;
+    }
+
+    if(!BN_mod_add(conv.s7, conv.s7, conv.s5, conv.s6, conv.ctx))
+    {
+        __conv_intern__x__(&conv);
+        EC_GROUP_free(group);
+        return -1;
+    }
+
+    if(BN_is_zero(conv.s7))
+    {
+        __conv_intern__x__(&conv);
+        EC_GROUP_free(group);
+        return -1;
+    }
+
+    memset(&p_intern[0], 0, 0x20);
+    int n_;
+    if((n_ = BN_num_bytes(conv.s7)) > 0x20
+            || BN_bn2bin(conv.s7, &p_intern[0x20-n_]) != n_)
+    {
+        __conv_intern__x__(&conv);
+        EC_GROUP_free(group);
+        return -1;
+    };
+
     __conv_intern__x__(&conv);
     EC_GROUP_free(group);
-    return -1;
-  }  
 
-  if(!(conv.s1 = BN_bin2bn(&x_intern[0], 0x20, BN_new())))
-  {
-    __conv_intern__x__(&conv);
-    EC_GROUP_free(group);
-    return -1;
-  }
-
-  if(!(conv.s2 = BN_bin2bn(&im[0], im.size(), BN_new())))
-  {
-    __conv_intern__x__(&conv);
-    EC_GROUP_free(group);
-    return -1;
-  }
-
-  if(!(conv.s3 = EC_POINT_bn2point(group, conv.s2, NULL, conv.ctx)))
-  {
-    __conv_intern__x__(&conv);
-    EC_GROUP_free(group);
-    return -1;
-  }
-
-  if(!EC_POINT_mul(group, conv.s3, NULL, conv.s3, conv.s1, conv.ctx))
-  {
-    __conv_intern__x__(&conv);
-    EC_GROUP_free(group);
-    return -1;
-  }
-
-
-  if(!(conv.s4 = EC_POINT_point2bn(group, conv.s3, POINT_CONVERSION_COMPRESSED, BN_new(), conv.ctx)))
-  {
-    __conv_intern__x__(&conv);
-    EC_GROUP_free(group);
-    return -1;
-  }
-
-  vector<unsigned char> v;
-  v.resize(0x21);
-
-  if(BN_num_bytes(conv.s4) != 0x21 || BN_bn2bin(conv.s4, &v[0]) != 0x21)
-  {
-    __conv_intern__x__(&conv);
-    EC_GROUP_free(group);
-    return -1;
-  }
-
-  vector<unsigned char> v__f;
-  v__f.resize(0x20);
-  SHA256(&v[0], v.size(), &v__f[0]);
-
-  if(!(conv.s5 = BN_bin2bn(&v__f[0], 0x20, BN_new())))
-  {
-    __conv_intern__x__(&conv);
-    EC_GROUP_free(group);
-    return -1;
-  }
-
-  if(!(conv.s6 = BN_new()) || !EC_GROUP_get_order(group, conv.s6, conv.ctx))
-  {
-    __conv_intern__x__(&conv);
-    EC_GROUP_free(group);
-    return -1;
-  }
-
-  if(!(conv.s7 = BN_bin2bn(&y_intern[0], 0x20, BN_new())))
-  {
-    __conv_intern__x__(&conv);
-    EC_GROUP_free(group);
-    return -1;
-  }
-
-  if(!BN_mod_add(conv.s7, conv.s7, conv.s5, conv.s6, conv.ctx))
-  {
-    __conv_intern__x__(&conv);
-    EC_GROUP_free(group);
-    return -1;
-  }
-
-  if(BN_is_zero(conv.s7))
-  {
-    __conv_intern__x__(&conv);
-    EC_GROUP_free(group);
-    return -1;
-  }
-
-  memset(&p_intern[0], 0, 0x20);
-  int n_;
-  if((n_ = BN_num_bytes(conv.s7)) > 0x20 
-    || BN_bn2bin(conv.s7, &p_intern[0x20-n_]) != n_)
-  {
-    __conv_intern__x__(&conv);
-    EC_GROUP_free(group);
-    return -1;
-  };
-
-  __conv_intern__x__(&conv);
-  EC_GROUP_free(group);
-
-  return 0;
+    return 0;
 }
 
-int __synth_piv__conv71__outer(__im__& t, __im__& i, 
+int __synth_piv__conv71__outer(__im__& t, __im__& i,
                                __im__& outer_offset, __im__& c)
 {
-  __fbase__ __fb; 
-  std::vector<unsigned char> vt_;
-    
-  EC_GROUP* group = EC_GROUP_new_by_curve_name(NID_secp256k1);
-    
-  if (!group)
-  {
-    return -1;
-  }
-   
-  if (!(__fb.ctx = BN_CTX_new()))
-  {
-    return -1;
-  };
-   
-  if (!(__fb._g1 = BN_bin2bn(&t[0], 0x20, BN_new())))
-  {
-    return -1;
-  };
-   
-  if (!(__fb._s = BN_bin2bn(&i[0], i.size(), BN_new())))
-  {
-    return -1;
-  };
-   
-  if (!(__fb._g0 = EC_POINT_bn2point(group, __fb._s, NULL, __fb.ctx)))
-  {
-    return -1;
-  };
-   
-  if (!(__fb._kvtx = EC_POINT_new(group)))
-  {
-    return -1;
-  };
-  if (!EC_POINT_mul(group, __fb._kvtx, NULL, __fb._g0, __fb._g1, __fb.ctx))
-  {
-    return -1;
-  };
-  
-  if (!(__fb._q1 = EC_POINT_point2bn(group, __fb._kvtx, POINT_CONVERSION_COMPRESSED, BN_new(), __fb.ctx)))
-  {
-    return -1;
-  };
-    
-    
-  vt_.resize(0x21);
-  if (BN_num_bytes(__fb._q1) != 0x21
-    || BN_bn2bin(__fb._q1, &vt_[0]) != 0x21)
-  {
-    return -1;
-  };
-   
-  vector<unsigned char> v;
-  v.resize(0x21); 
-  SHA256(&vt_[0], vt_.size(), &v[0]);
-  
-  if (!(__fb._l1 = BN_bin2bn(&v[0], 0x20, BN_new())))
-  {
-    return -1;
-  };
-  
-  if (!(__fb._o1 = EC_POINT_new(group)))
-  {
-    return -1;
-  };
-    
-  if (!EC_POINT_mul(group, __fb._o1, __fb._l1, NULL, NULL, __fb.ctx))
-  {
-    return -1;
-  };
+    __fbase__ __fb;
+    std::vector<unsigned char> vt_;
 
-  if (!(__fb._q = BN_bin2bn(&outer_offset[0], 0x21, BN_new())))
-  {
-    return -1;
-  }
-  if (!(__fb._k = EC_POINT_bn2point(group, __fb._q, NULL, __fb.ctx)))
-  {
-    return -1;
-  };
+    EC_GROUP* group = EC_GROUP_new_by_curve_name(NID_secp256k1);
 
-  if (!(__fb._f = EC_POINT_new(group)))
-  {
-    return -1;
-  };
-  if (!EC_POINT_add(group, __fb._f, __fb._o1, __fb._k, __fb.ctx))
-  {
-    return -1;
-  };
-   
-  if (!(__fb._t = EC_POINT_point2bn(group, __fb._f, POINT_CONVERSION_COMPRESSED, BN_new(), __fb.ctx)))
-  {
-    return -1;
-  };
-    
-  c.resize(0x21);
-  if(BN_num_bytes(__fb._t) != 0x21
-    || BN_bn2bin(__fb._t, &c[0]) != 0x21)
-  {
-    return -1;
-  };
+    if (!group)
+    {
+        return -1;
+    }
 
-  return 0;
+    if (!(__fb.ctx = BN_CTX_new()))
+    {
+        return -1;
+    };
+
+    if (!(__fb._g1 = BN_bin2bn(&t[0], 0x20, BN_new())))
+    {
+        return -1;
+    };
+
+    if (!(__fb._s = BN_bin2bn(&i[0], i.size(), BN_new())))
+    {
+        return -1;
+    };
+
+    if (!(__fb._g0 = EC_POINT_bn2point(group, __fb._s, NULL, __fb.ctx)))
+    {
+        return -1;
+    };
+
+    if (!(__fb._kvtx = EC_POINT_new(group)))
+    {
+        return -1;
+    };
+    if (!EC_POINT_mul(group, __fb._kvtx, NULL, __fb._g0, __fb._g1, __fb.ctx))
+    {
+        return -1;
+    };
+
+    if (!(__fb._q1 = EC_POINT_point2bn(group, __fb._kvtx, POINT_CONVERSION_COMPRESSED, BN_new(), __fb.ctx)))
+    {
+        return -1;
+    };
+
+
+    vt_.resize(0x21);
+    if (BN_num_bytes(__fb._q1) != 0x21
+            || BN_bn2bin(__fb._q1, &vt_[0]) != 0x21)
+    {
+        return -1;
+    };
+
+    vector<unsigned char> v;
+    v.resize(0x21);
+    SHA256(&vt_[0], vt_.size(), &v[0]);
+
+    if (!(__fb._l1 = BN_bin2bn(&v[0], 0x20, BN_new())))
+    {
+        return -1;
+    };
+
+    if (!(__fb._o1 = EC_POINT_new(group)))
+    {
+        return -1;
+    };
+
+    if (!EC_POINT_mul(group, __fb._o1, __fb._l1, NULL, NULL, __fb.ctx))
+    {
+        return -1;
+    };
+
+    if (!(__fb._q = BN_bin2bn(&outer_offset[0], 0x21, BN_new())))
+    {
+        return -1;
+    }
+    if (!(__fb._k = EC_POINT_bn2point(group, __fb._q, NULL, __fb.ctx)))
+    {
+        return -1;
+    };
+
+    if (!(__fb._f = EC_POINT_new(group)))
+    {
+        return -1;
+    };
+    if (!EC_POINT_add(group, __fb._f, __fb._o1, __fb._k, __fb.ctx))
+    {
+        return -1;
+    };
+
+    if (!(__fb._t = EC_POINT_point2bn(group, __fb._f, POINT_CONVERSION_COMPRESSED, BN_new(), __fb.ctx)))
+    {
+        return -1;
+    };
+
+    c.resize(0x21);
+    if(BN_num_bytes(__fb._t) != 0x21
+            || BN_bn2bin(__fb._t, &c[0]) != 0x21)
+    {
+        return -1;
+    };
+
+    return 0;
 }
 

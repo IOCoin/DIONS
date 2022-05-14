@@ -1,3 +1,6 @@
+
+
+
 // Copyright (c) 2010 Satoshi Nakamoto
 // Copyright (c) 2009-2012 The Bitcoin developers
 // Distributed under the MIT/X11 software license, see the accompanying
@@ -211,7 +214,7 @@ Value getpowblocksleft(const Array& params, bool fHelp)
     int powHeight = GetPowHeight(block);
 
     return (powHeight > LAST_POW_BLOCK) ?
-        0 : LAST_POW_BLOCK - powHeight;
+           0 : LAST_POW_BLOCK - powHeight;
 }
 
 // TODO: Move somewhere more accessible
@@ -219,7 +222,7 @@ double GetBlocktime(CBlockIndex * block, int blocks,
                     bool proofOfWork, bool proofOfStake)
 {
     if (!block || !(block->pprev) || (blocks <= 0)
-        || (!proofOfStake && !proofOfWork))
+            || (!proofOfStake && !proofOfWork))
     {
         return 0.0;
     }
@@ -229,7 +232,7 @@ double GetBlocktime(CBlockIndex * block, int blocks,
     while (end->pprev && (checked > 0))
     {
         if ((proofOfStake && end->IsProofOfStake()) ||
-            (proofOfWork && end->IsProofOfWork()))
+                (proofOfWork && end->IsProofOfWork()))
         {
             --checked;
         }
@@ -279,7 +282,7 @@ Value getpowtimeleft(const Array& params, bool fHelp)
     CBlockIndex* block = FindBlockByHeight(nHeight);
     int powHeight = GetPowHeight(block);
     int powLeft = (powHeight > LAST_POW_BLOCK) ?
-        0 : LAST_POW_BLOCK - powHeight;
+                  0 : LAST_POW_BLOCK - powHeight;
     double blocktime = GetBlocktime(block, 300, true, false);
     return (blocktime * powLeft) / divisor;
 }
@@ -324,7 +327,7 @@ Value getrawmempool(const Array& params, bool fHelp)
 
     Array a;
     BOOST_FOREACH(const uint256& hash, vtxid)
-        a.push_back(hash.ToString());
+    a.push_back(hash.ToString());
 
     return a;
 }
@@ -467,59 +470,60 @@ Value gettxout(const Array& params, bool fHelp)
     CTransaction tx;
     uint256 hashBlock = 0;
     if (!GetTransaction(hash, tx, hashBlock, mem))
-      return Value::null;  
+        return Value::null;
 
     if (n<0 || (unsigned int)n>=tx.vout.size() || tx.vout[n].IsNull())
-      return Value::null;
+        return Value::null;
 
     if (hashBlock == 0)
     {
-      ret.push_back(Pair("bestblock", pindexBest->GetBlockHash().GetHex()));
-      ret.push_back(Pair("confirmations", 0));
+        ret.push_back(Pair("bestblock", pindexBest->GetBlockHash().GetHex()));
+        ret.push_back(Pair("confirmations", 0));
     }
     else
     {
-      map<uint256, CBlockIndex*>::iterator mi = mapBlockIndex.find(hashBlock);
-      if (mi != mapBlockIndex.end() && (*mi).second)
-      {
-        CBlockIndex* pindex = (*mi).second;
-        if (pindex->IsInMainChain())
+        map<uint256, CBlockIndex*>::iterator mi = mapBlockIndex.find(hashBlock);
+        if (mi != mapBlockIndex.end() && (*mi).second)
         {
-          bool isSpent=false;
-          CBlockIndex* p = pindex;
-          p=p->pnext;
-          for (; p; p = p->pnext)
-          {
-            CBlock block;
-            CBlockIndex* pblockindex = mapBlockIndex[p->GetBlockHash()];
-            block.ReadFromDisk(pblockindex, true);
-            BOOST_FOREACH(const CTransaction& tx, block.vtx)
+            CBlockIndex* pindex = (*mi).second;
+            if (pindex->IsInMainChain())
             {
-              BOOST_FOREACH(const CTxIn& txin, tx.vin)
-              {
-                if( hash == txin.prevout.hash &&
-                   (int64_t)txin.prevout.n )
+                bool isSpent=false;
+                CBlockIndex* p = pindex;
+                p=p->pnext;
+                for (; p; p = p->pnext)
                 {
-                  printf("spent at block %s\n", block.GetHash().GetHex().c_str());
-                  isSpent=true; break;
+                    CBlock block;
+                    CBlockIndex* pblockindex = mapBlockIndex[p->GetBlockHash()];
+                    block.ReadFromDisk(pblockindex, true);
+                    BOOST_FOREACH(const CTransaction& tx, block.vtx)
+                    {
+                        BOOST_FOREACH(const CTxIn& txin, tx.vin)
+                        {
+                            if( hash == txin.prevout.hash &&
+                                    (int64_t)txin.prevout.n )
+                            {
+                                printf("spent at block %s\n", block.GetHash().GetHex().c_str());
+                                isSpent=true;
+                                break;
+                            }
+                        }
+
+                        if(isSpent) break;
+                    }
+
+                    if(isSpent) break;
                 }
-              }
 
-              if(isSpent) break;
+                if(isSpent)
+                    return Value::null;
+
+                ret.push_back(Pair("confirmations", pindexBest->nHeight - pindex->nHeight + 1));
             }
-
-            if(isSpent) break;
-          }
-
-          if(isSpent)
-            return Value::null;
-
-          ret.push_back(Pair("confirmations", pindexBest->nHeight - pindex->nHeight + 1));
+            else
+                return Value::null;
         }
-        else
-          return Value::null;
-      }
-      ret.push_back(Pair("bestblock", hashBlock.GetHex()));
+        ret.push_back(Pair("bestblock", hashBlock.GetHex()));
     }
 
     ret.push_back(Pair("value", ValueFromAmount(tx.vout[n].nValue)));

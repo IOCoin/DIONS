@@ -1,3 +1,6 @@
+
+
+
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2012 The Bitcoin developers
 // Distributed under the MIT/X11 software license, see the accompanying
@@ -26,8 +29,12 @@ extern int nBestHeight;
 
 
 
-inline unsigned int ReceiveFloodSize() { return 1000*GetArg("-maxreceivebuffer", 5*1000); }
-inline unsigned int SendBufferSize() { return 1000*GetArg("-maxsendbuffer", 1*1000); }
+inline unsigned int ReceiveFloodSize() {
+    return 1000*GetArg("-maxreceivebuffer", 5*1000);
+}
+inline unsigned int SendBufferSize() {
+    return 1000*GetArg("-maxsendbuffer", 1*1000);
+}
 
 void AddOneShot(std::string strDest);
 bool RecvLine(SOCKET hSocket, std::string& strLine);
@@ -308,8 +315,8 @@ public:
     unsigned int GetTotalRecvSize()
     {
         unsigned int total = 0;
-        BOOST_FOREACH(const CNetMessage &msg, vRecvMsg) 
-            total += msg.vRecv.size() + 24;
+        BOOST_FOREACH(const CNetMessage &msg, vRecvMsg)
+        total += msg.vRecv.size() + 24;
         return total;
     }
 
@@ -321,7 +328,7 @@ public:
     {
         nRecvVersion = nVersionIn;
         BOOST_FOREACH(CNetMessage &msg, vRecvMsg)
-            msg.SetVersion(nVersionIn);
+        msg.SetVersion(nVersionIn);
     }
 
     CNode* AddRef()
@@ -688,7 +695,7 @@ inline void RelayInventory(const CInv& inv)
     {
         LOCK(cs_vNodes);
         BOOST_FOREACH(CNode* pnode, vNodes)
-            pnode->PushInventory(inv);
+        pnode->PushInventory(inv);
     }
 }
 

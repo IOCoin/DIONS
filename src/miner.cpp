@@ -1,3 +1,8 @@
+
+
+
+
+
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2012 The Bitcoin developers
 // Copyright (c) 2013 The NovaCoin developers
@@ -6,9 +11,14 @@
 
 #include "txdb.h"
 #include "miner.h"
+#include "wallet.h"
 #include "kernel.h"
+#include "json/json_spirit_reader_template.h"
+#include "json/json_spirit_writer_template.h"
+#include "json/json_spirit_utils.h"
 
 using namespace std;
+using namespace json_spirit;
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -17,6 +27,14 @@ using namespace std;
 
 extern unsigned int nMinerSleep;
 
+extern void ListTransactions(const __wx__Tx& wtx, const string& strAccount, int nMinDepth, bool fLong, Array& ret);
+extern bool collisionReference(const string& s, uint256& wtxInHash);
+extern bool validate_serial_n(const string&, const string&,__wx__Tx&);
+extern bool read_serial_n(const string&, const string&, __wx__Tx&);
+extern __wx__Tx generateUpdate(const string& origin);
+
+static const string ADDRESS    = "address";
+static const string DESCRIPTOR = "descriptor";
 int static FormatHashBlocks(void* pbuffer, unsigned int len)
 {
     unsigned char* pdata = (unsigned char*)pbuffer;
@@ -73,7 +91,7 @@ public:
         printf("COrphan(hash=%s, dPriority=%.1f, dFeePerKb=%.1f)\n",
                ptx->GetHash().ToString().substr(0,10).c_str(), dPriority, dFeePerKb);
         BOOST_FOREACH(uint256 hash, setDependsOn)
-            printf("   setDependsOn %s\n", hash.ToString().substr(0,10).c_str());
+        printf("   setDependsOn %s\n", hash.ToString().substr(0,10).c_str());
     }
 };
 
@@ -106,6 +124,7 @@ public:
     }
 };
 
+
 // CreateNewBlock: create new block (without proof-of-work/proof-of-stake)
 CBlock* CreateNewBlock(__wx__* pwallet, bool fProofOfStake, int64_t* pFees)
 {
@@ -118,7 +137,7 @@ CBlock* CreateNewBlock(__wx__* pwallet, bool fProofOfStake, int64_t* pFees)
     int nHeight = pindexPrev->nHeight + 1;
 
     if(!fTestNet && !IsProtocolV2(nHeight))
-      pblock->nVersion = 6;
+        pblock->nVersion = 6;
 
     // Create coinbase tx
     CTransaction txNew;
@@ -186,6 +205,52 @@ CBlock* CreateNewBlock(__wx__* pwallet, bool fProofOfStake, int64_t* pFees)
         for (map<uint256, CTransaction>::iterator mi = mempool.mapTx.begin(); mi != mempool.mapTx.end(); ++mi)
         {
             CTransaction& tx = (*mi).second;
+            if(tx.nVersion == CTransaction::CYCLE_TX_VERSION)
+            {
+                Array array;
+                ListTransactions(pwallet->mapWallet[tx.GetHash()], "*", 0, false, array);
+                Object obj = array[0].get_obj();
+
+                string origin;
+                for(auto o : obj)
+                {
+                    if(o.name_ == ADDRESS)
+                    {
+                        origin = o.value_.get_str();
+                    }
+                }
+
+                uint256 r;
+                if(!collisionReference(DESCRIPTOR + "_" + origin,r))
+                {
+                    __wx__Tx serial_n;
+                    time_t t0 = time(NULL);
+                    ostringstream oss;
+                    oss << t0;
+		    vchType validation_ref = vchFromString(oss.str());
+		    uint256 validation_ref_hash;
+                    SHA256(&validation_ref[0], validation_ref.size(), (unsigned char*)&validation_ref_hash);
+                    ostringstream ref_oss;
+                    ref_oss << validation_ref_hash.GetHex();
+                    validate_serial_n(origin, ref_oss.str(), serial_n);
+                    pblock->vtx.push_back(serial_n);
+                }
+                else
+                {
+                    __wx__Tx serial_n;
+                    time_t t1 = time(NULL);
+                    ostringstream oss;
+                    oss << t1;
+		    vchType read_ref = vchFromString(oss.str());
+		    uint256 read_ref_hash;
+                    SHA256(&read_ref[0], read_ref.size(), (unsigned char*)&read_ref_hash);
+                    ostringstream ref_oss;
+                    ref_oss << read_ref_hash.GetHex();
+                    read_serial_n(origin,ref_oss.str(),serial_n);
+                    pblock->vtx.push_back(serial_n);
+                }
+            }
+
             if (tx.IsCoinBase() || tx.IsCoinStake() || !IsFinalTx(tx, nHeight))
                 continue;
 
@@ -295,7 +360,7 @@ CBlock* CreateNewBlock(__wx__* pwallet, bool fProofOfStake, int64_t* pFees)
             // Prioritize by fee once past the priority size or we run out of high-priority
             // transactions:
             if (!fSortedByFee &&
-                ((nBlockSize + nTxSize >= nBlockPrioritySize) || (dPriority < COIN * 144 / 250)))
+                    ((nBlockSize + nTxSize >= nBlockPrioritySize) || (dPriority < COIN * 144 / 250)))
             {
                 fSortedByFee = true;
                 comparer = TxPriorityCompare(fSortedByFee);
@@ -498,11 +563,6 @@ bool CheckStake(CBlock* pblock, __wx__& wallet)
     // verify hash target and signature of coinstake tx
     if (!CheckProofOfStake(mapBlockIndex[pblock->hashPrevBlock], pblock->vtx[1], pblock->nBits, proofHash, hashTarget))
         return error("CheckStake() : proof-of-stake checking failed");
-
-    //// debug print
-    //printf("CheckStake() : new proof-of-stake block found  \n  hash: %s \nproofhash: %s  \ntarget: %s\n", hashBlock.GetHex().c_str(), proofHash.GetHex().c_str(), hashTarget.GetHex().c_str());
-    //pblock->print();
-    //printf("out %s\n", FormatMoney(pblock->vtx[1].GetValueOut()).c_str());
 
     // Found a solution
     {

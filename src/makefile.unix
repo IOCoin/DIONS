@@ -131,6 +131,7 @@ OBJS= \
     obj/twister.o \
     obj/tor.o \
     obj/dions.o \
+    obj/base_reflect.o \
     obj/noui.o \
     obj/cubehash.o \
     obj/luffa.o \
@@ -149,14 +150,13 @@ OBJS= \
 
 all: iocoind
 
-LIBS += $(CURDIR)/leveldb/build/libleveldb.a 
+LIBS += $(CURDIR)/leveldb/libleveldb.a $(CURDIR)/leveldb/libmemenv.a
 DEFS += $(addprefix -I,$(CURDIR)/leveldb/include)
 DEFS += $(addprefix -I,$(CURDIR)/leveldb/helpers)
 OBJS += obj/txdb-leveldb.o
 leveldb/libleveldb.a:
-	@echo "Building LevelDB ..."; cd leveldb; mkdir -p build && cd build; cmake -DCMAKE_BUILD_TYPE=Release  .. && cmake --build . ; cd ..;
+	@echo "Building LevelDB ..."; cd leveldb; make libleveldb.a libmemenv.a; cd ..;
 obj/txdb-leveldb.o: leveldb/libleveldb.a
-
 
 # auto-generated dependencies:
 -include obj/*.P
@@ -200,8 +200,5 @@ clean:
 	-rm -f obj/*.o
 	-rm -f obj/*.P
 	-rm -f obj/build.h
-	-cd  leveldb
-	-rm  -rf build
 
 FORCE:
-

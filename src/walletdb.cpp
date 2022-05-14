@@ -1,3 +1,6 @@
+
+
+
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2012 The Bitcoin developers
 // Distributed under the MIT/X11 software license, see the accompanying
@@ -61,7 +64,7 @@ int64_t __wx__DB::GetAccountCreditDebit(const string& strAccount)
 
     int64_t nCreditDebit = 0;
     BOOST_FOREACH (const CAccountingEntry& entry, entries)
-        nCreditDebit += entry.nCreditDebit;
+    nCreditDebit += entry.nCreditDebit;
 
     return nCreditDebit;
 }
@@ -173,9 +176,8 @@ __wx__DB::ReorderTransactions(__wx__* pwallet)
                 if (!WriteTx(pwtx->GetHash(), *pwtx))
                     return DB_LOAD_FAIL;
             }
-            else
-                if (!WriteAccountingEntry(pacentry->nEntryNo, *pacentry))
-                    return DB_LOAD_FAIL;
+            else if (!WriteAccountingEntry(pacentry->nEntryNo, *pacentry))
+                return DB_LOAD_FAIL;
         }
     }
 
@@ -372,7 +374,7 @@ ReadKeyValue(__wx__* pwallet, CDataStream& ssKey, CDataStream& ssValue,
 
             // find earliest key creation time, as wallet birthday
             if (!pwallet->nTimeFirstKey ||
-                (keyMeta.nCreateTime < pwallet->nTimeFirstKey))
+                    (keyMeta.nCreateTime < pwallet->nTimeFirstKey))
                 pwallet->nTimeFirstKey = keyMeta.nCreateTime;
         }
         else if (strType == "relay")
@@ -524,7 +526,7 @@ DBErrors __wx__DB::LoadWallet(__wx__* pwallet)
 
 
     BOOST_FOREACH(uint256 hash, wss.vWalletUpgrade)
-        WriteTx(hash, pwallet->mapWallet[hash]);
+    WriteTx(hash, pwallet->mapWallet[hash]);
 
     // Rewrite encrypted wallets of versions 0.4.0 and 0.5.0rc:
     if (wss.fIsEncrypted && (wss.nFileVersion == 40000 || wss.nFileVersion == 50000))
@@ -631,18 +633,18 @@ DBErrors __wx__DB::ZapWalletTx(__wx__* pwallet)
     vector<uint256> vTxHash;
     DBErrors err = FindWalletTx(pwallet, vTxHash);
     if (err != DB_LOAD_OK)
-    return err;
+        return err;
 
 
-    BOOST_FOREACH(uint256& hash, vTxHash) 
+    BOOST_FOREACH(uint256& hash, vTxHash)
     {
-      if (!EraseTx(hash))
-      {
-        return DB_CORRUPT;
-      }
+        if (!EraseTx(hash))
+        {
+            return DB_CORRUPT;
+        }
     }
 
-   return DB_LOAD_OK;
+    return DB_LOAD_OK;
 }
 
 DBErrors __wx__DB::FindWalletTx(__wx__* pwallet, vector<uint256>& vTxHash)
@@ -684,7 +686,7 @@ DBErrors __wx__DB::FindWalletTx(__wx__* pwallet, vector<uint256>& vTxHash)
 
             string strType;
             ssKey >> strType;
-            if (strType == "tx") 
+            if (strType == "tx")
             {
                 uint256 hash;
                 ssKey >> hash;

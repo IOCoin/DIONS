@@ -1,3 +1,6 @@
+
+
+
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2012 The Bitcoin developers
 // Distributed under the MIT/X11 software license, see the accompanying
@@ -21,9 +24,9 @@
 ////////////////////////////////////////////////
 
 /*
- 
- 
- 
+
+
+
 CCriticalSection mutex;
     boost::recursive_mutex mutex;
 
@@ -42,9 +45,9 @@ ENTER_CRITICAL_SECTION(mutex); // no RAII
 
 LEAVE_CRITICAL_SECTION(mutex); // no RAII
     mutex.unlock();
- 
- 
- 
+
+
+
  */
 
 
@@ -63,17 +66,17 @@ class LOCKABLE AnnotatedMixin : public PARENT
 public:
     void lock() EXCLUSIVE_LOCK_FUNCTION()
     {
-      PARENT::lock();
+        PARENT::lock();
     }
 
     void unlock() UNLOCK_FUNCTION()
     {
-      PARENT::unlock();
+        PARENT::unlock();
     }
 
     bool try_lock() EXCLUSIVE_TRYLOCK_FUNCTION(true)
     {
-      return PARENT::try_lock();
+        return PARENT::try_lock();
     }
 };
 
@@ -115,7 +118,7 @@ private:
         {
             PrintLockContention(pszName, pszFile, nLine);
 #endif
-        lock.lock();
+            lock.lock();
 #ifdef DEBUG_LOCKCONTENTION
         }
 #endif

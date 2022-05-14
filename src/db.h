@@ -1,3 +1,6 @@
+
+
+
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2012 The Bitcoin developers
 // Distributed under the MIT/X11 software license, see the accompanying
@@ -26,7 +29,7 @@ class COutPoint;
 class CTxIndex;
 class __wx__;
 class __wx__Tx;
-class AliasIndex;
+class PathIndex;
 class CTxDB;
 
 extern unsigned int nWalletDBUpdated;
@@ -57,7 +60,9 @@ public:
     CDBEnv();
     ~CDBEnv();
     void MakeMock();
-    bool IsMock() { return fMockDb; };
+    bool IsMock() {
+        return fMockDb;
+    };
 
     /*
      * Verify that database file strFile is OK. If it is not,
@@ -108,7 +113,9 @@ protected:
     bool fReadOnly;
 
     explicit CDB(const char* pszFile, const char* pszMode="r+");
-    ~CDB() { Close(); }
+    ~CDB() {
+        Close();
+    }
 public:
     void Close();
 private:
@@ -327,19 +334,19 @@ public:
     bool Write(const CAddrMan& addr);
     bool Read(CAddrMan& addr);
 };
-class AliasIndex
+class PathIndex
 {
-  public:
+public:
     CDiskTxPos txPos;
     unsigned int nHeight;
     std::vector<unsigned char> vValue;
     std::string vAddress;
 
-    AliasIndex()
+    PathIndex()
     {
     }
 
-    AliasIndex(CDiskTxPos txPosIn, unsigned int nHeightIn, std::vector<unsigned char> vValueIn, std::string vAddressIn)
+    PathIndex(CDiskTxPos txPosIn, unsigned int nHeightIn, std::vector<unsigned char> vValueIn, std::string vAddressIn)
     {
         txPos = txPosIn;
         nHeight = nHeightIn;
@@ -360,15 +367,15 @@ class LocatorNodeDB : public CDB
 {
 public:
     LocatorNodeDB(const char* pszMode="cr+") : CDB("aliascache.dat", pszMode)
-    {     
+    {
     }
 
-    bool lPut(const vchType& alias, const std::vector<AliasIndex>& vtxPos)
+    bool lPut(const vchType& alias, const std::vector<PathIndex>& vtxPos)
     {
         return Write(make_pair(std::string("alias_"), alias), vtxPos, true);
     }
 
-    bool lGet(const vchType& alias, std::vector<AliasIndex>& vtxPos)
+    bool lGet(const vchType& alias, std::vector<PathIndex>& vtxPos)
     {
         return Read(make_pair(std::string("alias_"), alias), vtxPos);
     }
@@ -386,7 +393,9 @@ public:
     bool ydwiWhldw();
     bool test();
     void filter(CBlockIndex*);
-    void filter() { return; };
+    void filter() {
+        return;
+    };
 };
 
 

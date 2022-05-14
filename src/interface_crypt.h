@@ -1,3 +1,6 @@
+
+
+
 #ifndef INTERFACE_CRYPTH
 #define INTERFACE_CRYPTH
 
@@ -7,7 +10,7 @@ using namespace::std;
 
 class InterfaceCrypt
 {
-  public:
+public:
     virtual int    sig() = 0;
     virtual bool   burstRelay(BurstBuffer& data) = 0;
     virtual void   burstTx(BurstBuffer& data) = 0;

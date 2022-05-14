@@ -1,3 +1,6 @@
+
+
+
 // Copyright (c) 2010 Satoshi Nakamoto
 // Copyright (c) 2009-2012 The Bitcoin developers
 // Distributed under the MIT/X11 software license, see the accompanying
@@ -16,8 +19,8 @@ int64_t nWalletUnlockTime;
 static CCriticalSection cs_nWalletUnlockTime;
 
 static unsigned char trans__ydwi[] = {
-  0x21, 0x56, 0x02, 0x71, 0x54, 0x78, 0x62, 0xa0,
-  0x1f, 0x26, 0x0f, 0xdc, 0x36, 0xcd, 0xaa, 0x3c
+    0x21, 0x56, 0x02, 0x71, 0x54, 0x78, 0x62, 0xa0,
+    0x1f, 0x26, 0x0f, 0xdc, 0x36, 0xcd, 0xaa, 0x3c
 };
 
 extern unsigned int CONSISTENCY_MARGIN;
@@ -39,8 +42,8 @@ static void accountingDeprecationCheck()
 std::string HelpRequiringPassphrase()
 {
     return pwalletMain->IsCrypted()
-        ? "\nrequires wallet passphrase to be set with walletpassphrase first"
-        : "";
+           ? "\nrequires wallet passphrase to be set with walletpassphrase first"
+           : "";
 }
 
 void EnsureWalletIsUnlocked()
@@ -68,7 +71,7 @@ void WalletTxToJSON(const __wx__Tx& wtx, Object& entry)
     entry.push_back(Pair("tx-info", wtx.strTxInfo));
     entry.push_back(Pair("timereceived", (int64_t)wtx.nTimeReceived));
     BOOST_FOREACH(const PAIRTYPE(string,string)& item, wtx.mapValue)
-        entry.push_back(Pair(item.first, item.second));
+    entry.push_back(Pair(item.first, item.second));
 }
 
 string AccountFromValue(const Value& value)
@@ -94,7 +97,7 @@ Value getinfo(const Array& params, bool fHelp)
     obj.push_back(Pair("protocolversion",(int)PROTOCOL_VERSION));
     obj.push_back(Pair("walletversion", pwalletMain->GetVersion()));
     if(fViewWallet)
-      obj.push_back(Pair("VIEWWALLET", "The wallet is configured for view only!"));
+        obj.push_back(Pair("VIEWWALLET", "The wallet is configured for view only!"));
     obj.push_back(Pair("balance",       ValueFromAmount(pwalletMain->GetBalance())));
     obj.push_back(Pair("pending",       ValueFromAmount(pwalletMain->GetUnconfirmedBalance())));
     obj.push_back(Pair("newmint",       ValueFromAmount(pwalletMain->GetNewMint())));
@@ -163,9 +166,9 @@ Value getnewaddress(const Array& params, bool fHelp)
             "so payments received with the address will be credited to [account].");
 
     if(fViewWallet)
-      throw runtime_error(
-      "wallet configured as : view\n"
-      );
+        throw runtime_error(
+            "wallet configured as : view\n"
+        );
 
     // Parse the account first so we don't generate a key if there's an error
     string strAccount;
@@ -184,12 +187,12 @@ Value getnewaddress(const Array& params, bool fHelp)
 
     BOOST_FOREACH(const PAIRTYPE(cba, string)& item, pwalletMain->mapAddressBook)
     {
-      if(item.second == strAccount)
-      {
-        pwalletMain->SetAddressBookName(item.first.Get(), "");
-      }
+        if(item.second == strAccount)
+        {
+            pwalletMain->SetAddressBookName(item.first.Get(), "");
+        }
     }
-    
+
     pwalletMain->SetAddressBookName(keyID, strAccount);
 
     return cba(keyID).ToString();
@@ -197,109 +200,109 @@ Value getnewaddress(const Array& params, bool fHelp)
 
 Value sectionlog(const Array& params, bool fHelp)
 {
-  if (fHelp || params.size() > 2)
-    throw runtime_error(
-    "sectionlog [sign] [primitive]\n"
-  );
+    if (fHelp || params.size() > 2)
+        throw runtime_error(
+            "sectionlog [sign] [primitive]\n"
+        );
 
-  if (pwalletMain->as())
-    throw std::runtime_error("unlock the wallet first!");
+    if (pwalletMain->as())
+        throw std::runtime_error("unlock the wallet first!");
 
-  Array oRes;
+    Array oRes;
 
-  string sign = params[0].get_str();
-  cba s(sign);
+    string sign = params[0].get_str();
+    cba s(sign);
     if (!s.IsValid())
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "sign : Invalid I/OCoin address");
-  string primitive = params[1].get_str();
-  vchType p = ParseHex(primitive);
-  CPubKey pk(p);
-  cba pr(pk.GetID());
+    string primitive = params[1].get_str();
+    vchType p = ParseHex(primitive);
+    CPubKey pk(p);
+    cba pr(pk.GetID());
     if (!pr.IsValid())
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "primitive : Invalid I/OCoin address");
- 
-  Object o_s; 
-  o_s.push_back(Pair("sign", s.ToString()));
-  oRes.push_back(o_s);
-  Object o_p; 
-  o_p.push_back(Pair("primitive", pr.ToString()));
-  oRes.push_back(o_p);
 
-  CPubKey r_p(p);
+    Object o_s;
+    o_s.push_back(Pair("sign", s.ToString()));
+    oRes.push_back(o_s);
+    Object o_p;
+    o_p.push_back(Pair("primitive", pr.ToString()));
+    oRes.push_back(o_p);
 
-  CPubKey s_p;
-  CKeyID i;
-  s.GetKeyID(i);
+    CPubKey r_p(p);
 
-  std::map<CKeyID, int64_t> mk;
-  pwalletMain->kt(mk);
-  for(std::map<CKeyID, int64_t>::const_iterator it = mk.begin(); it != mk.end(); it++)
-  {
-    CKeyID ck = it->first;
-    CSecret z;
-    bool fCompressed;
-    pwalletMain->GetSecret(ck, z, fCompressed);
-              unsigned char* a = z.data();
-              __im__ t(a, a + 0x20);
+    CPubKey s_p;
+    CKeyID i;
+    s.GetKeyID(i);
 
+    std::map<CKeyID, int64_t> mk;
+    pwalletMain->kt(mk);
+    for(std::map<CKeyID, int64_t>::const_iterator it = mk.begin(); it != mk.end(); it++)
     {
-      for(std::map<CKeyID, int64_t>::const_iterator it = mk.begin(); it != mk.end(); it++)
-      {
-        CKeyID ck_ = it->first;
-        { 
-          {
-            __im__ t2 = r_p.Raw();
-            CPubKey pp;
-            pwalletMain->GetPubKey(ck_, pp);
-            __im__ off = pp.Raw();
-            __im__ c;
-            __synth_piv__conv71__outer(t,t2,off,c);
-            CPubKey x(c);
-        if(x.GetID() == i)
-              {
-              Object o0;
-              o0.push_back(Pair("x", "x-gen"));
-              Object o;
-              o.push_back(Pair("outer-comp", cba(ck).ToString()));
-              Object o1;
-              o1.push_back(Pair("inner-comp", cba(ck_).ToString()));
-              oRes.push_back(o0);
-              oRes.push_back(o);
-              oRes.push_back(o1);
-              break;
-              }
+        CKeyID ck = it->first;
+        CSecret z;
+        bool fCompressed;
+        pwalletMain->GetSecret(ck, z, fCompressed);
+        unsigned char* a = z.data();
+        __im__ t(a, a + 0x20);
+
+        {
+            for(std::map<CKeyID, int64_t>::const_iterator it = mk.begin(); it != mk.end(); it++)
+            {
+                CKeyID ck_ = it->first;
+                {
+                    {
+                        __im__ t2 = r_p.Raw();
+                        CPubKey pp;
+                        pwalletMain->GetPubKey(ck_, pp);
+                        __im__ off = pp.Raw();
+                        __im__ c;
+                        __synth_piv__conv71__outer(t,t2,off,c);
+                        CPubKey x(c);
+                        if(x.GetID() == i)
+                        {
+                            Object o0;
+                            o0.push_back(Pair("x", "x-gen"));
+                            Object o;
+                            o.push_back(Pair("outer-comp", cba(ck).ToString()));
+                            Object o1;
+                            o1.push_back(Pair("inner-comp", cba(ck_).ToString()));
+                            oRes.push_back(o0);
+                            oRes.push_back(o);
+                            oRes.push_back(o1);
+                            break;
+                        }
+                    }
+                }
             }
-          }
         }
-      }
     }
 
-  return oRes; 
+    return oRes;
 }
 
 Value shade(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() > 1)
-    throw runtime_error(
-    "shade [account] [ray id]\n"
-    );
+        throw runtime_error(
+            "shade [account] [ray id]\n"
+        );
 
     if (pwalletMain->as())
-      throw std::runtime_error("unlock the wallet first!");
+        throw std::runtime_error("unlock the wallet first!");
 
     Array oRes;
 
     if(!pwalletMain->as())
-      pwalletMain->TopUpKeyPool();
+        pwalletMain->TopUpKeyPool();
 
 
 
     CPubKey k1;
     CPubKey k2;
     if(!pwalletMain->GetKeyFromPool(k1, k2, false))
-      throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
-   
-    //Verify - orange 
+        throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
+
+    //Verify - orange
     oRes.push_back(cba(k1.GetID()).ToString());
     oRes.push_back(cba(k2.GetID()).ToString());
     vector<unsigned char> k;
@@ -311,30 +314,30 @@ Value shade(const Array& params, bool fHelp)
     k.insert(k.end(), a.begin(), a.end());
     k.insert(k.end(), b.begin(), b.end());
     if(k.size() == 0)
-      throw runtime_error("k size " + k.size());
+        throw runtime_error("k size " + k.size());
     string s1 = EncodeBase58(&k[0], &k[0] + k.size());
 
     RayShade& r = pwalletMain->kd[k1.GetID()].rs_;
     CKey l;
     if(pwalletMain->GetKey(k1.GetID(), l))
     {
-      bool c;
-      CSecret s1;
-      if(pwalletMain->GetSecret(k1.GetID(), s1, c))
-      {
-        unsigned char* a1 = s1.data();
-        vector<unsigned char> v(a1, a1 + 0x20);
-        r.streamID(v);
-        if(!__wx__DB(pwalletMain->strWalletFile).UpdateKey(k1, pwalletMain->kd[k1.GetID()]))
+        bool c;
+        CSecret s1;
+        if(pwalletMain->GetSecret(k1.GetID(), s1, c))
         {
-          oRes.push_back("update error");
-          return oRes; 
+            unsigned char* a1 = s1.data();
+            vector<unsigned char> v(a1, a1 + 0x20);
+            r.streamID(v);
+            if(!__wx__DB(pwalletMain->strWalletFile).UpdateKey(k1, pwalletMain->kd[k1.GetID()]))
+            {
+                oRes.push_back("update error");
+                return oRes;
+            }
         }
-      }         
     }
 
     oRes.push_back(s1);
-    return oRes; 
+    return oRes;
 }
 
 Value sr71(const Array& params, bool fHelp)
@@ -342,7 +345,7 @@ Value sr71(const Array& params, bool fHelp)
     if (fHelp || params.size() > 1)
         throw runtime_error(
             "sr71 tunnel list\n"
-            );
+        );
 
     Array oRes;
 
@@ -351,108 +354,108 @@ Value sr71(const Array& params, bool fHelp)
 
     for(std::map<CKeyID, int64_t>::const_iterator it = mk.begin(); it != mk.end(); it++)
     {
-      CKeyID ck = it->first;
-      RayShade& r1 = pwalletMain->kd[ck].rs_;
-      if(r1.ctrlExternalAngle())
-      {
-
-        for(std::map<CKeyID, int64_t>::const_iterator it = mk.begin(); it != mk.end(); it++)
+        CKeyID ck = it->first;
+        RayShade& r1 = pwalletMain->kd[ck].rs_;
+        if(r1.ctrlExternalAngle())
         {
-          CKeyID ck_ = it->first;
-          RayShade& r = pwalletMain->kd[ck_].rs_;
-          if(!r.ctrlExternalAngle() && r.ctrlPath() == r1.ctrlPath())
-          {
-            //Verify - green - Ydwi
-            CPubKey vertex1;
-            pwalletMain->GetPubKey(ck, vertex1);
-            CPubKey vertex2;
-            pwalletMain->GetPubKey(ck_, vertex2);
-            vector<unsigned char> k;
-            k.reserve(1 + vertex1.Raw().size() + vertex2.Raw().size());
-            vchType a = vertex1.Raw();
-            vchType b = vertex2.Raw();
-            k.push_back(0x18);
 
-            k.insert(k.end(), a.begin(), a.end());
-            k.insert(k.end(), b.begin(), b.end());
-            if(k.size() == 0)
-              throw runtime_error("k size " + k.size());
-            string s1 = EncodeBase58(&k[0], &k[0] + k.size());
-        Object obj;
-        obj.push_back(Pair("vertex point", cba(ck).ToString()));
-        obj.push_back(Pair("vertex i", r1.ctrlIndex()));
-            obj.push_back(Pair("ray id", cba(ck_).ToString()));
-            obj.push_back(Pair("ref", s1));
-        oRes.push_back(obj);
-            break;
-          }
+            for(std::map<CKeyID, int64_t>::const_iterator it = mk.begin(); it != mk.end(); it++)
+            {
+                CKeyID ck_ = it->first;
+                RayShade& r = pwalletMain->kd[ck_].rs_;
+                if(!r.ctrlExternalAngle() && r.ctrlPath() == r1.ctrlPath())
+                {
+                    //Verify - green - Ydwi
+                    CPubKey vertex1;
+                    pwalletMain->GetPubKey(ck, vertex1);
+                    CPubKey vertex2;
+                    pwalletMain->GetPubKey(ck_, vertex2);
+                    vector<unsigned char> k;
+                    k.reserve(1 + vertex1.Raw().size() + vertex2.Raw().size());
+                    vchType a = vertex1.Raw();
+                    vchType b = vertex2.Raw();
+                    k.push_back(0x18);
+
+                    k.insert(k.end(), a.begin(), a.end());
+                    k.insert(k.end(), b.begin(), b.end());
+                    if(k.size() == 0)
+                        throw runtime_error("k size " + k.size());
+                    string s1 = EncodeBase58(&k[0], &k[0] + k.size());
+                    Object obj;
+                    obj.push_back(Pair("vertex point", cba(ck).ToString()));
+                    obj.push_back(Pair("vertex i", r1.ctrlIndex()));
+                    obj.push_back(Pair("ray id", cba(ck_).ToString()));
+                    obj.push_back(Pair("ref", s1));
+                    oRes.push_back(obj);
+                    break;
+                }
+            }
+
         }
-
-      }
     }
 
-    return oRes; 
+    return oRes;
 }
 
 Value center__base__0(const Array& params, bool fHelp)
 {
-  if (fHelp || params.size() > 2)
-    throw runtime_error(
-    "center [q] [r]\n"
-  );
+    if (fHelp || params.size() > 2)
+        throw runtime_error(
+            "center [q] [r]\n"
+        );
 
-  if (pwalletMain->as())
-    throw std::runtime_error("unlock the wallet first!");
+    if (pwalletMain->as())
+        throw std::runtime_error("unlock the wallet first!");
 
-  Array oRes;
+    Array oRes;
 
-  string q = params[0].get_str();
-  string r = params[1].get_str();
-  cba u(q);
-  if(!u.IsValid())
-    throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid I/OCoin address");
+    string q = params[0].get_str();
+    string r = params[1].get_str();
+    cba u(q);
+    if(!u.IsValid())
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid I/OCoin address");
 
-  if(!IsMine(*pwalletMain, u.Get()))
-    throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid");
+    if(!IsMine(*pwalletMain, u.Get()))
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid");
 
-  cba v(r);
-  if(!v.IsValid())
-    throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid I/OCoin address");
+    cba v(r);
+    if(!v.IsValid())
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid I/OCoin address");
 
-  if(!IsMine(*pwalletMain, v.Get()))
-    throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid");
+    if(!IsMine(*pwalletMain, v.Get()))
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid");
 
-  CKeyID k1;
-  u.GetKeyID(k1);
-  CKeyID k2;
-  v.GetKeyID(k2);
-  RayShade& a = pwalletMain->kd[k1].rs_;
-  RayShade& b = pwalletMain->kd[k2].rs_;
-  a.ctrlExternalDtx(RayShade::RAY_VTX, (uint160)(k2));
-  b.ctrlExternalDtx(RayShade::RAY_SET, (uint160)(k2));
+    CKeyID k1;
+    u.GetKeyID(k1);
+    CKeyID k2;
+    v.GetKeyID(k2);
+    RayShade& a = pwalletMain->kd[k1].rs_;
+    RayShade& b = pwalletMain->kd[k2].rs_;
+    a.ctrlExternalDtx(RayShade::RAY_VTX, (uint160)(k2));
+    b.ctrlExternalDtx(RayShade::RAY_SET, (uint160)(k2));
 
-  CPubKey t0;
-  pwalletMain->GetPubKey(k1, t0);
-  CPubKey t1;
-  pwalletMain->GetPubKey(k2, t1);
+    CPubKey t0;
+    pwalletMain->GetPubKey(k1, t0);
+    CPubKey t1;
+    pwalletMain->GetPubKey(k2, t1);
 
-  bool c;
-  CSecret s1;
-  if(pwalletMain->GetSecret(k1, s1, c))
-  {
-    unsigned char* a1 = s1.data();
-    vector<unsigned char> v(a1, a1 + 0x20);
-    a.streamID(v);
-  }
+    bool c;
+    CSecret s1;
+    if(pwalletMain->GetSecret(k1, s1, c))
+    {
+        unsigned char* a1 = s1.data();
+        vector<unsigned char> v(a1, a1 + 0x20);
+        a.streamID(v);
+    }
 
-  pwalletMain->kd[k1].nVersion = CKeyMetadata::CURRENT_VERSION;
-  pwalletMain->kd[k2].nVersion = CKeyMetadata::CURRENT_VERSION;
-  if((!__wx__DB(pwalletMain->strWalletFile).UpdateKey(t0, pwalletMain->kd[k1]) || !__wx__DB(pwalletMain->strWalletFile).UpdateKey(t1, pwalletMain->kd[k2])))
-      throw runtime_error("update, vtx");
+    pwalletMain->kd[k1].nVersion = CKeyMetadata::CURRENT_VERSION;
+    pwalletMain->kd[k2].nVersion = CKeyMetadata::CURRENT_VERSION;
+    if((!__wx__DB(pwalletMain->strWalletFile).UpdateKey(t0, pwalletMain->kd[k1]) || !__wx__DB(pwalletMain->strWalletFile).UpdateKey(t1, pwalletMain->kd[k2])))
+        throw runtime_error("update, vtx");
 
-  oRes.push_back("true");
+    oRes.push_back("true");
 
-  return oRes;
+    return oRes;
 }
 
 cba GetAccountAddress(string strAccount, bool bForceNew=false)
@@ -470,13 +473,13 @@ cba GetAccountAddress(string strAccount, bool bForceNew=false)
         CScript scriptPubKey;
         scriptPubKey.SetDestination(account.vchPubKey.GetID());
         for (map<uint256, __wx__Tx>::iterator it = pwalletMain->mapWallet.begin();
-             it != pwalletMain->mapWallet.end() && account.vchPubKey.IsValid();
-             ++it)
+                it != pwalletMain->mapWallet.end() && account.vchPubKey.IsValid();
+                ++it)
         {
             const __wx__Tx& wtx = (*it).second;
             BOOST_FOREACH(const CTxOut& txout, wtx.vout)
-                if (txout.scriptPubKey == scriptPubKey)
-                    bKeyUsed = true;
+            if (txout.scriptPubKey == scriptPubKey)
+                bKeyUsed = true;
         }
     }
 
@@ -613,77 +616,77 @@ Value addresstodion(const Array& params, bool fHelp)
     ln1Db->filter();
     cba address__(address);
     if (!address__.IsValid())
-      throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid I/OCoin address");
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid I/OCoin address");
 
     string alias;
 
 
     Dbc* cursorp;
-    try 
+    try
     {
-      cursorp = ln1Db->GetCursor(); 
+        cursorp = ln1Db->GetCursor();
 
-      Dbt key, data;
-      int ret;
+        Dbt key, data;
+        int ret;
 
-      while ((ret = cursorp->get(&key, &data, DB_NEXT)) == 0) 
-      {
-        printf("  key \n");
-        CDataStream ssKey(SER_DISK, CLIENT_VERSION);
-        ssKey.write((char*)key.get_data(), key.get_size());
-
-        string k1;
-        ssKey >> k1;
-        if(k1 == "alias_")
+        while ((ret = cursorp->get(&key, &data, DB_NEXT)) == 0)
         {
-          printf("  k1 %s\n", k1.c_str());
-          vchType k2;
-          ssKey >> k2; 
-          string a = stringFromVch(k2);
-          printf("  k2 %s\n", a.c_str());
+            printf("  key \n");
+            CDataStream ssKey(SER_DISK, CLIENT_VERSION);
+            ssKey.write((char*)key.get_data(), key.get_size());
 
-          vector<AliasIndex> vtxPos;
-          CDataStream ssValue((char*)data.get_data(), (char*)data.get_data() + data.get_size(), SER_DISK, CLIENT_VERSION);
-          ssValue >> vtxPos;
+            string k1;
+            ssKey >> k1;
+            if(k1 == "alias_")
+            {
+                printf("  k1 %s\n", k1.c_str());
+                vchType k2;
+                ssKey >> k2;
+                string a = stringFromVch(k2);
+                printf("  k2 %s\n", a.c_str());
 
-          AliasIndex i = vtxPos.back();
-          string i_address = (i.vAddress).c_str();
-          printf("  vAddress %s\n", i_address.c_str());
-          if(i_address == address)
-          {
-            alias = a;
-            break;
-          }
+                vector<PathIndex> vtxPos;
+                CDataStream ssValue((char*)data.get_data(), (char*)data.get_data() + data.get_size(), SER_DISK, CLIENT_VERSION);
+                ssValue >> vtxPos;
+
+                PathIndex i = vtxPos.back();
+                string i_address = (i.vAddress).c_str();
+                printf("  vAddress %s\n", i_address.c_str());
+                if(i_address == address)
+                {
+                    alias = a;
+                    break;
+                }
+            }
         }
-      }
-      if (ret != DB_NOTFOUND) 
-      {
-        // ret should be DB_NOTFOUND upon exiting the loop.
-        // Dbc::get() will by default throw an exception if any
-        // significant errors occur, so by default this if block
-        // can never be reached. 
-      }
-    } 
-    catch(DbException &e) 
+        if (ret != DB_NOTFOUND)
+        {
+            // ret should be DB_NOTFOUND upon exiting the loop.
+            // Dbc::get() will by default throw an exception if any
+            // significant errors occur, so by default this if block
+            // can never be reached.
+        }
+    }
+    catch(DbException &e)
     {
-      //ln1Db.err(e.get_errno(), "Error!");
-    } 
-    catch(std::exception &e) 
+        //ln1Db.err(e.get_errno(), "Error!");
+    }
+    catch(std::exception &e)
     {
-      //ln1Db.errx("Error! %s", e.what());
+        //ln1Db.errx("Error! %s", e.what());
     }
 
-    if (cursorp != NULL) 
-      cursorp->close(); 
+    if (cursorp != NULL)
+        cursorp->close();
 
     Array oRes;
     if(alias != "")
     {
-      oRes.push_back(alias);
+        oRes.push_back(alias);
     }
-    
-    //return oRes; 
-    return alias; 
+
+    //return oRes;
+    return alias;
 }
 Value sendtodion(const Array& params, bool fHelp)
 {
@@ -695,29 +698,28 @@ Value sendtodion(const Array& params, bool fHelp)
 
     ln1Db->filter();
     string alias = params[0].get_str();
-    std::transform(alias.begin(), alias.end(), alias.begin(), ::tolower);
     string address = "address not found";
 
-    vector<AliasIndex> vtxPos;
-    vchType vchAlias = vchFromString(alias);
-    if(ln1Db->lKey(vchAlias))
+    vector<PathIndex> vtxPos;
+    vchType vchPath = vchFromString(alias);
+    if(ln1Db->lKey(vchPath))
     {
-      if(!ln1Db->lGet(vchAlias, vtxPos))
-        return error("aliasHeight() : failed to read from name DB");
-      if(vtxPos.empty())
-        return -1;
+        if(!ln1Db->lGet(vchPath, vtxPos))
+            return error("aliasHeight() : failed to read from name DB");
+        if(vtxPos.empty())
+            return -1;
 
-      AliasIndex& txPos = vtxPos.back();
-          if(txPos.nHeight + scaleMonitor() <= nBestHeight)
+        PathIndex& txPos = vtxPos.back();
+        if(txPos.nHeight + scaleMonitor() <= nBestHeight)
             throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "extern alias");
-      address = txPos.vAddress;
+        address = txPos.vAddress;
     }
     else
     {
-      throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "DION does not exist.");
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "DION does not exist.");
     }
 
-    return address; 
+    return address;
 }
 
 Value sendtoaddress(const Array& params, bool fHelp)
@@ -732,25 +734,25 @@ Value sendtoaddress(const Array& params, bool fHelp)
     cba address(addrStr);
     if(!address.IsValid())
     {
-      vector<AliasIndex> vtxPos;
-      vchType vchAlias = vchFromString(addrStr);
-      if (ln1Db->lKey (vchAlias))
-      {
-        printf("  name exists\n");
-        if (!ln1Db->lGet (vchAlias, vtxPos))
-          return error("aliasHeight() : failed to read from name DB");
-        if (vtxPos.empty ())
-          return -1;
+        vector<PathIndex> vtxPos;
+        vchType vchPath = vchFromString(addrStr);
+        if (ln1Db->lKey (vchPath))
+        {
+            printf("  name exists\n");
+            if (!ln1Db->lGet (vchPath, vtxPos))
+                return error("aliasHeight() : failed to read from name DB");
+            if (vtxPos.empty ())
+                return -1;
 
-        AliasIndex& txPos = vtxPos.back ();
-          if(txPos.nHeight + scaleMonitor() <= nBestHeight)
-            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "extern alias");
-        address.SetString(txPos.vAddress); 
-      }
-      else
-      {
-          throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid I/OCoin address or unknown alias");
-      }
+            PathIndex& txPos = vtxPos.back ();
+            if(txPos.nHeight + scaleMonitor() <= nBestHeight)
+                throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "extern alias");
+            address.SetString(txPos.vAddress);
+        }
+        else
+        {
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid I/OCoin address or unknown alias");
+        }
     }
 
     // Amount
@@ -765,11 +767,13 @@ Value sendtoaddress(const Array& params, bool fHelp)
     // Info for sender
     std::string txdetails;
     if (params.size() > 4 && params[4].type() != null_type && !params[4].get_str().empty())
-      {
+    {
         txdetails = params[4].get_str();
         if (txdetails.length() > MAX_TX_INFO_LEN)
-            {txdetails.resize(MAX_TX_INFO_LEN);}
-      }
+        {
+            txdetails.resize(MAX_TX_INFO_LEN);
+        }
+    }
 
     if (pwalletMain->as())
         throw JSONRPCError(RPC_WALLET_UNLOCK_NEEDED, "Error: Please enter the wallet passphrase with walletpassphrase first.");
@@ -898,25 +902,24 @@ Value verifymessage(const Array& params, bool fHelp)
 Value xtu_url__(const string& s)
 {
     string url=s;
-    std::transform(url.begin(), url.end(), url.begin(), ::tolower);
     string target = "state-0";
 
     ln1Db->filter();
-    vector<AliasIndex> vtxPos;
+    vector<PathIndex> vtxPos;
     vchType vchURL = vchFromString(url);
     if (ln1Db->lKey(vchURL))
     {
-      if (!ln1Db->lGet(vchURL, vtxPos))
-        return error("failed to read from DB");
-      if (vtxPos.empty ())
-        return -1;
+        if (!ln1Db->lGet(vchURL, vtxPos))
+            return error("failed to read from DB");
+        if (vtxPos.empty ())
+            return -1;
 
-      AliasIndex& txPos = vtxPos.back();
-      target = txPos.vAddress;
+        PathIndex& txPos = vtxPos.back();
+        target = txPos.vAddress;
     }
     else
     {
-      throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "does not exist.");
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "does not exist.");
     }
 
     cba address = cba(target);
@@ -940,9 +943,9 @@ Value xtu_url__(const string& s)
             continue;
 
         BOOST_FOREACH(const CTxOut& txout, wtx.vout)
-            if (txout.scriptPubKey == scriptPubKey)
-                if (wtx.GetDepthInMainChain() >= nMinDepth)
-                    nAmount += txout.nValue;
+        if (txout.scriptPubKey == scriptPubKey)
+            if (wtx.GetDepthInMainChain() >= nMinDepth)
+                nAmount += txout.nValue;
     }
 
     return  ValueFromAmount(nAmount);
@@ -956,25 +959,24 @@ Value xtu_url(const Array& params, bool fHelp)
             "return xtu eval url");
 
     string url = params[0].get_str();
-    std::transform(url.begin(), url.end(), url.begin(), ::tolower);
     string target = "state-0";
 
     ln1Db->filter();
-    vector<AliasIndex> vtxPos;
+    vector<PathIndex> vtxPos;
     vchType vchURL = vchFromString(url);
     if (ln1Db->lKey(vchURL))
     {
-      if (!ln1Db->lGet(vchURL, vtxPos))
-        return error("failed to read from DB");
-      if (vtxPos.empty ())
-        return -1;
+        if (!ln1Db->lGet(vchURL, vtxPos))
+            return error("failed to read from DB");
+        if (vtxPos.empty ())
+            return -1;
 
-      AliasIndex& txPos = vtxPos.back();
-      target = txPos.vAddress;
+        PathIndex& txPos = vtxPos.back();
+        target = txPos.vAddress;
     }
     else
     {
-      throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "does not exist.");
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "does not exist.");
     }
 
     cba address = cba(target);
@@ -1000,9 +1002,9 @@ Value xtu_url(const Array& params, bool fHelp)
             continue;
 
         BOOST_FOREACH(const CTxOut& txout, wtx.vout)
-            if (txout.scriptPubKey == scriptPubKey)
-                if (wtx.GetDepthInMainChain() >= nMinDepth)
-                    nAmount += txout.nValue;
+        if (txout.scriptPubKey == scriptPubKey)
+            if (wtx.GetDepthInMainChain() >= nMinDepth)
+                nAmount += txout.nValue;
     }
 
     return  ValueFromAmount(nAmount);
@@ -1038,9 +1040,9 @@ Value getreceivedbyaddress(const Array& params, bool fHelp)
             continue;
 
         BOOST_FOREACH(const CTxOut& txout, wtx.vout)
-            if (txout.scriptPubKey == scriptPubKey)
-                if (wtx.GetDepthInMainChain() >= nMinDepth)
-                    nAmount += txout.nValue;
+        if (txout.scriptPubKey == scriptPubKey)
+            if (wtx.GetDepthInMainChain() >= nMinDepth)
+                nAmount += txout.nValue;
     }
 
     return  ValueFromAmount(nAmount);
@@ -1076,9 +1078,9 @@ Value gra(const Array& params, bool fHelp)
             continue;
 
         BOOST_FOREACH(const CTxOut& txout, wtx.vout)
-            if (txout.scriptPubKey == scriptPubKey)
-                if (wtx.GetDepthInMainChain() >= nMinDepth)
-                    nAmount += txout.nValue;
+        if (txout.scriptPubKey == scriptPubKey)
+            if (wtx.GetDepthInMainChain() >= nMinDepth)
+                nAmount += txout.nValue;
     }
 
     Array oRes;
@@ -1214,10 +1216,10 @@ Value getbalance(const Array& params, bool fHelp)
             if (wtx.GetDepthInMainChain() >= nMinDepth && wtx.GetBlocksToMaturity() == 0)
             {
                 BOOST_FOREACH(const PAIRTYPE(CTxDestination,int64_t)& r, listReceived)
-                    nBalance += r.second;
+                nBalance += r.second;
             }
             BOOST_FOREACH(const PAIRTYPE(CTxDestination,int64_t)& r, listSent)
-                nBalance -= r.second;
+            nBalance -= r.second;
             nBalance -= allFee;
         }
         return  ValueFromAmount(nBalance);
@@ -1312,11 +1314,13 @@ Value sendfrom(const Array& params, bool fHelp)
         wtx.mapValue["to"]      = params[5].get_str();
     std::string txdetails;
     if (params.size() > 6 && params[6].type() != null_type && !params[6].get_str().empty())
-     {
-         txdetails = params[6].get_str();
-         if (txdetails.length() > MAX_TX_INFO_LEN)
-             {txdetails.resize(MAX_TX_INFO_LEN);}
-     }
+    {
+        txdetails = params[6].get_str();
+        if (txdetails.length() > MAX_TX_INFO_LEN)
+        {
+            txdetails.resize(MAX_TX_INFO_LEN);
+        }
+    }
     EnsureWalletIsUnlocked();
 
     // Check funds
@@ -1406,9 +1410,9 @@ Value addmultisigaddress(const Array& params, bool fHelp)
     if (fHelp || params.size() < 2 || params.size() > 3)
     {
         string msg = "addmultisigaddress <nrequired> <'[\"key\",\"key\"]'> [account]\n"
-            "Add a nrequired-to-sign multisignature address to the wallet\"\n"
-            "each key is a I/OCoin address or hex-encoded public key\n"
-            "If [account] is specified, assign address to [account].";
+                     "Add a nrequired-to-sign multisignature address to the wallet\"\n"
+                     "each key is a I/OCoin address or hex-encoded public key\n"
+                     "If [account] is specified, assign address to [account].";
         throw runtime_error(msg);
     }
 
@@ -1476,8 +1480,8 @@ Value addredeemscript(const Array& params, bool fHelp)
     if (fHelp || params.size() < 1 || params.size() > 2)
     {
         string msg = "addredeemscript <redeemScript> [account]\n"
-            "Add a P2SH address with a specified redeemScript to the wallet.\n"
-            "If [account] is specified, assign address to [account].";
+                     "Add a P2SH address with a specified redeemScript to the wallet.\n"
+                     "If [account] is specified, assign address to [account].";
         throw runtime_error(msg);
     }
 
@@ -1656,10 +1660,10 @@ void ListTransactions(const __wx__Tx& wtx, const string& strAccount, int nMinDep
             Object entry;
             entry.push_back(Pair("account", strSentAccount));
             MaybePushAddress(entry, s.first);
-            if(wtx.nVersion == CTransaction::DION_TX_VERSION)
-              entry.push_back(Pair("category", "send__"));
+            if(wtx.nVersion == CTransaction::DION_TX_VERSION || wtx.nVersion == CTransaction::CYCLE_TX_VERSION)
+                entry.push_back(Pair("category", "send__"));
             else
-              entry.push_back(Pair("category", "send"));
+                entry.push_back(Pair("category", "send"));
             entry.push_back(Pair("amount", ValueFromAmount(-s.second)));
             entry.push_back(Pair("fee", ValueFromAmount(-nFee)));
             if (fLong)
@@ -1693,10 +1697,10 @@ void ListTransactions(const __wx__Tx& wtx, const string& strAccount, int nMinDep
                 }
                 else
                 {
-                  if(wtx.nVersion == CTransaction::DION_TX_VERSION)
-                    entry.push_back(Pair("category", "receive__"));
-                  else
-                    entry.push_back(Pair("category", "receive"));
+                    if(wtx.nVersion == CTransaction::DION_TX_VERSION || wtx.nVersion == CTransaction::CYCLE_TX_VERSION)
+                        entry.push_back(Pair("category", "receive__"));
+                    else
+                        entry.push_back(Pair("category", "receive"));
                 }
                 if (!wtx.IsCoinStake())
                     entry.push_back(Pair("amount", ValueFromAmount(r.second)));
@@ -1879,21 +1883,21 @@ Value listaccounts(const Array& params, bool fHelp)
         wtx.GetAmounts(listReceived, listSent, nFee, strSentAccount);
         mapAccountBalances[strSentAccount] -= nFee;
         BOOST_FOREACH(const PAIRTYPE(CTxDestination, int64_t)& s, listSent)
-            mapAccountBalances[strSentAccount] -= s.second;
+        mapAccountBalances[strSentAccount] -= s.second;
         if (nDepth >= nMinDepth && wtx.GetBlocksToMaturity() == 0)
         {
             BOOST_FOREACH(const PAIRTYPE(CTxDestination, int64_t)& r, listReceived)
-                if (pwalletMain->mapAddressBook.count(r.first))
-                    mapAccountBalances[pwalletMain->mapAddressBook[r.first]] += r.second;
-                else
-                    mapAccountBalances[""] += r.second;
+            if (pwalletMain->mapAddressBook.count(r.first))
+                mapAccountBalances[pwalletMain->mapAddressBook[r.first]] += r.second;
+            else
+                mapAccountBalances[""] += r.second;
         }
     }
 
     list<CAccountingEntry> acentries;
     __wx__DB(pwalletMain->strWalletFile).ListAccountCreditDebit("*", acentries);
     BOOST_FOREACH(const CAccountingEntry& entry, acentries)
-        mapAccountBalances[entry.strAccount] += entry.nCreditDebit;
+    mapAccountBalances[entry.strAccount] += entry.nCreditDebit;
 
     Object ret;
     BOOST_FOREACH(const PAIRTYPE(string, int64_t)& accountBalance, mapAccountBalances) {
@@ -1952,8 +1956,8 @@ Value listsinceblock(const Array& params, bool fHelp)
 
         CBlockIndex *block;
         for (block = pindexBest;
-             block && block->nHeight > target_height;
-             block = block->pprev)  { }
+                block && block->nHeight > target_height;
+                block = block->pprev)  { }
 
         lastblock = block ? block->GetBlockHash() : 0;
     }
@@ -2252,6 +2256,8 @@ Value encryptwallet(const Array& params, bool fHelp)
     if (pwalletMain->IsCrypted())
         throw JSONRPCError(RPC_WALLET_WRONG_ENC_STATE, "Error: running with an encrypted wallet, but encryptwallet was called.");
 
+    // TODO: get rid of this .c_str() by implementing SecureString::operator=(std::string)
+    // Alternately, find a way to make params[0] mlock()'d to begin with.
     SecureString strWalletPass;
     strWalletPass.reserve(100);
     strWalletPass = params[0].get_str().c_str();
@@ -2274,7 +2280,9 @@ Value encryptwallet(const Array& params, bool fHelp)
 class DescribeAddressVisitor : public boost::static_visitor<Object>
 {
 public:
-    Object operator()(const CNoDestination &dest) const { return Object(); }
+    Object operator()(const CNoDestination &dest) const {
+        return Object();
+    }
 
     Object operator()(const CKeyID &keyID) const {
         Object obj;
@@ -2299,7 +2307,7 @@ public:
         obj.push_back(Pair("hex", HexStr(subscript.begin(), subscript.end())));
         Array a;
         BOOST_FOREACH(const CTxDestination& addr, addresses)
-            a.push_back(cba(addr).ToString());
+        a.push_back(cba(addr).ToString());
         obj.push_back(Pair("addresses", a));
         if (whichType == TX_MULTISIG)
             obj.push_back(Pair("sigsrequired", nRequired));
@@ -2481,7 +2489,7 @@ Value makekeypair(const Array& params, bool fHelp)
     string strPrefix = "";
     if (params.size() > 0)
         strPrefix = params[0].get_str();
- 
+
     CKey key;
     key.MakeNewKey(false);
 
@@ -2521,69 +2529,69 @@ Value shadesend(const Array& params, bool fHelp)
 
     if(!V4(nBestHeight))
     {
-      throw std::runtime_error("Feature not active. Block not reached");
+        throw std::runtime_error("Feature not active. Block not reached");
     }
 
     Object obj;
-   
+
     string ray_ = params[0].get_str();
     vector<unsigned char> k;
     k.reserve(0x42);
     if(DecodeBase58(ray_.c_str(), k))
     {
-      vector<unsigned char> k1;
-      vector<unsigned char> k2;
-      k1.reserve(0x21);
-      k2.reserve(0x21);
-      k1.insert(k1.end(), k.begin() + 0x01, k.begin() + 0x22);
-      k2.insert(k2.end(), k.begin() + 0x22, k.end());
-      CPubKey k1_(k1);
-      CPubKey k2_(k2);
-      obj.push_back(Pair("abs", cba(k1_.GetID()).ToString()));
-      obj.push_back(Pair("ord", cba(k2_.GetID()).ToString()));
+        vector<unsigned char> k1;
+        vector<unsigned char> k2;
+        k1.reserve(0x21);
+        k2.reserve(0x21);
+        k1.insert(k1.end(), k.begin() + 0x01, k.begin() + 0x22);
+        k2.insert(k2.end(), k.begin() + 0x22, k.end());
+        CPubKey k1_(k1);
+        CPubKey k2_(k2);
+        obj.push_back(Pair("abs", cba(k1_.GetID()).ToString()));
+        obj.push_back(Pair("ord", cba(k2_.GetID()).ToString()));
 
-      vector<unsigned char> fq_;
-      fq_.resize(0x20);
-      vector<unsigned char> fq1_;
-      fq1_.resize(0x20);
-      vector<unsigned char> fq2_;
-      fq2_.resize(0x21);
-      int rIndex = fqa__7(fq_);
-      if(rIndex != 1)
-        throw runtime_error("rfl fq error");
+        vector<unsigned char> fq_;
+        fq_.resize(0x20);
+        vector<unsigned char> fq1_;
+        fq1_.resize(0x20);
+        vector<unsigned char> fq2_;
+        fq2_.resize(0x21);
+        int rIndex = fqa__7(fq_);
+        if(rIndex != 1)
+            throw runtime_error("rfl fq error");
 
-      __pq__ v = { fq_, k1, k2, fq1_, fq2_ };
+        __pq__ v = { fq_, k1, k2, fq1_, fq2_ };
 
-      vector<unsigned char> _i1;
-      _i1.resize(0x21);
-      __inv__ inv = { fq_, _i1 };
+        vector<unsigned char> _i1;
+        _i1.resize(0x21);
+        __inv__ inv = { fq_, _i1 };
 
-      if(reflection(v) == 0)
-      {
-        CPubKey pivot(v.__fq5);
-        if(!pivot.IsValid())
-          throw runtime_error("rfl pivot point");
-
-        obj.push_back(Pair("target", cba(pivot.GetID()).ToString()));
-        
-        if(invert(inv) == 0)
+        if(reflection(v) == 0)
         {
-          CPubKey inv_(inv.__inv1);
-          if(!inv_.IsValid())
-            throw runtime_error("rfl image");
-          
-          obj.push_back(Pair("trace", cba(inv_.GetID()).ToString()));
-          int64_t v = AmountFromValue(params[1]);
-          CScript pk;
-          pk.SetDestination(cba(pivot.GetID()).Get());
-          __wx__Tx t;
-          string err = pwalletMain->__associate_fn__(pk, v, t, inv.__inv1);
-          if(err != "")
-            obj.push_back(Pair("status", err));
-          else
-            obj.push_back(Pair("txid", t.GetHash().GetHex()));
-        }  
-      }
+            CPubKey pivot(v.__fq5);
+            if(!pivot.IsValid())
+                throw runtime_error("rfl pivot point");
+
+            obj.push_back(Pair("target", cba(pivot.GetID()).ToString()));
+
+            if(invert(inv) == 0)
+            {
+                CPubKey inv_(inv.__inv1);
+                if(!inv_.IsValid())
+                    throw runtime_error("rfl image");
+
+                obj.push_back(Pair("trace", cba(inv_.GetID()).ToString()));
+                int64_t v = AmountFromValue(params[1]);
+                CScript pk;
+                pk.SetDestination(cba(pivot.GetID()).Get());
+                __wx__Tx t;
+                string err = pwalletMain->__associate_fn__(pk, v, t, inv.__inv1);
+                if(err != "")
+                    obj.push_back(Pair("status", err));
+                else
+                    obj.push_back(Pair("txid", t.GetHash().GetHex()));
+            }
+        }
     }
 
     return obj;
@@ -2596,93 +2604,93 @@ Value __vtx_s(const Array& params, bool fHelp)
             + HelpRequiringPassphrase());
 
     Array oRes;
-   
+
     string ray_ = params[0].get_str();
     vector<unsigned char> k;
     k.reserve(0x42);
     if(DecodeBase58(ray_.c_str(), k))
     {
-      vector<unsigned char> k1;
-      vector<unsigned char> k2;
-      k1.reserve(0x21);
-      k2.reserve(0x21);
-      k1.insert(k1.end(), k.begin(), k.begin() + 0x21);
-      k2.insert(k2.end(), k.begin() + 0x21, k.end());
-      CPubKey k1_(k1);
+        vector<unsigned char> k1;
+        vector<unsigned char> k2;
+        k1.reserve(0x21);
+        k2.reserve(0x21);
+        k1.insert(k1.end(), k.begin(), k.begin() + 0x21);
+        k2.insert(k2.end(), k.begin() + 0x21, k.end());
+        CPubKey k1_(k1);
 
-      CKeyID k_id1;
-      if (!cba(k1_.GetID()).GetKeyID(k_id1))
-        throw runtime_error("key");
+        CKeyID k_id1;
+        if (!cba(k1_.GetID()).GetKeyID(k_id1))
+            throw runtime_error("key");
 
-      CSecret vchSecret1;
-      bool fCompressed;
-      if (!pwalletMain->GetSecret(k_id1, vchSecret1, fCompressed))
-       throw runtime_error("k1 secret"); 
+        CSecret vchSecret1;
+        bool fCompressed;
+        if (!pwalletMain->GetSecret(k_id1, vchSecret1, fCompressed))
+            throw runtime_error("k1 secret");
 
-      CPubKey k2_(k2);
+        CPubKey k2_(k2);
 
-      CKeyID k_id2;
-      if (!cba(k2_.GetID()).GetKeyID(k_id2))
-        throw runtime_error("key");
+        CKeyID k_id2;
+        if (!cba(k2_.GetID()).GetKeyID(k_id2))
+            throw runtime_error("key");
 
-      CSecret vchSecret2;
-      if (!pwalletMain->GetSecret(k_id2, vchSecret2, fCompressed))
-       throw runtime_error("k2 secret"); 
-      
-      Object obj;
-      obj.push_back(Pair("vertex point", cba(k1_.GetID()).ToString()));
-      obj.push_back(Pair("ray id", cba(k2_.GetID()).ToString()));
+        CSecret vchSecret2;
+        if (!pwalletMain->GetSecret(k_id2, vchSecret2, fCompressed))
+            throw runtime_error("k2 secret");
 
-      vector<unsigned char> fq_;
-      fq_.resize(0x20);
-      vector<unsigned char> fq1_;
-      fq1_.resize(0x20);
-      vector<unsigned char> fq2_;
-      fq2_.resize(0x21);
-      int rIndex = fqa__7(fq_);
-      if(rIndex != 1)
-        throw runtime_error("rfl fq error");
+        Object obj;
+        obj.push_back(Pair("vertex point", cba(k1_.GetID()).ToString()));
+        obj.push_back(Pair("ray id", cba(k2_.GetID()).ToString()));
 
-      __pq__ v = { fq_, k1, k2, fq1_, fq2_ };
+        vector<unsigned char> fq_;
+        fq_.resize(0x20);
+        vector<unsigned char> fq1_;
+        fq1_.resize(0x20);
+        vector<unsigned char> fq2_;
+        fq2_.resize(0x21);
+        int rIndex = fqa__7(fq_);
+        if(rIndex != 1)
+            throw runtime_error("rfl fq error");
 
-      vector<unsigned char> _i1;
-      _i1.resize(0x21);
-      __inv__ inv = { fq_, _i1 };
+        __pq__ v = { fq_, k1, k2, fq1_, fq2_ };
 
-      if(reflection(v) == 0)
-      {
-        CPubKey pivot(v.__fq5);
-        if(!pivot.IsValid())
-          throw runtime_error("rfl pivot point");
+        vector<unsigned char> _i1;
+        _i1.resize(0x21);
+        __inv__ inv = { fq_, _i1 };
 
-        obj.push_back(Pair("pivot point", cba(pivot.GetID()).ToString()));
-        
-        if(invert(inv) == 0)
+        if(reflection(v) == 0)
         {
-          CPubKey inv_(inv.__inv1);
-          if(!inv_.IsValid())
-            throw runtime_error("rfl image");
-          
-          obj.push_back(Pair("image", cba(inv_.GetID()).ToString()));
+            CPubKey pivot(v.__fq5);
+            if(!pivot.IsValid())
+                throw runtime_error("rfl pivot point");
 
-          unsigned char* a1 = vchSecret1.data();
-          unsigned char* a2 = vchSecret2.data();
-          __im__ tmp1(a1, a1 + 0x20);
-          __im__ tmp2 = inv.__inv1;
-          __im__ tmp3(a2, a2 + 0x20);
-          __im__ tmp4;
-          tmp4.resize(0x20);
-          __synth_piv__conv71__intern(tmp1,tmp2,tmp3,tmp4);
-          CSecret sx(tmp4.data(), tmp4.data() + 0x20);
-          CKey ks_x;
-          ks_x.SetSecret(sx, true);
-          CPubKey sx_p = ks_x.GetPubKey();
-          cba sxa(sx_p.GetID());
-          obj.push_back(Pair("sx_p", sxa.ToString()));
-        }  
-      }
-      
-      oRes.push_back(obj);
+            obj.push_back(Pair("pivot point", cba(pivot.GetID()).ToString()));
+
+            if(invert(inv) == 0)
+            {
+                CPubKey inv_(inv.__inv1);
+                if(!inv_.IsValid())
+                    throw runtime_error("rfl image");
+
+                obj.push_back(Pair("image", cba(inv_.GetID()).ToString()));
+
+                unsigned char* a1 = vchSecret1.data();
+                unsigned char* a2 = vchSecret2.data();
+                __im__ tmp1(a1, a1 + 0x20);
+                __im__ tmp2 = inv.__inv1;
+                __im__ tmp3(a2, a2 + 0x20);
+                __im__ tmp4;
+                tmp4.resize(0x20);
+                __synth_piv__conv71__intern(tmp1,tmp2,tmp3,tmp4);
+                CSecret sx(tmp4.data(), tmp4.data() + 0x20);
+                CKey ks_x;
+                ks_x.SetSecret(sx, true);
+                CPubKey sx_p = ks_x.GetPubKey();
+                cba sxa(sx_p.GetID());
+                obj.push_back(Pair("sx_p", sxa.ToString()));
+            }
+        }
+
+        oRes.push_back(obj);
     }
 
     return oRes;
@@ -2705,22 +2713,22 @@ Value sublimateYdwi(const Array& params, bool fHelp)
     k.reserve(0x42);
     if(DecodeBase58(ydwi_point.c_str(), k))
     {
-      vector<unsigned char> ydwi__k1;
-      vector<unsigned char> ydwi__k2;
-      ydwi__k1.reserve(0x21);
-      ydwi__k2.reserve(0x21);
-      ydwi__k1.insert(ydwi__k1.end(), k.begin() + 0x01, k.begin() + 0x22);
-      ydwi__k2.insert(ydwi__k2.end(), k.begin() + 0x22, k.end());
-      CPubKey ydwi__k1_(ydwi__k1);
-      CPubKey ydwi__k2_(ydwi__k2);
-      cba ydwi_x(ydwi__k1_.GetID());
-      cba ydwi_y(ydwi__k2_.GetID());
+        vector<unsigned char> ydwi__k1;
+        vector<unsigned char> ydwi__k2;
+        ydwi__k1.reserve(0x21);
+        ydwi__k2.reserve(0x21);
+        ydwi__k1.insert(ydwi__k1.end(), k.begin() + 0x01, k.begin() + 0x22);
+        ydwi__k2.insert(ydwi__k2.end(), k.begin() + 0x22, k.end());
+        CPubKey ydwi__k1_(ydwi__k1);
+        CPubKey ydwi__k2_(ydwi__k2);
+        cba ydwi_x(ydwi__k1_.GetID());
+        cba ydwi_y(ydwi__k2_.GetID());
 
-      bool sentinel = k[0] == 0x18;
-      bool base = ydwi_x.IsValid() && ydwi_y.IsValid();
-      ret.push_back(Pair("stat", sentinel && base));
-      ret.push_back(Pair("abs", ydwi_x.ToString().c_str()));
-      ret.push_back(Pair("ord", ydwi_y.ToString().c_str()));
+        bool sentinel = k[0] == 0x18;
+        bool base = ydwi_x.IsValid() && ydwi_y.IsValid();
+        ret.push_back(Pair("stat", sentinel && base));
+        ret.push_back(Pair("abs", ydwi_x.ToString().c_str()));
+        ret.push_back(Pair("ord", ydwi_y.ToString().c_str()));
     }
     return ret;
 }
@@ -2728,9 +2736,9 @@ Value sublimateYdwi(const Array& params, bool fHelp)
 Value shadeK(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() != 2)
-    throw runtime_error(
-    "shadeK alpha beta\n"
-    );
+        throw runtime_error(
+            "shadeK alpha beta\n"
+        );
 
     cba alpha(params[0].get_str());
     CKeyID alphaK;
@@ -2752,7 +2760,7 @@ Value shadeK(const Array& params, bool fHelp)
     RayShade& rs1 = pwalletMain->kd[betaK].rs_;
     rs1.ctrlExternalDtx(RayShade::RAY_SET, (uint160)(betaK));
     if((!__wx__DB(pwalletMain->strWalletFile).UpdateKey(vertex1, pwalletMain->kd[alphaK]) || !__wx__DB(pwalletMain->strWalletFile).UpdateKey(vertex2, pwalletMain->kd[betaK])))
-      throw runtime_error("update vtx");
+        throw runtime_error("update vtx");
 
     vector<unsigned char> k;
     k.reserve(1 + vertex1.Raw().size() + vertex2.Raw().size());
@@ -2762,25 +2770,25 @@ Value shadeK(const Array& params, bool fHelp)
     k.insert(k.end(), a.begin(), a.end());
     k.insert(k.end(), b.begin(), b.end());
     if(k.size() == 0)
-      throw runtime_error("k size " + k.size());
+        throw runtime_error("k size " + k.size());
     string s1 = EncodeBase58(&k[0], &k[0] + k.size());
     RayShade& r = pwalletMain->kd[alphaK].rs_;
     CKey l;
     Object oRes;
     if(pwalletMain->GetKey(alphaK, l))
     {
-      bool c;
-      CSecret s1;
-      if(pwalletMain->GetSecret(alphaK, s1, c))
-      {
-        unsigned char* a1 = s1.data();
-        vector<unsigned char> v(a1, a1 + 0x20);
-        r.streamID(v);
-        if(!__wx__DB(pwalletMain->strWalletFile).UpdateKey(vertex1, pwalletMain->kd[vertex1.GetID()]))
+        bool c;
+        CSecret s1;
+        if(pwalletMain->GetSecret(alphaK, s1, c))
         {
-          throw JSONRPCError(RPC_TYPE_ERROR, "update error");
+            unsigned char* a1 = s1.data();
+            vector<unsigned char> v(a1, a1 + 0x20);
+            r.streamID(v);
+            if(!__wx__DB(pwalletMain->strWalletFile).UpdateKey(vertex1, pwalletMain->kd[vertex1.GetID()]))
+            {
+                throw JSONRPCError(RPC_TYPE_ERROR, "update error");
+            }
         }
-      }         
     }
 
     oRes.push_back(Pair("s", s1.c_str()));

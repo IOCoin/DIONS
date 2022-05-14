@@ -1,3 +1,6 @@
+
+
+
 // Copyright (c) 2011-2012 The Bitcoin developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
@@ -42,7 +45,9 @@ struct CLockLocation
         return mutexName+"  "+sourceFile+":"+itostr(sourceLine);
     }
 
-    std::string MutexName() const { return mutexName; }
+    std::string MutexName() const {
+        return mutexName;
+    }
 
 private:
     std::string mutexName;
@@ -132,14 +137,14 @@ std::string LocksHeld()
 {
     std::string result;
     BOOST_FOREACH(const PAIRTYPE(void*, CLockLocation)&i, *lockstack)
-        result += i.second.ToString() + std::string("\n");
+    result += i.second.ToString() + std::string("\n");
     return result;
 }
 
 void AssertLockHeldInternal(const char *pszName, const char* pszFile, int nLine, void *cs)
 {
     BOOST_FOREACH(const PAIRTYPE(void*, CLockLocation)&i, *lockstack)
-        if (i.first == cs) return;
+    if (i.first == cs) return;
     fprintf(stderr, "Assertion failed: lock %s not held in %s:%i; locks held:\n%s",
             pszName, pszFile, nLine, LocksHeld().c_str());
     abort();

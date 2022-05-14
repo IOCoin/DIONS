@@ -1,3 +1,6 @@
+
+
+
 #ifndef SCRYPT_MINE_H
 #define SCRYPT_MINE_H
 

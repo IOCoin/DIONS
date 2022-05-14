@@ -1,3 +1,6 @@
+
+
+
 #include "util.h"
 #include "sync.h"
 #include "strlcpy.h"
@@ -25,9 +28,9 @@
 
 
 namespace boost {
-    namespace program_options {
-        std::string to_internal(const std::string&);
-    }
+namespace program_options {
+std::string to_internal(const std::string&);
+}
 }
 
 #include <boost/program_options/detail/config_file.hpp>
@@ -57,7 +60,7 @@ namespace boost {
 #define _WIN32_IE 0x0501
 #define WIN32_LEAN_AND_MEAN 1
 #ifndef NOMINMAX
-#define NOMINMAX 
+#define NOMINMAX
 #endif
 #include <io.h>
 #include "shlobj.h"
@@ -135,208 +138,208 @@ instance_of_cinit;
 
 void ex(void)
 {
-  ERR_print_errors_fp(stderr);
-  abort();
+    ERR_print_errors_fp(stderr);
+    abort();
 }
 
 int encrypt(unsigned char *plaintext, int plaintext_len, unsigned char *key,
-  unsigned char *iv, unsigned char *ciphertext)
+            unsigned char *iv, unsigned char *ciphertext)
 {
-  EVP_CIPHER_CTX *ctx;
+    EVP_CIPHER_CTX *ctx;
 
 
-  int ciphertext_len = 0;
+    int ciphertext_len = 0;
 
-  if(!(ctx = EVP_CIPHER_CTX_new())) ex();
+    if(!(ctx = EVP_CIPHER_CTX_new())) ex();
 
-  if(EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv) != 1)
-    ex();
+    if(EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv) != 1)
+        ex();
 
-  int len;
+    int len;
     if(EVP_EncryptUpdate(ctx, ciphertext, &len, plaintext, plaintext_len) != 1)
-      ex();
+        ex();
     ciphertext_len += len;
 
-  if(EVP_EncryptFinal_ex(ctx, ciphertext + len, &len) != 1) ex();
-  ciphertext_len += len;
+    if(EVP_EncryptFinal_ex(ctx, ciphertext + len, &len) != 1) ex();
+    ciphertext_len += len;
 
-  EVP_CIPHER_CTX_free(ctx);
+    EVP_CIPHER_CTX_free(ctx);
 
-  return ciphertext_len;
+    return ciphertext_len;
 }
 
 int decrypt(unsigned char* ciphertext, int ciphertext_len, unsigned char* key,
-  unsigned char *iv, unsigned char *plaintext)
+            unsigned char *iv, unsigned char *plaintext)
 {
-  EVP_CIPHER_CTX *ctx;
+    EVP_CIPHER_CTX *ctx;
 
 
-  int plaintext_len=0;
+    int plaintext_len=0;
 
-  if(!(ctx = EVP_CIPHER_CTX_new())) ex();
+    if(!(ctx = EVP_CIPHER_CTX_new())) ex();
 
-  if(EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv) != 1)
-    ex();
+    if(EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv) != 1)
+        ex();
 
-  int len;
-  if(EVP_DecryptUpdate(ctx, plaintext, &len, ciphertext, ciphertext_len) != 1)
-    ex();
-  plaintext_len += len;
+    int len;
+    if(EVP_DecryptUpdate(ctx, plaintext, &len, ciphertext, ciphertext_len) != 1)
+        ex();
+    plaintext_len += len;
 
-  if(EVP_DecryptFinal_ex(ctx, plaintext + len, &len) != 1) ex();
-  plaintext_len += len;
+    if(EVP_DecryptFinal_ex(ctx, plaintext + len, &len) != 1) ex();
+    plaintext_len += len;
 
-  EVP_CIPHER_CTX_free(ctx);
+    EVP_CIPHER_CTX_free(ctx);
 
-  return plaintext_len;
+    return plaintext_len;
 }
 
 bool EncryptMessageAES(const string& message, string& encryptedMsg, vector<unsigned char>& key, string& iv128Base64)
 {
 #ifdef WIN32
-  srand(time(NULL));
+    srand(time(NULL));
 #else
-  srandom(time(NULL));
+    srandom(time(NULL));
 #endif
 
-  int LEN=16;
-  vector<unsigned char> iv128;
-  for(int i=0; i<LEN; i++)
-  {
-    iv128.push_back((unsigned char)(rand() % 255 + 1));
-  }
+    int LEN=16;
+    vector<unsigned char> iv128;
+    for(int i=0; i<LEN; i++)
+    {
+        iv128.push_back((unsigned char)(rand() % 255 + 1));
+    }
 
-  unsigned char* key256_array = &key[0];
-  unsigned char* iv128_array = &iv128[0];
+    unsigned char* key256_array = &key[0];
+    unsigned char* iv128_array = &iv128[0];
 
-  const char* m = message.c_str();
-  unsigned char* msg = (unsigned char*)m;
-
-
-  ERR_load_crypto_strings();
-  OpenSSL_add_all_algorithms();
+    const char* m = message.c_str();
+    unsigned char* msg = (unsigned char*)m;
 
 
-  unsigned char* encrypted_msg = (unsigned char*)malloc(message.size() + 16);
+    ERR_load_crypto_strings();
+    OpenSSL_add_all_algorithms();
 
 
-  int encrypted_msg_len = encrypt(msg,
-                                  message.size(),
-                                  key256_array,
-                                  iv128_array,
-                                  encrypted_msg);
+    unsigned char* encrypted_msg = (unsigned char*)malloc(message.size() + 16);
 
 
-  encryptedMsg = EncodeBase64(encrypted_msg, encrypted_msg_len);
+    int encrypted_msg_len = encrypt(msg,
+                                    message.size(),
+                                    key256_array,
+                                    iv128_array,
+                                    encrypted_msg);
 
-  iv128Base64 = EncodeBase64(&iv128[0], 16);
-  free(encrypted_msg);
 
-  return true;
+    encryptedMsg = EncodeBase64(encrypted_msg, encrypted_msg_len);
+
+    iv128Base64 = EncodeBase64(&iv128[0], 16);
+    free(encrypted_msg);
+
+    return true;
 }
 
 bool DecryptMessageAES(const string& encryptedMsg, string& message, vector<unsigned char>& key, string& iv128Base64)
 {
 
-  ERR_load_crypto_strings();
-  OpenSSL_add_all_algorithms();
+    ERR_load_crypto_strings();
+    OpenSSL_add_all_algorithms();
 
 
-  unsigned char* plain = (unsigned char*)malloc(encryptedMsg.size());
+    unsigned char* plain = (unsigned char*)malloc(encryptedMsg.size());
 
 
-  vector<unsigned char> msg__ = DecodeBase64(encryptedMsg.c_str());
+    vector<unsigned char> msg__ = DecodeBase64(encryptedMsg.c_str());
 
 
-  vector<unsigned char> iv128RawVector = DecodeBase64(iv128Base64.c_str());
-  int p_len = decrypt(&msg__[0],
-                                  msg__.size(),
-                                  &key[0],
-                                  &iv128RawVector[0],
-                                  plain);
+    vector<unsigned char> iv128RawVector = DecodeBase64(iv128Base64.c_str());
+    int p_len = decrypt(&msg__[0],
+                        msg__.size(),
+                        &key[0],
+                        &iv128RawVector[0],
+                        plain);
 
-  std::string s( reinterpret_cast<char const*>(plain), p_len ) ;
-  message = s;
-  free(plain);
+    std::string s( reinterpret_cast<char const*>(plain), p_len ) ;
+    message = s;
+    free(plain);
 
-  return true;
+    return true;
 }
 
 bool EncryptMessage(const string& rsaPubKey, const string& message, string& encryptedMsg)
 {
-  const int KEY_LENGTH=4096;
+    const int KEY_LENGTH=4096;
 
-  const char* pubKeyStr = rsaPubKey.c_str();
+    const char* pubKeyStr = rsaPubKey.c_str();
 
-  const unsigned char* msg = reinterpret_cast<const unsigned char*>(message.c_str());
+    const unsigned char* msg = reinterpret_cast<const unsigned char*>(message.c_str());
 
-  RSA *rsa= NULL;
-  BIO *keybio ;
-  keybio = BIO_new_mem_buf((void*)pubKeyStr, -1);
-  if (keybio==NULL)
-  {
-    return false;
-  }
+    RSA *rsa= NULL;
+    BIO *keybio ;
+    keybio = BIO_new_mem_buf((void*)pubKeyStr, -1);
+    if (keybio==NULL)
+    {
+        return false;
+    }
 
-  rsa = PEM_read_bio_RSA_PUBKEY(keybio, &rsa,NULL, NULL);
+    rsa = PEM_read_bio_RSA_PUBKEY(keybio, &rsa,NULL, NULL);
 
-  unsigned char encrypted[KEY_LENGTH/8] = { };
+    unsigned char encrypted[KEY_LENGTH/8] = { };
 
-  int result = RSA_public_encrypt(message.size(),msg,encrypted,rsa,RSA_PKCS1_OAEP_PADDING);
-  if(result != 0)
-  {
-     ERR_load_crypto_strings();
-     char* err = (char*)malloc(0x100);
-     ERR_error_string(ERR_get_error(), err);
-     fprintf(stderr, "Error encrypting message: %s\n", err);
-     free(err);
-  }
+    int result = RSA_public_encrypt(message.size(),msg,encrypted,rsa,RSA_PKCS1_OAEP_PADDING);
+    if(result != 0)
+    {
+        ERR_load_crypto_strings();
+        char* err = (char*)malloc(0x100);
+        ERR_error_string(ERR_get_error(), err);
+        fprintf(stderr, "Error encrypting message: %s\n", err);
+        free(err);
+    }
 
 
-  encryptedMsg = EncodeBase64(encrypted, result);
+    encryptedMsg = EncodeBase64(encrypted, result);
 
-  return true;
+    return true;
 }
 bool DecryptMessage(const string& rsaPrivKey, const string& encrypted, string& decryptedMsg)
 {
-  const char* privKeyStr = rsaPrivKey.c_str();
+    const char* privKeyStr = rsaPrivKey.c_str();
 
 
-  vector<unsigned char> msg = DecodeBase64(encrypted.c_str());
+    vector<unsigned char> msg = DecodeBase64(encrypted.c_str());
 
-  RSA *rsa= NULL;
-  BIO *keybio ;
-  keybio = BIO_new_mem_buf((unsigned char*)privKeyStr, -1);
-  if (keybio==NULL)
-  {
-    return false;
-  }
+    RSA *rsa= NULL;
+    BIO *keybio ;
+    keybio = BIO_new_mem_buf((unsigned char*)privKeyStr, -1);
+    if (keybio==NULL)
+    {
+        return false;
+    }
 
-  rsa = PEM_read_bio_RSAPrivateKey(keybio, &rsa,NULL, NULL);
+    rsa = PEM_read_bio_RSAPrivateKey(keybio, &rsa,NULL, NULL);
 
-  unsigned char decrypted[4098] = { };
+    unsigned char decrypted[4098] = { };
 
-  int r = RSA_private_decrypt(msg.size(),&msg[0],decrypted,rsa,RSA_PKCS1_OAEP_PADDING);
-  if(r == -1)
-    return false;
+    int r = RSA_private_decrypt(msg.size(),&msg[0],decrypted,rsa,RSA_PKCS1_OAEP_PADDING);
+    if(r == -1)
+        return false;
 
-  decryptedMsg = string(reinterpret_cast<const char*>(decrypted));
+    decryptedMsg = string(reinterpret_cast<const char*>(decrypted));
 
-  return true;
+    return true;
 }
 
 void GenerateAESKey(vchType& aesKey)
 {
-  #ifdef WIN32
+#ifdef WIN32
     srand(time(NULL));
-  #else
+#else
     srandom(time(NULL));
-  #endif
-  int LEN=32;
-  for(int i=0; i<LEN; i++)
-  {
-    aesKey.push_back((unsigned char)(rand() % 255 + 1));
-  }
+#endif
+    int LEN=32;
+    for(int i=0; i<LEN; i++)
+    {
+        aesKey.push_back((unsigned char)(rand() % 255 + 1));
+    }
 }
 
 void GenerateRSAKey(CoordinateVector& p)
@@ -358,7 +361,7 @@ void GenerateRSAKey(CoordinateVector& p)
     BN_dec2bn(&exp, os.str().c_str());
     if(RSA_generate_key_ex(keypair, KEY_LENGTH, exp, NULL) == 0)
     {
-      throw runtime_error("RSA_generate_key_ex");
+        throw runtime_error("RSA_generate_key_ex");
     }
 
 
@@ -381,11 +384,11 @@ void GenerateRSAKey(CoordinateVector& p)
     pub_key[pub_len] = '\0';
 
 
-  string k1 = string(pri_key);
-  string k2 = string(pub_key);
-  p.domain(k1);
+    string k1 = string(pri_key);
+    string k2 = string(pub_key);
+    p.domain(k1);
 
-  p.codomain(k2);
+    p.codomain(k2);
 }
 
 void RandAddSeed()
@@ -691,22 +694,23 @@ bool ParseMoney(const char* pszIn, int64_t& nRet)
 
 
 static const signed char phexdigit[256] =
-{ -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-  -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-  -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-  0,1,2,3,4,5,6,7,8,9,-1,-1,-1,-1,-1,-1,
-  -1,0xa,0xb,0xc,0xd,0xe,0xf,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-  -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-  -1,0xa,0xb,0xc,0xd,0xe,0xf,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-  -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-  -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-  -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-  -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-  -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-  -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-  -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-  -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
-  -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1, };
+{   -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+    -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+    -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+    0,1,2,3,4,5,6,7,8,9,-1,-1,-1,-1,-1,-1,
+    -1,0xa,0xb,0xc,0xd,0xe,0xf,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+    -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+    -1,0xa,0xb,0xc,0xd,0xe,0xf,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+    -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+    -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+    -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+    -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+    -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+    -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+    -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+    -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+    -1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,
+};
 
 bool IsHex(const string& str)
 {
@@ -773,11 +777,11 @@ void ParseParameters(int argc, const char* const argv[])
             pszValue = strchr(psz, '=');
             *pszValue++ = '\0';
         }
-        #ifdef WIN32
+#ifdef WIN32
         _strlwr(psz);
         if (psz[0] == '/')
             psz[0] = '-';
-        #endif
+#endif
         if (psz[0] != '-')
             break;
 
@@ -861,23 +865,23 @@ string EncodeBase64(const unsigned char* pch, size_t len)
         int enc = *(pch++);
         switch (mode)
         {
-            case 0:
-                strRet += pbase64[enc >> 2];
-                left = (enc & 3) << 4;
-                mode = 1;
-                break;
+        case 0:
+            strRet += pbase64[enc >> 2];
+            left = (enc & 3) << 4;
+            mode = 1;
+            break;
 
-            case 1:
-                strRet += pbase64[left | (enc >> 4)];
-                left = (enc & 15) << 2;
-                mode = 2;
-                break;
+        case 1:
+            strRet += pbase64[left | (enc >> 4)];
+            left = (enc & 15) << 2;
+            mode = 2;
+            break;
 
-            case 2:
-                strRet += pbase64[left | (enc >> 6)];
-                strRet += pbase64[enc & 63];
-                mode = 0;
-                break;
+        case 2:
+            strRet += pbase64[left | (enc >> 6)];
+            strRet += pbase64[enc & 63];
+            mode = 0;
+            break;
         }
     }
 
@@ -902,19 +906,19 @@ vector<unsigned char> DecodeBase64(const char* p, bool* pfInvalid)
     static const int decode64_table[256] =
     {
         -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-        -1, -1, -1, 62, -1, -1, -1, 63, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, -1, -1,
-        -1, -1, -1, -1, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
-        15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, -1, -1, -1, -1, -1, -1, 26, 27, 28,
-        29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48,
-        49, 50, 51, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
-    };
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, 62, -1, -1, -1, 63, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, -1, -1,
+            -1, -1, -1, -1, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
+            15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, -1, -1, -1, -1, -1, -1, 26, 27, 28,
+            29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48,
+            49, 50, 51, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
+        };
 
     if (pfInvalid)
         *pfInvalid = false;
@@ -927,54 +931,54 @@ vector<unsigned char> DecodeBase64(const char* p, bool* pfInvalid)
 
     while (1)
     {
-         int dec = decode64_table[(unsigned char)*p];
-         if (dec == -1) break;
-         p++;
-         switch (mode)
-         {
-             case 0:
-                 left = dec;
-                 mode = 1;
-                 break;
+        int dec = decode64_table[(unsigned char)*p];
+        if (dec == -1) break;
+        p++;
+        switch (mode)
+        {
+        case 0:
+            left = dec;
+            mode = 1;
+            break;
 
-              case 1:
-                  vchRet.push_back((left<<2) | (dec>>4));
-                  left = dec & 15;
-                  mode = 2;
-                  break;
+        case 1:
+            vchRet.push_back((left<<2) | (dec>>4));
+            left = dec & 15;
+            mode = 2;
+            break;
 
-             case 2:
-                 vchRet.push_back((left<<4) | (dec>>2));
-                 left = dec & 3;
-                 mode = 3;
-                 break;
+        case 2:
+            vchRet.push_back((left<<4) | (dec>>2));
+            left = dec & 3;
+            mode = 3;
+            break;
 
-             case 3:
-                 vchRet.push_back((left<<6) | dec);
-                 mode = 0;
-                 break;
-         }
+        case 3:
+            vchRet.push_back((left<<6) | dec);
+            mode = 0;
+            break;
+        }
     }
 
     if (pfInvalid)
         switch (mode)
         {
-            case 0:
-                break;
+        case 0:
+            break;
 
-            case 1:
+        case 1:
+            *pfInvalid = true;
+            break;
+
+        case 2:
+            if (left || p[0] != '=' || p[1] != '=' || decode64_table[(unsigned char)p[2]] != -1)
                 *pfInvalid = true;
-                break;
+            break;
 
-            case 2:
-                if (left || p[0] != '=' || p[1] != '=' || decode64_table[(unsigned char)p[2]] != -1)
-                    *pfInvalid = true;
-                break;
-
-            case 3:
-                if (left || p[0] != '=' || decode64_table[(unsigned char)p[1]] != -1)
-                    *pfInvalid = true;
-                break;
+        case 3:
+            if (left || p[0] != '=' || decode64_table[(unsigned char)p[1]] != -1)
+                *pfInvalid = true;
+            break;
         }
 
     return vchRet;
@@ -1001,36 +1005,36 @@ string EncodeBase32(const unsigned char* pch, size_t len)
         int enc = *(pch++);
         switch (mode)
         {
-            case 0:
-                strRet += pbase32[enc >> 3];
-                left = (enc & 7) << 2;
-                mode = 1;
-                break;
+        case 0:
+            strRet += pbase32[enc >> 3];
+            left = (enc & 7) << 2;
+            mode = 1;
+            break;
 
-            case 1:
-                strRet += pbase32[left | (enc >> 6)];
-                strRet += pbase32[(enc >> 1) & 31];
-                left = (enc & 1) << 4;
-                mode = 2;
-                break;
+        case 1:
+            strRet += pbase32[left | (enc >> 6)];
+            strRet += pbase32[(enc >> 1) & 31];
+            left = (enc & 1) << 4;
+            mode = 2;
+            break;
 
-            case 2:
-                strRet += pbase32[left | (enc >> 4)];
-                left = (enc & 15) << 1;
-                mode = 3;
-                break;
+        case 2:
+            strRet += pbase32[left | (enc >> 4)];
+            left = (enc & 15) << 1;
+            mode = 3;
+            break;
 
-            case 3:
-                strRet += pbase32[left | (enc >> 7)];
-                strRet += pbase32[(enc >> 2) & 31];
-                left = (enc & 3) << 3;
-                mode = 4;
-                break;
+        case 3:
+            strRet += pbase32[left | (enc >> 7)];
+            strRet += pbase32[(enc >> 2) & 31];
+            left = (enc & 3) << 3;
+            mode = 4;
+            break;
 
-            case 4:
-                strRet += pbase32[left | (enc >> 5)];
-                strRet += pbase32[enc & 31];
-                mode = 0;
+        case 4:
+            strRet += pbase32[left | (enc >> 5)];
+            strRet += pbase32[enc & 31];
+            mode = 0;
         }
     }
 
@@ -1039,7 +1043,7 @@ string EncodeBase32(const unsigned char* pch, size_t len)
     {
         strRet += pbase32[left];
         for (int n=0; n<nPadding[mode]; n++)
-             strRet += '=';
+            strRet += '=';
     }
 
     return strRet;
@@ -1055,19 +1059,19 @@ vector<unsigned char> DecodeBase32(const char* p, bool* pfInvalid)
     static const int decode32_table[256] =
     {
         -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 26, 27, 28, 29, 30, 31, -1, -1, -1, -1,
-        -1, -1, -1, -1, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
-        15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, -1, -1, -1, -1, -1, -1, 0, 1, 2,
-         3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22,
-        23, 24, 25, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
-    };
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 26, 27, 28, 29, 30, 31, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
+            15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, -1, -1, -1, -1, -1, -1, 0, 1, 2,
+            3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22,
+            23, 24, 25, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
+        };
 
     if (pfInvalid)
         *pfInvalid = false;
@@ -1080,88 +1084,88 @@ vector<unsigned char> DecodeBase32(const char* p, bool* pfInvalid)
 
     while (1)
     {
-         int dec = decode32_table[(unsigned char)*p];
-         if (dec == -1) break;
-         p++;
-         switch (mode)
-         {
-             case 0:
-                 left = dec;
-                 mode = 1;
-                 break;
+        int dec = decode32_table[(unsigned char)*p];
+        if (dec == -1) break;
+        p++;
+        switch (mode)
+        {
+        case 0:
+            left = dec;
+            mode = 1;
+            break;
 
-              case 1:
-                  vchRet.push_back((left<<3) | (dec>>2));
-                  left = dec & 3;
-                  mode = 2;
-                  break;
+        case 1:
+            vchRet.push_back((left<<3) | (dec>>2));
+            left = dec & 3;
+            mode = 2;
+            break;
 
-             case 2:
-                 left = left << 5 | dec;
-                 mode = 3;
-                 break;
+        case 2:
+            left = left << 5 | dec;
+            mode = 3;
+            break;
 
-             case 3:
-                 vchRet.push_back((left<<1) | (dec>>4));
-                 left = dec & 15;
-                 mode = 4;
-                 break;
+        case 3:
+            vchRet.push_back((left<<1) | (dec>>4));
+            left = dec & 15;
+            mode = 4;
+            break;
 
-             case 4:
-                 vchRet.push_back((left<<4) | (dec>>1));
-                 left = dec & 1;
-                 mode = 5;
-                 break;
+        case 4:
+            vchRet.push_back((left<<4) | (dec>>1));
+            left = dec & 1;
+            mode = 5;
+            break;
 
-             case 5:
-                 left = left << 5 | dec;
-                 mode = 6;
-                 break;
+        case 5:
+            left = left << 5 | dec;
+            mode = 6;
+            break;
 
-             case 6:
-                 vchRet.push_back((left<<2) | (dec>>3));
-                 left = dec & 7;
-                 mode = 7;
-                 break;
+        case 6:
+            vchRet.push_back((left<<2) | (dec>>3));
+            left = dec & 7;
+            mode = 7;
+            break;
 
-             case 7:
-                 vchRet.push_back((left<<5) | dec);
-                 mode = 0;
-                 break;
-         }
+        case 7:
+            vchRet.push_back((left<<5) | dec);
+            mode = 0;
+            break;
+        }
     }
 
     if (pfInvalid)
         switch (mode)
         {
-            case 0:
-                break;
+        case 0:
+            break;
 
-            case 1:
-            case 3:
-            case 6:
+        case 1:
+        case 3:
+        case 6:
+            *pfInvalid = true;
+            break;
+
+        case 2:
+            if (left || p[0] != '=' || p[1] != '=' || p[2] != '=' || p[3] != '=' || p[4] != '=' || p[5] != '=' || decode32_table[(unsigned char)p[6]] != -1)
                 *pfInvalid = true;
-                break;
+            break;
 
-            case 2:
-                if (left || p[0] != '=' || p[1] != '=' || p[2] != '=' || p[3] != '=' || p[4] != '=' || p[5] != '=' || decode32_table[(unsigned char)p[6]] != -1)
-                    *pfInvalid = true;
-                break;
+        case 4:
+            if (left || p[0] != '=' || p[1] != '=' || p[2] != '=' || p[3] != '=' || decode32_table[(unsigned char)p[4]] != -1)
+                *pfInvalid = true;
+            break;
 
-            case 4:
-                if (left || p[0] != '=' || p[1] != '=' || p[2] != '=' || p[3] != '=' || decode32_table[(unsigned char)p[4]] != -1)
-                    *pfInvalid = true;
-                break;
+        case 5:
+            if (left || p[0] != '=' || p[1] != '=' || p[2] != '=' || decode32_table[(unsigned char)p[3]] != -1)
+                *pfInvalid = true;
+            break;
 
-            case 5:
-                if (left || p[0] != '=' || p[1] != '=' || p[2] != '=' || decode32_table[(unsigned char)p[3]] != -1)
-                    *pfInvalid = true;
-                break;
-
-            case 7:
-                if (left || p[0] != '=' || decode32_table[(unsigned char)p[1]] != -1)
-                    *pfInvalid = true;
-                break;
+        case 7:
+            if (left || p[0] != '=' || decode32_table[(unsigned char)p[1]] != -1)
+                *pfInvalid = true;
+            break;
         }
 
     return vchRet;
@@ -1213,10 +1217,10 @@ static std::string FormatException(std::exception* pex, const char* pszThread)
 #endif
     if (pex)
         return strprintf(
-            "EXCEPTION: %s       \n%s       \n%s in %s       \n", typeid(*pex).name(), pex->what(), pszModule, pszThread);
+                   "EXCEPTION: %s       \n%s       \n%s in %s       \n", typeid(*pex).name(), pex->what(), pszModule, pszThread);
     else
         return strprintf(
-            "UNKNOWN EXCEPTION       \n%s in %s       \n", pszModule, pszThread);
+                   "UNKNOWN EXCEPTION       \n%s in %s       \n", pszModule, pszThread);
 }
 
 void PrintException(std::exception* pex, const char* pszThread)
@@ -1354,7 +1358,7 @@ bool RenameOver(boost::filesystem::path src, boost::filesystem::path dest)
 {
 #ifdef WIN32
     return MoveFileExA(src.string().c_str(), dest.string().c_str(),
-                      MOVEFILE_REPLACE_EXISTING);
+                       MOVEFILE_REPLACE_EXISTING);
 #else
     int rc = std::rename(src.string().c_str(), dest.string().c_str());
     return (rc == 0);
@@ -1450,8 +1454,8 @@ void AddTimeData(const CNetAddr& ip, int64_t nTime)
 
                 bool fMatch = false;
                 BOOST_FOREACH(int64_t nOffset, vSorted)
-                    if (nOffset != 0 && abs64(nOffset) < 5 * 60)
-                        fMatch = true;
+                if (nOffset != 0 && abs64(nOffset) < 5 * 60)
+                    fMatch = true;
 
                 if (!fMatch)
                 {
@@ -1465,7 +1469,7 @@ void AddTimeData(const CNetAddr& ip, int64_t nTime)
         }
         if (fDebug) {
             BOOST_FOREACH(int64_t n, vSorted)
-                printf("%+" PRId64 "  ", n);
+            printf("%+" PRId64 "  ", n);
             printf("|  ");
         }
         printf("nTimeOffset = %+" PRId64 "  (%+" PRId64 " minutes)\n", nTimeOffset, nTimeOffset/60);
@@ -1482,13 +1486,13 @@ void seed_insecure_rand(bool fDeterministic)
         insecure_rand_Rz = insecure_rand_Rw = 11;
     } else {
         uint32_t tmp;
-        do{
+        do {
             RAND_bytes((unsigned char*)&tmp,4);
-        }while(tmp==0 || tmp==0x9068ffffU);
+        } while(tmp==0 || tmp==0x9068ffffU);
         insecure_rand_Rz=tmp;
-        do{
+        do {
             RAND_bytes((unsigned char*)&tmp,4);
-        }while(tmp==0 || tmp==0x464fffffU);
+        } while(tmp==0 || tmp==0x464fffffU);
         insecure_rand_Rw=tmp;
     }
 }
@@ -1599,16 +1603,16 @@ bool NewThread(void(*pfn)(void*), void* parg)
 
 int fqa__7(vector<unsigned char>& a)
 {
-  RandAddSeedPerfmon();
-  int r = RAND_bytes((unsigned char*)&a[0], 0x20);
- 
-  if(r != 1)
-  {
-    char* err = (char*)malloc(0x100);
-    ERR_error_string(ERR_get_error(), err);
-    fprintf(stderr, "Error : %s\n", err);
-    free(err);
-  }
- 
-  return r;
+    RandAddSeedPerfmon();
+    int r = RAND_bytes((unsigned char*)&a[0], 0x20);
+
+    if(r != 1)
+    {
+        char* err = (char*)malloc(0x100);
+        ERR_error_string(ERR_get_error(), err);
+        fprintf(stderr, "Error : %s\n", err);
+        free(err);
+    }
+
+    return r;
 }
