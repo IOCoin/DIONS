@@ -8,7 +8,7 @@
 
 namespace dvm_base__
 {
-/// The dvm_base__ EVMC instance.
+/// The dvm_base__ DVMC instance.
 class VM : public evmc_vm
 {
     std::unique_ptr<Tracer> m_first_tracer;

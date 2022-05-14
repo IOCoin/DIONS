@@ -15,7 +15,7 @@ using bytes = std::basic_string<uint8_t>;
 using bytes_view = std::basic_string_view<uint8_t>;
 
 
-/// The stack for 256-bit EVM words.
+/// The stack for 256-bit DVM words.
 ///
 /// This implementation reserves memory inplace for all possible stack items (1024),
 /// so this type is big. Make sure it is allocated on heap.
@@ -61,7 +61,7 @@ struct Stack
     [[clang::no_sanitize("bounds")]] void clear() noexcept { top_item = storage - 1; }
 };
 
-/// The EVM memory.
+/// The DVM memory.
 ///
 /// At this point it is a wrapper for std::vector<uint8_t> with initial allocation of 4k.
 /// Some benchmarks has been done to confirm 4k is ok-ish value.
@@ -102,7 +102,7 @@ struct ExecutionState
     evmc_revision rev = {};
     bytes return_data;
     bytes_view code;
-    evmc_status_code status = EVMC_SUCCESS;
+    evmc_status_code status = DVMC_SUCCESS;
     size_t output_offset = 0;
     size_t output_size = 0;
 
@@ -131,7 +131,7 @@ struct ExecutionState
         rev = revision;
         return_data.clear();
         code = {code_ptr, code_size};
-        status = EVMC_SUCCESS;
+        status = DVMC_SUCCESS;
         output_offset = 0;
         output_size = 0;
     }
