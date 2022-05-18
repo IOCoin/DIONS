@@ -1,0 +1,3 @@
+[submodule "dvmc"]
+	path = dvmc
+	url = https://github.com/blastdoor7/dvmc

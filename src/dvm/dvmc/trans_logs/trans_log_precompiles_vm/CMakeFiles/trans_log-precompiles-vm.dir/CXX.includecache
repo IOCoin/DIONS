@@ -1,0 +1,30 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/ioc/dvmone/dvmc/trans_logs/trans_log_precompiles_vm/trans_log_precompiles_vm.cpp
+trans_log_precompiles_vm.h
+/home/ioc/dvmone/dvmc/trans_logs/trans_log_precompiles_vm/trans_log_precompiles_vm.h
+algorithm
+-
+
+/home/ioc/dvmone/dvmc/trans_logs/trans_log_precompiles_vm/trans_log_precompiles_vm.h
+dvmc/dvmc.h
+-
+dvmc/utils.h
+-
+
+dvmc/include/dvmc/dvmc.h
+stdbool.h
+-
+stddef.h
+-
+stdint.h
+-
+
+dvmc/include/dvmc/utils.h
+

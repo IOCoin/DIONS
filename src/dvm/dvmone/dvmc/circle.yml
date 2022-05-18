@@ -1,0 +1,416 @@
+version: 2.1
+
+executors:
+  linux-gcc-latest:
+    docker:
+      - image: blastdoor7/cpp-build-env:17-gcc-11
+  linux-clang-latest:
+    docker:
+      - image: blastdoor7/cpp-build-env:17-clang-13
+
+
+commands:
+  install_doxygen:
+    steps:
+      - run:
+          name: "Install doxygen"
+          command: sudo apt-get -q update && sudo apt-get -qy install doxygen
+  build:
+    parameters:
+      build_type:
+        type: string
+        default: ""
+      toolchain:
+        type: string
+        default: ""
+    steps:
+      - run:
+          name: "Environment"
+          command: |
+            CC=${CC:-cc}
+            CXX=${CXX:-cpp}
+            echo CC: $CC
+            echo CXX: $CXX
+            $CC --version
+            $CXX --version
+            cmake --version
+
+            # Create the toolchain.info file for cache key.
+            echo '<<parameters.toolchain>>' >> toolchain.info
+            echo '<<parameters.build_type>>' >> toolchain.info
+            $CXX --version >> toolchain.info
+      - restore_cache:
+          name: "Restore Hunter Cache"
+          key: &hunter-cache-key hunter-{{arch}}-{{checksum "toolchain.info"}}-{{checksum "cmake/Hunter/init.cmake"}}
+      - run:
+          name: "Configure"
+          working_directory: ~/build
+          command: |
+            cmake ../project <<#parameters.build_type>>-DCMAKE_BUILD_TYPE=<<parameters.build_type>><</parameters.build_type>> <<#parameters.toolchain>>-DCMAKE_TOOLCHAIN_FILE=~/project/cmake/cable/toolchains/<<parameters.toolchain>>.cmake<</parameters.toolchain>> -DCMAKE_INSTALL_PREFIX=~/install -DDVMC_TESTING=ON $CMAKE_OPTIONS
+      - save_cache:
+          name: "Save Hunter Cache"
+          key: *hunter-cache-key
+          paths:
+            - ~/.hunter/_Base/Cache
+      - run:
+          name: "Build"
+          command: cmake --build ~/build -- -j4
+      - run:
+          name: "Install"
+          command: cmake --build ~/build --target install
+      - run:
+          name: "Package"
+          command: |
+            cmake --build ~/build --target package_source
+            cmake --build ~/build --target package
+            mkdir ~/package
+            mv ~/build/dvmc-*.tar.gz ~/package
+      - store_artifacts:
+          path: ~/package
+          destination: package
+      - persist_to_workspace:
+          root: ~/build
+          paths:
+            - bin/dvmc-vmtester
+            - bin/dvmc-trans_log
+
+  test:
+    steps:
+      - run:
+          name: "Test"
+          command: |
+            cmake --build ~/build --target test -- ARGS="-j4 --schedule-random --output-on-failure"
+
+jobs:
+
+  lint:
+    executor: linux-clang-latest
+    steps:
+    - checkout
+    - run:
+        name: "Check code format"
+        command: |
+          clang-format --version
+          find bindings trans_logs include lib test tools -name '*.hpp' -o -name '*.cpp' -o -name '*.h' -o -name '*.c' | xargs clang-format -i
+          git diff --color --exit-code
+    - run:
+        name: "Run codespell"
+        command: |
+          codespell --quiet-level=4 --ignore-words=./.codespell-whitelist --skip=.git
+    - run:
+        name: "Check bumpversion"
+        command: |
+          bumpversion --dry-run --verbose major
+          bumpversion --dry-run --verbose minor
+          bumpversion --dry-run --verbose patch
+    - install_doxygen
+    - run:
+        name: "Test documentation"
+        command: |
+          cat Doxyfile | sed 's/HTML_OUTPUT            = ./HTML_OUTPUT            = ..\/docs/' | doxygen - > doxygen.log 2> doxygen.warnings
+          if [ -s doxygen.warnings ]; then
+            printf '\n\nDoxygen warnings:\n\n'
+            cat doxygen.warnings
+            exit 1
+          fi
+          cat doxygen.log
+    - store_artifacts:
+        path: ~/docs
+        destination: docs
+
+  upload-docs:
+    executor: linux-clang-latest
+    steps:
+      - checkout
+      - install_doxygen
+      - run:
+          name: "Generate documentation"
+          command: doxygen Doxyfile
+      - run:
+          name: "Upload documentation"
+          command: |
+            git config user.email "docs-bot@blastdoor7.org"
+            git config user.name "Documentation Bot"
+            git add --all
+            git commit -m "Update docs"
+            git push -f "https://$GITHUB_TOKEN@github.com/blastdoor7/dvmc.git" HEAD:gh-pages
+
+  build-clang-coverage:
+    executor: linux-clang-latest
+    environment:
+      CMAKE_OPTIONS: -DCMAKE_CXX_CLANG_TIDY=clang-tidy -DCMAKE_C_CLANG_TIDY=clang-tidy
+    steps:
+      - checkout
+      - build:
+          build_type: Coverage
+      - test
+      - run:
+          name: "Collect coverage data"
+          working_directory: ~/build
+          command: |
+            find -name '*.profraw'
+            llvm-profdata merge *.profraw -o dvmc.profdata
+            llvm-cov report -instr-profile dvmc.profdata \
+              -object bin/dvmc-unittests \
+              -object bin/dvmc-vmtester
+            llvm-cov export -instr-profile dvmc.profdata -format=lcov > dvmc.lcov \
+              -object bin/dvmc-unittests \
+              -object bin/dvmc \
+              -object bin/dvmc-vmtester
+            genhtml dvmc.lcov -o coverage -t DVMC
+      - store_artifacts:
+          path: ~/build/coverage
+          destination: coverage
+      - run:
+          name: "Upload to Codecov"
+          command: |
+            # Convert to relative paths
+            sed -i 's|$(pwd)/||' ~/build/dvmc.lcov
+            sudo pip3 install --upgrade --quiet --no-cache-dir codecov==2.1.11
+            codecov --file ~/build/dvmc.lcov -X gcov
+
+
+  build-gcc8:
+    docker:
+      - image: blastdoor7/cpp-build-env:12-gcc-8
+    steps:
+      - checkout
+      - build
+      - test
+
+  build-gcc-sanitizers:
+    executor: linux-gcc-latest
+    environment:
+      CMAKE_OPTIONS: -DSANITIZE=address,undefined
+    steps:
+      - checkout
+      - build
+      - test
+
+  build-clang-sanitizers:
+    executor: linux-clang-latest
+    environment:
+      CMAKE_OPTIONS: -DSANITIZE=address,undefined,nullability,implicit-unsigned-integer-truncation,implicit-signed-integer-truncation
+      UBSAN_OPTIONS: halt_on_error=1
+    steps:
+      - checkout
+      - build
+      - test
+
+  build-clang9-asan:
+    docker:
+      - image: blastdoor7/cpp-build-env:12-clang-9
+    environment:
+      CMAKE_OPTIONS: -DSANITIZE=address
+      UBSAN_OPTIONS: halt_on_error=1
+    steps:
+      - checkout
+      - build
+      - test
+
+  build-gcc-min:
+    docker:
+      - image: blastdoor7/cpp-build-env:13-gcc-7
+    steps:
+      - checkout
+      - build
+      - test
+
+  build-clang-min:
+    docker:
+      - image: blastdoor7/cpp-build-env:13-clang-5
+    steps:
+      - checkout
+      - build
+      - test
+
+  build-gcc-32bit:
+    docker:
+      - image: blastdoor7/cpp-build-env:14-gcc-10-multilib
+    steps:
+      - checkout
+      - build:
+          toolchain: cxx11-32bit
+      - test
+
+  build-cmake-min:
+    docker:
+      - image: circleci/buildpack-deps:bionic
+    steps:
+      - run:
+          name: "Install default CMake"
+          command: sudo apt -q update && sudo apt -qy install cmake
+      - checkout
+      - build
+      - test
+
+  bindings-go-latest:
+    docker:
+      - image: circleci/golang
+    steps: &bindings-go-steps
+      - checkout
+      - run:
+          name: "Environment"
+          command: |
+            go version
+            go env
+            gcc --version
+      - run:
+          name: "Go Build"
+          command: |
+            go build -v ./bindings/go/dvmc
+            go vet -v ./bindings/go/dvmc
+            go generate -v ./bindings/go/dvmc
+            go test -v ./bindings/go/dvmc
+      - run:
+          name: "Go module integration test"
+          working_directory: test/gomod
+          command: |
+            test -z "$CIRCLE_PR_USERNAME" || { echo "Skip for PRs from forks"; exit 0; }
+
+            V=$CIRCLE_TAG
+            if [ -z $V ]; then
+              V=$CIRCLE_SHA1
+            fi
+            echo "version: $V"
+
+            go mod init dvmc.blastdoor7.org/dvmc_use
+            go get -v $(grep -o 'github.com/blastdoor7/dvmc/v.*' ../../go.mod)@$V
+            go mod tidy -v
+            go mod graph
+            g++ -shared -I../../include ../../trans_logs/trans_log_vm/trans_log_vm.cpp -o trans_log-vm.so
+            go test -v
+            go mod graph
+
+
+  bindings-go-min:
+    docker:
+      - image: circleci/golang:1.11
+    steps: *bindings-go-steps
+
+  bindings-java:
+    docker:
+      - image: circleci/openjdk:13-buster
+    environment:
+      CMAKE_OPTIONS: -DDVMC_JAVA=ON
+    steps:
+      - run:
+          name: "Install CMake"
+          command: |
+            sudo apt -qq update
+            sudo apt -yq install cmake
+      - checkout
+      - build
+      - test
+      - run:
+          name: "Java Lint (spotlessCheck)"
+          command: cd bindings/java && make lint
+      - run:
+          name: "Java Build"
+          command: cd bindings/java && make clean build
+      - run:
+          name: "Java Test"
+          command: cd bindings/java && make test
+
+  bindings-rust:
+    docker:
+      - image: rust:1
+    steps:
+      - checkout
+      - run:
+          name: Update environment
+          command: |
+            apt -qq update
+            apt -yq install libclang-dev clang --no-install-recommends
+            rustup component add rustfmt
+      - run:
+          name: Check formatting
+          command: |
+            rustfmt --version
+            cargo fmt --all -- --check
+      - run:
+          name: Build
+          command: cargo build
+      - run:
+          name: Test
+          command: cargo test
+      - attach_workspace:
+          at: ~/build
+      - run:
+          name: Test with dvmc-vmtester
+          command: |
+            ~/build/bin/dvmc-vmtester target/debug/libtrans_logrustvm.so
+      - run:
+          name: Test with dvmc-trans_log
+          command: |
+            ~/build/bin/dvmc-trans_log target/debug/libtrans_logrustvm.so
+      - run:
+          name: Package dvmc-sys
+          # NOTE: can not be run for dvmc-vm and dvmc-declare due to version dependencies
+          working_directory: bindings/rust/dvmc-sys
+          command: cargo package
+
+  bindings-rust-asan:
+    docker:
+      - image: rust:1-bullseye
+    steps:
+      - checkout
+      - run:
+          name: Update environment
+          command: |
+            apt -qq update
+            apt -yq install llvm-11-dev clang-11 --no-install-recommends
+            rustup toolchain install nightly-x86_64-unknown-linux-gnu
+      - run:
+          name: Build
+          command: RUSTFLAGS="-Z sanitizer=address" ASAN_OPTIONS=detect_leaks=1 cargo +nightly build --target x86_64-unknown-linux-gnu
+      - run:
+          name: Test
+          command: RUSTFLAGS="-Z sanitizer=address -C opt-level=0" ASAN_OPTIONS=detect_leaks=1 cargo +nightly test --target x86_64-unknown-linux-gnu
+      - attach_workspace:
+          at: ~/build
+      - run:
+          name: Test with dvmc-vmtester
+          command: |
+            ~/build/bin/dvmc-vmtester target/x86_64-unknown-linux-gnu/debug/libtrans_logrustvm.so
+      - run:
+          name: Test with dvmc-trans_log
+          command: |
+            ~/build/bin/dvmc-trans_log target/x86_64-unknown-linux-gnu/debug/libtrans_logrustvm.so
+
+workflows:
+  version: 2
+  dvmc:
+    jobs:
+      - lint
+      - build-clang-coverage
+      - build-gcc8
+      - build-gcc-sanitizers
+      - build-clang-sanitizers
+      - build-clang9-asan
+      - build-gcc-min
+      - build-clang-min
+      - build-gcc-32bit
+      - build-cmake-min
+      - bindings-go-latest:
+          filters:
+            tags:
+              only: /.*/
+      - bindings-go-min:
+          filters:
+            tags:
+              only: /.*/
+      - bindings-java
+      - bindings-rust:
+          requires:
+            - build-gcc8
+      - bindings-rust-asan:
+          requires:
+            - build-clang9-asan
+      - upload-docs:
+          requires:
+            - lint
+          filters:
+            branches:
+              only:
+                - master

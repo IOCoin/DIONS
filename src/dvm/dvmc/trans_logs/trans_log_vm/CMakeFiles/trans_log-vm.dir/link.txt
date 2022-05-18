@@ -1,0 +1,1 @@
+/usr/bin/c++ -fPIC -O3 -DNDEBUG  -shared -Wl,-soname,libtrans_log-vm.so -o libtrans_log-vm.so CMakeFiles/trans_log-vm.dir/trans_log_vm.cpp.o 

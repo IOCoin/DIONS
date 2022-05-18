@@ -1,0 +1,15 @@
+# DVMC: DVM Client-VM Connector API.
+# Copyright 2022 blastdoor7
+# Licensed under the Apache License, Version 2.0.
+
+[package]
+name = "dvmc-vm"
+version = "10.0.0-alpha.5"
+authors = ["Alex Beregszaszi <alex@rtfs.hu>", "Jake Lang <jak3lang@gmail.com>"]
+license = "Apache-2.0"
+repository = "https://github.com/blastdoor7/dvmc"
+description = "Bindings to DVMC (VM specific)"
+edition = "2018"
+
+[dependencies]
+dvmc-sys = { path = "../dvmc-sys", version = "10.0.0-alpha.5" }

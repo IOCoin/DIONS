@@ -1,0 +1,2 @@
+/usr/bin/ar qc libloader-mocked.a  CMakeFiles/loader-mocked.dir/__/__/lib/loader/loader.c.o
+/usr/bin/ranlib libloader-mocked.a

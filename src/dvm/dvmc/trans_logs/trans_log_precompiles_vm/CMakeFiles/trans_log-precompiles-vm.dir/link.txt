@@ -1,0 +1,1 @@
+/usr/bin/c++ -fPIC -O3 -DNDEBUG  -shared -Wl,-soname,libtrans_log-precompiles-vm.so -o libtrans_log-precompiles-vm.so CMakeFiles/trans_log-precompiles-vm.dir/trans_log_precompiles_vm.cpp.o 

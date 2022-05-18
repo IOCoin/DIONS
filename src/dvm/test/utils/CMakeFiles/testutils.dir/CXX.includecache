@@ -1,0 +1,30 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/ioc/rem/CC/src/dvm/test/utils/utils.cpp
+utils.hpp
+/home/ioc/rem/CC/src/dvm/test/utils/utils.hpp
+regex
+-
+
+/home/ioc/rem/CC/src/dvm/test/utils/utils.hpp
+dvmc/hex.hpp
+-
+
+dvmc/include/dvmc/hex.hpp
+cstdint
+-
+iterator
+-
+string
+-
+string_view
+-
+system_error
+-
+

@@ -1,0 +1,2 @@
+/usr/bin/ar qc libdvmc-trans_log-host.a  CMakeFiles/dvmc-trans_log-host.dir/trans_log_host.cpp.o
+/usr/bin/ranlib libdvmc-trans_log-host.a

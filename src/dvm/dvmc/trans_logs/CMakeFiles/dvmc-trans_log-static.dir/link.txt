@@ -1,0 +1,1 @@
+/usr/bin/c++  -O3 -DNDEBUG   CMakeFiles/dvmc-trans_log-static.dir/trans_log.c.o  -o ../../bin/dvmc-trans_log-static  libdvmc-trans_log-host.a trans_log_vm/libtrans_log-vm-static.a 

@@ -1,0 +1,8 @@
+[workspace]
+members = [
+    "bindings/rust/dvmc-sys",
+    "bindings/rust/dvmc-vm",
+    "bindings/rust/dvmc-declare",
+    "bindings/rust/dvmc-declare-tests",
+    "trans_logs/trans_log-rust-vm"
+]

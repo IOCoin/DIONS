@@ -1,0 +1,5 @@
+if(EXISTS "/home/ioc/rem/CC/src/dvm/test/unittests/dvmone-unittests[1]_tests.cmake")
+  include("/home/ioc/rem/CC/src/dvm/test/unittests/dvmone-unittests[1]_tests.cmake")
+else()
+  add_test(dvmone-unittests_NOT_BUILT dvmone-unittests_NOT_BUILT)
+endif()

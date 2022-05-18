@@ -1,0 +1,32 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/ioc/rem/CC/src/dvm/dvmc/lib/instructions/instruction_metrics.c
+dvmc/instructions.h
+-
+
+/home/ioc/rem/CC/src/dvm/dvmc/lib/instructions/instruction_names.c
+dvmc/instructions.h
+-
+
+dvmc/include/dvmc/dvmc.h
+stdbool.h
+-
+stddef.h
+-
+stdint.h
+-
+
+dvmc/include/dvmc/instructions.h
+dvmc/dvmc.h
+-
+dvmc/utils.h
+-
+
+dvmc/include/dvmc/utils.h
+

@@ -1,0 +1,2 @@
+/usr/bin/ar qc libtrans_log-vm-static.a  CMakeFiles/trans_log-vm-static.dir/trans_log_vm.cpp.o
+/usr/bin/ranlib libtrans_log-vm-static.a

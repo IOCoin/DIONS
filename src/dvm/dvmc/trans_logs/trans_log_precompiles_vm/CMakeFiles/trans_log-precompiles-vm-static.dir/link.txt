@@ -1,0 +1,2 @@
+/usr/bin/ar qc libtrans_log-precompiles-vm-static.a  CMakeFiles/trans_log-precompiles-vm-static.dir/trans_log_precompiles_vm.cpp.o
+/usr/bin/ranlib libtrans_log-precompiles-vm-static.a

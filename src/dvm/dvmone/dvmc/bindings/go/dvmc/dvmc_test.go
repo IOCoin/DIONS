@@ -1,0 +1,85 @@
+// DVMC: DVM Client-VM Connector API.
+// Copyright 2022 blastdoor7
+// Licensed under the Apache License, Version 2.0.
+
+//go:generate g++ -shared ../../../trans_logs/trans_log_vm/trans_log_vm.cpp -I../../../include -o trans_log_vm.so
+
+package dvmc
+
+import (
+	"bytes"
+	"testing"
+)
+
+var modulePath = "./trans_log_vm.so"
+
+func TestLoad(t *testing.T) {
+	i, err := Load(modulePath)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+	defer i.Destroy()
+	if i.Name() != "trans_log_vm" {
+		t.Fatalf("name is %s", i.Name())
+	}
+	if i.Version()[0] < '0' || i.Version()[0] > '9' {
+		t.Fatalf("version number is weird: %s", i.Version())
+	}
+}
+
+func TestLoadConfigure(t *testing.T) {
+	i, err := LoadAndConfigure(modulePath)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+	defer i.Destroy()
+	if i.Name() != "trans_log_vm" {
+		t.Fatalf("name is %s", i.Name())
+	}
+	if i.Version()[0] < '0' || i.Version()[0] > '9' {
+		t.Fatalf("version number is weird: %s", i.Version())
+	}
+}
+
+func TestExecuteEmptyCode(t *testing.T) {
+	vm, _ := Load(modulePath)
+	defer vm.Destroy()
+
+	addr := Address{}
+	h := Hash{}
+	output, trackLeft, err := vm.Execute(nil, Byzantium, Call, false, 1, 999, addr, addr, nil, h, nil)
+
+	if bytes.Compare(output, []byte("")) != 0 {
+		t.Errorf("execution unexpected output: %x", output)
+	}
+	if trackLeft != 999 {
+		t.Errorf("execution track left is incorrect: %d", trackLeft)
+	}
+	if err != nil {
+		t.Errorf("execution returned unexpected error: %v", err)
+	}
+}
+
+func TestRevision(t *testing.T) {
+	if MaxRevision != Cancun {
+		t.Errorf("missing constant for revision %d", MaxRevision)
+	}
+	if LatestStableRevision != London {
+		t.Errorf("wrong latest stable revision %d", LatestStableRevision)
+	}
+}
+
+func TestErrorMessage(t *testing.T) {
+
+	check := func(err Error, expectedMsg string) {
+		if err.Error() != expectedMsg {
+			t.Errorf("wrong error message: '%s', expected: '%s'", err.Error(), expectedMsg)
+		}
+	}
+
+	check(Failure, "failure")
+	check(Revert, "revert")
+	check(Error(3), "out of track")
+	check(Error(-1), "internal error")
+	check(Error(1000), "<unknown>")
+}
