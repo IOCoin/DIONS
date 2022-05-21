@@ -151,7 +151,7 @@ OBJS= \
 
 all: iocoind
 
-LIBS += $(CURDIR)/leveldb/libleveldb.a $(CURDIR)/leveldb/libmemenv.a
+LIBS += $(CURDIR)/leveldb/libleveldb.a
 DEFS += $(addprefix -I,$(CURDIR)/leveldb/include)
 DEFS += $(addprefix -I,$(CURDIR)/leveldb/helpers)
 OBJS += obj/txdb-leveldb.o
