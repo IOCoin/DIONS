@@ -213,6 +213,7 @@ optimize: $(OBJS:obj/%=obj/%)
 
 clean:
 	-rm -f iocoind
+	-cd leveldb; make clean; rm -f CMakeCache.txt
 	-cd dvm; make clean; rm -f CMakeCache.txt
 	-cd dvm/ethash; make clean; rm -f CMakeCache.txt
 	-rm -f obj/*.o
