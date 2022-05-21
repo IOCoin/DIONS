@@ -1,0 +1,5 @@
+if(EXISTS "/home/ioc/rem/CC/src/dvm/ethash/test/unittests/ethash-test[1]_tests.cmake")
+  include("/home/ioc/rem/CC/src/dvm/ethash/test/unittests/ethash-test[1]_tests.cmake")
+else()
+  add_test(ethash-test_NOT_BUILT ethash-test_NOT_BUILT)
+endif()

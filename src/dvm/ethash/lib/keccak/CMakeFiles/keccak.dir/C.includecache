@@ -1,0 +1,28 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/ioc/rem/CC/src/dvm/ethash/lib/keccak/keccak.c
+../support/attributes.h
+/home/ioc/rem/CC/src/dvm/ethash/lib/support/attributes.h
+ethash/keccak.h
+-
+string.h
+-
+
+/home/ioc/rem/CC/src/dvm/ethash/lib/support/attributes.h
+
+include/ethash/hash_types.h
+stdint.h
+-
+
+include/ethash/keccak.h
+ethash/hash_types.h
+-
+stddef.h
+-
+

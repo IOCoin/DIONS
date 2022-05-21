@@ -1,0 +1,2 @@
+/usr/bin/ar qc libethash.a  CMakeFiles/ethash.dir/ethash.cpp.o CMakeFiles/ethash.dir/primes.c.o
+/usr/bin/ranlib libethash.a

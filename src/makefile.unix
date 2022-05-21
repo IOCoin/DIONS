@@ -81,16 +81,17 @@ ifeq (${ARCH}, i686)
     EXT_OPTIONS=-msse2
 endif
 
+    EXT_OPTIONS=-std=c++17
 # CXXFLAGS can be specified on the make command line, so we use xCXXFLAGS that only
 # adds some defaults in front. Unfortunately, CXXFLAGS=... $(CXXFLAGS) does not work.
 ifeq ($(OPTIMIZE), yes)
-xCXXFLAGS=-O03 $(EXT_OPTIONS) -std=c++17 -pthread -Wall -Wextra -Wno-ignored-qualifiers -Wformat -Wformat-security -Wno-unused-parameter \
+xCXXFLAGS=-O03 $(EXT_OPTIONS) -pthread -Wall -Wextra -Wno-ignored-qualifiers -Wformat -Wformat-security -Wno-unused-parameter \
     $(DEFS) $(HARDENING) $(CXXFLAGS)
 else ifeq ($(PROFILE),yes)
-xCXXFLAGS=-pg -fno-pie -fPIC $(EXT_OPTIONS) -std=c++17 -pthread -Wall -Wextra -Wno-ignored-qualifiers -Wformat -Wformat-security -Wno-unused-parameter \
+xCXXFLAGS=-pg -fno-pie -fPIC $(EXT_OPTIONS) -pthread -Wall -Wextra -Wno-ignored-qualifiers -Wformat -Wformat-security -Wno-unused-parameter \
     $(DEBUGFLAGS) $(DEFS) $(HARDENING) $(CXXFLAGS)
 else
-xCXXFLAGS=-ggdb $(EXT_OPTIONS) -std=c++17 -pthread -Wall -Wextra -Wno-ignored-qualifiers -Wformat -Wformat-security -Wno-unused-parameter \
+xCXXFLAGS=-ggdb $(EXT_OPTIONS) -pthread -Wall -Wextra -Wno-ignored-qualifiers -Wformat -Wformat-security -Wno-unused-parameter \
     $(DEBUGFLAGS) $(DEFS) $(HARDENING) $(CXXFLAGS)
 endif
 
@@ -150,13 +151,28 @@ OBJS= \
 
 all: iocoind
 
-LIBS += $(CURDIR)/leveldb/libleveldb.a $(CURDIR)/leveldb/libmemenv.a
+LIBS += $(CURDIR)/leveldb/libleveldb.a
 DEFS += $(addprefix -I,$(CURDIR)/leveldb/include)
 DEFS += $(addprefix -I,$(CURDIR)/leveldb/helpers)
 OBJS += obj/txdb-leveldb.o
 leveldb/libleveldb.a:
-	@echo "Building LevelDB ..."; cd leveldb; make libleveldb.a libmemenv.a; cd ..;
+	@echo "Building LevelDB ..."; cd leveldb; cmake CMakeLists.txt; make; cd ..;
 obj/txdb-leveldb.o: leveldb/libleveldb.a
+
+LIBS += $(CURDIR)/dvm/lib/libdvmone.a
+LIBS += $(CURDIR)/dvm/ethash/lib/ethash/libethash.a
+LIBS += $(CURDIR)/dvm/ethash/lib/keccak/libkeccak.a
+LIBS += $(CURDIR)/dvm/dvmc/lib/hex/libhex.a
+LIBS += $(CURDIR)/dvm/dvmc/lib/instructions/libdvmc-instructions.a
+DEFS += $(addprefix -I,$(CURDIR)/dvmone/include)
+DEFS += $(addprefix -I,$(CURDIR)/dvmone/dvmc/include)
+DEFS += $(addprefix -I,$(CURDIR)/dvm/include)
+DEFS += $(addprefix -I,$(CURDIR)/dvm/dvmc/include)
+dvm/ethash/lib/ethash/libethash.a:
+	@echo "Building DVM ..."; cd dvm/ethash; cmake CMakeLists.txt; make; cd ..;
+dvm/lib/libdvmone.a:
+	@echo "Building DVM ..."; cd dvm; cmake CMakeLists.txt; make; cd ethash; cmake CMakeLists.txt; make; cd ..;
+iocoind: dvm/lib/libdvmone.a dvm/ethash/lib/ethash/libethash.a
 
 # auto-generated dependencies:
 -include obj/*.P
@@ -197,6 +213,8 @@ optimize: $(OBJS:obj/%=obj/%)
 
 clean:
 	-rm -f iocoind
+	-cd dvm; make clean; rm -f CMakeCache.txt
+	-cd dvm/ethash; make clean; rm -f CMakeCache.txt
 	-rm -f obj/*.o
 	-rm -f obj/*.P
 	-rm -f obj/build.h
