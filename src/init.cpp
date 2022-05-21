@@ -411,12 +411,12 @@ bool AppInit2()
     fViewWallet = GetBoolArg("-viewwallet");
     if(fViewWallet)
     {
-        if(filesystem::exists(GetDataDir() / "wallet.dat"))
+        if(boost::filesystem::exists(GetDataDir() / "wallet.dat"))
             return InitError(_("Initialization error. Configured as view wallet but wallet.dat file exists in configuration directory. I/O Coin shutting down."));
     }
     else
     {
-        if(filesystem::exists(GetDataDir() / "view.dat"))
+        if(boost::filesystem::exists(GetDataDir() / "view.dat"))
             return InitError(_("Initialization error. Configured as default wallet but view.dat file exists in configuration directory. I/O Coin shutting down."));
     }
 
@@ -588,7 +588,7 @@ bool AppInit2()
             return false;
     }
 
-    if (filesystem::exists(GetDataDir() / strWalletFileName))
+    if (boost::filesystem::exists(GetDataDir() / strWalletFileName))
     {
         CDBEnv::VerifyResult r = bitdb.Verify(strWalletFileName, __wx__DB::Recover);
         if (r == CDBEnv::RECOVER_OK)
@@ -865,11 +865,11 @@ bool AppInit2()
 
     if(GetBoolArg("-xscan"))
     {
-        filesystem::path dc = GetDataDir() / "aliascache.dat";
+	    boost::filesystem::path dc = GetDataDir() / "aliascache.dat";
         FILE *file = fopen(dc.string().c_str(), "rb");
         if (file)
         {
-            filesystem::path dc__ = GetDataDir() / "aliascache.dat.old";
+		boost::filesystem::path dc__ = GetDataDir() / "aliascache.dat.old";
             RenameOver(dc, dc__);
         }
     }
@@ -919,13 +919,13 @@ bool AppInit2()
         exit(0);
     }
 
-    filesystem::path pathBootstrap = GetDataDir() / "bootstrap.dat";
-    if (filesystem::exists(pathBootstrap)) {
+    boost::filesystem::path pathBootstrap = GetDataDir() / "bootstrap.dat";
+    if (boost::filesystem::exists(pathBootstrap)) {
         uiInterface.InitMessage(_("Importing bootstrap blockchain data file."));
 
         FILE *file = fopen(pathBootstrap.string().c_str(), "rb");
         if (file) {
-            filesystem::path pathBootstrapOld = GetDataDir() / "bootstrap.dat.old";
+		boost::filesystem::path pathBootstrapOld = GetDataDir() / "bootstrap.dat.old";
             LoadExternalBlockFile(file);
             RenameOver(pathBootstrap, pathBootstrapOld);
         }

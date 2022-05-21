@@ -1,8 +1,3 @@
-
-
-
-
-
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2012 The Bitcoin developers
 // Copyright (c) 2013 The NovaCoin developers
@@ -16,8 +11,18 @@
 #include "json/json_spirit_reader_template.h"
 #include "json/json_spirit_writer_template.h"
 #include "json/json_spirit_utils.h"
+//#include <CLI/CLI.hpp>
+#include <dvmone/dvmone.h>
+#include <dvmc/mocked_host.hpp>
+#include <dvmc/dvmc.h>
+#include <dvmc/dvmc.hpp>
+#include <dvmc/hex.hpp>
+#include <dvmc/loader.h>
+#include <dvmc/tooling.hpp>
+#include <fstream>
 
 using namespace std;
+using dvmc::operator""_address;
 using namespace json_spirit;
 
 //////////////////////////////////////////////////////////////////////////////
@@ -32,7 +37,7 @@ extern bool collisionReference(const string& s, uint256& wtxInHash);
 extern bool validate_serial_n(const string&, const string&,__wx__Tx&);
 extern bool read_serial_n(const string&, const string&, __wx__Tx&);
 extern __wx__Tx generateUpdate(const string& origin);
-
+static const string code_hex_str = "608060405234801561001057600080fd5b5061017c806100206000396000f3fe608060405234801561001057600080fd5b506004361061002b5760003560e01c8063f15fad2314610030575b600080fd5b61003861004e565b60405161004591906100c4565b60405180910390f35b60606040518060400160405280600c81526020017f74657374206d6573736167650000000000000000000000000000000000000000815250905090565b6000610096826100e6565b6100a081856100f1565b93506100b0818560208601610102565b6100b981610135565b840191505092915050565b600060208201905081810360008301526100de818461008b565b905092915050565b600081519050919050565b600082825260208201905092915050565b60005b83811015610120578082015181840152602081019050610105565b8381111561012f576000848401525b50505050565b6000601f19601f830116905091905056fea264697066735822122077ae7640f98ab2783e9eaf216c0440651b7b59a7061342c8aba40b91d4def4b964736f6c63430008070033";
 static const string ADDRESS    = "address";
 static const string DESCRIPTOR = "descriptor";
 int static FormatHashBlocks(void* pbuffer, unsigned int len)
@@ -123,8 +128,225 @@ public:
         }
     }
 };
+/*
+int main(int argc, const char** argv) noexcept
+{
+    using namespace dvmc;
 
+    try
+    {
+        HexValidator Hex;
 
+        std::string vm_config;
+        std::string code_arg;
+        int64_t track = 1000000;
+        auto rev = DVMC_LATEST_STABLE_REVISION;
+        std::string input_arg;
+        auto create = false;
+        auto bench = false;
+
+        CLI::App app{"DVMC tool"};
+        const auto& version_flag = *app.add_flag("--version", "Print version information and exit");
+        const auto& vm_option =
+            *app.add_option("--vm", vm_config, "DVMC VM module")->envname("DVMC_VM");
+
+        auto& run_cmd = *app.add_subcommand("run", "Execute DVM pos_read")->fallthrough();
+        run_cmd.add_option("code", code_arg, "Bytecode")
+            ->required()
+            ->check(Hex | CLI::ExistingFile);
+        run_cmd.add_option("--track", track, "Execution track limit", true)
+            ->check(CLI::Range(0, 1000000000));
+        run_cmd.add_option("--rev", rev, "DVM revision", true);
+        run_cmd.add_option("--input", input_arg, "Input bytes")->check(Hex | CLI::ExistingFile);
+        run_cmd.add_flag(
+            "--create", create,
+            "Create new contract out of the code and then retrieve_desc_vx this contract with the input");
+        run_cmd.add_flag(
+            "--bench", bench,
+            "Benchmark execution time (state modification may result in unexpected behaviour)");
+
+        try
+        {
+            app.parse(argc, argv);
+
+            dvmc::VM vm;
+            if (vm_option.count() != 0)
+            {
+                dvmc_loader_error_code ec = DVMC_LOADER_UNSPECIFIED_ERROR;
+                vm = VM{dvmc_load_and_configure(vm_config.c_str(), &ec)};
+                if (ec != DVMC_LOADER_SUCCESS)
+                {
+                    const auto error = dvmc_last_error_msg();
+                    if (error != nullptr)
+                        std::cerr << error << "\n";
+                    else
+                        std::cerr << "Loading error " << ec << "\n";
+                    return static_cast<int>(ec);
+                }
+            }
+
+            // Handle the --version flag first and exit when present.
+            if (version_flag)
+            {
+                if (vm)
+                    std::cout << vm.name() << " " << vm.version() << " (" << vm_config << ")\n";
+
+                std::cout << "DVMC " PROJECT_VERSION;
+                if (argc >= 1)
+                    std::cout << " (" << argv[0] << ")";
+                std::cout << "\n";
+                return 0;
+            }
+
+            if (run_cmd)
+            {
+                // For run command the --vm is required.
+                if (vm_option.count() == 0)
+                    throw CLI::RequiredError{vm_option.get_name()};
+
+                std::cout << "Config: " << vm_config << "\n";
+
+                const auto code_hex = load_hex(code_arg);
+                const auto input_hex = load_hex(input_arg);
+                // If code_hex or input_hex is not valid hex string an exception is thrown.
+                return tooling::run(vm, rev, track, code_hex, input_hex, create, bench, std::cout);
+            }
+
+            return 0;
+        }
+        catch (const CLI::ParseError& e)
+        {
+            return app.exit(e);
+        }
+    }
+    catch (const std::exception& e)
+    {
+        std::cerr << "Error: " << e.what() << "\n";
+        return -1;
+    }
+    catch (...)
+    {
+        return -2;
+    }
+} */
+/*
+#include <dvmc/dvmc.hpp>
+#include <dvmc/hex.hpp>
+#include <dvmc/mocked_host.hpp>
+#include <dvmc/tooling.hpp>
+#include <chrono>
+#include <ostream>
+
+namespace dvmc::tooling
+{
+namespace
+{
+/// The address where a new contract is created with --create option.
+constexpr auto create_address = 0xc9ea7ed000000000000000000000000000000001_address;
+
+/// The track limit for contract creation.
+constexpr auto create_track = 10'000'000;
+
+auto bench(MockedHost& host,
+           dvmc::VM& vm,
+           dvmc_revision rev,
+           const dvmc_message& msg,
+           bytes_view code,
+           const dvmc::result& expected_result,
+           std::ostream& out)
+{
+    {
+        using clock = std::chrono::steady_clock;
+        using unit = std::chrono::nanoseconds;
+        constexpr auto unit_name = " ns";
+        constexpr auto target_bench_time = std::chrono::seconds{1};
+        constexpr auto warning =
+            "WARNING! Inconsistent execution result likely due to the use of storage ";
+
+        // Probe run: retrieve_desc_vx once again the already warm code to estimate a single run time.
+        const auto probe_start = clock::now();
+        const auto result = vm.retrieve_desc_vx(host, rev, msg, code.data(), code.size());
+        const auto bench_start = clock::now();
+        const auto probe_time = bench_start - probe_start;
+
+        if (result.track_left != expected_result.track_left)
+            out << warning << "(track used: " << (msg.track - result.track_left) << ")\n";
+        if (bytes_view{result.output_data, result.output_size} !=
+            bytes_view{expected_result.output_data, expected_result.output_size})
+            out << warning << "(output: " << hex({result.output_data, result.output_size}) << ")\n";
+
+        // Benchmark loop.
+        const auto num_iterations = std::max(static_cast<int>(target_bench_time / probe_time), 1);
+        for (int i = 0; i < num_iterations; ++i)
+            vm.retrieve_desc_vx(host, rev, msg, code.data(), code.size());
+        const auto bench_time = (clock::now() - bench_start) / num_iterations;
+
+        out << "Time:     " << std::chrono::duration_cast<unit>(bench_time).count() << unit_name
+            << " (avg of " << num_iterations << " iterations)\n";
+    }
+}
+}  // namespace
+
+int run(dvmc::VM& vm,
+        dvmc_revision rev,
+        int64_t track,
+        const std::string& code_hex,
+        const std::string& input_hex,
+        bool create,
+        bool bench,
+        std::ostream& out)
+{
+    out << (create ? "Creating and executing on " : "Executing on ") << rev << " with " << track
+        << " track limit\n";
+
+    const auto code = from_hex(code_hex);
+    const auto input = from_hex(input_hex);
+
+    MockedHost host;
+
+    dvmc_message msg{};
+    msg.track = track;
+    msg.input_data = input.data();
+    msg.input_size = input.size();
+
+    bytes_view exec_code = code;
+    if (create)
+    {
+        dvmc_message create_msg{};
+        create_msg.kind = DVMC_CREATE;
+        create_msg.recipient = create_address;
+        create_msg.track = create_track;
+
+        const auto create_result = vm.retrieve_desc_vx(host, rev, create_msg, code.data(), code.size());
+        if (create_result.status_code != DVMC_SUCCESS)
+        {
+            out << "Contract creation failed: " << create_result.status_code << "\n";
+            return create_result.status_code;
+        }
+
+        auto& created_account = host.accounts[create_address];
+        created_account.code = bytes(create_result.output_data, create_result.output_size);
+
+        msg.recipient = create_address;
+        exec_code = created_account.code;
+    }
+    out << "\n";
+
+    const auto result = vm.retrieve_desc_vx(host, rev, msg, exec_code.data(), exec_code.size());
+
+    if (bench)
+        tooling::bench(host, vm, rev, msg, exec_code, result, out);
+
+    const auto track_used = msg.track - result.track_left;
+    out << "Result:   " << result.status_code << "\nGas used: " << track_used << "\n";
+
+    if (result.status_code == DVMC_SUCCESS || result.status_code == DVMC_REVERT)
+        out << "Output:   " << hex({result.output_data, result.output_size}) << "\n";
+
+    return 0;
+}
+}  // namespace dvmc::tooling
+*/
 // CreateNewBlock: create new block (without proof-of-work/proof-of-stake)
 CBlock* CreateNewBlock(__wx__* pwallet, bool fProofOfStake, int64_t* pFees)
 {
@@ -207,6 +429,43 @@ CBlock* CreateNewBlock(__wx__* pwallet, bool fProofOfStake, int64_t* pFees)
             CTransaction& tx = (*mi).second;
             if(tx.nVersion == CTransaction::CYCLE_TX_VERSION)
             {
+                dvmc::MockedHost host;
+                dvmc_message msg{};
+                msg.track = 10000000;
+                const auto code = dvmc::from_hex(code_hex_str);
+                dvmc::bytes_view exec_code = code;
+                const auto input = dvmc::from_hex("f15fad23");
+                msg.input_data = input.data();
+                msg.input_size = input.size();
+
+                dvmc_message create_msg{};
+                create_msg.kind = DVMC_CREATE;
+
+                //constexpr auto create_address = 0xc9ea7ed000000000000000000000000000000001dvmc::fnv::literals::_address;
+                constexpr auto create_address = 0xc9ea7ed000000000000000000000000000000001_address;
+                create_msg.recipient = create_address;
+                create_msg.track = 1000000;
+                dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
+                dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
+                const auto create_result = vm.retrieve_desc_vx(host, rev, create_msg, code.data(), code.size());
+                if (create_result.status_code != DVMC_SUCCESS)
+                {
+                    cout << "Contract creation failed: " << create_result.status_code << endl;
+                }
+
+                auto& created_account = host.accounts[create_address];
+                created_account.code = dvmc::bytes(create_result.output_data, create_result.output_size);
+
+                msg.recipient = create_address;
+                exec_code = created_account.code;
+                const auto result = vm.retrieve_desc_vx(host, rev, msg, exec_code.data(), exec_code.size());
+                const auto track_used = msg.track - result.track_left;
+                cout << "Result:   " << result.status_code << "\nGas used: " << track_used << endl;
+
+                if (result.status_code == DVMC_SUCCESS || result.status_code == DVMC_REVERT)
+                    cout << "Output:   " << dvmc::hex({result.output_data, result.output_size}) << endl;
+
+
                 Array array;
                 ListTransactions(pwallet->mapWallet[tx.GetHash()], "*", 0, false, array);
                 Object obj = array[0].get_obj();
@@ -227,8 +486,8 @@ CBlock* CreateNewBlock(__wx__* pwallet, bool fProofOfStake, int64_t* pFees)
                     time_t t0 = time(NULL);
                     ostringstream oss;
                     oss << t0;
-		    vchType validation_ref = vchFromString(oss.str());
-		    uint256 validation_ref_hash;
+                    vchType validation_ref = vchFromString(oss.str());
+                    uint256 validation_ref_hash;
                     SHA256(&validation_ref[0], validation_ref.size(), (unsigned char*)&validation_ref_hash);
                     ostringstream ref_oss;
                     ref_oss << validation_ref_hash.GetHex();
@@ -241,8 +500,8 @@ CBlock* CreateNewBlock(__wx__* pwallet, bool fProofOfStake, int64_t* pFees)
                     time_t t1 = time(NULL);
                     ostringstream oss;
                     oss << t1;
-		    vchType read_ref = vchFromString(oss.str());
-		    uint256 read_ref_hash;
+                    vchType read_ref = vchFromString(oss.str());
+                    uint256 read_ref_hash;
                     SHA256(&read_ref[0], read_ref.size(), (unsigned char*)&read_ref_hash);
                     ostringstream ref_oss;
                     ref_oss << read_ref_hash.GetHex();
@@ -645,3 +904,4 @@ void StakeMiner(__wx__ *pwallet)
             MilliSleep(nMinerSleep);
     }
 }
+

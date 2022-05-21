@@ -7152,19 +7152,25 @@ bool aliasScript(const CScript& script, int& op, vector<vector<unsigned char> > 
 }
 bool aliasScript(const CScript& script, int& op, vector<vector<unsigned char> > &vvch, CScript::const_iterator& pc)
 {
+    printf("aliasScript 1\n");
     opcodetype opcode;
     if(!script.GetOp(pc, opcode))
     {
+        printf("aliasScript 1 1\n");
         return false;
     }
     if(opcode < OP_1 || opcode > OP_16)
     {
+        printf("aliasScript 1 2\n");
+        if(opcode == OP_BASE_SET)
+            printf("aliasScript 1 3\n");
 
         return false;
     }
 
     op = opcode - OP_1 + 1;
 
+    printf("aliasScript 2\n");
     for(;;) {
         vector<unsigned char> vch;
         if(!script.GetOp(pc, opcode, vch))
@@ -7173,11 +7179,13 @@ bool aliasScript(const CScript& script, int& op, vector<vector<unsigned char> > 
             break;
         if(!(opcode >= 0 && opcode <= OP_PUSHDATA4))
         {
+            printf("aliasScript 2 2\n");
             return false;
         }
         vvch.push_back(vch);
     }
 
+    printf("aliasScript 3\n");
     while(opcode == OP_DROP || opcode == OP_2DROP || opcode == OP_NOP)
     {
         if(!script.GetOp(pc, opcode))
@@ -7186,6 +7194,7 @@ bool aliasScript(const CScript& script, int& op, vector<vector<unsigned char> > 
 
     pc--;
 
+    printf("aliasScript 4\n");
     if((op == OP_ALIAS_ENCRYPTED && vvch.size() == 8) ||
             (op == OP_ALIAS_SET && vvch.size() == 5) ||
             (op == OP_MESSAGE) ||
@@ -7197,6 +7206,7 @@ bool aliasScript(const CScript& script, int& op, vector<vector<unsigned char> > 
             (op == OP_VERTEX) ||
             (op == OP_ALIAS_RELAY && vvch.size() == 2))
     {
+        printf("aliasScript 5\n");
         return true;
     }
     return error("invalid number of arguments for alias op");
@@ -7231,6 +7241,7 @@ bool DecodeMessageTx(const CTransaction& tx, int& op, int& nOut, vector<vector<u
 }
 bool aliasTx(const CTransaction& tx, int& op, int& nOut, vector<vector<unsigned char> >& vvch )
 {
+    printf("aliasTx 1\n");
     bool found = false;
     for(unsigned int i = 0; i < tx.vout.size(); i++)
     {
@@ -7238,19 +7249,23 @@ bool aliasTx(const CTransaction& tx, int& op, int& nOut, vector<vector<unsigned 
 
         vector<vector<unsigned char> > vvchRead;
 
+        printf("aliasTx 2\n");
         if(aliasScript(out.scriptPubKey, op, vvchRead))
         {
             if(found)
             {
                 vvch.clear();
+                printf("aliasTx 3\n");
                 return false;
             }
             nOut = i;
             found = true;
             vvch = vvchRead;
+            printf("aliasTx 4\n");
         }
     }
 
+    printf("aliasTx 5\n");
     if(!found)
         vvch.clear();
 
@@ -7267,6 +7282,7 @@ bool aliasTxValue(const CTransaction& tx, vector<unsigned char>& value)
     if(!aliasTx(tx, op, nOut, vvch))
         return false;
 
+    printf("aliasTxVal 1\n");
     switch(op)
     {
     case OP_ALIAS_ENCRYPTED:
