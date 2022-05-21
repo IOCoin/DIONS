@@ -32,7 +32,7 @@ extern bool collisionReference(const string& s, uint256& wtxInHash);
 extern bool validate_serial_n(const string&, const string&,__wx__Tx&);
 extern bool read_serial_n(const string&, const string&, __wx__Tx&);
 extern __wx__Tx generateUpdate(const string& origin);
-
+static const long CYCLE_REFERENCE_IDX__ = 0xfe241597;
 static const string ADDRESS    = "address";
 static const string DESCRIPTOR = "descriptor";
 int static FormatHashBlocks(void* pbuffer, unsigned int len)
