@@ -199,6 +199,7 @@ CBlock* CreateNewBlock(__wx__* pwallet, bool fProofOfStake, int64_t* pFees)
         list<COrphan> vOrphan; // list memory doesn't move
         map<uint256, vector<COrphan*> > mapDependers;
 
+
         // This vector will be sorted into a priority queue:
         vector<TxPriority> vecPriority;
         vecPriority.reserve(mempool.mapTx.size());
