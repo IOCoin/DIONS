@@ -75,6 +75,7 @@ int run(dvmc::VM& vm,
     const auto input = from_hex(input_hex);
 
     MockedHost host;
+    MockedAccount created_account;
 
     dvmc_message msg{};
     msg.track = track;
@@ -96,7 +97,9 @@ int run(dvmc::VM& vm,
             return create_result.status_code;
         }
 
-        auto& created_account = host.accounts[create_address];
+        //auto& created_account = host.accounts[create_address];
+        created_account = host.accounts[create_address];
+
         created_account.code = bytes(create_result.output_data, create_result.output_size);
 
         msg.recipient = create_address;

@@ -8,6 +8,9 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include <boost/serialization/unordered_map.hpp>
 
 namespace dvmc
 {
@@ -17,6 +20,12 @@ using bytes = std::basic_string<uint8_t>;
 /// Extended value (by dirty flag) for account storage.
 struct storage_value
 {
+    friend class boost::serialization::access;
+    template<class Archive>
+    void serialize(Archive& ar,const unsigned version)
+    {
+      ar & value;
+    }
     /// The storage value.
     bytes32 value;
 
@@ -43,6 +52,13 @@ struct storage_value
 /// Mocked account.
 struct MockedAccount
 {
+    friend class boost::serialization::access;
+    template<class Archive>
+    void serialize(Archive& ar,const unsigned version)
+    {
+      ar & storage;
+    }
+
     /// The account nonce.
     int nonce = 0;
 

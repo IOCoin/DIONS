@@ -11,6 +11,8 @@
 #include <ostream>
 #include <utility>
 
+#include <boost/serialization/base_object.hpp>
+
 static_assert(DVMC_LATEST_STABLE_REVISION <= DVMC_MAX_REVISION,
               "latest stable revision ill-defined");
 
@@ -26,33 +28,39 @@ struct address : dvmc_address
     /// Default and converting constructor.
     ///
     /// Initializes bytes to zeros if not other @p init value provided.
-    constexpr address(dvmc_address init = {}) noexcept : dvmc_address{init} {}
+    constexpr address(dvmc_address init = {}) noexcept : dvmc_address {
+        init
+    } {}
 
     /// Converting constructor from unsigned integer value.
     ///
     /// This constructor assigns the @p v value to the last 8 bytes [12:19]
     /// in big-endian order.
     constexpr explicit address(uint64_t v) noexcept
-      : dvmc_address{{0,
-                      0,
-                      0,
-                      0,
-                      0,
-                      0,
-                      0,
-                      0,
-                      0,
-                      0,
-                      0,
-                      0,
-                      static_cast<uint8_t>(v >> 56),
-                      static_cast<uint8_t>(v >> 48),
-                      static_cast<uint8_t>(v >> 40),
-                      static_cast<uint8_t>(v >> 32),
-                      static_cast<uint8_t>(v >> 24),
-                      static_cast<uint8_t>(v >> 16),
-                      static_cast<uint8_t>(v >> 8),
-                      static_cast<uint8_t>(v >> 0)}}
+        : dvmc_address {
+        {
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            static_cast<uint8_t>(v >> 56),
+            static_cast<uint8_t>(v >> 48),
+            static_cast<uint8_t>(v >> 40),
+            static_cast<uint8_t>(v >> 32),
+            static_cast<uint8_t>(v >> 24),
+            static_cast<uint8_t>(v >> 16),
+            static_cast<uint8_t>(v >> 8),
+            static_cast<uint8_t>(v >> 0)
+        }
+    }
     {}
 
     /// Explicit operator converting to bool.
@@ -64,53 +72,78 @@ struct address : dvmc_address
 /// This type wraps C ::dvmc_bytes32 to make sure objects of this type are always initialized.
 struct bytes32 : dvmc_bytes32
 {
+    friend class boost::serialization::access;
+    template<class Archive>
+    void serialize(Archive& ar,const unsigned version)
+    {
+      ar & this->bytes;
+    }
+
     /// Default and converting constructor.
     ///
     /// Initializes bytes to zeros if not other @p init value provided.
-    constexpr bytes32(dvmc_bytes32 init = {}) noexcept : dvmc_bytes32{init} {}
+    constexpr bytes32(dvmc_bytes32 init = {}) noexcept : dvmc_bytes32 {
+        init
+    } {}
 
     /// Converting constructor from unsigned integer value.
     ///
     /// This constructor assigns the @p v value to the last 8 bytes [24:31]
     /// in big-endian order.
     constexpr explicit bytes32(uint64_t v) noexcept
-      : dvmc_bytes32{{0,
-                      0,
-                      0,
-                      0,
-                      0,
-                      0,
-                      0,
-                      0,
-                      0,
-                      0,
-                      0,
-                      0,
-                      0,
-                      0,
-                      0,
-                      0,
-                      0,
-                      0,
-                      0,
-                      0,
-                      0,
-                      0,
-                      0,
-                      0,
-                      static_cast<uint8_t>(v >> 56),
-                      static_cast<uint8_t>(v >> 48),
-                      static_cast<uint8_t>(v >> 40),
-                      static_cast<uint8_t>(v >> 32),
-                      static_cast<uint8_t>(v >> 24),
-                      static_cast<uint8_t>(v >> 16),
-                      static_cast<uint8_t>(v >> 8),
-                      static_cast<uint8_t>(v >> 0)}}
+        : dvmc_bytes32 {
+        {
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            static_cast<uint8_t>(v >> 56),
+            static_cast<uint8_t>(v >> 48),
+            static_cast<uint8_t>(v >> 40),
+            static_cast<uint8_t>(v >> 32),
+            static_cast<uint8_t>(v >> 24),
+            static_cast<uint8_t>(v >> 16),
+            static_cast<uint8_t>(v >> 8),
+            static_cast<uint8_t>(v >> 0)
+        }
+    }
     {}
 
     /// Explicit operator converting to bool.
     constexpr inline explicit operator bool() const noexcept;
 };
+/*
+namespace boost
+{
+  namespace serialization
+  {
+    template<class Archive>
+    void serialize(Archive& ar,bytes32& b,const unsigned version)
+    {
+      ar & b.tmp_;
+    }
+  }
+} */
 
 /// The alias for dvmc::bytes32 to represent a big-endian 256-bit integer.
 using uint256be = bytes32;
@@ -276,7 +309,7 @@ constexpr int from_hex(char c) noexcept
 {
     return (c >= 'a' && c <= 'f') ? c - ('a' - 10) :
            (c >= 'A' && c <= 'F') ? c - ('A' - 10) :
-                                    c - '0';
+           c - '0';
 }
 
 constexpr uint8_t byte(const char* s, size_t i) noexcept
@@ -291,20 +324,24 @@ template <>
 constexpr bytes32 from_hex<bytes32>(const char* s) noexcept
 {
     return {
-        {{byte(s, 0),  byte(s, 1),  byte(s, 2),  byte(s, 3),  byte(s, 4),  byte(s, 5),  byte(s, 6),
-          byte(s, 7),  byte(s, 8),  byte(s, 9),  byte(s, 10), byte(s, 11), byte(s, 12), byte(s, 13),
-          byte(s, 14), byte(s, 15), byte(s, 16), byte(s, 17), byte(s, 18), byte(s, 19), byte(s, 20),
-          byte(s, 21), byte(s, 22), byte(s, 23), byte(s, 24), byte(s, 25), byte(s, 26), byte(s, 27),
-          byte(s, 28), byte(s, 29), byte(s, 30), byte(s, 31)}}};
+        {   {   byte(s, 0),  byte(s, 1),  byte(s, 2),  byte(s, 3),  byte(s, 4),  byte(s, 5),  byte(s, 6),
+                byte(s, 7),  byte(s, 8),  byte(s, 9),  byte(s, 10), byte(s, 11), byte(s, 12), byte(s, 13),
+                byte(s, 14), byte(s, 15), byte(s, 16), byte(s, 17), byte(s, 18), byte(s, 19), byte(s, 20),
+                byte(s, 21), byte(s, 22), byte(s, 23), byte(s, 24), byte(s, 25), byte(s, 26), byte(s, 27),
+                byte(s, 28), byte(s, 29), byte(s, 30), byte(s, 31)
+            }
+        }};
 }
 
 template <>
 constexpr address from_hex<address>(const char* s) noexcept
 {
     return {
-        {{byte(s, 0),  byte(s, 1),  byte(s, 2),  byte(s, 3),  byte(s, 4),  byte(s, 5),  byte(s, 6),
-          byte(s, 7),  byte(s, 8),  byte(s, 9),  byte(s, 10), byte(s, 11), byte(s, 12), byte(s, 13),
-          byte(s, 14), byte(s, 15), byte(s, 16), byte(s, 17), byte(s, 18), byte(s, 19)}}};
+        {   {   byte(s, 0),  byte(s, 1),  byte(s, 2),  byte(s, 3),  byte(s, 4),  byte(s, 5),  byte(s, 6),
+                byte(s, 7),  byte(s, 8),  byte(s, 9),  byte(s, 10), byte(s, 11), byte(s, 12), byte(s, 13),
+                byte(s, 14), byte(s, 15), byte(s, 16), byte(s, 17), byte(s, 18), byte(s, 19)
+            }
+        }};
 }
 
 template <typename T, char... c>
@@ -319,7 +356,8 @@ constexpr T from_literal() noexcept
     static_assert(is_simple_zero || size == 2 * sizeof(T) + 2,
                   "literal must match the result type size");
 
-    return is_simple_zero ? T{} : from_hex<T>(&literal[2]);
+    return is_simple_zero ? T{} :
+           from_hex<T>(&literal[2]);
 }
 }  // namespace internal
 
@@ -383,11 +421,15 @@ public:
            int64_t _track_left,
            const uint8_t* _output_data,
            size_t _output_size) noexcept
-      : dvmc_result{make_result(_status_code, _track_left, _output_data, _output_size)}
+        : dvmc_result {
+        make_result(_status_code, _track_left, _output_data, _output_size)
+    }
     {}
 
     /// Converting constructor from raw dvmc_result.
-    explicit result(dvmc_result const& res) noexcept : dvmc_result{res} {}
+    explicit result(dvmc_result const& res) noexcept : dvmc_result {
+        res
+    } {}
 
     /// Destructor responsible for automatically releasing attached resources.
     ~result() noexcept
@@ -397,7 +439,9 @@ public:
     }
 
     /// Move constructor.
-    result(result&& other) noexcept : dvmc_result{other}
+    result(result&& other) noexcept : dvmc_result {
+        other
+    }
     {
         other.release = nullptr;  // Disable releasing of the rvalue object.
     }
@@ -508,7 +552,7 @@ public:
     /// @param interface  The reference to the Host interface.
     /// @param ctx        The pointer to the Host context object. This parameter MAY be null.
     HostContext(const dvmc_host_interface& interface, dvmc_host_context* ctx) noexcept
-      : host{&interface}, context{ctx}
+        : host{&interface}, context{ctx}
     {}
 
     bool account_exists(const address& address) const noexcept final
@@ -562,7 +606,9 @@ public:
     }
 
     /// @copydoc HostInterface::get_tx_context()
-    dvmc_tx_context get_tx_context() const noexcept final { return host->get_tx_context(context); }
+    dvmc_tx_context get_tx_context() const noexcept final {
+        return host->get_tx_context(context);
+    }
 
     bytes32 get_block_hash(int64_t number) const noexcept final
     {
@@ -604,7 +650,9 @@ public:
 
     /// Converts the Host object to the opaque host context pointer.
     /// @returns  Pointer to dvmc_host_context.
-    dvmc_host_context* to_context() noexcept { return reinterpret_cast<dvmc_host_context*>(this); }
+    dvmc_host_context* to_context() noexcept {
+        return reinterpret_cast<dvmc_host_context*>(this);
+    }
 
     /// Converts the opaque host context pointer back to the original Host object.
     /// @tparam DerivedClass  The class derived from the Host class.
@@ -632,7 +680,9 @@ public:
     VM() noexcept = default;
 
     /// Converting constructor from dvmc_vm.
-    explicit VM(dvmc_vm* vm) noexcept : m_instance{vm} {}
+    explicit VM(dvmc_vm* vm) noexcept : m_instance {
+        vm
+    } {}
 
     /// Destructor responsible for automatically destroying the VM instance.
     ~VM() noexcept
@@ -645,7 +695,11 @@ public:
     VM& operator=(const VM&) = delete;
 
     /// Move constructor.
-    VM(VM&& other) noexcept : m_instance{other.m_instance} { other.m_instance = nullptr; }
+    VM(VM&& other) noexcept : m_instance {
+        other.m_instance
+    } {
+        other.m_instance = nullptr;
+    }
 
     /// Move assignment operator.
     VM& operator=(VM&& other) noexcept
@@ -662,16 +716,24 @@ public:
               std::initializer_list<std::pair<const char*, const char*>> options) noexcept;
 
     /// Checks if contains a valid pointer to the VM instance.
-    explicit operator bool() const noexcept { return m_instance != nullptr; }
+    explicit operator bool() const noexcept {
+        return m_instance != nullptr;
+    }
 
     /// Checks whenever the VM instance is ABI compatible with the current DVMC API.
-    bool is_abi_compatible() const noexcept { return m_instance->abi_version == DVMC_ABI_VERSION; }
+    bool is_abi_compatible() const noexcept {
+        return m_instance->abi_version == DVMC_ABI_VERSION;
+    }
 
     /// @copydoc dvmc_vm::name
-    char const* name() const noexcept { return m_instance->name; }
+    char const* name() const noexcept {
+        return m_instance->name;
+    }
 
     /// @copydoc dvmc_vm::version
-    char const* version() const noexcept { return m_instance->version; }
+    char const* version() const noexcept {
+        return m_instance->version;
+    }
 
     /// Checks if the VM has the given capability.
     bool has_capability(dvmc_capabilities capability) const noexcept
@@ -693,21 +755,21 @@ public:
 
     /// @copydoc dvmc_retrieve_desc_vx()
     result retrieve_desc_vx(const dvmc_host_interface& host,
-                   dvmc_host_context* ctx,
-                   dvmc_revision rev,
-                   const dvmc_message& msg,
-                   const uint8_t* code,
-                   size_t code_size) noexcept
+                            dvmc_host_context* ctx,
+                            dvmc_revision rev,
+                            const dvmc_message& msg,
+                            const uint8_t* code,
+                            size_t code_size) noexcept
     {
         return result{m_instance->retrieve_desc_vx(m_instance, &host, ctx, rev, &msg, code, code_size)};
     }
 
     /// Convenient variant of the VM::retrieve_desc_vx() that takes reference to dvmc::Host class.
     result retrieve_desc_vx(Host& host,
-                   dvmc_revision rev,
-                   const dvmc_message& msg,
-                   const uint8_t* code,
-                   size_t code_size) noexcept
+                            dvmc_revision rev,
+                            const dvmc_message& msg,
+                            const uint8_t* code,
+                            size_t code_size) noexcept
     {
         return retrieve_desc_vx(Host::get_interface(), host.to_context(), rev, msg, code, code_size);
     }
@@ -721,9 +783,9 @@ public:
     /// This method is for experimental precompiles support where execution is
     /// guaranteed not to require any Host access.
     result retrieve_desc_vx(dvmc_revision rev,
-                   const dvmc_message& msg,
-                   const uint8_t* code,
-                   size_t code_size) noexcept
+                            const dvmc_message& msg,
+                            const uint8_t* code,
+                            size_t code_size) noexcept
     {
         return result{
             m_instance->retrieve_desc_vx(m_instance, nullptr, nullptr, rev, &msg, code, code_size)};
@@ -734,7 +796,9 @@ public:
     /// Gives access to the C DVMC VM struct to allow advanced interaction with the VM not supported
     /// by the C++ interface. Use as the last resort.
     /// This object still owns the VM after returning the pointer. The returned pointer MAY be null.
-    dvmc_vm* get_raw_pointer() const noexcept { return m_instance; }
+    dvmc_vm* get_raw_pointer() const noexcept {
+        return m_instance;
+    }
 
 private:
     dvmc_vm* m_instance = nullptr;
@@ -742,7 +806,9 @@ private:
 
 inline VM::VM(dvmc_vm* vm,
               std::initializer_list<std::pair<const char*, const char*>> options) noexcept
-  : m_instance{vm}
+    : m_instance {
+    vm
+}
 {
     // This constructor is implemented outside of the class definition to workaround a doxygen bug.
     for (const auto& option : options)
@@ -835,8 +901,8 @@ inline dvmc_access_status access_account(dvmc_host_context* h, const dvmc_addres
 }
 
 inline dvmc_access_status access_storage(dvmc_host_context* h,
-                                         const dvmc_address* addr,
-                                         const dvmc_bytes32* key) noexcept
+        const dvmc_address* addr,
+        const dvmc_bytes32* key) noexcept
 {
     return Host::from_context(h)->access_storage(*addr, *key);
 }
@@ -888,8 +954,8 @@ struct hash<dvmc::address>
         using namespace dvmc;
         using namespace fnv;
         return static_cast<size_t>(fnv1a_by64(
-            fnv1a_by64(fnv1a_by64(fnv::offset_basis, load64le(&s.bytes[0])), load64le(&s.bytes[8])),
-            load32le(&s.bytes[16])));
+                                       fnv1a_by64(fnv1a_by64(fnv::offset_basis, load64le(&s.bytes[0])), load64le(&s.bytes[8])),
+                                       load32le(&s.bytes[16])));
     }
 };
 
@@ -903,10 +969,10 @@ struct hash<dvmc::bytes32>
         using namespace dvmc;
         using namespace fnv;
         return static_cast<size_t>(
-            fnv1a_by64(fnv1a_by64(fnv1a_by64(fnv1a_by64(fnv::offset_basis, load64le(&s.bytes[0])),
-                                             load64le(&s.bytes[8])),
-                                  load64le(&s.bytes[16])),
-                       load64le(&s.bytes[24])));
+                   fnv1a_by64(fnv1a_by64(fnv1a_by64(fnv1a_by64(fnv::offset_basis, load64le(&s.bytes[0])),
+                                         load64le(&s.bytes[8])),
+                                         load64le(&s.bytes[16])),
+                              load64le(&s.bytes[24])));
     }
 };
 }  // namespace std
