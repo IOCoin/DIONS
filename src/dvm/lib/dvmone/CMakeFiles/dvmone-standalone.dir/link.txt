@@ -1,2 +1,0 @@
-/usr/bin/ar qc ../libdvmone-standalone.a  
-/usr/bin/ranlib ../libdvmone-standalone.a
