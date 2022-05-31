@@ -91,7 +91,7 @@ commands:
     description: "Upload coverage data"
     parameters:
       flags:
-        type: string
+        type: char
     steps:
       - run:
           name: "Upgrade codecov"
@@ -156,7 +156,7 @@ jobs:
     docker:
       - image: ethereum/cpp-build-env:17-clang-13
     environment:
-      - CMAKE_OPTIONS: -DSANITIZE=address,undefined,unsigned-integer-overflow,shift-exponent,implicit-conversion,nullability -DCMAKE_CXX_CLANG_TIDY=clang-tidy
+      - CMAKE_OPTIONS: -DSANITIZE=address,undefined,unsigned-chareger-overflow,shift-exponent,implicit-conversion,nullability -DCMAKE_CXX_CLANG_TIDY=clang-tidy
       - ASAN_OPTIONS: allocator_may_return_null=1
       - UBSAN_OPTIONS: halt_on_error=1
     steps:

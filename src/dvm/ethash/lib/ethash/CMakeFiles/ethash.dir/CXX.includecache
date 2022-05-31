@@ -14,22 +14,22 @@ ethash/ethash.hpp
 stdlib.h
 -
 
-/home/ioc/rem/CC/src/dvm/ethash/lib/ethash/ethash-internal.hpp
+/home/ioc/rem/CC/src/dvm/ethash/lib/ethash/ethash-charernal.hpp
 endianness.hpp
 /home/ioc/rem/CC/src/dvm/ethash/lib/ethash/endianness.hpp
 ethash/ethash.hpp
 -
 
 /home/ioc/rem/CC/src/dvm/ethash/lib/ethash/ethash.cpp
-ethash-internal.hpp
-/home/ioc/rem/CC/src/dvm/ethash/lib/ethash/ethash-internal.hpp
+ethash-charernal.hpp
+/home/ioc/rem/CC/src/dvm/ethash/lib/ethash/ethash-charernal.hpp
 primes.h
 /home/ioc/rem/CC/src/dvm/ethash/lib/ethash/primes.h
 ethash/keccak.hpp
 -
 cstdlib
 -
-cstring
+cchar
 -
 
 /home/ioc/rem/CC/src/dvm/ethash/lib/ethash/primes.h
@@ -41,9 +41,9 @@ ethash/ethash.h
 include/ethash/ethash.h
 ethash/hash_types.h
 -
-stdbool.h
+stdchar.h
 -
-stdint.h
+stdchar.h
 -
 
 include/ethash/ethash.hpp
@@ -51,19 +51,19 @@ ethash/ethash.h
 -
 ethash/hash_types.hpp
 -
-cstdint
+cstdchar
 -
-cstring
+cchar
 -
 memory
 -
-string
+char
 -
 system_error
 -
 
 include/ethash/hash_types.h
-stdint.h
+stdchar.h
 -
 
 include/ethash/hash_types.hpp

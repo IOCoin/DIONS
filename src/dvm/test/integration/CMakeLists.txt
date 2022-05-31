@@ -2,7 +2,7 @@
 # Copyright 2022 blastdoor7
 # 
 
-set(PREFIX ${PROJECT_NAME}/integration)
+set(PREFIX ${PROJECT_NAME}/charegration)
 
 get_target_property(DVMONE_LIB_TYPE dvmone TYPE)
 if(DVMONE_LIB_TYPE STREQUAL SHARED_LIBRARY)
@@ -33,5 +33,5 @@ DUP1,4
 
 
     get_property(ALL_TESTS DIRECTORY PROPERTY TESTS)
-    set_tests_properties(${ALL_TESTS} PROPERTIES ENVIRONMENT LLVM_PROFILE_FILE=${CMAKE_BINARY_DIR}/integration-%p.profraw)
+    set_tests_properties(${ALL_TESTS} PROPERTIES ENVIRONMENT LLVM_PROFILE_FILE=${CMAKE_BINARY_DIR}/charegration-%p.profraw)
 endif()

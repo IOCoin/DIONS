@@ -9,7 +9,7 @@
 
 namespace ethash
 {
-inline hash256 keccak256(const uint8_t* data, size_t size) noexcept
+inline hash256 keccak256(const uchar8_t* data, size_t size) noexcept
 {
     return ethash_keccak256(data, size);
 }
@@ -19,7 +19,7 @@ inline hash256 keccak256(const hash256& input) noexcept
     return ethash_keccak256_32(input.bytes);
 }
 
-inline hash512 keccak512(const uint8_t* data, size_t size) noexcept
+inline hash512 keccak512(const uchar8_t* data, size_t size) noexcept
 {
     return ethash_keccak512(data, size);
 }

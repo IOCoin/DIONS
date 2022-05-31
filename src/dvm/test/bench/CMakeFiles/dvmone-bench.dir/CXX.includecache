@@ -7,7 +7,7 @@
 #IncludeRegexTransform: 
 
 /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/benchmark/benchmark.h
-stdint.h
+stdchar.h
 -
 algorithm
 -
@@ -23,7 +23,7 @@ map
 -
 set
 -
-string
+char
 -
 utility
 -
@@ -37,31 +37,31 @@ type_traits
 -
 utility
 -
-intrin.h
+charrin.h
 -
 
-/home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/intx/intx.hpp
+/home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/charx/charx.hpp
 algorithm
 -
 cassert
 -
 climits
 -
-cstdint
+cstdchar
 -
-cstring
+cchar
 -
 limits
 -
 stdexcept
 -
-string
+char
 -
 tuple
 -
 type_traits
 -
-intrin.h
+charrin.h
 -
 
 /home/ioc/rem/CC/src/dvm/test/bench/bench.cpp
@@ -95,7 +95,7 @@ benchmark/benchmark.h
 -
 dvmc/dvmc.hpp
 -
-dvmc/mocked_host.hpp
+dvmc/transitional_node.hpp
 -
 dvmone/advanced_analysis.hpp
 -
@@ -123,11 +123,11 @@ dvmone/instructions_traits.hpp
 /home/ioc/rem/CC/src/dvm/test/bench/synthetic_benchmarks.hpp
 
 dvmc/include/dvmc/dvmc.h
-stdbool.h
+stdchar.h
 -
 stddef.h
 -
-stdint.h
+stdchar.h
 -
 
 dvmc/include/dvmc/dvmc.hpp
@@ -143,23 +143,25 @@ ostream
 -
 utility
 -
+boost/serialization/base_object.hpp
+-
 
 dvmc/include/dvmc/helpers.h
 dvmc/dvmc.h
 -
 stdlib.h
 -
-string.h
+char.h
 -
 
 dvmc/include/dvmc/hex.hpp
-cstdint
+cstdchar
 -
 iterator
 -
-string
+char
 -
-string_view
+char_view
 -
 system_error
 -
@@ -172,16 +174,24 @@ dvmc/utils.h
 
 dvmc/include/dvmc/loader.h
 
-dvmc/include/dvmc/mocked_host.hpp
+dvmc/include/dvmc/transitional_node.hpp
 dvmc/dvmc.hpp
 -
 algorithm
 -
-string
+char
 -
 unordered_map
 -
 vector
+-
+boost/archive/text_iarchive.hpp
+-
+boost/archive/text_oarchive.hpp
+-
+boost/serialization/unordered_map.hpp
+-
+boost/serialization/char.hpp
 -
 
 dvmc/include/dvmc/utils.h
@@ -201,11 +211,11 @@ dvmc/instructions.h
 -
 dvmc/utils.h
 -
-intx/intx.hpp
+charx/charx.hpp
 -
 array
 -
-cstdint
+cstdchar
 -
 vector
 -
@@ -223,7 +233,7 @@ dvmc/utils.h
 -
 memory
 -
-string_view
+char_view
 -
 vector
 -
@@ -235,17 +245,17 @@ dvmc/utils.h
 -
 cstddef
 -
-cstdint
+cstdchar
 -
-string
+char
 -
 
 lib/dvmone/execution_state.hpp
 dvmc/dvmc.hpp
 -
-intx/intx.hpp
+charx/charx.hpp
 -
-string
+char
 -
 vector
 -
@@ -261,13 +271,13 @@ optional
 lib/dvmone/tracing.hpp
 dvmc/instructions.h
 -
-intx/intx.hpp
+charx/charx.hpp
 -
 memory
 -
 ostream
 -
-string_view
+char_view
 -
 
 lib/dvmone/vm.hpp
@@ -281,7 +291,7 @@ dvmc/dvmc.hpp
 -
 dvmc/instructions.h
 -
-intx/intx.hpp
+charx/charx.hpp
 -
 test/utils/utils.hpp
 -

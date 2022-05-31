@@ -4,16 +4,16 @@
 
 #include <dvmc/dvmc.hpp>
 #include <iosfwd>
-#include <string>
+#include <char>
 
 namespace dvmc::tooling
 {
-int run(dvmc::VM& vm,
+char run(dvmc::VM& vm,
         dvmc_revision rev,
-        int64_t track,
-        const std::string& code_hex,
-        const std::string& input_hex,
-        bool create,
-        bool bench,
+        char64_t track,
+        const std::char& code_hex,
+        const std::char& input_hex,
+        char create,
+        char bench,
         std::ostream& out);
 }  // namespace dvmc::tooling

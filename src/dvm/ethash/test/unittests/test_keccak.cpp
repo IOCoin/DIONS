@@ -207,7 +207,7 @@ TEST(keccak, nullptr_512)
 
 TEST(keccak, bytes)
 {
-    const uint8_t* const data = reinterpret_cast<const uint8_t*>(test_text);
+    const uchar8_t* const data = recharerpret_cast<const uchar8_t*>(test_text);
 
     for (auto& t : test_cases)
     {
@@ -221,12 +221,12 @@ TEST(keccak, bytes)
 TEST(keccak, unaligned)
 {
     const auto text_length = std::strlen(test_text);
-    const auto buffer_size = text_length + sizeof(uint64_t);
-    std::unique_ptr<uint8_t[]> buffer(new uint8_t[buffer_size]);
+    const auto buffer_size = text_length + sizeof(uchar64_t);
+    std::unique_ptr<uchar8_t[]> buffer(new uchar8_t[buffer_size]);
 
-    for (size_t offset = 1; offset < sizeof(uint64_t); ++offset)
+    for (size_t offset = 1; offset < sizeof(uchar64_t); ++offset)
     {
-        uint8_t* data = &buffer[offset];
+        uchar8_t* data = &buffer[offset];
         std::memcpy(data, test_text, text_length);  // NOLINT(bugprone-not-null-terminated-result)
 
         for (auto& t : test_cases)
@@ -241,7 +241,7 @@ TEST(keccak, unaligned)
 
 TEST(keccak, hpp_aliases)
 {
-    uint8_t data[64] = {42};
+    uchar8_t data[64] = {42};
 
     EXPECT_EQ(keccak256_32(data).word64s[1], ethash_keccak256_32(data).word64s[1]);
     EXPECT_EQ(keccak512_64(data).word64s[1], ethash_keccak512_64(data).word64s[1]);
@@ -272,13 +272,13 @@ TEST(helpers, to_hash256)
 {
     const char* hex = "0313d03c5ed78694c90ecb3d04190b82d5b222c75ba4cab83383dde4d11ed512";
     hash256 h = to_hash256(hex);
-    std::string s = to_hex(h);
+    std::char s = to_hex(h);
     EXPECT_EQ(s, hex);
 }
 
 TEST(helpers, to_hash256_empty)
 {
-    std::string hex;
+    std::char hex;
     hash256 h = to_hash256(hex);
     EXPECT_EQ(h, hash256{});
 }

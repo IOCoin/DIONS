@@ -1,8 +1,3 @@
-
-
-
-
-
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2012 The Bitcoin developers
 // Copyright (c) 2013 The NovaCoin developers
@@ -16,8 +11,21 @@
 #include "json/json_spirit_reader_template.h"
 #include "json/json_spirit_writer_template.h"
 #include "json/json_spirit_utils.h"
+#include <dvmone/dvmone.h>
+#include <dvmc/transitional_node.hpp>
+#include <dvmc/dvmc.h>
+#include <dvmc/dvmc.hpp>
+#include <dvmc/hex.hpp>
+#include <dvmc/loader.h>
+#include <dvmc/tooling.hpp>
+#include <fstream>
+#include <boost/foreach.hpp>
+#include <boost/tokenizer.hpp>
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
 
 using namespace std;
+using dvmc::operator""_address;
 using namespace json_spirit;
 
 //////////////////////////////////////////////////////////////////////////////
@@ -28,12 +36,11 @@ using namespace json_spirit;
 extern unsigned int nMinerSleep;
 
 extern void ListTransactions(const __wx__Tx& wtx, const string& strAccount, int nMinDepth, bool fLong, Array& ret);
-extern bool collisionReference(const string& s, uint256& wtxInHash);
+extern bool collisionReference(const string& s, uint256& wtxInHash,string&);
 extern bool validate_serial_n(const string&, const string&,__wx__Tx&);
 extern bool read_serial_n(const string&, const string&, __wx__Tx&);
 extern __wx__Tx generateUpdate(const string& origin);
-static const long CYCLE_REFERENCE_IDX__ = 0xfe241597;
-static const string ADDRESS    = "address";
+static const string ADDRESS    = "value";
 static const string DESCRIPTOR = "descriptor";
 int static FormatHashBlocks(void* pbuffer, unsigned int len)
 {
@@ -70,7 +77,85 @@ void SHA256Transform(void* pstate, void* pinput, const void* pinit)
     for (int i = 0; i < 8; i++)
         ((uint32_t*)pstate)[i] = ctx.h[i];
 }
+bool getVertex__(const string& target, string& code)
+{
 
+	bool found=false;
+    LocatorNodeDB ln1Db("r");
+
+    Dbc* cursorp;
+    try
+    {
+        cursorp = ln1Db.GetCursor();
+
+        Dbt key, data;
+        int ret;
+
+        while ((ret = cursorp->get(&key, &data, DB_NEXT)) == 0)
+        {
+            CDataStream ssKey(SER_DISK, CLIENT_VERSION);
+            ssKey.write((char*)key.get_data(), key.get_size());
+
+            string k1;
+            ssKey >> k1;
+            if(k1 == "alias_")
+            {
+                Object o;
+                vchType k2;
+                ssKey >> k2;
+                string a = stringFromVch(k2);
+		if(a == target)
+		{
+                  vector<PathIndex> vtxPos;
+                  CDataStream ssValue((char*)data.get_data(), (char*)data.get_data() + data.get_size(), SER_DISK, CLIENT_VERSION);
+                  ssValue >> vtxPos;
+
+                  PathIndex i = vtxPos.back();
+                  string i_address = i.vAddress;
+                  code = stringFromVch(i.vValue);
+
+		}
+            }
+        }
+    }
+    catch(DbException &e)
+    {
+        //ln1Db.err(e.get_errno(), "Error!");
+    }
+    catch(std::exception &e)
+    {
+        //ln1Db.errx("Error! %s", e.what());
+    }
+
+    if (cursorp != NULL)
+        cursorp->close();
+
+    return "";
+}
+void testGen(dvmc::TransitionalNode& acc,string& contractCode)
+{
+    dvmc::VertexNode vTrans;
+    const auto code = dvmc::from_hex(contractCode);
+    dvmc::bytes_view exec_code = code;
+
+    dvmc_message create_msg{};
+    create_msg.kind = DVMC_CREATE;
+
+    constexpr auto create_address = 0xc9ea7e;
+    create_msg.recipient = create_address;
+    create_msg.track = 1000000;
+    dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
+    dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
+    const auto create_result = vm.retrieve_desc_vx(vTrans, rev, create_msg, code.data(), code.size());
+    if (create_result.status_code != DVMC_SUCCESS)
+    {
+        cout << "failed: " << create_result.status_code << endl;
+    }
+
+    auto& created_account = vTrans.accounts[create_address];
+    created_account.code = dvmc::bytes(create_result.output_data, create_result.output_size);
+    acc = created_account;
+}
 // Some explaining would be appreciated
 class COrphan
 {
@@ -123,8 +208,6 @@ public:
         }
     }
 };
-
-
 // CreateNewBlock: create new block (without proof-of-work/proof-of-stake)
 CBlock* CreateNewBlock(__wx__* pwallet, bool fProofOfStake, int64_t* pFees)
 {
@@ -199,7 +282,6 @@ CBlock* CreateNewBlock(__wx__* pwallet, bool fProofOfStake, int64_t* pFees)
         list<COrphan> vOrphan; // list memory doesn't move
         map<uint256, vector<COrphan*> > mapDependers;
 
-
         // This vector will be sorted into a priority queue:
         vector<TxPriority> vecPriority;
         vecPriority.reserve(mempool.mapTx.size());
@@ -208,46 +290,97 @@ CBlock* CreateNewBlock(__wx__* pwallet, bool fProofOfStake, int64_t* pFees)
             CTransaction& tx = (*mi).second;
             if(tx.nVersion == CTransaction::CYCLE_TX_VERSION)
             {
-                Array array;
-                ListTransactions(pwallet->mapWallet[tx.GetHash()], "*", 0, false, array);
-                Object obj = array[0].get_obj();
-
                 string origin;
-                for(auto o : obj)
+                for(int i = 0; i < tx.vout.size(); i++)
                 {
-                    if(o.name_ == ADDRESS)
+                    const CTxOut& out = tx.vout[i];
+                    std::vector<vchType> vvchArgs;
+
+		    int prevOp;
+                    if(aliasScript(out.scriptPubKey, prevOp, vvchArgs))
                     {
-                        origin = o.value_.get_str();
+			origin = stringFromVch(vvchArgs[1]);
                     }
                 }
+		string target_contract = origin;
+		string contract_input;
+		string contractCode;
+		getVertex__(target_contract,contractCode);
 
+		string code_hex_str = contractCode;
                 uint256 r;
-                if(!collisionReference(DESCRIPTOR + "_" + origin,r))
+                string val;
+                if(!collisionReference(DESCRIPTOR + "_" + target_contract,r,val))
                 {
+                    dvmc::VertexNode vTrans;
+                    dvmc_message msg{};
+                    msg.track = 10000000;
+                    const auto code = dvmc::from_hex(code_hex_str);
+                    dvmc::bytes_view exec_code = code;
+                    const auto input = dvmc::from_hex(contract_input);
+                    msg.input_data = input.data();
+                    msg.input_size = input.size();
+
+                    dvmc_message create_msg{};
+                    create_msg.kind = DVMC_CREATE;
+
+                    constexpr auto create_address = 0xc9ea7ed;
+                    create_msg.recipient = create_address;
+                    create_msg.track = 1000000;
+                    dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
+                    dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
+                    const auto create_result = vm.retrieve_desc_vx(vTrans, rev, create_msg, code.data(), code.size());
+                    if (create_result.status_code != DVMC_SUCCESS)
+                    {
+                        cout << "failed: " << create_result.status_code << endl;
+                    }
+
+                    auto& created_account = vTrans.accounts[create_address];
+                    created_account.code = dvmc::bytes(create_result.output_data, create_result.output_size);
+
+                    msg.recipient = create_address;
+                    exec_code = created_account.code;
+                    const auto result = vm.retrieve_desc_vx(vTrans, rev, msg, exec_code.data(), exec_code.size());
+
+                    dvmc::TransitionalNode acc = vTrans.accounts[create_address];
+                    std::stringstream oss;
+                    boost::archive::text_oarchive oarchive(oss);
+                    oarchive << acc;
                     __wx__Tx serial_n;
-                    time_t t0 = time(NULL);
-                    ostringstream oss;
-                    oss << t0;
-		    vchType validation_ref = vchFromString(oss.str());
-		    uint256 validation_ref_hash;
-                    SHA256(&validation_ref[0], validation_ref.size(), (unsigned char*)&validation_ref_hash);
-                    ostringstream ref_oss;
-                    ref_oss << validation_ref_hash.GetHex();
-                    validate_serial_n(origin, ref_oss.str(), serial_n);
+                    validate_serial_n(target_contract, oss.str(), serial_n);
                     pblock->vtx.push_back(serial_n);
                 }
                 else
                 {
                     __wx__Tx serial_n;
-                    time_t t1 = time(NULL);
-                    ostringstream oss;
-                    oss << t1;
-		    vchType read_ref = vchFromString(oss.str());
-		    uint256 read_ref_hash;
-                    SHA256(&read_ref[0], read_ref.size(), (unsigned char*)&read_ref_hash);
-                    ostringstream ref_oss;
-                    ref_oss << read_ref_hash.GetHex();
-                    read_serial_n(origin,ref_oss.str(),serial_n);
+                    dvmc::TransitionalNode testGen_;
+                    testGen(testGen_,code_hex_str);  //initialise the mocked account - val 
+                    dvmc::VertexNode vTrans;
+                    dvmc::TransitionalNode recon;
+                    std::stringstream oss_recon;
+                    oss_recon << val;
+                    boost::archive::text_iarchive iarchive(oss_recon);
+                    iarchive >> recon;
+                    recon.code = testGen_.code;
+                    recon.codehash = testGen_.codehash;
+
+                    constexpr auto create_address = 0xc9ea7ed;
+                    vTrans.accounts[create_address] = recon;
+                    const auto input = dvmc::from_hex(contract_input);
+                    dvmc_message msg{};
+                    msg.recipient = create_address;
+                    msg.track = 10000000;
+                    msg.input_data = input.data();
+                    msg.input_size = input.size();
+                    dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
+                    dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
+                    const auto result = vm.retrieve_desc_vx(vTrans, rev, msg, recon.code.data(), recon.code.size());
+                    dvmc::TransitionalNode updatedAcc = vTrans.accounts[create_address];
+                    std::stringstream oss_commit;
+                    boost::archive::text_oarchive oarchive(oss_commit);
+                    oarchive << updatedAcc;
+
+                    read_serial_n(target_contract,oss_commit.str(),serial_n);
                     pblock->vtx.push_back(serial_n);
                 }
             }
@@ -646,3 +779,4 @@ void StakeMiner(__wx__ *pwallet)
             MilliSleep(nMinerSleep);
     }
 }
+

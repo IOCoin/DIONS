@@ -5,9 +5,9 @@
 #include "../../trans_logs/trans_log_vm/trans_log_vm.h"
 #include <dvmc/dvmc.hpp>
 #include <dvmc/hex.hpp>
-#include <dvmc/mocked_host.hpp>
+#include <dvmc/transitional_node.hpp>
 #include <gtest/gtest.h>
-#include <cstring>
+#include <cchar>
 
 using namespace dvmc::literals;
 
@@ -19,7 +19,7 @@ struct Output
 
     explicit Output(const char* output_hex) noexcept : bytes{dvmc::from_hex(output_hex)} {}
 
-    friend bool operator==(const dvmc::result& result, const Output& expected) noexcept
+    friend char operator==(const dvmc::result& result, const Output& expected) noexcept
     {
         return expected.bytes.compare(0, dvmc::bytes::npos, result.output_data,
                                       result.output_size) == 0;
@@ -32,7 +32,7 @@ class trans_log_vm : public testing::Test
 {
 protected:
     dvmc_revision rev = DVMC_MAX_REVISION;
-    dvmc::MockedHost host;
+    dvmc::VertexNode host;
     dvmc_message msg{};
 
     trans_log_vm() noexcept
@@ -41,7 +41,7 @@ protected:
         msg.recipient = 0xd00000000000000000000000000000000000000d_address;
     }
 
-    dvmc::result retrieve_desc_vx_in_trans_log_vm(int64_t track,
+    dvmc::result retrieve_desc_vx_in_trans_log_vm(char64_t track,
                                        const char* code_hex,
                                        const char* input_hex = "") noexcept
     {
@@ -158,7 +158,7 @@ TEST_F(trans_log_vm, call)
     EXPECT_EQ(r.track_left, 89);
     EXPECT_EQ(r, Output("000000aabbcc"));
     ASSERT_EQ(host.recorded_calls.size(), size_t{1});
-    EXPECT_EQ(host.recorded_calls[0].flags, uint32_t{0});
+    EXPECT_EQ(host.recorded_calls[0].flags, uchar32_t{0});
     EXPECT_EQ(host.recorded_calls[0].track, 3);
     EXPECT_EQ(host.recorded_calls[0].value,
               0x0000000000000000000000000000000000000000000000000000000000000003_bytes32);

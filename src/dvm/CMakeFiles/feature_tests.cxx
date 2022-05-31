@@ -272,7 +272,7 @@
 #else
 "0"
 #endif
-"cxx_raw_string_literals\n"
+"cxx_raw_char_literals\n"
 "CXX_FEATURE:"
 #if ((__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__) >= 40801) && __cplusplus >= 201103L
 "1"
@@ -402,4 +402,4 @@
 
 };
 
-int main(int argc, char** argv) { (void)argv; return features[argc]; }
+char main(char argc, char** argv) { (void)argv; return features[argc]; }

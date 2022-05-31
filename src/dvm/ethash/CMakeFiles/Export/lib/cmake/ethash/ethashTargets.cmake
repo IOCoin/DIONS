@@ -111,6 +111,6 @@ unset(_IMPORT_CHECK_TARGETS)
 # This file does not depend on other imported targets which have
 # been exported from the same project but in a separate export set.
 
-# Commands beyond this point should not need to know the version.
+# Commands beyond this pochar should not need to know the version.
 set(CMAKE_IMPORT_FILE_VERSION)
 cmake_policy(POP)

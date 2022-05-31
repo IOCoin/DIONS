@@ -15,11 +15,11 @@ dvmc/instructions.h
 -
 
 dvmc/include/dvmc/dvmc.h
-stdbool.h
+stdchar.h
 -
 stddef.h
 -
-stdint.h
+stdchar.h
 -
 
 dvmc/include/dvmc/instructions.h

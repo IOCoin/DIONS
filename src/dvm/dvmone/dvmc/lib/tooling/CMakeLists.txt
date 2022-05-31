@@ -5,7 +5,7 @@
 add_library(tooling STATIC)
 add_library(dvmc::tooling ALIAS tooling)
 target_compile_features(tooling PUBLIC cxx_std_17)
-target_link_libraries(tooling PUBLIC dvmc::dvmc_cpp dvmc::mocked_host dvmc::hex)
+target_link_libraries(tooling PUBLIC dvmc::dvmc_cpp dvmc::transitional_node dvmc::hex)
 
 target_sources(
     tooling PRIVATE

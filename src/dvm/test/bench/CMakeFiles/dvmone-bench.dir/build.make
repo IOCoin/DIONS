@@ -18,7 +18,7 @@ SUFFIXES =
 .SUFFIXES: .hpux_make_needs_suffix_list
 
 
-# Suppress display of retrieve_desc_vxd commands.
+# Suppress display of executed commands.
 $(VERBOSE).SILENT:
 
 
@@ -30,7 +30,7 @@ cmake_force:
 #=============================================================================
 # Set environment variables for the build.
 
-# The shell in which to retrieve_desc_vx make rules.
+# The shell in which to execute make rules.
 SHELL = /bin/sh
 
 # The CMake executable.
@@ -94,10 +94,11 @@ dvmone__bench_EXTERNAL_OBJECTS =
 bin/dvmone-bench: test/bench/CMakeFiles/dvmone-bench.dir/bench.cpp.o
 bin/dvmone-bench: test/bench/CMakeFiles/dvmone-bench.dir/synthetic_benchmarks.cpp.o
 bin/dvmone-bench: test/bench/CMakeFiles/dvmone-bench.dir/build.make
-bin/dvmone-bench: lib/libdvmone.so.0.9.0-dev
+bin/dvmone-bench: lib/libdvmone.a
 bin/dvmone-bench: lib/libtestutils.a
 bin/dvmone-bench: dvmc/lib/loader/libdvmc-loader.a
 bin/dvmone-bench: /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/lib/libbenchmark.a
+bin/dvmone-bench: /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/lib/libkeccak.a
 bin/dvmone-bench: dvmc/lib/instructions/libdvmc-instructions.a
 bin/dvmone-bench: dvmc/lib/hex/libhex.a
 bin/dvmone-bench: test/bench/CMakeFiles/dvmone-bench.dir/link.txt

@@ -7,12 +7,12 @@
 #include <stdlib.h>
 
 /* Go does not support exporting functions with parameters with const modifiers,
- * so we have to cast function pointers to the function types defined in DVMC.
+ * so we have to cast function pocharers to the function types defined in DVMC.
  * This disables any type checking of exported Go functions. To mitigate this
  * problem the go_exported_functions_type_checks() function simulates usage
  * of Go exported functions with expected types to check them during compilation.
  */
-const struct dvmc_host_interface dvmc_go_host = {
+const struct dvmc_host_charerface dvmc_go_host = {
     (dvmc_account_exists_fn)accountExists,
     (dvmc_get_storage_fn)getStorage,
     (dvmc_set_storage_fn)setStorage,
@@ -36,13 +36,13 @@ static inline void go_exported_functions_type_checks()
     struct dvmc_host_context* context = NULL;
     dvmc_address* address = NULL;
     dvmc_bytes32 bytes32;
-    uint8_t* data = NULL;
+    uchar8_t* data = NULL;
     size_t size = 0;
-    int64_t number = 0;
+    char64_t number = 0;
     struct dvmc_message* message = NULL;
 
-    dvmc_uint256be uint256be;
-    (void)uint256be;
+    dvmc_uchar256be uchar256be;
+    (void)uchar256be;
     struct dvmc_tx_context tx_context;
     (void)tx_context;
     struct dvmc_result result;
@@ -51,12 +51,12 @@ static inline void go_exported_functions_type_checks()
     (void)access_status;
     enum dvmc_storage_status storage_status;
     (void)storage_status;
-    bool bool_flag;
-    (void)bool_flag;
+    char char_flag;
+    (void)char_flag;
 
     dvmc_account_exists_fn account_exists_fn = NULL;
-    bool_flag = account_exists_fn(context, address);
-    bool_flag = accountExists(context, address);
+    char_flag = account_exists_fn(context, address);
+    char_flag = accountExists(context, address);
 
     dvmc_get_storage_fn get_storage_fn = NULL;
     bytes32 = get_storage_fn(context, address, &bytes32);
@@ -67,8 +67,8 @@ static inline void go_exported_functions_type_checks()
     storage_status = setStorage(context, address, &bytes32, &bytes32);
 
     dvmc_get_balance_fn get_balance_fn = NULL;
-    uint256be = get_balance_fn(context, address);
-    uint256be = getBalance(context, address);
+    uchar256be = get_balance_fn(context, address);
+    uchar256be = getBalance(context, address);
 
     dvmc_get_code_size_fn get_code_size_fn = NULL;
     size = get_code_size_fn(context, address);

@@ -182,28 +182,28 @@ enum dvmc_opcode
 /**
  * Metrics for an DVM 1 instruction.
  *
- * Small integer types are used here to make the tables of metrics smaller.
+ * Small chareger types are used here to make the tables of metrics smaller.
  */
 struct dvmc_instruction_metrics
 {
     /** The instruction track cost. */
-    int16_t track_cost;
+    char16_t track_cost;
 
     /** The minimum number of the DVM stack items required for the instruction. */
-    int8_t stack_height_required;
+    char8_t stack_height_required;
 
     /**
      * The DVM stack height change caused by the instruction execution,
      * i.e. stack height _after_ execution - stack height _before_ execution.
      */
-    int8_t stack_height_change;
+    char8_t stack_height_change;
 };
 
 /**
  * Get the table of the DVM 1 instructions metrics.
  *
  * @param revision  The DVM revision.
- * @return          The pointer to the array of 256 instruction metrics. Null pointer in case
+ * @return          The pocharer to the array of 256 instruction metrics. Null pocharer in case
  *                  an invalid DVM revision provided.
  */
 DVMC_EXPORT const struct dvmc_instruction_metrics* dvmc_get_instruction_metrics_table(
@@ -212,10 +212,10 @@ DVMC_EXPORT const struct dvmc_instruction_metrics* dvmc_get_instruction_metrics_
 /**
  * Get the table of the DVM 1 instruction names.
  *
- * The entries for undefined instructions contain null pointers.
+ * The entries for undefined instructions contain null pocharers.
  *
  * @param revision  The DVM revision.
- * @return          The pointer to the array of 256 instruction names. Null pointer in case
+ * @return          The pocharer to the array of 256 instruction names. Null pocharer in case
  *                  an invalid DVM revision provided.
  */
 DVMC_EXPORT const char* const* dvmc_get_instruction_names_table(enum dvmc_revision revision);

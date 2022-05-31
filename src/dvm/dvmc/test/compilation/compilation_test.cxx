@@ -9,7 +9,7 @@
 #include <dvmc/helpers.h>
 #include <dvmc/instructions.h>
 #include <dvmc/loader.h>
-#include <dvmc/mocked_host.hpp>
+#include <dvmc/transitional_node.hpp>
 #include <dvmc/utils.h>
 
 // Include again to check if headers have proper include guards.
@@ -18,5 +18,5 @@
 #include <dvmc/helpers.h>
 #include <dvmc/instructions.h>
 #include <dvmc/loader.h>
-#include <dvmc/mocked_host.hpp>
+#include <dvmc/transitional_node.hpp>
 #include <dvmc/utils.h>

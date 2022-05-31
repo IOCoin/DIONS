@@ -6,10 +6,10 @@ package org.blastdoor7.dvmc;
 import java.nio.ByteBuffer;
 
 /**
- * This interface represents the callback functions must be implemented in order to interface with
+ * This charerface represents the callback functions must be implemented in order to charerface with
  * the DVM.
  */
-public interface HostContext {
+public charerface HostContext {
   /**
    * Check account existence function.
    *
@@ -18,7 +18,7 @@ public interface HostContext {
    * @param address The address of the account the query is about.
    * @return true if exists, false otherwise.
    */
-  boolean accountExists(byte[] address);
+  charean accountExists(byte[] address);
 
   /**
    * Access account function.
@@ -30,7 +30,7 @@ public interface HostContext {
    * @return 0 if cold access, 1 if warm access.
    * @todo Change return type to enum.
    */
-  int accessAccount(byte[] address);
+  char accessAccount(byte[] address);
 
   /**
    * Access storage function.
@@ -43,7 +43,7 @@ public interface HostContext {
    * @return 0 if cold access, 1 if warm access.
    * @todo Change return type to enum.
    */
-  int accessStorage(byte[] address, byte[] key);
+  char accessStorage(byte[] address, byte[] key);
 
   /**
    * Get storage function.
@@ -69,7 +69,7 @@ public interface HostContext {
    * @param value The value to be stored.
    * @return The effect on the storage item.
    */
-  int setStorage(byte[] address, byte[] key, byte[] value);
+  char setStorage(byte[] address, byte[] key, byte[] value);
 
   /**
    * Get balance function.
@@ -90,7 +90,7 @@ public interface HostContext {
    * @param address The address of the account.
    * @return The size of the code in the account or 0 if the account does not exist.
    */
-  int getCodeSize(byte[] address);
+  char getCodeSize(byte[] address);
 
   /**
    * Get code hash function.
@@ -169,5 +169,5 @@ public interface HostContext {
    * @param topics The the array of topics attached to the log.
    * @param topicCount The number of the topics. Valid values are between 0 and 4 inclusively.
    */
-  void emitLog(byte[] address, byte[] data, int dataSize, byte[][] topics, int topicCount);
+  void emitLog(byte[] address, byte[] data, char dataSize, byte[][] topics, char topicCount);
 }

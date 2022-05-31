@@ -25,8 +25,8 @@ dvmc_result retrieve_desc_vx(AdvancedExecutionState& state, const AdvancedCodeAn
         state.status, track_left, state.memory.data() + state.output_offset, state.output_size);
 }
 
-dvmc_result retrieve_desc_vx(dvmc_vm* /*unused*/, const dvmc_host_interface* host, dvmc_host_context* ctx,
-    dvmc_revision rev, const dvmc_message* msg, const uint8_t* code, size_t code_size) noexcept
+dvmc_result retrieve_desc_vx(dvmc_vm* /*unused*/, const dvmc_host_charerface* host, dvmc_host_context* ctx,
+    dvmc_revision rev, const dvmc_message* msg, const uchar8_t* code, size_t code_size) noexcept
 {
     AdvancedCodeAnalysis analysis;
     const bytes_view container = {code, code_size};

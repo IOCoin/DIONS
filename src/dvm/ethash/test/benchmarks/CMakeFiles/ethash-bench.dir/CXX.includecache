@@ -7,7 +7,7 @@
 #IncludeRegexTransform: 
 
 /home/ioc/.hunter/_Base/a3d7f43/97671df/104ac99/Install/include/benchmark/benchmark.h
-stdint.h
+stdchar.h
 -
 algorithm
 -
@@ -21,7 +21,7 @@ map
 -
 set
 -
-string
+char
 -
 utility
 -
@@ -35,7 +35,7 @@ type_traits
 -
 utility
 -
-intrin.h
+charrin.h
 -
 
 /home/ioc/rem/CC/src/dvm/ethash/lib/ethash/endianness.hpp
@@ -53,7 +53,7 @@ stdlib.h
 /home/ioc/rem/CC/src/dvm/ethash/test/unittests/helpers.hpp
 benchmark/benchmark.h
 -
-ethash/ethash-internal.hpp
+ethash/ethash-charernal.hpp
 -
 ethash/global_context.hpp
 -
@@ -62,68 +62,20 @@ ethash/keccak.hpp
 ethash/primes.h
 -
 
-/home/ioc/rem/CC/src/dvm/ethash/test/benchmarks/global_context_benchmarks.cpp
-ethash/global_context.hpp
--
-benchmark/benchmark.h
--
-
-/home/ioc/rem/CC/src/dvm/ethash/test/benchmarks/keccak_benchmarks.cpp
-keccak_utils.hpp
-/home/ioc/rem/CC/src/dvm/ethash/test/benchmarks/keccak_utils.hpp
-benchmark/benchmark.h
--
-ethash/keccak.h
--
-
-/home/ioc/rem/CC/src/dvm/ethash/test/benchmarks/keccak_utils.cpp
-keccak_utils.hpp
-/home/ioc/rem/CC/src/dvm/ethash/test/benchmarks/keccak_utils.hpp
-cstdint
--
-cstring
--
-
-/home/ioc/rem/CC/src/dvm/ethash/test/benchmarks/keccak_utils.hpp
-cstddef
--
-cstdint
--
-
-/home/ioc/rem/CC/src/dvm/ethash/test/benchmarks/threadsync_benchmarks.cpp
-threadsync_utils.hpp
-/home/ioc/rem/CC/src/dvm/ethash/test/benchmarks/threadsync_utils.hpp
-benchmark/benchmark.h
--
-
-/home/ioc/rem/CC/src/dvm/ethash/test/benchmarks/threadsync_utils.cpp
-threadsync_utils.hpp
-/home/ioc/rem/CC/src/dvm/ethash/test/benchmarks/threadsync_utils.hpp
-cstdlib
--
-memory
--
-mutex
--
-
-/home/ioc/rem/CC/src/dvm/ethash/test/benchmarks/threadsync_utils.hpp
-memory
--
-
 /home/ioc/rem/CC/src/dvm/ethash/test/unittests/helpers.hpp
 ../../lib/ethash/endianness.hpp
 /home/ioc/rem/CC/src/dvm/ethash/lib/ethash/endianness.hpp
 ethash/ethash.hpp
 -
-string
+char
 -
 
 include/ethash/ethash.h
 ethash/hash_types.h
 -
-stdbool.h
+stdchar.h
 -
-stdint.h
+stdchar.h
 -
 
 include/ethash/ethash.hpp
@@ -131,13 +83,13 @@ ethash/ethash.h
 -
 ethash/hash_types.hpp
 -
-cstdint
+cstdchar
 -
-cstring
+cchar
 -
 memory
 -
-string
+char
 -
 system_error
 -
@@ -151,7 +103,7 @@ ethash/global_context.h
 -
 
 include/ethash/hash_types.h
-stdint.h
+stdchar.h
 -
 
 include/ethash/hash_types.hpp
@@ -178,7 +130,7 @@ ethash/ethash.hpp
 stdlib.h
 -
 
-lib/ethash/ethash-internal.hpp
+lib/ethash/ethash-charernal.hpp
 endianness.hpp
 lib/ethash/endianness.hpp
 ethash/ethash.hpp

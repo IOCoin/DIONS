@@ -12,11 +12,11 @@ find_package(benchmark CONFIG REQUIRED)
 
 add_subdirectory(utils)
 add_subdirectory(bench)
-add_subdirectory(integration)
-add_subdirectory(internal_benchmarks)
+add_subdirectory(charegration)
+add_subdirectory(charernal_benchmarks)
 add_subdirectory(unittests)
 
-set(targets dvmone-bench dvmone-bench-internal dvmone-unittests testutils)
+set(targets dvmone-bench dvmone-bench-charernal dvmone-unittests testutils)
 
 if(DVMONE_FUZZING)
     add_subdirectory(fuzzer)

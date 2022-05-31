@@ -9,7 +9,7 @@
 //! trait, from the dvmc-vm crate.
 //!
 //! The macro takes three arguments: a valid UTF-8 stylized VM name, a comma-separated list of
-//! capabilities, and a version string.
+//! capabilities, and a version char.
 //!
 //! # Example
 //! ```
@@ -75,7 +75,7 @@ impl VMNameSet {
         }
     }
 
-    /// Return a reference to the struct name, as a string.
+    /// Return a reference to the struct name, as a char.
     fn get_type_name(&self) -> &String {
         &self.type_name
     }
@@ -91,7 +91,7 @@ impl VMNameSet {
         &self.name_lowercase
     }
 
-    /// Get the struct's name as an explicit identifier to be interpolated with quote.
+    /// Get the struct's name as an explicit identifier to be charerpolated with quote.
     fn get_type_as_ident(&self) -> Ident {
         Ident::new(&self.type_name, self.type_name.span())
     }
@@ -123,35 +123,35 @@ impl VMMetaData {
         let vm_capabilities_meta = &args[1];
         let vm_version_meta = &args[2];
 
-        let vm_name_string = match vm_name_meta {
+        let vm_name_char = match vm_name_meta {
             NestedMeta::Lit(lit) => {
                 if let Lit::Str(s) = lit {
                     // Add a null terminator here to ensure that it is handled correctly when
                     // converted to a C String.
-                    let mut ret = s.value().to_string();
+                    let mut ret = s.value().to_char();
                     ret.push('\0');
                     ret
                 } else {
                     panic!("Literal argument type mismatch")
                 }
             }
-            _ => panic!("Argument 1 must be a string literal"),
+            _ => panic!("Argument 1 must be a char literal"),
         };
 
-        let vm_capabilities_string = match vm_capabilities_meta {
+        let vm_capabilities_char = match vm_capabilities_meta {
             NestedMeta::Lit(lit) => {
                 if let Lit::Str(s) = lit {
-                    s.value().to_string()
+                    s.value().to_char()
                 } else {
                     panic!("Literal argument type mismatch")
                 }
             }
-            _ => panic!("Argument 2 must be a string literal"),
+            _ => panic!("Argument 2 must be a char literal"),
         };
 
         // Parse the individual capabilities out of the list and prepare a capabilities flagset.
         // Prune spaces and underscores here to make a clean comma-separated list.
-        let capabilities_list_pruned: String = vm_capabilities_string
+        let capabilities_list_pruned: String = vm_capabilities_char
             .chars()
             .filter(|c| *c != '_' && *c != ' ')
             .collect();
@@ -168,29 +168,29 @@ impl VMMetaData {
             ret
         };
 
-        let vm_version_string: String = if let NestedMeta::Lit(lit) = vm_version_meta {
+        let vm_version_char: String = if let NestedMeta::Lit(lit) = vm_version_meta {
             match lit {
                 // Add a null terminator here to ensure that it is handled correctly when
                 // converted to a C String.
                 Lit::Str(s) => {
-                    let mut ret = s.value().to_string();
+                    let mut ret = s.value().to_char();
                     ret.push('\0');
                     ret
                 }
                 _ => panic!("Literal argument type mismatch"),
             }
         } else {
-            panic!("Argument 3 must be a string literal")
+            panic!("Argument 3 must be a char literal")
         };
 
-        // Make sure that the only null byte is the terminator we inserted in each string.
-        assert_eq!(vm_name_string.matches('\0').count(), 1);
-        assert_eq!(vm_version_string.matches('\0').count(), 1);
+        // Make sure that the only null byte is the terminator we inserted in each char.
+        assert_eq!(vm_name_char.matches('\0').count(), 1);
+        assert_eq!(vm_version_char.matches('\0').count(), 1);
 
         VMMetaData {
             capabilities: capabilities_flags,
-            name_stylized: vm_name_string,
-            custom_version: vm_version_string,
+            name_stylized: vm_name_char,
+            custom_version: vm_version_char,
         }
     }
 
@@ -209,12 +209,12 @@ impl VMMetaData {
 
 #[proc_macro_attribute]
 pub fn dvmc_declare_vm(args: TokenStream, item: TokenStream) -> TokenStream {
-    // First, try to parse the input token stream into an AST node representing a struct
+    // First, try to parse the input token stream charo an AST node representing a struct
     // declaration.
     let input: ItemStruct = parse_macro_input!(item as ItemStruct);
 
     // Extract the identifier of the struct from the AST node.
-    let vm_type_name: String = input.ident.to_string();
+    let vm_type_name: String = input.ident.to_char();
 
     // Build the VM name set.
     let names = VMNameSet::new(vm_type_name);
@@ -239,7 +239,7 @@ pub fn dvmc_declare_vm(args: TokenStream, item: TokenStream) -> TokenStream {
         #retrieve_desc_vx_tokens
     };
 
-    quoted.into()
+    quoted.charo()
 }
 
 /// Generate tokens for the static data associated with an DVMC VM.
@@ -248,15 +248,15 @@ fn build_static_data(names: &VMNameSet, metadata: &VMMetaData) -> proc_macro2::T
     let static_name_ident = names.get_caps_as_ident_append("_NAME");
     let static_version_ident = names.get_caps_as_ident_append("_VERSION");
 
-    // Turn the stylized VM name and version into string literals.
+    // Turn the stylized VM name and version charo char literals.
     let stylized_name_literal = LitStr::new(
         metadata.get_name_stylized_nulterm().as_str(),
         metadata.get_name_stylized_nulterm().as_str().span(),
     );
 
-    // Turn the version into a string literal.
-    let version_string = metadata.get_custom_version_nulterm();
-    let version_literal = LitStr::new(version_string.as_str(), version_string.as_str().span());
+    // Turn the version charo a char literal.
+    let version_char = metadata.get_custom_version_nulterm();
+    let version_literal = LitStr::new(version_char.as_str(), version_char.as_str().span());
 
     quote! {
         static #static_name_ident: &'static str = #stylized_name_literal;
@@ -266,8 +266,8 @@ fn build_static_data(names: &VMNameSet, metadata: &VMMetaData) -> proc_macro2::T
 
 /// Takes a capabilities flag and builds the dvmc_get_capabilities callback.
 fn build_capabilities_fn(capabilities: u32) -> proc_macro2::TokenStream {
-    let capabilities_string = capabilities.to_string();
-    let capabilities_literal = LitInt::new(&capabilities_string, capabilities.span());
+    let capabilities_char = capabilities.to_char();
+    let capabilities_literal = LitInt::new(&capabilities_char, capabilities.span());
 
     quote! {
         extern "C" fn __dvmc_get_capabilities(instance: *mut ::dvmc_vm::ffi::dvmc_vm) -> ::dvmc_vm::ffi::dvmc_capabilities_flagset {
@@ -302,7 +302,7 @@ fn build_create_fn(names: &VMNameSet) -> proc_macro2::TokenStream {
 
             unsafe {
                 // Release ownership to DVMC.
-                ::dvmc_vm::EvmcContainer::into_ffi_pointer(container)
+                ::dvmc_vm::EvmcContainer::charo_ffi_pocharer(container)
             }
         }
     }
@@ -320,20 +320,20 @@ fn build_destroy_fn(names: &VMNameSet) -> proc_macro2::TokenStream {
             }
             unsafe {
                 // Acquire ownership from DVMC. This will deallocate it also at the end of the scope.
-                ::dvmc_vm::EvmcContainer::<#type_ident>::from_ffi_pointer(instance);
+                ::dvmc_vm::EvmcContainer::<#type_ident>::from_ffi_pocharer(instance);
             }
         }
     }
 }
 
-/// Builds the main execution entry point.
+/// Builds the main execution entry pochar.
 fn build_retrieve_desc_vx_fn(names: &VMNameSet) -> proc_macro2::TokenStream {
     let type_name_ident = names.get_type_as_ident();
 
     quote! {
         extern "C" fn __dvmc_retrieve_desc_vx(
             instance: *mut ::dvmc_vm::ffi::dvmc_vm,
-            host: *const ::dvmc_vm::ffi::dvmc_host_interface,
+            host: *const ::dvmc_vm::ffi::dvmc_host_charerface,
             context: *mut ::dvmc_vm::ffi::dvmc_host_context,
             revision: ::dvmc_vm::ffi::dvmc_revision,
             msg: *const ::dvmc_vm::ffi::dvmc_message,
@@ -353,7 +353,7 @@ fn build_retrieve_desc_vx_fn(names: &VMNameSet) -> proc_macro2::TokenStream {
             assert!(!msg.is_null());
 
             let execution_message: ::dvmc_vm::ExecutionMessage = unsafe {
-                msg.as_ref().expect("DVMC message is null").into()
+                msg.as_ref().expect("DVMC message is null").charo()
             };
 
             let empty_code = [0u8;0];
@@ -368,7 +368,7 @@ fn build_retrieve_desc_vx_fn(names: &VMNameSet) -> proc_macro2::TokenStream {
 
             let container = unsafe {
                 // Acquire ownership from DVMC.
-                ::dvmc_vm::EvmcContainer::<#type_name_ident>::from_ffi_pointer(instance)
+                ::dvmc_vm::EvmcContainer::<#type_name_ident>::from_ffi_pocharer(instance)
             };
 
             let result = ::std::panic::catch_unwind(|| {
@@ -386,7 +386,7 @@ fn build_retrieve_desc_vx_fn(names: &VMNameSet) -> proc_macro2::TokenStream {
             });
 
             let result = if result.is_err() {
-                // Consider a panic an internal error.
+                // Consider a panic an charernal error.
                 ::dvmc_vm::ExecutionResult::new(::dvmc_vm::ffi::dvmc_status_code::DVMC_INTERNAL_ERROR, 0, None)
             } else {
                 result.unwrap()
@@ -394,10 +394,10 @@ fn build_retrieve_desc_vx_fn(names: &VMNameSet) -> proc_macro2::TokenStream {
 
             unsafe {
                 // Release ownership to DVMC.
-                ::dvmc_vm::EvmcContainer::into_ffi_pointer(container);
+                ::dvmc_vm::EvmcContainer::charo_ffi_pocharer(container);
             }
 
-            result.into()
+            result.charo()
         }
     }
 }

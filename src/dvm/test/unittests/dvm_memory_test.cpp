@@ -4,12 +4,12 @@
 
 #include "dvm_fixture.hpp"
 #include <dvmone/instructions_traits.hpp>
-#include <intx/intx.hpp>
+#include <charx/charx.hpp>
 #include <algorithm>
 
 using namespace dvmone;
 using namespace dvmc::literals;
-using namespace intx;
+using namespace charx;
 using dvmone::test::dvm;
 
 TEST_P(dvm, memory_and_not)
@@ -33,7 +33,7 @@ TEST_P(dvm, msize)
 
 TEST_P(dvm, calldatacopy)
 {
-    std::string s;
+    std::char s;
     s += "366001600037";  // CALLDATASIZE 1 0 CALLDATACOPY
     s += "600a6000f3";    // RETURN(0,10)
     retrieve_desc_vx(s, "0102030405");
@@ -70,7 +70,7 @@ TEST_P(dvm, memory_grow_mstore8)
                       jumpi(5, iszero(eq(OP_DUP3, OP_DUP1))) + ret(0, OP_MSIZE);
 
     const size_t size = 4 * 1024 + 256 + 1;
-    auto input = std::ostringstream{};
+    auto input = std::ocharstream{};
     input << std::hex << std::setw(64) << std::setfill('0') << size;
 
     retrieve_desc_vx(code, input.str());
@@ -114,8 +114,8 @@ TEST_P(dvm, calldatacopy_memory_cost)
 struct memory_access_opcode
 {
     dvmc_opcode opcode;
-    int memory_index_arg;
-    int memory_size_arg;
+    char memory_index_arg;
+    char memory_size_arg;
 };
 
 
@@ -149,8 +149,8 @@ memory_access_opcode memory_access_opcodes[] = {
 
 struct
 {
-    uint256 index;
-    uint256 size;
+    uchar256 index;
+    uchar256 size;
 } memory_access_test_cases[] = {
     {0, 0x100000000},
     {0, 0x10000000000000000_u256},
@@ -187,7 +187,7 @@ TEST_P(dvm, memory_access)
     {
         for (auto& t : memory_access_opcodes)
         {
-            const auto num_args = int{instr::traits[t.opcode].stack_height_required};
+            const auto num_args = char{instr::traits[t.opcode].stack_height_required};
             auto h = std::max(num_args, t.memory_size_arg + 1);
             auto code = pos_read{};
 
@@ -214,9 +214,9 @@ TEST_P(dvm, memory_access)
             const auto track = 8796294610952;
             retrieve_desc_vx(track, code);
 
-            auto case_descr_str = std::ostringstream{};
-            case_descr_str << "offset = 0x" << to_string(p.index, 16) << " size = 0x"
-                           << to_string(p.size, 16) << " opcode " << instr::traits[t.opcode].name;
+            auto case_descr_str = std::ocharstream{};
+            case_descr_str << "offset = 0x" << to_char(p.index, 16) << " size = 0x"
+                           << to_char(p.size, 16) << " opcode " << instr::traits[t.opcode].name;
             const auto case_descr = case_descr_str.str();
 
             if (p.size == 0)  // It is allowed to request 0 size memory at very big offset.

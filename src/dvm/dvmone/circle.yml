@@ -1,9 +1,9 @@
 version: 2.1
 
 executors:
-  lint:
+  lchar:
     docker:
-      - image: blastdoor7/cpp-build-env:17-lint
+      - image: blastdoor7/cpp-build-env:17-lchar
     resource_class: small
     environment:
       CMAKE_BUILD_PARALLEL_LEVEL: 2
@@ -45,10 +45,10 @@ commands:
   build_silkworm:
     parameters:
       branch:
-        type: string
+        type: char
         default: master
       commit:
-        type: string
+        type: char
     steps:
       - run:
           # Fix fixes the cache restore step in case the silkworm dir does not exist
@@ -99,7 +99,7 @@ commands:
   download_consensus_tests:
     parameters:
       rev:
-        type: string
+        type: char
     steps:
       - run:
           name: "Download consensus tests: <<parameters.rev>>"
@@ -130,7 +130,7 @@ commands:
             echo $CMAKE_OPTIONS >> build.info
             $CXX --version >> build.info
             
-            printf '\n-----------\nbuild.info:\n'
+            prcharf '\n-----------\nbuild.info:\n'
             cat build.info
       - restore_cache:
           name: "Restore Hunter cache"
@@ -182,7 +182,7 @@ commands:
     description: "Upload coverage data"
     parameters:
       flags:
-        type: string
+        type: char
     steps:
       - run:
           name: "Upgrade codecov"
@@ -225,8 +225,8 @@ commands:
 
 jobs:
 
-  lint:
-    executor: lint
+  lchar:
+    executor: lchar
     steps:
     - checkout
     - run:
@@ -322,7 +322,7 @@ jobs:
     executor: linux-gcc-latest
     environment:
       BUILD_TYPE: Coverage
-      TESTS_FILTER: unittests|integration
+      TESTS_FILTER: unittests|charegration
     steps:
       - build
       - test
@@ -372,7 +372,7 @@ jobs:
     environment:
       CMAKE_BUILD_PARALLEL_LEVEL: 2
       BUILD_TYPE: Coverage
-      TESTS_FILTER: unittests|integration
+      TESTS_FILTER: unittests|charegration
     steps:
       - build
       # TODO: use `test` command
@@ -418,7 +418,7 @@ workflows:
   version: 2
   dvmone:
     jobs:
-      - lint
+      - lchar
       - release-linux:
           filters:
             tags:

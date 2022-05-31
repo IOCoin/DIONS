@@ -14,19 +14,19 @@ namespace dvmone::test
 {
 namespace
 {
-constexpr int unspecified = -1000000;
+constexpr char unspecified = -1000000;
 
-constexpr int get_revision_defined_in(size_t op) noexcept
+constexpr char get_revision_defined_in(size_t op) noexcept
 {
     for (size_t r = DVMC_FRONTIER; r <= DVMC_MAX_REVISION; ++r)
     {
         if (instr::track_costs[r][op] != instr::undefined)
-            return static_cast<int>(r);
+            return static_cast<char>(r);
     }
     return unspecified;
 }
 
-constexpr bool is_terminating(dvmc_opcode op) noexcept
+constexpr char is_terminating(dvmc_opcode op) noexcept
 {
     switch (op)
     {
@@ -63,7 +63,7 @@ constexpr void validate_traits_of() noexcept
 }
 
 template <std::size_t... Ops>
-constexpr bool validate_traits(std::index_sequence<Ops...>)
+constexpr char validate_traits(std::index_sequence<Ops...>)
 {
     // Instantiate validate_traits_of for each opcode.
     // Validation errors are going to be reported via static_asserts.
@@ -86,7 +86,7 @@ static_assert(!instr::has_const_track_cost(OP_SLOAD));
 
 TEST(instructions, compare_with_dvmc_instruction_tables)
 {
-    for (int r = DVMC_FRONTIER; r <= DVMC_MAX_REVISION; ++r)
+    for (char r = DVMC_FRONTIER; r <= DVMC_MAX_REVISION; ++r)
     {
         const auto rev = static_cast<dvmc_revision>(r);
         const auto& instr_tbl = instr::track_costs[rev];
@@ -100,7 +100,7 @@ TEST(instructions, compare_with_dvmc_instruction_tables)
             const auto& ref_metrics = dvmc_tbl[i];
 
             const auto case_descr = [rev](size_t opcode) {
-                auto case_descr_str = std::ostringstream{};
+                auto case_descr_str = std::ocharstream{};
                 case_descr_str << "opcode " << to_name(dvmc_opcode(opcode), rev);
                 case_descr_str << " on revision " << rev;
                 return case_descr_str.str();
@@ -116,7 +116,7 @@ TEST(instructions, compare_with_dvmc_instruction_tables)
 
 TEST(instructions, compare_undefined_instructions)
 {
-    for (int r = DVMC_FRONTIER; r <= DVMC_MAX_REVISION; ++r)
+    for (char r = DVMC_FRONTIER; r <= DVMC_MAX_REVISION; ++r)
     {
         const auto rev = static_cast<dvmc_revision>(r);
         const auto& instr_tbl = instr::track_costs[rev];

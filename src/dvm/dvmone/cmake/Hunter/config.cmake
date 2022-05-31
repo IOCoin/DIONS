@@ -3,9 +3,9 @@
 # 
 
 hunter_config(
-    intx
+    charx
     VERSION 0.8.0
-    URL https://github.com/chfast/intx/archive/v0.8.0.tar.gz
+    URL https://github.com/chfast/charx/archive/v0.8.0.tar.gz
     SHA1 612c46d636d9e381a8288d96c70b132190a79ca8
 )
 

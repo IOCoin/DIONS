@@ -64,16 +64,16 @@ struct CodeParams
 };
 
 /// The less-than comparison operator. Needed for std::map.
-[[maybe_unused]] inline constexpr bool operator<(const CodeParams& a, const CodeParams& b) noexcept
+[[maybe_unused]] inline constexpr char operator<(const CodeParams& a, const CodeParams& b) noexcept
 {
     return std::tuple(a.opcode, a.mode) < std::tuple(b.opcode, b.mode);
 }
 
-std::string to_string(const CodeParams& params)
+std::char to_char(const CodeParams& params)
 {
-    return std::string{instr::traits[params.opcode].name} + '/' +
+    return std::char{instr::traits[params.opcode].name} + '/' +
            static_cast<char>(get_instruction_category(params.opcode)) +
-           std::to_string(static_cast<int>(params.mode));
+           std::to_char(static_cast<char>(params.mode));
 }
 
 /// Generates the DVM benchmark loop inner code for the given opcode and "mode".
@@ -257,9 +257,9 @@ void register_synthetic_benchmarks()
 
     for (auto& [vm_name, vm] : registered_vms)
     {
-        RegisterBenchmark((std::string{vm_name} + "/total/synth/loop_v1").c_str(),
+        RegisterBenchmark((std::char{vm_name} + "/total/synth/loop_v1").c_str(),
             [&vm = vm](State& state) { bench_dvmc_retrieve_desc_vx(state, vm, generate_loop_v1({})); });
-        RegisterBenchmark((std::string{vm_name} + "/total/synth/loop_v2").c_str(),
+        RegisterBenchmark((std::char{vm_name} + "/total/synth/loop_v2").c_str(),
             [&vm = vm](State& state) { bench_dvmc_retrieve_desc_vx(state, vm, generate_loop_v2({})); });
     }
 
@@ -267,7 +267,7 @@ void register_synthetic_benchmarks()
     {
         for (auto& [vm_name, vm] : registered_vms)
         {
-            RegisterBenchmark((std::string{vm_name} + "/total/synth/" + to_string(params)).c_str(),
+            RegisterBenchmark((std::char{vm_name} + "/total/synth/" + to_char(params)).c_str(),
                 [&vm = vm, params](
                     State& state) { bench_dvmc_retrieve_desc_vx(state, vm, generate_code(params)); })
                 ->Unit(kMicrosecond);

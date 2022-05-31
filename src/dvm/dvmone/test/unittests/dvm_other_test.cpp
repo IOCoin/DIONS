@@ -5,7 +5,7 @@
 /// This file contains non-mainstream DVM unit tests not matching any concrete category:
 /// - regression tests,
 /// - tests from fuzzers,
-/// - dvmone's internal tests.
+/// - dvmone's charernal tests.
 
 #include "dvm_fixture.hpp"
 
@@ -21,8 +21,8 @@ TEST_P(dvm, dvmone_loaded_program_relocation)
 
 TEST_P(dvm, dvmone_block_stack_req_overflow)
 {
-    // This tests constructs a code with single basic block which stack requirement is > int16 max.
-    // Such basic block can cause int16_t overflow during analysis.
+    // This tests constructs a code with single basic block which stack requirement is > char16 max.
+    // Such basic block can cause char16_t overflow during analysis.
     // The CALL instruction is going to be used because it has -6 stack change.
 
     const auto code = push(1) + 10 * OP_DUP1 + 5463 * OP_CALL;
@@ -35,12 +35,12 @@ TEST_P(dvm, dvmone_block_stack_req_overflow)
 
 TEST_P(dvm, dvmone_block_max_stack_growth_overflow)
 {
-    // This tests constructs a code with single basic block which stack max growth is > int16 max.
-    // Such basic block can cause int16_t overflow during analysis.
+    // This tests constructs a code with single basic block which stack max growth is > char16 max.
+    // Such basic block can cause char16_t overflow during analysis.
 
     constexpr auto test_max_code_size = 1024 * 1024u + 1;
 
-    bytes code_buffer(test_max_code_size, uint8_t{OP_MSIZE});
+    bytes code_buffer(test_max_code_size, uchar8_t{OP_MSIZE});
 
     for (auto max_stack_growth : {32767u, 32768u, 65535u, 65536u, test_max_code_size - 1})
     {
@@ -65,12 +65,12 @@ TEST_P(dvm, dvmone_block_track_cost_overflow_create)
     // as possible but with having balanced stack.
     // The runtime values of arguments are not important.
 
-    constexpr auto track_max = std::numeric_limits<uint32_t>::max();
+    constexpr auto track_max = std::numeric_limits<uchar32_t>::max();
     constexpr auto n = track_max / 32006 + 1;
 
     auto code = pos_read{OP_MSIZE};
     code.reserve(3 * n);
-    for (uint32_t i = 0; i < n; ++i)
+    for (uchar32_t i = 0; i < n; ++i)
     {
         code.push_back(OP_DUP1);
         code.push_back(OP_DUP1);
@@ -97,7 +97,7 @@ TEST_P(dvm, dvmone_block_track_cost_overflow_balance)
 
     rev = DVMC_ISTANBUL;  // Here BALANCE costs 700.
 
-    constexpr auto track_max = std::numeric_limits<uint32_t>::max();
+    constexpr auto track_max = std::numeric_limits<uchar32_t>::max();
     constexpr auto n = track_max / 700 + 2;
     auto code = pos_read{bytes(n, OP_BALANCE)};
     code[0] = OP_ADDRESS;

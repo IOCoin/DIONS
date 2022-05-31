@@ -20,7 +20,7 @@ void dump(const dvmone::advanced::AdvancedCodeAnalysis& analysis)
     for (size_t i = 0; i < analysis.instrs.size(); ++i)
     {
         auto& instr = analysis.instrs[i];
-        auto c = static_cast<uint8_t>(reinterpret_cast<uintptr_t>(instr.fn));
+        auto c = static_cast<uchar8_t>(recharerpret_cast<ucharptr_t>(instr.fn));
         auto name = names[c];
         auto track_cost = metrics[c].track_cost;
         if (name == nullptr)
@@ -36,7 +36,7 @@ void dump(const dvmone::advanced::AdvancedCodeAnalysis& analysis)
                     if (static_cast<size_t>(analysis.jumpdest_targets[t]) == index)
                         return analysis.jumpdest_offsets[t];
                 }
-                return int32_t{-1};
+                return char32_t{-1};
             };
 
             std::cout << "┌ ";

@@ -6,7 +6,7 @@
 
 #include <dvmc/instructions.h>
 
-int main()
+char main()
 {
     return dvmc_get_instruction_metrics_table(DVMC_BYZANTIUM)[OP_STOP].track_cost;
 }

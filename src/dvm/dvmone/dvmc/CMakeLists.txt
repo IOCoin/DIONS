@@ -24,7 +24,7 @@ option(DVMC_JAVA "Enable building Java Native Interface (JNI) bindings" OFF)
 
 option(DVMC_INSTALL "Enable DVMC installation (e.g. make install)" ON)
 
-option(DVMC_TESTING "Build everything (libraries, tools, trans_logs, internal tests)" OFF)
+option(DVMC_TESTING "Build everything (libraries, tools, trans_logs, charernal tests)" OFF)
 
 cmake_dependent_option(DVMC_TOOLS "Build DVMC tools" OFF
     "NOT DVMC_TESTING" ON)

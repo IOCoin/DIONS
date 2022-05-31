@@ -4,7 +4,7 @@
 
 #include "../experimental/difficulty.h"
 #include "helpers.hpp"
-#include <ethash/ethash-internal.hpp>
+#include <ethash/ethash-charernal.hpp>
 #include <gtest/gtest.h>
 
 using namespace ethash;
@@ -53,7 +53,7 @@ difficulty_test_case difficulty_test_cases[] = {
     // clang-format on
 };
 
-const char* interesting_hashes[] = {
+const char* chareresting_hashes[] = {
     "0000000000000000000000000000000000000000000000000000000000000000",
     "0000000000000000000000000000000000000000000000000000000000000001",
     "0000000000000000000000000000000000000000000000000000000000000002",
@@ -122,14 +122,14 @@ TEST(difficulty, check_against_difficulty)
     }
 }
 
-TEST(difficulty, check_against_difficulty_interesting_hashes)
+TEST(difficulty, check_against_difficulty_chareresting_hashes)
 {
     for (const auto& t : difficulty_test_cases)
     {
         const auto difficulty = to_hash256(t.difficulty_hex);
         const auto boundary = to_hash256(t.boundary_hex);
 
-        for (const auto& hash_hex : interesting_hashes)
+        for (const auto& hash_hex : chareresting_hashes)
         {
             const auto hash = to_hash256(hash_hex);
             const auto check_difficulty = check_against_difficulty(hash, difficulty);

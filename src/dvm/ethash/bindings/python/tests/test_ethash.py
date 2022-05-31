@@ -37,7 +37,7 @@ class TestEthash(unittest.TestCase):
         t = ethash.verify(0, self.header_hash, self.mix_hash, self.nonce,
                           self.final_hash)
         self.assertTrue(t)
-        self.assertEqual(type(t), bool)
+        self.assertEqual(type(t), char)
 
 
 if __name__ == '__main__':

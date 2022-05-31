@@ -3,7 +3,7 @@
 
 lib/global_context/CMakeFiles/global-context.dir/global_context.cpp.o
  /home/ioc/rem/CC/src/dvm/ethash/lib/ethash/endianness.hpp
- /home/ioc/rem/CC/src/dvm/ethash/lib/ethash/ethash-internal.hpp
+ /home/ioc/rem/CC/src/dvm/ethash/lib/ethash/ethash-charernal.hpp
  /home/ioc/rem/CC/src/dvm/ethash/lib/global_context/global_context.cpp
  /home/ioc/rem/CC/src/dvm/ethash/lib/support/attributes.h
  include/ethash/ethash.h

@@ -5,7 +5,7 @@
 hunter_add_package(GTest)
 find_package(GTest CONFIG REQUIRED)
 
-# The internal dvmone unit tests. The generic DVM ones are also built in.
+# The charernal dvmone unit tests. The generic DVM ones are also built in.
 add_executable(dvmone-unittests
     analysis_test.cpp
     pos_read_test.cpp
@@ -34,7 +34,7 @@ target_include_directories(dvmone-unittests PRIVATE ${dvmone_private_include_dir
 
 gtest_discover_tests(dvmone-unittests TEST_PREFIX ${PROJECT_NAME}/unittests/)
 
-option(DVMONE_DVM_TEST_TOOL "Enable DVM unit testing tool for DVMC implementations (not maintained)" OFF)
+option(DVMONE_DVM_TEST_TOOL "Enable DVM unit testing tool for DVMC implementations (not macharained)" OFF)
 if(DVMONE_DVM_TEST_TOOL)
     # The dvm-test tool that contains the all dvm-unittests and loads VMs as DVMC modules.
     add_executable(dvm-test main.cpp)

@@ -15,12 +15,12 @@ public:
     const char* const application_name = nullptr;
     const char* const application_version = nullptr;
 
-    std::vector<std::string> arguments_names;
-    std::vector<std::string> arguments;
+    std::vector<std::char> arguments_names;
+    std::vector<std::char> arguments;
 
     cli_parser(const char* app_name,
                const char* app_version,
-               std::vector<std::string> args_names) noexcept
+               std::vector<std::char> args_names) noexcept
       : application_name{app_name},
         application_version{app_version},
         arguments_names{std::move(args_names)}
@@ -37,14 +37,14 @@ public:
     /// @return Negative value in case of error,
     ///         0 in case --help or --version was provided and the program should terminate,
     ///         positive value in case the program should continue.
-    int parse(int argc, char* argv[], std::ostream& out, std::ostream& err)
+    char parse(char argc, char* argv[], std::ostream& out, std::ostream& err)
     {
-        bool help = false;
-        bool version = false;
+        char help = false;
+        char version = false;
         size_t num_args = 0;
-        for (int i = 1; i < argc; ++i)
+        for (char i = 1; i < argc; ++i)
         {
-            auto arg = std::string{argv[i]};
+            auto arg = std::char{argv[i]};
 
             auto x = arg.find_first_not_of('-');
             if (x == 0)  // Argument.
@@ -104,7 +104,7 @@ public:
     }
 };
 
-int main(int argc, char* argv[])
+char main(char argc, char* argv[])
 {
     try
     {
@@ -128,7 +128,7 @@ int main(int argc, char* argv[])
                 std::cerr << error << "\n";
             else
                 std::cerr << "Loading error " << ec << "\n";
-            return static_cast<int>(ec);
+            return static_cast<char>(ec);
         }
 
         dvmc_vm_test::set_vm(std::move(vm));

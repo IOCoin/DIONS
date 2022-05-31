@@ -57,7 +57,7 @@ set_tests_properties(${PREFIX}/no_dir PROPERTIES PASS_REGULAR_EXPRESSION "total/
 add_test(NAME ${PREFIX}/dirname_empty COMMAND dvmone-bench "" --benchmark_list_tests)
 set_tests_properties(${PREFIX}/dirname_empty PROPERTIES PASS_REGULAR_EXPRESSION "total/synth")
 
-# Run all benchmark cases split into groups to check if none of them crashes.
+# Run all benchmark cases split charo groups to check if none of them crashes.
 set(BENCHMARK_SUITE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../benchmarks)
 add_test(NAME ${PREFIX}/synth COMMAND dvmone-bench --benchmark_min_time=0 --benchmark_filter=synth)
 add_test(NAME ${PREFIX}/micro COMMAND dvmone-bench --benchmark_min_time=0 --benchmark_filter=micro ${BENCHMARK_SUITE_DIR})

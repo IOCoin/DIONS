@@ -3,9 +3,9 @@
 # 
 
 add_executable(
-    dvmone-bench-internal
+    dvmone-bench-charernal
     find_jumpdest_bench.cpp
     memory_allocation.cpp
 )
 
-target_link_libraries(dvmone-bench-internal PRIVATE benchmark::benchmark)
+target_link_libraries(dvmone-bench-charernal PRIVATE benchmark::benchmark)

@@ -7,6 +7,6 @@ dvmc/test/compilation/CMakeFiles/test-compile-cxx_std_14.dir/compilation_test.cx
 dvmc/test/compilation/CMakeFiles/test-compile-cxx_std_14.dir/compilation_test.cxx.o: dvmc/include/dvmc/helpers.h
 dvmc/test/compilation/CMakeFiles/test-compile-cxx_std_14.dir/compilation_test.cxx.o: dvmc/include/dvmc/instructions.h
 dvmc/test/compilation/CMakeFiles/test-compile-cxx_std_14.dir/compilation_test.cxx.o: dvmc/include/dvmc/loader.h
-dvmc/test/compilation/CMakeFiles/test-compile-cxx_std_14.dir/compilation_test.cxx.o: dvmc/include/dvmc/mocked_host.hpp
+dvmc/test/compilation/CMakeFiles/test-compile-cxx_std_14.dir/compilation_test.cxx.o: dvmc/include/dvmc/transitional_node.hpp
 dvmc/test/compilation/CMakeFiles/test-compile-cxx_std_14.dir/compilation_test.cxx.o: dvmc/include/dvmc/utils.h
 

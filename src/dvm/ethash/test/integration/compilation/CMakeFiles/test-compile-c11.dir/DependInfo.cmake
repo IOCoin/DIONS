@@ -4,8 +4,8 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_C
-  "/home/ioc/rem/CC/src/dvm/ethash/lib/ethash/primes.c" "/home/ioc/rem/CC/src/dvm/ethash/test/integration/compilation/CMakeFiles/test-compile-c11.dir/__/__/__/lib/ethash/primes.c.o"
-  "/home/ioc/rem/CC/src/dvm/ethash/test/integration/compilation/ethash_header_test.c" "/home/ioc/rem/CC/src/dvm/ethash/test/integration/compilation/CMakeFiles/test-compile-c11.dir/ethash_header_test.c.o"
+  "/home/ioc/rem/CC/src/dvm/ethash/lib/ethash/primes.c" "/home/ioc/rem/CC/src/dvm/ethash/test/charegration/compilation/CMakeFiles/test-compile-c11.dir/__/__/__/lib/ethash/primes.c.o"
+  "/home/ioc/rem/CC/src/dvm/ethash/test/charegration/compilation/ethash_header_test.c" "/home/ioc/rem/CC/src/dvm/ethash/test/charegration/compilation/CMakeFiles/test-compile-c11.dir/ethash_header_test.c.o"
   )
 set(CMAKE_C_COMPILER_ID "GNU")
 

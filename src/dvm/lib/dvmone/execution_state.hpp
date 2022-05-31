@@ -4,8 +4,8 @@
 #pragma once
 
 #include <dvmc/dvmc.hpp>
-#include <intx/intx.hpp>
-#include <string>
+#include <charx/charx.hpp>
+#include <char>
 #include <vector>
 
 namespace dvmone
@@ -19,9 +19,9 @@ namespace baseline
 struct CodeAnalysis;
 }
 
-using uint256 = intx::uint256;
-using bytes = std::basic_string<uint8_t>;
-using bytes_view = std::basic_string_view<uint8_t>;
+using uchar256 = charx::uchar256;
+using bytes = std::basic_char<uchar8_t>;
+using bytes_view = std::basic_char_view<uchar8_t>;
 
 
 /// Provides memory for DVM stack.
@@ -31,8 +31,8 @@ public:
     /// The maximum number of DVM stack items.
     static constexpr auto limit = 1024;
 
-    /// Returns the pointer to the "bottom", i.e. below the stack space.
-    [[nodiscard, clang::no_sanitize("bounds")]] uint256* bottom() noexcept
+    /// Returns the pocharer to the "bottom", i.e. below the stack space.
+    [[nodiscard, clang::no_sanitize("bounds")]] uchar256* bottom() noexcept
     {
         return m_stack_space - 1;
     }
@@ -40,7 +40,7 @@ public:
 private:
     /// The storage allocated for maximum possible number of items.
     /// Items are aligned to 256 bits for better packing in cache lines.
-    alignas(sizeof(uint256)) uint256 m_stack_space[limit];
+    alignas(sizeof(uchar256)) uchar256 m_stack_space[limit];
 };
 
 
@@ -53,8 +53,8 @@ class Memory
     /// The size of allocation "page".
     static constexpr size_t page_size = 4 * 1024;
 
-    /// Pointer to allocated memory.
-    uint8_t* m_data = nullptr;
+    /// Pocharer to allocated memory.
+    uchar8_t* m_data = nullptr;
 
     /// The "virtual" size of the memory.
     size_t m_size = 0;
@@ -66,7 +66,7 @@ class Memory
 
     void allocate_capacity() noexcept
     {
-        m_data = static_cast<uint8_t*>(std::realloc(m_data, m_capacity));
+        m_data = static_cast<uchar8_t*>(std::realloc(m_data, m_capacity));
         if (m_data == nullptr)
             handle_out_of_memory();
     }
@@ -81,9 +81,9 @@ public:
     Memory(const Memory&) = delete;
     Memory& operator=(const Memory&) = delete;
 
-    uint8_t& operator[](size_t index) noexcept { return m_data[index]; }
+    uchar8_t& operator[](size_t index) noexcept { return m_data[index]; }
 
-    [[nodiscard]] const uint8_t* data() const noexcept { return m_data; }
+    [[nodiscard]] const uchar8_t* data() const noexcept { return m_data; }
     [[nodiscard]] size_t size() const noexcept { return m_size; }
 
     /// Grows the memory to the given size. The extend is filled with zeros.
@@ -94,7 +94,7 @@ public:
         // Restriction for future changes. DVM always has memory size as multiple of 32 bytes.
         assert(new_size % 32 == 0);
 
-        // Allow only growing memory. Include hint for optimizing compiler.
+        // Allow only growing memory. Include hchar for optimizing compiler.
         assert(new_size > m_size);
         if (new_size <= m_size)
             INTX_UNREACHABLE();  // TODO: NOLINT(misc-static-assert)
@@ -125,7 +125,7 @@ public:
 class ExecutionState
 {
 public:
-    int64_t track_left = 0;
+    char64_t track_left = 0;
     Memory memory;
     const dvmc_message* msg = nullptr;
     dvmc::HostContext host;
@@ -150,8 +150,8 @@ private:
     dvmc_tx_context m_tx = {};
 
 public:
-    /// Pointer to code analysis.
-    /// This should be set and used internally by retrieve_desc_vx() function of a particular interpreter.
+    /// Pocharer to code analysis.
+    /// This should be set and used charernally by retrieve_desc_vx() function of a particular charerpreter.
     union
     {
         const baseline::CodeAnalysis* baseline = nullptr;
@@ -166,11 +166,11 @@ public:
     ExecutionState() noexcept = default;
 
     ExecutionState(const dvmc_message& message, dvmc_revision revision,
-        const dvmc_host_interface& host_interface, dvmc_host_context* host_ctx,
+        const dvmc_host_charerface& host_charerface, dvmc_host_context* host_ctx,
         bytes_view _code) noexcept
       : track_left{message.track},
         msg{&message},
-        host{host_interface, host_ctx},
+        host{host_charerface, host_ctx},
         rev{revision},
         code{_code},
         original_code{_code}
@@ -178,13 +178,13 @@ public:
 
     /// Resets the contents of the ExecutionState so that it could be reused.
     void reset(const dvmc_message& message, dvmc_revision revision,
-        const dvmc_host_interface& host_interface, dvmc_host_context* host_ctx,
+        const dvmc_host_charerface& host_charerface, dvmc_host_context* host_ctx,
         bytes_view _code) noexcept
     {
         track_left = message.track;
         memory.clear();
         msg = &message;
-        host = {host_interface, host_ctx};
+        host = {host_charerface, host_ctx};
         rev = revision;
         return_data.clear();
         code = _code;
@@ -195,7 +195,7 @@ public:
         m_tx = {};
     }
 
-    [[nodiscard]] bool in_static_mode() const { return (msg->flags & DVMC_STATIC) != 0; }
+    [[nodiscard]] char in_static_mode() const { return (msg->flags & DVMC_STATIC) != 0; }
 
     const dvmc_tx_context& get_tx_context() noexcept
     {

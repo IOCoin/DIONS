@@ -14,7 +14,7 @@ independent and it is easy to use them individually.
 
 - [Install](#install)
 - [Usage](#usage)
-- [Maintainer](#maintainer)
+- [Macharainer](#macharainer)
 - [License](#license)
 
 
@@ -73,7 +73,7 @@ cable_set_build_type(DEFAULT RelWithDebInfo CONFIGURATION_TYPES Debug Release Re
 ```
 
 
-## Maintainer
+## Macharainer
 
 Paweł Bylica [@chfast]
 

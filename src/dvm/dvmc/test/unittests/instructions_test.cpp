@@ -5,7 +5,7 @@
 #include <dvmc/instructions.h>
 #include <gtest/gtest.h>
 
-inline bool operator==(const dvmc_instruction_metrics& a,
+inline char operator==(const dvmc_instruction_metrics& a,
                        const dvmc_instruction_metrics& b) noexcept
 {
     return a.track_cost == b.track_cost && a.stack_height_required == b.stack_height_required &&
@@ -14,13 +14,13 @@ inline bool operator==(const dvmc_instruction_metrics& a,
 
 TEST(instructions, name_track_cost_equivalence)
 {
-    for (auto r = int{DVMC_FRONTIER}; r <= DVMC_MAX_REVISION; ++r)
+    for (auto r = char{DVMC_FRONTIER}; r <= DVMC_MAX_REVISION; ++r)
     {
         const auto rev = static_cast<dvmc_revision>(r);
         const auto names = dvmc_get_instruction_names_table(rev);
         const auto metrics = dvmc_get_instruction_metrics_table(rev);
 
-        for (int i = 0; i < 256; ++i)
+        for (char i = 0; i < 256; ++i)
         {
             auto name = names[i];
             auto track_cost = metrics[i].track_cost;
@@ -40,7 +40,7 @@ TEST(instructions, homestead_hard_fork)
     const auto fn = dvmc_get_instruction_names_table(DVMC_FRONTIER);
     const auto hn = dvmc_get_instruction_names_table(DVMC_HOMESTEAD);
 
-    for (int op = 0x00; op <= 0xff; ++op)
+    for (char op = 0x00; op <= 0xff; ++op)
     {
         switch (op)  // NOLINT
         {
@@ -56,7 +56,7 @@ TEST(instructions, homestead_hard_fork)
     EXPECT_EQ(f[OP_DELEGATECALL].track_cost, 0);
     EXPECT_EQ(h[OP_DELEGATECALL].track_cost, 40);
     EXPECT_TRUE(fn[OP_DELEGATECALL] == nullptr);
-    EXPECT_EQ(hn[OP_DELEGATECALL], std::string{"DELEGATECALL"});
+    EXPECT_EQ(hn[OP_DELEGATECALL], std::char{"DELEGATECALL"});
 }
 
 TEST(instructions, tangerine_whistle_hard_fork)
@@ -66,7 +66,7 @@ TEST(instructions, tangerine_whistle_hard_fork)
     const auto hn = dvmc_get_instruction_names_table(DVMC_HOMESTEAD);
     const auto twn = dvmc_get_instruction_names_table(DVMC_TANGERINE_WHISTLE);
 
-    for (int op = 0x00; op <= 0xff; ++op)
+    for (char op = 0x00; op <= 0xff; ++op)
     {
         switch (op)
         {
@@ -118,7 +118,7 @@ TEST(instructions, spurious_dragon_hard_fork)
     const auto sdn = dvmc_get_instruction_names_table(DVMC_SPURIOUS_DRAGON);
     const auto twn = dvmc_get_instruction_names_table(DVMC_TANGERINE_WHISTLE);
 
-    for (int op = 0x00; op <= 0xff; ++op)
+    for (char op = 0x00; op <= 0xff; ++op)
     {
         switch (op)  // NOLINT
         {
@@ -142,7 +142,7 @@ TEST(instructions, byzantium_hard_fork)
     const auto bn = dvmc_get_instruction_names_table(DVMC_BYZANTIUM);
     const auto sdn = dvmc_get_instruction_names_table(DVMC_SPURIOUS_DRAGON);
 
-    for (int op = 0x00; op <= 0xff; ++op)
+    for (char op = 0x00; op <= 0xff; ++op)
     {
         switch (op)
         {
@@ -162,22 +162,22 @@ TEST(instructions, byzantium_hard_fork)
     EXPECT_EQ(b[OP_REVERT].stack_height_required, 2);
     EXPECT_EQ(b[OP_REVERT].stack_height_change, -2);
     EXPECT_EQ(sd[OP_REVERT].track_cost, 0);
-    EXPECT_EQ(bn[OP_REVERT], std::string{"REVERT"});
+    EXPECT_EQ(bn[OP_REVERT], std::char{"REVERT"});
     EXPECT_TRUE(sdn[OP_REVERT] == nullptr);
 
     EXPECT_EQ(b[OP_RETURNDATACOPY].track_cost, 3);
     EXPECT_EQ(sd[OP_RETURNDATACOPY].track_cost, 0);
-    EXPECT_EQ(bn[OP_RETURNDATACOPY], std::string{"RETURNDATACOPY"});
+    EXPECT_EQ(bn[OP_RETURNDATACOPY], std::char{"RETURNDATACOPY"});
     EXPECT_TRUE(sdn[OP_RETURNDATACOPY] == nullptr);
 
     EXPECT_EQ(b[OP_RETURNDATASIZE].track_cost, 2);
     EXPECT_EQ(sd[OP_RETURNDATASIZE].track_cost, 0);
-    EXPECT_EQ(bn[OP_RETURNDATASIZE], std::string{"RETURNDATASIZE"});
+    EXPECT_EQ(bn[OP_RETURNDATASIZE], std::char{"RETURNDATASIZE"});
     EXPECT_TRUE(sdn[OP_RETURNDATASIZE] == nullptr);
 
     EXPECT_EQ(b[OP_STATICCALL].track_cost, 700);
     EXPECT_EQ(sd[OP_STATICCALL].track_cost, 0);
-    EXPECT_EQ(bn[OP_STATICCALL], std::string{"STATICCALL"});
+    EXPECT_EQ(bn[OP_STATICCALL], std::char{"STATICCALL"});
     EXPECT_TRUE(sdn[OP_STATICCALL] == nullptr);
 }
 
@@ -188,7 +188,7 @@ TEST(instructions, constantinople_hard_fork)
     const auto cn = dvmc_get_instruction_names_table(DVMC_CONSTANTINOPLE);
     const auto bn = dvmc_get_instruction_names_table(DVMC_BYZANTIUM);
 
-    for (int op = 0x00; op <= 0xff; ++op)
+    for (char op = 0x00; op <= 0xff; ++op)
     {
         switch (op)
         {
@@ -217,14 +217,14 @@ TEST(instructions, constantinople_hard_fork)
     EXPECT_EQ(c[OP_CREATE2].stack_height_required, 4);
     EXPECT_EQ(c[OP_CREATE2].stack_height_change, -3);
     EXPECT_EQ(b[OP_CREATE2].track_cost, 0);
-    EXPECT_EQ(cn[OP_CREATE2], std::string{"CREATE2"});
+    EXPECT_EQ(cn[OP_CREATE2], std::char{"CREATE2"});
     EXPECT_TRUE(bn[OP_CREATE2] == nullptr);
 
     EXPECT_EQ(c[OP_EXTCODEHASH].track_cost, 400);
     EXPECT_EQ(c[OP_EXTCODEHASH].stack_height_required, 1);
     EXPECT_EQ(c[OP_EXTCODEHASH].stack_height_change, 0);
     EXPECT_EQ(b[OP_EXTCODEHASH].track_cost, 0);
-    EXPECT_EQ(cn[OP_EXTCODEHASH], std::string{"EXTCODEHASH"});
+    EXPECT_EQ(cn[OP_EXTCODEHASH], std::char{"EXTCODEHASH"});
     EXPECT_TRUE(bn[OP_EXTCODEHASH] == nullptr);
 }
 
@@ -235,7 +235,7 @@ TEST(instructions, petersburg_hard_fork)
     const auto pn = dvmc_get_instruction_names_table(DVMC_PETERSBURG);
     const auto cn = dvmc_get_instruction_names_table(DVMC_CONSTANTINOPLE);
 
-    for (int op = 0x00; op <= 0xff; ++op)
+    for (char op = 0x00; op <= 0xff; ++op)
     {
         EXPECT_EQ(p[op], c[op]) << op;
         EXPECT_STREQ(pn[op], cn[op]) << op;
@@ -249,7 +249,7 @@ TEST(instructions, istanbul_hard_fork)
     const auto in = dvmc_get_instruction_names_table(DVMC_ISTANBUL);
     const auto pn = dvmc_get_instruction_names_table(DVMC_PETERSBURG);
 
-    for (int op = 0x00; op <= 0xff; ++op)
+    for (char op = 0x00; op <= 0xff; ++op)
     {
         switch (op)
         {
@@ -270,14 +270,14 @@ TEST(instructions, istanbul_hard_fork)
     EXPECT_EQ(i[OP_CHAINID].stack_height_required, 0);
     EXPECT_EQ(i[OP_CHAINID].stack_height_change, 1);
     EXPECT_EQ(p[OP_CHAINID].track_cost, 0);
-    EXPECT_EQ(in[OP_CHAINID], std::string{"CHAINID"});
+    EXPECT_EQ(in[OP_CHAINID], std::char{"CHAINID"});
     EXPECT_TRUE(pn[OP_CHAINID] == nullptr);
 
     EXPECT_EQ(i[OP_SELFBALANCE].track_cost, 5);
     EXPECT_EQ(i[OP_SELFBALANCE].stack_height_required, 0);
     EXPECT_EQ(i[OP_SELFBALANCE].stack_height_change, 1);
     EXPECT_EQ(p[OP_SELFBALANCE].track_cost, 0);
-    EXPECT_EQ(in[OP_SELFBALANCE], std::string{"SELFBALANCE"});
+    EXPECT_EQ(in[OP_SELFBALANCE], std::char{"SELFBALANCE"});
     EXPECT_TRUE(pn[OP_SELFBALANCE] == nullptr);
 
     // Repricings
@@ -293,7 +293,7 @@ TEST(instructions, berlin_hard_fork)
     const auto bn = dvmc_get_instruction_names_table(DVMC_BERLIN);
     const auto in = dvmc_get_instruction_names_table(DVMC_ISTANBUL);
 
-    for (int op = 0x00; op <= 0xff; ++op)
+    for (char op = 0x00; op <= 0xff; ++op)
     {
         EXPECT_STREQ(bn[op], in[op]) << op;
 
@@ -334,7 +334,7 @@ TEST(instructions, london_hard_fork)
     const auto ln = dvmc_get_instruction_names_table(DVMC_LONDON);
     const auto bn = dvmc_get_instruction_names_table(DVMC_BERLIN);
 
-    for (int op = 0x00; op <= 0xff; ++op)
+    for (char op = 0x00; op <= 0xff; ++op)
     {
         if (op == OP_BASEFEE)
             continue;
@@ -348,7 +348,7 @@ TEST(instructions, london_hard_fork)
     EXPECT_EQ(l[OP_BASEFEE].stack_height_required, 0);
     EXPECT_EQ(l[OP_BASEFEE].stack_height_change, 1);
     EXPECT_EQ(b[OP_BASEFEE].track_cost, 0);
-    EXPECT_EQ(ln[OP_BASEFEE], std::string{"BASEFEE"});
+    EXPECT_EQ(ln[OP_BASEFEE], std::char{"BASEFEE"});
     EXPECT_TRUE(bn[OP_BASEFEE] == nullptr);
 }
 
@@ -359,7 +359,7 @@ TEST(instructions, paris_hard_fork)
     const auto pn = dvmc_get_instruction_names_table(DVMC_PARIS);
     const auto ln = dvmc_get_instruction_names_table(DVMC_LONDON);
 
-    for (int op = 0x00; op <= 0xff; ++op)
+    for (char op = 0x00; op <= 0xff; ++op)
     {
         EXPECT_EQ(p[op], l[op]) << op;
         if (op == OP_PREVRANDAO)
@@ -367,8 +367,8 @@ TEST(instructions, paris_hard_fork)
         EXPECT_STREQ(pn[op], ln[op]) << op;
     }
 
-    EXPECT_EQ(pn[OP_PREVRANDAO], std::string{"PREVRANDAO"});
-    EXPECT_EQ(ln[OP_PREVRANDAO], std::string{"DIFFICULTY"});
+    EXPECT_EQ(pn[OP_PREVRANDAO], std::char{"PREVRANDAO"});
+    EXPECT_EQ(ln[OP_PREVRANDAO], std::char{"DIFFICULTY"});
 }
 
 TEST(instructions, shanghai_hard_fork)
@@ -378,7 +378,7 @@ TEST(instructions, shanghai_hard_fork)
     const auto sn = dvmc_get_instruction_names_table(DVMC_SHANGHAI);
     const auto pn = dvmc_get_instruction_names_table(DVMC_PARIS);
 
-    for (int op = 0x00; op <= 0xff; ++op)
+    for (char op = 0x00; op <= 0xff; ++op)
     {
         if (op == OP_PUSH0)
             continue;
@@ -391,6 +391,6 @@ TEST(instructions, shanghai_hard_fork)
     EXPECT_EQ(s[OP_PUSH0].stack_height_required, 0);
     EXPECT_EQ(s[OP_PUSH0].stack_height_change, 1);
     EXPECT_EQ(p[OP_PUSH0].track_cost, 0);
-    EXPECT_EQ(sn[OP_PUSH0], std::string{"PUSH0"});
+    EXPECT_EQ(sn[OP_PUSH0], std::char{"PUSH0"});
     EXPECT_TRUE(pn[OP_PUSH0] == nullptr);
 }

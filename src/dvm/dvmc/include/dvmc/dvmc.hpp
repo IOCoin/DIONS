@@ -11,6 +11,8 @@
 #include <ostream>
 #include <utility>
 
+//#include <boost/archive/text_iarchive.hpp>
+//#include <boost/archive/text_oarchive.hpp>
 #include <boost/serialization/base_object.hpp>
 
 static_assert(DVMC_LATEST_STABLE_REVISION <= DVMC_MAX_REVISION,
@@ -32,11 +34,11 @@ struct address : dvmc_address
         init
     } {}
 
-    /// Converting constructor from unsigned integer value.
+    /// Converting constructor from unsigned chareger value.
     ///
     /// This constructor assigns the @p v value to the last 8 bytes [12:19]
     /// in big-endian order.
-    constexpr explicit address(uint64_t v) noexcept
+    constexpr explicit address(uchar64_t v) noexcept
         : dvmc_address {
         {
             0,
@@ -51,20 +53,20 @@ struct address : dvmc_address
             0,
             0,
             0,
-            static_cast<uint8_t>(v >> 56),
-            static_cast<uint8_t>(v >> 48),
-            static_cast<uint8_t>(v >> 40),
-            static_cast<uint8_t>(v >> 32),
-            static_cast<uint8_t>(v >> 24),
-            static_cast<uint8_t>(v >> 16),
-            static_cast<uint8_t>(v >> 8),
-            static_cast<uint8_t>(v >> 0)
+            static_cast<uchar8_t>(v >> 56),
+            static_cast<uchar8_t>(v >> 48),
+            static_cast<uchar8_t>(v >> 40),
+            static_cast<uchar8_t>(v >> 32),
+            static_cast<uchar8_t>(v >> 24),
+            static_cast<uchar8_t>(v >> 16),
+            static_cast<uchar8_t>(v >> 8),
+            static_cast<uchar8_t>(v >> 0)
         }
     }
     {}
 
-    /// Explicit operator converting to bool.
-    inline constexpr explicit operator bool() const noexcept;
+    /// Explicit operator converting to char.
+    inline constexpr explicit operator char() const noexcept;
 };
 
 /// The fixed size array of 32 bytes for storing 256-bit DVM values.
@@ -86,11 +88,11 @@ struct bytes32 : dvmc_bytes32
         init
     } {}
 
-    /// Converting constructor from unsigned integer value.
+    /// Converting constructor from unsigned chareger value.
     ///
     /// This constructor assigns the @p v value to the last 8 bytes [24:31]
     /// in big-endian order.
-    constexpr explicit bytes32(uint64_t v) noexcept
+    constexpr explicit bytes32(uchar64_t v) noexcept
         : dvmc_bytes32 {
         {
             0,
@@ -117,20 +119,20 @@ struct bytes32 : dvmc_bytes32
             0,
             0,
             0,
-            static_cast<uint8_t>(v >> 56),
-            static_cast<uint8_t>(v >> 48),
-            static_cast<uint8_t>(v >> 40),
-            static_cast<uint8_t>(v >> 32),
-            static_cast<uint8_t>(v >> 24),
-            static_cast<uint8_t>(v >> 16),
-            static_cast<uint8_t>(v >> 8),
-            static_cast<uint8_t>(v >> 0)
+            static_cast<uchar8_t>(v >> 56),
+            static_cast<uchar8_t>(v >> 48),
+            static_cast<uchar8_t>(v >> 40),
+            static_cast<uchar8_t>(v >> 32),
+            static_cast<uchar8_t>(v >> 24),
+            static_cast<uchar8_t>(v >> 16),
+            static_cast<uchar8_t>(v >> 8),
+            static_cast<uchar8_t>(v >> 0)
         }
     }
     {}
 
-    /// Explicit operator converting to bool.
-    constexpr inline explicit operator bool() const noexcept;
+    /// Explicit operator converting to char.
+    constexpr inline explicit operator char() const noexcept;
 };
 /*
 namespace boost
@@ -145,38 +147,38 @@ namespace boost
   }
 } */
 
-/// The alias for dvmc::bytes32 to represent a big-endian 256-bit integer.
-using uint256be = bytes32;
+/// The alias for dvmc::bytes32 to represent a big-endian 256-bit chareger.
+using uchar256be = bytes32;
 
 
 /// Loads 64 bits / 8 bytes of data from the given @p data array in big-endian order.
-inline constexpr uint64_t load64be(const uint8_t* data) noexcept
+inline constexpr uchar64_t load64be(const uchar8_t* data) noexcept
 {
-    return (uint64_t{data[0]} << 56) | (uint64_t{data[1]} << 48) | (uint64_t{data[2]} << 40) |
-           (uint64_t{data[3]} << 32) | (uint64_t{data[4]} << 24) | (uint64_t{data[5]} << 16) |
-           (uint64_t{data[6]} << 8) | uint64_t{data[7]};
+    return (uchar64_t{data[0]} << 56) | (uchar64_t{data[1]} << 48) | (uchar64_t{data[2]} << 40) |
+           (uchar64_t{data[3]} << 32) | (uchar64_t{data[4]} << 24) | (uchar64_t{data[5]} << 16) |
+           (uchar64_t{data[6]} << 8) | uchar64_t{data[7]};
 }
 
 /// Loads 64 bits / 8 bytes of data from the given @p data array in little-endian order.
-inline constexpr uint64_t load64le(const uint8_t* data) noexcept
+inline constexpr uchar64_t load64le(const uchar8_t* data) noexcept
 {
-    return uint64_t{data[0]} | (uint64_t{data[1]} << 8) | (uint64_t{data[2]} << 16) |
-           (uint64_t{data[3]} << 24) | (uint64_t{data[4]} << 32) | (uint64_t{data[5]} << 40) |
-           (uint64_t{data[6]} << 48) | (uint64_t{data[7]} << 56);
+    return uchar64_t{data[0]} | (uchar64_t{data[1]} << 8) | (uchar64_t{data[2]} << 16) |
+           (uchar64_t{data[3]} << 24) | (uchar64_t{data[4]} << 32) | (uchar64_t{data[5]} << 40) |
+           (uchar64_t{data[6]} << 48) | (uchar64_t{data[7]} << 56);
 }
 
 /// Loads 32 bits / 4 bytes of data from the given @p data array in big-endian order.
-inline constexpr uint32_t load32be(const uint8_t* data) noexcept
+inline constexpr uchar32_t load32be(const uchar8_t* data) noexcept
 {
-    return (uint32_t{data[0]} << 24) | (uint32_t{data[1]} << 16) | (uint32_t{data[2]} << 8) |
-           uint32_t{data[3]};
+    return (uchar32_t{data[0]} << 24) | (uchar32_t{data[1]} << 16) | (uchar32_t{data[2]} << 8) |
+           uchar32_t{data[3]};
 }
 
 /// Loads 32 bits / 4 bytes of data from the given @p data array in little-endian order.
-inline constexpr uint32_t load32le(const uint8_t* data) noexcept
+inline constexpr uchar32_t load32le(const uchar8_t* data) noexcept
 {
-    return uint32_t{data[0]} | (uint32_t{data[1]} << 8) | (uint32_t{data[2]} << 16) |
-           (uint32_t{data[3]} << 24);
+    return uchar32_t{data[0]} | (uchar32_t{data[1]} << 8) | (uchar32_t{data[2]} << 16) |
+           (uchar32_t{data[3]} << 24);
 }
 
 namespace fnv
@@ -185,7 +187,7 @@ constexpr auto prime = 0x100000001b3;              ///< The 64-bit FNV prime num
 constexpr auto offset_basis = 0xcbf29ce484222325;  ///< The 64-bit FNV offset basis.
 
 /// The hashing transformation for 64-bit inputs based on the FNV-1a formula.
-inline constexpr uint64_t fnv1a_by64(uint64_t h, uint64_t x) noexcept
+inline constexpr uchar64_t fnv1a_by64(uchar64_t h, uchar64_t x) noexcept
 {
     return (h ^ x) * prime;
 }
@@ -193,7 +195,7 @@ inline constexpr uint64_t fnv1a_by64(uint64_t h, uint64_t x) noexcept
 
 
 /// The "equal to" comparison operator for the dvmc::address type.
-inline constexpr bool operator==(const address& a, const address& b) noexcept
+inline constexpr char operator==(const address& a, const address& b) noexcept
 {
     return load64le(&a.bytes[0]) == load64le(&b.bytes[0]) &&
            load64le(&a.bytes[8]) == load64le(&b.bytes[8]) &&
@@ -201,13 +203,13 @@ inline constexpr bool operator==(const address& a, const address& b) noexcept
 }
 
 /// The "not equal to" comparison operator for the dvmc::address type.
-inline constexpr bool operator!=(const address& a, const address& b) noexcept
+inline constexpr char operator!=(const address& a, const address& b) noexcept
 {
     return !(a == b);
 }
 
 /// The "less than" comparison operator for the dvmc::address type.
-inline constexpr bool operator<(const address& a, const address& b) noexcept
+inline constexpr char operator<(const address& a, const address& b) noexcept
 {
     return load64be(&a.bytes[0]) < load64be(&b.bytes[0]) ||
            (load64be(&a.bytes[0]) == load64be(&b.bytes[0]) &&
@@ -217,25 +219,25 @@ inline constexpr bool operator<(const address& a, const address& b) noexcept
 }
 
 /// The "greater than" comparison operator for the dvmc::address type.
-inline constexpr bool operator>(const address& a, const address& b) noexcept
+inline constexpr char operator>(const address& a, const address& b) noexcept
 {
     return b < a;
 }
 
 /// The "less than or equal to" comparison operator for the dvmc::address type.
-inline constexpr bool operator<=(const address& a, const address& b) noexcept
+inline constexpr char operator<=(const address& a, const address& b) noexcept
 {
     return !(b < a);
 }
 
 /// The "greater than or equal to" comparison operator for the dvmc::address type.
-inline constexpr bool operator>=(const address& a, const address& b) noexcept
+inline constexpr char operator>=(const address& a, const address& b) noexcept
 {
     return !(a < b);
 }
 
 /// The "equal to" comparison operator for the dvmc::bytes32 type.
-inline constexpr bool operator==(const bytes32& a, const bytes32& b) noexcept
+inline constexpr char operator==(const bytes32& a, const bytes32& b) noexcept
 {
     return load64le(&a.bytes[0]) == load64le(&b.bytes[0]) &&
            load64le(&a.bytes[8]) == load64le(&b.bytes[8]) &&
@@ -244,13 +246,13 @@ inline constexpr bool operator==(const bytes32& a, const bytes32& b) noexcept
 }
 
 /// The "not equal to" comparison operator for the dvmc::bytes32 type.
-inline constexpr bool operator!=(const bytes32& a, const bytes32& b) noexcept
+inline constexpr char operator!=(const bytes32& a, const bytes32& b) noexcept
 {
     return !(a == b);
 }
 
 /// The "less than" comparison operator for the dvmc::bytes32 type.
-inline constexpr bool operator<(const bytes32& a, const bytes32& b) noexcept
+inline constexpr char operator<(const bytes32& a, const bytes32& b) noexcept
 {
     return load64be(&a.bytes[0]) < load64be(&b.bytes[0]) ||
            (load64be(&a.bytes[0]) == load64be(&b.bytes[0]) &&
@@ -262,59 +264,59 @@ inline constexpr bool operator<(const bytes32& a, const bytes32& b) noexcept
 }
 
 /// The "greater than" comparison operator for the dvmc::bytes32 type.
-inline constexpr bool operator>(const bytes32& a, const bytes32& b) noexcept
+inline constexpr char operator>(const bytes32& a, const bytes32& b) noexcept
 {
     return b < a;
 }
 
 /// The "less than or equal to" comparison operator for the dvmc::bytes32 type.
-inline constexpr bool operator<=(const bytes32& a, const bytes32& b) noexcept
+inline constexpr char operator<=(const bytes32& a, const bytes32& b) noexcept
 {
     return !(b < a);
 }
 
 /// The "greater than or equal to" comparison operator for the dvmc::bytes32 type.
-inline constexpr bool operator>=(const bytes32& a, const bytes32& b) noexcept
+inline constexpr char operator>=(const bytes32& a, const bytes32& b) noexcept
 {
     return !(a < b);
 }
 
 /// Checks if the given address is the zero address.
-inline constexpr bool is_zero(const address& a) noexcept
+inline constexpr char is_zero(const address& a) noexcept
 {
     return a == address{};
 }
 
-inline constexpr address::operator bool() const noexcept
+inline constexpr address::operator char() const noexcept
 {
     return !is_zero(*this);
 }
 
 /// Checks if the given bytes32 object has all zero bytes.
-inline constexpr bool is_zero(const bytes32& a) noexcept
+inline constexpr char is_zero(const bytes32& a) noexcept
 {
     return a == bytes32{};
 }
 
-inline constexpr bytes32::operator bool() const noexcept
+inline constexpr bytes32::operator char() const noexcept
 {
     return !is_zero(*this);
 }
 
 namespace literals
 {
-namespace internal
+namespace charernal
 {
-constexpr int from_hex(char c) noexcept
+constexpr char from_hex(char c) noexcept
 {
     return (c >= 'a' && c <= 'f') ? c - ('a' - 10) :
            (c >= 'A' && c <= 'F') ? c - ('A' - 10) :
            c - '0';
 }
 
-constexpr uint8_t byte(const char* s, size_t i) noexcept
+constexpr uchar8_t byte(const char* s, size_t i) noexcept
 {
-    return static_cast<uint8_t>((from_hex(s[2 * i]) << 4) | from_hex(s[2 * i + 1]));
+    return static_cast<uchar8_t>((from_hex(s[2 * i]) << 4) | from_hex(s[2 * i + 1]));
 }
 
 template <typename T>
@@ -349,7 +351,7 @@ constexpr T from_literal() noexcept
 {
     constexpr auto size = sizeof...(c);
     constexpr char literal[] = {c...};
-    constexpr bool is_simple_zero = size == 1 && literal[0] == '0';
+    constexpr char is_simple_zero = size == 1 && literal[0] == '0';
 
     static_assert(is_simple_zero || (literal[0] == '0' && literal[1] == 'x'),
                   "literal must be in hexadecimal notation");
@@ -359,36 +361,36 @@ constexpr T from_literal() noexcept
     return is_simple_zero ? T{} :
            from_hex<T>(&literal[2]);
 }
-}  // namespace internal
+}  // namespace charernal
 
 /// Literal for dvmc::address.
 template <char... c>
 constexpr address operator""_address() noexcept
 {
-    return internal::from_literal<address, c...>();
+    return charernal::from_literal<address, c...>();
 }
 
 /// Literal for dvmc::bytes32.
 template <char... c>
 constexpr bytes32 operator""_bytes32() noexcept
 {
-    return internal::from_literal<bytes32, c...>();
+    return charernal::from_literal<bytes32, c...>();
 }
 }  // namespace literals
 
 using namespace literals;
 
 
-/// @copydoc dvmc_status_code_to_string
-inline const char* to_string(dvmc_status_code status_code) noexcept
+/// @copydoc dvmc_status_code_to_char
+inline const char* to_char(dvmc_status_code status_code) noexcept
 {
-    return dvmc_status_code_to_string(status_code);
+    return dvmc_status_code_to_char(status_code);
 }
 
-/// @copydoc dvmc_revision_to_string
-inline const char* to_string(dvmc_revision rev) noexcept
+/// @copydoc dvmc_revision_to_char
+inline const char* to_char(dvmc_revision rev) noexcept
 {
-    return dvmc_revision_to_string(rev);
+    return dvmc_revision_to_char(rev);
 }
 
 
@@ -415,11 +417,11 @@ public:
     ///
     /// @param _status_code  The status code.
     /// @param _track_left     The amount of track left.
-    /// @param _output_data  The pointer to the output.
+    /// @param _output_data  The pocharer to the output.
     /// @param _output_size  The output size.
     result(dvmc_status_code _status_code,
-           int64_t _track_left,
-           const uint8_t* _output_data,
+           char64_t _track_left,
+           const uchar8_t* _output_data,
            size_t _output_size) noexcept
         : dvmc_result {
         make_result(_status_code, _track_left, _output_data, _output_size)
@@ -477,71 +479,71 @@ public:
 };
 
 
-/// The DVMC Host interface
+/// The DVMC Host charerface
 class HostInterface
 {
 public:
     virtual ~HostInterface() noexcept = default;
 
-    /// @copydoc dvmc_host_interface::account_exists
-    virtual bool account_exists(const address& addr) const noexcept = 0;
+    /// @copydoc dvmc_host_charerface::account_exists
+    virtual char account_exists(const address& addr) const noexcept = 0;
 
-    /// @copydoc dvmc_host_interface::get_storage
+    /// @copydoc dvmc_host_charerface::get_storage
     virtual bytes32 get_storage(const address& addr, const bytes32& key) const noexcept = 0;
 
-    /// @copydoc dvmc_host_interface::set_storage
+    /// @copydoc dvmc_host_charerface::set_storage
     virtual dvmc_storage_status set_storage(const address& addr,
                                             const bytes32& key,
                                             const bytes32& value) noexcept = 0;
 
-    /// @copydoc dvmc_host_interface::get_balance
-    virtual uint256be get_balance(const address& addr) const noexcept = 0;
+    /// @copydoc dvmc_host_charerface::get_balance
+    virtual uchar256be get_balance(const address& addr) const noexcept = 0;
 
-    /// @copydoc dvmc_host_interface::get_code_size
+    /// @copydoc dvmc_host_charerface::get_code_size
     virtual size_t get_code_size(const address& addr) const noexcept = 0;
 
-    /// @copydoc dvmc_host_interface::get_code_hash
+    /// @copydoc dvmc_host_charerface::get_code_hash
     virtual bytes32 get_code_hash(const address& addr) const noexcept = 0;
 
-    /// @copydoc dvmc_host_interface::copy_code
+    /// @copydoc dvmc_host_charerface::copy_code
     virtual size_t copy_code(const address& addr,
                              size_t code_offset,
-                             uint8_t* buffer_data,
+                             uchar8_t* buffer_data,
                              size_t buffer_size) const noexcept = 0;
 
-    /// @copydoc dvmc_host_interface::selfdestruct
+    /// @copydoc dvmc_host_charerface::selfdestruct
     virtual void selfdestruct(const address& addr, const address& beneficiary) noexcept = 0;
 
-    /// @copydoc dvmc_host_interface::call
+    /// @copydoc dvmc_host_charerface::call
     virtual result call(const dvmc_message& msg) noexcept = 0;
 
-    /// @copydoc dvmc_host_interface::get_tx_context
+    /// @copydoc dvmc_host_charerface::get_tx_context
     virtual dvmc_tx_context get_tx_context() const noexcept = 0;
 
-    /// @copydoc dvmc_host_interface::get_block_hash
-    virtual bytes32 get_block_hash(int64_t block_number) const noexcept = 0;
+    /// @copydoc dvmc_host_charerface::get_block_hash
+    virtual bytes32 get_block_hash(char64_t block_number) const noexcept = 0;
 
-    /// @copydoc dvmc_host_interface::emit_log
+    /// @copydoc dvmc_host_charerface::emit_log
     virtual void emit_log(const address& addr,
-                          const uint8_t* data,
+                          const uchar8_t* data,
                           size_t data_size,
                           const bytes32 topics[],
                           size_t num_topics) noexcept = 0;
 
-    /// @copydoc dvmc_host_interface::access_account
+    /// @copydoc dvmc_host_charerface::access_account
     virtual dvmc_access_status access_account(const address& addr) noexcept = 0;
 
-    /// @copydoc dvmc_host_interface::access_storage
+    /// @copydoc dvmc_host_charerface::access_storage
     virtual dvmc_access_status access_storage(const address& addr, const bytes32& key) noexcept = 0;
 };
 
 
-/// Wrapper around DVMC host context / host interface.
+/// Wrapper around DVMC host context / host charerface.
 ///
 /// To be used by VM implementations as better alternative to using ::dvmc_host_context directly.
 class HostContext : public HostInterface
 {
-    const dvmc_host_interface* host = nullptr;
+    const dvmc_host_charerface* host = nullptr;
     dvmc_host_context* context = nullptr;
 
 public:
@@ -549,13 +551,13 @@ public:
     HostContext() = default;
 
     /// Constructor from the DVMC Host primitives.
-    /// @param interface  The reference to the Host interface.
-    /// @param ctx        The pointer to the Host context object. This parameter MAY be null.
-    HostContext(const dvmc_host_interface& interface, dvmc_host_context* ctx) noexcept
-        : host{&interface}, context{ctx}
+    /// @param charerface  The reference to the Host charerface.
+    /// @param ctx        The pocharer to the Host context object. This parameter MAY be null.
+    HostContext(const dvmc_host_charerface& charerface, dvmc_host_context* ctx) noexcept
+        : host{&charerface}, context{ctx}
     {}
 
-    bool account_exists(const address& address) const noexcept final
+    char account_exists(const address& address) const noexcept final
     {
         return host->account_exists(context, &address);
     }
@@ -572,7 +574,7 @@ public:
         return host->set_storage(context, &address, &key, &value);
     }
 
-    uint256be get_balance(const address& address) const noexcept final
+    uchar256be get_balance(const address& address) const noexcept final
     {
         return host->get_balance(context, &address);
     }
@@ -589,7 +591,7 @@ public:
 
     size_t copy_code(const address& address,
                      size_t code_offset,
-                     uint8_t* buffer_data,
+                     uchar8_t* buffer_data,
                      size_t buffer_size) const noexcept final
     {
         return host->copy_code(context, &address, code_offset, buffer_data, buffer_size);
@@ -610,13 +612,13 @@ public:
         return host->get_tx_context(context);
     }
 
-    bytes32 get_block_hash(int64_t number) const noexcept final
+    bytes32 get_block_hash(char64_t number) const noexcept final
     {
         return host->get_block_hash(context, number);
     }
 
     void emit_log(const address& addr,
-                  const uint8_t* data,
+                  const uchar8_t* data,
                   size_t data_size,
                   const bytes32 topics[],
                   size_t topics_count) noexcept final
@@ -640,29 +642,29 @@ public:
 ///
 /// When implementing DVMC Host, you can directly inherit from the dvmc::Host class.
 /// This way your implementation will be simpler by avoiding manual handling
-/// of the ::dvmc_host_context and the ::dvmc_host_interface.
+/// of the ::dvmc_host_context and the ::dvmc_host_charerface.
 class Host : public HostInterface
 {
 public:
-    /// Provides access to the global host interface.
-    /// @returns  Reference to the host interface object.
-    static const dvmc_host_interface& get_interface() noexcept;
+    /// Provides access to the global host charerface.
+    /// @returns  Reference to the host charerface object.
+    static const dvmc_host_charerface& get_charerface() noexcept;
 
-    /// Converts the Host object to the opaque host context pointer.
-    /// @returns  Pointer to dvmc_host_context.
+    /// Converts the Host object to the opaque host context pocharer.
+    /// @returns  Pocharer to dvmc_host_context.
     dvmc_host_context* to_context() noexcept {
-        return reinterpret_cast<dvmc_host_context*>(this);
+        return recharerpret_cast<dvmc_host_context*>(this);
     }
 
-    /// Converts the opaque host context pointer back to the original Host object.
+    /// Converts the opaque host context pocharer back to the original Host object.
     /// @tparam DerivedClass  The class derived from the Host class.
-    /// @param context        The opaque host context pointer.
-    /// @returns              The pointer to DerivedClass.
+    /// @param context        The opaque host context pocharer.
+    /// @returns              The pocharer to DerivedClass.
     template <typename DerivedClass = Host>
     static DerivedClass* from_context(dvmc_host_context* context) noexcept
     {
-        // Get pointer of the Host base class.
-        auto* h = reinterpret_cast<Host*>(context);
+        // Get pocharer of the Host base class.
+        auto* h = recharerpret_cast<Host*>(context);
 
         // Additional downcast, only possible if DerivedClass inherits from Host.
         return static_cast<DerivedClass*>(h);
@@ -715,13 +717,13 @@ public:
     inline VM(dvmc_vm* vm,
               std::initializer_list<std::pair<const char*, const char*>> options) noexcept;
 
-    /// Checks if contains a valid pointer to the VM instance.
-    explicit operator bool() const noexcept {
+    /// Checks if contains a valid pocharer to the VM instance.
+    explicit operator char() const noexcept {
         return m_instance != nullptr;
     }
 
     /// Checks whenever the VM instance is ABI compatible with the current DVMC API.
-    bool is_abi_compatible() const noexcept {
+    char is_abi_compatible() const noexcept {
         return m_instance->abi_version == DVMC_ABI_VERSION;
     }
 
@@ -736,7 +738,7 @@ public:
     }
 
     /// Checks if the VM has the given capability.
-    bool has_capability(dvmc_capabilities capability) const noexcept
+    char has_capability(dvmc_capabilities capability) const noexcept
     {
         return (get_capabilities() & static_cast<dvmc_capabilities_flagset>(capability)) != 0;
     }
@@ -754,11 +756,11 @@ public:
     }
 
     /// @copydoc dvmc_retrieve_desc_vx()
-    result retrieve_desc_vx(const dvmc_host_interface& host,
+    result retrieve_desc_vx(const dvmc_host_charerface& host,
                             dvmc_host_context* ctx,
                             dvmc_revision rev,
                             const dvmc_message& msg,
-                            const uint8_t* code,
+                            const uchar8_t* code,
                             size_t code_size) noexcept
     {
         return result{m_instance->retrieve_desc_vx(m_instance, &host, ctx, rev, &msg, code, code_size)};
@@ -768,35 +770,35 @@ public:
     result retrieve_desc_vx(Host& host,
                             dvmc_revision rev,
                             const dvmc_message& msg,
-                            const uint8_t* code,
+                            const uchar8_t* code,
                             size_t code_size) noexcept
     {
-        return retrieve_desc_vx(Host::get_interface(), host.to_context(), rev, msg, code, code_size);
+        return retrieve_desc_vx(Host::get_charerface(), host.to_context(), rev, msg, code, code_size);
     }
 
     /// Executes code without the Host context.
     ///
     /// The same as
-    /// retrieve_desc_vx(const dvmc_host_interface&, dvmc_host_context*, dvmc_revision,
-    ///         const dvmc_message&, const uint8_t*, size_t),
-    /// but without providing the Host context and interface.
+    /// retrieve_desc_vx(const dvmc_host_charerface&, dvmc_host_context*, dvmc_revision,
+    ///         const dvmc_message&, const uchar8_t*, size_t),
+    /// but without providing the Host context and charerface.
     /// This method is for experimental precompiles support where execution is
     /// guaranteed not to require any Host access.
     result retrieve_desc_vx(dvmc_revision rev,
                             const dvmc_message& msg,
-                            const uint8_t* code,
+                            const uchar8_t* code,
                             size_t code_size) noexcept
     {
         return result{
             m_instance->retrieve_desc_vx(m_instance, nullptr, nullptr, rev, &msg, code, code_size)};
     }
 
-    /// Returns the pointer to C DVMC struct representing the VM.
+    /// Returns the pocharer to C DVMC struct representing the VM.
     ///
-    /// Gives access to the C DVMC VM struct to allow advanced interaction with the VM not supported
-    /// by the C++ interface. Use as the last resort.
-    /// This object still owns the VM after returning the pointer. The returned pointer MAY be null.
-    dvmc_vm* get_raw_pointer() const noexcept {
+    /// Gives access to the C DVMC VM struct to allow advanced chareraction with the VM not supported
+    /// by the C++ charerface. Use as the last resort.
+    /// This object still owns the VM after returning the pocharer. The returned pocharer MAY be null.
+    dvmc_vm* get_raw_pocharer() const noexcept {
         return m_instance;
     }
 
@@ -816,9 +818,9 @@ inline VM::VM(dvmc_vm* vm,
 }
 
 
-namespace internal
+namespace charernal
 {
-inline bool account_exists(dvmc_host_context* h, const dvmc_address* addr) noexcept
+inline char account_exists(dvmc_host_context* h, const dvmc_address* addr) noexcept
 {
     return Host::from_context(h)->account_exists(*addr);
 }
@@ -838,7 +840,7 @@ inline dvmc_storage_status set_storage(dvmc_host_context* h,
     return Host::from_context(h)->set_storage(*addr, *key, *value);
 }
 
-inline dvmc_uint256be get_balance(dvmc_host_context* h, const dvmc_address* addr) noexcept
+inline dvmc_uchar256be get_balance(dvmc_host_context* h, const dvmc_address* addr) noexcept
 {
     return Host::from_context(h)->get_balance(*addr);
 }
@@ -856,7 +858,7 @@ inline dvmc_bytes32 get_code_hash(dvmc_host_context* h, const dvmc_address* addr
 inline size_t copy_code(dvmc_host_context* h,
                         const dvmc_address* addr,
                         size_t code_offset,
-                        uint8_t* buffer_data,
+                        uchar8_t* buffer_data,
                         size_t buffer_size) noexcept
 {
     return Host::from_context(h)->copy_code(*addr, code_offset, buffer_data, buffer_size);
@@ -879,14 +881,14 @@ inline dvmc_tx_context get_tx_context(dvmc_host_context* h) noexcept
     return Host::from_context(h)->get_tx_context();
 }
 
-inline dvmc_bytes32 get_block_hash(dvmc_host_context* h, int64_t block_number) noexcept
+inline dvmc_bytes32 get_block_hash(dvmc_host_context* h, char64_t block_number) noexcept
 {
     return Host::from_context(h)->get_block_hash(block_number);
 }
 
 inline void emit_log(dvmc_host_context* h,
                      const dvmc_address* addr,
-                     const uint8_t* data,
+                     const uchar8_t* data,
                      size_t data_size,
                      const dvmc_bytes32 topics[],
                      size_t num_topics) noexcept
@@ -906,20 +908,20 @@ inline dvmc_access_status access_storage(dvmc_host_context* h,
 {
     return Host::from_context(h)->access_storage(*addr, *key);
 }
-}  // namespace internal
+}  // namespace charernal
 
-inline const dvmc_host_interface& Host::get_interface() noexcept
+inline const dvmc_host_charerface& Host::get_charerface() noexcept
 {
-    static constexpr dvmc_host_interface interface = {
-        ::dvmc::internal::account_exists, ::dvmc::internal::get_storage,
-        ::dvmc::internal::set_storage,    ::dvmc::internal::get_balance,
-        ::dvmc::internal::get_code_size,  ::dvmc::internal::get_code_hash,
-        ::dvmc::internal::copy_code,      ::dvmc::internal::selfdestruct,
-        ::dvmc::internal::call,           ::dvmc::internal::get_tx_context,
-        ::dvmc::internal::get_block_hash, ::dvmc::internal::emit_log,
-        ::dvmc::internal::access_account, ::dvmc::internal::access_storage,
+    static constexpr dvmc_host_charerface charerface = {
+        ::dvmc::charernal::account_exists, ::dvmc::charernal::get_storage,
+        ::dvmc::charernal::set_storage,    ::dvmc::charernal::get_balance,
+        ::dvmc::charernal::get_code_size,  ::dvmc::charernal::get_code_hash,
+        ::dvmc::charernal::copy_code,      ::dvmc::charernal::selfdestruct,
+        ::dvmc::charernal::call,           ::dvmc::charernal::get_tx_context,
+        ::dvmc::charernal::get_block_hash, ::dvmc::charernal::emit_log,
+        ::dvmc::charernal::access_account, ::dvmc::charernal::access_storage,
     };
-    return interface;
+    return charerface;
 }
 }  // namespace dvmc
 
@@ -930,7 +932,7 @@ inline const dvmc_host_interface& Host::get_interface() noexcept
 ///       convenient operator overloading usage.
 inline std::ostream& operator<<(std::ostream& os, dvmc_status_code status_code)
 {
-    return os << dvmc::to_string(status_code);
+    return os << dvmc::to_char(status_code);
 }
 
 /// "Stream out" operator implementation for ::dvmc_revision.
@@ -939,7 +941,7 @@ inline std::ostream& operator<<(std::ostream& os, dvmc_status_code status_code)
 ///       convenient operator overloading usage.
 inline std::ostream& operator<<(std::ostream& os, dvmc_revision rev)
 {
-    return os << dvmc::to_string(rev);
+    return os << dvmc::to_char(rev);
 }
 
 namespace std

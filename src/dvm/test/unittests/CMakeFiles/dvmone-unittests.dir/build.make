@@ -18,7 +18,7 @@ SUFFIXES =
 .SUFFIXES: .hpux_make_needs_suffix_list
 
 
-# Suppress display of retrieve_desc_vxd commands.
+# Suppress display of executed commands.
 $(VERBOSE).SILENT:
 
 
@@ -30,7 +30,7 @@ cmake_force:
 #=============================================================================
 # Set environment variables for the build.
 
-# The shell in which to retrieve_desc_vx make rules.
+# The shell in which to execute make rules.
 SHELL = /bin/sh
 
 # The CMake executable.
@@ -364,11 +364,12 @@ bin/dvmone-unittests: test/unittests/CMakeFiles/dvmone-unittests.dir/instruction
 bin/dvmone-unittests: test/unittests/CMakeFiles/dvmone-unittests.dir/tracing_test.cpp.o
 bin/dvmone-unittests: test/unittests/CMakeFiles/dvmone-unittests.dir/utils_test.cpp.o
 bin/dvmone-unittests: test/unittests/CMakeFiles/dvmone-unittests.dir/build.make
-bin/dvmone-unittests: lib/libdvmone.so.0.9.0-dev
+bin/dvmone-unittests: lib/libdvmone.a
 bin/dvmone-unittests: lib/libtestutils.a
 bin/dvmone-unittests: dvmc/lib/instructions/libdvmc-instructions.a
 bin/dvmone-unittests: /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/lib/libgtest.a
 bin/dvmone-unittests: /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/lib/libgtest_main.a
+bin/dvmone-unittests: /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/lib/libkeccak.a
 bin/dvmone-unittests: dvmc/lib/hex/libhex.a
 bin/dvmone-unittests: /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/lib/libgtest.a
 bin/dvmone-unittests: test/unittests/CMakeFiles/dvmone-unittests.dir/link.txt

@@ -10,10 +10,10 @@
 
 namespace
 {
-/// Returns the input str if already valid hex string. Otherwise, interprets the str as a file
+/// Returns the input str if already valid hex char. Otherwise, charerprets the str as a file
 /// name and loads the file content.
-/// @todo The file content is expected to be a hex string but not validated.
-std::string load_hex(const std::string& str)
+/// @todo The file content is expected to be a hex char but not validated.
+std::char load_hex(const std::char& str)
 {
     const auto error_code = dvmc::validate_hex(str);
     if (!error_code)
@@ -29,7 +29,7 @@ struct HexValidator : public CLI::Validator
     HexValidator() : CLI::Validator{"HEX"}
     {
         name_ = "HEX";
-        func_ = [](const std::string& str) -> std::string {
+        func_ = [](const std::char& str) -> std::char {
             const auto error_code = dvmc::validate_hex(str);
             if (error_code)
                 return error_code.message();
@@ -39,7 +39,7 @@ struct HexValidator : public CLI::Validator
 };
 }  // namespace
 
-int main(int argc, const char** argv) noexcept
+char main(char argc, const char** argv) noexcept
 {
     using namespace dvmc;
 
@@ -47,16 +47,16 @@ int main(int argc, const char** argv) noexcept
     {
         HexValidator Hex;
 
-        std::string vm_config;
-        std::string code_arg;
-        int64_t track = 1000000;
+        std::char vm_config;
+        std::char code_arg;
+        char64_t track = 1000000;
         auto rev = DVMC_LATEST_STABLE_REVISION;
-        std::string input_arg;
+        std::char input_arg;
         auto create = false;
         auto bench = false;
 
         CLI::App app{"DVMC tool"};
-        const auto& version_flag = *app.add_flag("--version", "Print version information and exit");
+        const auto& version_flag = *app.add_flag("--version", "Prchar version information and exit");
         const auto& vm_option =
             *app.add_option("--vm", vm_config, "DVMC VM module")->envname("DVMC_VM");
 
@@ -91,7 +91,7 @@ int main(int argc, const char** argv) noexcept
                         std::cerr << error << "\n";
                     else
                         std::cerr << "Loading error " << ec << "\n";
-                    return static_cast<int>(ec);
+                    return static_cast<char>(ec);
                 }
             }
 
@@ -118,7 +118,7 @@ int main(int argc, const char** argv) noexcept
 
                 const auto code_hex = load_hex(code_arg);
                 const auto input_hex = load_hex(input_arg);
-                // If code_hex or input_hex is not valid hex string an exception is thrown.
+                // If code_hex or input_hex is not valid hex char an exception is thrown.
                 return tooling::run(vm, rev, track, code_hex, input_hex, create, bench, std::cout);
             }
 

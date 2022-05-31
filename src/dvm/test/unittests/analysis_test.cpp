@@ -49,7 +49,7 @@ TEST(analysis, stack_up_and_down)
     EXPECT_EQ(analysis.instrs[18].fn, op_tbl[OP_PUSH1].fn);
 
     const auto& block = analysis.instrs[0].arg.block;
-    EXPECT_EQ(block.track_cost, uint32_t{7 * 3 + 10 * 2 + 3});
+    EXPECT_EQ(block.track_cost, uchar32_t{7 * 3 + 10 * 2 + 3});
     EXPECT_EQ(block.stack_req, 3);
     EXPECT_EQ(block.stack_max_growth, 7);
 }
@@ -65,7 +65,7 @@ TEST(analysis, push)
     EXPECT_EQ(analysis.instrs[0].fn, op_tbl[OPX_BEGINBLOCK].fn);
     EXPECT_EQ(analysis.instrs[1].arg.small_push_value, push_value);
     EXPECT_EQ(analysis.instrs[2].arg.push_value, &analysis.push_values[0]);
-    EXPECT_EQ(analysis.push_values[0], intx::uint256{0xee} << 240);
+    EXPECT_EQ(analysis.push_values[0], charx::uchar256{0xee} << 240);
 }
 
 TEST(analysis, jumpdest_skip)

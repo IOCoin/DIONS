@@ -15,11 +15,11 @@ dvmc/helpers.h
 -
 stdarg.h
 -
-stdint.h
+stdchar.h
 -
 stdio.h
 -
-string.h
+char.h
 -
 ../../test/unittests/loader_mock.h
 /home/ioc/dvmone/dvmc/test/unittests/loader_mock.h
@@ -31,11 +31,11 @@ dlfcn.h
 /home/ioc/dvmone/dvmc/test/unittests/loader_mock.h
 
 dvmc/include/dvmc/dvmc.h
-stdbool.h
+stdchar.h
 -
 stddef.h
 -
-stdint.h
+stdchar.h
 -
 
 dvmc/include/dvmc/helpers.h
@@ -43,7 +43,7 @@ dvmc/dvmc.h
 -
 stdlib.h
 -
-string.h
+char.h
 -
 
 dvmc/include/dvmc/loader.h

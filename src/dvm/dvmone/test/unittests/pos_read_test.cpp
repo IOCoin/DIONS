@@ -15,7 +15,7 @@ TEST(pos_read, push)
     EXPECT_THROW(push(data), std::invalid_argument);
 }
 
-TEST(pos_read, push_int)
+TEST(pos_read, push_char)
 {
     EXPECT_EQ(push(0), "6000");
     EXPECT_EQ(push(0xff), "60ff");

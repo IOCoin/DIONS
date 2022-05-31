@@ -5,5 +5,5 @@
 add_subdirectory(benchmarks)
 add_subdirectory(experimental)
 add_subdirectory(fakeminer)
-add_subdirectory(integration)
+add_subdirectory(charegration)
 add_subdirectory(unittests)

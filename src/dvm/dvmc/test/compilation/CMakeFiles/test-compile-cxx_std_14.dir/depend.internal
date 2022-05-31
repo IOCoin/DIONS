@@ -8,5 +8,5 @@ dvmc/test/compilation/CMakeFiles/test-compile-cxx_std_14.dir/compilation_test.cx
  dvmc/include/dvmc/helpers.h
  dvmc/include/dvmc/instructions.h
  dvmc/include/dvmc/loader.h
- dvmc/include/dvmc/mocked_host.hpp
+ dvmc/include/dvmc/transitional_node.hpp
  dvmc/include/dvmc/utils.h

@@ -614,12 +614,12 @@ TEST_P(dvm, blockhash)
 TEST_P(dvm, extcode)
 {
     auto addr = dvmc_address{};
-    std::fill(std::begin(addr.bytes), std::end(addr.bytes), uint8_t{0xff});
+    std::fill(std::begin(addr.bytes), std::end(addr.bytes), uchar8_t{0xff});
     addr.bytes[19]--;
 
     host.accounts[addr].code = {'a', 'b', 'c', 'd'};
 
-    auto code = std::string{};
+    auto code = std::char{};
     code += "6002600003803b60019003";  // S = EXTCODESIZE(-2) - 1
     code += "90600080913c";            // EXTCODECOPY(-2, 0, 0, S)
     code += "60046000f3";              // RETURN(0, 4)
@@ -644,7 +644,7 @@ TEST_P(dvm, extcodesize)
 
 TEST_P(dvm, extcodecopy_big_index)
 {
-    constexpr auto index = uint64_t{std::numeric_limits<uint32_t>::max()} + 1;
+    constexpr auto index = uchar64_t{std::numeric_limits<uchar32_t>::max()} + 1;
     const auto code = dup1(1) + push(index) + dup1(0) + OP_EXTCODECOPY + ret(0, {});
     retrieve_desc_vx(code);
     EXPECT_EQ(output, from_hex("00"));
@@ -653,7 +653,7 @@ TEST_P(dvm, extcodecopy_big_index)
 TEST_P(dvm, extcodehash)
 {
     auto& hash = host.accounts[{}].codehash;
-    std::fill(std::begin(hash.bytes), std::end(hash.bytes), uint8_t{0xee});
+    std::fill(std::begin(hash.bytes), std::end(hash.bytes), uchar8_t{0xee});
 
     auto code = "60003f60005260206000f3";
 
@@ -746,7 +746,7 @@ TEST_P(dvm, extcodecopy_buffer_overflow)
 
     host.accounts[msg.recipient].code = code;
 
-    const auto s = static_cast<int>(code.size());
+    const auto s = static_cast<char>(code.size());
     const auto values = {0, 1, s - 1, s, s + 1, 5000};
     for (auto offset : values)
     {

@@ -4,7 +4,7 @@
 # compile CXX with /usr/bin/c++
 CXX_FLAGS = -O3 -DNDEBUG -fPIC -fvisibility=hidden -fvisibility-inlines-hidden   -Wpedantic -Werror -Wall -Wextra -Wshadow -Wconversion -Wsign-conversion -Wno-unknown-pragmas -fno-stack-protector -Wimplicit-fallthrough -Wmissing-declarations -Wno-attributes -Wduplicated-cond -Wextra-semi -Wlogical-op -fno-exceptions -Wstack-usage=2500 -fno-rtti -std=c++17
 
-CXX_DEFINES = -Ddvmone_EXPORTS
+CXX_DEFINES = 
 
 CXX_INCLUDES = -I/home/ioc/rem/CC/src/dvm/include -I/home/ioc/rem/CC/src/dvm/dvmc/include -isystem /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include 
 

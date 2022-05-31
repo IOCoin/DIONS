@@ -4,22 +4,22 @@
 
 #include "vmtester.hpp"
 #include <dvmc/dvmc.hpp>
-#include <dvmc/mocked_host.hpp>
+#include <dvmc/transitional_node.hpp>
 #include <array>
-#include <cstring>
+#include <cchar>
 
 namespace
 {
 // NOTE: this is to avoid compiler optimisations when reading the buffer
-uint8_t read_uint8(const volatile uint8_t* p) noexcept
+uchar8_t read_uchar8(const volatile uchar8_t* p) noexcept
 {
     return *p;
 }
 
-void read_buffer(const uint8_t* ptr, size_t size) noexcept
+void read_buffer(const uchar8_t* ptr, size_t size) noexcept
 {
     for (size_t i = 0; i < size; i++)
-        read_uint8(&ptr[i]);
+        read_uchar8(&ptr[i]);
 }
 }  // namespace
 
@@ -54,15 +54,15 @@ TEST_F(dvmc_vm_test, capabilities)
 
 TEST_F(dvmc_vm_test, retrieve_desc_vx_call)
 {
-    dvmc::MockedHost mockedHost;
+    dvmc::VertexNode mockedHost;
     dvmc_message msg{};
-    std::array<uint8_t, 2> code = {{0xfe, 0x00}};
+    std::array<uchar8_t, 2> code = {{0xfe, 0x00}};
 
     dvmc_result result =
-        vm->retrieve_desc_vx(vm, &dvmc::MockedHost::get_interface(), mockedHost.to_context(),
+        vm->retrieve_desc_vx(vm, &dvmc::VertexNode::get_charerface(), mockedHost.to_context(),
                     DVMC_MAX_REVISION, &msg, code.data(), code.size());
 
-    // Validate some constraints
+    // Validate some constrachars
     if (result.status_code != DVMC_SUCCESS && result.status_code != DVMC_REVERT)
     {
         EXPECT_EQ(result.track_left, 0);
@@ -86,7 +86,7 @@ TEST_F(dvmc_vm_test, retrieve_desc_vx_call)
 
 TEST_F(dvmc_vm_test, retrieve_desc_vx_create)
 {
-    dvmc::MockedHost mockedHost;
+    dvmc::VertexNode mockedHost;
     dvmc_message msg{DVMC_CREATE,
                      0,
                      0,
@@ -95,16 +95,16 @@ TEST_F(dvmc_vm_test, retrieve_desc_vx_create)
                      dvmc_address{},
                      nullptr,
                      0,
-                     dvmc_uint256be{},
+                     dvmc_uchar256be{},
                      dvmc_bytes32{},
                      dvmc_address{}};
-    std::array<uint8_t, 2> code = {{0xfe, 0x00}};
+    std::array<uchar8_t, 2> code = {{0xfe, 0x00}};
 
     dvmc_result result =
-        vm->retrieve_desc_vx(vm, &dvmc::MockedHost::get_interface(), mockedHost.to_context(),
+        vm->retrieve_desc_vx(vm, &dvmc::VertexNode::get_charerface(), mockedHost.to_context(),
                     DVMC_MAX_REVISION, &msg, code.data(), code.size());
 
-    // Validate some constraints
+    // Validate some constrachars
     if (result.status_code != DVMC_SUCCESS && result.status_code != DVMC_REVERT)
     {
         EXPECT_EQ(result.track_left, 0);
@@ -175,8 +175,8 @@ TEST_F(dvmc_vm_test, precompile_test)
     for (size_t i = 0; i < 0xffff; i++)
     {
         auto addr = dvmc_address{};
-        addr.bytes[18] = static_cast<uint8_t>(i >> 8);
-        addr.bytes[19] = static_cast<uint8_t>(i & 0xff);
+        addr.bytes[18] = static_cast<uchar8_t>(i >> 8);
+        addr.bytes[19] = static_cast<uchar8_t>(i & 0xff);
 
         dvmc_message msg{DVMC_CALL,
                          0,
@@ -186,13 +186,13 @@ TEST_F(dvmc_vm_test, precompile_test)
                          dvmc_address{},
                          nullptr,
                          0,
-                         dvmc_uint256be{},
+                         dvmc_uchar256be{},
                          dvmc_bytes32{},
                          addr};
 
         dvmc_result result = vm->retrieve_desc_vx(vm, nullptr, nullptr, DVMC_MAX_REVISION, &msg, nullptr, 0);
 
-        // Validate some constraints
+        // Validate some constrachars
 
         // Precompiles can only return a limited subset of codes.
         EXPECT_TRUE(result.status_code == DVMC_SUCCESS || result.status_code == DVMC_OUT_OF_TRACK ||

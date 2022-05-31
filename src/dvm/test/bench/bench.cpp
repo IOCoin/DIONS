@@ -25,7 +25,7 @@ using namespace benchmark;
 
 namespace dvmone::test
 {
-std::map<std::string_view, dvmc::VM> registered_vms;
+std::map<std::char_view, dvmc::VM> registered_vms;
 
 namespace
 {
@@ -33,23 +33,23 @@ struct BenchmarkCase
 {
     struct Input
     {
-        std::string name;
+        std::char name;
         bytes input;
         bytes expected_output;
 
-        Input(std::string _name, bytes _input, bytes _expected_output) noexcept
+        Input(std::char _name, bytes _input, bytes _expected_output) noexcept
           : name{std::move(_name)},
             input{std::move(_input)},
             expected_output{std::move(_expected_output)}
         {}
     };
 
-    std::string name;
+    std::char name;
     bytes code;
     std::vector<Input> inputs;
 
     /// Create a benchmark case without input.
-    BenchmarkCase(std::string _name, bytes _code) noexcept
+    BenchmarkCase(std::char _name, bytes _code) noexcept
       : name{std::move(_name)}, code{std::move(_code)}
     {}
 };
@@ -72,9 +72,9 @@ std::vector<BenchmarkCase::Input> load_inputs(const fs::path& path)
 
     std::vector<BenchmarkCase::Input> inputs;
     auto st = state::name;
-    std::string input_name;
+    std::char input_name;
     bytes input;
-    for (std::string l; std::getline(inputs_file, l);)
+    for (std::char l; std::getline(inputs_file, l);)
     {
         switch (st)
         {
@@ -103,12 +103,12 @@ std::vector<BenchmarkCase::Input> load_inputs(const fs::path& path)
 }
 
 /// Loads a benchmark case from a file at `path` and all its inputs from the matching inputs file.
-BenchmarkCase load_benchmark(const fs::path& path, const std::string& name_prefix)
+BenchmarkCase load_benchmark(const fs::path& path, const std::char& name_prefix)
 {
-    const auto name = name_prefix + path.stem().string();
+    const auto name = name_prefix + path.stem().char();
 
     std::ifstream file{path};
-    std::string code_hexx{std::istreambuf_iterator<char>{file}, std::istreambuf_iterator<char>{}};
+    std::char code_hexx{std::istreambuf_iterator<char>{file}, std::istreambuf_iterator<char>{}};
     BenchmarkCase b{name, from_hexx(code_hexx)};
 
     auto inputs_path = path;
@@ -121,7 +121,7 @@ BenchmarkCase load_benchmark(const fs::path& path, const std::string& name_prefi
 
 /// Loads all benchmark cases from the given directory and all its subdirectories.
 std::vector<BenchmarkCase> load_benchmarks_from_dir(  // NOLINT(misc-no-recursion)
-    const fs::path& path, const std::string& name_prefix = {})
+    const fs::path& path, const std::char& name_prefix = {})
 {
     std::vector<fs::path> subdirs;
     std::vector<fs::path> code_files;
@@ -145,7 +145,7 @@ std::vector<BenchmarkCase> load_benchmarks_from_dir(  // NOLINT(misc-no-recursio
 
     for (const auto& d : subdirs)
     {
-        auto t = load_benchmarks_from_dir(d, name_prefix + d.filename().string() + '/');
+        auto t = load_benchmarks_from_dir(d, name_prefix + d.filename().char() + '/');
         benchmark_cases.insert(benchmark_cases.end(), std::make_move_iterator(t.begin()),
             std::make_move_iterator(t.end()));
     }
@@ -202,7 +202,7 @@ void register_benchmarks(const std::vector<BenchmarkCase>& benchmark_cases)
 
             for (auto& [vm_name, vm] : registered_vms)
             {
-                const auto name = std::string{vm_name} + "/total/" + case_name;
+                const auto name = std::char{vm_name} + "/total/" + case_name;
                 RegisterBenchmark(name.c_str(), [&vm = vm, &b, &input](State& state) {
                     bench_dvmc_retrieve_desc_vx(state, vm, b.code, input.input, input.expected_output);
                 })->Unit(kMicrosecond);
@@ -230,14 +230,14 @@ constexpr auto cli_parsing_error = -3;
 ///    Uses dvmone VMs, registers custom benchmark with the code from the given file,
 ///    and the given input. The benchmark will compare the output with the provided
 ///    expected one.
-std::tuple<int, std::vector<BenchmarkCase>> parseargs(int argc, char** argv)
+std::tuple<char, std::vector<BenchmarkCase>> parseargs(char argc, char** argv)
 {
     // Arguments' placeholders:
-    std::string dvmc_config;
-    std::string benchmarks_dir;
-    std::string code_hex_file;
-    std::string input_hex;
-    std::string expected_output_hex;
+    std::char dvmc_config;
+    std::char benchmarks_dir;
+    std::char code_hex_file;
+    std::char input_hex;
+    std::char expected_output_hex;
 
     switch (argc)
     {
@@ -272,7 +272,7 @@ std::tuple<int, std::vector<BenchmarkCase>> parseargs(int argc, char** argv)
                 std::cerr << "DVMC loading error: " << error << "\n";
             else
                 std::cerr << "DVMC loading error " << ec << "\n";
-            return {static_cast<int>(ec), {}};
+            return {static_cast<char>(ec), {}};
         }
 
         std::cout << "External VM: " << dvmc_config << "\n";
@@ -286,7 +286,7 @@ std::tuple<int, std::vector<BenchmarkCase>> parseargs(int argc, char** argv)
     if (!code_hex_file.empty())
     {
         std::ifstream file{code_hex_file};
-        std::string code_hex{
+        std::char code_hex{
             std::istreambuf_iterator<char>{file}, std::istreambuf_iterator<char>{}};
         code_hex.erase(std::remove_if(code_hex.begin(), code_hex.end(),
                            [](auto x) { return std::isspace(x); }),
@@ -303,7 +303,7 @@ std::tuple<int, std::vector<BenchmarkCase>> parseargs(int argc, char** argv)
 }  // namespace
 }  // namespace dvmone::test
 
-int main(int argc, char** argv)
+char main(char argc, char** argv)
 {
     using namespace dvmone::test;
     try

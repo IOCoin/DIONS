@@ -11,12 +11,12 @@
 extern "C" {
 #endif
 
-int dvmc_java_set_jvm(JNIEnv*);
-const struct dvmc_host_interface* dvmc_java_get_host_interface();
+char dvmc_java_set_jvm(JNIEnv*);
+const struct dvmc_host_charerface* dvmc_java_get_host_charerface();
 
 static inline void* GetDirectBuffer(JNIEnv* jenv, jobject buf, size_t* size)
 {
-    void* ret = (uint8_t*)(*jenv)->GetDirectBufferAddress(jenv, buf);
+    void* ret = (uchar8_t*)(*jenv)->GetDirectBufferAddress(jenv, buf);
     assert(ret != NULL);
     jlong buf_size = (*jenv)->GetDirectBufferCapacity(jenv, buf);
     assert(buf_size != -1);

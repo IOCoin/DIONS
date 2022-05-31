@@ -122,18 +122,18 @@ dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/loader_test.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/dvmc-unittests.dir/loader_test.cpp.s"
 	cd /home/ioc/dvmone/dvmc/test/unittests && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ioc/dvmone/dvmc/test/unittests/loader_test.cpp -o CMakeFiles/dvmc-unittests.dir/loader_test.cpp.s
 
-dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/mocked_host_test.cpp.o: dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/flags.make
-dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/mocked_host_test.cpp.o: dvmc/test/unittests/mocked_host_test.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ioc/dvmone/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/mocked_host_test.cpp.o"
-	cd /home/ioc/dvmone/dvmc/test/unittests && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/dvmc-unittests.dir/mocked_host_test.cpp.o -c /home/ioc/dvmone/dvmc/test/unittests/mocked_host_test.cpp
+dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/transitional_node_test.cpp.o: dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/flags.make
+dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/transitional_node_test.cpp.o: dvmc/test/unittests/transitional_node_test.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ioc/dvmone/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/transitional_node_test.cpp.o"
+	cd /home/ioc/dvmone/dvmc/test/unittests && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/dvmc-unittests.dir/transitional_node_test.cpp.o -c /home/ioc/dvmone/dvmc/test/unittests/transitional_node_test.cpp
 
-dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/mocked_host_test.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/dvmc-unittests.dir/mocked_host_test.cpp.i"
-	cd /home/ioc/dvmone/dvmc/test/unittests && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ioc/dvmone/dvmc/test/unittests/mocked_host_test.cpp > CMakeFiles/dvmc-unittests.dir/mocked_host_test.cpp.i
+dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/transitional_node_test.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/dvmc-unittests.dir/transitional_node_test.cpp.i"
+	cd /home/ioc/dvmone/dvmc/test/unittests && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ioc/dvmone/dvmc/test/unittests/transitional_node_test.cpp > CMakeFiles/dvmc-unittests.dir/transitional_node_test.cpp.i
 
-dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/mocked_host_test.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/dvmc-unittests.dir/mocked_host_test.cpp.s"
-	cd /home/ioc/dvmone/dvmc/test/unittests && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ioc/dvmone/dvmc/test/unittests/mocked_host_test.cpp -o CMakeFiles/dvmc-unittests.dir/mocked_host_test.cpp.s
+dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/transitional_node_test.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/dvmc-unittests.dir/transitional_node_test.cpp.s"
+	cd /home/ioc/dvmone/dvmc/test/unittests && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ioc/dvmone/dvmc/test/unittests/transitional_node_test.cpp -o CMakeFiles/dvmc-unittests.dir/transitional_node_test.cpp.s
 
 dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/tooling_test.cpp.o: dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/flags.make
 dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/tooling_test.cpp.o: dvmc/test/unittests/tooling_test.cpp
@@ -168,7 +168,7 @@ dvmc__unittests_OBJECTS = \
 "CMakeFiles/dvmc-unittests.dir/helpers_test.cpp.o" \
 "CMakeFiles/dvmc-unittests.dir/instructions_test.cpp.o" \
 "CMakeFiles/dvmc-unittests.dir/loader_test.cpp.o" \
-"CMakeFiles/dvmc-unittests.dir/mocked_host_test.cpp.o" \
+"CMakeFiles/dvmc-unittests.dir/transitional_node_test.cpp.o" \
 "CMakeFiles/dvmc-unittests.dir/tooling_test.cpp.o" \
 "CMakeFiles/dvmc-unittests.dir/hex_test.cpp.o"
 
@@ -180,7 +180,7 @@ bin/dvmc-unittests: dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/trans_log_
 bin/dvmc-unittests: dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/helpers_test.cpp.o
 bin/dvmc-unittests: dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/instructions_test.cpp.o
 bin/dvmc-unittests: dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/loader_test.cpp.o
-bin/dvmc-unittests: dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/mocked_host_test.cpp.o
+bin/dvmc-unittests: dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/transitional_node_test.cpp.o
 bin/dvmc-unittests: dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/tooling_test.cpp.o
 bin/dvmc-unittests: dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/hex_test.cpp.o
 bin/dvmc-unittests: dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/build.make

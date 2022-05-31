@@ -6,28 +6,28 @@
 
 #IncludeRegexTransform: 
 
-/home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/intx/intx.hpp
+/home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/charx/charx.hpp
 algorithm
 -
 cassert
 -
 climits
 -
-cstdint
+cstdchar
 -
-cstring
+cchar
 -
 limits
 -
 stdexcept
 -
-string
+char
 -
 tuple
 -
 type_traits
 -
-intrin.h
+charrin.h
 -
 
 /home/ioc/rem/CC/src/dvm/test/utils/dump.cpp
@@ -49,11 +49,11 @@ dvmone/advanced_analysis.hpp
 -
 
 dvmc/include/dvmc/dvmc.h
-stdbool.h
+stdchar.h
 -
 stddef.h
 -
-stdint.h
+stdchar.h
 -
 
 dvmc/include/dvmc/dvmc.hpp
@@ -69,23 +69,25 @@ ostream
 -
 utility
 -
+boost/serialization/base_object.hpp
+-
 
 dvmc/include/dvmc/helpers.h
 dvmc/dvmc.h
 -
 stdlib.h
 -
-string.h
+char.h
 -
 
 dvmc/include/dvmc/hex.hpp
-cstdint
+cstdchar
 -
 iterator
 -
-string
+char
 -
-string_view
+char_view
 -
 system_error
 -
@@ -107,11 +109,11 @@ dvmc/instructions.h
 -
 dvmc/utils.h
 -
-intx/intx.hpp
+charx/charx.hpp
 -
 array
 -
-cstdint
+cstdchar
 -
 vector
 -
@@ -119,9 +121,9 @@ vector
 lib/dvmone/execution_state.hpp
 dvmc/dvmc.hpp
 -
-intx/intx.hpp
+charx/charx.hpp
 -
-string
+char
 -
 vector
 -

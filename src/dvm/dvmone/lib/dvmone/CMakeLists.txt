@@ -4,8 +4,8 @@
 
 include(LibraryTools)
 
-hunter_add_package(intx)
-find_package(intx CONFIG REQUIRED)
+hunter_add_package(charx)
+find_package(charx CONFIG REQUIRED)
 
 add_library(dvmone
     ${include_dir}/dvmone/dvmone.h
@@ -30,7 +30,7 @@ add_library(dvmone
     vm.cpp
     vm.hpp
 )
-target_link_libraries(dvmone PUBLIC dvmc::dvmc intx::intx PRIVATE dvmc::instructions dvmc::hex ethash::keccak)
+target_link_libraries(dvmone PUBLIC dvmc::dvmc charx::charx PRIVATE dvmc::instructions dvmc::hex ethash::keccak)
 target_include_directories(dvmone PUBLIC
     $<BUILD_INTERFACE:${include_dir}>$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
@@ -41,7 +41,7 @@ if(CABLE_COMPILER_GNULIKE)
         $<$<CXX_COMPILER_ID:GNU>:-Wstack-usage=2500>
     )
     if(NOT SANITIZE MATCHES undefined)
-        # RTTI can be disabled except for UBSan which checks vptr integrity.
+        # RTTI can be disabled except for UBSan which checks vptr charegrity.
         target_compile_options(dvmone PRIVATE -fno-rtti)
     endif()
 endif()

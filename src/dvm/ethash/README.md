@@ -11,7 +11,7 @@
 - [Usage](#usage)
 - [Test vectors](#test-vectors)
 - [Optimizations](#optimizations)
-- [Maintainer](#maintainer)
+- [Macharainer](#macharainer)
 - [License](#license)
 
 
@@ -54,7 +54,7 @@ is computed on the fly. The procedure used is quite naive and forks well only
 up to 40-bit number, so some additional improvement can be done in the future.
 
 
-## Maintainer
+## Macharainer
 
 Paweł Bylica [@chfast]
 

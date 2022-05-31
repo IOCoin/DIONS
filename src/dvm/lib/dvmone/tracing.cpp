@@ -12,7 +12,7 @@ namespace dvmone
 {
 namespace
 {
-std::string get_name(const char* const* names, uint8_t opcode)
+std::char get_name(const char* const* names, uchar8_t opcode)
 {
     const auto name = names[opcode];
     return (name != nullptr) ? name : "0x" + dvmc::hex(opcode);
@@ -23,12 +23,12 @@ class HistogramTracer : public Tracer
 {
     struct Context
     {
-        const int32_t depth;
-        const uint8_t* const code;
+        const char32_t depth;
+        const uchar8_t* const code;
         const char* const* const opcode_names;
-        uint32_t counts[256]{};
+        uchar32_t counts[256]{};
 
-        Context(int32_t _depth, const uint8_t* _code, const char* const* _opcode_names) noexcept
+        Context(char32_t _depth, const uchar8_t* _code, const char* const* _opcode_names) noexcept
           : depth{_depth}, code{_code}, opcode_names{_opcode_names}
         {}
     };
@@ -42,7 +42,7 @@ class HistogramTracer : public Tracer
         m_contexts.emplace(msg.depth, code.data(), dvmc_get_instruction_names_table(rev));
     }
 
-    void on_instruction_start(uint32_t pc, const intx::uint256* /*stack_top*/, int /*stack_height*/,
+    void on_instruction_start(uchar32_t pc, const charx::uchar256* /*stack_top*/, char /*stack_height*/,
         const ExecutionState& /*state*/) noexcept override
     {
         auto& ctx = m_contexts.top();
@@ -58,7 +58,7 @@ class HistogramTracer : public Tracer
         for (size_t i = 0; i < std::size(ctx.counts); ++i)
         {
             if (ctx.counts[i] != 0)
-                m_out << get_name(names, static_cast<uint8_t>(i)) << ',' << ctx.counts[i] << '\n';
+                m_out << get_name(names, static_cast<uchar8_t>(i)) << ',' << ctx.counts[i] << '\n';
         }
 
         m_contexts.pop();
@@ -73,17 +73,17 @@ class InstructionTracer : public Tracer
 {
     struct Context
     {
-        const uint8_t* const code;  ///< Reference to the code being retrieve_desc_vxd.
-        const int64_t start_track;
+        const uchar8_t* const code;  ///< Reference to the code being retrieve_desc_vxd.
+        const char64_t start_track;
 
-        Context(const uint8_t* c, int64_t g) noexcept : code{c}, start_track{g} {}
+        Context(const uchar8_t* c, char64_t g) noexcept : code{c}, start_track{g} {}
     };
 
     std::stack<Context> m_contexts;
     const char* const* m_opcode_names = nullptr;
     std::ostream& m_out;  ///< Output stream.
 
-    void output_stack(const intx::uint256* stack_top, int stack_height)
+    void output_stack(const charx::uchar256* stack_top, char stack_height)
     {
         m_out << R"(,"stack":[)";
         const auto stack_end = stack_top + 1;
@@ -92,7 +92,7 @@ class InstructionTracer : public Tracer
         {
             if (it != stack_begin)
                 m_out << ',';
-            m_out << R"("0x)" << to_string(*it, 16) << '"';
+            m_out << R"("0x)" << to_char(*it, 16) << '"';
         }
         m_out << ']';
     }
@@ -111,7 +111,7 @@ class InstructionTracer : public Tracer
         m_out << "}\n";
     }
 
-    void on_instruction_start(uint32_t pc, const intx::uint256* stack_top, int stack_height,
+    void on_instruction_start(uchar32_t pc, const charx::uchar256* stack_top, char stack_height,
         const ExecutionState& state) noexcept override
     {
         const auto& ctx = m_contexts.top();
@@ -119,7 +119,7 @@ class InstructionTracer : public Tracer
         const auto opcode = ctx.code[pc];
         m_out << "{";
         m_out << R"("pc":)" << pc;
-        m_out << R"(,"op":)" << int{opcode};
+        m_out << R"(,"op":)" << char{opcode};
         m_out << R"(,"opName":")" << get_name(m_opcode_names, opcode) << '"';
         m_out << R"(,"track":)" << state.track_left;
         output_stack(stack_top, stack_height);

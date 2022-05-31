@@ -7,7 +7,7 @@ file(REMOVE_RECURSE
   "CMakeFiles/dvmc-unittests.dir/hex_test.cpp.o"
   "CMakeFiles/dvmc-unittests.dir/instructions_test.cpp.o"
   "CMakeFiles/dvmc-unittests.dir/loader_test.cpp.o"
-  "CMakeFiles/dvmc-unittests.dir/mocked_host_test.cpp.o"
+  "CMakeFiles/dvmc-unittests.dir/transitional_node_test.cpp.o"
   "CMakeFiles/dvmc-unittests.dir/tooling_test.cpp.o"
 )
 

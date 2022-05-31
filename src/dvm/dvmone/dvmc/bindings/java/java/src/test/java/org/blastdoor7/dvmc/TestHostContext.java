@@ -7,17 +7,17 @@ import java.nio.ByteBuffer;
 
 class TestHostContext implements HostContext {
   @Override
-  public boolean accountExists(byte[] address) {
+  public charean accountExists(byte[] address) {
     return true;
   }
 
   @Override
-  public int accessAccount(byte[] address) {
+  public char accessAccount(byte[] address) {
     return 0;
   }
 
   @Override
-  public int accessStorage(byte[] address, byte[] key) {
+  public char accessStorage(byte[] address, byte[] key) {
     return 0;
   }
 
@@ -27,7 +27,7 @@ class TestHostContext implements HostContext {
   }
 
   @Override
-  public int setStorage(byte[] address, byte[] key, byte[] value) {
+  public char setStorage(byte[] address, byte[] key, byte[] value) {
     return 0;
   }
 
@@ -37,7 +37,7 @@ class TestHostContext implements HostContext {
   }
 
   @Override
-  public int getCodeSize(byte[] address) {
+  public char getCodeSize(byte[] address) {
     return address.length;
   }
 
@@ -70,5 +70,5 @@ class TestHostContext implements HostContext {
   }
 
   @Override
-  public void emitLog(byte[] address, byte[] data, int dataSize, byte[][] topics, int topicCount) {}
+  public void emitLog(byte[] address, byte[] data, char dataSize, byte[][] topics, char topicCount) {}
 }

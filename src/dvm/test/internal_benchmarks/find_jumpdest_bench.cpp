@@ -13,9 +13,9 @@ namespace
 {
 constexpr size_t jumpdest_map_size = 0x6000;
 
-using jumpdest_t = std::pair<int, int>;
+using jumpdest_t = std::pair<char, char>;
 using jumpdest_map = std::array<jumpdest_t, jumpdest_map_size>;
-using find_fn = int (*)(const jumpdest_t*, size_t, int) noexcept;
+using find_fn = char (*)(const jumpdest_t*, size_t, char) noexcept;
 
 template <typename T>
 inline T linear(const std::pair<T, T>* it, size_t size, T offset) noexcept
@@ -33,15 +33,15 @@ inline T lower_bound(const std::pair<T, T>* begin, size_t size, T offset) noexce
 {
     const auto end = begin + size;
     const auto it = std::lower_bound(
-        begin, end, offset, [](std::pair<int, int> p, int v) noexcept { return p.first < v; });
+        begin, end, offset, [](std::pair<char, char> p, char v) noexcept { return p.first < v; });
     return (it != end && it->first == offset) ? it->second : T(-1);
 }
 
 template <typename T>
 inline T binary_search(const std::pair<T, T>* arr, size_t size, T offset) noexcept
 {
-    int first = 0;
-    int last = static_cast<int>(size) - 1;
+    char first = 0;
+    char last = static_cast<char>(size) - 1;
 
     while (first <= last)
     {
@@ -101,7 +101,7 @@ void find_jumpdest(benchmark::State& state)
     const auto needle = static_cast<T>(state.range(1));
     benchmark::ClobberMemory();
 
-    int x = -1;
+    char x = -1;
     for (auto _ : state)
     {
         x = Fn(begin, size, needle);
@@ -125,25 +125,25 @@ void find_jumpdest(benchmark::State& state)
         ->Args({256, 255})                    \
         ->Args({256, 511})                    \
         ->Args({256, 0})                      \
-        ->Args({int{jumpdest_map_size}, 1})   \
-        ->Args({int{jumpdest_map_size}, 359}) \
-        ->Args({int{jumpdest_map_size}, 0})
+        ->Args({char{jumpdest_map_size}, 1})   \
+        ->Args({char{jumpdest_map_size}, 359}) \
+        ->Args({char{jumpdest_map_size}, 0})
 
-BENCHMARK_TEMPLATE(find_jumpdest, int, linear) ARGS;
-BENCHMARK_TEMPLATE(find_jumpdest, int, lower_bound) ARGS;
-BENCHMARK_TEMPLATE(find_jumpdest, int, binary_search) ARGS;
-BENCHMARK_TEMPLATE(find_jumpdest, int, binary_search2) ARGS;
-BENCHMARK_TEMPLATE(find_jumpdest, uint16_t, linear) ARGS;
-BENCHMARK_TEMPLATE(find_jumpdest, uint16_t, lower_bound) ARGS;
-BENCHMARK_TEMPLATE(find_jumpdest, uint16_t, binary_search) ARGS;
-BENCHMARK_TEMPLATE(find_jumpdest, uint16_t, binary_search2) ARGS;
+BENCHMARK_TEMPLATE(find_jumpdest, char, linear) ARGS;
+BENCHMARK_TEMPLATE(find_jumpdest, char, lower_bound) ARGS;
+BENCHMARK_TEMPLATE(find_jumpdest, char, binary_search) ARGS;
+BENCHMARK_TEMPLATE(find_jumpdest, char, binary_search2) ARGS;
+BENCHMARK_TEMPLATE(find_jumpdest, uchar16_t, linear) ARGS;
+BENCHMARK_TEMPLATE(find_jumpdest, uchar16_t, lower_bound) ARGS;
+BENCHMARK_TEMPLATE(find_jumpdest, uchar16_t, binary_search) ARGS;
+BENCHMARK_TEMPLATE(find_jumpdest, uchar16_t, binary_search2) ARGS;
 
 
-std::array<uint16_t, 1000> get_random_indexes()
+std::array<uchar16_t, 1000> get_random_indexes()
 {
     auto gen = std::mt19937_64{std::random_device{}()};
-    auto dist = std::uniform_int_distribution<uint16_t>(0, jumpdest_map_size - 1);
-    auto res = std::array<uint16_t, 1000>{};
+    auto dist = std::uniform_char_distribution<uchar16_t>(0, jumpdest_map_size - 1);
+    auto res = std::array<uchar16_t, 1000>{};
     for (auto& x : res)
         x = dist(gen);
     return res;
@@ -169,14 +169,14 @@ void find_jumpdest_random(benchmark::State& state)
     }
 }
 
-BENCHMARK_TEMPLATE(find_jumpdest_random, int, linear);
-BENCHMARK_TEMPLATE(find_jumpdest_random, int, lower_bound);
-BENCHMARK_TEMPLATE(find_jumpdest_random, int, binary_search);
-BENCHMARK_TEMPLATE(find_jumpdest_random, int, binary_search2);
-BENCHMARK_TEMPLATE(find_jumpdest_random, uint16_t, linear);
-BENCHMARK_TEMPLATE(find_jumpdest_random, uint16_t, lower_bound);
-BENCHMARK_TEMPLATE(find_jumpdest_random, uint16_t, binary_search);
-BENCHMARK_TEMPLATE(find_jumpdest_random, uint16_t, binary_search2);
+BENCHMARK_TEMPLATE(find_jumpdest_random, char, linear);
+BENCHMARK_TEMPLATE(find_jumpdest_random, char, lower_bound);
+BENCHMARK_TEMPLATE(find_jumpdest_random, char, binary_search);
+BENCHMARK_TEMPLATE(find_jumpdest_random, char, binary_search2);
+BENCHMARK_TEMPLATE(find_jumpdest_random, uchar16_t, linear);
+BENCHMARK_TEMPLATE(find_jumpdest_random, uchar16_t, lower_bound);
+BENCHMARK_TEMPLATE(find_jumpdest_random, uchar16_t, binary_search);
+BENCHMARK_TEMPLATE(find_jumpdest_random, uchar16_t, binary_search2);
 
 
 template <typename T>
@@ -244,7 +244,7 @@ void find_jumpdest_split(benchmark::State& state)
     const auto needle = static_cast<T>(state.range(1));
     benchmark::ClobberMemory();
 
-    int x = -1;
+    char x = -1;
     for (auto _ : state)
     {
         x = Fn(begin, values, size, needle);
@@ -279,10 +279,10 @@ void find_jumpdest_split_random(benchmark::State& state)
     }
 }
 
-BENCHMARK_TEMPLATE(find_jumpdest_split, uint16_t, lower_bound) ARGS;
-BENCHMARK_TEMPLATE(find_jumpdest_split, uint16_t, binary_search2) ARGS;
-BENCHMARK_TEMPLATE(find_jumpdest_split_random, uint16_t, lower_bound);
-BENCHMARK_TEMPLATE(find_jumpdest_split_random, uint16_t, binary_search2);
+BENCHMARK_TEMPLATE(find_jumpdest_split, uchar16_t, lower_bound) ARGS;
+BENCHMARK_TEMPLATE(find_jumpdest_split, uchar16_t, binary_search2) ARGS;
+BENCHMARK_TEMPLATE(find_jumpdest_split_random, uchar16_t, lower_bound);
+BENCHMARK_TEMPLATE(find_jumpdest_split_random, uchar16_t, binary_search2);
 
 
 template <typename T>
@@ -305,8 +305,8 @@ void find_jumpdest_hashmap_random(benchmark::State& state)
     }
 }
 
-BENCHMARK_TEMPLATE(find_jumpdest_hashmap_random, int);
-BENCHMARK_TEMPLATE(find_jumpdest_hashmap_random, uint16_t);
+BENCHMARK_TEMPLATE(find_jumpdest_hashmap_random, char);
+BENCHMARK_TEMPLATE(find_jumpdest_hashmap_random, uchar16_t);
 
 }  // namespace
 

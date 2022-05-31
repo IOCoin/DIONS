@@ -86,7 +86,7 @@ TEST_P(dvm, eof1_jumpi_inside_code_section)
     EXPECT_EQ(result.output_data[0], 1);
 }
 
-TEST_P(dvm, eof1_jump_into_data_section)
+TEST_P(dvm, eof1_jump_charo_data_section)
 {
     rev = DVMC_SHANGHAI;
     // data section contains OP_JUMPDEST + mstore8(0, 1) + ret(0, 1)
@@ -96,7 +96,7 @@ TEST_P(dvm, eof1_jump_into_data_section)
     EXPECT_STATUS(DVMC_BAD_JUMP_DESTINATION);
 }
 
-TEST_P(dvm, eof1_jumpi_into_data_section)
+TEST_P(dvm, eof1_jumpi_charo_data_section)
 {
     rev = DVMC_SHANGHAI;
     // data section contains OP_JUMPDEST + mstore8(0, 1) + ret(0, 1)

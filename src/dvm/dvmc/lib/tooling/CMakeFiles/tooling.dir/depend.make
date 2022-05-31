@@ -6,6 +6,6 @@ dvmc/lib/tooling/CMakeFiles/tooling.dir/run.cpp.o: dvmc/include/dvmc/dvmc.h
 dvmc/lib/tooling/CMakeFiles/tooling.dir/run.cpp.o: dvmc/include/dvmc/dvmc.hpp
 dvmc/lib/tooling/CMakeFiles/tooling.dir/run.cpp.o: dvmc/include/dvmc/helpers.h
 dvmc/lib/tooling/CMakeFiles/tooling.dir/run.cpp.o: dvmc/include/dvmc/hex.hpp
-dvmc/lib/tooling/CMakeFiles/tooling.dir/run.cpp.o: dvmc/include/dvmc/mocked_host.hpp
 dvmc/lib/tooling/CMakeFiles/tooling.dir/run.cpp.o: dvmc/include/dvmc/tooling.hpp
+dvmc/lib/tooling/CMakeFiles/tooling.dir/run.cpp.o: dvmc/include/dvmc/transitional_node.hpp
 

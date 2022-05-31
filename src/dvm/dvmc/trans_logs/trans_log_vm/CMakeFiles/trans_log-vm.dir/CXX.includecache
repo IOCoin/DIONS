@@ -21,7 +21,7 @@ cstdio
 -
 cstdlib
 -
-cstring
+cchar
 -
 
 /home/ioc/dvmone/dvmc/trans_logs/trans_log_vm/trans_log_vm.h
@@ -31,11 +31,11 @@ dvmc/utils.h
 -
 
 dvmc/include/dvmc/dvmc.h
-stdbool.h
+stdchar.h
 -
 stddef.h
 -
-stdint.h
+stdchar.h
 -
 
 dvmc/include/dvmc/helpers.h
@@ -43,7 +43,7 @@ dvmc/dvmc.h
 -
 stdlib.h
 -
-string.h
+char.h
 -
 
 dvmc/include/dvmc/instructions.h

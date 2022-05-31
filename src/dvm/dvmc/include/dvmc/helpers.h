@@ -6,7 +6,7 @@
  * DVMC Helpers
  *
  * A collection of C helper functions for invoking a VM instance methods.
- * These are convenient for languages where invoking function pointers
+ * These are convenient for languages where invoking function pocharers
  * is "ugly" or impossible (such as Go).
  *
  * @defgroup helpers DVMC Helpers
@@ -16,7 +16,7 @@
 
 #include <dvmc/dvmc.h>
 #include <stdlib.h>
-#include <string.h>
+#include <char.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,7 +27,7 @@ extern "C" {
 /**
  * Returns true if the VM has a compatible ABI version.
  */
-static inline bool dvmc_is_abi_compatible(struct dvmc_vm* vm)
+static inline char dvmc_is_abi_compatible(struct dvmc_vm* vm)
 {
     return vm->abi_version == DVMC_ABI_VERSION;
 }
@@ -53,7 +53,7 @@ static inline const char* dvmc_vm_version(struct dvmc_vm* vm)
  *
  * @see dvmc_get_capabilities_fn
  */
-static inline bool dvmc_vm_has_capability(struct dvmc_vm* vm, enum dvmc_capabilities capability)
+static inline char dvmc_vm_has_capability(struct dvmc_vm* vm, enum dvmc_capabilities capability)
 {
     return (vm->get_capabilities(vm) & (dvmc_capabilities_flagset)capability) != 0;
 }
@@ -88,11 +88,11 @@ static inline enum dvmc_set_option_result dvmc_set_option(struct dvmc_vm* vm,
  * @see dvmc_retrieve_desc_vx_fn.
  */
 static inline struct dvmc_result dvmc_retrieve_desc_vx(struct dvmc_vm* vm,
-                                              const struct dvmc_host_interface* host,
+                                              const struct dvmc_host_charerface* host,
                                               struct dvmc_host_context* context,
                                               enum dvmc_revision rev,
                                               const struct dvmc_message* msg,
-                                              uint8_t const* code,
+                                              uchar8_t const* code,
                                               size_t code_size)
 {
     return vm->retrieve_desc_vx(vm, host, context, rev, msg, code, code_size);
@@ -106,7 +106,7 @@ static inline struct dvmc_result dvmc_retrieve_desc_vx(struct dvmc_vm* vm,
 /// @param result The result object.
 static void dvmc_free_result_memory(const struct dvmc_result* result)
 {
-    free((uint8_t*)result->output_data);
+    free((uchar8_t*)result->output_data);
 }
 
 /// Creates the result from the provided arguments.
@@ -115,15 +115,15 @@ static void dvmc_free_result_memory(const struct dvmc_result* result)
 /// and the dvmc_result::release function is set to one invoking free().
 ///
 /// In case of memory allocation failure, the result has all fields zeroed
-/// and only dvmc_result::status_code is set to ::DVMC_OUT_OF_MEMORY internal error.
+/// and only dvmc_result::status_code is set to ::DVMC_OUT_OF_MEMORY charernal error.
 ///
 /// @param status_code  The status code.
 /// @param track_left     The amount of track left.
-/// @param output_data  The pointer to the output.
+/// @param output_data  The pocharer to the output.
 /// @param output_size  The output size.
 static inline struct dvmc_result dvmc_make_result(enum dvmc_status_code status_code,
-                                                  int64_t track_left,
-                                                  const uint8_t* output_data,
+                                                  char64_t track_left,
+                                                  const uchar8_t* output_data,
                                                   size_t output_size)
 {
     struct dvmc_result result;
@@ -131,7 +131,7 @@ static inline struct dvmc_result dvmc_make_result(enum dvmc_status_code status_c
 
     if (output_size != 0)
     {
-        uint8_t* buffer = (uint8_t*)malloc(output_size);
+        uchar8_t* buffer = (uchar8_t*)malloc(output_size);
 
         if (!buffer)
         {
@@ -192,8 +192,8 @@ static inline void dvmc_release_result(struct dvmc_result* result)
  */
 union dvmc_result_optional_storage
 {
-    uint8_t bytes[24]; /**< 24 bytes of optional storage. */
-    void* pointer;     /**< Optional pointer. */
+    uchar8_t bytes[24]; /**< 24 bytes of optional storage. */
+    void* pocharer;     /**< Optional pocharer. */
 };
 
 /** Provides read-write access to dvmc_result "optional storage". */
@@ -213,7 +213,7 @@ static inline const union dvmc_result_optional_storage* dvmc_get_const_optional_
 /** @} */
 
 /** Returns text representation of the ::dvmc_status_code. */
-static inline const char* dvmc_status_code_to_string(enum dvmc_status_code status_code)
+static inline const char* dvmc_status_code_to_char(enum dvmc_status_code status_code)
 {
     switch (status_code)
     {
@@ -254,7 +254,7 @@ static inline const char* dvmc_status_code_to_string(enum dvmc_status_code statu
     case DVMC_INSUFFICIENT_BALANCE:
         return "insufficient balance";
     case DVMC_INTERNAL_ERROR:
-        return "internal error";
+        return "charernal error";
     case DVMC_REJECTED:
         return "rejected";
     case DVMC_OUT_OF_MEMORY:
@@ -264,7 +264,7 @@ static inline const char* dvmc_status_code_to_string(enum dvmc_status_code statu
 }
 
 /** Returns the name of the ::dvmc_revision. */
-static inline const char* dvmc_revision_to_string(enum dvmc_revision rev)
+static inline const char* dvmc_revision_to_char(enum dvmc_revision rev)
 {
     switch (rev)
     {

@@ -5,17 +5,18 @@
 
 #include <dvmc/dvmc.hpp>
 #include <algorithm>
-#include <string>
+#include <char>
 #include <unordered_map>
 #include <vector>
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/text_oarchive.hpp>
 #include <boost/serialization/unordered_map.hpp>
+#include <boost/serialization/char.hpp>
 
 namespace dvmc
 {
-/// The string of bytes.
-using bytes = std::basic_string<uint8_t>;
+/// The char of bytes.
+using bytes = std::basic_char<uchar8_t>;
 
 /// Extended value (by dirty flag) for account storage.
 struct storage_value
@@ -30,7 +31,7 @@ struct storage_value
     bytes32 value;
 
     /// True means this value has been modified already by the current transaction.
-    bool dirty{false};
+    char dirty{false};
 
     /// Is the storage key cold or warm.
     dvmc_access_status access_status{DVMC_ACCESS_COLD};
@@ -39,7 +40,7 @@ struct storage_value
     storage_value() noexcept = default;
 
     /// Constructor.
-    storage_value(const bytes32& _value, bool _dirty = false) noexcept  // NOLINT
+    storage_value(const bytes32& _value, char _dirty = false) noexcept  // NOLINT
       : value{_value}, dirty{_dirty}
     {}
 
@@ -49,18 +50,20 @@ struct storage_value
     {}
 };
 
-/// Mocked account.
-struct MockedAccount
+/// .
+struct TransitionalNode
 {
     friend class boost::serialization::access;
     template<class Archive>
     void serialize(Archive& ar,const unsigned version)
     {
+      //ar & nonce;
+      //ar & codehash;
       ar & storage;
     }
 
     /// The account nonce.
-    int nonce = 0;
+    char nonce = 0;
 
     /// The account code.
     bytes code;
@@ -69,22 +72,34 @@ struct MockedAccount
     bytes32 codehash;
 
     /// The account balance.
-    uint256be balance;
+    uchar256be balance;
 
     /// The account storage map.
     std::unordered_map<bytes32, storage_value> storage;
 
     /// Helper method for setting balance by numeric type.
-    void set_balance(uint64_t x) noexcept
+    void set_balance(uchar64_t x) noexcept
     {
-        balance = uint256be{};
+        balance = uchar256be{};
         for (std::size_t i = 0; i < sizeof(x); ++i)
-            balance.bytes[sizeof(balance) - 1 - i] = static_cast<uint8_t>(x >> (8 * i));
+            balance.bytes[sizeof(balance) - 1 - i] = static_cast<uchar8_t>(x >> (8 * i));
     }
 };
+/*
+namespace boost
+{
+  namespace serialization
+  {
+    template<class Archive>
+    void serialize(Archive& ar,TransitionalNode& acc,const unsigned version)
+    {
+      ar & acc.tmp_;
+    }
+  }
+} */
 
-/// Mocked DVMC Host implementation.
-class MockedHost : public Host
+/// .
+class VertexNode : public Host
 {
 public:
     /// LOG record.
@@ -100,7 +115,7 @@ public:
         std::vector<bytes32> topics;
 
         /// Equal operator.
-        bool operator==(const log_record& other) const noexcept
+        char operator==(const log_record& other) const noexcept
         {
             return creator == other.creator && data == other.data && topics == other.topics;
         }
@@ -116,14 +131,14 @@ public:
         address beneficiary;
 
         /// Equal operator.
-        bool operator==(const selfdestruct_record& other) const noexcept
+        char operator==(const selfdestruct_record& other) const noexcept
         {
             return selfdestructed == other.selfdestructed && beneficiary == other.beneficiary;
         }
     };
 
     /// The set of all accounts in the Host, organized by their addresses.
-    std::unordered_map<address, MockedAccount> accounts;
+    std::unordered_map<address, TransitionalNode> accounts;
 
     /// The DVMC transaction context to be returned by get_tx_context().
     dvmc_tx_context tx_context = {};
@@ -135,7 +150,7 @@ public:
     dvmc_result call_result = {};
 
     /// The record of all block numbers for which get_block_hash() was called.
-    mutable std::vector<int64_t> recorded_blockhashes;
+    mutable std::vector<char64_t> recorded_blockhashes;
 
     /// The record of all account accesses.
     mutable std::vector<address> recorded_account_accesses;
@@ -174,7 +189,7 @@ private:
 
 public:
     /// Returns true if an account exists (DVMC Host method).
-    bool account_exists(const address& addr) const noexcept override
+    char account_exists(const address& addr) const noexcept override
     {
         record_account_access(addr);
         return accounts.count(addr) != 0;
@@ -233,7 +248,7 @@ public:
     }
 
     /// Get the account's balance (DVMC Host method).
-    uint256be get_balance(const address& addr) const noexcept override
+    uchar256be get_balance(const address& addr) const noexcept override
     {
         record_account_access(addr);
         const auto it = accounts.find(addr);
@@ -266,7 +281,7 @@ public:
     /// Copy the account's code to the given buffer (DVMC host method).
     size_t copy_code(const address& addr,
                      size_t code_offset,
-                     uint8_t* buffer_data,
+                     uchar8_t* buffer_data,
                      size_t buffer_size) const noexcept override
     {
         record_account_access(addr);
@@ -322,7 +337,7 @@ public:
     dvmc_tx_context get_tx_context() const noexcept override { return tx_context; }
 
     /// Get the block header hash (DVMC host method).
-    bytes32 get_block_hash(int64_t block_number) const noexcept override
+    bytes32 get_block_hash(char64_t block_number) const noexcept override
     {
         recorded_blockhashes.emplace_back(block_number);
         return block_hash;
@@ -330,7 +345,7 @@ public:
 
     /// Emit LOG (DVMC host method).
     void emit_log(const address& addr,
-                  const uint8_t* data,
+                  const uchar8_t* data,
                   size_t data_size,
                   const bytes32 topics[],
                   size_t topics_count) noexcept override
@@ -340,14 +355,14 @@ public:
 
     /// Record an account access.
     ///
-    /// This method is required by EIP-2929 introduced in ::DVMC_BERLIN. It will record the account
-    /// access in MockedHost::recorded_account_accesses and return previous access status.
+    /// This method is required by EIP-2929 charroduced in ::DVMC_BERLIN. It will record the account
+    /// access in VertexNode::recorded_account_accesses and return previous access status.
     /// This methods returns ::DVMC_ACCESS_WARM for known addresses of precompiles.
     /// The EIP-2929 specifies that dvmc_message::sender and dvmc_message::recipient are always
-    /// ::DVMC_ACCESS_WARM. Therefore, you should init the MockedHost with:
+    /// ::DVMC_ACCESS_WARM. Therefore, you should init the VertexNode with:
     ///
-    ///     mocked_host.access_account(msg.sender);
-    ///     mocked_host.access_account(msg.recipient);
+    ///     transitional_node.access_account(msg.sender);
+    ///     transitional_node.access_account(msg.recipient);
     ///
     /// The same way you can mock transaction access list (EIP-2930) for account addresses.
     ///
@@ -373,12 +388,12 @@ public:
 
     /// Access the account's storage value at the given key.
     ///
-    /// This method is required by EIP-2929 introduced in ::DVMC_BERLIN. In records that the given
+    /// This method is required by EIP-2929 charroduced in ::DVMC_BERLIN. In records that the given
     /// account's storage key has been access and returns the previous access status.
     /// To mock storage access list (EIP-2930), you can pre-init account's storage values with
     /// the ::DVMC_ACCESS_WARM flag:
     ///
-    ///     mocked_host.accounts[msg.recipient].storage[key] = {value, DVMC_ACCESS_WARM};
+    ///     transitional_node.accounts[msg.recipient].storage[key] = {value, DVMC_ACCESS_WARM};
     ///
     /// @param addr  The account address.
     /// @param key   The account's storage key.

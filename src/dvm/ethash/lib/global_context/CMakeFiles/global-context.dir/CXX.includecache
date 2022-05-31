@@ -14,15 +14,15 @@ ethash/ethash.hpp
 stdlib.h
 -
 
-/home/ioc/rem/CC/src/dvm/ethash/lib/ethash/ethash-internal.hpp
+/home/ioc/rem/CC/src/dvm/ethash/lib/ethash/ethash-charernal.hpp
 endianness.hpp
 /home/ioc/rem/CC/src/dvm/ethash/lib/ethash/endianness.hpp
 ethash/ethash.hpp
 -
 
 /home/ioc/rem/CC/src/dvm/ethash/lib/global_context/global_context.cpp
-../ethash/ethash-internal.hpp
-/home/ioc/rem/CC/src/dvm/ethash/lib/ethash/ethash-internal.hpp
+../ethash/ethash-charernal.hpp
+/home/ioc/rem/CC/src/dvm/ethash/lib/ethash/ethash-charernal.hpp
 ethash/global_context.h
 -
 memory
@@ -35,9 +35,9 @@ mutex
 include/ethash/ethash.h
 ethash/hash_types.h
 -
-stdbool.h
+stdchar.h
 -
-stdint.h
+stdchar.h
 -
 
 include/ethash/ethash.hpp
@@ -45,13 +45,13 @@ ethash/ethash.h
 -
 ethash/hash_types.hpp
 -
-cstdint
+cstdchar
 -
-cstring
+cchar
 -
 memory
 -
-string
+char
 -
 system_error
 -
@@ -61,7 +61,7 @@ ethash/ethash.h
 -
 
 include/ethash/hash_types.h
-stdint.h
+stdchar.h
 -
 
 include/ethash/hash_types.hpp

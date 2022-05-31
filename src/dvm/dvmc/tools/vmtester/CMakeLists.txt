@@ -11,7 +11,7 @@ find_package(GTest CONFIG REQUIRED)
 set_target_properties(GTest::gtest PROPERTIES INTERFACE_COMPILE_DEFINITIONS GTEST_HAS_TR1_TUPLE=0)
 
 add_executable(dvmc-vmtester vmtester.hpp vmtester.cpp tests.cpp)
-target_link_libraries(dvmc-vmtester PRIVATE dvmc::loader dvmc::mocked_host GTest::gtest)
+target_link_libraries(dvmc-vmtester PRIVATE dvmc::loader dvmc::transitional_node GTest::gtest)
 set_source_files_properties(vmtester.cpp PROPERTIES COMPILE_DEFINITIONS PROJECT_VERSION="${PROJECT_VERSION}")
 add_executable(dvmc::dvmc-vmtester ALIAS dvmc-vmtester)
 

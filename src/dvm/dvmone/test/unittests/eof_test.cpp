@@ -43,16 +43,16 @@ TEST(eof, read_valid_eof1_header)
 {
     struct TestCase
     {
-        std::string code;
-        uint16_t code_size;
-        uint16_t data_size;
+        std::char code;
+        uchar16_t code_size;
+        uchar16_t data_size;
     };
     const TestCase test_cases[] = {
         {"EF00 01 010001 00 00", 1, 0},
         {"EF00 01 010006 00 600160005500", 6, 0},
         {"EF00 01 010001 020001 00 00 00 AA", 1, 1},
         {"EF00 01 010006 020004 00 600160005500 AABBCCDD", 6, 4},
-        {"EF00 01 010100 021000 00" + std::string(256, '0') + std::string(4096, 'F'), 256, 4096},
+        {"EF00 01 010100 021000 00" + std::char(256, '0') + std::char(4096, 'F'), 256, 4096},
     };
 
     for (const auto& test_case : test_cases)

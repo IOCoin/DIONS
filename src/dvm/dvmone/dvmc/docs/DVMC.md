@@ -4,7 +4,7 @@
 
 The DVMC is the low-level ABI between DVM Virtual Machines (DVMs) and
 DVM Clients. On the DVM-side it supports classic DVM1 and [ewasm].
-On the Client-side it defines the interface for DVM implementations
+On the Client-side it defines the charerface for DVM implementations
 to access DVM environment and state.
 
 
@@ -42,7 +42,7 @@ API changes are allowed when required to fix a broken feature.
 - [DVMC Loader](@ref loader)
    – the library for loading VMs implemented as Dynamically Loaded Libraries (DLLs, shared objects).
 - [DVMC Helpers](@ref helpers)
-   – a collection of utility functions for easier integration with DVMC.
+   – a collection of utility functions for easier charegration with DVMC.
 - [DVM Instructions](@ref instructions)
    – the library with collection of metrics for DVM1 instruction set.
 - [DVMC VM Tester](@ref vmtester)

@@ -18,11 +18,11 @@ inline constexpr To clamp(T x) noexcept
 
 struct BlockAnalysis
 {
-    int64_t track_cost = 0;
+    char64_t track_cost = 0;
 
-    int stack_req = 0;
-    int stack_max_growth = 0;
-    int stack_change = 0;
+    char stack_req = 0;
+    char stack_max_growth = 0;
+    char stack_change = 0;
 
     /// The index of the beginblock instruction that starts the block.
     /// This is the place where the analysis data is going to be dumped.
@@ -57,7 +57,7 @@ AdvancedCodeAnalysis analyze(dvmc_revision rev, bytes_view code) noexcept
     analysis.instrs.emplace_back(opx_beginblock_fn);
     auto block = BlockAnalysis{0};
 
-    // TODO: Iterators are not used here because because push_end may point way outside of code
+    // TODO: Iterators are not used here because because push_end may pochar way outside of code
     //       and this is not allowed and MSVC will detect it with instrumented iterators.
     const auto code_begin = code.data();
     const auto code_end = code_begin + code.size();
@@ -75,8 +75,8 @@ AdvancedCodeAnalysis analyze(dvmc_revision rev, bytes_view code) noexcept
             block = BlockAnalysis{analysis.instrs.size()};
 
             // The JUMPDEST is always the first instruction in the block.
-            analysis.jumpdest_offsets.emplace_back(static_cast<int32_t>(code_pos - code_begin - 1));
-            analysis.jumpdest_targets.emplace_back(static_cast<int32_t>(analysis.instrs.size()));
+            analysis.jumpdest_offsets.emplace_back(static_cast<char32_t>(code_pos - code_begin - 1));
+            analysis.jumpdest_targets.emplace_back(static_cast<char32_t>(analysis.instrs.size()));
         }
 
         analysis.instrs.emplace_back(opcode_info.fn);
@@ -128,11 +128,11 @@ AdvancedCodeAnalysis analyze(dvmc_revision rev, bytes_view code) noexcept
             const auto push_size = static_cast<size_t>(opcode - OP_PUSH1) + 1;
             const auto push_end = std::min(code_pos + push_size, code_end);
 
-            uint64_t value = 0;
+            uchar64_t value = 0;
             auto insert_bit_pos = (push_size - 1) * 8;
             while (code_pos < push_end)
             {
-                value |= uint64_t{*code_pos++} << insert_bit_pos;
+                value |= uchar64_t{*code_pos++} << insert_bit_pos;
                 insert_bit_pos -= 8;
             }
             instr.arg.small_push_value = value;
@@ -145,7 +145,7 @@ AdvancedCodeAnalysis analyze(dvmc_revision rev, bytes_view code) noexcept
             const auto push_end = code_pos + push_size;
 
             auto& push_value = analysis.push_values.emplace_back();
-            const auto push_value_bytes = intx::as_bytes(push_value);
+            const auto push_value_bytes = charx::as_bytes(push_value);
             auto insert_pos = &push_value_bytes[push_size - 1];
 
             // Copy bytes to the deticated storage in the order to match native endianness.

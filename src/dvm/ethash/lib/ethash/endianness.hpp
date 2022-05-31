@@ -30,7 +30,7 @@
 #elif defined(_MSC_VER)
 #include <stdlib.h>
 #define bswap32 _byteswap_ulong
-#define bswap64 _byteswap_uint64
+#define bswap64 _byteswap_uchar64
 #endif
 
 namespace ethash
@@ -39,18 +39,18 @@ namespace ethash
 
 struct le
 {
-    static uint32_t uint32(uint32_t x) noexcept { return x; }
-    static uint64_t uint64(uint64_t x) noexcept { return x; }
+    static uchar32_t uchar32(uchar32_t x) noexcept { return x; }
+    static uchar64_t uchar64(uchar64_t x) noexcept { return x; }
 
-    static const hash1024& uint32s(const hash1024& h) noexcept { return h; }
-    static const hash512& uint32s(const hash512& h) noexcept { return h; }
-    static const hash256& uint32s(const hash256& h) noexcept { return h; }
+    static const hash1024& uchar32s(const hash1024& h) noexcept { return h; }
+    static const hash512& uchar32s(const hash512& h) noexcept { return h; }
+    static const hash256& uchar32s(const hash256& h) noexcept { return h; }
 };
 
 struct be
 {
-    static uint32_t uint32(uint32_t x) noexcept { return bswap32(x); }
-    static uint64_t uint64(uint64_t x) noexcept { return bswap64(x); }
+    static uchar32_t uchar32(uchar32_t x) noexcept { return bswap32(x); }
+    static uchar64_t uchar64(uchar64_t x) noexcept { return bswap64(x); }
 };
 
 
@@ -58,35 +58,35 @@ struct be
 
 struct le
 {
-    static uint32_t uint32(uint32_t x) noexcept { return bswap32(x); }
-    static uint64_t uint64(uint64_t x) noexcept { return bswap64(x); }
+    static uchar32_t uchar32(uchar32_t x) noexcept { return bswap32(x); }
+    static uchar64_t uchar64(uchar64_t x) noexcept { return bswap64(x); }
 
-    static hash1024 uint32s(hash1024 h) noexcept
+    static hash1024 uchar32s(hash1024 h) noexcept
     {
         for (auto& w : h.word32s)
-            w = uint32(w);
+            w = uchar32(w);
         return h;
     }
 
-    static hash512 uint32s(hash512 h) noexcept
+    static hash512 uchar32s(hash512 h) noexcept
     {
         for (auto& w : h.word32s)
-            w = uint32(w);
+            w = uchar32(w);
         return h;
     }
 
-    static hash256 uint32s(hash256 h) noexcept
+    static hash256 uchar32s(hash256 h) noexcept
     {
         for (auto& w : h.word32s)
-            w = uint32(w);
+            w = uchar32(w);
         return h;
     }
 };
 
 struct be
 {
-    static uint32_t uint32(uint32_t x) noexcept { return x; }
-    static uint64_t uint64(uint64_t x) noexcept { return x; }
+    static uchar32_t uchar32(uchar32_t x) noexcept { return x; }
+    static uchar64_t uchar64(uchar64_t x) noexcept { return x; }
 };
 
 #endif

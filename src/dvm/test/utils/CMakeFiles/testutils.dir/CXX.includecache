@@ -17,13 +17,13 @@ dvmc/hex.hpp
 -
 
 dvmc/include/dvmc/hex.hpp
-cstdint
+cstdchar
 -
 iterator
 -
-string
+char
 -
-string_view
+char_view
 -
 system_error
 -

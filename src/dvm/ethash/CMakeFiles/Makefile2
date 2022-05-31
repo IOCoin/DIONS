@@ -155,7 +155,7 @@ lib/keccak/clean: lib/keccak/CMakeFiles/keccak.dir/clean
 test/all: test/benchmarks/all
 test/all: test/experimental/all
 test/all: test/fakeminer/all
-test/all: test/integration/all
+test/all: test/charegration/all
 test/all: test/unittests/all
 
 .PHONY : test/all
@@ -164,7 +164,7 @@ test/all: test/unittests/all
 test/preinstall: test/benchmarks/preinstall
 test/preinstall: test/experimental/preinstall
 test/preinstall: test/fakeminer/preinstall
-test/preinstall: test/integration/preinstall
+test/preinstall: test/charegration/preinstall
 test/preinstall: test/unittests/preinstall
 
 .PHONY : test/preinstall
@@ -173,7 +173,7 @@ test/preinstall: test/unittests/preinstall
 test/clean: test/benchmarks/clean
 test/clean: test/experimental/clean
 test/clean: test/fakeminer/clean
-test/clean: test/integration/clean
+test/clean: test/charegration/clean
 test/clean: test/unittests/clean
 
 .PHONY : test/clean
@@ -233,44 +233,44 @@ test/fakeminer/clean: test/fakeminer/CMakeFiles/ethash-fakeminer.dir/clean
 .PHONY : test/fakeminer/clean
 
 #=============================================================================
-# Directory level rules for directory test/integration
+# Directory level rules for directory test/charegration
 
 # Recursive "all" directory target.
-test/integration/all: test/integration/compilation/all
+test/charegration/all: test/charegration/compilation/all
 
-.PHONY : test/integration/all
+.PHONY : test/charegration/all
 
 # Recursive "preinstall" directory target.
-test/integration/preinstall: test/integration/compilation/preinstall
+test/charegration/preinstall: test/charegration/compilation/preinstall
 
-.PHONY : test/integration/preinstall
+.PHONY : test/charegration/preinstall
 
 # Recursive "clean" directory target.
-test/integration/clean: test/integration/compilation/clean
+test/charegration/clean: test/charegration/compilation/clean
 
-.PHONY : test/integration/clean
+.PHONY : test/charegration/clean
 
 #=============================================================================
-# Directory level rules for directory test/integration/compilation
+# Directory level rules for directory test/charegration/compilation
 
 # Recursive "all" directory target.
-test/integration/compilation/all: test/integration/compilation/CMakeFiles/test-compile-c11.dir/all
-test/integration/compilation/all: test/integration/compilation/CMakeFiles/test-compile-c99.dir/all
-test/integration/compilation/all: test/integration/compilation/CMakeFiles/test-compile-c0.dir/all
+test/charegration/compilation/all: test/charegration/compilation/CMakeFiles/test-compile-c11.dir/all
+test/charegration/compilation/all: test/charegration/compilation/CMakeFiles/test-compile-c99.dir/all
+test/charegration/compilation/all: test/charegration/compilation/CMakeFiles/test-compile-c0.dir/all
 
-.PHONY : test/integration/compilation/all
+.PHONY : test/charegration/compilation/all
 
 # Recursive "preinstall" directory target.
-test/integration/compilation/preinstall:
+test/charegration/compilation/preinstall:
 
-.PHONY : test/integration/compilation/preinstall
+.PHONY : test/charegration/compilation/preinstall
 
 # Recursive "clean" directory target.
-test/integration/compilation/clean: test/integration/compilation/CMakeFiles/test-compile-c11.dir/clean
-test/integration/compilation/clean: test/integration/compilation/CMakeFiles/test-compile-c99.dir/clean
-test/integration/compilation/clean: test/integration/compilation/CMakeFiles/test-compile-c0.dir/clean
+test/charegration/compilation/clean: test/charegration/compilation/CMakeFiles/test-compile-c11.dir/clean
+test/charegration/compilation/clean: test/charegration/compilation/CMakeFiles/test-compile-c99.dir/clean
+test/charegration/compilation/clean: test/charegration/compilation/CMakeFiles/test-compile-c0.dir/clean
 
-.PHONY : test/integration/compilation/clean
+.PHONY : test/charegration/compilation/clean
 
 #=============================================================================
 # Directory level rules for directory test/unittests
@@ -459,88 +459,88 @@ test/fakeminer/CMakeFiles/ethash-fakeminer.dir/clean:
 .PHONY : test/fakeminer/CMakeFiles/ethash-fakeminer.dir/clean
 
 #=============================================================================
-# Target rules for target test/integration/compilation/CMakeFiles/test-compile-c11.dir
+# Target rules for target test/charegration/compilation/CMakeFiles/test-compile-c11.dir
 
 # All Build rule for target.
-test/integration/compilation/CMakeFiles/test-compile-c11.dir/all: lib/keccak/CMakeFiles/keccak.dir/all
-test/integration/compilation/CMakeFiles/test-compile-c11.dir/all: lib/ethash/CMakeFiles/ethash.dir/all
-	$(MAKE) -f test/integration/compilation/CMakeFiles/test-compile-c11.dir/build.make test/integration/compilation/CMakeFiles/test-compile-c11.dir/depend
-	$(MAKE) -f test/integration/compilation/CMakeFiles/test-compile-c11.dir/build.make test/integration/compilation/CMakeFiles/test-compile-c11.dir/build
+test/charegration/compilation/CMakeFiles/test-compile-c11.dir/all: lib/keccak/CMakeFiles/keccak.dir/all
+test/charegration/compilation/CMakeFiles/test-compile-c11.dir/all: lib/ethash/CMakeFiles/ethash.dir/all
+	$(MAKE) -f test/charegration/compilation/CMakeFiles/test-compile-c11.dir/build.make test/charegration/compilation/CMakeFiles/test-compile-c11.dir/depend
+	$(MAKE) -f test/charegration/compilation/CMakeFiles/test-compile-c11.dir/build.make test/charegration/compilation/CMakeFiles/test-compile-c11.dir/build
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ioc/rem/CC/src/dvm/ethash/CMakeFiles --progress-num=29,30,31 "Built target test-compile-c11"
-.PHONY : test/integration/compilation/CMakeFiles/test-compile-c11.dir/all
+.PHONY : test/charegration/compilation/CMakeFiles/test-compile-c11.dir/all
 
 # Build rule for subdir invocation for target.
-test/integration/compilation/CMakeFiles/test-compile-c11.dir/rule: cmake_check_build_system
+test/charegration/compilation/CMakeFiles/test-compile-c11.dir/rule: cmake_check_build_system
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/rem/CC/src/dvm/ethash/CMakeFiles 8
-	$(MAKE) -f CMakeFiles/Makefile2 test/integration/compilation/CMakeFiles/test-compile-c11.dir/all
+	$(MAKE) -f CMakeFiles/Makefile2 test/charegration/compilation/CMakeFiles/test-compile-c11.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/rem/CC/src/dvm/ethash/CMakeFiles 0
-.PHONY : test/integration/compilation/CMakeFiles/test-compile-c11.dir/rule
+.PHONY : test/charegration/compilation/CMakeFiles/test-compile-c11.dir/rule
 
 # Convenience name for target.
-test-compile-c11: test/integration/compilation/CMakeFiles/test-compile-c11.dir/rule
+test-compile-c11: test/charegration/compilation/CMakeFiles/test-compile-c11.dir/rule
 
 .PHONY : test-compile-c11
 
 # clean rule for target.
-test/integration/compilation/CMakeFiles/test-compile-c11.dir/clean:
-	$(MAKE) -f test/integration/compilation/CMakeFiles/test-compile-c11.dir/build.make test/integration/compilation/CMakeFiles/test-compile-c11.dir/clean
-.PHONY : test/integration/compilation/CMakeFiles/test-compile-c11.dir/clean
+test/charegration/compilation/CMakeFiles/test-compile-c11.dir/clean:
+	$(MAKE) -f test/charegration/compilation/CMakeFiles/test-compile-c11.dir/build.make test/charegration/compilation/CMakeFiles/test-compile-c11.dir/clean
+.PHONY : test/charegration/compilation/CMakeFiles/test-compile-c11.dir/clean
 
 #=============================================================================
-# Target rules for target test/integration/compilation/CMakeFiles/test-compile-c99.dir
+# Target rules for target test/charegration/compilation/CMakeFiles/test-compile-c99.dir
 
 # All Build rule for target.
-test/integration/compilation/CMakeFiles/test-compile-c99.dir/all: lib/keccak/CMakeFiles/keccak.dir/all
-test/integration/compilation/CMakeFiles/test-compile-c99.dir/all: lib/ethash/CMakeFiles/ethash.dir/all
-	$(MAKE) -f test/integration/compilation/CMakeFiles/test-compile-c99.dir/build.make test/integration/compilation/CMakeFiles/test-compile-c99.dir/depend
-	$(MAKE) -f test/integration/compilation/CMakeFiles/test-compile-c99.dir/build.make test/integration/compilation/CMakeFiles/test-compile-c99.dir/build
+test/charegration/compilation/CMakeFiles/test-compile-c99.dir/all: lib/keccak/CMakeFiles/keccak.dir/all
+test/charegration/compilation/CMakeFiles/test-compile-c99.dir/all: lib/ethash/CMakeFiles/ethash.dir/all
+	$(MAKE) -f test/charegration/compilation/CMakeFiles/test-compile-c99.dir/build.make test/charegration/compilation/CMakeFiles/test-compile-c99.dir/depend
+	$(MAKE) -f test/charegration/compilation/CMakeFiles/test-compile-c99.dir/build.make test/charegration/compilation/CMakeFiles/test-compile-c99.dir/build
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ioc/rem/CC/src/dvm/ethash/CMakeFiles --progress-num=32,33,34 "Built target test-compile-c99"
-.PHONY : test/integration/compilation/CMakeFiles/test-compile-c99.dir/all
+.PHONY : test/charegration/compilation/CMakeFiles/test-compile-c99.dir/all
 
 # Build rule for subdir invocation for target.
-test/integration/compilation/CMakeFiles/test-compile-c99.dir/rule: cmake_check_build_system
+test/charegration/compilation/CMakeFiles/test-compile-c99.dir/rule: cmake_check_build_system
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/rem/CC/src/dvm/ethash/CMakeFiles 8
-	$(MAKE) -f CMakeFiles/Makefile2 test/integration/compilation/CMakeFiles/test-compile-c99.dir/all
+	$(MAKE) -f CMakeFiles/Makefile2 test/charegration/compilation/CMakeFiles/test-compile-c99.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/rem/CC/src/dvm/ethash/CMakeFiles 0
-.PHONY : test/integration/compilation/CMakeFiles/test-compile-c99.dir/rule
+.PHONY : test/charegration/compilation/CMakeFiles/test-compile-c99.dir/rule
 
 # Convenience name for target.
-test-compile-c99: test/integration/compilation/CMakeFiles/test-compile-c99.dir/rule
+test-compile-c99: test/charegration/compilation/CMakeFiles/test-compile-c99.dir/rule
 
 .PHONY : test-compile-c99
 
 # clean rule for target.
-test/integration/compilation/CMakeFiles/test-compile-c99.dir/clean:
-	$(MAKE) -f test/integration/compilation/CMakeFiles/test-compile-c99.dir/build.make test/integration/compilation/CMakeFiles/test-compile-c99.dir/clean
-.PHONY : test/integration/compilation/CMakeFiles/test-compile-c99.dir/clean
+test/charegration/compilation/CMakeFiles/test-compile-c99.dir/clean:
+	$(MAKE) -f test/charegration/compilation/CMakeFiles/test-compile-c99.dir/build.make test/charegration/compilation/CMakeFiles/test-compile-c99.dir/clean
+.PHONY : test/charegration/compilation/CMakeFiles/test-compile-c99.dir/clean
 
 #=============================================================================
-# Target rules for target test/integration/compilation/CMakeFiles/test-compile-c0.dir
+# Target rules for target test/charegration/compilation/CMakeFiles/test-compile-c0.dir
 
 # All Build rule for target.
-test/integration/compilation/CMakeFiles/test-compile-c0.dir/all: lib/keccak/CMakeFiles/keccak.dir/all
-test/integration/compilation/CMakeFiles/test-compile-c0.dir/all: lib/ethash/CMakeFiles/ethash.dir/all
-	$(MAKE) -f test/integration/compilation/CMakeFiles/test-compile-c0.dir/build.make test/integration/compilation/CMakeFiles/test-compile-c0.dir/depend
-	$(MAKE) -f test/integration/compilation/CMakeFiles/test-compile-c0.dir/build.make test/integration/compilation/CMakeFiles/test-compile-c0.dir/build
+test/charegration/compilation/CMakeFiles/test-compile-c0.dir/all: lib/keccak/CMakeFiles/keccak.dir/all
+test/charegration/compilation/CMakeFiles/test-compile-c0.dir/all: lib/ethash/CMakeFiles/ethash.dir/all
+	$(MAKE) -f test/charegration/compilation/CMakeFiles/test-compile-c0.dir/build.make test/charegration/compilation/CMakeFiles/test-compile-c0.dir/depend
+	$(MAKE) -f test/charegration/compilation/CMakeFiles/test-compile-c0.dir/build.make test/charegration/compilation/CMakeFiles/test-compile-c0.dir/build
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ioc/rem/CC/src/dvm/ethash/CMakeFiles --progress-num=26,27,28 "Built target test-compile-c0"
-.PHONY : test/integration/compilation/CMakeFiles/test-compile-c0.dir/all
+.PHONY : test/charegration/compilation/CMakeFiles/test-compile-c0.dir/all
 
 # Build rule for subdir invocation for target.
-test/integration/compilation/CMakeFiles/test-compile-c0.dir/rule: cmake_check_build_system
+test/charegration/compilation/CMakeFiles/test-compile-c0.dir/rule: cmake_check_build_system
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/rem/CC/src/dvm/ethash/CMakeFiles 8
-	$(MAKE) -f CMakeFiles/Makefile2 test/integration/compilation/CMakeFiles/test-compile-c0.dir/all
+	$(MAKE) -f CMakeFiles/Makefile2 test/charegration/compilation/CMakeFiles/test-compile-c0.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/rem/CC/src/dvm/ethash/CMakeFiles 0
-.PHONY : test/integration/compilation/CMakeFiles/test-compile-c0.dir/rule
+.PHONY : test/charegration/compilation/CMakeFiles/test-compile-c0.dir/rule
 
 # Convenience name for target.
-test-compile-c0: test/integration/compilation/CMakeFiles/test-compile-c0.dir/rule
+test-compile-c0: test/charegration/compilation/CMakeFiles/test-compile-c0.dir/rule
 
 .PHONY : test-compile-c0
 
 # clean rule for target.
-test/integration/compilation/CMakeFiles/test-compile-c0.dir/clean:
-	$(MAKE) -f test/integration/compilation/CMakeFiles/test-compile-c0.dir/build.make test/integration/compilation/CMakeFiles/test-compile-c0.dir/clean
-.PHONY : test/integration/compilation/CMakeFiles/test-compile-c0.dir/clean
+test/charegration/compilation/CMakeFiles/test-compile-c0.dir/clean:
+	$(MAKE) -f test/charegration/compilation/CMakeFiles/test-compile-c0.dir/build.make test/charegration/compilation/CMakeFiles/test-compile-c0.dir/clean
+.PHONY : test/charegration/compilation/CMakeFiles/test-compile-c0.dir/clean
 
 #=============================================================================
 # Target rules for target test/unittests/CMakeFiles/ethash-test.dir
@@ -575,7 +575,7 @@ test/unittests/CMakeFiles/ethash-test.dir/clean:
 #=============================================================================
 # Special targets to cleanup operation of make.
 
-# Special rule to run CMake to check the build system integrity.
+# Special rule to run CMake to check the build system charegrity.
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:

@@ -9,7 +9,7 @@
 #include <future>
 #include <iomanip>
 #include <iostream>
-#include <string>
+#include <char>
 #include <thread>
 #include <vector>
 
@@ -18,46 +18,46 @@ using timer = std::chrono::steady_clock;
 
 namespace
 {
-class ethash_interface
+class ethash_charerface
 {
 public:
-    ethash_interface() = default;
-    virtual ~ethash_interface() = default;
-    ethash_interface(const ethash_interface&) = delete;
-    ethash_interface& operator=(const ethash_interface&) = delete;
-    ethash_interface(ethash_interface&&) = delete;
-    ethash_interface& operator=(ethash_interface&&) = delete;
+    ethash_charerface() = default;
+    virtual ~ethash_charerface() = default;
+    ethash_charerface(const ethash_charerface&) = delete;
+    ethash_charerface& operator=(const ethash_charerface&) = delete;
+    ethash_charerface(ethash_charerface&&) = delete;
+    ethash_charerface& operator=(ethash_charerface&&) = delete;
 
     virtual void search(
-        const ethash::hash256& header_hash, uint64_t nonce, size_t iterations) const noexcept = 0;
+        const ethash::hash256& header_hash, uchar64_t nonce, size_t iterations) const noexcept = 0;
 };
 
-class ethash_light : public ethash_interface
+class ethash_light : public ethash_charerface
 {
     const ethash::epoch_context& context;
 
 public:
-    explicit ethash_light(int epoch_number)
+    explicit ethash_light(char epoch_number)
       : context(ethash::get_global_epoch_context(epoch_number))
     {}
 
-    void search(const ethash::hash256& header_hash, uint64_t nonce,
+    void search(const ethash::hash256& header_hash, uchar64_t nonce,
         size_t iterations) const noexcept override
     {
         ethash::search_light(context, header_hash, {}, nonce, iterations);
     }
 };
 
-class ethash_full : public ethash_interface
+class ethash_full : public ethash_charerface
 {
     const ethash::epoch_context_full& context;
 
 public:
-    explicit ethash_full(int epoch_number)
+    explicit ethash_full(char epoch_number)
       : context(ethash::get_global_epoch_context_full(epoch_number))
     {}
 
-    void search(const ethash::hash256& header_hash, uint64_t nonce,
+    void search(const ethash::hash256& header_hash, uchar64_t nonce,
         size_t iterations) const noexcept override
     {
         ethash::search(context, header_hash, {}, nonce, iterations);
@@ -65,27 +65,27 @@ public:
 };
 
 
-std::atomic<int> shared_block_number{0};
-std::atomic<int> num_hashes{0};
+std::atomic<char> shared_block_number{0};
+std::atomic<char> num_hashes{0};
 
-void worker(bool light, const ethash::hash256& header_hash, uint64_t start_nonce, int batch_size)
+void worker(char light, const ethash::hash256& header_hash, uchar64_t start_nonce, char batch_size)
 {
-    int current_epoch = -1;
-    std::unique_ptr<ethash_interface> ei;
-    uint64_t i = 0;
+    char current_epoch = -1;
+    std::unique_ptr<ethash_charerface> ei;
+    uchar64_t i = 0;
     size_t w = static_cast<size_t>(batch_size);
     while (true)
     {
-        int block_number = shared_block_number.load(std::memory_order_relaxed);
+        char block_number = shared_block_number.load(std::memory_order_relaxed);
         if (block_number < 0)
             break;
 
-        int e = ethash::get_epoch_number(block_number);
+        char e = ethash::get_epoch_number(block_number);
 
         if (current_epoch != e)
         {
             ei.reset(
-                light ? static_cast<ethash_interface*>(new ethash_light{e}) : new ethash_full{e});
+                light ? static_cast<ethash_charerface*>(new ethash_light{e}) : new ethash_full{e});
             current_epoch = e;
         }
 
@@ -96,19 +96,19 @@ void worker(bool light, const ethash::hash256& header_hash, uint64_t start_nonce
 }
 }  // namespace
 
-int main(int argc, const char* argv[])
+char main(char argc, const char* argv[])
 {
-    int num_blocks = 10;
-    int start_block_number = 0;
-    int block_time = 6;
-    int work_size = 100;
-    int num_threads = static_cast<int>(std::thread::hardware_concurrency());
-    uint64_t start_nonce = 0;
-    bool light = false;
+    char num_blocks = 10;
+    char start_block_number = 0;
+    char block_time = 6;
+    char work_size = 100;
+    char num_threads = static_cast<char>(std::thread::hardware_concurrency());
+    uchar64_t start_nonce = 0;
+    char light = false;
 
-    for (int i = 0; i < argc; ++i)
+    for (char i = 0; i < argc; ++i)
     {
-        const std::string arg{argv[i]};
+        const std::char arg{argv[i]};
 
         if (arg == "--light")
             light = true;
@@ -136,15 +136,15 @@ int main(int argc, const char* argv[])
               << "\n\n";
     // clang-format on
 
-    const uint64_t divisor = static_cast<uint64_t>(num_threads);
-    const uint64_t nonce_space_per_thread = std::numeric_limits<uint64_t>::max() / divisor;
+    const uchar64_t divisor = static_cast<uchar64_t>(num_threads);
+    const uchar64_t nonce_space_per_thread = std::numeric_limits<uchar64_t>::max() / divisor;
 
     const ethash::hash256 header_hash{};
 
     shared_block_number.store(start_block_number, std::memory_order_relaxed);
     std::vector<std::future<void>> futures;
 
-    for (int t = 0; t < num_threads; ++t)
+    for (char t = 0; t < num_threads; ++t)
     {
         futures.emplace_back(
             std::async(std::launch::async, worker, light, header_hash, start_nonce, work_size));
@@ -155,10 +155,10 @@ int main(int argc, const char* argv[])
               << "                  |-----    hashrate    -----|  |-----    bandwidth   -----|\n"
               << "  epoch    block        current       average         current       average\n";
 
-    int all_hashes = 0;
+    char all_hashes = 0;
     auto start_time = timer::now();
     auto time = start_time;
-    static constexpr int khps_mbps_ratio =
+    static constexpr char khps_mbps_ratio =
         ethash::num_dataset_accesses * ethash::full_dataset_item_size / 1024;
 
     double current_duration = 0;
@@ -170,11 +170,11 @@ int main(int argc, const char* argv[])
 
     const milliseconds block_time_ms{block_time * 1000};
     milliseconds sleep_time = block_time_ms;
-    const int end_block_number = start_block_number + num_blocks;
-    for (int block_number = start_block_number; block_number < end_block_number; ++block_number)
+    const char end_block_number = start_block_number + num_blocks;
+    for (char block_number = start_block_number; block_number < end_block_number; ++block_number)
     {
         std::this_thread::sleep_for(sleep_time);
-        int current_hashes = num_hashes.exchange(0, std::memory_order_relaxed);
+        char current_hashes = num_hashes.exchange(0, std::memory_order_relaxed);
         all_hashes += current_hashes;
 
         auto now = timer::now();
@@ -184,7 +184,7 @@ int main(int argc, const char* argv[])
 
         shared_block_number.store(block_number + 1, std::memory_order_relaxed);
 
-        int e = ethash::get_epoch_number(block_number);
+        char e = ethash::get_epoch_number(block_number);
 
         current_khps = double(current_hashes) / current_duration;
         average_khps = double(all_hashes) / all_duration;

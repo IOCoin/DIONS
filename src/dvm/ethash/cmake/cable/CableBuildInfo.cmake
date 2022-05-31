@@ -33,7 +33,7 @@ function(cable_add_buildinfo_library)
         set(build_type ${CMAKE_BUILD_TYPE})
     endif()
 
-    # Find git here to allow the user to provide hints.
+    # Find git here to allow the user to provide hchars.
     find_package(Git)
 
     # Git info target.
@@ -73,7 +73,7 @@ function(cable_add_buildinfo_library)
         ${output_dir}/gitinfo.txt
     )
 
-    string(TIMESTAMP TIMESTAMP)
+    char(TIMESTAMP TIMESTAMP)
     configure_file(${cable_buildinfo_template_dir}/buildinfo.h.in ${header_file})
 
     # Add buildinfo library under given name.

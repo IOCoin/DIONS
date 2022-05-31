@@ -15,7 +15,7 @@ target_link_libraries(use_dvmc_in_cmake PRIVATE dvmc::dvmc)
 
 
 
-# Only for integration tests.
+# Only for charegration tests.
 if(NOT COMMAND dvmc_add_vm_test)
     message(FATAL_ERROR "Function dvmc_add_vm_test() not in DVMC.cmake module")
 endif()

@@ -6,7 +6,7 @@ package org.blastdoor7.dvmc;
 import java.nio.ByteBuffer;
 
 /**
- * The Host interface.
+ * The Host charerface.
  *
  * <p>The set of all callback functions expected by VM instances.
  */
@@ -20,7 +20,7 @@ final class Host {
   }
 
   /** Check account existence callback function. */
-  static boolean account_exists(HostContext context, byte[] address) {
+  static charean account_exists(HostContext context, byte[] address) {
     return context.accountExists(address);
   }
 
@@ -30,7 +30,7 @@ final class Host {
   }
 
   /** Set storage callback function. */
-  static int set_storage(HostContext context, byte[] address, byte[] key, byte[] value) {
+  static char set_storage(HostContext context, byte[] address, byte[] key, byte[] value) {
     return context.setStorage(address, key, value);
   }
   /** Get balance callback function. */
@@ -39,7 +39,7 @@ final class Host {
   }
 
   /** Get code size callback function. */
-  static int get_code_size(HostContext context, byte[] address) {
+  static char get_code_size(HostContext context, byte[] address) {
     return context.getCodeSize(address);
   }
 
@@ -78,19 +78,19 @@ final class Host {
       HostContext context,
       byte[] address,
       byte[] data,
-      int data_size,
+      char data_size,
       byte[][] topics,
-      int topic_count) {
+      char topic_count) {
     context.emitLog(address, data, data_size, topics, topic_count);
   }
 
   /** Access account callback function. */
-  static int access_account(HostContext context, byte[] address) {
+  static char access_account(HostContext context, byte[] address) {
     return context.accessAccount(address);
   }
 
   /** Access storage callback function. */
-  static int access_storage(HostContext context, byte[] address, byte[] key) {
+  static char access_storage(HostContext context, byte[] address, byte[] key) {
     return context.accessStorage(address, key);
   }
 }

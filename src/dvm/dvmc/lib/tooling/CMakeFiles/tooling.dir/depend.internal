@@ -7,5 +7,5 @@ dvmc/lib/tooling/CMakeFiles/tooling.dir/run.cpp.o
  dvmc/include/dvmc/dvmc.hpp
  dvmc/include/dvmc/helpers.h
  dvmc/include/dvmc/hex.hpp
- dvmc/include/dvmc/mocked_host.hpp
  dvmc/include/dvmc/tooling.hpp
+ dvmc/include/dvmc/transitional_node.hpp

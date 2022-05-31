@@ -7,5 +7,5 @@
 subdirs("benchmarks")
 subdirs("experimental")
 subdirs("fakeminer")
-subdirs("integration")
+subdirs("charegration")
 subdirs("unittests")

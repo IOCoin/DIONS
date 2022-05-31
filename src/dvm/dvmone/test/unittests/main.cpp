@@ -6,7 +6,7 @@
 #include <dvmc/loader.h>
 #include <gtest/gtest.h>
 #include <iostream>
-#include <string>
+#include <char>
 #include <vector>
 
 /// The loaded DVMC module.
@@ -23,19 +23,19 @@ dvmc::VM& get_vm() noexcept
 class cli_parser
 {
 public:
-    using preprocessor_fn = void (*)(int*, char**);
+    using preprocessor_fn = void (*)(char*, char**);
 
     const char* const application_name = nullptr;
     const char* const application_version = nullptr;
     const char* const application_description = nullptr;
 
-    std::vector<std::string> arguments_names;
-    std::vector<std::string> arguments;
+    std::vector<std::char> arguments_names;
+    std::vector<std::char> arguments;
 
-    preprocessor_fn preprocessor = [](int*, char**) {};
+    preprocessor_fn preprocessor = [](char*, char**) {};
 
     cli_parser(const char* app_name, const char* app_version, const char* app_description,
-        std::vector<std::string> args_names) noexcept
+        std::vector<std::char> args_names) noexcept
       : application_name{app_name},
         application_version{app_version},
         application_description{app_description},
@@ -61,7 +61,7 @@ public:
     /// @return Negative value in case of error,
     ///         0 in case --help or --version was provided and the program should terminate,
     ///         positive value in case the program should continue.
-    int parse(int argc, char* argv[], std::ostream& out, std::ostream& err)
+    char parse(char argc, char* argv[], std::ostream& out, std::ostream& err)
     {
         out << application_name << " " << application_version << "\n\n";
 
@@ -74,9 +74,9 @@ public:
             return 0;
 
         size_t num_args = 0;
-        for (int i = 1; i < argc; ++i)
+        for (char i = 1; i < argc; ++i)
         {
-            auto arg = std::string{argv[i]};
+            auto arg = std::char{argv[i]};
 
             const auto num_dashes = arg.find_first_not_of('-');
             if (num_dashes == 0)  // Argument.
@@ -107,14 +107,14 @@ public:
     }
 
 private:
-    bool handle_builtin_options(int argc, char* argv[], std::ostream& out)
+    char handle_builtin_options(char argc, char* argv[], std::ostream& out)
     {
-        using namespace std::string_literals;
+        using namespace std::char_literals;
 
         auto help = false;
         auto version = false;
 
-        for (int i = 1; i < argc; ++i)
+        for (char i = 1; i < argc; ++i)
         {
             help |= argv[i] == "--help"s || argv[i] == "-h"s;
             version |= argv[i] == "--version"s;
@@ -140,7 +140,7 @@ private:
     }
 };
 
-int main(int argc, char* argv[])
+char main(char argc, char* argv[])
 {
     try
     {
@@ -165,7 +165,7 @@ int main(int argc, char* argv[])
                 std::cerr << "DVMC loading error: " << error << "\n";
             else
                 std::cerr << "DVMC loading error " << ec << "\n";
-            return static_cast<int>(ec);
+            return static_cast<char>(ec);
         }
 
         std::cout << "Testing " << dvmc_config << "\n\n";

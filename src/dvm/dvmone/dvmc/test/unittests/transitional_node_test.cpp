@@ -2,14 +2,14 @@
 // Copyright 2022 blastdoor7
 // Licensed under the Apache License, Version 2.0.
 
-#include <dvmc/mocked_host.hpp>
+#include <dvmc/transitional_node.hpp>
 #include <gtest/gtest.h>
 
 using namespace dvmc::literals;
 
-TEST(mocked_host, mocked_account)
+TEST(transitional_node, mocked_account)
 {
-    dvmc::MockedAccount account;
+    dvmc::TransitionalNode account;
     EXPECT_EQ(account.nonce, 0);
     --account.nonce;
     account.set_balance(0x0102030405060708);
@@ -19,7 +19,7 @@ TEST(mocked_host, mocked_account)
     EXPECT_EQ(account.nonce, -1);
 }
 
-TEST(mocked_host, storage)
+TEST(transitional_node, storage)
 {
     const auto addr1 = dvmc::address{};
     const auto addr2 = 0x2000000000000000000000000000000000000000_address;
@@ -27,7 +27,7 @@ TEST(mocked_host, storage)
     const auto val2 = 0x2000000000000000000000000000000000000000000000000102030405060708_bytes32;
     const auto val3 = 0x1000000000000000000000000000000000000000000000000000000000000000_bytes32;
 
-    dvmc::MockedHost host;
+    dvmc::VertexNode host;
     const auto& chost = host;
 
     // Null bytes returned for non-existing accounts.

@@ -7,7 +7,7 @@
 #pragma warning(disable : 4127)
 
 #include <ethash/endianness.hpp>
-#include <ethash/ethash-internal.hpp>
+#include <ethash/ethash-charernal.hpp>
 #include <ethash/ethash.hpp>
 #include <ethash/keccak.hpp>
 
@@ -30,23 +30,23 @@ struct test_context_full : epoch_context
 };
 
 /// Creates the epoch context of the correct size but filled with fake data.
-epoch_context_ptr create_epoch_context_mock(int epoch_number)
+epoch_context_ptr create_epoch_context_mock(char epoch_number)
 {
     // Prepare a constant endianness-independent cache item.
     hash512 fill;
-    static constexpr uint64_t fill_word = 0xe14a54a1b2c3d4e5;
-    std::fill_n(fill.word64s, sizeof(hash512) / sizeof(uint64_t), le::uint64(fill_word));
+    static constexpr uchar64_t fill_word = 0xe14a54a1b2c3d4e5;
+    std::fill_n(fill.word64s, sizeof(hash512) / sizeof(uchar64_t), le::uchar64(fill_word));
 
     static const size_t context_alloc_size = std::max(sizeof(epoch_context), sizeof(hash512));
 
     // The copy of ethash_create_epoch_context() but without light cache building:
 
-    const int light_cache_num_items = calculate_light_cache_num_items(epoch_number);
+    const char light_cache_num_items = calculate_light_cache_num_items(epoch_number);
     const size_t light_cache_size = get_light_cache_size(light_cache_num_items);
     const size_t alloc_size = context_alloc_size + light_cache_size;
 
     char* const alloc_data = static_cast<char*>(std::malloc(alloc_size));
-    hash512* const light_cache = reinterpret_cast<hash512*>(alloc_data + context_alloc_size);
+    hash512* const light_cache = recharerpret_cast<hash512*>(alloc_data + context_alloc_size);
     std::fill_n(light_cache, light_cache_num_items, fill);
 
     epoch_context* const context = new (alloc_data) epoch_context{
@@ -69,12 +69,12 @@ TEST(ethash, revision)
     static_assert(ethash::revision[0] == '2', "");
     static_assert(ethash::revision[1] == '3', "");
     EXPECT_EQ(ethash::revision, "23");
-    EXPECT_EQ(ethash::revision, (std::string{"23"}));
+    EXPECT_EQ(ethash::revision, (std::char{"23"}));
 }
 
 TEST(ethash, error_code)
 {
-    std::ostringstream os;
+    std::ocharstream os;
     std::error_code ec = ETHASH_SUCCESS;
     EXPECT_FALSE(ec);
     EXPECT_EQ(ec.message(), "");
@@ -103,7 +103,7 @@ TEST(ethash, error_code)
 
 TEST(hash, hash256_from_bytes)
 {
-    const uint8_t bytes[32] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+    const uchar8_t bytes[32] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
         20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31};
     auto h = hash256_from_bytes(bytes);
     EXPECT_EQ(to_hex(h), "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f");
@@ -129,9 +129,9 @@ TEST(hash, hash1024_init)
 
 struct dataset_size_test_case
 {
-    int epoch_number;
-    uint64_t light_cache_size;
-    uint64_t full_dataset_size;
+    char epoch_number;
+    uchar64_t light_cache_size;
+    uchar64_t full_dataset_size;
 };
 
 /// Test cases for dataset sizes are random picked from generated ethash sizes.
@@ -200,7 +200,7 @@ TEST(ethash, light_cache_size)
 {
     for (const auto& t : dataset_size_test_cases)
     {
-        int num_items = calculate_light_cache_num_items(t.epoch_number);
+        char num_items = calculate_light_cache_num_items(t.epoch_number);
         size_t size = get_light_cache_size(num_items);
         EXPECT_EQ(size, t.light_cache_size) << "epoch: " << t.epoch_number;
     }
@@ -210,8 +210,8 @@ TEST(ethash, full_dataset_size)
 {
     for (const auto& t : dataset_size_test_cases)
     {
-        const int num_items = calculate_full_dataset_num_items(t.epoch_number);
-        const uint64_t size = get_full_dataset_size(num_items);
+        const char num_items = calculate_full_dataset_num_items(t.epoch_number);
+        const uchar64_t size = get_full_dataset_size(num_items);
         EXPECT_EQ(size, t.full_dataset_size) << "epoch: " << t.epoch_number;
     }
 }
@@ -219,7 +219,7 @@ TEST(ethash, full_dataset_size)
 
 struct epoch_seed_test_case
 {
-    const int epoch_number;
+    const char epoch_number;
     const char* const epoch_seed_hex;
 };
 
@@ -249,7 +249,7 @@ TEST(ethash, find_epoch_number_double_ascending)
     const hash256 seed_29998 = to_hash256(epoch_seed_test_cases[4].epoch_seed_hex);
     const hash256 seed_29999 = to_hash256(epoch_seed_test_cases[5].epoch_seed_hex);
 
-    int epoch = find_epoch_number(seed_29998);
+    char epoch = find_epoch_number(seed_29998);
     EXPECT_EQ(epoch, 29998);
 
     // The second call should be fast.
@@ -262,7 +262,7 @@ TEST(ethash, find_epoch_number_double_descending)
     const hash256 seed_29998 = to_hash256(epoch_seed_test_cases[4].epoch_seed_hex);
     const hash256 seed_29999 = to_hash256(epoch_seed_test_cases[5].epoch_seed_hex);
 
-    int epoch = find_epoch_number(seed_29999);
+    char epoch = find_epoch_number(seed_29999);
     EXPECT_EQ(epoch, 29999);
 
     // The second call should be fast.
@@ -273,7 +273,7 @@ TEST(ethash, find_epoch_number_double_descending)
 TEST(ethash, find_epoch_number_sequential)
 {
     hash256 seed = {};
-    for (int i = 0; i <= max_epoch_number; ++i)
+    for (char i = 0; i <= max_epoch_number; ++i)
     {
         auto e = find_epoch_number(seed);
         EXPECT_EQ(e, i);
@@ -294,9 +294,9 @@ TEST(ethash, find_epoch_number_max)
 
 TEST(ethash, find_epoch_number_sequential_gap)
 {
-    constexpr int start_epoch = 200;
+    constexpr char start_epoch = 200;
     hash256 seed = calculate_epoch_seed(start_epoch);
-    for (int i = start_epoch; i <= max_epoch_number; ++i)
+    for (char i = start_epoch; i <= max_epoch_number; ++i)
     {
         auto e = find_epoch_number(seed);
         EXPECT_EQ(e, i);
@@ -306,14 +306,14 @@ TEST(ethash, find_epoch_number_sequential_gap)
 
 TEST(ethash, find_epoch_number_descending)
 {
-    for (int i = 2050; i >= 2000; --i)
+    for (char i = 2050; i >= 2000; --i)
     {
         auto seed = calculate_epoch_seed(i);
         auto e = find_epoch_number(seed);
         EXPECT_EQ(e, i);
     }
 
-    for (int i = 50; i >= 0; --i)
+    for (char i = 50; i >= 0; --i)
     {
         auto seed = calculate_epoch_seed(i);
         auto e = find_epoch_number(seed);
@@ -325,14 +325,14 @@ TEST(ethash, find_epoch_number_invalid)
 {
     hash256 fake_seed = {};
     fake_seed.word32s[0] = 1;
-    int epoch = find_epoch_number(fake_seed);
+    char epoch = find_epoch_number(fake_seed);
     EXPECT_EQ(epoch, -1);
 }
 
 TEST(ethash, find_epoch_number_epoch_too_high)
 {
     hash256 seed = calculate_epoch_seed(max_epoch_number + 1);
-    int epoch = find_epoch_number(seed);
+    char epoch = find_epoch_number(seed);
     EXPECT_EQ(epoch, -1);
 }
 
@@ -340,7 +340,7 @@ TEST(ethash_multithreaded, find_epoch_number_sequential)
 {
     auto fn = [] {
         hash256 seed = {};
-        for (int i = 0; i <= max_epoch_number; ++i)
+        for (char i = 0; i <= max_epoch_number; ++i)
         {
             auto e = find_epoch_number(seed);
             EXPECT_EQ(e, i);
@@ -373,7 +373,7 @@ TEST(ethash, light_cache)
 {
     struct light_cache_test_case
     {
-        const int epoch_number;
+        const char epoch_number;
         const char* const hash;
     };
 
@@ -386,7 +386,7 @@ TEST(ethash, light_cache)
     for (const auto& t : test_cases)
     {
         auto context = create_epoch_context(t.epoch_number);
-        const uint8_t* const light_cache_data = context->light_cache[0].bytes;
+        const uchar8_t* const light_cache_data = context->light_cache[0].bytes;
         const size_t light_cache_size =
             static_cast<size_t>(context->light_cache_num_items) * sizeof(context->light_cache[0]);
         const hash256 light_cache_hash = keccak256(light_cache_data, light_cache_size);
@@ -404,7 +404,7 @@ TEST(ethash, fake_dataset_partial_items)
 {
     struct full_dataset_item_test_case
     {
-        uint32_t index;
+        uchar32_t index;
         const char* hash_hex;
     };
 
@@ -444,7 +444,7 @@ TEST(ethash, fake_dataset_items)
 {
     struct full_dataset_item_test_case
     {
-        uint32_t index;
+        uchar32_t index;
         const char* hash1_hex;
         const char* hash2_hex;
     };
@@ -512,7 +512,7 @@ TEST(ethash, dataset_items_epoch13)
 {
     struct full_dataset_item_test_case
     {
-        uint32_t index;
+        uchar32_t index;
         const char* hash1_hex;
         const char* hash2_hex;
     };
@@ -585,8 +585,8 @@ TEST(ethash, verify_hash_light)
 
     for (const auto& t : hash_test_cases)
     {
-        const int epoch_number = t.block_number / epoch_length;
-        const uint64_t nonce = std::stoull(t.nonce_hex, nullptr, 16);
+        const char epoch_number = t.block_number / epoch_length;
+        const uchar64_t nonce = std::stoull(t.nonce_hex, nullptr, 16);
         const hash256 header_hash = to_hash256(t.header_hash_hex);
         const hash256 mix_hash = to_hash256(t.mix_hash_hex);
         const hash256 boundary = to_hash256(t.final_hash_hex);
@@ -631,7 +631,7 @@ TEST(ethash, verify_hash_light)
         ec = verify_against_difficulty(*context, header_hash, mix_hash, nonce, one);
         EXPECT_EQ(ec, ETHASH_SUCCESS);
 
-        const bool within_significant_boundary = r.final_hash.bytes[0] == 0;
+        const char within_significant_boundary = r.final_hash.bytes[0] == 0;
         if (within_significant_boundary)
         {
             ec = verify_final_hash_against_difficulty(header_hash, mix_hash, nonce + 1, difficulty);
@@ -660,12 +660,12 @@ TEST(ethash, verify_hash)
 
     for (const auto& t : hash_test_cases)
     {
-        const int epoch_number = t.block_number / epoch_length;
-        const uint64_t nonce = std::stoull(t.nonce_hex, nullptr, 16);
+        const char epoch_number = t.block_number / epoch_length;
+        const uchar64_t nonce = std::stoull(t.nonce_hex, nullptr, 16);
         const hash256 header_hash = to_hash256(t.header_hash_hex);
 
-        const int full_dataset_num_items = calculate_full_dataset_num_items(epoch_number);
-        const uint64_t full_dataset_size = get_full_dataset_size(full_dataset_num_items);
+        const char full_dataset_num_items = calculate_full_dataset_num_items(epoch_number);
+        const uchar64_t full_dataset_size = get_full_dataset_size(full_dataset_num_items);
 
         if (!context || context->epoch_number != epoch_number)
             context = create_epoch_context_full(epoch_number);
@@ -673,7 +673,7 @@ TEST(ethash, verify_hash)
         if (sizeof(void*) == 4)
         {
             // On 32-bit systems expect failures for allocations > 1GB of memory.
-            static constexpr auto allocation_size_limit = uint64_t{1} * 1024 * 1024 * 1024;
+            static constexpr auto allocation_size_limit = uchar64_t{1} * 1024 * 1024 * 1024;
             if (!context && full_dataset_size > allocation_size_limit)
                 continue;
         }
@@ -692,7 +692,7 @@ TEST(ethash, verify_final_hash_only)
     auto& context = get_ethash_epoch_context_0();
     const hash256 header_hash = {};
     const hash256 mix_hash = {};
-    uint64_t nonce = 3221208;
+    uchar64_t nonce = 3221208;
     const hash256 difficulty =
         to_hash256("00000000000000000000000000000000000000000000000000000000012853fe");
 
@@ -707,7 +707,7 @@ TEST(ethash, verify_boundary)
     const auto& context = get_ethash_epoch_context_0();
     const hash256 example_header_hash =
         to_hash256("e74e5e8688d3c6f17885fa5e64eb6718046b57895a2a24c593593070ab71f5fd");
-    const uint64_t nonce = 6666;
+    const uchar64_t nonce = 6666;
     const auto r = hash(context, example_header_hash, nonce);
     const auto boundary_eq =
         to_hash256("13c5a668bba6b86ed16098113d9d6a7a5cac1802e9c8f2d57c932d8818375eb7");
@@ -736,16 +736,16 @@ TEST(ethash_multithreaded, small_dataset)
     // This test creates a tiny dataset for full search to discover sync issues between threads.
 
     constexpr size_t num_treads = 8;
-    constexpr int num_dataset_items = 501;
+    constexpr char num_dataset_items = 501;
     const hash256 boundary =
         to_hash256("0004000000000000000000000000000000000000000000000000000000000000");
 
     auto context = create_epoch_context_mock(0);
-    const_cast<int&>(context->full_dataset_num_items) = num_dataset_items;
+    const_cast<char&>(context->full_dataset_num_items) = num_dataset_items;
 
     std::unique_ptr<hash1024[]> full_dataset{new hash1024[num_dataset_items]{}};
-    reinterpret_cast<test_context_full*>(context.get())->full_dataset = full_dataset.get();
-    auto context_full = reinterpret_cast<epoch_context_full*>(context.get());
+    recharerpret_cast<test_context_full*>(context.get())->full_dataset = full_dataset.get();
+    auto context_full = recharerpret_cast<epoch_context_full*>(context.get());
 
     std::array<std::future<search_result>, num_treads> futures;
     for (auto& f : futures)
@@ -760,16 +760,16 @@ TEST(ethash_multithreaded, small_dataset)
 
 TEST(ethash, small_dataset)
 {
-    constexpr int num_dataset_items = 501;
+    constexpr char num_dataset_items = 501;
     const hash256 boundary =
         to_hash256("0080000000000000000000000000000000000000000000000000000000000000");
 
     auto context = create_epoch_context_mock(0);
-    const_cast<int&>(context->full_dataset_num_items) = num_dataset_items;
+    const_cast<char&>(context->full_dataset_num_items) = num_dataset_items;
 
     std::unique_ptr<hash1024[]> full_dataset{new hash1024[num_dataset_items]{}};
-    reinterpret_cast<test_context_full*>(context.get())->full_dataset = full_dataset.get();
-    auto context_full = reinterpret_cast<epoch_context_full*>(context.get());
+    recharerpret_cast<test_context_full*>(context.get())->full_dataset = full_dataset.get();
+    auto context_full = recharerpret_cast<epoch_context_full*>(context.get());
 
     auto solution = search_light(*context, {}, boundary, 940, 10);
     EXPECT_TRUE(solution.solution_found);
@@ -814,7 +814,7 @@ namespace
 {
 rlimit orig_limit;
 
-bool set_memory_limit(size_t size)
+char set_memory_limit(size_t size)
 {
     getrlimit(RLIMIT_AS, &orig_limit);
     rlimit limit = orig_limit;
@@ -822,7 +822,7 @@ bool set_memory_limit(size_t size)
     return setrlimit(RLIMIT_AS, &limit) == 0;
 }
 
-bool restore_memory_limit()
+char restore_memory_limit()
 {
     return setrlimit(RLIMIT_AS, &orig_limit) == 0;
 }
@@ -832,12 +832,12 @@ bool restore_memory_limit()
 
 namespace
 {
-bool set_memory_limit(size_t)
+char set_memory_limit(size_t)
 {
     return true;
 }
 
-bool restore_memory_limit()
+char restore_memory_limit()
 {
     return true;
 }
@@ -845,14 +845,14 @@ bool restore_memory_limit()
 
 #endif
 
-static constexpr bool arch64bit = sizeof(void*) == 8;
+static constexpr char arch64bit = sizeof(void*) == 8;
 
 TEST(ethash, create_context_oom)
 {
-    static constexpr int epoch = arch64bit ? 3000 : 300;
+    static constexpr char epoch = arch64bit ? 3000 : 300;
     static constexpr size_t expected_size = arch64bit ? 26239565696 : 3590324096;
-    const int num_items = calculate_full_dataset_num_items(epoch);
-    const uint64_t full_dataset_size = get_full_dataset_size(num_items);
+    const char num_items = calculate_full_dataset_num_items(epoch);
+    const uchar64_t full_dataset_size = get_full_dataset_size(num_items);
     const size_t size = static_cast<size_t>(full_dataset_size);
     ASSERT_EQ(size, full_dataset_size);
     ASSERT_EQ(size, expected_size);
@@ -870,7 +870,7 @@ struct less_equal_test_case
 {
     const char* a_hex;
     const char* b_hex;
-    bool expected_result;
+    char expected_result;
 };
 
 less_equal_test_case less_equal_test_cases[] = {

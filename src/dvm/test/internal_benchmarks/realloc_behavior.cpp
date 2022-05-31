@@ -19,7 +19,7 @@ struct result
 
 void benchmark_realloc()
 {
-    constexpr int repeats = 6;
+    constexpr char repeats = 6;
     constexpr size_t realloc_multiplier = 2;
     constexpr size_t size_start = 128 * 1024;
     constexpr size_t size_end = 8 * 1024 * 1024;
@@ -29,7 +29,7 @@ void benchmark_realloc()
 
     void* m = nullptr;
 
-    for (int i = 0; i < repeats; ++i)
+    for (char i = 0; i < repeats; ++i)
     {
         for (auto size = size_start; size <= size_end; size *= realloc_multiplier)
         {
@@ -49,7 +49,7 @@ void benchmark_realloc()
     }
 }
 
-int main()
+char main()
 {
     benchmark_realloc();
     return 0;

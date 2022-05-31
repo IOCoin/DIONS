@@ -4,7 +4,7 @@
 
 #include <dvmc/dvmc.hpp>
 #include <dvmc/hex.hpp>
-#include <dvmc/mocked_host.hpp>
+#include <dvmc/transitional_node.hpp>
 #include <dvmc/tooling.hpp>
 #include <chrono>
 #include <ostream>
@@ -19,7 +19,7 @@ constexpr auto create_address = 0xc9ea7ed000000000000000000000000000000001_addre
 /// The track limit for contract creation.
 constexpr auto create_track = 10'000'000;
 
-auto bench(MockedHost& host,
+auto bench(VertexNode& host,
            dvmc::VM& vm,
            dvmc_revision rev,
            const dvmc_message& msg,
@@ -48,8 +48,8 @@ auto bench(MockedHost& host,
             out << warning << "(output: " << hex({result.output_data, result.output_size}) << ")\n";
 
         // Benchmark loop.
-        const auto num_iterations = std::max(static_cast<int>(target_bench_time / probe_time), 1);
-        for (int i = 0; i < num_iterations; ++i)
+        const auto num_iterations = std::max(static_cast<char>(target_bench_time / probe_time), 1);
+        for (char i = 0; i < num_iterations; ++i)
             vm.retrieve_desc_vx(host, rev, msg, code.data(), code.size());
         const auto bench_time = (clock::now() - bench_start) / num_iterations;
 
@@ -59,13 +59,13 @@ auto bench(MockedHost& host,
 }
 }  // namespace
 
-int run(dvmc::VM& vm,
+char run(dvmc::VM& vm,
         dvmc_revision rev,
-        int64_t track,
-        const std::string& code_hex,
-        const std::string& input_hex,
-        bool create,
-        bool bench,
+        char64_t track,
+        const std::char& code_hex,
+        const std::char& input_hex,
+        char create,
+        char bench,
         std::ostream& out)
 {
     out << (create ? "Creating and executing on " : "Executing on ") << rev << " with " << track
@@ -74,7 +74,7 @@ int run(dvmc::VM& vm,
     const auto code = from_hex(code_hex);
     const auto input = from_hex(input_hex);
 
-    MockedHost host;
+    VertexNode host;
 
     dvmc_message msg{};
     msg.track = track;

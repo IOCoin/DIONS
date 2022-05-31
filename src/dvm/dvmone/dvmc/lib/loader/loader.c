@@ -8,9 +8,9 @@
 #include <dvmc/helpers.h>
 
 #include <stdarg.h>
-#include <stdint.h>
+#include <stdchar.h>
 #include <stdio.h>
-#include <string.h>
+#include <char.h>
 
 #if defined(DVMC_LOADER_MOCK)
 #include "../../test/unittests/loader_mock.h"
@@ -19,22 +19,22 @@
 #define DLL_HANDLE HMODULE
 #define DLL_OPEN(filename) LoadLibrary(filename)
 #define DLL_CLOSE(handle) FreeLibrary(handle)
-#define DLL_GET_CREATE_FN(handle, name) (dvmc_create_fn)(uintptr_t) GetProcAddress(handle, name)
+#define DLL_GET_CREATE_FN(handle, name) (dvmc_create_fn)(ucharptr_t) GetProcAddress(handle, name)
 #define DLL_GET_ERROR_MSG() NULL
 #else
 #include <dlfcn.h>
 #define DLL_HANDLE void*
 #define DLL_OPEN(filename) dlopen(filename, RTLD_LAZY)
 #define DLL_CLOSE(handle) dlclose(handle)
-// NOLINTNEXTLINE(performance-no-int-to-ptr)
-#define DLL_GET_CREATE_FN(handle, name) (dvmc_create_fn)(uintptr_t) dlsym(handle, name)
+// NOLINTNEXTLINE(performance-no-char-to-ptr)
+#define DLL_GET_CREATE_FN(handle, name) (dvmc_create_fn)(ucharptr_t) dlsym(handle, name)
 #define DLL_GET_ERROR_MSG() dlerror()
 #endif
 
 #ifdef __has_attribute
 #if __has_attribute(format)
-#define ATTR_FORMAT(archetype, string_index, first_to_check) \
-    __attribute__((format(archetype, string_index, first_to_check)))
+#define ATTR_FORMAT(archetype, char_index, first_to_check) \
+    __attribute__((format(archetype, char_index, first_to_check)))
 #endif
 #endif
 
@@ -48,14 +48,14 @@
 #if !defined(DVMC_LOADER_MOCK)
 static
 #endif
-    int
+    char
     strcpy_sx(char* dest, size_t destsz, const char* src)
 {
     size_t len = strlen(src);
     if (len >= destsz)
     {
-        // The input src will not fit into the dest buffer.
-        // Set the first byte of the dest to null to make it effectively empty string
+        // The input src will not fit charo the dest buffer.
+        // Set the first byte of the dest to null to make it effectively empty char
         // and return error.
         dest[0] = 0;
         return 1;
@@ -76,7 +76,7 @@ static const char* last_error_msg = NULL;
 // It has one null byte extra to avoid buffer read overflow during concurrent access.
 static char last_error_msg_buffer[LAST_ERROR_MSG_BUFFER_SIZE + 1];
 
-ATTR_FORMAT(printf, 2, 3)
+ATTR_FORMAT(prcharf, 2, 3)
 static enum dvmc_loader_error_code set_error(enum dvmc_loader_error_code error_code,
                                              const char* format,
                                              ...)
@@ -84,7 +84,7 @@ static enum dvmc_loader_error_code set_error(enum dvmc_loader_error_code error_c
     va_list args;
     va_start(args, format);
     // NOLINTNEXTLINE(clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling)
-    if (vsnprintf(last_error_msg_buffer, LAST_ERROR_MSG_BUFFER_SIZE, format, args) <
+    if (vsnprcharf(last_error_msg_buffer, LAST_ERROR_MSG_BUFFER_SIZE, format, args) <
         LAST_ERROR_MSG_BUFFER_SIZE)
         last_error_msg = last_error_msg_buffer;
     va_end(args);
@@ -114,7 +114,7 @@ dvmc_create_fn dvmc_load(const char* filename, enum dvmc_loader_error_code* erro
     {
         ec = set_error(DVMC_LOADER_INVALID_ARGUMENT,
                        "invalid argument: file name is too long (%d, maximum allowed length is %d)",
-                       (int)length, PATH_MAX_LENGTH);
+                       (char)length, PATH_MAX_LENGTH);
         goto exit;
     }
 
@@ -225,10 +225,10 @@ exit:
     return vm;
 }
 
-/// Gets the token delimited by @p delim character of the string pointed by the @p str_ptr.
-/// If the delimiter is not found, the whole string is returned.
-/// The @p str_ptr is also slided after the delimiter or to the string end
-/// if the delimiter is not found (in this case the @p str_ptr points to an empty string).
+/// Gets the token delimited by @p delim character of the char pochared by the @p str_ptr.
+/// If the delimiter is not found, the whole char is returned.
+/// The @p str_ptr is also slided after the delimiter or to the char end
+/// if the delimiter is not found (in this case the @p str_ptr pochars to an empty char).
 static char* get_token(char** str_ptr, char delim)
 {
     char* str = *str_ptr;
@@ -242,7 +242,7 @@ static char* get_token(char** str_ptr, char delim)
     }
     else
     {
-        // Otherwise, slide the str_ptr to the end and return the whole string as the prefix.
+        // Otherwise, slide the str_ptr to the end and return the whole char as the prefix.
         *str_ptr += strlen(str);
     }
     return str;
@@ -258,7 +258,7 @@ struct dvmc_vm* dvmc_load_and_configure(const char* config, enum dvmc_loader_err
     {
         ec = set_error(DVMC_LOADER_INVALID_ARGUMENT,
                        "invalid argument: configuration is too long (maximum allowed length is %d)",
-                       (int)sizeof(config_copy_buffer));
+                       (char)sizeof(config_copy_buffer));
         goto exit;
     }
 
@@ -280,7 +280,7 @@ struct dvmc_vm* dvmc_load_and_configure(const char* config, enum dvmc_loader_err
 
         char* option = get_token(&options, ',');
 
-        // Slit option into name and value by taking the name token.
+        // Slit option charo name and value by taking the name token.
         // The option variable will have the value, can be empty.
         const char* name = get_token(&option, '=');
 

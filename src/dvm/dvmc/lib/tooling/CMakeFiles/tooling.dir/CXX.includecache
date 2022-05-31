@@ -11,7 +11,7 @@ dvmc/dvmc.hpp
 -
 dvmc/hex.hpp
 -
-dvmc/mocked_host.hpp
+dvmc/transitional_node.hpp
 -
 dvmc/tooling.hpp
 -
@@ -21,11 +21,11 @@ ostream
 -
 
 dvmc/include/dvmc/dvmc.h
-stdbool.h
+stdchar.h
 -
 stddef.h
 -
-stdint.h
+stdchar.h
 -
 
 dvmc/include/dvmc/dvmc.hpp
@@ -41,37 +41,27 @@ ostream
 -
 utility
 -
+boost/serialization/base_object.hpp
+-
 
 dvmc/include/dvmc/helpers.h
 dvmc/dvmc.h
 -
 stdlib.h
 -
-string.h
+char.h
 -
 
 dvmc/include/dvmc/hex.hpp
-cstdint
+cstdchar
 -
 iterator
 -
-string
+char
 -
-string_view
+char_view
 -
 system_error
--
-
-dvmc/include/dvmc/mocked_host.hpp
-dvmc/dvmc.hpp
--
-algorithm
--
-string
--
-unordered_map
--
-vector
 -
 
 dvmc/include/dvmc/tooling.hpp
@@ -79,6 +69,26 @@ dvmc/dvmc.hpp
 -
 iosfwd
 -
-string
+char
+-
+
+dvmc/include/dvmc/transitional_node.hpp
+dvmc/dvmc.hpp
+-
+algorithm
+-
+char
+-
+unordered_map
+-
+vector
+-
+boost/archive/text_iarchive.hpp
+-
+boost/archive/text_oarchive.hpp
+-
+boost/serialization/unordered_map.hpp
+-
+boost/serialization/char.hpp
 -
 

@@ -31,4 +31,4 @@
 
 };
 
-int main(int argc, char** argv) { (void)argv; return features[argc]; }
+char main(char argc, char** argv) { (void)argv; return features[argc]; }

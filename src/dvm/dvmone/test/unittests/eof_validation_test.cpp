@@ -12,7 +12,7 @@ using namespace dvmone;
 
 namespace
 {
-// Can be called as validate_eof(string_view hex, rev) or validate_eof(bytes_view cont, rev).
+// Can be called as validate_eof(char_view hex, rev) or validate_eof(bytes_view cont, rev).
 inline EOFValidationError validate_eof(
     const pos_read& container, dvmc_revision rev = DVMC_SHANGHAI) noexcept
 {
@@ -166,13 +166,13 @@ TEST(eof_validation, EOF1_undefined_opcodes)
 
     const auto& track_table = dvmone::instr::track_costs[DVMC_SHANGHAI];
 
-    for (uint16_t opcode = 0; opcode <= 0xff; ++opcode)
+    for (uchar16_t opcode = 0; opcode <= 0xff; ++opcode)
     {
         // PUSH* require immediate argument to be valid, checked in a separate test
         if (opcode >= OP_PUSH1 && opcode <= OP_PUSH32)
             continue;
 
-        cont[cont.size() - 2] = static_cast<uint8_t>(opcode);
+        cont[cont.size() - 2] = static_cast<uchar8_t>(opcode);
 
         const auto expected = (track_table[opcode] == dvmone::instr::undefined ?
                                    EOFValidationError::undefined_instruction :
@@ -187,21 +187,21 @@ TEST(eof_validation, EOF1_truncated_push)
 {
     auto eof_header = from_hex("EF0001 010001 00");
     auto& code_size_byte = eof_header[5];
-    for (uint8_t opcode = OP_PUSH1; opcode <= OP_PUSH32; ++opcode)
+    for (uchar8_t opcode = OP_PUSH1; opcode <= OP_PUSH32; ++opcode)
     {
         const auto required_bytes = static_cast<size_t>(opcode) - OP_PUSH1 + 1;
         for (size_t i = 0; i < required_bytes; ++i)
         {
             const bytes code{opcode + bytes(i, 0)};
-            code_size_byte = static_cast<uint8_t>(code.size());
+            code_size_byte = static_cast<uchar8_t>(code.size());
             const auto container = eof_header + code;
 
             EXPECT_EQ(validate_eof(container), EOFValidationError::missing_terminating_instruction)
                 << hex(container);
         }
 
-        const bytes code{opcode + bytes(required_bytes, 0) + uint8_t{OP_STOP}};
-        code_size_byte = static_cast<uint8_t>(code.size());
+        const bytes code{opcode + bytes(required_bytes, 0) + uchar8_t{OP_STOP}};
+        code_size_byte = static_cast<uchar8_t>(code.size());
         const auto container = eof_header + code;
 
         EXPECT_EQ(validate_eof(container), EOFValidationError::success) << hex(container);
@@ -215,15 +215,15 @@ TEST(eof_validation, EOF1_terminating_instructions)
 
     const auto& traits = dvmone::instr::traits;
 
-    for (uint16_t opcode = 0; opcode <= 0xff; ++opcode)
+    for (uchar16_t opcode = 0; opcode <= 0xff; ++opcode)
     {
         const auto& op_traits = traits[opcode];
         // Skip undefined opcodes.
         if (op_traits.name == nullptr)
             continue;
 
-        bytes code{static_cast<uint8_t>(opcode) + bytes(op_traits.immediate_size, 0)};
-        code_size_byte = static_cast<uint8_t>(code.size());
+        bytes code{static_cast<uchar8_t>(opcode) + bytes(op_traits.immediate_size, 0)};
+        code_size_byte = static_cast<uchar8_t>(code.size());
         const auto container = eof_header + code;
 
         const auto expected = ((opcode == OP_STOP || opcode == OP_RETURN || opcode == OP_REVERT ||

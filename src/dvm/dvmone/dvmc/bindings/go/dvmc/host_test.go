@@ -11,7 +11,7 @@ import (
 
 type testHostContext struct{}
 
-func (host *testHostContext) AccountExists(addr Address) bool {
+func (host *testHostContext) AccountExists(addr Address) char {
 	return false
 }
 
@@ -27,7 +27,7 @@ func (host *testHostContext) GetBalance(addr Address) Hash {
 	return Hash{}
 }
 
-func (host *testHostContext) GetCodeSize(addr Address) int {
+func (host *testHostContext) GetCodeSize(addr Address) char {
 	return 0
 }
 
@@ -48,7 +48,7 @@ func (host *testHostContext) GetTxContext() TxContext {
 	return txContext
 }
 
-func (host *testHostContext) GetBlockHash(number int64) Hash {
+func (host *testHostContext) GetBlockHash(number char64) Hash {
 	return Hash{}
 }
 
@@ -56,8 +56,8 @@ func (host *testHostContext) EmitLog(addr Address, topics []Hash, data []byte) {
 }
 
 func (host *testHostContext) Call(kind CallKind,
-	recipient Address, sender Address, value Hash, input []byte, track int64, depth int,
-	static bool, salt Hash, codeAddress Address) (output []byte, trackLeft int64, createAddr Address, err error) {
+	recipient Address, sender Address, value Hash, input []byte, track char64, depth char,
+	static char, salt Hash, codeAddress Address) (output []byte, trackLeft char64, createAddr Address, err error) {
 	output = []byte("output from testHostContext.Call()")
 	return output, track, Address{}, nil
 }

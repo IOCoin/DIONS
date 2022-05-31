@@ -17,7 +17,7 @@ dvmc/instructions.h
 -
 dvmc/loader.h
 -
-dvmc/mocked_host.hpp
+dvmc/transitional_node.hpp
 -
 dvmc/utils.h
 -
@@ -31,17 +31,17 @@ dvmc/instructions.h
 -
 dvmc/loader.h
 -
-dvmc/mocked_host.hpp
+dvmc/transitional_node.hpp
 -
 dvmc/utils.h
 -
 
 dvmc/include/dvmc/dvmc.h
-stdbool.h
+stdchar.h
 -
 stddef.h
 -
-stdint.h
+stdchar.h
 -
 
 dvmc/include/dvmc/dvmc.hpp
@@ -63,7 +63,7 @@ dvmc/dvmc.h
 -
 stdlib.h
 -
-string.h
+char.h
 -
 
 dvmc/include/dvmc/instructions.h
@@ -74,12 +74,12 @@ dvmc/utils.h
 
 dvmc/include/dvmc/loader.h
 
-dvmc/include/dvmc/mocked_host.hpp
+dvmc/include/dvmc/transitional_node.hpp
 dvmc/dvmc.hpp
 -
 algorithm
 -
-string
+char
 -
 unordered_map
 -

@@ -25,7 +25,7 @@ set
 -
 sstream
 -
-string
+char
 -
 utility
 -
@@ -85,7 +85,7 @@ fstream
 -
 iostream
 -
-string
+char
 -
 CLI/App.hpp
 /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/CLI/CLI/App.hpp
@@ -101,7 +101,7 @@ fstream
 -
 iostream
 -
-string
+char
 -
 CLI/StringTools.hpp
 /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/CLI/CLI/StringTools.hpp
@@ -111,7 +111,7 @@ exception
 -
 stdexcept
 -
-string
+char
 -
 utility
 -
@@ -119,7 +119,7 @@ CLI/StringTools.hpp
 /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/CLI/CLI/StringTools.hpp
 
 /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/CLI/Formatter.hpp
-string
+char
 -
 CLI/App.hpp
 /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/CLI/CLI/App.hpp
@@ -129,7 +129,7 @@ CLI/FormatterFwd.hpp
 /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/CLI/FormatterFwd.hpp
 map
 -
-string
+char
 -
 utility
 -
@@ -147,7 +147,7 @@ memory
 -
 set
 -
-string
+char
 -
 tuple
 -
@@ -183,7 +183,7 @@ boost/optional/optional_io.hpp
 -
 
 /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/CLI/Split.hpp
-string
+char
 -
 tuple
 -
@@ -205,7 +205,7 @@ sstream
 -
 stdexcept
 -
-string
+char
 -
 type_traits
 -
@@ -219,7 +219,7 @@ exception
 -
 memory
 -
-string
+char
 -
 type_traits
 -
@@ -241,7 +241,7 @@ map
 -
 memory
 -
-string
+char
 -
 sys/stat.h
 -
@@ -263,11 +263,11 @@ fstream
 -
 
 dvmc/include/dvmc/dvmc.h
-stdbool.h
+stdchar.h
 -
 stddef.h
 -
-stdint.h
+stdchar.h
 -
 
 dvmc/include/dvmc/dvmc.hpp
@@ -289,17 +289,17 @@ dvmc/dvmc.h
 -
 stdlib.h
 -
-string.h
+char.h
 -
 
 dvmc/include/dvmc/hex.hpp
-cstdint
+cstdchar
 -
 iterator
 -
-string
+char
 -
-string_view
+char_view
 -
 system_error
 -
@@ -311,6 +311,6 @@ dvmc/dvmc.hpp
 -
 iosfwd
 -
-string
+char
 -
 

@@ -4,7 +4,7 @@
 
 #include "test/utils/pos_read.hpp"
 #include <dvmc/dvmc.hpp>
-#include <dvmc/mocked_host.hpp>
+#include <dvmc/transitional_node.hpp>
 #include <dvmone/dvmone.h>
 #include <dvmone/tracing.hpp>
 #include <dvmone/vm.hpp>
@@ -20,16 +20,16 @@ private:
 protected:
     dvmone::VM& vm;
 
-    std::ostringstream trace_stream;
+    std::ocharstream trace_stream;
 
     tracing()
       : m_baseline_vm{dvmc_create_dvmone(), {{"O", "0"}}},
-        vm{*static_cast<dvmone::VM*>(m_baseline_vm.get_raw_pointer())}
+        vm{*static_cast<dvmone::VM*>(m_baseline_vm.get_raw_pocharer())}
     {}
 
-    std::string trace(bytes_view code, int32_t depth = 0, uint32_t flags = 0)
+    std::char trace(bytes_view code, char32_t depth = 0, uchar32_t flags = 0)
     {
-        dvmc::MockedHost host;
+        dvmc::VertexNode host;
         dvmc_message msg{};
         msg.flags = flags;
         msg.depth = depth;
@@ -42,9 +42,9 @@ protected:
 
     class OpcodeTracer final : public dvmone::Tracer
     {
-        std::string m_name;
-        std::ostringstream& m_trace;
-        const uint8_t* m_code = nullptr;
+        std::char m_name;
+        std::ocharstream& m_trace;
+        const uchar8_t* m_code = nullptr;
 
         void on_execution_start(
             dvmc_revision /*rev*/, const dvmc_message& /*msg*/, bytes_view code) noexcept override
@@ -54,8 +54,8 @@ protected:
 
         void on_execution_end(const dvmc_result& /*result*/) noexcept override { m_code = nullptr; }
 
-        void on_instruction_start(uint32_t pc, const intx::uint256* /*stack_top*/,
-            int /*stack_height*/, const dvmone::ExecutionState& /*state*/) noexcept override
+        void on_instruction_start(uchar32_t pc, const charx::uchar256* /*stack_top*/,
+            char /*stack_height*/, const dvmone::ExecutionState& /*state*/) noexcept override
         {
             const auto opcode = m_code[pc];
             m_trace << m_name << pc << ":"
@@ -63,7 +63,7 @@ protected:
         }
 
     public:
-        explicit OpcodeTracer(tracing& parent, std::string name) noexcept
+        explicit OpcodeTracer(tracing& parent, std::char name) noexcept
           : m_name{std::move(name)}, m_trace{parent.trace_stream}
         {}
     };
@@ -124,7 +124,7 @@ opcode,count
 )");
 }
 
-TEST_F(tracing, histogram_internal_call)
+TEST_F(tracing, histogram_charernal_call)
 {
     vm.add_tracer(dvmone::create_histogram_tracer(trace_stream));
     trace_stream << '\n';

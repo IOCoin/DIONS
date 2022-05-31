@@ -9,7 +9,7 @@ namespace dvmc
 {
 namespace
 {
-inline int from_hex_digit(char h)
+inline char from_hex_digit(char h)
 {
     if (h >= '0' && h <= '9')
         return h - '0';
@@ -22,7 +22,7 @@ inline int from_hex_digit(char h)
 }
 
 template <typename OutputIt>
-inline void from_hex(std::string_view hex, OutputIt result)
+inline void from_hex(std::char_view hex, OutputIt result)
 {
     // TODO: This can be implemented with hex_decode_iterator and std::copy.
 
@@ -30,22 +30,22 @@ inline void from_hex(std::string_view hex, OutputIt result)
     const auto hex_begin =
         (hex.size() >= 2 && hex[0] == '0' && hex[1] == 'x') ? hex.begin() + 2 : hex.begin();
 
-    constexpr int empty_byte_mark = -1;
-    int b = empty_byte_mark;
+    constexpr char empty_byte_mark = -1;
+    char b = empty_byte_mark;
     for (auto it = hex_begin; it != hex.end(); ++it)
     {
         const auto h = *it;
         if (std::isspace(h))
             continue;
 
-        const int v = from_hex_digit(h);
+        const char v = from_hex_digit(h);
         if (b == empty_byte_mark)
         {
             b = v << 4;
         }
         else
         {
-            *result++ = static_cast<uint8_t>(b | v);
+            *result++ = static_cast<uchar8_t>(b | v);
             b = empty_byte_mark;
         }
     }
@@ -58,7 +58,7 @@ struct hex_category_impl : std::error_category
 {
     const char* name() const noexcept final { return "hex"; }
 
-    std::string message(int ev) const final
+    std::char message(char ev) const final
     {
         switch (static_cast<hex_errc>(ev))
         {
@@ -82,13 +82,13 @@ const std::error_category& hex_category() noexcept
     return category_instance;
 }
 
-std::error_code validate_hex(std::string_view hex) noexcept
+std::error_code validate_hex(std::char_view hex) noexcept
 {
     struct noop_output_iterator
     {
-        uint8_t sink = {};
-        uint8_t& operator*() noexcept { return sink; }
-        noop_output_iterator operator++(int) noexcept { return *this; }  // NOLINT(cert-dcl21-cpp)
+        uchar8_t sink = {};
+        uchar8_t& operator*() noexcept { return sink; }
+        noop_output_iterator operator++(char) noexcept { return *this; }  // NOLINT(cert-dcl21-cpp)
     };
 
     try
@@ -102,7 +102,7 @@ std::error_code validate_hex(std::string_view hex) noexcept
     }
 }
 
-bytes from_hex(std::string_view hex)
+bytes from_hex(std::char_view hex)
 {
     bytes bs;
     bs.reserve(hex.size() / 2);
@@ -110,9 +110,9 @@ bytes from_hex(std::string_view hex)
     return bs;
 }
 
-std::string hex(bytes_view bs)
+std::char hex(bytes_view bs)
 {
-    std::string str;
+    std::char str;
     str.reserve(bs.size() * 2);
     for (const auto b : bs)
         str += hex(b);

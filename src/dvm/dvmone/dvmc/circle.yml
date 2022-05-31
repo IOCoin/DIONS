@@ -18,10 +18,10 @@ commands:
   build:
     parameters:
       build_type:
-        type: string
+        type: char
         default: ""
       toolchain:
-        type: string
+        type: char
         default: ""
     steps:
       - run:
@@ -83,7 +83,7 @@ commands:
 
 jobs:
 
-  lint:
+  lchar:
     executor: linux-clang-latest
     steps:
     - checkout
@@ -109,7 +109,7 @@ jobs:
         command: |
           cat Doxyfile | sed 's/HTML_OUTPUT            = ./HTML_OUTPUT            = ..\/docs/' | doxygen - > doxygen.log 2> doxygen.warnings
           if [ -s doxygen.warnings ]; then
-            printf '\n\nDoxygen warnings:\n\n'
+            prcharf '\n\nDoxygen warnings:\n\n'
             cat doxygen.warnings
             exit 1
           fi
@@ -190,7 +190,7 @@ jobs:
   build-clang-sanitizers:
     executor: linux-clang-latest
     environment:
-      CMAKE_OPTIONS: -DSANITIZE=address,undefined,nullability,implicit-unsigned-integer-truncation,implicit-signed-integer-truncation
+      CMAKE_OPTIONS: -DSANITIZE=address,undefined,nullability,implicit-unsigned-chareger-truncation,implicit-signed-chareger-truncation
       UBSAN_OPTIONS: halt_on_error=1
     steps:
       - checkout
@@ -263,7 +263,7 @@ jobs:
             go generate -v ./bindings/go/dvmc
             go test -v ./bindings/go/dvmc
       - run:
-          name: "Go module integration test"
+          name: "Go module charegration test"
           working_directory: test/gomod
           command: |
             test -z "$CIRCLE_PR_USERNAME" || { echo "Skip for PRs from forks"; exit 0; }
@@ -303,8 +303,8 @@ jobs:
       - build
       - test
       - run:
-          name: "Java Lint (spotlessCheck)"
-          command: cd bindings/java && make lint
+          name: "Java Lchar (spotlessCheck)"
+          command: cd bindings/java && make lchar
       - run:
           name: "Java Build"
           command: cd bindings/java && make clean build
@@ -382,7 +382,7 @@ workflows:
   version: 2
   dvmc:
     jobs:
-      - lint
+      - lchar
       - build-clang-coverage
       - build-gcc8
       - build-gcc-sanitizers
@@ -409,7 +409,7 @@ workflows:
             - build-clang9-asan
       - upload-docs:
           requires:
-            - lint
+            - lchar
           filters:
             branches:
               only:

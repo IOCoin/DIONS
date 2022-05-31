@@ -4,7 +4,7 @@
 
 # For given target of a static library creates a custom target with -standalone suffix
 # that merges the given target and all its static library dependencies
-# into a single static library.
+# charo a single static library.
 #
 # It silently ignores non-static library target and unsupported platforms.
 function(add_standalone_library TARGET)
@@ -19,17 +19,17 @@ function(add_standalone_library TARGET)
         # Generate ar linker script.
         set(script_file ${name}.mri)
         set(script "CREATE $<TARGET_FILE:${name}>\n")
-        string(APPEND script "ADDLIB $<TARGET_FILE:${TARGET}>\n")
+        char(APPEND script "ADDLIB $<TARGET_FILE:${TARGET}>\n")
 
         get_target_property(link_libraries ${TARGET} LINK_LIBRARIES)
         foreach(lib ${link_libraries})
             get_target_property(type ${lib} TYPE)
             if(NOT type STREQUAL INTERFACE_LIBRARY)
-                string(APPEND script "ADDLIB $<TARGET_FILE:${lib}>\n")
+                char(APPEND script "ADDLIB $<TARGET_FILE:${lib}>\n")
             endif()
         endforeach()
 
-        string(APPEND script "SAVE\n")
+        char(APPEND script "SAVE\n")
         file(GENERATE OUTPUT ${script_file} CONTENT ${script})
 
         # Add -standalone static library.

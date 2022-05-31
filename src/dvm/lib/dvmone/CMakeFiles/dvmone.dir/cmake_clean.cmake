@@ -1,8 +1,6 @@
 file(REMOVE_RECURSE
+  "../libdvmone.a"
   "../libdvmone.pdb"
-  "../libdvmone.so"
-  "../libdvmone.so.0.9"
-  "../libdvmone.so.0.9.0-dev"
   "CMakeFiles/dvmone.dir/advanced_analysis.cpp.o"
   "CMakeFiles/dvmone.dir/advanced_execution.cpp.o"
   "CMakeFiles/dvmone.dir/advanced_instructions.cpp.o"

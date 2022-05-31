@@ -10,7 +10,7 @@ set(CMAKE_DEPENDS_CHECK_CXX
   "/home/ioc/dvmone/dvmc/test/unittests/hex_test.cpp" "/home/ioc/dvmone/dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/hex_test.cpp.o"
   "/home/ioc/dvmone/dvmc/test/unittests/instructions_test.cpp" "/home/ioc/dvmone/dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/instructions_test.cpp.o"
   "/home/ioc/dvmone/dvmc/test/unittests/loader_test.cpp" "/home/ioc/dvmone/dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/loader_test.cpp.o"
-  "/home/ioc/dvmone/dvmc/test/unittests/mocked_host_test.cpp" "/home/ioc/dvmone/dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/mocked_host_test.cpp.o"
+  "/home/ioc/dvmone/dvmc/test/unittests/transitional_node_test.cpp" "/home/ioc/dvmone/dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/transitional_node_test.cpp.o"
   "/home/ioc/dvmone/dvmc/test/unittests/tooling_test.cpp" "/home/ioc/dvmone/dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/tooling_test.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")

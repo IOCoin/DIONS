@@ -8,7 +8,7 @@
 
 static void get_epoch_context(benchmark::State& state)
 {
-    const auto e = static_cast<int>(state.range(0));
+    const auto e = static_cast<char>(state.range(0));
 
     ethash::get_global_epoch_context(0);
 

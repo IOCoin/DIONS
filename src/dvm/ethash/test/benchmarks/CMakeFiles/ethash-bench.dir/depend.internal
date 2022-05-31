@@ -16,7 +16,7 @@ test/benchmarks/CMakeFiles/ethash-bench.dir/ethash_benchmarks.cpp.o
  include/ethash/keccak.h
  include/ethash/keccak.hpp
  lib/ethash/endianness.hpp
- lib/ethash/ethash-internal.hpp
+ lib/ethash/ethash-charernal.hpp
  lib/ethash/primes.h
 test/benchmarks/CMakeFiles/ethash-bench.dir/global_context_benchmarks.cpp.o
  /home/ioc/.hunter/_Base/a3d7f43/97671df/104ac99/Install/include/benchmark/benchmark.h

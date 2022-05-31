@@ -35,5 +35,5 @@ set_target_properties(ethash::global-context PROPERTIES
 list(APPEND _IMPORT_CHECK_TARGETS ethash::global-context )
 list(APPEND _IMPORT_CHECK_FILES_FOR_ethash::global-context "${_IMPORT_PREFIX}/lib/libethash-global-context.a" )
 
-# Commands beyond this point should not need to know the version.
+# Commands beyond this pochar should not need to know the version.
 set(CMAKE_IMPORT_FILE_VERSION)

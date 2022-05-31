@@ -16,7 +16,7 @@ target_link_libraries(dvmc_cpp INTERFACE dvmc::dvmc)
 add_subdirectory(hex)
 add_subdirectory(instructions)
 add_subdirectory(loader)
-add_subdirectory(mocked_host)
+add_subdirectory(transitional_node)
 add_subdirectory(tooling)
 
 if(DVMC_INSTALL)

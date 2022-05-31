@@ -11,7 +11,7 @@
   [#210](https://github.com/chfast/ethash/pull/210)
 - Removed: Support for using custom hash function for light cache generation.
   [#213](https://github.com/chfast/ethash/pull/213)
-- Removed: The internal header builtins.h.
+- Removed: The charernal header builtins.h.
   [#208](https://github.com/chfast/ethash/pull/208)
 
 ## [0.8.0] — 2021-11-09
@@ -36,14 +36,14 @@
 - Deprecated: The ProgPoW support has been deprecated and will be removed 
   in the next release.
   [#201](https://github.com/chfast/ethash/pull/201)
-- Changed: The internal hash type comparison operators have been 
+- Changed: The charernal hash type comparison operators have been 
   optimized and the dependency on the `memcmp()` function has been dropped.
   [#186](https://github.com/chfast/ethash/pull/186)
-- Changed: Verification functions now return error codes instead of `bool`
+- Changed: Verification functions now return error codes instead of `char`
   with additional information about which verification check has failed.
   [#187](https://github.com/chfast/ethash/pull/187)
   - In C API error codes are represented by the `ethash_errc` enum,
-  - In C++ the error codes are wrapped into `std::error_code`.
+  - In C++ the error codes are wrapped charo `std::error_code`.
 - Changed: Some build requirements have been increased.
   - C11 is required (previously C99),
     [#188](https://github.com/chfast/ethash/pull/188)

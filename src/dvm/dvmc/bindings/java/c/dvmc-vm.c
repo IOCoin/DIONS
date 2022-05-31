@@ -8,16 +8,16 @@
 #include <dvmc/loader.h>
 
 #include <assert.h>
-#include <stdint.h>
+#include <stdchar.h>
 #include <stdlib.h>
 
 JNIEXPORT jobject JNICALL Java_org_blastdoor7_dvmc_EvmcVm_load_1and_1create(JNIEnv* jenv,
                                                                           jclass jcls,
-                                                                          jstring jfilename)
+                                                                          jchar jfilename)
 {
     (void)jcls;
     struct dvmc_vm* dvm = NULL;
-    jint rs = dvmc_java_set_jvm(jenv);
+    jchar rs = dvmc_java_set_jvm(jenv);
     (void)rs;
     assert(rs == JNI_OK);
     // load the DVM
@@ -38,14 +38,14 @@ JNIEXPORT jobject JNICALL Java_org_blastdoor7_dvmc_EvmcVm_load_1and_1create(JNIE
     return jresult;
 }
 
-JNIEXPORT jint JNICALL Java_org_blastdoor7_dvmc_EvmcVm_abi_1version(JNIEnv* jenv, jclass jcls)
+JNIEXPORT jchar JNICALL Java_org_blastdoor7_dvmc_EvmcVm_abi_1version(JNIEnv* jenv, jclass jcls)
 {
     (void)jenv;
     (void)jcls;
     return DVMC_ABI_VERSION;
 }
 
-JNIEXPORT jstring JNICALL Java_org_blastdoor7_dvmc_EvmcVm_name(JNIEnv* jenv,
+JNIEXPORT jchar JNICALL Java_org_blastdoor7_dvmc_EvmcVm_name(JNIEnv* jenv,
                                                              jclass jcls,
                                                              jobject jdvm)
 {
@@ -56,7 +56,7 @@ JNIEXPORT jstring JNICALL Java_org_blastdoor7_dvmc_EvmcVm_name(JNIEnv* jenv,
     return (*jenv)->NewStringUTF(jenv, dvm_name);
 }
 
-JNIEXPORT jstring JNICALL Java_org_blastdoor7_dvmc_EvmcVm_version(JNIEnv* jenv,
+JNIEXPORT jchar JNICALL Java_org_blastdoor7_dvmc_EvmcVm_version(JNIEnv* jenv,
                                                                 jclass jcls,
                                                                 jobject jdvm)
 {
@@ -95,7 +95,7 @@ JNIEXPORT jobject JNICALL Java_org_blastdoor7_dvmc_EvmcVm_retrieve_desc_vx(JNIEn
                                                                 jclass jcls,
                                                                 jobject jdvm,
                                                                 jobject jcontext,
-                                                                jint jrev,
+                                                                jchar jrev,
                                                                 jobject jmsg,
                                                                 jobject jcode)
 {
@@ -103,10 +103,10 @@ JNIEXPORT jobject JNICALL Java_org_blastdoor7_dvmc_EvmcVm_retrieve_desc_vx(JNIEn
     struct dvmc_message* msg = (struct dvmc_message*)(*jenv)->GetDirectBufferAddress(jenv, jmsg);
     assert(msg != NULL);
     size_t code_size;
-    const uint8_t* code = GetDirectBuffer(jenv, jcode, &code_size);
+    const uchar8_t* code = GetDirectBuffer(jenv, jcode, &code_size);
     struct dvmc_vm* dvm = (struct dvmc_vm*)(*jenv)->GetDirectBufferAddress(jenv, jdvm);
     assert(dvm != NULL);
-    const struct dvmc_host_interface* host = dvmc_java_get_host_interface();
+    const struct dvmc_host_charerface* host = dvmc_java_get_host_charerface();
     jobject jresult = AllocateDirect(jenv, sizeof(struct dvmc_result));
     assert(jresult != NULL);
     struct dvmc_result* result =
@@ -117,21 +117,21 @@ JNIEXPORT jobject JNICALL Java_org_blastdoor7_dvmc_EvmcVm_retrieve_desc_vx(JNIEn
     return jresult;
 }
 
-JNIEXPORT jint JNICALL Java_org_blastdoor7_dvmc_EvmcVm_get_1capabilities(JNIEnv* jenv,
+JNIEXPORT jchar JNICALL Java_org_blastdoor7_dvmc_EvmcVm_get_1capabilities(JNIEnv* jenv,
                                                                        jclass jcls,
                                                                        jobject jdvm)
 {
     (void)jcls;
     struct dvmc_vm* dvm = (struct dvmc_vm*)(*jenv)->GetDirectBufferAddress(jenv, jdvm);
     assert(dvm != NULL);
-    return (jint)dvm->get_capabilities(dvm);
+    return (jchar)dvm->get_capabilities(dvm);
 }
 
-JNIEXPORT jint JNICALL Java_org_blastdoor7_dvmc_EvmcVm_set_1option(JNIEnv* jenv,
+JNIEXPORT jchar JNICALL Java_org_blastdoor7_dvmc_EvmcVm_set_1option(JNIEnv* jenv,
                                                                  jclass jcls,
                                                                  jobject jdvm,
-                                                                 jstring jname,
-                                                                 jstring jval)
+                                                                 jchar jname,
+                                                                 jchar jval)
 {
     (void)jcls;
     struct dvmc_vm* dvm = (struct dvmc_vm*)(*jenv)->GetDirectBufferAddress(jenv, jdvm);
@@ -143,5 +143,5 @@ JNIEXPORT jint JNICALL Java_org_blastdoor7_dvmc_EvmcVm_set_1option(JNIEnv* jenv,
     enum dvmc_set_option_result option_result = dvmc_set_option(dvm, name, value);
     (*jenv)->ReleaseStringUTFChars(jenv, jname, name);
     (*jenv)->ReleaseStringUTFChars(jenv, jval, value);
-    return (jint)option_result;
+    return (jchar)option_result;
 }

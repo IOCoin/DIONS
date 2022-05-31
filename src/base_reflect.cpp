@@ -79,7 +79,118 @@ extern int GetTxPosHeight(PathIndex& txPos);
 extern int GetTxPosHeight(CDiskTxPos& txPos);
 int aliasHeight(vector<unsigned char> vchPath);
 
+bool vertex_serial_n_cycle(const string& origin, const string& data, __wx__Tx& serial_n)
+{
+    string locatorStr = "vertex_" + origin;
+    string indexStr = data;
+
+    if(isOnlyWhiteSpace(locatorStr))
+    {
+        string err = "Attempt to register alias consisting only of white space";
+
+        throw JSONRPCError(RPC_WALLET_ERROR, err);
+    }
+    else if(locatorStr.size() > 255)
+    {
+        string err = "Attempt to register alias more than 255 chars";
+
+        throw JSONRPCError(RPC_WALLET_ERROR, err);
+    }
+
+    uint256 wtxInHash__;
+
+    vector<Value> res;
+    LocatorNodeDB aliasCacheDB("r");
+    CTransaction tx;
+    if(aliasTx(aliasCacheDB, vchFromString(locatorStr), tx))
+    {
+        string err = "Attempt to register alias : " + locatorStr + ", this alias is already active with tx " + tx.GetHash().GetHex();
+
+        throw JSONRPCError(RPC_WALLET_ERROR, err);
+    }
+
+    CPubKey vchPubKey;
+    CReserveKey reservekey(pwalletMain);
+    if(!reservekey.GetReservedKey(vchPubKey))
+    {
+        return false;
+    }
+
+    reservekey.KeepKey();
+
+    cba keyAddress(vchPubKey.GetID());
+    CKeyID keyID;
+    keyAddress.GetKeyID(keyID);
+    pwalletMain->SetAddressBookName(keyID, "");
+
+    __wx__DB walletdb(pwalletMain->strWalletFile, "r+");
+
+    CKey key;
+    if(!pwalletMain->GetKey(keyID, key))
+        throw JSONRPCError(RPC_WALLET_ERROR, "Private key not available");
+
+    serial_n.nVersion = CTransaction::CYCLE_TX_VERSION;
+
+    CScript scriptPubKeyOrig;
+    scriptPubKeyOrig.SetBitcoinAddress(vchPubKey.Raw());
+    CScript scriptPubKey;
+    vchType vchPath = vchFromString(locatorStr);
+    vchType vchValue = vchFromString(indexStr);
+
+    scriptPubKey << OP_BASE_SET << vchPath << vchValue << OP_2DROP << OP_DROP;
+    scriptPubKey += scriptPubKeyOrig;
+
+    ENTER_CRITICAL_SECTION(cs_main)
+    {
+        EnsureWalletIsUnlocked();
+
+        string strError = pwalletMain->SendMoney__(scriptPubKey, CTRL__, serial_n, false);
+
+        if(strError != "")
+        {
+            LEAVE_CRITICAL_SECTION(cs_main)
+            throw JSONRPCError(RPC_WALLET_ERROR, strError);
+        }
+        mapLocator[vchPath] = serial_n.GetHash();
+    }
+    LEAVE_CRITICAL_SECTION(cs_main)
+
+    return true;
+}
+
 Value decryptPath_cycle(const Array& params, bool fHelp)
+{
+    if(fHelp || params.size() != 3)
+        throw runtime_error(
+            "registerPathGenerate <alias> <t> <i>"
+            + HelpRequiringPassphrase());
+
+    string locatorStr = params[0].get_str();
+    string tStr = params[1].get_str();
+    string iStr = params[2].get_str();
+
+    locatorStr = stripSpacesAndQuotes(locatorStr);
+
+    if(isOnlyWhiteSpace(locatorStr))
+    {
+        string err = "Attempt to register alias consisting only of white space";
+
+        throw JSONRPCError(RPC_WALLET_ERROR, err);
+    }
+    else if(locatorStr.size() > 255)
+    {
+        string err = "Attempt to register alias more than 255 chars";
+
+        throw JSONRPCError(RPC_WALLET_ERROR, err);
+    }
+    __wx__Tx vertex;
+    vertex_serial_n_cycle(locatorStr, "__", vertex);
+    vector<Value> res;
+    res.push_back(vertex.GetHash().GetHex());
+    return res;
+}
+
+Value decryptPath_cycle__(const Array& params, bool fHelp)
 {
     if(fHelp || params.size() != 2 )
         throw runtime_error(

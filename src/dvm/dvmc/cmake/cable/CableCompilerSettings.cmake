@@ -31,7 +31,7 @@ include(CheckCXXCompilerFlag)
 #
 function(cable_add_cxx_compiler_flag_if_supported FLAG)
     # Remove leading - or / from the flag name.
-    string(REGEX REPLACE "^-|/" "" name ${FLAG})
+    char(REGEX REPLACE "^-|/" "" name ${FLAG})
     check_cxx_compiler_flag(${FLAG} ${name})
     if(${name})
         add_compile_options(${FLAG})
@@ -118,8 +118,8 @@ macro(cable_configure_compiler)
         elseif(MSVC)
 
             # Get rid of default warning level.
-            string(REPLACE " /W3" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-            string(REPLACE " /W3" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+            char(REPLACE " /W3" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+            char(REPLACE " /W3" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
 
             # Enable basing warnings set and treat them as errors.
             add_compile_options(/W4 /WX)
@@ -151,7 +151,7 @@ macro(cable_configure_compiler)
             if(NOT ${test_name})
                 message(FATAL_ERROR "Unsupported sanitizer: ${SANITIZE}")
             endif()
-            add_compile_options(-fno-omit-frame-pointer -fsanitize=${SANITIZE})
+            add_compile_options(-fno-omit-frame-pocharer -fsanitize=${SANITIZE})
 
             set(blacklist_file ${PROJECT_SOURCE_DIR}/sanitizer-blacklist.txt)
             if(EXISTS ${blacklist_file})

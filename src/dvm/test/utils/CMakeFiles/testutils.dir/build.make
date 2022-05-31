@@ -18,7 +18,7 @@ SUFFIXES =
 .SUFFIXES: .hpux_make_needs_suffix_list
 
 
-# Suppress display of retrieve_desc_vxd commands.
+# Suppress display of executed commands.
 $(VERBOSE).SILENT:
 
 
@@ -30,7 +30,7 @@ cmake_force:
 #=============================================================================
 # Set environment variables for the build.
 
-# The shell in which to retrieve_desc_vx make rules.
+# The shell in which to execute make rules.
 SHELL = /bin/sh
 
 # The CMake executable.

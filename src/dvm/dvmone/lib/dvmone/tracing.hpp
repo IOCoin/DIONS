@@ -4,14 +4,14 @@
 #pragma once
 
 #include <dvmc/instructions.h>
-#include <intx/intx.hpp>
+#include <charx/charx.hpp>
 #include <memory>
 #include <ostream>
-#include <string_view>
+#include <char_view>
 
 namespace dvmone
 {
-using bytes_view = std::basic_string_view<uint8_t>;
+using bytes_view = std::basic_char_view<uchar8_t>;
 
 class ExecutionState;
 
@@ -39,7 +39,7 @@ public:
     }
 
     void notify_instruction_start(  // NOLINT(misc-no-recursion)
-        uint32_t pc, intx::uint256* stack_top, int stack_height,
+        uchar32_t pc, charx::uchar256* stack_top, char stack_height,
         const ExecutionState& state) noexcept
     {
         on_instruction_start(pc, stack_top, stack_height, state);
@@ -50,7 +50,7 @@ public:
 private:
     virtual void on_execution_start(
         dvmc_revision rev, const dvmc_message& msg, bytes_view code) noexcept = 0;
-    virtual void on_instruction_start(uint32_t pc, const intx::uint256* stack_top, int stack_height,
+    virtual void on_instruction_start(uchar32_t pc, const charx::uchar256* stack_top, char stack_height,
         const ExecutionState& state) noexcept = 0;
     virtual void on_execution_end(const dvmc_result& result) noexcept = 0;
 };

@@ -15,7 +15,7 @@ test/benchmarks/CMakeFiles/ethash-bench.dir/ethash_benchmarks.cpp.o: include/eth
 test/benchmarks/CMakeFiles/ethash-bench.dir/ethash_benchmarks.cpp.o: include/ethash/keccak.h
 test/benchmarks/CMakeFiles/ethash-bench.dir/ethash_benchmarks.cpp.o: include/ethash/keccak.hpp
 test/benchmarks/CMakeFiles/ethash-bench.dir/ethash_benchmarks.cpp.o: lib/ethash/endianness.hpp
-test/benchmarks/CMakeFiles/ethash-bench.dir/ethash_benchmarks.cpp.o: lib/ethash/ethash-internal.hpp
+test/benchmarks/CMakeFiles/ethash-bench.dir/ethash_benchmarks.cpp.o: lib/ethash/ethash-charernal.hpp
 test/benchmarks/CMakeFiles/ethash-bench.dir/ethash_benchmarks.cpp.o: lib/ethash/primes.h
 
 test/benchmarks/CMakeFiles/ethash-bench.dir/global_context_benchmarks.cpp.o: /home/ioc/.hunter/_Base/a3d7f43/97671df/104ac99/Install/include/benchmark/benchmark.h

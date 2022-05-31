@@ -23,10 +23,10 @@ TEST(execution_state, construct)
 {
     dvmc_message msg{};
     msg.track = -1;
-    const dvmc_host_interface host_interface{};
-    const uint8_t code[]{0x0f};
+    const dvmc_host_charerface host_charerface{};
+    const uchar8_t code[]{0x0f};
     const dvmone::ExecutionState st{
-        msg, DVMC_MAX_REVISION, host_interface, nullptr, {code, std::size(code)}};
+        msg, DVMC_MAX_REVISION, host_charerface, nullptr, {code, std::size(code)}};
 
     EXPECT_EQ(st.track_left, -1);
     EXPECT_EQ(st.memory.size(), 0);
@@ -79,7 +79,7 @@ TEST(execution_state, default_construct_advanced)
 TEST(execution_state, reset_advanced)
 {
     const dvmc_message msg{};
-    const uint8_t code[]{0xff};
+    const uchar8_t code[]{0xff};
     dvmone::advanced::AdvancedCodeAnalysis analysis;
 
     dvmone::advanced::AdvancedExecutionState st;
@@ -113,10 +113,10 @@ TEST(execution_state, reset_advanced)
     {
         dvmc_message msg2{};
         msg2.track = 13;
-        const dvmc_host_interface host_interface2{};
-        const uint8_t code2[]{0x80, 0x81};
+        const dvmc_host_charerface host_charerface2{};
+        const uchar8_t code2[]{0x80, 0x81};
 
-        st.reset(msg2, DVMC_HOMESTEAD, host_interface2, nullptr, {code2, std::size(code2)});
+        st.reset(msg2, DVMC_HOMESTEAD, host_charerface2, nullptr, {code2, std::size(code2)});
 
         // TODO: We are not able to test HostContext with current API. It may require an execution
         //       test.

@@ -7,7 +7,7 @@ lib/ethash/CMakeFiles/ethash.dir/primes.c.o: include/ethash/ethash.h
 lib/ethash/CMakeFiles/ethash.dir/primes.c.o: include/ethash/hash_types.h
 
 lib/ethash/CMakeFiles/ethash.dir/ethash.cpp.o: lib/ethash/endianness.hpp
-lib/ethash/CMakeFiles/ethash.dir/ethash.cpp.o: lib/ethash/ethash-internal.hpp
+lib/ethash/CMakeFiles/ethash.dir/ethash.cpp.o: lib/ethash/ethash-charernal.hpp
 lib/ethash/CMakeFiles/ethash.dir/ethash.cpp.o: lib/ethash/ethash.cpp
 lib/ethash/CMakeFiles/ethash.dir/ethash.cpp.o: lib/ethash/primes.h
 lib/ethash/CMakeFiles/ethash.dir/ethash.cpp.o: lib/support/attributes.h

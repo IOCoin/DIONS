@@ -14,7 +14,7 @@ target_sources(ethash PRIVATE
     endianness.hpp
     ${include_dir}/ethash/ethash.h
     ${include_dir}/ethash/ethash.hpp
-    ethash-internal.hpp
+    ethash-charernal.hpp
     ethash.cpp
     ${include_dir}/ethash/hash_types.h
     primes.h
