@@ -15,7 +15,7 @@ functional
 -
 memory
 -
-char
+string
 -
 tuple
 -
@@ -71,7 +71,7 @@ ostream
 -
 sstream
 -
-char
+string
 -
 type_traits
 -
@@ -125,7 +125,7 @@ set
 -
 sstream
 -
-char
+string
 -
 type_traits
 -
@@ -177,7 +177,7 @@ stdio.h
 -
 ostream
 -
-char
+string
 -
 type_traits
 -
@@ -213,7 +213,7 @@ memory
 -
 ostream
 -
-char
+string
 -
 type_traits
 -
@@ -255,7 +255,7 @@ ostream
 -
 sstream
 -
-char
+string
 -
 tuple
 -
@@ -279,8 +279,8 @@ vector
 -
 gtest/charernal/gtest-charernal.h
 /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/gtest/charernal/gtest-charernal.h
-gtest/charernal/gtest-char.h
-/home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/gtest/charernal/gtest-char.h
+gtest/charernal/gtest-string.h
+/home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/gtest/charernal/gtest-string.h
 
 /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/gtest-typed-test.h
 gtest/charernal/gtest-charernal.h
@@ -305,8 +305,8 @@ vector
 -
 gtest/charernal/gtest-charernal.h
 /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/gtest/charernal/gtest-charernal.h
-gtest/charernal/gtest-char.h
-/home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/gtest/charernal/gtest-char.h
+gtest/charernal/gtest-string.h
+/home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/gtest/charernal/gtest-string.h
 gtest/gtest-death-test.h
 /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/gtest/gtest-death-test.h
 gtest/gtest-matchers.h
@@ -347,8 +347,8 @@ memory
 -
 
 /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/gtest-filepath.h
-gtest/charernal/gtest-char.h
-/home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/gtest/charernal/gtest-char.h
+gtest/charernal/gtest-string.h
+/home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/gtest/charernal/gtest-string.h
 
 /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/gtest-charernal.h
 gtest/charernal/gtest-port.h
@@ -367,7 +367,7 @@ ctype.h
 -
 float.h
 -
-char.h
+string.h
 -
 cstdchar
 -
@@ -379,7 +379,7 @@ map
 -
 set
 -
-char
+string
 -
 type_traits
 -
@@ -389,8 +389,8 @@ gtest/gtest-message.h
 /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/gtest/gtest-message.h
 gtest/charernal/gtest-filepath.h
 /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/gtest/charernal/gtest-filepath.h
-gtest/charernal/gtest-char.h
-/home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/gtest/charernal/gtest-char.h
+gtest/charernal/gtest-string.h
+/home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/gtest/charernal/gtest-string.h
 gtest/charernal/gtest-type-util.h
 /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/gtest/charernal/gtest-type-util.h
 
@@ -437,7 +437,7 @@ stdio.h
 -
 stdlib.h
 -
-char.h
+string.h
 -
 cerrno
 -
@@ -461,7 +461,7 @@ locale
 -
 memory
 -
-char
+string
 -
 tuple
 -
@@ -479,7 +479,7 @@ unistd.h
 -
 unistd.h
 -
-chars.h
+strings.h
 -
 android/api-level.h
 -
@@ -499,23 +499,23 @@ absl/types/optional.h
 /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/absl/types/optional.h
 optional
 -
-absl/chars/char_view.h
-/home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/absl/chars/char_view.h
-char_view
+absl/strings/string_view.h
+/home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/absl/strings/string_view.h
+string_view
 -
 absl/types/variant.h
 /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/absl/types/variant.h
 variant
 -
 
-/home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/gtest-char.h
+/home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/gtest-string.h
 mem.h
 -
-char.h
+string.h
 -
 cstdchar
 -
-char
+string
 -
 gtest/charernal/gtest-port.h
 /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/gtest/charernal/gtest-port.h
@@ -537,13 +537,13 @@ climits
 -
 cstdchar
 -
-cchar
+cstring
 -
 limits
 -
 stdexcept
 -
-char
+string
 -
 tuple
 -
@@ -719,7 +719,7 @@ test/utils/utils.hpp
 -
 
 dvmc/include/dvmc/dvmc.h
-stdchar.h
+stdbool.h
 -
 stddef.h
 -
@@ -747,7 +747,7 @@ dvmc/dvmc.h
 -
 stdlib.h
 -
-char.h
+string.h
 -
 
 dvmc/include/dvmc/hex.hpp
@@ -755,9 +755,9 @@ cstdchar
 -
 iterator
 -
-char
+string
 -
-char_view
+string_view
 -
 system_error
 -
@@ -773,7 +773,7 @@ dvmc/dvmc.hpp
 -
 algorithm
 -
-char
+string
 -
 unordered_map
 -
@@ -785,7 +785,7 @@ boost/archive/text_oarchive.hpp
 -
 boost/serialization/unordered_map.hpp
 -
-boost/serialization/char.hpp
+boost/serialization/string.hpp
 -
 
 dvmc/include/dvmc/utils.h
@@ -823,7 +823,7 @@ cstddef
 -
 cstdchar
 -
-char
+string
 -
 
 lib/dvmone/execution_state.hpp
@@ -831,7 +831,7 @@ dvmc/dvmc.hpp
 -
 charx/charx.hpp
 -
-char
+string
 -
 vector
 -
@@ -853,7 +853,7 @@ memory
 -
 ostream
 -
-char_view
+string_view
 -
 
 lib/dvmone/vm.hpp

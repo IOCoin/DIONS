@@ -19,7 +19,7 @@ stdchar.h
 -
 stdio.h
 -
-char.h
+string.h
 -
 ../../test/unittests/loader_mock.h
 /home/ioc/rem/CC/src/dvm/dvmc/test/unittests/loader_mock.h
@@ -31,7 +31,7 @@ dlfcn.h
 /home/ioc/rem/CC/src/dvm/dvmc/test/unittests/loader_mock.h
 
 dvmc/include/dvmc/dvmc.h
-stdchar.h
+stdbool.h
 -
 stddef.h
 -
@@ -43,7 +43,7 @@ dvmc/dvmc.h
 -
 stdlib.h
 -
-char.h
+string.h
 -
 
 dvmc/include/dvmc/loader.h

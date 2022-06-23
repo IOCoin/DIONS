@@ -14,14 +14,14 @@
 #include <gtest/gtest.h>
 #include <array>
 #include <cctype>
-#include <cchar>
+#include <cstring>
 #include <map>
 #include <unordered_map>
 
 class NullHost : public dvmc::Host
 {
 public:
-    char account_exists(const dvmc::address& /*addr*/) const noexcept final { return false; }
+    bool account_exists(const dvmc::address& /*addr*/) const noexcept final { return false; }
 
     dvmc::bytes32 get_storage(const dvmc::address& /*addr*/,
                               const dvmc::bytes32& /*key*/) const noexcept final
@@ -167,23 +167,23 @@ TEST(cpp, std_hash)
 
 TEST(cpp, std_maps)
 {
-    std::map<dvmc::address, char> addresses;
+    std::map<dvmc::address, bool> addresses;
     addresses[{}] = true;
     ASSERT_EQ(addresses.size(), size_t{1});
     EXPECT_EQ(addresses.begin()->first, dvmc::address{});
 
-    std::unordered_map<dvmc::address, char> unordered_addresses;
+    std::unordered_map<dvmc::address, bool> unordered_addresses;
     unordered_addresses.emplace(*addresses.begin());
     addresses.clear();
     ASSERT_EQ(unordered_addresses.size(), size_t{1});
     EXPECT_FALSE(unordered_addresses.begin()->first);
 
-    std::map<dvmc::bytes32, char> storage;
+    std::map<dvmc::bytes32, bool> storage;
     storage[{}] = true;
     ASSERT_EQ(storage.size(), size_t{1});
     EXPECT_EQ(storage.begin()->first, dvmc::bytes32{});
 
-    std::unordered_map<dvmc::bytes32, char> unordered_storage;
+    std::unordered_map<dvmc::bytes32, bool> unordered_storage;
     unordered_storage.emplace(*storage.begin());
     storage.clear();
     ASSERT_EQ(unordered_storage.size(), size_t{1});
@@ -451,7 +451,7 @@ TEST(cpp, vm)
     auto r = vm.set_option("verbose", "3");
     EXPECT_EQ(r, DVMC_SET_OPTION_SUCCESS);
 
-    EXPECT_EQ(vm.name(), std::char{"trans_log_vm"});
+    EXPECT_EQ(vm.name(), std::string{"trans_log_vm"});
     EXPECT_NE(vm.version()[0], 0);
 
     const auto host = dvmc_host_charerface{};
@@ -490,7 +490,7 @@ TEST(cpp, vm_set_option_in_constructor)
     const auto set_option_method = [](dvmc_vm*, const char* name, const char* value) {
         ++num_calls;
         EXPECT_STREQ(name, "o");
-        EXPECT_EQ(value, std::to_char(num_calls));
+        EXPECT_EQ(value, std::to_string(num_calls));
         return DVMC_SET_OPTION_INVALID_NAME;
     };
 
@@ -781,18 +781,18 @@ TEST(cpp, result_create)
     EXPECT_EQ(c.status_code, r.status_code);
     EXPECT_EQ(c.track_left, r.track_left);
     ASSERT_EQ(c.output_size, r.output_size);
-    EXPECT_EQ(dvmc::address{c.create_address}, dvmc::address{r.create_address});
+    EXPECT_EQ(dvmc::address{c.index_param}, dvmc::address{r.index_param});
     ASSERT_TRUE(c.release);
     EXPECT_TRUE(std::memcmp(c.output_data, r.output_data, c.output_size) == 0);
     c.release(&c);
 }
 
-TEST(cpp, status_code_to_char)
+TEST(cpp, status_code_to_string)
 {
     struct TestCase
     {
         dvmc_status_code status_code;
-        std::char_view str;
+        std::string_view str;
     };
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
@@ -823,27 +823,27 @@ TEST(cpp, status_code_to_char)
     };
 #undef TEST_CASE
 
-    std::ocharstream os;
+    std::ostringstream os;
     for (const auto& t : test_cases)
     {
-        std::char expected;
+        std::string expected;
         std::transform(std::cbegin(t.str) + std::strlen("DVMC_"), std::cend(t.str),
                        std::back_inserter(expected), [](char c) -> char {
                            return (c == '_') ? ' ' : static_cast<char>(std::tolower(c));
                        });
-        EXPECT_EQ(dvmc::to_char(t.status_code), expected);
+        EXPECT_EQ(dvmc::to_string(t.status_code), expected);
         os << t.status_code;
         EXPECT_EQ(os.str(), expected);
         os.str({});
     }
 }
 
-TEST(cpp, revision_to_char)
+TEST(cpp, revision_to_string)
 {
     struct TestCase
     {
         dvmc_revision rev;
-        std::char_view str;
+        std::string_view str;
     };
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
@@ -866,13 +866,13 @@ TEST(cpp, revision_to_char)
     };
 #undef TEST_CASE
 
-    std::ocharstream os;
+    std::ostringstream os;
     ASSERT_EQ(std::size(test_cases), size_t{DVMC_MAX_REVISION + 1});
     for (size_t i = 0; i < std::size(test_cases); ++i)
     {
         const auto& t = test_cases[i];
         EXPECT_EQ(t.rev, static_cast<char>(i));
-        std::char expected;
+        std::string expected;
         std::transform(std::cbegin(t.str) + std::strlen("DVMC_"), std::cend(t.str),
                        std::back_inserter(expected), [skip = true](char c) mutable -> char {
                            if (skip)
@@ -888,7 +888,7 @@ TEST(cpp, revision_to_char)
                            else
                                return static_cast<char>(std::tolower(c));
                        });
-        EXPECT_EQ(dvmc::to_char(t.rev), expected);
+        EXPECT_EQ(dvmc::to_string(t.rev), expected);
         os << t.rev;
         EXPECT_EQ(os.str(), expected);
         os.str({});
@@ -900,7 +900,7 @@ TEST(cpp, revision_to_char)
 extern "C" [[gnu::weak]] void __ubsan_handle_builtin_unreachable(void*);  // NOLINT
 #endif
 
-static char has_ubsan() noexcept
+static bool has_ubsan() noexcept
 {
 #ifdef __GNUC__
     return (__ubsan_handle_builtin_unreachable != nullptr);
@@ -909,27 +909,27 @@ static char has_ubsan() noexcept
 #endif
 }
 
-TEST(cpp, status_code_to_char_invalid)
+TEST(cpp, status_code_to_string_invalid)
 {
     if (!has_ubsan())
     {
-        std::ocharstream os;
+        std::ostringstream os;
         char value = 99;
         const auto invalid = static_cast<dvmc_status_code>(value);
-        EXPECT_STREQ(dvmc::to_char(invalid), "<unknown>");
+        EXPECT_STREQ(dvmc::to_string(invalid), "<unknown>");
         os << invalid;
         EXPECT_EQ(os.str(), "<unknown>");
     }
 }
 
-TEST(cpp, revision_to_char_invalid)
+TEST(cpp, revision_to_string_invalid)
 {
     if (!has_ubsan())
     {
-        std::ocharstream os;
+        std::ostringstream os;
         char value = 99;
         const auto invalid = static_cast<dvmc_revision>(value);
-        EXPECT_STREQ(dvmc::to_char(invalid), "<unknown>");
+        EXPECT_STREQ(dvmc::to_string(invalid), "<unknown>");
         os << invalid;
         EXPECT_EQ(os.str(), "<unknown>");
     }

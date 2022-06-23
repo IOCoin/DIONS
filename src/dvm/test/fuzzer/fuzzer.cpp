@@ -7,7 +7,7 @@
 #include <test/utils/pos_read.hpp>
 #include <test/utils/utils.hpp>
 
-#include <cchar>
+#include <cstring>
 #include <iostream>
 #include <limits>
 
@@ -27,7 +27,7 @@ inline std::ostream& operator<<(std::ostream& os, const bytes_view& v)
 }
 
 [[clang::always_inline]] inline void assert_true(
-    char cond, const char* cond_str, const char* file, char line)
+    bool cond, const char* cond_str, const char* file, char line)
 {
     if (!cond)
     {
@@ -83,8 +83,8 @@ public:
         {
             // Use the output to fill the create address.
             // We still keep the output to check if VM is going to ignore it.
-            std::memcpy(result.create_address.bytes, result.output_data,
-                std::min(sizeof(result.create_address), result.output_size));
+            std::memcpy(result.index_param.bytes, result.output_data,
+                std::min(sizeof(result.index_param), result.output_size));
         }
 
         return result;
@@ -106,7 +106,7 @@ struct fuzz_input
     /// Creates invalid input.
     fuzz_input() noexcept { msg.track = -1; }
 
-    explicit operator char() const noexcept { return msg.track != -1; }
+    explicit operator bool() const noexcept { return msg.track != -1; }
 };
 
 inline dvmc::uchar256be generate_chareresting_value(uchar8_t b) noexcept

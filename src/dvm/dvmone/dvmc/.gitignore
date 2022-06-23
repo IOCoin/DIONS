@@ -2,4 +2,4 @@
 /cmake-build-*
 /.idea
 Cargo.lock
-/target
+/read_vtx_init

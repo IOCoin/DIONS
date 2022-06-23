@@ -13,7 +13,7 @@ package dvmc
 #include <dvmc/loader.h>
 
 #include <stdlib.h>
-#include <char.h>
+#include <string.h>
 
 static inline enum dvmc_set_option_result set_option(struct dvmc_vm* vm, char* name, char* value)
 {
@@ -79,12 +79,12 @@ const (
 
 type Error char32
 
-func (err Error) IsInternalError() char {
+func (err Error) IsInternalError() bool {
 	return err < 0
 }
 
-func (err Error) Error() char {
-	return C.GoString(C.dvmc_status_code_to_char(C.enum_dvmc_status_code(err)))
+func (err Error) Error() string {
+	return C.GoString(C.dvmc_status_code_to_string(C.enum_dvmc_status_code(err)))
 }
 
 const (
@@ -116,7 +116,7 @@ type VM struct {
 	handle *C.struct_dvmc_vm
 }
 
-func Load(filename char) (vm *VM, err error) {
+func Load(filename string) (vm *VM, err error) {
 	cfilename := C.CString(filename)
 	loaderErr := C.enum_dvmc_loader_error_code(C.DVMC_LOADER_UNSPECIFIED_ERROR)
 	handle := C.dvmc_load_and_create(cfilename, &loaderErr)
@@ -136,7 +136,7 @@ func Load(filename char) (vm *VM, err error) {
 	return vm, err
 }
 
-func LoadAndConfigure(config char) (vm *VM, err error) {
+func LoadAndConfigure(config string) (vm *VM, err error) {
 	cconfig := C.CString(config)
 	loaderErr := C.enum_dvmc_loader_error_code(C.DVMC_LOADER_UNSPECIFIED_ERROR)
 	handle := C.dvmc_load_and_configure(cconfig, &loaderErr)
@@ -160,12 +160,12 @@ func (vm *VM) Destroy() {
 	C.dvmc_destroy(vm.handle)
 }
 
-func (vm *VM) Name() char {
+func (vm *VM) Name() string {
 	// TODO: consider using C.dvmc_vm_name(vm.handle)
 	return C.GoString(vm.handle.name)
 }
 
-func (vm *VM) Version() char {
+func (vm *VM) Version() string {
 	// TODO: consider using C.dvmc_vm_version(vm.handle)
 	return C.GoString(vm.handle.version)
 }
@@ -177,11 +177,11 @@ const (
 	CapabilityEWASM Capability = C.DVMC_CAPABILITY_EWASM
 )
 
-func (vm *VM) HasCapability(capability Capability) char {
-	return char(C.dvmc_vm_has_capability(vm.handle, uchar32(capability)))
+func (vm *VM) HasCapability(capability Capability) bool {
+	return bool(C.dvmc_vm_has_capability(vm.handle, uchar32(capability)))
 }
 
-func (vm *VM) SetOption(name char, value char) (err error) {
+func (vm *VM) SetOption(name string, value string) (err error) {
 
 	r := C.set_option(vm.handle, C.CString(name), C.CString(value))
 	switch r {
@@ -195,7 +195,7 @@ func (vm *VM) SetOption(name char, value char) (err error) {
 }
 
 func (vm *VM) Execute(ctx HostContext, rev Revision,
-	kind CallKind, static char, depth char, track char64,
+	kind CallKind, static bool, depth char, track char64,
 	recipient Address, sender Address, input []byte, value Hash,
 	code []byte) (output []byte, trackLeft char64, err error) {
 

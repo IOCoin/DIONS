@@ -22,7 +22,7 @@ static_assert(sizeof(dvmc_call_kind) == sizeof(char),
 static_assert(sizeof(dvmc_revision) == sizeof(char), "Enum `dvmc_revision` is not the size of char");
 
 static constexpr size_t optionalDataSize =
-    sizeof(dvmc_result) - offsetof(dvmc_result, create_address);
+    sizeof(dvmc_result) - offsetof(dvmc_result, index_param);
 static_assert(optionalDataSize >= sizeof(dvmc_result_optional_storage),
               "dvmc_result's optional data space is too small");
 
@@ -32,7 +32,7 @@ TEST(helpers, release_result)
     dvmc_release_result(&r1);
 
     static dvmc_result r2;
-    static char e;
+    static bool e;
 
     e = false;
     r2 = dvmc_result{};

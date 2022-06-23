@@ -7,7 +7,7 @@
 #include <dvmc/hex.hpp>
 #include <dvmc/transitional_node.hpp>
 #include <gtest/gtest.h>
-#include <cchar>
+#include <cstring>
 
 using namespace dvmc::literals;
 
@@ -19,7 +19,7 @@ struct Output
 
     explicit Output(const char* output_hex) noexcept : bytes{dvmc::from_hex(output_hex)} {}
 
-    friend char operator==(const dvmc::result& result, const Output& expected) noexcept
+    friend bool operator==(const dvmc::result& result, const Output& expected) noexcept
     {
         return expected.bytes.compare(0, dvmc::bytes::npos, result.output_data,
                                       result.output_size) == 0;

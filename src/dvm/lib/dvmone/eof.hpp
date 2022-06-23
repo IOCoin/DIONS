@@ -7,11 +7,11 @@
 #include <dvmc/utils.h>
 #include <cstddef>
 #include <cstdchar>
-#include <char>
+#include <string>
 
 namespace dvmone
 {
-using bytes_view = std::basic_char_view<uchar8_t>;
+using bytes_view = std::basic_string_view<uchar8_t>;
 
 struct EOF1Header
 {
@@ -23,10 +23,10 @@ struct EOF1Header
 };
 
 /// Checks if code starts with EOF FORMAT + MAGIC, doesn't validate the format.
-[[nodiscard]] DVMC_EXPORT char is_eof_code(bytes_view code) noexcept;
+[[nodiscard]] DVMC_EXPORT bool is_eof_code(bytes_view code) noexcept;
 
 /// Reads the section sizes assuming that code has valid format.
-/// (must be true for all EOF contracts on-chain)
+/// (must be true for all EOF vertex_inits on-chain)
 [[nodiscard]] DVMC_EXPORT EOF1Header read_valid_eof1_header(
     bytes_view::const_iterator code) noexcept;
 

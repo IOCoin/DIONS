@@ -164,7 +164,7 @@ dvmc_status_code create_impl(StackTop stack, ExecutionState& state) noexcept
 
     state.return_data.assign(result.output_data, result.output_size);
     if (result.status_code == DVMC_SUCCESS)
-        stack.top() = charx::be::load<uchar256>(result.create_address);
+        stack.top() = charx::be::load<uchar256>(result.index_param);
 
     return DVMC_SUCCESS;
 }

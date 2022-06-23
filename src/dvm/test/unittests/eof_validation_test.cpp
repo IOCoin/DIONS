@@ -12,7 +12,7 @@ using namespace dvmone;
 
 namespace
 {
-// Can be called as validate_eof(char_view hex, rev) or validate_eof(bytes_view cont, rev).
+// Can be called as validate_eof(string_view hex, rev) or validate_eof(bytes_view cont, rev).
 inline EOFValidationError validate_eof(
     const pos_read& container, dvmc_revision rev = DVMC_SHANGHAI) noexcept
 {

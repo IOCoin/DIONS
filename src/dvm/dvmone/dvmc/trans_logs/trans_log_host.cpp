@@ -51,7 +51,7 @@ public:
       : accounts{_accounts}, tx_context{_tx_context}
     {}
 
-    char account_exists(const dvmc::address& addr) const noexcept final
+    bool account_exists(const dvmc::address& addr) const noexcept final
     {
         return accounts.find(addr) != accounts.end();
     }

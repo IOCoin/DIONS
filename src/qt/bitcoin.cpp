@@ -1,4 +1,7 @@
-#include "iocoingui.h"
+/*
+ * W.J. van der Laan 2011-2012
+ */
+#include "bitcoingui.h"
 #include "clientmodel.h"
 #include "walletmodel.h"
 #include "optionsmodel.h"
@@ -13,13 +16,9 @@
 #include <QMessageBox>
 #include <QTextCodec>
 #include <QLocale>
-#include <QThread>
 #include <QTranslator>
 #include <QSplashScreen>
 #include <QLibraryInfo>
-#include <QDesktopWidget>
-#include <QVBoxLayout>
-#include "stdlib.h" 
 
 #if defined(BITCOIN_NEED_QT_PLUGINS) && !defined(_BITCOIN_QT_PLUGINS_INCLUDED)
 #define _BITCOIN_QT_PLUGINS_INCLUDED
@@ -32,26 +31,9 @@ Q_IMPORT_PLUGIN(qkrcodecs)
 Q_IMPORT_PLUGIN(qtaccessiblewidgets)
 #endif
 
-const string BOOTSTRAP_LOCATION = "/home/argon/bootstrap.dat";
 // Need a global reference for the notifications to find the GUI
-static IocoinGUI *guiref;
+static BitcoinGUI *guiref;
 static QSplashScreen *splashref;
-//static SplashScreen *splashref;
-//
-static string sha256(const string str)
-{
-    unsigned char hash[SHA256_DIGEST_LENGTH];
-    SHA256_CTX sha256;
-    SHA256_Init(&sha256);
-    SHA256_Update(&sha256, str.c_str(), str.size());
-    SHA256_Final(hash, &sha256);
-    stringstream ss;
-    for(int i = 0; i < SHA256_DIGEST_LENGTH; i++)
-    {
-        ss << hex << setw(2) << setfill('0') << (int)hash[i];
-    }
-    return ss.str();
-}
 
 static void ThreadSafeMessageBox(const std::string& message, const std::string& caption, int style)
 {
@@ -124,78 +106,53 @@ static std::string Translate(const char* psz)
 static void handleRunawayException(std::exception *e)
 {
     PrintExceptionContinue(e, "Runaway exception");
-    QMessageBox::critical(0, "Runaway exception", IocoinGUI::tr("A fatal error occurred. I/OCoin can no longer continue safely and will quit.") + QString("\n\n") + QString::fromStdString(strMiscWarning));
+    QMessageBox::critical(0, "Runaway exception", BitcoinGUI::tr("A fatal error occurred. I/OCoin can no longer continue safely and will quit.") + QString("\n\n") + QString::fromStdString(strMiscWarning));
     exit(1);
 }
-static int argc_;
-static char** argv_;
-extern "C" int setup_application(IocoinGUI& window, std::string directory)
-{
-  bool init = true;
-  boost::filesystem::path p(directory);
-  boost::filesystem::directory_iterator end_itr;
-  boost::filesystem::directory_iterator it(p);
-  for(; it != end_itr; it++)
-  {
-    if(boost::filesystem::is_regular_file(it->path()))
-    {
-      string f = it->path().filename().string();
-      if(f == "iocoin.conf")
-      {
-        init=false;
-      }
-    }
-  }
 
-  if(init)
-  {
-    boost::filesystem::ofstream ofs(p / "iocoin.conf");   
-
-    srand(time(NULL));
-    unsigned int r = rand();
-    string rStr = std::to_string(r);
-    string defaultUser = sha256(rStr);
-    r = rand();
-    string passStr = std::to_string(r);
-    string pass = sha256(passStr);
-    ofs << "rpcuser=" << defaultUser << endl;
-    ofs << "rpcpassword=" << pass << endl;
-    ofs << endl;
-    ofs << endl;
-    ofs << "addnode=amer.supernode.iocoin.io" << endl;
-    ofs << "addnode=emea.supernode.iocoin.io" << endl;
-    ofs << "addnode=apac.supernode.iocoin.io" << endl;
-  }
-
-  mapArgs["-datadir"] = directory.c_str();
-  ReadConfigFile(mapArgs, mapMultiArgs);
-
-  AppInit2();
-
-  return 0;
-}
-
-extern "C" int app_init()
-{
-  AppInit2();
-  return 0;
-}
-
+#ifndef BITCOIN_QT_TEST
 int main(int argc, char *argv[])
 {
+    // Do this early as we don't want to bother initializing if we are just calling IPC
+    ipcScanRelay(argc, argv);
+
+#if QT_VERSION < 0x050000
+    // Internal string conversion is all UTF-8
+    QTextCodec::setCodecForTr(QTextCodec::codecForName("UTF-8"));
+    QTextCodec::setCodecForCStrings(QTextCodec::codecForTr());
+#endif
 
     Q_INIT_RESOURCE(bitcoin);
     QApplication app(argc, argv);
 
-    argc_=argc; argv_=argv;
     // Install global event filter that makes sure that long tooltips can be word-wrapped
     app.installEventFilter(new GUIUtil::ToolTipToRichTextFilter(TOOLTIP_WRAP_THRESHOLD, &app));
 
+    // Command-line options take precedence:
+    ParseParameters(argc, argv);
+
+    // ... then bitcoin.conf:
+    if (!boost::filesystem::is_directory(GetDataDir(false)))
+    {
+        // This message can not be translated, as translation is not initialized yet
+        // (which not yet possible because lang=XX can be overridden in bitcoin.conf in the data directory)
+        QMessageBox::critical(0, "I/OCoin",
+                              QString("Error: Specified data directory \"%1\" does not exist.").arg(QString::fromStdString(mapArgs["-datadir"])));
+        return 1;
+    }
+    ReadConfigFile(mapArgs, mapMultiArgs);
+
+    // Application identification (must be set before OptionsModel is initialized,
+    // as it is used to locate QSettings)
     app.setOrganizationName("I/OCoin");
+    //XXX app.setOrganizationDomain("");
     if(GetBoolArg("-testnet")) // Separate UI settings for testnet
         app.setApplicationName("I/OCoin-Qt-testnet");
     else
         app.setApplicationName("I/OCoin-Qt");
+
+    // ... then GUI settings:
+    OptionsModel optionsModel;
 
     // Get desired locale (e.g. "de_DE") from command line or use system locale
     QString lang_territory = QString::fromStdString(GetArg("-lang", QLocale::system().name().toStdString()));
@@ -254,31 +211,54 @@ int main(int argc, char *argv[])
 
     try
     {
-      IocoinGUI window;
-      guiref = &window;
-      {
+        // Regenerate startup link, to fix links to old versions
+        if (GUIUtil::GetStartOnSystemStartup())
+            GUIUtil::SetStartOnSystemStartup(true);
+
+        BitcoinGUI window;
+        guiref = &window;
+        if(AppInit2())
         {
-          if (splashref)
-            splash.finish(&window);
+            {
+                // Put this in a block, so that the Model objects are cleaned up before
+                // calling Shutdown().
 
-          // If -min option passed, start window minimized.
-          if(GetBoolArg("-min"))
-          {
-            window.showMinimized();
-          }
-          else
-          {
-            window.show();
-          }
+                if (splashref)
+                    splash.finish(&window);
 
-          app.exec();
-          window.hide();
-          window.setClientModel(0);
-          window.setWalletModel(0);
-          guiref = 0;
-        }
+                ClientModel clientModel(&optionsModel);
+                WalletModel walletModel(pwalletMain, &optionsModel);
+
+                window.setClientModel(&clientModel);
+                window.setWalletModel(&walletModel);
+
+                // If -min option passed, start window minimized.
+                if(GetBoolArg("-min"))
+                {
+                    window.showMinimized();
+                }
+                else
+                {
+                    window.show();
+                }
+
+                // Place this here as guiref has to be defined if we don't want to lose URIs
+                ipcInit(argc, argv);
+
+                app.exec();
+
+                window.hide();
+                window.setClientModel(0);
+                window.setWalletModel(0);
+                guiref = 0;
+            }
+            // Shutdown the core and its threads, but don't exit Bitcoin-Qt here
             Shutdown(NULL);
-      }
+        }
+        else
+        {
+            return 1;
+        }
     } catch (std::exception& e) {
         handleRunawayException(&e);
     } catch (...) {
@@ -286,3 +266,4 @@ int main(int argc, char *argv[])
     }
     return 0;
 }
+#endif // BITCOIN_QT_TEST

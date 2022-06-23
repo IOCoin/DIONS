@@ -6,7 +6,7 @@
 #include <map>
 
 #include "allocators.h" /* for SecureString */
-#include<boost/filesystem.hpp>
+
 class OptionsModel;
 class AddressTableModel;
 class TransactionTableModel;
@@ -63,7 +63,6 @@ public:
     AddressTableModel *getAddressTableModel();
     TransactionTableModel *getTransactionTableModel();
 
-    const boost::filesystem::path& getDataDir() const;
     qint64 getBalance() const;
     qint64 getStake() const;
     qint64 getUnconfirmedBalance() const;

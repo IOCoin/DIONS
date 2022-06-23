@@ -11,7 +11,7 @@
 /home/ioc/rem/CC/src/dvm/ethash/lib/support/attributes.h
 ethash/keccak.h
 -
-char.h
+string.h
 -
 
 /home/ioc/rem/CC/src/dvm/ethash/lib/support/attributes.h

@@ -4,12 +4,12 @@
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
   set(CMAKE_INSTALL_PREFIX "/usr/local")
 endif()
-char(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
+string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
 # Set the install configuration name.
 if(NOT DEFINED CMAKE_INSTALL_CONFIG_NAME)
   if(BUILD_TYPE)
-    char(REGEX REPLACE "^[^A-Za-z0-9_]+" ""
+    string(REGEX REPLACE "^[^A-Za-z0-9_]+" ""
            CMAKE_INSTALL_CONFIG_NAME "${BUILD_TYPE}")
   else()
     set(CMAKE_INSTALL_CONFIG_NAME "")
@@ -43,7 +43,7 @@ else()
   set(CMAKE_INSTALL_MANIFEST "install_manifest.txt")
 endif()
 
-char(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
+string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
 file(WRITE "/home/ioc/rem/CC/src/dvm/ethash/_3rdParty/Hunter/toolchain/_builds/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

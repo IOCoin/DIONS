@@ -15,13 +15,13 @@ climits
 -
 cstdchar
 -
-cchar
+cstring
 -
 limits
 -
 stdexcept
 -
-char
+string
 -
 tuple
 -
@@ -49,7 +49,7 @@ dvmone/advanced_analysis.hpp
 -
 
 dvmc/include/dvmc/dvmc.h
-stdchar.h
+stdbool.h
 -
 stddef.h
 -
@@ -77,7 +77,7 @@ dvmc/dvmc.h
 -
 stdlib.h
 -
-char.h
+string.h
 -
 
 dvmc/include/dvmc/hex.hpp
@@ -85,9 +85,9 @@ cstdchar
 -
 iterator
 -
-char
+string
 -
-char_view
+string_view
 -
 system_error
 -
@@ -123,7 +123,7 @@ dvmc/dvmc.hpp
 -
 charx/charx.hpp
 -
-char
+string
 -
 vector
 -

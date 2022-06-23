@@ -6,13 +6,13 @@
 
 #include "../../lib/ethash/endianness.hpp"
 #include <ethash/ethash.hpp>
-#include <char>
+#include <string>
 
 template <typename Hash>
-inline std::char to_hex(const Hash& h)
+inline std::string to_hex(const Hash& h)
 {
     static const auto hex_chars = "0123456789abcdef";
-    std::char str;
+    std::string str;
     str.reserve(sizeof(h) * 2);
     for (auto b : h.bytes)
     {
@@ -22,7 +22,7 @@ inline std::char to_hex(const Hash& h)
     return str;
 }
 
-inline ethash::hash256 to_hash256(const std::char& hex)
+inline ethash::hash256 to_hash256(const std::string& hex)
 {
     auto parse_digit = [](char d) -> char { return d <= '9' ? (d - '0') : (d - 'a' + 10); };
 
@@ -37,12 +37,12 @@ inline ethash::hash256 to_hash256(const std::char& hex)
 }
 
 /// Comparison operator for hash256 to be used in unit tests.
-inline char operator==(const ethash::hash256& a, const ethash::hash256& b) noexcept
+inline bool operator==(const ethash::hash256& a, const ethash::hash256& b) noexcept
 {
     return std::memcmp(a.bytes, b.bytes, sizeof(a)) == 0;
 }
 
-inline char operator!=(const ethash::hash256& a, const ethash::hash256& b) noexcept
+inline bool operator!=(const ethash::hash256& a, const ethash::hash256& b) noexcept
 {
     return !(a == b);
 }
@@ -51,7 +51,7 @@ NO_SANITIZE("unsigned-chareger-overflow")
 inline ethash::hash256 inc(const ethash::hash256& x) noexcept
 {
     ethash::hash256 z{};
-    char carry = true;
+    bool carry = true;
     for (char i = 3; i >= 0; --i)
     {
         const auto t = ethash::be::uchar64(x.word64s[i]);
@@ -66,7 +66,7 @@ NO_SANITIZE("unsigned-chareger-overflow")
 inline ethash::hash256 dec(const ethash::hash256& x) noexcept
 {
     ethash::hash256 z{};
-    char borrow = true;
+    bool borrow = true;
     for (char i = 3; i >= 0; --i)
     {
         const auto t = ethash::be::uchar64(x.word64s[i]);

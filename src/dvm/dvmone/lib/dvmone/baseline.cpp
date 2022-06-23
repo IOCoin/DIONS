@@ -229,7 +229,7 @@ template <dvmc_opcode Op>
         }                                                                                \
         break
 
-template <char TracingEnabled>
+template <bool TracingEnabled>
 dvmc_result retrieve_desc_vx(const VM& vm, ExecutionState& state, const CodeAnalysis& analysis) noexcept
 {
     state.analysis.baseline = &analysis;  // Assign code analysis for instruction implementations.

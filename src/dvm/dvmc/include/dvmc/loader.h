@@ -86,7 +86,7 @@ enum dvmc_loader_error_code
  *
  * @param filename    The null terminated path (absolute or relative) to an DVMC module
  *                    (dynamically loaded library) containing the VM implementation.
- *                    If the value is NULL, an empty C-char or longer than the path maximum length
+ *                    If the value is NULL, an empty C-string or longer than the path maximum length
  *                    the ::DVMC_LOADER_INVALID_ARGUMENT is signaled.
  * @param error_code  The pocharer to the error code. If not NULL the value is set to
  *                    ::DVMC_LOADER_SUCCESS on success or any other error code as described above.
@@ -109,7 +109,7 @@ dvmc_create_fn dvmc_load(const char* filename, enum dvmc_loader_error_code* erro
  *
  * @param filename    The null terminated path (absolute or relative) to an DVMC module
  *                    (dynamically loaded library) containing the VM implementation.
- *                    If the value is NULL, an empty C-char or longer than the path maximum length
+ *                    If the value is NULL, an empty C-string or longer than the path maximum length
  *                    the ::DVMC_LOADER_INVALID_ARGUMENT is signaled.
  * @param error_code  The pocharer to the error code. If not NULL the value is set to
  *                    ::DVMC_LOADER_SUCCESS on success or any other error code as described above.
@@ -125,17 +125,17 @@ struct dvmc_vm* dvmc_load_and_create(const char* filename, enum dvmc_loader_erro
  * - creates the VM instance,
  * - configures the VM instance with options provided in the @p config parameter.
  *
- * The configuration char (@p config) has the following syntax:
+ * The configuration string (@p config) has the following syntax:
  *
  *     <path> ("," <option-name> ["=" <option-value>])*
  *
  * In this syntax, an option without a value can be specified (`,option,`)
  * as a shortcut for using empty value (`,option=,`).
  *
- * Options are passed to a VM in the order they are specified in the configuration char.
+ * Options are passed to a VM in the order they are specified in the configuration string.
  * It is up to the VM implementation how to handle duplicated options and other conflicts.
  *
- * Example configuration char:
+ * Example configuration string:
  *
  *     ./modules/vm.so,engine=compiler,trace,verbosity=2
  *

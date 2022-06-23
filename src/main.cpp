@@ -18,10 +18,22 @@
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
+#include <dvmone/dvmone.h>
+#include <dvmc/transitional_node.hpp>
+#include <dvmc/dvmc.h>
+#include <dvmc/dvmc.hpp>
+#include <dvmc/hex.hpp>
+#include <dvmc/loader.h>
+#include <dvmc/tooling.hpp>
+#include <boost/foreach.hpp>
+#include <boost/tokenizer.hpp>
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
 
 using namespace json_spirit;
 using namespace std;
 using namespace boost;
+using dvmc::operator""_address;
 
 #include "dions.h"
 //
@@ -43,7 +55,7 @@ bool fReindex = false;
 map<uint256, CBlockIndex*> mapBlockIndex;
 set<pair<COutPoint, unsigned int> > setStakeSeen;
 
-CBigNum bnProofOfWorkLimit(~uint256(0) >> 20); // "standard" scrypt target limit for proof of work, results with 0,000244140625 proof-of-work difficulty
+CBigNum bnProofOfWorkLimit(~uint256(0) >> 20); // "standard" scrypt read_vtx_init limit for proof of work, results with 0,000244140625 proof-of-work difficulty
 CBigNum bnProofOfStakeLimit(~uint256(0) >> 20);
 CBigNum bnProofOfStakeLimitV2(~uint256(0) >> 48);
 CBigNum bnProofOfWorkLimitTestNet(~uint256(0) >> 1);
@@ -162,7 +174,14 @@ static const int checkpointPoWHeight[NUM_OF_POW_CHECKPOINT][2] =
     { 12000,  6390}
 };
 
+extern string ADDRESS;
+extern string DESCRIPTOR;
 extern enum Checkpoints::CPMode CheckpointsMode;
+extern void testGen(dvmc::TransitionalNode&,string&);
+extern bool collisionReference(const string& s, uint256& wtxInHash,string&);
+extern bool validate_serial_n(const string&, const string&,__wx__Tx&);
+extern bool read_serial_n(const string&, const string&, __wx__Tx&);
+extern bool getVertex__(const string&, string&);
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -282,12 +301,6 @@ void ResendWalletTransactions(bool fForce)
     BOOST_FOREACH(__wx__* pwallet, setpwalletRegistered)
     pwallet->ResendWalletTransactions(fForce);
 }
-
-
-
-
-
-
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -1354,8 +1367,8 @@ static unsigned int GetNextTargetRequiredV1(const CBlockIndex* pindexLast, bool 
     int64_t nTargetSpacing = GetTargetSpacing(pindexLast->nHeight);
     int64_t nActualSpacing = pindexPrev->GetBlockTime() - pindexPrevPrev->GetBlockTime();
 
-    // ppcoin: target change every block
-    // ppcoin: retarget with exponential moving toward target spacing
+    // ppcoin: read_vtx_init change every block
+    // ppcoin: reread_vtx_init with exponential moving toward read_vtx_init spacing
     CBigNum bnNew;
     bnNew.SetCompact(pindexPrev->nBits);
     int64_t nInterval = nTargetTimespan / nTargetSpacing;
@@ -1387,8 +1400,8 @@ static unsigned int GetNextTargetRequiredV2(const CBlockIndex* pindexLast, bool 
     if (nActualSpacing < 0)
         nActualSpacing = nTargetSpacing;
 
-    // ppcoin: target change every block
-    // ppcoin: retarget with exponential moving toward target spacing
+    // ppcoin: read_vtx_init change every block
+    // ppcoin: reread_vtx_init with exponential moving toward read_vtx_init spacing
     CBigNum bnNew;
     bnNew.SetCompact(pindexPrev->nBits);
     int64_t nInterval = nTargetTimespan / nTargetSpacing;
@@ -1426,8 +1439,8 @@ static unsigned int GetNextTargetRequiredV3(const CBlockIndex* pindexLast, bool 
             nActualSpacing = nTargetSpacing;
     }
 
-    // ppcoin: target change every block
-    // ppcoin: retarget with exponential moving toward target spacing
+    // ppcoin: read_vtx_init change every block
+    // ppcoin: reread_vtx_init with exponential moving toward read_vtx_init spacing
     CBigNum bnNew, bnMit;
     bnNew.SetCompact(pindexPrev->nBits);
     int64_t nFeesMitigation = nFees / ( MIN_TX_FEE * 10) + 1;
@@ -1801,8 +1814,8 @@ bool CTransaction::ConnectInputs(CTxDB& txdb, MapPrevTx inputs, map<uint256, CTx
             if (nValueIn < GetValueOut())
                 return DoS(100, error("ConnectInputs() : %s value in < value out", GetHash().ToString().substr(0,10).c_str()));
 
-            if (!ConnectInputsPost (mapTestPool, *this, vTxPrev, vTxindex,
-                                    pindexBlock, posThisTx, fBlock, fMiner))
+            if (!ConnectInputsPost(mapTestPool, *this, vTxPrev, vTxindex,
+                                   pindexBlock, posThisTx, fBlock, fMiner))
             {
                 return DoS(100, error("pre forward %s\n", GetHash().ToString().substr(0,10).c_str()));
             }
@@ -1884,6 +1897,186 @@ bool CBlock::ConnectBlock(CTxDB& txdb, CBlockIndex* pindex, bool fJustCheck)
     BOOST_FOREACH(CTransaction& tx, vtx)
     {
         uint256 hashTx = tx.GetHash();
+        if(tx.nVersion == CTransaction::CYCLE_TX_VERSION)
+        {
+            string origin;
+            for(int i = 0; i < tx.vout.size(); i++)
+            {
+                const CTxOut& out = tx.vout[i];
+                std::vector<vchType> vvchArgs;
+
+                int prevOp;
+                if(aliasScript(out.scriptPubKey, prevOp, vvchArgs))
+                {
+                    origin = stringFromVch(vvchArgs[1]);
+                }
+            }
+            std::vector<string> vertex_init_execution_data;
+            boost::char_separator<char> tok(":");
+            boost::tokenizer<boost::char_separator<char>> tokens(origin,tok);
+            BOOST_FOREACH(const string& s,tokens)
+            {
+                vertex_init_execution_data.push_back(s);
+            }
+            string read_vtx_init_vertex_init = vertex_init_execution_data[0];
+            string vertex_param  = vertex_init_execution_data[1];
+            string vertex_initP;
+            bool f = getVertex__(read_vtx_init_vertex_init,vertex_initP);
+            if(f != true)
+            {
+                return false;
+            }
+            printf("ConnectBlock CYCLE_TX_VERSION detected\n");
+            bool sc_stat=false;
+            BOOST_FOREACH(CTransaction& tx, vtx)
+            {
+                printf("ConnectBlock CYCLE_TX_VERSION : scan for results\n");
+                if(tx.nVersion == CTransaction::DION_TX_VERSION)
+                {
+                    std::vector<vchType> vvchArgs;
+                    int op;
+                    int nOut;
+
+                    if(!aliasTx(tx, op, nOut, vvchArgs))
+                    {
+                        return error("ConnectBlock() : could not decode a dions tx");
+                    }
+                    string name_ = "descriptor_" + read_vtx_init_vertex_init;
+                    if(name_ == stringFromVch(vvchArgs[0]))
+                    {
+                        printf("Found storage for read_vtx_init vertex_init in the block\n");
+                        CScript s1 = tx.vout[nOut].scriptPubKey;
+                        const CScript& s1_ = aliasStrip(s1);
+                        switch(op)
+                        {
+                        case OP_BASE_RELAY:
+                        {
+                            if(vvchArgs[1].size() > MAX_XUNIT_LENGTH)
+                                return error("updatePath tx with value too long");
+                            printf("ConnectBlock: op_base_relay name %s\n", stringFromVch(vvchArgs[1]).c_str());
+
+                            CTxDB txdb;
+                            int prevOp;
+                            std::vector<vchType> vvchPrevArgs;
+                            MapPrevTx inputs;
+                            map<uint256, CTxIndex> mapQueuedChanges;
+                            bool fInvalid;
+                            if (!tx.FetchInputs(txdb, mapQueuedChanges, true, false, inputs, fInvalid))
+                                return false;
+                            int nInput;
+                            bool found=false;
+                            for(int i = 0; i < tx.vin.size(); i++)
+                            {
+                                COutPoint prevout = tx.vin[i].prevout;
+                                assert(inputs.count(prevout.hash) > 0);
+                                CTxIndex& txindex = inputs[prevout.hash].first;
+                                CTransaction& txPrev = inputs[prevout.hash].second;
+                                CTxOut& out = txPrev.vout[tx.vin[i].prevout.n];
+                                std::vector<vchType> vvchPrevArgsRead;
+
+                                if(aliasScript(out.scriptPubKey, prevOp, vvchPrevArgsRead))
+                                {
+                                    if(found)
+                                        return error("ConnectBlock() : multiple previous alias transactions");
+
+                                    found = true;
+                                    nInput = i;
+
+                                    vvchPrevArgs = vvchPrevArgsRead;
+                                }
+                            }
+                            if(!found)
+                                return error("ConnectBlock OP_BASE_RELAY with no previous storage");
+
+                            string prevImageTraceState = stringFromVch(vvchPrevArgs[1]);
+                            string code_hex_str = vertex_initP;
+                            dvmc::TransitionalNode testGen_;
+                            testGen(testGen_,code_hex_str);
+                            dvmc::VertexNode vTrans;
+                            dvmc::TransitionalNode recon;
+                            std::stringstream oss_recon;
+                            oss_recon << prevImageTraceState;
+                            boost::archive::text_iarchive iarchive(oss_recon);
+                            iarchive >> recon;
+                            recon.code = testGen_.code;
+                            recon.codehash = testGen_.codehash;
+
+                            constexpr auto index_param = 0x00ffff;
+                            vTrans.accounts[index_param] = recon;
+                            const auto input = dvmc::from_hex(vertex_param);
+                            dvmc_message msg{};
+                            msg.recipient = index_param;
+                            msg.track = 10000000;
+                            msg.input_data = input.data();
+                            msg.input_size = input.size();
+                            dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
+                            dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
+                            const auto result = vm.retrieve_desc_vx(vTrans, rev, msg, recon.code.data(), recon.code.size());
+                            dvmc::TransitionalNode readStatus = vTrans.accounts[index_param];
+                            std::stringstream oss_commit;
+                            boost::archive::text_oarchive oarchive(oss_commit);
+                            oarchive << readStatus;
+                            if(oss_commit.str() != stringFromVch(vvchArgs[1]))
+                                return error("ConnectBlock() OP_RELAY inconsistency");
+                            sc_stat=true;
+                            break;
+                        }
+                        case OP_BASE_SET:
+			{
+                            printf("ConnectBlock: op_base_set name %s\n", stringFromVch(vvchArgs[1]).c_str());
+                            if(vvchArgs[1].size() > MAX_XUNIT_LENGTH)
+                                return error("ConnectBlock op_base_set with value too long");
+                            dvmc::VertexNode vTrans;
+                            dvmc_message msg{};
+                            msg.track = 10000000;
+                            string code_hex_str = vertex_initP;
+                            const auto code = dvmc::from_hex(code_hex_str);
+                            dvmc::bytes_view exec_code = code;
+                            const auto input = dvmc::from_hex(vertex_param);
+                            msg.input_data = input.data();
+                            msg.input_size = input.size();
+
+                            dvmc_message create_msg{};
+                            create_msg.kind = DVMC_CREATE;
+
+                            constexpr auto index_param = 0x00ffff;
+                            create_msg.recipient = index_param;
+                            create_msg.track = 1000000;
+                            dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
+                            dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
+                            const auto create_result = vm.retrieve_desc_vx(vTrans, rev, create_msg, code.data(), code.size());
+                            if (create_result.status_code != DVMC_SUCCESS)
+                            {
+                                return error("ConnectBlock op_base_set %d\n",create_result.status_code);
+                            }
+
+                            auto& created_account = vTrans.accounts[index_param];
+                            created_account.code = dvmc::bytes(create_result.output_data, create_result.output_size);
+
+                            msg.recipient = index_param;
+                            exec_code = created_account.code;
+                            const auto result = vm.retrieve_desc_vx(vTrans, rev, msg, exec_code.data(), exec_code.size());
+
+                            dvmc::TransitionalNodereadStatus_init= vTrans.accounts[index_param];
+                            std::stringstream oss;
+                            boost::archive::text_oarchive oarchive(oss);
+                            oarchive <<readStatus_init;
+                            if(oss.str() != stringFromVch(vvchArgs[1]))
+                                return error("ConnectBlock op_base_set inconsistency");
+                            sc_stat=true;
+                            break;
+			}
+                        default:
+                            return error("ConnectBlock : expected op_base_set or op_base_relay");
+                        }
+                    }
+
+                }
+            }
+
+            if(!sc_stat)
+                return error("sc_stat inconsistent with CYCLE_TX execution");
+        }
 
         // Do not allow blocks that contain transactions which 'overwrite' older transactions,
         // unless those are already completely spent.
@@ -2553,7 +2746,7 @@ bool CBlock::AcceptBlock()
     if (IsProofOfStake() && !CheckCoinStakeTimestamp(nHeight, GetBlockTime(), (int64_t)vtx[1].nTime))
         return DoS(50, error("AcceptBlock() : coinstake timestamp violation nTimeBlock=%" PRId64 " nTimeTx=%u", GetBlockTime(), vtx[1].nTime));
 
-    //we need to know fees to calculate new target
+    //we need to know fees to calculate new read_vtx_init
     int64_t nFees = 0;
     CTxDB txdb("r");
     map<uint256, CTxIndex> mapQueuedChanges;
@@ -2594,11 +2787,11 @@ bool CBlock::AcceptBlock()
         return DoS(100, error("AcceptBlock() : rejected by hardened checkpoint lock-in at %d", nHeight));
 
     uint256 hashProof;
-    // Verify hash target and signature of coinstake tx
+    // Verify hash read_vtx_init and signature of coinstake tx
     if (IsProofOfStake())
     {
-        uint256 targetProofOfStake;
-        if (!CheckProofOfStake(pindexPrev, vtx[1], nBits, hashProof, targetProofOfStake))
+        uint256 read_vtx_initProofOfStake;
+        if (!CheckProofOfStake(pindexPrev, vtx[1], nBits, hashProof, read_vtx_initProofOfStake))
         {
             printf("WARNING: AcceptBlock(): check proof-of-stake failed for block %s\n", hash.ToString().c_str());
             return false; // do not error here as we expect this during initial block download
@@ -2964,7 +3157,7 @@ bool LoadBlockIndex(bool fAllowNew)
         pchMessageStart[3] = 0xdf;
 
         bnTrustedModulus.SetHex("f0d14cf72623dacfe738d0892b599be0f31052239cddd95a3f25101c801dc990453b38c9434efe3f372db39a32c2bb44cbaea72d62c8931fa785b0ec44531308df3e46069be5573e49bb29f4d479bfc3d162f57a5965db03810be7636da265bfced9c01a6b0296c77910ebdc8016f70174f0f18a57b3b971ac43a934c6aedbc5c866764a3622b5b7e3f9832b8b3f133c849dbcc0396588abcd1e41048555746e4823fb8aba5b3d23692c6857fccce733d6bb6ec1d5ea0afafecea14a0f6f798b6b27f77dc989c557795cc39a0940ef6bb29a7fc84135193a55bcfc2f01dd73efad1b69f45a55198bd0e6bef4d338e452f6a420f1ae2b1167b923f76633ab6e55");
-        bnProofOfWorkLimit = bnProofOfWorkLimitTestNet; // 16 bits PoW target limit for testnet
+        bnProofOfWorkLimit = bnProofOfWorkLimitTestNet; // 16 bits PoW read_vtx_init limit for testnet
         nStakeMinAge = 1 * 60 * 60; // test net min age is 1 hour
         nCoinbaseMaturity = 10; // test maturity is 10 blocks
         nStakeMinConfirmations = 10; // test maturity is 10 blocks
@@ -3041,7 +3234,7 @@ bool LoadBlockIndex(bool fAllowNew)
         //           break;
         //       if ((block.nNonce & 0xFFF) == 0)
         //       {
-        //           printf("nonce %08X: hash = %s (target = %s)\n", block.nNonce, thash.ToString().c_str(), hashTarget.ToString().c_str());
+        //           printf("nonce %08X: hash = %s (read_vtx_init = %s)\n", block.nNonce, thash.ToString().c_str(), hashTarget.ToString().c_str());
         //       }
         //       ++block.nNonce;
         //       if (block.nNonce == 0)

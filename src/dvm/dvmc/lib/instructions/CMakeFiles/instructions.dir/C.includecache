@@ -15,7 +15,7 @@ dvmc/instructions.h
 -
 
 dvmc/include/dvmc/dvmc.h
-stdchar.h
+stdbool.h
 -
 stddef.h
 -

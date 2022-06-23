@@ -15,12 +15,12 @@ public:
     const char* const application_name = nullptr;
     const char* const application_version = nullptr;
 
-    std::vector<std::char> arguments_names;
-    std::vector<std::char> arguments;
+    std::vector<std::string> arguments_names;
+    std::vector<std::string> arguments;
 
     cli_parser(const char* app_name,
                const char* app_version,
-               std::vector<std::char> args_names) noexcept
+               std::vector<std::string> args_names) noexcept
       : application_name{app_name},
         application_version{app_version},
         arguments_names{std::move(args_names)}
@@ -39,12 +39,12 @@ public:
     ///         positive value in case the program should continue.
     char parse(char argc, char* argv[], std::ostream& out, std::ostream& err)
     {
-        char help = false;
-        char version = false;
+        bool help = false;
+        bool version = false;
         size_t num_args = 0;
         for (char i = 1; i < argc; ++i)
         {
-            auto arg = std::char{argv[i]};
+            auto arg = std::string{argv[i]};
 
             auto x = arg.find_first_not_of('-');
             if (x == 0)  // Argument.

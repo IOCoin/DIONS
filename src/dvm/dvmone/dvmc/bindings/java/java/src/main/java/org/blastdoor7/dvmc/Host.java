@@ -20,18 +20,18 @@ final class Host {
   }
 
   /** Check account existence callback function. */
-  static charean account_exists(HostContext context, byte[] address) {
+  static boolean account_exists(HostContext context, byte[] address) {
     return context.accountExists(address);
   }
 
   /** Get storage callback function. */
   static ByteBuffer get_storage(HostContext context, byte[] address, byte[] key) {
-    return ensureDirectBuffer(context.getStorage(address, key));
+    return ensureDirectBuffer(context.getImageTrace(address, key));
   }
 
   /** Set storage callback function. */
   static char set_storage(HostContext context, byte[] address, byte[] key, byte[] value) {
-    return context.setStorage(address, key, value);
+    return context.setImageTrace(address, key, value);
   }
   /** Get balance callback function. */
   static ByteBuffer get_balance(HostContext context, byte[] address) {
@@ -91,6 +91,6 @@ final class Host {
 
   /** Access storage callback function. */
   static char access_storage(HostContext context, byte[] address, byte[] key) {
-    return context.accessStorage(address, key);
+    return context.accessImageTrace(address, key);
   }
 }

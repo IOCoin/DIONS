@@ -18,9 +18,9 @@
 #include <ethash/hash_types.hpp>
 
 #include <cstdchar>
-#include <cchar>
+#include <cstring>
 #include <memory>
-#include <char>
+#include <string>
 #include <system_error>
 
 namespace std
@@ -63,7 +63,7 @@ inline hash256 hash256_from_bytes(const uchar8_t bytes[32]) noexcept
 
 struct search_result
 {
-    char solution_found = false;
+    bool solution_found = false;
     uchar64_t nonce = 0;
     hash256 final_hash = {};
     hash256 mix_hash = {};
@@ -195,7 +195,7 @@ inline const std::error_category& ethash_category() noexcept
     {
         const char* name() const noexcept final { return "ethash"; }
 
-        std::char message(char ev) const final
+        std::string message(char ev) const final
         {
             switch (ev)
             {

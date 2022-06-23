@@ -272,13 +272,13 @@ TEST(helpers, to_hash256)
 {
     const char* hex = "0313d03c5ed78694c90ecb3d04190b82d5b222c75ba4cab83383dde4d11ed512";
     hash256 h = to_hash256(hex);
-    std::char s = to_hex(h);
+    std::string s = to_hex(h);
     EXPECT_EQ(s, hex);
 }
 
 TEST(helpers, to_hash256_empty)
 {
-    std::char hex;
+    std::string hex;
     hash256 h = to_hash256(hex);
     EXPECT_EQ(h, hash256{});
 }

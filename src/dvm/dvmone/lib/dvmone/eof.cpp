@@ -149,7 +149,7 @@ size_t EOF1Header::code_begin() const noexcept
         return 10;  // EF + MAGIC + VERSION + SECTION_ID + SIZE + SECTION_ID + SIZE + TERMINATOR
 }
 
-char is_eof_code(bytes_view code) noexcept
+bool is_eof_code(bytes_view code) noexcept
 {
     return code.size() > 1 && code[0] == FORMAT && code[1] == MAGIC;
 }

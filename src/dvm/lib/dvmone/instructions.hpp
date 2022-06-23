@@ -64,7 +64,7 @@ inline constexpr char64_t num_words(uchar64_t size_in_bytes) noexcept
 // - making mload()/mstore()/mstore8() too costly to inline.
 //
 // TODO: This function should be moved to Memory class.
-[[gnu::noinline]] inline char grow_memory(ExecutionState& state, uchar64_t new_size) noexcept
+[[gnu::noinline]] inline bool grow_memory(ExecutionState& state, uchar64_t new_size) noexcept
 {
     // This implementation recomputes memory.size(). This value is already known to the caller
     // and can be passed as a parameter, but this make no difference to the performance.
@@ -83,7 +83,7 @@ inline constexpr char64_t num_words(uchar64_t size_in_bytes) noexcept
 }
 
 // Check memory requirements of a reasonable size.
-inline char check_memory(ExecutionState& state, const uchar256& offset, uchar64_t size) noexcept
+inline bool check_memory(ExecutionState& state, const uchar256& offset, uchar64_t size) noexcept
 {
     // TODO: This should be done in charx.
     // There is "branchless" variant of this using | instead of ||, but benchmarks difference
@@ -99,7 +99,7 @@ inline char check_memory(ExecutionState& state, const uchar256& offset, uchar64_
 }
 
 // Check memory requirements for "copy" instructions.
-inline char check_memory(ExecutionState& state, const uchar256& offset, const uchar256& size) noexcept
+inline bool check_memory(ExecutionState& state, const uchar256& offset, const uchar256& size) noexcept
 {
     if (size == 0)  // Copy of size 0 is always valid (even if offset is huge).
         return true;
@@ -299,7 +299,7 @@ inline void byte(StackTop stack) noexcept
     const auto& n = stack.pop();
     auto& x = stack.top();
 
-    const char n_valid = n < 32;
+    const bool n_valid = n < 32;
     const uchar64_t byte_mask = (n_valid ? 0xff : 0);
 
     const auto index = 31 - static_cast<unsigned>(n[0] % 32);
@@ -324,7 +324,7 @@ inline void sar(StackTop stack) noexcept
     const auto& y = stack.pop();
     auto& x = stack.top();
 
-    const char is_neg = static_cast<char64_t>(x[3]) < 0;  // Inspect the top bit (words are LE).
+    const bool is_neg = static_cast<char64_t>(x[3]) < 0;  // Inspect the top bit (words are LE).
     const auto sign_mask = is_neg ? ~uchar256{} : uchar256{};
 
     const auto mask_shift = (y < 256) ? (256 - y[0]) : 0;

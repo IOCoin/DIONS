@@ -26,33 +26,33 @@ OptionsDialog::OptionsDialog(QWidget *parent) :
 
     /* Network elements init */
 #ifndef USE_UPNP
-    //XXXX ui->mapPortUpnp->setEnabled(false);
+    ui->mapPortUpnp->setEnabled(false);
 #endif
 
-    //XXXX ui->proxyIp->setEnabled(false);
-    //XXXX ui->proxyPort->setEnabled(false);
-    //XXXX ui->proxyPort->setValidator(new QIntValidator(1, 65535, this));
+    ui->proxyIp->setEnabled(false);
+    ui->proxyPort->setEnabled(false);
+    ui->proxyPort->setValidator(new QIntValidator(1, 65535, this));
 
-    //XXXX ui->socksVersion->setEnabled(false);
-    //XXXX ui->socksVersion->addItem("5", 5);
-    //XXXX ui->socksVersion->addItem("4", 4);
-    //XXXX ui->socksVersion->setCurrentIndex(0);
+    ui->socksVersion->setEnabled(false);
+    ui->socksVersion->addItem("5", 5);
+    ui->socksVersion->addItem("4", 4);
+    ui->socksVersion->setCurrentIndex(0);
 
-    //XXXX connect(ui->connectSocks, SIGNAL(toggled(bool)), ui->proxyIp, SLOT(setEnabled(bool)));
-    //XXXX connect(ui->connectSocks, SIGNAL(toggled(bool)), ui->proxyPort, SLOT(setEnabled(bool)));
-    //XXXX connect(ui->connectSocks, SIGNAL(toggled(bool)), ui->socksVersion, SLOT(setEnabled(bool)));
-    //XXXX connect(ui->connectSocks, SIGNAL(clicked(bool)), this, SLOT(showRestartWarning_Proxy()));
+    connect(ui->connectSocks, SIGNAL(toggled(bool)), ui->proxyIp, SLOT(setEnabled(bool)));
+    connect(ui->connectSocks, SIGNAL(toggled(bool)), ui->proxyPort, SLOT(setEnabled(bool)));
+    connect(ui->connectSocks, SIGNAL(toggled(bool)), ui->socksVersion, SLOT(setEnabled(bool)));
+    connect(ui->connectSocks, SIGNAL(clicked(bool)), this, SLOT(showRestartWarning_Proxy()));
 
-    //XXXX ui->proxyIp->installEventFilter(this);
+    ui->proxyIp->installEventFilter(this);
 
     /* Window elements init */
 #ifdef Q_OS_MAC
-    //XXXX ui->tabWindow->setVisible(false);
+    ui->tabWindow->setVisible(false);
 #endif
 
     /* Display elements init */
     QDir translations(":translations");
-    //XXXX ui->lang->addItem(QString("(") + tr("default") + QString(")"), QVariant(""));
+    ui->lang->addItem(QString("(") + tr("default") + QString(")"), QVariant(""));
     foreach(const QString &langStr, translations.entryList())
     {
         QLocale locale(langStr);
@@ -62,25 +62,25 @@ OptionsDialog::OptionsDialog(QWidget *parent) :
         {
 #if QT_VERSION >= 0x040800
             /** display language strings as "native language - native country (locale name)", e.g. "Deutsch - Deutschland (de)" */
-            //XXXX ui->lang->addItem(locale.nativeLanguageName() + QString(" - ") + locale.nativeCountryName() + QString(" (") + langStr + QString(")"), QVariant(langStr));
+            ui->lang->addItem(locale.nativeLanguageName() + QString(" - ") + locale.nativeCountryName() + QString(" (") + langStr + QString(")"), QVariant(langStr));
 #else
             /** display language strings as "language - country (locale name)", e.g. "German - Germany (de)" */
-            //XXXX ui->lang->addItem(QLocale::languageToString(locale.language()) + QString(" - ") + QLocale::countryToString(locale.country()) + QString(" (") + langStr + QString(")"), QVariant(langStr));
+            ui->lang->addItem(QLocale::languageToString(locale.language()) + QString(" - ") + QLocale::countryToString(locale.country()) + QString(" (") + langStr + QString(")"), QVariant(langStr));
 #endif
         }
         else
         {
 #if QT_VERSION >= 0x040800
             /** display language strings as "native language (locale name)", e.g. "Deutsch (de)" */
-            //XXXX ui->lang->addItem(locale.nativeLanguageName() + QString(" (") + langStr + QString(")"), QVariant(langStr));
+            ui->lang->addItem(locale.nativeLanguageName() + QString(" (") + langStr + QString(")"), QVariant(langStr));
 #else
             /** display language strings as "language (locale name)", e.g. "German (de)" */
-            //XXXX ui->lang->addItem(QLocale::languageToString(locale.language()) + QString(" (") + langStr + QString(")"), QVariant(langStr));
+            ui->lang->addItem(QLocale::languageToString(locale.language()) + QString(" (") + langStr + QString(")"), QVariant(langStr));
 #endif
         }
     }
 
-    ui->unit->setModel(new IocoinUnits(this));
+    ui->unit->setModel(new BitcoinUnits(this));
 
     /* Widget-to-option mapper */
     mapper = new MonitoredDataMapper(this);
@@ -117,7 +117,7 @@ void OptionsDialog::setModel(OptionsModel *model)
     updateDisplayUnit();
 
     /* warn only when language selection changes by user action (placed here so init via mapper doesn't trigger this) */
-    //XXXX connect(ui->lang, SIGNAL(valueChanged()), this, SLOT(showRestartWarning_Lang()));
+    connect(ui->lang, SIGNAL(valueChanged()), this, SLOT(showRestartWarning_Lang()));
 
     /* disable apply button after settings are loaded as there is nothing to save */
     disableApplyButton();
@@ -128,27 +128,27 @@ void OptionsDialog::setMapper()
     /* Main */
     mapper->addMapping(ui->transactionFee, OptionsModel::Fee);
     mapper->addMapping(ui->reserveBalance, OptionsModel::ReserveBalance);
-    //XXXX mapper->addMapping(ui->bitcoinAtStartup, OptionsModel::StartAtStartup);
+    mapper->addMapping(ui->bitcoinAtStartup, OptionsModel::StartAtStartup);
 
     /* Network */
-    //XXXX mapper->addMapping(ui->mapPortUpnp, OptionsModel::MapPortUPnP);
+    mapper->addMapping(ui->mapPortUpnp, OptionsModel::MapPortUPnP);
 
-    //XXXX mapper->addMapping(ui->connectSocks, OptionsModel::ProxyUse);
-    //XXXX mapper->addMapping(ui->proxyIp, OptionsModel::ProxyIP);
-    //XXXX mapper->addMapping(ui->proxyPort, OptionsModel::ProxyPort);
-    //XXXX mapper->addMapping(ui->socksVersion, OptionsModel::ProxySocksVersion);
+    mapper->addMapping(ui->connectSocks, OptionsModel::ProxyUse);
+    mapper->addMapping(ui->proxyIp, OptionsModel::ProxyIP);
+    mapper->addMapping(ui->proxyPort, OptionsModel::ProxyPort);
+    mapper->addMapping(ui->socksVersion, OptionsModel::ProxySocksVersion);
 
     /* Window */
 #ifndef Q_OS_MAC
-    //XXXX mapper->addMapping(ui->minimizeToTray, OptionsModel::MinimizeToTray);
-    //XXXX mapper->addMapping(ui->minimizeOnClose, OptionsModel::MinimizeOnClose);
+    mapper->addMapping(ui->minimizeToTray, OptionsModel::MinimizeToTray);
+    mapper->addMapping(ui->minimizeOnClose, OptionsModel::MinimizeOnClose);
 #endif
 
     /* Display */
-    //XXXX mapper->addMapping(ui->lang, OptionsModel::Language);
+    mapper->addMapping(ui->lang, OptionsModel::Language);
     mapper->addMapping(ui->unit, OptionsModel::DisplayUnit);
     mapper->addMapping(ui->displayAddresses, OptionsModel::DisplayAddresses);
-    //XXXX mapper->addMapping(ui->coinControlFeatures, OptionsModel::CoinControlFeatures);
+    mapper->addMapping(ui->coinControlFeatures, OptionsModel::CoinControlFeatures);
 }
 
 void OptionsDialog::enableApplyButton()
@@ -245,13 +245,13 @@ void OptionsDialog::handleProxyIpValid(QValidatedLineEdit *object, bool fState)
 bool OptionsDialog::eventFilter(QObject *object, QEvent *event)
 {
     if(event->type() == QEvent::FocusOut)
-    {   /*
+    {
         if(object == ui->proxyIp)
         {
             CService addr;
-            //Check proxyIp for a valid IPv4/IPv6 address and emit the proxyIpValid signal 
+            /* Check proxyIp for a valid IPv4/IPv6 address and emit the proxyIpValid signal */
             emit proxyIpValid(ui->proxyIp, LookupNumeric(ui->proxyIp->text().toStdString().c_str(), addr));
-        }*/ 
+        }
     }
     return QDialog::eventFilter(object, event);
 }

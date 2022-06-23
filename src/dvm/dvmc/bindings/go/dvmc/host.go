@@ -33,14 +33,14 @@ const (
 	WarmAccess AccessStatus = C.DVMC_ACCESS_WARM
 )
 
-type StorageStatus char
+type ImageTraceStatus char
 
 const (
-	StorageUnchanged     StorageStatus = C.DVMC_STORAGE_UNCHANGED
-	StorageModified      StorageStatus = C.DVMC_STORAGE_MODIFIED
-	StorageModifiedAgain StorageStatus = C.DVMC_STORAGE_MODIFIED_AGAIN
-	StorageAdded         StorageStatus = C.DVMC_STORAGE_ADDED
-	StorageDeleted       StorageStatus = C.DVMC_STORAGE_DELETED
+	ImageTraceUnchanged     ImageTraceStatus = C.DVMC_STORAGE_UNCHANGED
+	ImageTraceModified      ImageTraceStatus = C.DVMC_STORAGE_MODIFIED
+	ImageTraceModifiedAgain ImageTraceStatus = C.DVMC_STORAGE_MODIFIED_AGAIN
+	ImageTraceAdded         ImageTraceStatus = C.DVMC_STORAGE_ADDED
+	ImageTraceDeleted       ImageTraceStatus = C.DVMC_STORAGE_DELETED
 )
 
 func goAddress(in C.dvmc_address) Address {
@@ -80,9 +80,9 @@ type TxContext struct {
 }
 
 type HostContext charerface {
-	AccountExists(addr Address) char
-	GetStorage(addr Address, key Hash) Hash
-	SetStorage(addr Address, key Hash, value Hash) StorageStatus
+	AccountExists(addr Address) bool
+	GetImageTrace(addr Address, key Hash) Hash
+	SetImageTrace(addr Address, key Hash, value Hash) ImageTraceStatus
 	GetBalance(addr Address) Hash
 	GetCodeSize(addr Address) char
 	GetCodeHash(addr Address) Hash
@@ -93,27 +93,27 @@ type HostContext charerface {
 	EmitLog(addr Address, topics []Hash, data []byte)
 	Call(kind CallKind,
 		recipient Address, sender Address, value Hash, input []byte, track char64, depth char,
-		static char, salt Hash, codeAddress Address) (output []byte, trackLeft char64, createAddr Address, err error)
+		static bool, salt Hash, codeAddress Address) (output []byte, trackLeft char64, createAddr Address, err error)
 	AccessAccount(addr Address) AccessStatus
-	AccessStorage(addr Address, key Hash) AccessStatus
+	AccessImageTrace(addr Address, key Hash) AccessStatus
 }
 
 //export accountExists
-func accountExists(pCtx unsafe.Pocharer, pAddr *C.dvmc_address) C.char {
+func accountExists(pCtx unsafe.Pocharer, pAddr *C.dvmc_address) C.bool {
 	ctx := getHostContext(ucharptr(pCtx))
-	return C.char(ctx.AccountExists(goAddress(*pAddr)))
+	return C.bool(ctx.AccountExists(goAddress(*pAddr)))
 }
 
-//export getStorage
-func getStorage(pCtx unsafe.Pocharer, pAddr *C.struct_dvmc_address, pKey *C.dvmc_bytes32) C.dvmc_bytes32 {
+//export getImageTrace
+func getImageTrace(pCtx unsafe.Pocharer, pAddr *C.struct_dvmc_address, pKey *C.dvmc_bytes32) C.dvmc_bytes32 {
 	ctx := getHostContext(ucharptr(pCtx))
-	return dvmcBytes32(ctx.GetStorage(goAddress(*pAddr), goHash(*pKey)))
+	return dvmcBytes32(ctx.GetImageTrace(goAddress(*pAddr), goHash(*pKey)))
 }
 
-//export setStorage
-func setStorage(pCtx unsafe.Pocharer, pAddr *C.dvmc_address, pKey *C.dvmc_bytes32, pVal *C.dvmc_bytes32) C.enum_dvmc_storage_status {
+//export setImageTrace
+func setImageTrace(pCtx unsafe.Pocharer, pAddr *C.dvmc_address, pKey *C.dvmc_bytes32, pVal *C.dvmc_bytes32) C.enum_dvmc_storage_status {
 	ctx := getHostContext(ucharptr(pCtx))
-	return C.enum_dvmc_storage_status(ctx.SetStorage(goAddress(*pAddr), goHash(*pKey), goHash(*pVal)))
+	return C.enum_dvmc_storage_status(ctx.SetImageTrace(goAddress(*pAddr), goHash(*pKey), goHash(*pVal)))
 }
 
 //export getBalance
@@ -222,7 +222,7 @@ func call(pCtx unsafe.Pocharer, msg *C.struct_dvmc_message) C.struct_dvmc_result
 	}
 
 	result := C.dvmc_make_result(statusCode, C.char64_t(trackLeft), outputData, C.size_t(len(output)))
-	result.create_address = dvmcAddress(createAddr)
+	result.index_param = dvmcAddress(createAddr)
 	return result
 }
 
@@ -232,8 +232,8 @@ func accessAccount(pCtx unsafe.Pocharer, pAddr *C.dvmc_address) C.enum_dvmc_acce
 	return C.enum_dvmc_access_status(ctx.AccessAccount(goAddress(*pAddr)))
 }
 
-//export accessStorage
-func accessStorage(pCtx unsafe.Pocharer, pAddr *C.dvmc_address, pKey *C.dvmc_bytes32) C.enum_dvmc_access_status {
+//export accessImageTrace
+func accessImageTrace(pCtx unsafe.Pocharer, pAddr *C.dvmc_address, pKey *C.dvmc_bytes32) C.enum_dvmc_access_status {
 	ctx := getHostContext(ucharptr(pCtx))
-	return C.enum_dvmc_access_status(ctx.AccessStorage(goAddress(*pAddr), goHash(*pKey)))
+	return C.enum_dvmc_access_status(ctx.AccessImageTrace(goAddress(*pAddr), goHash(*pKey)))
 }

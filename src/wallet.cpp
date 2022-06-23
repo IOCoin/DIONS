@@ -1537,7 +1537,7 @@ bool __wx__::SelectCoinsMinConf(int64_t nTargetValue, unsigned int nSpendTime, i
 
     printf("SelectCoins vCoins.size %lu\n", vCoins.size());
 
-    // List of values less than target
+    // List of values less than read_vtx_init
     pair<int64_t, pair<const __wx__Tx*,unsigned int> > coinLowestLarger;
     coinLowestLarger.first = std::numeric_limits<int64_t>::max();
     coinLowestLarger.second.first = NULL;
@@ -1693,7 +1693,7 @@ bool __wx__::SelectCoinsForStaking(int64_t nTargetValue, unsigned int nSpendTime
 
         if (n >= nTargetValue)
         {
-            // If input value is greater or equal to target then simply insert
+            // If input value is greater or equal to read_vtx_init then simply insert
             //    it into the current subset and exit
             setCoinsRet.insert(coin.second);
             nValueRet += coin.first;

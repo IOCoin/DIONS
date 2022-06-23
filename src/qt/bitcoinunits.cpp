@@ -2,22 +2,22 @@
 
 #include <QStringList>
 
-IocoinUnits::IocoinUnits(QObject *parent):
+BitcoinUnits::BitcoinUnits(QObject *parent):
         QAbstractListModel(parent),
         unitlist(availableUnits())
 {
 }
 
-QList<IocoinUnits::Unit> IocoinUnits::availableUnits()
+QList<BitcoinUnits::Unit> BitcoinUnits::availableUnits()
 {
-    QList<IocoinUnits::Unit> unitlist;
+    QList<BitcoinUnits::Unit> unitlist;
     unitlist.append(BTC);
     unitlist.append(mBTC);
     unitlist.append(uBTC);
     return unitlist;
 }
 
-bool IocoinUnits::valid(int unit)
+bool BitcoinUnits::valid(int unit)
 {
     switch(unit)
     {
@@ -30,18 +30,18 @@ bool IocoinUnits::valid(int unit)
     }
 }
 
-QString IocoinUnits::name(int unit)
+QString BitcoinUnits::name(int unit)
 {
     switch(unit)
     {
-    case BTC: return QString("IOC");
-    case mBTC: return QString("mIOC");
-    case uBTC: return QString::fromUtf8("ÎIOC");
+    case BTC: return QString("IO");
+    case mBTC: return QString("mIO");
+    case uBTC: return QString::fromUtf8("Î¼IO");
     default: return QString("???");
     }
 }
 
-QString IocoinUnits::description(int unit)
+QString BitcoinUnits::description(int unit)
 {
     switch(unit)
     {
@@ -52,7 +52,7 @@ QString IocoinUnits::description(int unit)
     }
 }
 
-qint64 IocoinUnits::factor(int unit)
+qint64 BitcoinUnits::factor(int unit)
 {
     switch(unit)
     {
@@ -63,7 +63,7 @@ qint64 IocoinUnits::factor(int unit)
     }
 }
 
-int IocoinUnits::amountDigits(int unit)
+int BitcoinUnits::amountDigits(int unit)
 {
     switch(unit)
     {
@@ -74,17 +74,18 @@ int IocoinUnits::amountDigits(int unit)
     }
 }
 
-int IocoinUnits::decimals(int unit)
+int BitcoinUnits::decimals(int unit)
 {
     switch(unit)
     {
     case BTC: return 8;
-    case mBTC: return 8;
-    case uBTC: return 8;
+    case mBTC: return 5;
+    case uBTC: return 2;
     default: return 0;
     }
 }
-QString IocoinUnits::format(int unit, qint64 n, bool fPlus)
+
+QString BitcoinUnits::format(int unit, qint64 n, bool fPlus)
 {
     // Note: not using straight sprintf here because we do NOT want
     // localized number formatting.
@@ -100,7 +101,7 @@ QString IocoinUnits::format(int unit, qint64 n, bool fPlus)
 
     // Right-trim excess zeros after the decimal point
     int nTrim = 0;
-    for (int i = remainder_str.size()-1; i>=3 && (remainder_str.at(i) == '0'); --i)
+    for (int i = remainder_str.size()-1; i>=2 && (remainder_str.at(i) == '0'); --i)
         ++nTrim;
     remainder_str.chop(nTrim);
 
@@ -110,74 +111,13 @@ QString IocoinUnits::format(int unit, qint64 n, bool fPlus)
         quotient_str.insert(0, '+');
     return quotient_str + QString(".") + remainder_str;
 }
-QString IocoinUnits::intformat(int unit, qint64 n, bool fPlus)
-{
-    // Note: not using straight sprintf here because we do NOT want
-    // localized number formatting.
-    if(!valid(unit))
-        return QString(); // Refuse to format invalid unit
-    qint64 coin = factor(unit);
-    int num_decimals = decimals(unit);
-    qint64 n_abs = (n > 0 ? n : -n);
-    qint64 quotient = n_abs / coin;
-    qint64 remainder = n_abs % coin;
-    QString quotient_str = QString::number(quotient);
-    QString remainder_str = QString::number(remainder).rightJustified(num_decimals, '0');
 
-    // Right-trim excess zeros after the decimal point
-    int nTrim = 0;
-    for (int i = remainder_str.size()-1; i>=3 && (remainder_str.at(i) == '0'); --i)
-        ++nTrim;
-    remainder_str.chop(nTrim);
-
-    if (n < 0)
-        quotient_str.insert(0, '-');
-    else if (fPlus && n > 0)
-        quotient_str.insert(0, '+');
-    return quotient_str;
-}
-
-QString IocoinUnits::fracformat(int unit, qint64 n, bool fPlus)
-{
-    // Note: not using straight sprintf here because we do NOT want
-    // localized number formatting.
-    if(!valid(unit))
-        return QString(); // Refuse to format invalid unit
-    qint64 coin = factor(unit);
-    int num_decimals = decimals(unit);
-    qint64 n_abs = (n > 0 ? n : -n);
-    qint64 quotient = n_abs / coin;
-    qint64 remainder = n_abs % coin;
-    QString quotient_str = QString::number(quotient);
-    QString remainder_str = QString::number(remainder).rightJustified(num_decimals, '0');
-
-    // Right-trim excess zeros after the decimal point
-    int nTrim = 0;
-    for (int i = remainder_str.size()-1; i>=3 && (remainder_str.at(i) == '0'); --i)
-        ++nTrim;
-    remainder_str.chop(nTrim);
-
-    if (n < 0)
-        quotient_str.insert(0, '-');
-    else if (fPlus && n > 0)
-        quotient_str.insert(0, '+');
-    return QString(".") + remainder_str;
-}
-
-QString IocoinUnits::formatWithUnit(int unit, qint64 amount, bool plussign)
+QString BitcoinUnits::formatWithUnit(int unit, qint64 amount, bool plussign)
 {
     return format(unit, amount, plussign) + QString(" ") + name(unit);
 }
-QString IocoinUnits::intFormatWithUnit(int unit, qint64 amount, bool plussign)
-{
-    return intformat(unit, amount, plussign);
-}
-QString IocoinUnits::fracFormatWithUnit(int unit, qint64 amount, bool plussign)
-{
-    return fracformat(unit, amount, plussign);
-}
 
-bool IocoinUnits::parse(int unit, const QString &value, qint64 *val_out)
+bool BitcoinUnits::parse(int unit, const QString &value, qint64 *val_out)
 {
     if(!valid(unit) || value.isEmpty())
         return false; // Refuse to parse invalid unit or empty string
@@ -214,13 +154,13 @@ bool IocoinUnits::parse(int unit, const QString &value, qint64 *val_out)
     return ok;
 }
 
-int IocoinUnits::rowCount(const QModelIndex &parent) const
+int BitcoinUnits::rowCount(const QModelIndex &parent) const
 {
     Q_UNUSED(parent);
     return unitlist.size();
 }
 
-QVariant IocoinUnits::data(const QModelIndex &index, int role) const
+QVariant BitcoinUnits::data(const QModelIndex &index, int role) const
 {
     int row = index.row();
     if(row >= 0 && row < unitlist.size())

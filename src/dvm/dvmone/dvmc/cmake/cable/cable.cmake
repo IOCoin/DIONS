@@ -27,7 +27,7 @@ set(cable_dir ${CMAKE_CURRENT_LIST_DIR})
 
 function(get_modules_list OUTPUT_LIST)
     file(GLOB modules_files RELATIVE ${cable_dir} "${cable_dir}/Cable*.cmake")
-    char(REPLACE ".cmake" "" modules "${modules_files}")
+    string(REPLACE ".cmake" "" modules "${modules_files}")
     set(${OUTPUT_LIST} "${modules}" PARENT_SCOPE)
 endfunction()
 
@@ -54,7 +54,7 @@ endif()
 
 if(cmd STREQUAL list)
     get_modules_list(modules)
-    char(REPLACE ";" "\n  " modules "${modules}")
+    string(REPLACE ";" "\n  " modules "${modules}")
     message("Installed modules:\n  ${modules}")
 elseif(cmd STREQUAL update)
     get_modules_list(modules)

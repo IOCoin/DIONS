@@ -71,7 +71,7 @@ func TestRevision(t *testing.T) {
 
 func TestErrorMessage(t *testing.T) {
 
-	check := func(err Error, expectedMsg char) {
+	check := func(err Error, expectedMsg string) {
 		if err.Error() != expectedMsg {
 			t.Errorf("wrong error message: '%s', expected: '%s'", err.Error(), expectedMsg)
 		}

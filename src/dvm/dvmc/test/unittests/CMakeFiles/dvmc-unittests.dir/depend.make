@@ -19,7 +19,7 @@ dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/cpp_test.cpp.o: /home/ioc/.hun
 dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/cpp_test.cpp.o: /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/gtest-param-util.h
 dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/cpp_test.cpp.o: /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/gtest-port-arch.h
 dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/cpp_test.cpp.o: /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/gtest-port.h
-dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/cpp_test.cpp.o: /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/gtest-char.h
+dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/cpp_test.cpp.o: /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/gtest-string.h
 dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/cpp_test.cpp.o: /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/gtest-type-util.h
 dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/cpp_test.cpp.o: dvmc/trans_logs/trans_log_precompiles_vm/trans_log_precompiles_vm.h
 dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/cpp_test.cpp.o: dvmc/trans_logs/trans_log_vm/trans_log_vm.h
@@ -48,7 +48,7 @@ dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/trans_log_vm_test.cpp.o: /home
 dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/trans_log_vm_test.cpp.o: /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/gtest-param-util.h
 dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/trans_log_vm_test.cpp.o: /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/gtest-port-arch.h
 dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/trans_log_vm_test.cpp.o: /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/gtest-port.h
-dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/trans_log_vm_test.cpp.o: /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/gtest-char.h
+dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/trans_log_vm_test.cpp.o: /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/gtest-string.h
 dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/trans_log_vm_test.cpp.o: /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/gtest-type-util.h
 dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/trans_log_vm_test.cpp.o: dvmc/trans_logs/trans_log_vm/trans_log_vm.h
 dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/trans_log_vm_test.cpp.o: dvmc/test/unittests/trans_log_vm_test.cpp
@@ -77,7 +77,7 @@ dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/helpers_test.cpp.o: /home/ioc/
 dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/helpers_test.cpp.o: /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/gtest-param-util.h
 dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/helpers_test.cpp.o: /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/gtest-port-arch.h
 dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/helpers_test.cpp.o: /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/gtest-port.h
-dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/helpers_test.cpp.o: /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/gtest-char.h
+dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/helpers_test.cpp.o: /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/gtest-string.h
 dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/helpers_test.cpp.o: /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/gtest-type-util.h
 dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/helpers_test.cpp.o: dvmc/test/unittests/helpers_test.cpp
 dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/helpers_test.cpp.o: dvmc/include/dvmc/dvmc.h
@@ -101,7 +101,7 @@ dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/hex_test.cpp.o: /home/ioc/.hun
 dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/hex_test.cpp.o: /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/gtest-param-util.h
 dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/hex_test.cpp.o: /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/gtest-port-arch.h
 dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/hex_test.cpp.o: /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/gtest-port.h
-dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/hex_test.cpp.o: /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/gtest-char.h
+dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/hex_test.cpp.o: /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/gtest-string.h
 dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/hex_test.cpp.o: /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/gtest-type-util.h
 dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/hex_test.cpp.o: dvmc/test/unittests/hex_test.cpp
 dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/hex_test.cpp.o: dvmc/include/dvmc/hex.hpp
@@ -124,7 +124,7 @@ dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/instructions_test.cpp.o: /home
 dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/instructions_test.cpp.o: /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/gtest-param-util.h
 dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/instructions_test.cpp.o: /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/gtest-port-arch.h
 dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/instructions_test.cpp.o: /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/gtest-port.h
-dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/instructions_test.cpp.o: /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/gtest-char.h
+dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/instructions_test.cpp.o: /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/gtest-string.h
 dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/instructions_test.cpp.o: /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/gtest-type-util.h
 dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/instructions_test.cpp.o: dvmc/test/unittests/instructions_test.cpp
 dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/instructions_test.cpp.o: dvmc/include/dvmc/dvmc.h
@@ -149,7 +149,7 @@ dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/loader_test.cpp.o: /home/ioc/.
 dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/loader_test.cpp.o: /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/gtest-param-util.h
 dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/loader_test.cpp.o: /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/gtest-port-arch.h
 dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/loader_test.cpp.o: /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/gtest-port.h
-dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/loader_test.cpp.o: /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/gtest-char.h
+dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/loader_test.cpp.o: /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/gtest-string.h
 dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/loader_test.cpp.o: /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/gtest-type-util.h
 dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/loader_test.cpp.o: dvmc/test/unittests/loader_test.cpp
 dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/loader_test.cpp.o: dvmc/include/dvmc/dvmc.h
@@ -174,7 +174,7 @@ dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/transitional_node_test.cpp.o: 
 dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/transitional_node_test.cpp.o: /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/gtest-param-util.h
 dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/transitional_node_test.cpp.o: /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/gtest-port-arch.h
 dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/transitional_node_test.cpp.o: /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/gtest-port.h
-dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/transitional_node_test.cpp.o: /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/gtest-char.h
+dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/transitional_node_test.cpp.o: /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/gtest-string.h
 dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/transitional_node_test.cpp.o: /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/gtest-type-util.h
 dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/transitional_node_test.cpp.o: dvmc/test/unittests/transitional_node_test.cpp
 dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/transitional_node_test.cpp.o: dvmc/include/dvmc/dvmc.h
@@ -200,7 +200,7 @@ dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/tooling_test.cpp.o: /home/ioc/
 dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/tooling_test.cpp.o: /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/gtest-param-util.h
 dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/tooling_test.cpp.o: /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/gtest-port-arch.h
 dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/tooling_test.cpp.o: /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/gtest-port.h
-dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/tooling_test.cpp.o: /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/gtest-char.h
+dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/tooling_test.cpp.o: /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/gtest-string.h
 dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/tooling_test.cpp.o: /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/gtest/charernal/gtest-type-util.h
 dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/tooling_test.cpp.o: dvmc/test/unittests/tooling_test.cpp
 dvmc/test/unittests/CMakeFiles/dvmc-unittests.dir/tooling_test.cpp.o: dvmc/trans_logs/trans_log_vm/trans_log_vm.h

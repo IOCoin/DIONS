@@ -6,12 +6,12 @@
 #include <dvmc/dvmc.h>
 #include <dvmc/utils.h>
 #include <memory>
-#include <char_view>
+#include <string_view>
 #include <vector>
 
 namespace dvmone
 {
-using bytes_view = std::basic_char_view<uchar8_t>;
+using bytes_view = std::basic_string_view<uchar8_t>;
 
 class ExecutionState;
 class VM;
@@ -20,7 +20,7 @@ namespace baseline
 {
 struct CodeAnalysis
 {
-    using JumpdestMap = std::vector<char>;
+    using JumpdestMap = std::vector<bool>;
 
     std::unique_ptr<uchar8_t[]> padded_code;
     JumpdestMap jumpdest_map;

@@ -184,7 +184,7 @@ Value decryptPath_cycle(const Array& params, bool fHelp)
         throw JSONRPCError(RPC_WALLET_ERROR, err);
     }
     __wx__Tx vertex;
-    vertex_serial_n_cycle(locatorStr, "__", vertex);
+    vertex_serial_n_cycle(locatorStr, tStr + ":" + iStr, vertex);
     vector<Value> res;
     res.push_back(vertex.GetHash().GetHex());
     return res;

@@ -286,7 +286,7 @@ Predefined macroses:
 #define __cpp_lambdas 200907L
 #define __cpp_nsdmi 200809L
 #define __cpp_range_based_for 200907L
-#define __cpp_raw_chars 200710L
+#define __cpp_raw_strings 200710L
 #define __cpp_ref_qualifiers 200710L
 #define __cpp_return_type_deduction 201304L
 #define __cpp_rtti 199711L

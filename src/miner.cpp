@@ -11,6 +11,7 @@
 #include "json/json_spirit_reader_template.h"
 #include "json/json_spirit_writer_template.h"
 #include "json/json_spirit_utils.h"
+//#include <CLI/CLI.hpp>
 #include <dvmone/dvmone.h>
 #include <dvmc/transitional_node.hpp>
 #include <dvmc/dvmc.h>
@@ -40,8 +41,8 @@ extern bool collisionReference(const string& s, uint256& wtxInHash,string&);
 extern bool validate_serial_n(const string&, const string&,__wx__Tx&);
 extern bool read_serial_n(const string&, const string&, __wx__Tx&);
 extern __wx__Tx generateUpdate(const string& origin);
-static const string ADDRESS    = "value";
-static const string DESCRIPTOR = "descriptor";
+string ADDRESS    = "value";
+string DESCRIPTOR = "descriptor";
 int static FormatHashBlocks(void* pbuffer, unsigned int len)
 {
     unsigned char* pdata = (unsigned char*)pbuffer;
@@ -77,7 +78,7 @@ void SHA256Transform(void* pstate, void* pinput, const void* pinit)
     for (int i = 0; i < 8; i++)
         ((uint32_t*)pstate)[i] = ctx.h[i];
 }
-bool getVertex__(const string& target, string& code)
+bool getVertex__(const string& read_vtx_init, string& code)
 {
 
 	bool found=false;
@@ -104,7 +105,7 @@ bool getVertex__(const string& target, string& code)
                 vchType k2;
                 ssKey >> k2;
                 string a = stringFromVch(k2);
-		if(a == target)
+		if(a == read_vtx_init)
 		{
                   vector<PathIndex> vtxPos;
                   CDataStream ssValue((char*)data.get_data(), (char*)data.get_data() + data.get_size(), SER_DISK, CLIENT_VERSION);
@@ -132,29 +133,29 @@ bool getVertex__(const string& target, string& code)
 
     return "";
 }
-void testGen(dvmc::TransitionalNode& acc,string& contractCode)
+void testGen(dvmc::TransitionalNode& acc,string& vertex_initP)
 {
     dvmc::VertexNode vTrans;
-    const auto code = dvmc::from_hex(contractCode);
+    const auto code = dvmc::from_hex(vertex_initP);
     dvmc::bytes_view exec_code = code;
 
     dvmc_message create_msg{};
     create_msg.kind = DVMC_CREATE;
 
-    constexpr auto create_address = 0xc9ea7e;
-    create_msg.recipient = create_address;
+    constexpr auto index_param = 0x00ffff;
+    create_msg.recipient = index_param;
     create_msg.track = 1000000;
     dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
     dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
     const auto create_result = vm.retrieve_desc_vx(vTrans, rev, create_msg, code.data(), code.size());
     if (create_result.status_code != DVMC_SUCCESS)
     {
-        cout << "failed: " << create_result.status_code << endl;
+	throw error("Contract creation failed: %d\n",create_result.status_code);
     }
 
-    auto& created_account = vTrans.accounts[create_address];
+    auto& created_account = vTrans.accounts[index_param];
     created_account.code = dvmc::bytes(create_result.output_data, create_result.output_size);
-    acc = created_account;
+   readStatus_init= created_account;
 }
 // Some explaining would be appreciated
 class COrphan
@@ -302,52 +303,61 @@ CBlock* CreateNewBlock(__wx__* pwallet, bool fProofOfStake, int64_t* pFees)
 			origin = stringFromVch(vvchArgs[1]);
                     }
                 }
-		string target_contract = origin;
-		string contract_input;
-		string contractCode;
-		getVertex__(target_contract,contractCode);
+		std::vector<string> vertex_init_execution_data;
+		boost::char_separator<char> tok(":");
+		boost::tokenizer<boost::char_separator<char>> tokens(origin,tok);
+		BOOST_FOREACH(const string& s,tokens)
+		{
+			vertex_init_execution_data.push_back(s);
+		}
+		string read_vtx_init_vertex_init = vertex_init_execution_data[0];
+		string vertex_param  = vertex_init_execution_data[1];
+		string vertex_initP;
+		bool f = getVertex__(read_vtx_init_vertex_init,vertex_initP);
+		if(f != true)
+                  throw error("read_vtx_init vertex_init not found");
 
-		string code_hex_str = contractCode;
+		string code_hex_str = vertex_initP;
                 uint256 r;
                 string val;
-                if(!collisionReference(DESCRIPTOR + "_" + target_contract,r,val))
+                if(!collisionReference(DESCRIPTOR + "_" + read_vtx_init_vertex_init,r,val))
                 {
                     dvmc::VertexNode vTrans;
                     dvmc_message msg{};
                     msg.track = 10000000;
                     const auto code = dvmc::from_hex(code_hex_str);
                     dvmc::bytes_view exec_code = code;
-                    const auto input = dvmc::from_hex(contract_input);
+                    const auto input = dvmc::from_hex(vertex_param);
                     msg.input_data = input.data();
                     msg.input_size = input.size();
 
                     dvmc_message create_msg{};
                     create_msg.kind = DVMC_CREATE;
 
-                    constexpr auto create_address = 0xc9ea7ed;
-                    create_msg.recipient = create_address;
+                    constexpr auto index_param = 0x00ffff;
+                    create_msg.recipient = index_param;
                     create_msg.track = 1000000;
                     dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
                     dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
                     const auto create_result = vm.retrieve_desc_vx(vTrans, rev, create_msg, code.data(), code.size());
                     if (create_result.status_code != DVMC_SUCCESS)
                     {
-                        cout << "failed: " << create_result.status_code << endl;
+			throw error("failed to create vertex_init %d\n",create_result.status_code);
                     }
 
-                    auto& created_account = vTrans.accounts[create_address];
+                    auto& created_account = vTrans.accounts[index_param];
                     created_account.code = dvmc::bytes(create_result.output_data, create_result.output_size);
 
-                    msg.recipient = create_address;
+                    msg.recipient = index_param;
                     exec_code = created_account.code;
                     const auto result = vm.retrieve_desc_vx(vTrans, rev, msg, exec_code.data(), exec_code.size());
 
-                    dvmc::TransitionalNode acc = vTrans.accounts[create_address];
+                    dvmc::TransitionalNodereadStatus_init= vTrans.accounts[index_param];
                     std::stringstream oss;
                     boost::archive::text_oarchive oarchive(oss);
-                    oarchive << acc;
+                    oarchive <<readStatus_init;
                     __wx__Tx serial_n;
-                    validate_serial_n(target_contract, oss.str(), serial_n);
+                    validate_serial_n(read_vtx_init_vertex_init, oss.str(), serial_n);
                     pblock->vtx.push_back(serial_n);
                 }
                 else
@@ -364,23 +374,22 @@ CBlock* CreateNewBlock(__wx__* pwallet, bool fProofOfStake, int64_t* pFees)
                     recon.code = testGen_.code;
                     recon.codehash = testGen_.codehash;
 
-                    constexpr auto create_address = 0xc9ea7ed;
-                    vTrans.accounts[create_address] = recon;
-                    const auto input = dvmc::from_hex(contract_input);
+                    constexpr auto index_param = 0x00ffff;
+                    vTrans.accounts[index_param] = recon;
+                    const auto input = dvmc::from_hex(vertex_param);
                     dvmc_message msg{};
-                    msg.recipient = create_address;
+                    msg.recipient = index_param;
                     msg.track = 10000000;
                     msg.input_data = input.data();
                     msg.input_size = input.size();
                     dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
                     dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
                     const auto result = vm.retrieve_desc_vx(vTrans, rev, msg, recon.code.data(), recon.code.size());
-                    dvmc::TransitionalNode updatedAcc = vTrans.accounts[create_address];
+                    dvmc::TransitionalNode readStatus = vTrans.accounts[index_param];
                     std::stringstream oss_commit;
                     boost::archive::text_oarchive oarchive(oss_commit);
-                    oarchive << updatedAcc;
-
-                    read_serial_n(target_contract,oss_commit.str(),serial_n);
+                    oarchive << readStatus;
+                    read_serial_n(read_vtx_init_vertex_init,oss_commit.str(),serial_n);
                     pblock->vtx.push_back(serial_n);
                 }
             }
@@ -659,7 +668,7 @@ bool CheckWork(CBlock* pblock, __wx__& wallet, CReserveKey& reservekey)
         return false;
 
     //// debug print
-    printf("CheckWork() : new proof-of-work block found  \n  proof hash: %s  \ntarget: %s\n", hashProof.GetHex().c_str(), hashTarget.GetHex().c_str());
+    printf("CheckWork() : new proof-of-work block found  \n  proof hash: %s  \nread_vtx_init: %s\n", hashProof.GetHex().c_str(), hashTarget.GetHex().c_str());
     pblock->print();
     printf("generated %s\n", FormatMoney(pblock->vtx[0].vout[0].nValue).c_str());
 
@@ -694,7 +703,7 @@ bool CheckStake(CBlock* pblock, __wx__& wallet)
     if(!pblock->IsProofOfStake())
         return error("CheckStake() : %s is not a proof-of-stake block", hashBlock.GetHex().c_str());
 
-    // verify hash target and signature of coinstake tx
+    // verify hash read_vtx_init and signature of coinstake tx
     if (!CheckProofOfStake(mapBlockIndex[pblock->hashPrevBlock], pblock->vtx[1], pblock->nBits, proofHash, hashTarget))
         return error("CheckStake() : proof-of-stake checking failed");
 

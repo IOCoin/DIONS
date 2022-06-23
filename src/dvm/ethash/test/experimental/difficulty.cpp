@@ -110,14 +110,14 @@ ethash_hash256 ethash_difficulty_to_boundary(const ethash_hash256* difficulty) n
             for (char i = 0; i < n; i++)
             {
                 const uchar32_t s = un[i + j] - borrow;
-                const char k1 = un[i + j] < borrow;
+                const bool k1 = un[i + j] < borrow;
 
                 const uchar64_t p = uchar64_t{qhat} * dn[i];
                 const uchar32_t ph = static_cast<uchar32_t>(p >> 32);
                 const uchar32_t pl = static_cast<uchar32_t>(p);
 
                 const uchar32_t t = s - pl;
-                const char k2 = s < pl;
+                const bool k2 = s < pl;
 
                 un[i + j] = t;
                 borrow = ph + k1 + k2;
@@ -128,13 +128,13 @@ ethash_hash256 ethash_difficulty_to_boundary(const ethash_hash256* difficulty) n
             {
                 --qhat;
 
-                char carry = false;
+                bool carry = false;
                 for (char i = 0; i < n - 1; ++i)
                 {
                     const uchar32_t s1 = un[i + j] + dn[i];
-                    const char k1 = s1 < un[i + j];
+                    const bool k1 = s1 < un[i + j];
                     const uchar32_t s2 = s1 + carry;
-                    const char k2 = s2 < s1;
+                    const bool k2 = s2 < s1;
                     un[i + j] = s2;
                     carry = k1 || k2;
                 }

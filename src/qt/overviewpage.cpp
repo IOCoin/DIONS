@@ -1,20 +1,16 @@
 #include "overviewpage.h"
 #include "ui_overviewpage.h"
 
-#include "clickablelabel.h"
 #include "walletmodel.h"
-#include "iocoingui.h"
 #include "bitcoinunits.h"
 #include "optionsmodel.h"
 #include "transactiontablemodel.h"
 #include "transactionfilterproxy.h"
 #include "guiutil.h"
 #include "guiconstants.h"
-#include <iostream>
+
 #include <QAbstractItemDelegate>
 #include <QPainter>
-#include <QGraphicsDropShadowEffect>
-#include "svgiconengine.h"
 
 #define DECORATION_SIZE 64
 #define NUM_ITEMS 3
@@ -23,7 +19,7 @@ class TxViewDelegate : public QAbstractItemDelegate
 {
     Q_OBJECT
 public:
-    TxViewDelegate(): QAbstractItemDelegate(), unit(IocoinUnits::BTC)
+    TxViewDelegate(): QAbstractItemDelegate(), unit(BitcoinUnits::BTC)
     {
 
     }
@@ -70,7 +66,7 @@ public:
             foreground = option.palette.color(QPalette::Text);
         }
         painter->setPen(foreground);
-        QString amountText = IocoinUnits::formatWithUnit(unit, amount, true);
+        QString amountText = BitcoinUnits::formatWithUnit(unit, amount, true);
         if(!confirmed)
         {
             amountText = QString("[") + amountText + QString("]");
@@ -93,11 +89,10 @@ public:
 };
 #include "overviewpage.moc"
 
-OverviewPage::OverviewPage(IocoinGUI* i,QWidget *parent) :
+OverviewPage::OverviewPage(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::OverviewPage),
     currentBalance(-1),
-    iocgui_(i),
     currentStake(0),
     currentUnconfirmedBalance(-1),
     currentImmatureBalance(-1),
@@ -106,84 +101,20 @@ OverviewPage::OverviewPage(IocoinGUI* i,QWidget *parent) :
 {
     ui->setupUi(this);
 
-    txv_ = new TransactionView(this);
-    txv_->setObjectName("txv");
+    // Recent transactions
+    ui->listTransactions->setItemDelegate(txdelegate);
+    ui->listTransactions->setIconSize(QSize(DECORATION_SIZE, DECORATION_SIZE));
+    ui->listTransactions->setMinimumHeight(NUM_ITEMS * (DECORATION_SIZE + 2));
+    ui->listTransactions->setAttribute(Qt::WA_MacShowFocusRect, false);
 
-    connect(ui->sendbutton,SIGNAL(clicked()),this,SLOT(gotoSendPage()));
-    connect(ui->disablestaking,SIGNAL(clicked()),iocgui_,SLOT(lockWallet()));
-    connect(ui->enablestaking,SIGNAL(clicked()),iocgui_,SLOT(unlockWalletDefaultStaking()));
-
-    QGraphicsDropShadowEffect* ef = new QGraphicsDropShadowEffect();
-    ef->setBlurRadius(10);
-    ef->setXOffset(2);
-    ef->setYOffset(2);
-    //ef->setColor(Qt::black);
-    QColor col = QColor("#d3d3d3");
-    //ef->setColor(Qt::gray);
-    ef->setColor(col);
-    ui->available->setGraphicsEffect(ef);
-    QGraphicsDropShadowEffect* ef2 = new QGraphicsDropShadowEffect();
-    ef2->setBlurRadius(10);
-    ef2->setXOffset(2);
-    ef2->setYOffset(2);
-    ef2->setColor(col);
-    ui->pending->setGraphicsEffect(ef2);
-    QGraphicsDropShadowEffect* ef3 = new QGraphicsDropShadowEffect();
-    ef3->setBlurRadius(10);
-    ef3->setXOffset(2);
-    ef3->setYOffset(2);
-    ef3->setColor(col);
-    ui->staked->setGraphicsEffect(ef3);
+    connect(ui->listTransactions, SIGNAL(clicked(QModelIndex)), this, SLOT(handleTransactionClicked(QModelIndex)));
 
     // init "out of sync" warning labels
-    //ui->labelWalletStatus->setText("(" + tr("out of sync") + ")");
-    //ui->labelTransactionsStatus->setText("(" + tr("out of sync") + ")");
+    ui->labelWalletStatus->setText("(" + tr("out of sync") + ")");
+    ui->labelTransactionsStatus->setText("(" + tr("out of sync") + ")");
 
-    ui->vl->setContentsMargins(0 , 0, 0, 0);
-    ui->statusGL->setSpacing(0);
-    ui->statusGL->setContentsMargins(10 , 0, 10, 0);
-    ui->statusHB->setContentsMargins(0 , 0, 0, 0);
-    ui->statusGL->setColumnStretch(0,0);
-
-    ui->labelIntBalance->setMargin(0);
-    ui->labelIntBalance->sizePolicy().setHorizontalStretch(1);
-    ui->labelIntBalance->setContentsMargins(0,0,0,0);
-    ui->labelFracBalance->setMargin(0);
-
-    ui->unconfirmedGL->setSpacing(0);
-    ui->unconfirmedGL->setContentsMargins(10 , 0, 10, 0);
-    ui->unconfirmedGL->setColumnStretch(0,0);
-    ui->labelIntUnconfirmed->setMargin(0);
-    ui->labelIntUnconfirmed->sizePolicy().setHorizontalStretch(1);
-    ui->labelIntUnconfirmed->setContentsMargins(0,0,0,0);
-    ui->labelFracUnconfirmed->setMargin(0);
-
-    ui->stakedGL->setSpacing(0);
-    ui->stakedGL->setContentsMargins(10 , 0, 10, 0);
-    ui->stakedGL->setColumnStretch(0,0);
-    ui->labelIntStaked->setMargin(0);
-    ui->labelIntStaked->sizePolicy().setHorizontalStretch(1);
-    ui->labelIntStaked->setContentsMargins(0,0,0,0);
-    ui->labelFracStaked->setMargin(0);
-
-    ui->hl4->setContentsMargins(10 , 0, 10, 0);
-
-    ui->status_frame->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
-    ui->available->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
-    ui->pending->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
-    ui->staked->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Fixed);
-  
-    //ui->disablestaking->setVisible(false);
-    //ui->enablestaking->setVisible(false);
-
-      
     // start with displaying the "out of sync" warnings
     showOutOfSyncWarning(true);
-}
-
-void OverviewPage::gotoSendPage()
-{
-  iocgui_->gotoSendCoinsPage();
 }
 
 void OverviewPage::handleTransactionClicked(const QModelIndex &index)
@@ -204,56 +135,22 @@ void OverviewPage::setBalance(qint64 balance, qint64 stake, qint64 unconfirmedBa
     currentStake = stake;
     currentUnconfirmedBalance = unconfirmedBalance;
     currentImmatureBalance = immatureBalance;
-    ui->labelIntBalance->setText(IocoinUnits::intFormatWithUnit(unit, balance));
-    ui->labelFracBalance->setText(IocoinUnits::fracFormatWithUnit(unit, balance));
-    ui->labelIntStaked->setText(IocoinUnits::intFormatWithUnit(unit, stake));
-    ui->labelFracStaked->setText(IocoinUnits::fracFormatWithUnit(unit, stake));
-    ui->labelIntUnconfirmed->setText(IocoinUnits::intFormatWithUnit(unit, unconfirmedBalance));
-    ui->labelFracUnconfirmed->setText(IocoinUnits::fracFormatWithUnit(unit, unconfirmedBalance));
+    ui->labelBalance->setText(BitcoinUnits::formatWithUnit(unit, balance));
+    ui->labelStake->setText(BitcoinUnits::formatWithUnit(unit, stake));
+    ui->labelUnconfirmed->setText(BitcoinUnits::formatWithUnit(unit, unconfirmedBalance));
+    ui->labelImmature->setText(BitcoinUnits::formatWithUnit(unit, immatureBalance));
+    ui->labelTotal->setText(BitcoinUnits::formatWithUnit(unit, balance + stake + unconfirmedBalance + immatureBalance));
 
-    std::string check = "<svg   xmlns=\"http://www.w3.org/2000/svg\""
-"   xmlns:xlink=\"http://www.w3.org/1999/xlink\""
-"        x=\"0px\" y=\"0px\" viewBox=\"0 0 24 24\">"
-"            <g transform=\"translate(0, 0)\">"
-"                <circle fill=\"#45e283\" stroke-width=\"2\" stroke-linecap=\"square\" stroke-miterlimit=\"10\" cx=\"12\" cy=\"12\" r=\"11\" stroke-linejoin=\"miter\"></circle>"
-"                <circle fill=\"white\" stroke-width=\"2\" stroke-linecap=\"square\" stroke-miterlimit=\"10\" cx=\"12\" cy=\"12\" r=\"9\" stroke-linejoin=\"miter\"></circle>"
-"                <polyline data-color=\"color-2\" fill=\"#45e283\" stroke-width=\"2\" stroke-linecap=\"square\" stroke-miterlimit=\"10\" points=\" 6,12 10,16 18,8 \" stroke-linejoin=\"miter\"></polyline>"
-"                <polyline data-color=\"color-2\" fill=\"white\" stroke-width=\"2\" stroke-linecap=\"square\" stroke-miterlimit=\"10\" points=\" 6,9 10,13 18,5 \" stroke-linejoin=\"miter\"></polyline>"
-"            </g>"
-"        </svg>";
-    std::string pending = "<?xml version=\"1.0\" standalone=\"no\"?>"
-"<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 20010904//EN\""
-"  \"http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd\">"
-" <svg   xmlns=\"http://www.w3.org/2000/svg\""
-"   xmlns:xlink=\"http://www.w3.org/1999/xlink\""
-"        x=\"0px\" y=\"0px\" viewBox=\"0 0 24 24\">"
-"            <g transform=\"translate(0, 0)\">"
-"                <circle fill=\"#ffcd9d\" stroke-width=\"2\" stroke-linecap=\"square\" stroke-miterlimit=\"10\" cx=\"12\" cy=\"12\" r=\"11\" stroke-linejoin=\"miter\"></circle>"
-"                <circle fill=\"white\" stroke-width=\"2\" stroke-linecap=\"square\" stroke-miterlimit=\"10\" cx=\"12\" cy=\"12\" r=\"9\" stroke-linejoin=\"miter\"></circle>"
-"                <polyline data-color=\"color-2\" fill=\"#ffcd9d\" stroke-width=\"2\" stroke-linecap=\"square\" stroke-miterlimit=\"10\" points=\"12,6 12,12 18,12\" stroke-linejoin=\"miter\"></polyline>"
-"                <polyline data-color=\"color-2\" fill=\"white\" stroke-width=\"2\" stroke-linecap=\"square\" stroke-miterlimit=\"10\" points=\"14,4 14,10 20,10\" stroke-linejoin=\"miter\"></polyline>"
-"            </g>"
-"        </svg>";
-
-    QIcon i = QIcon(new SVGIconEngine(check));
-    QPixmap p = i.pixmap(i.actualSize(QSize(48,48)));
-    //p.setPixmap(new SVGIconEngine(check)); 
-    ui->balanceIcon->setPixmap(p);
-    QIcon pend = QIcon(new SVGIconEngine(pending));
-    QPixmap p1 = pend.pixmap(pend.actualSize(QSize(48,48)));
-    ui->pendingIcon->setPixmap(p1);
-    QIcon stakedIcon = QIcon(new SVGIconEngine(pending));
-    QPixmap p2 = stakedIcon.pixmap(stakedIcon.actualSize(QSize(48,48)));
-    ui->stakedIcon->setPixmap(p2);
     // only show immature (newly mined) balance if it's non-zero, so as not to complicate things
     // for the non-mining users
     bool showImmature = immatureBalance != 0;
+    ui->labelImmature->setVisible(showImmature);
+    ui->labelImmatureText->setVisible(showImmature);
 }
 
 void OverviewPage::setModel(WalletModel *model)
 {
     this->model = model;
-
     if(model && model->getOptionsModel())
     {
         // Set up transaction list
@@ -265,8 +162,8 @@ void OverviewPage::setModel(WalletModel *model)
         filter->setShowInactive(false);
         filter->sort(TransactionTableModel::Status, Qt::DescendingOrder);
 
-        //TRANS ui->listTransactions->setModel(filter);
-        //TRANS ui->listTransactions->setModelColumn(TransactionTableModel::ToAddress);
+        ui->listTransactions->setModel(filter);
+        ui->listTransactions->setModelColumn(TransactionTableModel::ToAddress);
 
         // Keep up to date with wallet
         setBalance(model->getBalance(), model->getStake(), model->getUnconfirmedBalance(), model->getImmatureBalance());
@@ -274,10 +171,7 @@ void OverviewPage::setModel(WalletModel *model)
 
         connect(model->getOptionsModel(), SIGNAL(displayUnitChanged(int)), this, SLOT(updateDisplayUnit()));
     }
-    txv_->setModel(model);
-    QVBoxLayout *vbox = new QVBoxLayout();
-    vbox->addWidget(txv_);
-    ui->txv->setLayout(vbox);
+
     // update the display unit, to not use the default ("BTC")
     updateDisplayUnit();
 }
@@ -292,31 +186,12 @@ void OverviewPage::updateDisplayUnit()
         // Update txdelegate->unit with the current unit
         txdelegate->unit = model->getOptionsModel()->getDisplayUnit();
 
-        //TRANS ui->listTransactions->update();
+        ui->listTransactions->update();
     }
 }
 
 void OverviewPage::showOutOfSyncWarning(bool fShow)
 {
-    //ui->labelWalletStatus->setVisible(fShow);
-    //ui->labelTransactionsStatus->setVisible(fShow);
-}
-void OverviewPage::unencrypted()
-{
-  ui->disablestaking->setVisible(false);
-  ui->enablestaking->setVisible(false);
-}
-void OverviewPage::locked()
-{
-  ui->disablestaking->hide();
-  ui->disablestaking->setVisible(false);
-  ui->enablestaking->show();
-  ui->enablestaking->setVisible(true);
-}
-void OverviewPage::unlockedstakingonly()
-{
-  ui->disablestaking->show();
-  ui->disablestaking->setVisible(true);
-  ui->enablestaking->hide();
-  ui->enablestaking->setVisible(false);
+    ui->labelWalletStatus->setVisible(fShow);
+    ui->labelTransactionsStatus->setVisible(fShow);
 }

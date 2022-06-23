@@ -5,7 +5,7 @@
 
 #include <dvmc/dvmc.hpp>
 #include <charx/charx.hpp>
-#include <char>
+#include <string>
 #include <vector>
 
 namespace dvmone
@@ -20,8 +20,8 @@ struct CodeAnalysis;
 }
 
 using uchar256 = charx::uchar256;
-using bytes = std::basic_char<uchar8_t>;
-using bytes_view = std::basic_char_view<uchar8_t>;
+using bytes = std::basic_string<uchar8_t>;
+using bytes_view = std::basic_string_view<uchar8_t>;
 
 
 /// Provides memory for DVM stack.
@@ -195,7 +195,7 @@ public:
         m_tx = {};
     }
 
-    [[nodiscard]] char in_static_mode() const { return (msg->flags & DVMC_STATIC) != 0; }
+    [[nodiscard]] bool in_static_mode() const { return (msg->flags & DVMC_STATIC) != 0; }
 
     const dvmc_tx_context& get_tx_context() noexcept
     {

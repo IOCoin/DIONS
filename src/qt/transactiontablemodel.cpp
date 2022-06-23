@@ -227,8 +227,7 @@ TransactionTableModel::TransactionTableModel(__wx__* wallet, WalletModel *parent
         walletModel(parent),
         priv(new TransactionTablePriv(wallet, this))
 {
-    //COL columns << QString() << tr("Date") << tr("Type") << tr("Address") << tr("Amount");
-    columns << QString() << tr("Type") << tr("Address") << tr("Date") << tr("Amount");
+    columns << QString() << tr("Date") << tr("Type") << tr("Address") << tr("Amount");
 
     priv->refreshWallet();
 
@@ -336,8 +335,7 @@ QString TransactionTableModel::lookupAddress(const std::string &address, bool to
     }
     if(label.isEmpty() || walletModel->getOptionsModel()->getDisplayAddresses() || tooltip)
     {
-        //description += QString("(") + QString::fromStdString(address) + QString(")");
-        description += QString("") + QString::fromStdString(address) + QString("");
+        description += QString("(") + QString::fromStdString(address) + QString(")");
     }
     return description;
 }
@@ -356,7 +354,7 @@ QString TransactionTableModel::formatTxType(const TransactionRecord *wtx) const
     case TransactionRecord::SendToSelf:
         return tr("Payment to yourself");
     case TransactionRecord::Generated:
-        return tr("Staked");
+        return tr("Mined");
     default:
         return QString();
     }
@@ -367,7 +365,7 @@ QVariant TransactionTableModel::txAddressDecoration(const TransactionRecord *wtx
     switch(wtx->type)
     {
     case TransactionRecord::Generated:
-        return QIcon(":/icons/staking_on");
+        return QIcon(":/icons/tx_mined");
     case TransactionRecord::RecvWithAddress:
     case TransactionRecord::RecvFromOther:
         return QIcon(":/icons/tx_input");
@@ -421,7 +419,7 @@ QVariant TransactionTableModel::addressColor(const TransactionRecord *wtx) const
 
 QString TransactionTableModel::formatTxAmount(const TransactionRecord *wtx, bool showUnconfirmed) const
 {
-    QString str = IocoinUnits::format(walletModel->getOptionsModel()->getDisplayUnit(), wtx->credit + wtx->debit);
+    QString str = BitcoinUnits::format(walletModel->getOptionsModel()->getDisplayUnit(), wtx->credit + wtx->debit);
     if(showUnconfirmed)
     {
         if(!wtx->status.countsForBalance)

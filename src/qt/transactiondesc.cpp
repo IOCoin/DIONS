@@ -11,6 +11,7 @@
 
 QString TransactionDesc::FormatTxStatus(const __wx__Tx& wtx)
 {
+    AssertLockHeld(cs_main);
     if (!IsFinalTx(wtx, nBestHeight + 1))
     {
         if (wtx.nLockTime < LOCKTIME_THRESHOLD)
@@ -128,7 +129,7 @@ QString TransactionDesc::toHTML(__wx__ *wallet, __wx__Tx &wtx)
             nUnmatured += wallet->GetCredit(txout);
         strHTML += "<b>" + tr("Credit") + ":</b> ";
         if (wtx.IsInMainChain())
-            strHTML += IocoinUnits::formatWithUnit(IocoinUnits::BTC, nUnmatured)+ " (" + tr("matures in %n more block(s)", "", wtx.GetBlocksToMaturity()) + ")";
+            strHTML += BitcoinUnits::formatWithUnit(BitcoinUnits::BTC, nUnmatured)+ " (" + tr("matures in %n more block(s)", "", wtx.GetBlocksToMaturity()) + ")";
         else
             strHTML += "(" + tr("not accepted") + ")";
         strHTML += "<br>";
@@ -138,7 +139,7 @@ QString TransactionDesc::toHTML(__wx__ *wallet, __wx__Tx &wtx)
         //
         // Credit
         //
-        strHTML += "<b>" + tr("Credit") + ":</b> " + IocoinUnits::formatWithUnit(IocoinUnits::BTC, nNet) + "<br>";
+        strHTML += "<b>" + tr("Credit") + ":</b> " + BitcoinUnits::formatWithUnit(BitcoinUnits::BTC, nNet) + "<br>";
     }
     else
     {
@@ -174,7 +175,7 @@ QString TransactionDesc::toHTML(__wx__ *wallet, __wx__Tx &wtx)
                     }
                 }
 
-                strHTML += "<b>" + tr("Debit") + ":</b> " + IocoinUnits::formatWithUnit(IocoinUnits::BTC, -txout.nValue) + "<br>";
+                strHTML += "<b>" + tr("Debit") + ":</b> " + BitcoinUnits::formatWithUnit(BitcoinUnits::BTC, -txout.nValue) + "<br>";
             }
 
             if (fAllToMe)
@@ -182,13 +183,13 @@ QString TransactionDesc::toHTML(__wx__ *wallet, __wx__Tx &wtx)
                 // Payment to self
                 int64_t nChange = wtx.GetChange();
                 int64_t nValue = nCredit - nChange;
-                strHTML += "<b>" + tr("Debit") + ":</b> " + IocoinUnits::formatWithUnit(IocoinUnits::BTC, -nValue) + "<br>";
-                strHTML += "<b>" + tr("Credit") + ":</b> " + IocoinUnits::formatWithUnit(IocoinUnits::BTC, nValue) + "<br>";
+                strHTML += "<b>" + tr("Debit") + ":</b> " + BitcoinUnits::formatWithUnit(BitcoinUnits::BTC, -nValue) + "<br>";
+                strHTML += "<b>" + tr("Credit") + ":</b> " + BitcoinUnits::formatWithUnit(BitcoinUnits::BTC, nValue) + "<br>";
             }
 
             int64_t nTxFee = nDebit - wtx.GetValueOut();
             if (nTxFee > 0)
-                strHTML += "<b>" + tr("Transaction fee") + ":</b> " + IocoinUnits::formatWithUnit(IocoinUnits::BTC, -nTxFee) + "<br>";
+                strHTML += "<b>" + tr("Transaction fee") + ":</b> " + BitcoinUnits::formatWithUnit(BitcoinUnits::BTC, -nTxFee) + "<br>";
         }
         else
         {
@@ -197,14 +198,14 @@ QString TransactionDesc::toHTML(__wx__ *wallet, __wx__Tx &wtx)
             //
             BOOST_FOREACH(const CTxIn& txin, wtx.vin)
                 if (wallet->IsMine(txin))
-                    strHTML += "<b>" + tr("Debit") + ":</b> " + IocoinUnits::formatWithUnit(IocoinUnits::BTC, -wallet->GetDebit(txin)) + "<br>";
+                    strHTML += "<b>" + tr("Debit") + ":</b> " + BitcoinUnits::formatWithUnit(BitcoinUnits::BTC, -wallet->GetDebit(txin)) + "<br>";
             BOOST_FOREACH(const CTxOut& txout, wtx.vout)
                 if (wallet->IsMine(txout))
-                    strHTML += "<b>" + tr("Credit") + ":</b> " + IocoinUnits::formatWithUnit(IocoinUnits::BTC, wallet->GetCredit(txout)) + "<br>";
+                    strHTML += "<b>" + tr("Credit") + ":</b> " + BitcoinUnits::formatWithUnit(BitcoinUnits::BTC, wallet->GetCredit(txout)) + "<br>";
         }
     }
 
-    strHTML += "<b>" + tr("Net amount") + ":</b> " + IocoinUnits::formatWithUnit(IocoinUnits::BTC, nNet, true) + "<br>";
+    strHTML += "<b>" + tr("Net amount") + ":</b> " + BitcoinUnits::formatWithUnit(BitcoinUnits::BTC, nNet, true) + "<br>";
 
     //
     // Message
@@ -227,10 +228,10 @@ QString TransactionDesc::toHTML(__wx__ *wallet, __wx__Tx &wtx)
         strHTML += "<hr><br>" + tr("Debug information") + "<br><br>";
         BOOST_FOREACH(const CTxIn& txin, wtx.vin)
             if(wallet->IsMine(txin))
-                strHTML += "<b>" + tr("Debit") + ":</b> " + IocoinUnits::formatWithUnit(IocoinUnits::BTC, -wallet->GetDebit(txin)) + "<br>";
+                strHTML += "<b>" + tr("Debit") + ":</b> " + BitcoinUnits::formatWithUnit(BitcoinUnits::BTC, -wallet->GetDebit(txin)) + "<br>";
         BOOST_FOREACH(const CTxOut& txout, wtx.vout)
             if(wallet->IsMine(txout))
-                strHTML += "<b>" + tr("Credit") + ":</b> " + IocoinUnits::formatWithUnit(IocoinUnits::BTC, wallet->GetCredit(txout)) + "<br>";
+                strHTML += "<b>" + tr("Credit") + ":</b> " + BitcoinUnits::formatWithUnit(BitcoinUnits::BTC, wallet->GetCredit(txout)) + "<br>";
 
         strHTML += "<br><b>" + tr("Transaction") + ":</b><br>";
         strHTML += GUIUtil::HtmlEscape(wtx.ToString(), true);
@@ -258,7 +259,7 @@ QString TransactionDesc::toHTML(__wx__ *wallet, __wx__Tx &wtx)
                             strHTML += GUIUtil::HtmlEscape(wallet->mapAddressBook[address]) + " ";
                         strHTML += QString::fromStdString(cba(address).ToString());
                     }
-                    strHTML = strHTML + " " + tr("Amount") + "=" + IocoinUnits::formatWithUnit(IocoinUnits::BTC, vout.nValue);
+                    strHTML = strHTML + " " + tr("Amount") + "=" + BitcoinUnits::formatWithUnit(BitcoinUnits::BTC, vout.nValue);
                     strHTML = strHTML + " IsMine=" + (wallet->IsMine(vout) ? tr("true") : tr("false")) + "</li>";
                 }
             }

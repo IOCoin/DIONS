@@ -33,7 +33,7 @@ namespace
 std::shared_ptr<fake_cache> handle_nosync = build_sentinel();
 }
 
-char verify_fake_cache_nosync(char id, char value) noexcept
+bool verify_fake_cache_nosync(char id, char value) noexcept
 {
     if (handle_nosync->id != id)
         handle_nosync = build_fake_cache(id);
@@ -46,7 +46,7 @@ std::shared_ptr<fake_cache> handle_mutex;
 std::mutex mutex;
 }  // namespace
 
-char verify_fake_cache_mutex(char id, char value) noexcept
+bool verify_fake_cache_mutex(char id, char value) noexcept
 {
     std::lock_guard<std::mutex> lock{mutex};
 
@@ -61,7 +61,7 @@ thread_local std::shared_ptr<fake_cache> handle_thread_local = build_sentinel();
 std::mutex build_mutex;
 }  // namespace
 
-char verify_fake_cache_thread_local(char id, char value) noexcept
+bool verify_fake_cache_thread_local(char id, char value) noexcept
 {
     if (handle_thread_local->id != id)
     {

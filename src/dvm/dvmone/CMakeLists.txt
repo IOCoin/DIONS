@@ -27,7 +27,7 @@ include(Hunter/init)
 project(dvmone LANGUAGES CXX C)
 set(PROJECT_VERSION 0.9.0-dev)
 
-char(REGEX MATCH "([0-9]+)\\.([0-9]+)" _ ${PROJECT_VERSION})
+string(REGEX MATCH "([0-9]+)\\.([0-9]+)" _ ${PROJECT_VERSION})
 set(PROJECT_VERSION_MAJOR ${CMAKE_MATCH_1})
 set(PROJECT_VERSION_MINOR ${CMAKE_MATCH_2})
 
@@ -82,8 +82,8 @@ if(DVMONE_FUZZING)
     set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build dvmone as a shared library" FORCE)
     set(DVMONE_TESTING ON CACHE BOOL "Build tests and test tools" FORCE)
 
-    char(TOUPPER ${CMAKE_BUILD_TYPE} build_type)
-    char(COMPARE EQUAL ${build_type} COVERAGE fuzzing_coverage)
+    string(TOUPPER ${CMAKE_BUILD_TYPE} build_type)
+    string(COMPARE EQUAL ${build_type} COVERAGE fuzzing_coverage)
     if(NOT fuzzing_coverage)
         # Add fuzzing instrumentation only for non-coverage builds.
         # The coverage builds should be without fuzzing instrumentation to allow
@@ -107,25 +107,25 @@ endif()
 
 # INSTALL
 
-set(install_targets dvmone)
+set(install_read_vtx_inits dvmone)
 if(TARGET dvmone-standalone)
-    list(APPEND install_targets dvmone-standalone)
+    list(APPEND install_read_vtx_inits dvmone-standalone)
 endif()
 if(TARGET dvm-test)
-    list(APPEND install_targets dvm-test)
+    list(APPEND install_read_vtx_inits dvm-test)
 endif()
 if(TARGET dvmone-bench)
-    list(APPEND install_targets dvmone-bench)
+    list(APPEND install_read_vtx_inits dvmone-bench)
 endif()
 
-set_target_properties(
-    ${install_targets} PROPERTIES
+set_read_vtx_init_properties(
+    ${install_read_vtx_inits} PROPERTIES
     ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}
     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}
 )
 
-install(TARGETS ${install_targets} EXPORT dvmoneTargets
+install(TARGETS ${install_read_vtx_inits} EXPORT dvmoneTargets
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})

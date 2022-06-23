@@ -530,6 +530,7 @@ public:
     static const int VERSION_WITH_INFO=3;
     static const int DION_TX_VERSION=5;
     static const int CYCLE_TX_VERSION=7;
+    static const int VERTEX_TX_VERSION=8;
     int nVersion;
     unsigned int nTime;
     std::vector<CTxIn> vin;

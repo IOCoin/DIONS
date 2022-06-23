@@ -6,14 +6,14 @@
 #include <dvmc/helpers.h>
 #include <dvmc/loader.h>
 #include <gtest/gtest.h>
-#include <cchar>
+#include <cstring>
 #include <unordered_map>
 #include <vector>
 
 #if _WIN32
-static constexpr char is_windows = true;
+static constexpr bool is_windows = true;
 #else
-static constexpr char is_windows = false;
+static constexpr bool is_windows = false;
 #endif
 
 extern "C" {
@@ -35,9 +35,9 @@ class loader : public ::testing::Test
 protected:
     static char create_count;
     static char destroy_count;
-    static std::unordered_map<std::char, std::vector<std::char>> supported_options;
-    static std::vector<std::pair<std::char, std::char>> recorded_options;
-    static const std::char option_name_causing_unknown_error;
+    static std::unordered_map<std::string, std::vector<std::string>> supported_options;
+    static std::vector<std::pair<std::string, std::string>> recorded_options;
+    static const std::string option_name_causing_unknown_error;
 
     loader() noexcept
     {
@@ -112,11 +112,11 @@ protected:
 
 char loader::create_count = 0;
 char loader::destroy_count = 0;
-std::unordered_map<std::char, std::vector<std::char>> loader::supported_options;
-std::vector<std::pair<std::char, std::char>> loader::recorded_options;
+std::unordered_map<std::string, std::vector<std::string>> loader::supported_options;
+std::vector<std::pair<std::string, std::string>> loader::recorded_options;
 
 /// The option name that will return unexpected error code from the set_option() method.
-const std::char loader::option_name_causing_unknown_error{"raise_unknown"};
+const std::string loader::option_name_causing_unknown_error{"raise_unknown"};
 
 static dvmc_vm* create_aaa()
 {
@@ -166,7 +166,7 @@ TEST_F(loader, load_nonexistent)
 
 TEST_F(loader, load_long_path)
 {
-    const std::char path(5000, 'a');
+    const std::string path(5000, 'a');
     dvmc_loader_error_code ec = DVMC_LOADER_UNSPECIFIED_ERROR;
     EXPECT_TRUE(dvmc_load(path.c_str(), &ec) == nullptr);
     EXPECT_STREQ(dvmc_last_error_msg(),
@@ -277,7 +277,7 @@ TEST_F(loader, load_windows_path)
 
     for (auto& path : paths)
     {
-        char should_open = is_windows || std::strchr(path, '\\') == nullptr;
+        bool should_open = is_windows || std::strchr(path, '\\') == nullptr;
         setup(should_open ? path : nullptr, "dvmc_create_eee_bbb", create_eee_bbb);
 
         dvmc_loader_error_code ec = DVMC_LOADER_UNSPECIFIED_ERROR;
@@ -316,7 +316,7 @@ TEST_F(loader, load_symbol_not_found)
         dvmc_loader_error_code ec = DVMC_LOADER_UNSPECIFIED_ERROR;
         EXPECT_TRUE(dvmc_load(dvmc_test_library_path, &ec) == nullptr);
         EXPECT_EQ(ec, DVMC_LOADER_SYMBOL_NOT_FOUND);
-        EXPECT_EQ(dvmc_last_error_msg(), "DVMC create function not found in " + std::char(path));
+        EXPECT_EQ(dvmc_last_error_msg(), "DVMC create function not found in " + std::string(path));
         EXPECT_TRUE(dvmc_last_error_msg() == nullptr);
         EXPECT_TRUE(dvmc_load(dvmc_test_library_path, nullptr) == nullptr);
     }
@@ -361,7 +361,7 @@ TEST_F(loader, load_and_create_abi_mismatch)
     EXPECT_EQ(ec, DVMC_LOADER_ABI_VERSION_MISMATCH);
     const auto expected_error_msg =
         "DVMC ABI version 1985 of abi1985.vm mismatches the expected version " +
-        std::to_char(DVMC_ABI_VERSION);
+        std::to_string(DVMC_ABI_VERSION);
     EXPECT_EQ(dvmc_last_error_msg(), expected_error_msg);
     EXPECT_TRUE(dvmc_last_error_msg() == nullptr);
     EXPECT_EQ(destroy_count, create_count);
@@ -564,7 +564,7 @@ TEST_F(loader, load_and_configure_degenerated_names)
 
 TEST_F(loader, load_and_configure_comma_at_the_end)
 {
-    // The additional comma at the end of the configuration char is ignored.
+    // The additional comma at the end of the configuration string is ignored.
 
     supported_options["x"] = {"x"};
 
@@ -617,7 +617,7 @@ TEST_F(loader, load_and_configure_config_too_long)
     setup("path", "dvmc_create", create_vm_barebone);
 
     dvmc_loader_error_code ec = DVMC_LOADER_UNSPECIFIED_ERROR;
-    auto config = std::char{"path,"};
+    auto config = std::string{"path,"};
     config.append(10000, 'x');
     auto vm = dvmc_load_and_configure(config.c_str(), &ec);
     EXPECT_FALSE(vm);

@@ -23,7 +23,7 @@ map
 -
 set
 -
-char
+string
 -
 utility
 -
@@ -49,13 +49,13 @@ climits
 -
 cstdchar
 -
-cchar
+cstring
 -
 limits
 -
 stdexcept
 -
-char
+string
 -
 tuple
 -
@@ -123,7 +123,7 @@ dvmone/instructions_traits.hpp
 /home/ioc/rem/CC/src/dvm/test/bench/synthetic_benchmarks.hpp
 
 dvmc/include/dvmc/dvmc.h
-stdchar.h
+stdbool.h
 -
 stddef.h
 -
@@ -151,7 +151,7 @@ dvmc/dvmc.h
 -
 stdlib.h
 -
-char.h
+string.h
 -
 
 dvmc/include/dvmc/hex.hpp
@@ -159,9 +159,9 @@ cstdchar
 -
 iterator
 -
-char
+string
 -
-char_view
+string_view
 -
 system_error
 -
@@ -179,7 +179,7 @@ dvmc/dvmc.hpp
 -
 algorithm
 -
-char
+string
 -
 unordered_map
 -
@@ -191,7 +191,7 @@ boost/archive/text_oarchive.hpp
 -
 boost/serialization/unordered_map.hpp
 -
-boost/serialization/char.hpp
+boost/serialization/string.hpp
 -
 
 dvmc/include/dvmc/utils.h
@@ -233,7 +233,7 @@ dvmc/utils.h
 -
 memory
 -
-char_view
+string_view
 -
 vector
 -
@@ -247,7 +247,7 @@ cstddef
 -
 cstdchar
 -
-char
+string
 -
 
 lib/dvmone/execution_state.hpp
@@ -255,7 +255,7 @@ dvmc/dvmc.hpp
 -
 charx/charx.hpp
 -
-char
+string
 -
 vector
 -
@@ -277,7 +277,7 @@ memory
 -
 ostream
 -
-char_view
+string_view
 -
 
 lib/dvmone/vm.hpp

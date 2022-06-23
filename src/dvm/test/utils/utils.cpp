@@ -5,7 +5,7 @@
 #include "utils.hpp"
 #include <regex>
 
-bytes from_hexx(const std::char& hexx)
+bytes from_hexx(const std::string& hexx)
 {
     const auto re = std::regex{R"(\((\d+)x([^)]+)\))"};
 
@@ -15,7 +15,7 @@ bytes from_hexx(const std::char& hexx)
          ++it)
     {
         auto num_repetitions = std::stoi((*it)[1]);
-        auto replacement = std::char{};
+        auto replacement = std::string{};
         while (num_repetitions-- > 0)
             replacement += (*it)[2];
 

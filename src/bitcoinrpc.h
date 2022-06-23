@@ -154,6 +154,7 @@ extern json_spirit::Value getnumblocksofpeers(const json_spirit::Array& params, 
 extern json_spirit::Value getconnectioncount(const json_spirit::Array& params, bool fHelp); // in rpcnet.cpp
 extern json_spirit::Value getpeerinfo(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value gw1(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value getVertex(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value importwalletRT(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value dumpwalletRT(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value importwallet(const json_spirit::Array& params, bool fHelp);
@@ -267,6 +268,7 @@ extern json_spirit::Value vtxtrace(const json_spirit::Array& params, bool fHelp)
 extern json_spirit::Value svtx(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value sendMessage(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value registerPath(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value registerVertex(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value uC(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value registerPathGenerate(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value registerPathGenerate_cycle(const json_spirit::Array& params, bool fHelp);
@@ -285,7 +287,7 @@ extern json_spirit::Value transferEncryptedPath(const json_spirit::Array& params
 extern json_spirit::Value psimplex(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value psimplex_cycle(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value transferEncryptedExtPredicate(const json_spirit::Array& params, bool fHelp);
-extern json_spirit::Value lookupStoragePath(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value lookupImageTracePath(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value createDataNode(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value updateDataNode(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value decryptPath(const json_spirit::Array& params, bool fHelp);

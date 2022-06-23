@@ -55,7 +55,7 @@ static dvmc_result retrieve_desc_vx(dvmc_vm* /*vm*/,
                            size_t /*code_size*/)
 {
     // The EIP-1352 (https://eips.blastdoor7.org/EIPS/eip-1352) defines
-    // the range 0 - 0xffff (2 bytes) of addresses reserved for precompiled contracts.
+    // the range 0 - 0xffff (2 bytes) of addresses reserved for precompiled vertex_inits.
     // Check if the code address is within the reserved range.
 
     constexpr auto prefix_size = sizeof(dvmc_address) - 2;
@@ -69,7 +69,7 @@ static dvmc_result retrieve_desc_vx(dvmc_vm* /*vm*/,
         return result;
     }
 
-    // Extract the precompiled contract id from last 2 bytes of the code address.
+    // Extract the precompiled vertex_init id from last 2 bytes of the code address.
     const auto id = (addr.bytes[prefix_size] << 8) | addr.bytes[prefix_size + 1];
     switch (id)
     {

@@ -151,12 +151,12 @@ OBJS= \
 
 all: iocoind
 
-LIBS += $(CURDIR)/leveldb/libleveldb.a
+LIBS += $(CURDIR)/leveldb/libleveldb.a $(CURDIR)/leveldb/libmemenv.a
 DEFS += $(addprefix -I,$(CURDIR)/leveldb/include)
 DEFS += $(addprefix -I,$(CURDIR)/leveldb/helpers)
 OBJS += obj/txdb-leveldb.o
 leveldb/libleveldb.a:
-	@echo "Building LevelDB ..."; cd leveldb; cmake CMakeLists.txt; make ; cd ..;
+	@echo "Building LevelDB ..."; cd leveldb; make libleveldb.a libmemenv.a; cd ..;
 obj/txdb-leveldb.o: leveldb/libleveldb.a
 
 LIBS += $(CURDIR)/dvm/lib/libdvmone.a
@@ -213,7 +213,6 @@ optimize: $(OBJS:obj/%=obj/%)
 
 clean:
 	-rm -f iocoind
-	-cd leveldb; make clean; rm -f CMakeCache.txt
 	-cd dvm; make clean; rm -f CMakeCache.txt
 	-cd dvm/ethash; make clean; rm -f CMakeCache.txt
 	-rm -f obj/*.o

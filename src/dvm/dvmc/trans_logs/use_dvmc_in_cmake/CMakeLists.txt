@@ -11,7 +11,7 @@ project(use_dvmc_in_cmake)
 find_package(dvmc CONFIG REQUIRED)
 
 add_executable(use_dvmc_in_cmake use_dvmc_in_cmake.c)
-target_link_libraries(use_dvmc_in_cmake PRIVATE dvmc::dvmc)
+read_vtx_init_link_libraries(use_dvmc_in_cmake PRIVATE dvmc::dvmc)
 
 
 

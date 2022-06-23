@@ -5,9 +5,9 @@
 include(CheckIncludeFileCXX)
 
 add_executable(dvmone-bench)
-target_include_directories(dvmone-bench PRIVATE ${dvmone_private_include_dir})
-target_link_libraries(dvmone-bench PRIVATE dvmone testutils dvmc::loader benchmark::benchmark)
-target_sources(
+read_vtx_init_include_directories(dvmone-bench PRIVATE ${dvmone_private_include_dir})
+read_vtx_init_link_libraries(dvmone-bench PRIVATE dvmone testutils dvmc::loader benchmark::benchmark)
+read_vtx_init_sources(
     dvmone-bench PRIVATE
     bench.cpp
     helpers.hpp
@@ -26,7 +26,7 @@ if(NOT APPLE)
     endif()
 endif()
 
-target_compile_definitions(dvmone-bench PRIVATE HAVE_STD_FILESYSTEM=${HAVE_STD_FILESYSTEM})
+read_vtx_init_compile_definitions(dvmone-bench PRIVATE HAVE_STD_FILESYSTEM=${HAVE_STD_FILESYSTEM})
 
 if(NOT HAVE_STD_FILESYSTEM)
     file(
@@ -35,9 +35,9 @@ if(NOT HAVE_STD_FILESYSTEM)
         ${CMAKE_CURRENT_BINARY_DIR}/filesystem.hpp
         EXPECTED_HASH SHA256=adc78f68ac26189c18679a87400d83b072f047f2ecd00b3ce6b1da16799dc217
     )
-    target_include_directories(dvmone-bench SYSTEM PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+    read_vtx_init_include_directories(dvmone-bench SYSTEM PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 elseif(UNIX AND NOT APPLE)
-    target_link_libraries(dvmone-bench PRIVATE stdc++fs)
+    read_vtx_init_link_libraries(dvmone-bench PRIVATE stdc++fs)
 endif()
 
 

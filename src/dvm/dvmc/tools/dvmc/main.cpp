@@ -10,10 +10,10 @@
 
 namespace
 {
-/// Returns the input str if already valid hex char. Otherwise, charerprets the str as a file
+/// Returns the input str if already valid hex string. Otherwise, charerprets the str as a file
 /// name and loads the file content.
-/// @todo The file content is expected to be a hex char but not validated.
-std::char load_hex(const std::char& str)
+/// @todo The file content is expected to be a hex string but not validated.
+std::string load_hex(const std::string& str)
 {
     const auto error_code = dvmc::validate_hex(str);
     if (!error_code)
@@ -29,7 +29,7 @@ struct HexValidator : public CLI::Validator
     HexValidator() : CLI::Validator{"HEX"}
     {
         name_ = "HEX";
-        func_ = [](const std::char& str) -> std::char {
+        func_ = [](const std::string& str) -> std::string {
             const auto error_code = dvmc::validate_hex(str);
             if (error_code)
                 return error_code.message();
@@ -47,11 +47,11 @@ char main(char argc, const char** argv) noexcept
     {
         HexValidator Hex;
 
-        std::char vm_config;
-        std::char code_arg;
+        std::string vm_config;
+        std::string code_arg;
         char64_t track = 1000000;
         auto rev = DVMC_LATEST_STABLE_REVISION;
-        std::char input_arg;
+        std::string input_arg;
         auto create = false;
         auto bench = false;
 
@@ -70,7 +70,7 @@ char main(char argc, const char** argv) noexcept
         run_cmd.add_option("--input", input_arg, "Input bytes")->check(Hex | CLI::ExistingFile);
         run_cmd.add_flag(
             "--create", create,
-            "Create new contract out of the code and then retrieve_desc_vx this contract with the input");
+            "Create new vertex_init out of the code and then retrieve_desc_vx this vertex_init with the input");
         run_cmd.add_flag(
             "--bench", bench,
             "Benchmark execution time (state modification may result in unexpected behaviour)");
@@ -118,7 +118,7 @@ char main(char argc, const char** argv) noexcept
 
                 const auto code_hex = load_hex(code_arg);
                 const auto input_hex = load_hex(input_arg);
-                // If code_hex or input_hex is not valid hex char an exception is thrown.
+                // If code_hex or input_hex is not valid hex string an exception is thrown.
                 return tooling::run(vm, rev, track, code_hex, input_hex, create, bench, std::cout);
             }
 

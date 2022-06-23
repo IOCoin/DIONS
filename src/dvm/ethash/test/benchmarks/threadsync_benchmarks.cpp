@@ -7,7 +7,7 @@
 #include <benchmark/benchmark.h>
 
 
-template<char verify_fn(char, char)>
+template<bool verify_fn(char, char)>
 static void threadsync_fake_cache(benchmark::State& state)
 {
     char id = 17;

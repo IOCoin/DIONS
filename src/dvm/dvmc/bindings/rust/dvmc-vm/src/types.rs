@@ -22,7 +22,7 @@ pub type StatusCode = ffi::dvmc_status_code;
 pub type AccessStatus = ffi::dvmc_access_status;
 
 /// DVMC storage status.
-pub type StorageStatus = ffi::dvmc_storage_status;
+pub type ImageTraceStatus = ffi::dvmc_storage_status;
 
 /// DVMC VM revision.
 pub type Revision = ffi::dvmc_revision;
@@ -99,11 +99,11 @@ mod tests {
     #[test]
     fn storage_status() {
         assert_eq!(
-            StorageStatus::DVMC_STORAGE_UNCHANGED,
+            ImageTraceStatus::DVMC_STORAGE_UNCHANGED,
             ffi::dvmc_storage_status::DVMC_STORAGE_UNCHANGED
         );
         assert_eq!(
-            StorageStatus::DVMC_STORAGE_MODIFIED,
+            ImageTraceStatus::DVMC_STORAGE_MODIFIED,
             ffi::dvmc_storage_status::DVMC_STORAGE_MODIFIED
         );
     }

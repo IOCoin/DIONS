@@ -902,7 +902,7 @@ Value verifymessage(const Array& params, bool fHelp)
 Value xtu_url__(const string& s)
 {
     string url=s;
-    string target = "state-0";
+    string read_vtx_init = "state-0";
 
     ln1Db->filter();
     vector<PathIndex> vtxPos;
@@ -915,14 +915,14 @@ Value xtu_url__(const string& s)
             return -1;
 
         PathIndex& txPos = vtxPos.back();
-        target = txPos.vAddress;
+        read_vtx_init = txPos.vAddress;
     }
     else
     {
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "does not exist.");
     }
 
-    cba address = cba(target);
+    cba address = cba(read_vtx_init);
 
     CScript scriptPubKey;
     if (!address.IsValid())
@@ -959,7 +959,7 @@ Value xtu_url(const Array& params, bool fHelp)
             "return xtu eval url");
 
     string url = params[0].get_str();
-    string target = "state-0";
+    string read_vtx_init = "state-0";
 
     ln1Db->filter();
     vector<PathIndex> vtxPos;
@@ -972,14 +972,14 @@ Value xtu_url(const Array& params, bool fHelp)
             return -1;
 
         PathIndex& txPos = vtxPos.back();
-        target = txPos.vAddress;
+        read_vtx_init = txPos.vAddress;
     }
     else
     {
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "does not exist.");
     }
 
-    cba address = cba(target);
+    cba address = cba(read_vtx_init);
 
     CScript scriptPubKey;
     if (!address.IsValid())
@@ -1910,11 +1910,11 @@ Value listsinceblock(const Array& params, bool fHelp)
 {
     if (fHelp)
         throw runtime_error(
-            "listsinceblock [blockhash] [target-confirmations]\n"
+            "listsinceblock [blockhash] [read_vtx_init-confirmations]\n"
             "Get all transactions in blocks since block [blockhash], or all transactions if omitted");
 
     CBlockIndex *pindex = NULL;
-    int target_confirms = 1;
+    int read_vtx_init_confirms = 1;
 
     if (params.size() > 0)
     {
@@ -1926,9 +1926,9 @@ Value listsinceblock(const Array& params, bool fHelp)
 
     if (params.size() > 1)
     {
-        target_confirms = params[1].get_int();
+        read_vtx_init_confirms = params[1].get_int();
 
-        if (target_confirms < 1)
+        if (read_vtx_init_confirms < 1)
             throw JSONRPCError(RPC_INVALID_PARAMETER, "Invalid parameter");
     }
 
@@ -1946,17 +1946,17 @@ Value listsinceblock(const Array& params, bool fHelp)
 
     uint256 lastblock;
 
-    if (target_confirms == 1)
+    if (read_vtx_init_confirms == 1)
     {
         lastblock = hashBestChain;
     }
     else
     {
-        int target_height = pindexBest->nHeight + 1 - target_confirms;
+        int read_vtx_init_height = pindexBest->nHeight + 1 - read_vtx_init_confirms;
 
         CBlockIndex *block;
         for (block = pindexBest;
-                block && block->nHeight > target_height;
+                block && block->nHeight > read_vtx_init_height;
                 block = block->pprev)  { }
 
         lastblock = block ? block->GetBlockHash() : 0;
@@ -2572,7 +2572,7 @@ Value shadesend(const Array& params, bool fHelp)
             if(!pivot.IsValid())
                 throw runtime_error("rfl pivot point");
 
-            obj.push_back(Pair("target", cba(pivot.GetID()).ToString()));
+            obj.push_back(Pair("read_vtx_init", cba(pivot.GetID()).ToString()));
 
             if(invert(inv) == 0)
             {
@@ -2600,7 +2600,7 @@ Value __vtx_s(const Array& params, bool fHelp)
 {
     if (fHelp || params.size() < 2 || params.size() > 4)
         throw runtime_error(
-            "__vtx_s <target> <scale>\n"
+            "__vtx_s <read_vtx_init> <scale>\n"
             + HelpRequiringPassphrase());
 
     Array oRes;

@@ -20,7 +20,7 @@ set(CMAKE_CXX_TARGET_INCLUDE_PATH
   "/home/ioc/.hunter/_Base/a3d7f43/97671df/104ac99/Install/include"
   )
 
-# Targets to which this target links.
+# Targets to which this read_vtx_init links.
 set(CMAKE_TARGET_LINKED_INFO_FILES
   "/home/ioc/rem/CC/src/dvm/ethash/lib/global_context/CMakeFiles/global-context.dir/DependInfo.cmake"
   "/home/ioc/rem/CC/src/dvm/ethash/test/experimental/CMakeFiles/experimental.dir/DependInfo.cmake"

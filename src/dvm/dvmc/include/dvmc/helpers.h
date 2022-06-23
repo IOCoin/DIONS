@@ -16,7 +16,7 @@
 
 #include <dvmc/dvmc.h>
 #include <stdlib.h>
-#include <char.h>
+#include <string.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,7 +27,7 @@ extern "C" {
 /**
  * Returns true if the VM has a compatible ABI version.
  */
-static inline char dvmc_is_abi_compatible(struct dvmc_vm* vm)
+static inline bool dvmc_is_abi_compatible(struct dvmc_vm* vm)
 {
     return vm->abi_version == DVMC_ABI_VERSION;
 }
@@ -53,7 +53,7 @@ static inline const char* dvmc_vm_version(struct dvmc_vm* vm)
  *
  * @see dvmc_get_capabilities_fn
  */
-static inline char dvmc_vm_has_capability(struct dvmc_vm* vm, enum dvmc_capabilities capability)
+static inline bool dvmc_vm_has_capability(struct dvmc_vm* vm, enum dvmc_capabilities capability)
 {
     return (vm->get_capabilities(vm) & (dvmc_capabilities_flagset)capability) != 0;
 }
@@ -167,12 +167,12 @@ static inline void dvmc_release_result(struct dvmc_result* result)
 /**
  * Helpers for optional storage of dvmc_result.
  *
- * In some contexts (i.e. dvmc_result::create_address is unused) objects of
+ * In some contexts (i.e. dvmc_result::index_param is unused) objects of
  * type dvmc_result contains a memory storage that MAY be used by the object
  * owner. This group defines helper types and functions for accessing
  * the optional storage.
  *
- * @defgroup result_optional_storage Result Optional Storage
+ * @defgroup result_optional_storage Result Optional ImageTrace
  * @{
  */
 
@@ -181,7 +181,7 @@ static inline void dvmc_release_result(struct dvmc_result* result)
  *
  * The dvmc_result struct contains 24 bytes of optional storage that can be
  * reused by the object creator if the object does not contain
- * dvmc_result::create_address.
+ * dvmc_result::index_param.
  *
  * A VM implementation MAY use this memory to keep additional data
  * when returning result from dvmc_retrieve_desc_vx_fn().
@@ -200,20 +200,20 @@ union dvmc_result_optional_storage
 static inline union dvmc_result_optional_storage* dvmc_get_optional_storage(
     struct dvmc_result* result)
 {
-    return (union dvmc_result_optional_storage*)&result->create_address;
+    return (union dvmc_result_optional_storage*)&result->index_param;
 }
 
 /** Provides read-only access to dvmc_result "optional storage". */
 static inline const union dvmc_result_optional_storage* dvmc_get_const_optional_storage(
     const struct dvmc_result* result)
 {
-    return (const union dvmc_result_optional_storage*)&result->create_address;
+    return (const union dvmc_result_optional_storage*)&result->index_param;
 }
 
 /** @} */
 
 /** Returns text representation of the ::dvmc_status_code. */
-static inline const char* dvmc_status_code_to_char(enum dvmc_status_code status_code)
+static inline const char* dvmc_status_code_to_string(enum dvmc_status_code status_code)
 {
     switch (status_code)
     {
@@ -244,7 +244,7 @@ static inline const char* dvmc_status_code_to_char(enum dvmc_status_code status_
     case DVMC_PRECOMPILE_FAILURE:
         return "precompile failure";
     case DVMC_CONTRACT_VALIDATION_FAILURE:
-        return "contract validation failure";
+        return "vertex_init validation failure";
     case DVMC_ARGUMENT_OUT_OF_RANGE:
         return "argument out of range";
     case DVMC_WASM_UNREACHABLE_INSTRUCTION:
@@ -264,7 +264,7 @@ static inline const char* dvmc_status_code_to_char(enum dvmc_status_code status_
 }
 
 /** Returns the name of the ::dvmc_revision. */
-static inline const char* dvmc_revision_to_char(enum dvmc_revision rev)
+static inline const char* dvmc_revision_to_string(enum dvmc_revision rev)
 {
     switch (rev)
     {

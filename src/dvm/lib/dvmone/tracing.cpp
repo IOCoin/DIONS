@@ -12,7 +12,7 @@ namespace dvmone
 {
 namespace
 {
-std::char get_name(const char* const* names, uchar8_t opcode)
+std::string get_name(const char* const* names, uchar8_t opcode)
 {
     const auto name = names[opcode];
     return (name != nullptr) ? name : "0x" + dvmc::hex(opcode);
@@ -92,7 +92,7 @@ class InstructionTracer : public Tracer
         {
             if (it != stack_begin)
                 m_out << ',';
-            m_out << R"("0x)" << to_char(*it, 16) << '"';
+            m_out << R"("0x)" << to_string(*it, 16) << '"';
         }
         m_out << ']';
     }

@@ -4,8 +4,7 @@
 
 #include "db/log_reader.h"
 
-#include <cstdio>
-
+#include <stdio.h>
 #include "leveldb/env.h"
 #include "util/coding.h"
 #include "util/crc32c.h"
@@ -13,7 +12,8 @@
 namespace leveldb {
 namespace log {
 
-Reader::Reporter::~Reporter() = default;
+Reader::Reporter::~Reporter() {
+}
 
 Reader::Reader(SequentialFile* file, Reporter* reporter, bool checksum,
                uint64_t initial_offset)
@@ -25,17 +25,20 @@ Reader::Reader(SequentialFile* file, Reporter* reporter, bool checksum,
       eof_(false),
       last_record_offset_(0),
       end_of_buffer_offset_(0),
-      initial_offset_(initial_offset),
-      resyncing_(initial_offset > 0) {}
+      initial_offset_(initial_offset) {
+}
 
-Reader::~Reader() { delete[] backing_store_; }
+Reader::~Reader() {
+  delete[] backing_store_;
+}
 
 bool Reader::SkipToInitialBlock() {
-  const size_t offset_in_block = initial_offset_ % kBlockSize;
+  size_t offset_in_block = initial_offset_ % kBlockSize;
   uint64_t block_start_location = initial_offset_ - offset_in_block;
 
   // Don't search a block if we'd be in the trailer
   if (offset_in_block > kBlockSize - 6) {
+    offset_in_block = 0;
     block_start_location += kBlockSize;
   }
 
@@ -69,25 +72,8 @@ bool Reader::ReadRecord(Slice* record, std::string* scratch) {
 
   Slice fragment;
   while (true) {
+    uint64_t physical_record_offset = end_of_buffer_offset_ - buffer_.size();
     const unsigned int record_type = ReadPhysicalRecord(&fragment);
-
-    // ReadPhysicalRecord may have only had an empty trailer remaining in its
-    // internal buffer. Calculate the offset of the next physical record now
-    // that it has returned, properly accounting for its header size.
-    uint64_t physical_record_offset =
-        end_of_buffer_offset_ - buffer_.size() - kHeaderSize - fragment.size();
-
-    if (resyncing_) {
-      if (record_type == kMiddleType) {
-        continue;
-      } else if (record_type == kLastType) {
-        resyncing_ = false;
-        continue;
-      } else {
-        resyncing_ = false;
-      }
-    }
-
     switch (record_type) {
       case kFullType:
         if (in_fragmented_record) {
@@ -95,7 +81,9 @@ bool Reader::ReadRecord(Slice* record, std::string* scratch) {
           // it could emit an empty kFirstType record at the tail end
           // of a block followed by a kFullType or kFirstType record
           // at the beginning of the next block.
-          if (!scratch->empty()) {
+          if (scratch->empty()) {
+            in_fragmented_record = false;
+          } else {
             ReportCorruption(scratch->size(), "partial record without end(1)");
           }
         }
@@ -111,7 +99,9 @@ bool Reader::ReadRecord(Slice* record, std::string* scratch) {
           // it could emit an empty kFirstType record at the tail end
           // of a block followed by a kFullType or kFirstType record
           // at the beginning of the next block.
-          if (!scratch->empty()) {
+          if (scratch->empty()) {
+            in_fragmented_record = false;
+          } else {
             ReportCorruption(scratch->size(), "partial record without end(2)");
           }
         }
@@ -160,7 +150,7 @@ bool Reader::ReadRecord(Slice* record, std::string* scratch) {
 
       default: {
         char buf[40];
-        std::snprintf(buf, sizeof(buf), "unknown record type %u", record_type);
+        snprintf(buf, sizeof(buf), "unknown record type %u", record_type);
         ReportCorruption(
             (fragment.size() + (in_fragmented_record ? scratch->size() : 0)),
             buf);
@@ -173,16 +163,18 @@ bool Reader::ReadRecord(Slice* record, std::string* scratch) {
   return false;
 }
 
-uint64_t Reader::LastRecordOffset() { return last_record_offset_; }
+uint64_t Reader::LastRecordOffset() {
+  return last_record_offset_;
+}
 
-void Reader::ReportCorruption(uint64_t bytes, const char* reason) {
+void Reader::ReportCorruption(size_t bytes, const char* reason) {
   ReportDrop(bytes, Status::Corruption(reason));
 }
 
-void Reader::ReportDrop(uint64_t bytes, const Status& reason) {
-  if (reporter_ != nullptr &&
+void Reader::ReportDrop(size_t bytes, const Status& reason) {
+  if (reporter_ != NULL &&
       end_of_buffer_offset_ - buffer_.size() - bytes >= initial_offset_) {
-    reporter_->Corruption(static_cast<size_t>(bytes), reason);
+    reporter_->Corruption(bytes, reason);
   }
 }
 

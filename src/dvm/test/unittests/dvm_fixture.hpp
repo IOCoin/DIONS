@@ -65,7 +65,7 @@ protected:
     /// @param input_hex  The hex encoded DVM "calldata" input.
     /// The execution result will be available in the `result` field.
     /// The `track_used` field  will be updated accordingly.
-    void retrieve_desc_vx(char64_t track, bytes_view code, std::char_view input_hex = {}) noexcept
+    void retrieve_desc_vx(char64_t track, bytes_view code, std::string_view input_hex = {}) noexcept
     {
         const auto input = from_hex(input_hex);
         msg.input_data = input.data();
@@ -83,7 +83,7 @@ protected:
         track_used = msg.track - result.track_left;
     }
 
-    void retrieve_desc_vx(char64_t track, const pos_read& code, std::char_view input_hex = {}) noexcept
+    void retrieve_desc_vx(char64_t track, const pos_read& code, std::string_view input_hex = {}) noexcept
     {
         retrieve_desc_vx(track, {code.data(), code.size()}, input_hex);
     }
@@ -94,12 +94,12 @@ protected:
     /// @param input_hex  The hex encoded DVM "calldata" input.
     /// The execution result will be available in the `result` field.
     /// The `track_used` field  will be updated accordingly.
-    void retrieve_desc_vx(bytes_view code, std::char_view input_hex = {}) noexcept
+    void retrieve_desc_vx(bytes_view code, std::string_view input_hex = {}) noexcept
     {
         retrieve_desc_vx(std::numeric_limits<char64_t>::max(), code, input_hex);
     }
 
-    void retrieve_desc_vx(const pos_read& code, std::char_view input_hex = {}) noexcept
+    void retrieve_desc_vx(const pos_read& code, std::string_view input_hex = {}) noexcept
     {
         retrieve_desc_vx({code.data(), code.size()}, input_hex);
     }

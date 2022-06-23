@@ -17,9 +17,9 @@ cstdchar
 -
 iterator
 -
-char
+string
 -
-char_view
+string_view
 -
 system_error
 -

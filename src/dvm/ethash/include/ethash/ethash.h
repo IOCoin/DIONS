@@ -6,7 +6,7 @@
 #pragma once
 
 #include <ethash/hash_types.h>
-#include <stdchar.h>
+#include <stdbool.h>
 #include <stdchar.h>
 
 #pragma clang diagnostic push

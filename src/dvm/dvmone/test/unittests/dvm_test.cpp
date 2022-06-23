@@ -171,7 +171,7 @@ TEST_P(dvm, arith)
     // z = 17 s% x
     // a = 17 * x + z
     // iszero
-    std::char s;
+    std::string s;
     s += "60116001600003600302";  // 17 -3
     s += "808205";                // 17 -3 -5
     s += "818307";                // 17 -3 -5 2
@@ -187,7 +187,7 @@ TEST_P(dvm, arith)
 
 TEST_P(dvm, comparison)
 {
-    std::char s;
+    std::string s;
     s += "60006001808203808001";  // 0 1 -1 -2
     s += "828210600053";          // m[0] = -1 < 1
     s += "828211600153";          // m[1] = -1 > 1
@@ -212,7 +212,7 @@ TEST_P(dvm, comparison)
 
 TEST_P(dvm, bitwise)
 {
-    std::char s;
+    std::string s;
     s += "60aa60ff";      // aa ff
     s += "818116600053";  // m[0] = aa & ff
     s += "818117600153";  // m[1] = aa | ff
@@ -229,7 +229,7 @@ TEST_P(dvm, bitwise)
 
 TEST_P(dvm, jump)
 {
-    std::char s;
+    std::string s;
     s += "60be600053";  // m[0] = be
     s += "60fa";        // fa
     s += "60055801";    // PC + 5
@@ -248,7 +248,7 @@ TEST_P(dvm, jump)
 
 TEST_P(dvm, jumpi)
 {
-    std::char s;
+    std::string s;
     s += "5a600557";      // TRACK 5 JUMPI
     s += "00";            // STOP
     s += "5b60016000f3";  // JUMPDEST RETURN(0,1)
@@ -387,7 +387,7 @@ TEST_P(dvm, pc_after_jump_2)
 
 TEST_P(dvm, byte)
 {
-    std::char s;
+    std::string s;
     s += "63aabbccdd";  // aabbccdd
     s += "8060001a";    // DUP 1 BYTE
     s += "600053";      // m[0] = 00
@@ -421,7 +421,7 @@ TEST_P(dvm, byte_overflow)
 
 TEST_P(dvm, addmod_mulmod)
 {
-    std::char s;
+    std::string s;
     s += "7fcdeb8272fc01d4d50a6ec165d2ea477af19b9b2c198459f59079583b97e88a66";
     s += "7f52e7e7a03b86f534d2e338aa1bb05ba3539cb2f51304cdbce69ce2d422c456ca";
     s += "7fe0f2f0cae05c220260e1724bdc66a0f83810bd1217bd105cb2da11e257c6cdf6";
@@ -480,7 +480,7 @@ TEST_P(dvm, addmod_mulmod_by_zero)
 
 TEST_P(dvm, signextend)
 {
-    std::char s;
+    std::string s;
     s += "62017ffe";    // 017ffe
     s += "8060000b";    // DUP SIGNEXTEND(0)
     s += "600052";      // m[0..]
@@ -547,7 +547,7 @@ TEST_P(dvm, signextend_fuzzing)
 
 TEST_P(dvm, exp)
 {
-    std::char s;
+    std::string s;
     s += "612019";      // 0x2019
     s += "6003";        // 3
     s += "0a";          // EXP
@@ -592,7 +592,7 @@ TEST_P(dvm, exp_oog)
 TEST_P(dvm, exp_pre_spurious_dragon)
 {
     rev = DVMC_TANGERINE_WHISTLE;
-    std::char s;
+    std::string s;
     s += "62012019";    // 0x012019
     s += "6003";        // 3
     s += "0a";          // EXP
@@ -608,7 +608,7 @@ TEST_P(dvm, exp_pre_spurious_dragon)
 
 TEST_P(dvm, calldataload)
 {
-    std::char s;
+    std::string s;
     s += "600335";      // CALLDATALOAD(3)
     s += "600052";      // m[0..]
     s += "600a6000f3";  // RETURN(0,10)
@@ -629,7 +629,7 @@ TEST_P(dvm, calldataload_outofrange)
 
 TEST_P(dvm, address)
 {
-    std::char s;
+    std::string s;
     s += "30600052";    // ADDRESS MSTORE(0)
     s += "600a600af3";  // RETURN(10,10)
     msg.recipient.bytes[0] = 0xcc;
@@ -643,7 +643,7 @@ TEST_P(dvm, address)
 
 TEST_P(dvm, caller_callvalue)
 {
-    std::char s;
+    std::string s;
     s += "333401600052";  // CALLER CALLVALUE ADD MSTORE(0)
     s += "600a600af3";    // RETURN(10,10)
     msg.sender.bytes[0] = 0xdd;
@@ -727,7 +727,7 @@ TEST_P(dvm, keccak256_empty)
 
 TEST_P(dvm, revert)
 {
-    std::char s;
+    std::string s;
     s += "60ee8053";    // m[ee] == e
     s += "600260edfd";  // REVERT(ee,1)
     retrieve_desc_vx(s);

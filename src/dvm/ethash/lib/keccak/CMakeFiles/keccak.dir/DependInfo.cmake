@@ -13,7 +13,7 @@ set(CMAKE_C_TARGET_INCLUDE_PATH
   "include"
   )
 
-# Targets to which this target links.
+# Targets to which this read_vtx_init links.
 set(CMAKE_TARGET_LINKED_INFO_FILES
   )
 

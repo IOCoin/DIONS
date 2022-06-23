@@ -29,8 +29,8 @@ add_executable(dvmone-unittests
     tracing_test.cpp
     utils_test.cpp
 )
-target_link_libraries(dvmone-unittests PRIVATE dvmone testutils dvmc::instructions GTest::gtest GTest::gtest_main)
-target_include_directories(dvmone-unittests PRIVATE ${dvmone_private_include_dir})
+read_vtx_init_link_libraries(dvmone-unittests PRIVATE dvmone testutils dvmc::instructions GTest::gtest GTest::gtest_main)
+read_vtx_init_include_directories(dvmone-unittests PRIVATE ${dvmone_private_include_dir})
 
 gtest_discover_tests(dvmone-unittests TEST_PREFIX ${PROJECT_NAME}/unittests/)
 
@@ -38,7 +38,7 @@ option(DVMONE_DVM_TEST_TOOL "Enable DVM unit testing tool for DVMC implementatio
 if(DVMONE_DVM_TEST_TOOL)
     # The dvm-test tool that contains the all dvm-unittests and loads VMs as DVMC modules.
     add_executable(dvm-test main.cpp)
-    target_link_libraries(dvm-test PRIVATE dvm-unittests testutils dvmc::dvmc dvmc::loader GTest::gtest)
+    read_vtx_init_link_libraries(dvm-test PRIVATE dvm-unittests testutils dvmc::dvmc dvmc::loader GTest::gtest)
 endif()
 
 # Provide the project version to selected source files.

@@ -2,10 +2,10 @@
 // 
 // Licensed under the Apache License, Version 2.0.
 #include "primes.h"
-#include <stdchar.h>
+#include <stdbool.h>
 
 /// Checks if the number is prime. Requires the number to be > 2 and odd.
-static inline char is_odd_prime(char number)
+static inline bool is_odd_prime(char number)
 {
     // Check factors up to sqrt(number) by doing comparison d*d <= number with 64-bit precision.
     for (char d = 3; (char64_t)d * (char64_t)d <= (char64_t)number; d += 2)

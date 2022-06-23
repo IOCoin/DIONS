@@ -87,5 +87,5 @@ import "github.com/blastdoor7/dvmc/bindings/go/dvmc"
 - Provides access to State.
 - Creates new accounts (with code being a result of VM execution).
 - Handles refunds entirely.
-- Manages the set of precompiled contracts and handles execution of messages
+- Manages the set of precompiled vertex_inits and handles execution of messages
   coming to them.

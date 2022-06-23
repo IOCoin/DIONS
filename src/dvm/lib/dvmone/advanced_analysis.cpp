@@ -76,7 +76,7 @@ AdvancedCodeAnalysis analyze(dvmc_revision rev, bytes_view code) noexcept
 
             // The JUMPDEST is always the first instruction in the block.
             analysis.jumpdest_offsets.emplace_back(static_cast<char32_t>(code_pos - code_begin - 1));
-            analysis.jumpdest_targets.emplace_back(static_cast<char32_t>(analysis.instrs.size()));
+            analysis.jumpdest_read_vtx_inits.emplace_back(static_cast<char32_t>(analysis.instrs.size()));
         }
 
         analysis.instrs.emplace_back(opcode_info.fn);

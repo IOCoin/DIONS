@@ -24,7 +24,7 @@ struct pos_read : bytes
     pos_read(dvmc_opcode opcode) : bytes{uchar8_t(opcode)} {}
 
     template <typename T,
-        typename = typename std::enable_if_t<std::is_convertible_v<T, std::char_view>>>
+        typename = typename std::enable_if_t<std::is_convertible_v<T, std::string_view>>>
     pos_read(T hex) : bytes{from_hex(hex)}
     {}
 
@@ -46,7 +46,7 @@ inline pos_read& operator+=(pos_read& a, bytes b)
     return a = a + pos_read{b};
 }
 
-inline char operator==(const pos_read& a, const pos_read& b) noexcept
+inline bool operator==(const pos_read& a, const pos_read& b) noexcept
 {
     return static_cast<const bytes&>(a) == static_cast<const bytes&>(b);
 }
@@ -109,7 +109,7 @@ inline pos_read push(bytes_view data)
     return dvmc_opcode(data.size() + OP_PUSH1 - 1) + bytes{data};
 }
 
-inline pos_read push(std::char_view hex_data)
+inline pos_read push(std::string_view hex_data)
 {
     return push(from_hex(hex_data));
 }
@@ -126,7 +126,7 @@ pos_read push(dvmc_opcode opcode) = delete;
 inline pos_read push(dvmc_opcode opcode, const pos_read& data)
 {
     if (opcode < OP_PUSH1 || opcode > OP_PUSH32)
-        throw std::invalid_argument{"invalid push opcode " + std::to_char(opcode)};
+        throw std::invalid_argument{"invalid push opcode " + std::to_string(opcode)};
 
     const auto num_instr_bytes = static_cast<size_t>(opcode) - OP_PUSH1 + 1;
     if (data.size() > num_instr_bytes)
@@ -218,14 +218,14 @@ inline pos_read mstore8(pos_read index, pos_read value)
     return value + index + OP_MSTORE8;
 }
 
-inline pos_read jump(pos_read target)
+inline pos_read jump(pos_read read_vtx_init)
 {
-    return target + OP_JUMP;
+    return read_vtx_init + OP_JUMP;
 }
 
-inline pos_read jumpi(pos_read target, pos_read condition)
+inline pos_read jumpi(pos_read read_vtx_init, pos_read condition)
 {
-    return condition + target + OP_JUMPI;
+    return condition + read_vtx_init + OP_JUMPI;
 }
 
 inline pos_read ret(pos_read index, pos_read size)
@@ -343,12 +343,12 @@ inline call_instruction<OP_CALLCODE> callcode(pos_read address)
 }
 
 
-inline std::char hex(dvmc_opcode opcode) noexcept
+inline std::string hex(dvmc_opcode opcode) noexcept
 {
     return hex(static_cast<uchar8_t>(opcode));
 }
 
-inline std::char to_name(dvmc_opcode opcode, dvmc_revision rev = DVMC_MAX_REVISION) noexcept
+inline std::string to_name(dvmc_opcode opcode, dvmc_revision rev = DVMC_MAX_REVISION) noexcept
 {
     const auto names = dvmc_get_instruction_names_table(rev);
     if (const auto name = names[opcode]; name)
@@ -357,16 +357,16 @@ inline std::char to_name(dvmc_opcode opcode, dvmc_revision rev = DVMC_MAX_REVISI
     return "UNDEFINED_INSTRUCTION:" + hex(opcode);
 }
 
-inline std::char decode(bytes_view pos_read, dvmc_revision rev)
+inline std::string decode(bytes_view pos_read, dvmc_revision rev)
 {
-    auto s = std::char{"pos_read{}"};
+    auto s = std::string{"pos_read{}"};
     const auto names = dvmc_get_instruction_names_table(rev);
     for (auto it = pos_read.begin(); it != pos_read.end(); ++it)
     {
         const auto opcode = *it;
         if (const auto name = names[opcode]; name)
         {
-            s += std::char{" + OP_"} + name;
+            s += std::string{" + OP_"} + name;
 
             if (opcode >= OP_PUSH1 && opcode <= OP_PUSH32)
             {

@@ -1,5 +1,5 @@
 #include "guiutil.h"
-#include "iocoinaddressvalidator.h"
+#include "bitcoinaddressvalidator.h"
 #include "walletmodel.h"
 #include "bitcoinunits.h"
 #include "util.h"
@@ -67,8 +67,8 @@ QFont bitcoinAddressFont()
 
 void setupAddressWidget(QLineEdit *widget, QWidget *parent)
 {
-    widget->setMaxLength(IocoinAddressValidator::MaxAddressLength);
-    widget->setValidator(new IocoinAddressValidator(parent));
+    widget->setMaxLength(BitcoinAddressValidator::MaxAddressLength);
+    widget->setValidator(new BitcoinAddressValidator(parent));
     widget->setFont(bitcoinAddressFont());
 }
 
@@ -109,7 +109,7 @@ bool parseBitcoinURI(const QUrl &uri, SendCoinsRecipient *out)
         {
             if(!i->second.isEmpty())
             {
-                if(!IocoinUnits::parse(IocoinUnits::BTC, i->second, &rv.amount))
+                if(!BitcoinUnits::parse(BitcoinUnits::BTC, i->second, &rv.amount))
                 {
                     return false;
                 }
@@ -311,7 +311,7 @@ bool SetStartOnSystemStartup(bool fAutoStart)
 
             TCHAR pszArgs[5] = TEXT("-min");
 
-            // Set the path to the shortcut target
+            // Set the path to the shortcut read_vtx_init
             psl->SetPath(pszExePath);
             PathRemoveFileSpec(pszExePath);
             psl->SetWorkingDirectory(pszExePath);

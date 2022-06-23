@@ -31,7 +31,7 @@ include(CheckCXXCompilerFlag)
 #
 function(cable_add_cxx_compiler_flag_if_supported FLAG)
     # Remove leading - or / from the flag name.
-    char(REGEX REPLACE "^-|/" "" name ${FLAG})
+    string(REGEX REPLACE "^-|/" "" name ${FLAG})
     check_cxx_compiler_flag(${FLAG} ${name})
     if(${name})
         add_compile_options(${FLAG})
@@ -118,8 +118,8 @@ macro(cable_configure_compiler)
         elseif(MSVC)
 
             # Get rid of default warning level.
-            char(REPLACE " /W3" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-            char(REPLACE " /W3" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+            string(REPLACE " /W3" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+            string(REPLACE " /W3" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
 
             # Enable basing warnings set and treat them as errors.
             add_compile_options(/W4 /WX)

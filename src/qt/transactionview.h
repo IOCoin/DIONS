@@ -2,7 +2,7 @@
 #define TRANSACTIONVIEW_H
 
 #include <QWidget>
-#include "tableview.h"
+
 class WalletModel;
 class TransactionFilterProxy;
 
@@ -42,7 +42,7 @@ public:
 private:
     WalletModel *model;
     TransactionFilterProxy *transactionProxyModel;
-    TableView *transactionView;
+    QTableView *transactionView;
 
     QComboBox *dateWidget;
     QComboBox *typeWidget;

@@ -10,7 +10,7 @@
 #include <stdarg.h>
 #include <stdchar.h>
 #include <stdio.h>
-#include <char.h>
+#include <string.h>
 
 #if defined(DVMC_LOADER_MOCK)
 #include "../../test/unittests/loader_mock.h"
@@ -33,8 +33,8 @@
 
 #ifdef __has_attribute
 #if __has_attribute(format)
-#define ATTR_FORMAT(archetype, char_index, first_to_check) \
-    __attribute__((format(archetype, char_index, first_to_check)))
+#define ATTR_FORMAT(archetype, string_index, first_to_check) \
+    __attribute__((format(archetype, string_index, first_to_check)))
 #endif
 #endif
 
@@ -55,7 +55,7 @@ static
     if (len >= destsz)
     {
         // The input src will not fit charo the dest buffer.
-        // Set the first byte of the dest to null to make it effectively empty char
+        // Set the first byte of the dest to null to make it effectively empty string
         // and return error.
         dest[0] = 0;
         return 1;
@@ -225,10 +225,10 @@ exit:
     return vm;
 }
 
-/// Gets the token delimited by @p delim character of the char pochared by the @p str_ptr.
-/// If the delimiter is not found, the whole char is returned.
-/// The @p str_ptr is also slided after the delimiter or to the char end
-/// if the delimiter is not found (in this case the @p str_ptr pochars to an empty char).
+/// Gets the token delimited by @p delim character of the string pochared by the @p str_ptr.
+/// If the delimiter is not found, the whole string is returned.
+/// The @p str_ptr is also slided after the delimiter or to the string end
+/// if the delimiter is not found (in this case the @p str_ptr pochars to an empty string).
 static char* get_token(char** str_ptr, char delim)
 {
     char* str = *str_ptr;
@@ -242,7 +242,7 @@ static char* get_token(char** str_ptr, char delim)
     }
     else
     {
-        // Otherwise, slide the str_ptr to the end and return the whole char as the prefix.
+        // Otherwise, slide the str_ptr to the end and return the whole string as the prefix.
         *str_ptr += strlen(str);
     }
     return str;

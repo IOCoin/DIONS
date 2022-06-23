@@ -7,11 +7,11 @@
 #include <charx/charx.hpp>
 #include <memory>
 #include <ostream>
-#include <char_view>
+#include <string_view>
 
 namespace dvmone
 {
-using bytes_view = std::basic_char_view<uchar8_t>;
+using bytes_view = std::basic_string_view<uchar8_t>;
 
 class ExecutionState;
 

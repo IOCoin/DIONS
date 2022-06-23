@@ -36,10 +36,6 @@ WalletModel::~WalletModel()
     unsubscribeFromCoreSignals();
 }
 
-const boost::filesystem::path& WalletModel::getDataDir() const
-{
-  return wallet->dataDir();
-}
 qint64 WalletModel::getBalance() const
 {
     return wallet->GetBalance();

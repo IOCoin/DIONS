@@ -19,7 +19,7 @@ test/unittests/CMakeFiles/ethash-test.dir/test_difficulty.cpp.o: /home/ioc/.hunt
 test/unittests/CMakeFiles/ethash-test.dir/test_difficulty.cpp.o: /home/ioc/.hunter/_Base/a3d7f43/97671df/104ac99/Install/include/gtest/charernal/gtest-param-util.h
 test/unittests/CMakeFiles/ethash-test.dir/test_difficulty.cpp.o: /home/ioc/.hunter/_Base/a3d7f43/97671df/104ac99/Install/include/gtest/charernal/gtest-port-arch.h
 test/unittests/CMakeFiles/ethash-test.dir/test_difficulty.cpp.o: /home/ioc/.hunter/_Base/a3d7f43/97671df/104ac99/Install/include/gtest/charernal/gtest-port.h
-test/unittests/CMakeFiles/ethash-test.dir/test_difficulty.cpp.o: /home/ioc/.hunter/_Base/a3d7f43/97671df/104ac99/Install/include/gtest/charernal/gtest-char.h
+test/unittests/CMakeFiles/ethash-test.dir/test_difficulty.cpp.o: /home/ioc/.hunter/_Base/a3d7f43/97671df/104ac99/Install/include/gtest/charernal/gtest-string.h
 test/unittests/CMakeFiles/ethash-test.dir/test_difficulty.cpp.o: /home/ioc/.hunter/_Base/a3d7f43/97671df/104ac99/Install/include/gtest/charernal/gtest-type-util.h
 test/unittests/CMakeFiles/ethash-test.dir/test_difficulty.cpp.o: lib/ethash/endianness.hpp
 test/unittests/CMakeFiles/ethash-test.dir/test_difficulty.cpp.o: lib/support/attributes.h
@@ -51,7 +51,7 @@ test/unittests/CMakeFiles/ethash-test.dir/test_ethash.cpp.o: /home/ioc/.hunter/_
 test/unittests/CMakeFiles/ethash-test.dir/test_ethash.cpp.o: /home/ioc/.hunter/_Base/a3d7f43/97671df/104ac99/Install/include/gtest/charernal/gtest-param-util.h
 test/unittests/CMakeFiles/ethash-test.dir/test_ethash.cpp.o: /home/ioc/.hunter/_Base/a3d7f43/97671df/104ac99/Install/include/gtest/charernal/gtest-port-arch.h
 test/unittests/CMakeFiles/ethash-test.dir/test_ethash.cpp.o: /home/ioc/.hunter/_Base/a3d7f43/97671df/104ac99/Install/include/gtest/charernal/gtest-port.h
-test/unittests/CMakeFiles/ethash-test.dir/test_ethash.cpp.o: /home/ioc/.hunter/_Base/a3d7f43/97671df/104ac99/Install/include/gtest/charernal/gtest-char.h
+test/unittests/CMakeFiles/ethash-test.dir/test_ethash.cpp.o: /home/ioc/.hunter/_Base/a3d7f43/97671df/104ac99/Install/include/gtest/charernal/gtest-string.h
 test/unittests/CMakeFiles/ethash-test.dir/test_ethash.cpp.o: /home/ioc/.hunter/_Base/a3d7f43/97671df/104ac99/Install/include/gtest/charernal/gtest-type-util.h
 test/unittests/CMakeFiles/ethash-test.dir/test_ethash.cpp.o: lib/ethash/endianness.hpp
 test/unittests/CMakeFiles/ethash-test.dir/test_ethash.cpp.o: test/experimental/difficulty.h
@@ -86,7 +86,7 @@ test/unittests/CMakeFiles/ethash-test.dir/test_global_context.cpp.o: /home/ioc/.
 test/unittests/CMakeFiles/ethash-test.dir/test_global_context.cpp.o: /home/ioc/.hunter/_Base/a3d7f43/97671df/104ac99/Install/include/gtest/charernal/gtest-param-util.h
 test/unittests/CMakeFiles/ethash-test.dir/test_global_context.cpp.o: /home/ioc/.hunter/_Base/a3d7f43/97671df/104ac99/Install/include/gtest/charernal/gtest-port-arch.h
 test/unittests/CMakeFiles/ethash-test.dir/test_global_context.cpp.o: /home/ioc/.hunter/_Base/a3d7f43/97671df/104ac99/Install/include/gtest/charernal/gtest-port.h
-test/unittests/CMakeFiles/ethash-test.dir/test_global_context.cpp.o: /home/ioc/.hunter/_Base/a3d7f43/97671df/104ac99/Install/include/gtest/charernal/gtest-char.h
+test/unittests/CMakeFiles/ethash-test.dir/test_global_context.cpp.o: /home/ioc/.hunter/_Base/a3d7f43/97671df/104ac99/Install/include/gtest/charernal/gtest-string.h
 test/unittests/CMakeFiles/ethash-test.dir/test_global_context.cpp.o: /home/ioc/.hunter/_Base/a3d7f43/97671df/104ac99/Install/include/gtest/charernal/gtest-type-util.h
 test/unittests/CMakeFiles/ethash-test.dir/test_global_context.cpp.o: lib/ethash/endianness.hpp
 test/unittests/CMakeFiles/ethash-test.dir/test_global_context.cpp.o: lib/support/attributes.h
@@ -120,7 +120,7 @@ test/unittests/CMakeFiles/ethash-test.dir/test_keccak.cpp.o: /home/ioc/.hunter/_
 test/unittests/CMakeFiles/ethash-test.dir/test_keccak.cpp.o: /home/ioc/.hunter/_Base/a3d7f43/97671df/104ac99/Install/include/gtest/charernal/gtest-param-util.h
 test/unittests/CMakeFiles/ethash-test.dir/test_keccak.cpp.o: /home/ioc/.hunter/_Base/a3d7f43/97671df/104ac99/Install/include/gtest/charernal/gtest-port-arch.h
 test/unittests/CMakeFiles/ethash-test.dir/test_keccak.cpp.o: /home/ioc/.hunter/_Base/a3d7f43/97671df/104ac99/Install/include/gtest/charernal/gtest-port.h
-test/unittests/CMakeFiles/ethash-test.dir/test_keccak.cpp.o: /home/ioc/.hunter/_Base/a3d7f43/97671df/104ac99/Install/include/gtest/charernal/gtest-char.h
+test/unittests/CMakeFiles/ethash-test.dir/test_keccak.cpp.o: /home/ioc/.hunter/_Base/a3d7f43/97671df/104ac99/Install/include/gtest/charernal/gtest-string.h
 test/unittests/CMakeFiles/ethash-test.dir/test_keccak.cpp.o: /home/ioc/.hunter/_Base/a3d7f43/97671df/104ac99/Install/include/gtest/charernal/gtest-type-util.h
 test/unittests/CMakeFiles/ethash-test.dir/test_keccak.cpp.o: lib/ethash/endianness.hpp
 test/unittests/CMakeFiles/ethash-test.dir/test_keccak.cpp.o: lib/support/attributes.h
@@ -151,7 +151,7 @@ test/unittests/CMakeFiles/ethash-test.dir/test_primes.cpp.o: /home/ioc/.hunter/_
 test/unittests/CMakeFiles/ethash-test.dir/test_primes.cpp.o: /home/ioc/.hunter/_Base/a3d7f43/97671df/104ac99/Install/include/gtest/charernal/gtest-param-util.h
 test/unittests/CMakeFiles/ethash-test.dir/test_primes.cpp.o: /home/ioc/.hunter/_Base/a3d7f43/97671df/104ac99/Install/include/gtest/charernal/gtest-port-arch.h
 test/unittests/CMakeFiles/ethash-test.dir/test_primes.cpp.o: /home/ioc/.hunter/_Base/a3d7f43/97671df/104ac99/Install/include/gtest/charernal/gtest-port.h
-test/unittests/CMakeFiles/ethash-test.dir/test_primes.cpp.o: /home/ioc/.hunter/_Base/a3d7f43/97671df/104ac99/Install/include/gtest/charernal/gtest-char.h
+test/unittests/CMakeFiles/ethash-test.dir/test_primes.cpp.o: /home/ioc/.hunter/_Base/a3d7f43/97671df/104ac99/Install/include/gtest/charernal/gtest-string.h
 test/unittests/CMakeFiles/ethash-test.dir/test_primes.cpp.o: /home/ioc/.hunter/_Base/a3d7f43/97671df/104ac99/Install/include/gtest/charernal/gtest-type-util.h
 test/unittests/CMakeFiles/ethash-test.dir/test_primes.cpp.o: test/unittests/test_primes.cpp
 test/unittests/CMakeFiles/ethash-test.dir/test_primes.cpp.o: include/ethash/ethash.h
@@ -176,7 +176,7 @@ test/unittests/CMakeFiles/ethash-test.dir/test_version.cpp.o: /home/ioc/.hunter/
 test/unittests/CMakeFiles/ethash-test.dir/test_version.cpp.o: /home/ioc/.hunter/_Base/a3d7f43/97671df/104ac99/Install/include/gtest/charernal/gtest-param-util.h
 test/unittests/CMakeFiles/ethash-test.dir/test_version.cpp.o: /home/ioc/.hunter/_Base/a3d7f43/97671df/104ac99/Install/include/gtest/charernal/gtest-port-arch.h
 test/unittests/CMakeFiles/ethash-test.dir/test_version.cpp.o: /home/ioc/.hunter/_Base/a3d7f43/97671df/104ac99/Install/include/gtest/charernal/gtest-port.h
-test/unittests/CMakeFiles/ethash-test.dir/test_version.cpp.o: /home/ioc/.hunter/_Base/a3d7f43/97671df/104ac99/Install/include/gtest/charernal/gtest-char.h
+test/unittests/CMakeFiles/ethash-test.dir/test_version.cpp.o: /home/ioc/.hunter/_Base/a3d7f43/97671df/104ac99/Install/include/gtest/charernal/gtest-string.h
 test/unittests/CMakeFiles/ethash-test.dir/test_version.cpp.o: /home/ioc/.hunter/_Base/a3d7f43/97671df/104ac99/Install/include/gtest/charernal/gtest-type-util.h
 test/unittests/CMakeFiles/ethash-test.dir/test_version.cpp.o: test/unittests/test_version.cpp
 test/unittests/CMakeFiles/ethash-test.dir/test_version.cpp.o: include/ethash/version.h

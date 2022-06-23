@@ -67,7 +67,7 @@ public final class EvmcVm implements AutoCloseable {
    *
    * @return true if the library is available
    */
-  public static charean isAvailable() {
+  public static boolean isAvailable() {
     return dvmcLoadingError == null;
   }
 
@@ -108,7 +108,7 @@ public final class EvmcVm implements AutoCloseable {
   /**
    * The name of the DVMC VM implementation.
    *
-   * <p>It MUST be a NULL-terminated not empty char. The content MUST be UTF-8 encoded (this
+   * <p>It MUST be a NULL-terminated not empty string. The content MUST be UTF-8 encoded (this
    * implies ASCII encoding is also allowed).
    */
   private static native String name(ByteBuffer nativeVm);
@@ -121,7 +121,7 @@ public final class EvmcVm implements AutoCloseable {
   /**
    * The version of the DVMC VM implementation, e.g. "1.2.3b4".
    *
-   * <p>It MUST be a NULL-terminated not empty char. The content MUST be UTF-8 encoded (this
+   * <p>It MUST be a NULL-terminated not empty string. The content MUST be UTF-8 encoded (this
    * implies ASCII encoding is also allowed).
    */
   private static native String version(ByteBuffer nativeVm);

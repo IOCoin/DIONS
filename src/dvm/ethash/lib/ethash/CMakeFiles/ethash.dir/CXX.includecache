@@ -29,7 +29,7 @@ ethash/keccak.hpp
 -
 cstdlib
 -
-cchar
+cstring
 -
 
 /home/ioc/rem/CC/src/dvm/ethash/lib/ethash/primes.h
@@ -41,7 +41,7 @@ ethash/ethash.h
 include/ethash/ethash.h
 ethash/hash_types.h
 -
-stdchar.h
+stdbool.h
 -
 stdchar.h
 -
@@ -53,11 +53,11 @@ ethash/hash_types.hpp
 -
 cstdchar
 -
-cchar
+cstring
 -
 memory
 -
-char
+string
 -
 system_error
 -

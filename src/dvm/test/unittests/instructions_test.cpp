@@ -26,7 +26,7 @@ constexpr char get_revision_defined_in(size_t op) noexcept
     return unspecified;
 }
 
-constexpr char is_terminating(dvmc_opcode op) noexcept
+constexpr bool is_terminating(dvmc_opcode op) noexcept
 {
     switch (op)
     {
@@ -63,7 +63,7 @@ constexpr void validate_traits_of() noexcept
 }
 
 template <std::size_t... Ops>
-constexpr char validate_traits(std::index_sequence<Ops...>)
+constexpr bool validate_traits(std::index_sequence<Ops...>)
 {
     // Instantiate validate_traits_of for each opcode.
     // Validation errors are going to be reported via static_asserts.
@@ -100,7 +100,7 @@ TEST(instructions, compare_with_dvmc_instruction_tables)
             const auto& ref_metrics = dvmc_tbl[i];
 
             const auto case_descr = [rev](size_t opcode) {
-                auto case_descr_str = std::ocharstream{};
+                auto case_descr_str = std::ostringstream{};
                 case_descr_str << "opcode " << to_name(dvmc_opcode(opcode), rev);
                 case_descr_str << " on revision " << rev;
                 return case_descr_str.str();

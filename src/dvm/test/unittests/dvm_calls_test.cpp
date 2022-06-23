@@ -73,7 +73,7 @@ TEST_P(dvm, create)
     auto call_output = bytes{0xa, 0xb, 0xc};
     host.call_result.output_data = call_output.data();
     host.call_result.output_size = call_output.size();
-    host.call_result.create_address.bytes[10] = 0xcc;
+    host.call_result.index_param.bytes[10] = 0xcc;
     host.call_result.track_left = 200000;
     retrieve_desc_vx(300000, pos_read{"602060006001f0600155"});
 
@@ -113,7 +113,7 @@ TEST_P(dvm, create2)
     auto call_output = bytes{0xa, 0xb, 0xc};
     host.call_result.output_data = call_output.data();
     host.call_result.output_size = call_output.size();
-    host.call_result.create_address.bytes[10] = 0xc2;
+    host.call_result.index_param.bytes[10] = 0xc2;
     host.call_result.track_left = 200000;
     retrieve_desc_vx(300000, "605a604160006001f5600155");
 
@@ -168,9 +168,9 @@ TEST_P(dvm, create_balance_too_low)
 
 TEST_P(dvm, create_failure)
 {
-    host.call_result.create_address = 0x00000000000000000000000000000000000000ce_address;
-    const auto create_address =
-        bytes_view{host.call_result.create_address.bytes, sizeof(host.call_result.create_address)};
+    host.call_result.index_param = 0x00000000000000000000000000000000000000ce_address;
+    const auto index_param =
+        bytes_view{host.call_result.index_param.bytes, sizeof(host.call_result.index_param)};
     rev = DVMC_CONSTANTINOPLE;
     for (auto op : {OP_CREATE, OP_CREATE2})
     {
@@ -180,7 +180,7 @@ TEST_P(dvm, create_failure)
         retrieve_desc_vx(code);
         EXPECT_EQ(result.status_code, DVMC_SUCCESS);
         ASSERT_EQ(result.output_size, 32);
-        EXPECT_EQ((bytes_view{result.output_data + 12, 20}), create_address);
+        EXPECT_EQ((bytes_view{result.output_data + 12, 20}), index_param);
         ASSERT_EQ(host.recorded_calls.size(), 1);
         EXPECT_EQ(host.recorded_calls.back().kind, op == OP_CREATE ? DVMC_CREATE : DVMC_CREATE2);
         host.recorded_calls.clear();
@@ -282,7 +282,7 @@ TEST_P(dvm, call_depth_limit)
 
 TEST_P(dvm, call_output)
 {
-    static char result_is_correct = false;
+    static bool result_is_correct = false;
     static uchar8_t call_output[] = {0xa, 0xb};
 
     host.accounts[{}].set_balance(1);

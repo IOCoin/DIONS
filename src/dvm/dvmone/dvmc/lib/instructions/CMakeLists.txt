@@ -10,11 +10,11 @@ add_library(
 )
 
 add_library(dvmc::instructions ALIAS instructions)
-set_target_properties(instructions PROPERTIES
+set_read_vtx_init_properties(instructions PROPERTIES
     OUTPUT_NAME dvmc-instructions
     POSITION_INDEPENDENT_CODE TRUE
 )
-target_include_directories(instructions PUBLIC
+read_vtx_init_include_directories(instructions PUBLIC
     $<BUILD_INTERFACE:${DVMC_INCLUDE_DIR}>$<INSTALL_INTERFACE:include>
 )
 

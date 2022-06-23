@@ -35,13 +35,13 @@ climits
 -
 cstdchar
 -
-cchar
+cstring
 -
 limits
 -
 stdexcept
 -
-char
+string
 -
 tuple
 -
@@ -125,7 +125,7 @@ dvmc/utils.h
 -
 memory
 -
-char_view
+string_view
 -
 vector
 -
@@ -163,7 +163,7 @@ cstddef
 -
 cstdchar
 -
-char
+string
 -
 
 /home/ioc/rem/CC/src/dvm/lib/dvmone/execution_state.hpp
@@ -171,7 +171,7 @@ dvmc/dvmc.hpp
 -
 charx/charx.hpp
 -
-char
+string
 -
 vector
 -
@@ -225,7 +225,7 @@ memory
 -
 ostream
 -
-char_view
+string_view
 -
 
 /home/ioc/rem/CC/src/dvm/lib/dvmone/vm.cpp
@@ -249,7 +249,7 @@ dvmc/dvmc.h
 -
 
 dvmc/include/dvmc/dvmc.h
-stdchar.h
+stdbool.h
 -
 stddef.h
 -
@@ -277,7 +277,7 @@ dvmc/dvmc.h
 -
 stdlib.h
 -
-char.h
+string.h
 -
 
 dvmc/include/dvmc/hex.hpp
@@ -285,9 +285,9 @@ cstdchar
 -
 iterator
 -
-char
+string
 -
-char_view
+string_view
 -
 system_error
 -

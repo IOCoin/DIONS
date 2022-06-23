@@ -122,7 +122,7 @@ Value downloadDecryptEPID(const Array& params, bool fHelp);
 
 extern unsigned int LR_SHIFT__[LR_R];
 
-bool collisionReference(string& s, uint256& wtxInHash);
+bool collisionReference(string& s, uint256& wtxInHash,string&);
 bool searchPathEncrypted2(string l, uint256& wtxInHash);
 bool getImportedPubKey(string senderAddress, string recipientAddress, vchType& recipientPubKeyVch, vchType& aesKeyBase64EncryptedVch, bool& thresholdCount);
 bool getImportedPubKey(string senderAddress, string recipientAddress, vchType& recipientPubKeyVch, vchType& aesKeyBase64EncryptedVch);
@@ -201,6 +201,115 @@ bool channelPredicate(string ext, string& tor)
 
     return true;
 }
+Value getVertex(const Array& params, bool fHelp)
+{
+    Array oRes;
+    LocatorNodeDB ln1Db("r");
+
+    Dbc* cursorp;
+    try
+    {
+        cursorp = ln1Db.GetCursor();
+
+        Dbt key, data;
+        int ret;
+
+        while ((ret = cursorp->get(&key, &data, DB_NEXT)) == 0)
+        {
+            CDataStream ssKey(SER_DISK, CLIENT_VERSION);
+            ssKey.write((char*)key.get_data(), key.get_size());
+
+            string k1;
+            ssKey >> k1;
+            if(k1 == "alias_")
+            {
+                Object o;
+                vchType k2;
+                ssKey >> k2;
+                string a = stringFromVch(k2);
+                o.push_back(Pair("alias", a));
+
+                vector<PathIndex> vtxPos;
+                CDataStream ssValue((char*)data.get_data(), (char*)data.get_data() + data.get_size(), SER_DISK, CLIENT_VERSION);
+                ssValue >> vtxPos;
+
+                PathIndex i = vtxPos.back();
+                string i_address = i.vAddress;
+                o.push_back(Pair("address", i_address));
+                string val = stringFromVch(i.vValue);
+                o.push_back(Pair("data", val));
+                o.push_back(Pair("h", (int)i.nHeight));
+                oRes.push_back(o);
+            }
+        }
+        if (ret != DB_NOTFOUND)
+        {
+            // ret should be DB_NOTFOUND upon exiting the loop.
+            // Dbc::get() will by default throw an exception if any
+            // significant errors occur, so by default this if block
+            // can never be reached.
+        }
+    }
+    catch(DbException &e)
+    {
+        //ln1Db.err(e.get_errno(), "Error!");
+    }
+    catch(std::exception &e)
+    {
+        //ln1Db.errx("Error! %s", e.what());
+    }
+
+    if (cursorp != NULL)
+        cursorp->close();
+
+    printf("XXXX xsc scanning for current dions\n");
+    LocatorNodeDB l("cr+");
+    CTxDB txdb("r");
+
+    CBlockIndex* p = pindexGenesisBlock;
+    for(; p; p=p->pnext)
+    {
+        if(p->nHeight < 1625000)
+            continue;
+
+        CBlock block;
+        CDiskTxPos txPos;
+        block.ReadFromDisk(p);
+        uint256 h;
+
+        BOOST_FOREACH(CTransaction& tx, block.vtx)
+        {
+            if (tx.nVersion != CTransaction::DION_TX_VERSION)
+                continue;
+
+            vector<vector<unsigned char> > vvchArgs;
+            int op, nOut;
+
+            aliasTx(tx, op, nOut, vvchArgs);
+            if (op != OP_ALIAS_SET)
+                continue;
+
+            const vector<unsigned char>& v = vvchArgs[0];
+            string a = stringFromVch(v);
+
+            if (!GetTransaction(tx.GetHash(), tx, h))
+                continue;
+
+            printf("XXXX ALIAS  %s\n", a.c_str());
+            const CTxOut& txout = tx.vout[nOut];
+            const CScript& scriptPubKey = aliasStrip(txout.scriptPubKey);
+            string s = scriptPubKey.GetBitcoinAddress();
+            printf("XXXX ADDRESS %s\n", s.c_str());
+            printf("XXXX HEIGHT %d\n", p->nHeight);
+            printf("XXXX TX     %s\n", tx.GetHash().ToString().c_str());
+            CTxIndex txI;
+            if(!txdb.ReadTxIndex(tx.GetHash(), txI))
+                continue;
+        }
+    }
+
+    return oRes;
+}
 Value gw1(const Array& params, bool fHelp)
 {
     Array oRes;
@@ -216,7 +325,6 @@ Value gw1(const Array& params, bool fHelp)
 
         while ((ret = cursorp->get(&key, &data, DB_NEXT)) == 0)
         {
-            printf("  key \n");
             CDataStream ssKey(SER_DISK, CLIENT_VERSION);
             ssKey.write((char*)key.get_data(), key.get_size());
 
@@ -225,11 +333,9 @@ Value gw1(const Array& params, bool fHelp)
             if(k1 == "alias_")
             {
                 Object o;
-                printf("  k1 %s\n", k1.c_str());
                 vchType k2;
                 ssKey >> k2;
                 string a = stringFromVch(k2);
-                printf("  k2 %s\n", a.c_str());
                 o.push_back(Pair("alias", a));
 
                 vector<PathIndex> vtxPos;
@@ -307,8 +413,6 @@ Value gw1(const Array& params, bool fHelp)
             if(!txdb.ReadTxIndex(tx.GetHash(), txI))
                 continue;
 
-            //printf("XXXX read txI\n");
-            //linkSet(vvchArgs, p, txI.pos, s, l);
         }
     }
 
@@ -626,9 +730,6 @@ string txRelay_no_commit(const CScript& scriptPubKey, int64_t nValue, const __wx
             strError = _("Error: Transaction creation failed  ");
         return strError;
     }
-
-    //if(!pwalletMain->CommitTransaction(wtxNew, reservekey))
-    //    return _("Error: The transaction was rejected.  This might happen if some of the coins in your wallet were already spent, such as if you used a copy of wallet.dat and coins were spent in the copy but not marked as spent here.");
 
     return "";
 }
@@ -1890,11 +1991,6 @@ Value nodeRetrieve(const Array& params, bool fHelp)
     }
     LEAVE_CRITICAL_SECTION(cs_main)
 
-
-    //Array oRes;
-    //BOOST_FOREACH(const PAIRTYPE(vector<unsigned char>, Object)& item, aliasMapVchObj)
-    //    oRes.push_back(item.second);
-
     return oRes;
 }
 
@@ -2052,7 +2148,7 @@ Value getNodeRecord(const Array& params, bool fHelp)
     return oRes;
 }
 
-bool collisionReference(const string& descriptor_alias, uint256& wtxInHash)
+bool collisionReference(const string& descriptor_alias, uint256& wtxInHash, string& val)
 {
 
     bool found=false;
@@ -2099,6 +2195,7 @@ bool collisionReference(const string& descriptor_alias, uint256& wtxInHash)
                 if(alias == descriptor_alias)
                 {
                     found = true;
+		    val = stringFromVch(vchValue);
                     wtxInHash=tx.GetHash();
                     break;
                 }
@@ -2446,7 +2543,7 @@ Value aliasList__(const Array& params, bool fHelp)
 
     return oRes;
 }
-Value lookupStoragePath(const Array& params, bool fHelp)
+Value lookupImageTracePath(const Array& params, bool fHelp)
 {
     if(fHelp || params.size() > 1)
         throw runtime_error(
@@ -2455,7 +2552,8 @@ Value lookupStoragePath(const Array& params, bool fHelp)
 
     uint256 wtx__;
     const string storagePath = "NOT FOUND";
-    collisionReference(storagePath, wtx__);
+    string val;
+    collisionReference(storagePath, wtx__,val);
 
     Array oRes;
     oRes.push_back(storagePath);
@@ -3080,8 +3178,6 @@ Value vEPID(const Array& params, bool fHelp)
             "vEPID [<node opt>]\n"
         );
 
-
-    //VX series
     vchType vchNodeLocator;
     string k =(params[0]).get_str();
     cba k1(k);
@@ -3955,21 +4051,7 @@ bool decrypt_ra(const string& alias, const string& address, __wx__Tx& ra_tx, __w
         throw JSONRPCError(RPC_WALLET_ERROR, "no random key available for address");
 
 
-    //__wx__Tx wtx;
     decrypt_ra_tx.nVersion = CTransaction::DION_TX_VERSION;
-
-    //ENTER_CRITICAL_SECTION(cs_main)
-    //{
-    //  if(mapState.count(vchPath) && mapState[vchPath].size())
-    // {
-    //    error("decryptPath() : there are %lu pending operations on that alias, including %s",
-    //           mapState[vchPath].size(),
-    //          mapState[vchPath].begin()->GetHex().c_str());
-    // LEAVE_CRITICAL_SECTION(cs_main)
-    //        throw runtime_error("there are pending operations on that alias");
-    //   }
-    //}
-    //LEAVE_CRITICAL_SECTION(cs_main)
 
     {
         LocatorNodeDB aliasCacheDB("r");
@@ -3986,35 +4068,9 @@ bool decrypt_ra(const string& alias, const string& address, __wx__Tx& ra_tx, __w
     ENTER_CRITICAL_SECTION(cs_main)
     {
         EnsureWalletIsUnlocked();
-
-        //   uint256 wtxInHash;
-        //if(!searchPathEncrypted2(stringFromsch(vchPath), wtxInHash))
-        //{
-        //LEAVE_CRITICAL_SECTION(cs_main)
-        //     throw runtime_error("could not find a coin with this alias, try specifying the registerPath transaction id");
-        //  }
-
-//        if(!pwalletMain->mapWallet.count(wtxInHash))
-//       {
-        //  LEAVE_CRITICAL_SECTION(cs_main)
-        //         throw runtime_error("previous transaction is not in the wallet");
-        //    }
-
         CScript scriptPubKeyOrig;
         scriptPubKeyOrig.SetBitcoinAddress(addressOfOwner);
-
         CScript scriptPubKey;
-
-
-        //  __wx__Tx& wtxIn = pwalletMain->mapWallet[wtxInHash];
-        //   const int nHeight = wtxIn.GetHeightInMainChain();
-        //  const int ex = nHeight + scaleMonitor() - pindexBest->nHeight;
-        // if(ex <= 0)
-        //   {
-        //    LEAVE_CRITICAL_SECTION(cs_main)
-        //   throw runtime_error("this encrypted alias is expired. You must create a new one of that name to decrypt it.");
-        // }
-
         vector<unsigned char> vchPrevSig;
         bool found = false;
         BOOST_FOREACH(CTxOut& out, ra_tx.vout)
@@ -5377,7 +5433,6 @@ __wx__Tx createRelayDescriptor(const string& origin)
                 throw runtime_error("this coin is not in your wallet");
             }
 
-            //if(params.size() == 2)
             {
                 string strAddress = "";
                 aliasAddress(tx, strAddress);
@@ -5405,6 +5460,114 @@ __wx__Tx createRelayDescriptor(const string& origin)
     }
     LEAVE_CRITICAL_SECTION(cs_main)
     return wtx;
+}
+bool vertex_serial_n(const string& origin, const string& data, __wx__Tx& serial_n)
+{
+    string locatorStr = "vertex_" + origin;
+    string indexStr = data;
+
+    if(isOnlyWhiteSpace(locatorStr))
+    {
+        string err = "Attempt to register alias consisting only of white space";
+
+        throw JSONRPCError(RPC_WALLET_ERROR, err);
+    }
+    else if(locatorStr.size() > 255)
+    {
+        string err = "Attempt to register alias more than 255 chars";
+
+        throw JSONRPCError(RPC_WALLET_ERROR, err);
+    }
+
+    uint256 wtxInHash__;
+
+    vector<Value> res;
+    LocatorNodeDB aliasCacheDB("r");
+    CTransaction tx;
+    if(aliasTx(aliasCacheDB, vchFromString(locatorStr), tx))
+    {
+        string err = "Attempt to register alias : " + locatorStr + ", this alias is already active with tx " + tx.GetHash().GetHex();
+
+        throw JSONRPCError(RPC_WALLET_ERROR, err);
+    }
+
+    CPubKey vchPubKey;
+    CReserveKey reservekey(pwalletMain);
+    if(!reservekey.GetReservedKey(vchPubKey))
+    {
+        return false;
+    }
+
+    reservekey.KeepKey();
+
+    cba keyAddress(vchPubKey.GetID());
+    CKeyID keyID;
+    keyAddress.GetKeyID(keyID);
+    pwalletMain->SetAddressBookName(keyID, "");
+
+    __wx__DB walletdb(pwalletMain->strWalletFile, "r+");
+
+    CKey key;
+    if(!pwalletMain->GetKey(keyID, key))
+        throw JSONRPCError(RPC_WALLET_ERROR, "Private key not available");
+
+    serial_n.nVersion = CTransaction::DION_TX_VERSION;
+
+    CScript scriptPubKeyOrig;
+    scriptPubKeyOrig.SetBitcoinAddress(vchPubKey.Raw());
+    CScript scriptPubKey;
+    vchType vchPath = vchFromString(locatorStr);
+    vchType vchValue = vchFromString(indexStr);
+
+    scriptPubKey << OP_BASE_SET << vchPath << vchValue << OP_2DROP << OP_DROP;
+    scriptPubKey += scriptPubKeyOrig;
+
+    ENTER_CRITICAL_SECTION(cs_main)
+    {
+        EnsureWalletIsUnlocked();
+
+        string strError = pwalletMain->SendMoney__(scriptPubKey, CTRL__, serial_n, false);
+
+        if(strError != "")
+        {
+            LEAVE_CRITICAL_SECTION(cs_main)
+            throw JSONRPCError(RPC_WALLET_ERROR, strError);
+        }
+        mapLocator[vchPath] = serial_n.GetHash();
+    }
+    LEAVE_CRITICAL_SECTION(cs_main)
+
+    return true;
+}
+Value registerVertex(const Array& params, bool fHelp)
+{
+    if(fHelp || params.size() != 2)
+        throw runtime_error(
+            "registerPathGenerate <alias> <ref>"
+            + HelpRequiringPassphrase());
+
+    string locatorStr = params[0].get_str();
+    string refStr = params[1].get_str();
+
+    locatorStr = stripSpacesAndQuotes(locatorStr);
+
+    if(isOnlyWhiteSpace(locatorStr))
+    {
+        string err = "Attempt to register alias consisting only of white space";
+
+        throw JSONRPCError(RPC_WALLET_ERROR, err);
+    }
+    else if(locatorStr.size() > 255)
+    {
+        string err = "Attempt to register alias more than 255 chars";
+
+        throw JSONRPCError(RPC_WALLET_ERROR, err);
+    }
+    __wx__Tx vertex;
+    vertex_serial_n(locatorStr, refStr, vertex);
+    vector<Value> res;
+    res.push_back(vertex.GetHash().GetHex());
+    return res;
 }
 
 bool validate_serial_n(const string& origin, const string& data, __wx__Tx& serial_n)
@@ -5559,8 +5722,6 @@ bool generate_ra_plain(const string& origin, __wx__Tx& ra)
     string encrypted;
     EncryptMessage(pub_k, locatorStr, encrypted);
 
-    //__wx__Tx wtx;
-    //wtx.nVersion = CTransaction::DION_TX_VERSION;
     ra.nVersion = CTransaction::DION_TX_VERSION;
 
     CScript scriptPubKeyOrig;
@@ -5688,8 +5849,6 @@ bool generate_ra_tested_encrypted(const string& origin, __wx__Tx& ra)
     string encrypted;
     EncryptMessage(pub_k, locatorStr, encrypted);
 
-    //__wx__Tx wtx;
-    //wtx.nVersion = CTransaction::DION_TX_VERSION;
     ra.nVersion = CTransaction::DION_TX_VERSION;
 
     CScript scriptPubKeyOrig;
@@ -5787,7 +5946,6 @@ __wx__Tx generateUpdate(const string& origin)
                 throw runtime_error("this coin is not in your wallet");
             }
 
-            //if(params.size() == 2)
             {
                 string strAddress = "";
                 aliasAddress(tx, strAddress);
@@ -6642,7 +6800,6 @@ bool read_serial_n(const string& origin, const string& data, __wx__Tx& serial_n)
                 throw runtime_error("this coin is not in your wallet");
             }
 
-            //if(params.size() == 2)
             {
                 string strAddress = "";
                 aliasAddress(tx, strAddress);
@@ -7152,25 +7309,18 @@ bool aliasScript(const CScript& script, int& op, vector<vector<unsigned char> > 
 }
 bool aliasScript(const CScript& script, int& op, vector<vector<unsigned char> > &vvch, CScript::const_iterator& pc)
 {
-    printf("aliasScript 1\n");
     opcodetype opcode;
     if(!script.GetOp(pc, opcode))
     {
-        printf("aliasScript 1 1\n");
         return false;
     }
     if(opcode < OP_1 || opcode > OP_16)
     {
-        printf("aliasScript 1 2\n");
-        if(opcode == OP_BASE_SET)
-            printf("aliasScript 1 3\n");
-
         return false;
     }
 
     op = opcode - OP_1 + 1;
 
-    printf("aliasScript 2\n");
     for(;;) {
         vector<unsigned char> vch;
         if(!script.GetOp(pc, opcode, vch))
@@ -7179,13 +7329,11 @@ bool aliasScript(const CScript& script, int& op, vector<vector<unsigned char> > 
             break;
         if(!(opcode >= 0 && opcode <= OP_PUSHDATA4))
         {
-            printf("aliasScript 2 2\n");
             return false;
         }
         vvch.push_back(vch);
     }
 
-    printf("aliasScript 3\n");
     while(opcode == OP_DROP || opcode == OP_2DROP || opcode == OP_NOP)
     {
         if(!script.GetOp(pc, opcode))
@@ -7194,7 +7342,6 @@ bool aliasScript(const CScript& script, int& op, vector<vector<unsigned char> > 
 
     pc--;
 
-    printf("aliasScript 4\n");
     if((op == OP_ALIAS_ENCRYPTED && vvch.size() == 8) ||
             (op == OP_ALIAS_SET && vvch.size() == 5) ||
             (op == OP_MESSAGE) ||
@@ -7206,7 +7353,6 @@ bool aliasScript(const CScript& script, int& op, vector<vector<unsigned char> > 
             (op == OP_VERTEX) ||
             (op == OP_ALIAS_RELAY && vvch.size() == 2))
     {
-        printf("aliasScript 5\n");
         return true;
     }
     return error("invalid number of arguments for alias op");
@@ -7241,7 +7387,6 @@ bool DecodeMessageTx(const CTransaction& tx, int& op, int& nOut, vector<vector<u
 }
 bool aliasTx(const CTransaction& tx, int& op, int& nOut, vector<vector<unsigned char> >& vvch )
 {
-    printf("aliasTx 1\n");
     bool found = false;
     for(unsigned int i = 0; i < tx.vout.size(); i++)
     {
@@ -7249,23 +7394,19 @@ bool aliasTx(const CTransaction& tx, int& op, int& nOut, vector<vector<unsigned 
 
         vector<vector<unsigned char> > vvchRead;
 
-        printf("aliasTx 2\n");
         if(aliasScript(out.scriptPubKey, op, vvchRead))
         {
             if(found)
             {
                 vvch.clear();
-                printf("aliasTx 3\n");
                 return false;
             }
             nOut = i;
             found = true;
             vvch = vvchRead;
-            printf("aliasTx 4\n");
         }
     }
 
-    printf("aliasTx 5\n");
     if(!found)
         vvch.clear();
 
@@ -7282,7 +7423,6 @@ bool aliasTxValue(const CTransaction& tx, vector<unsigned char>& value)
     if(!aliasTx(tx, op, nOut, vvch))
         return false;
 
-    printf("aliasTxVal 1\n");
     switch(op)
     {
     case OP_ALIAS_ENCRYPTED:
@@ -7520,7 +7660,6 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
                   CBlockIndex* pindexBlock, CDiskTxPos& txPos,
                   bool fBlock, bool fMiner)
 {
-    printf("conectinputspost 1\n");
     if(!(tx.nVersion == CTransaction::DION_TX_VERSION || tx.nVersion == CTransaction::CYCLE_TX_VERSION))
     {
         bool found= false;
@@ -7536,7 +7675,7 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
         }
 
         if(found)
-            printf("encountered non-dions transaction with a dions input");
+          return error("ConnectInputsPost() : detected non-dions with dions script");
 
         return true;
     }
@@ -7544,18 +7683,14 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
     int nInput;
     bool found = false;
 
-    printf("conectinputspost 2\n");
     int prevOp;
     std::vector<vchType> vvchPrevArgs;
-    printf("CIP tx %s\n",
-           tx.GetHash().GetHex().c_str());
 
     for(int i = 0; i < tx.vin.size(); i++)
     {
         const CTxOut& out = vTxPrev[i].vout[tx.vin[i].prevout.n];
         std::vector<vchType> vvchPrevArgsRead;
 
-        printf("conectinputspost 3\n");
         if(aliasScript(out.scriptPubKey, prevOp, vvchPrevArgsRead))
         {
             if(found)
@@ -7572,11 +7707,9 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
     int op;
     int nOut;
 
-    printf("conectinputspost 4\n");
     if(!aliasTx(tx, op, nOut, vvchArgs))
         return error("ConnectInputsPost() : could not decode a dions tx");
 
-    printf("conectinputspost 5\n");
     CScript s1 = tx.vout[nOut].scriptPubKey;
     const CScript& s1_ = aliasStrip(s1);
     string a1 = s1_.GetBitcoinAddress();
@@ -7586,7 +7719,6 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
     if(vvchArgs[0].size() > MAX_LOCATOR_LENGTH)
         return error("alias transaction with alias too long");
 
-    printf("conectinputspost 6\n");
     switch(op)
     {
     case OP_PUBLIC_KEY:
@@ -7867,7 +7999,7 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
             return error("expired alias, or there is a pending transaction on the alias");
         break;
     case OP_BASE_RELAY:
-        if(!found ||(prevOp != OP_BASE_SET && prevOp != OP_BASE_RELAY))
+        if(!found || !(prevOp == OP_BASE_SET || prevOp == OP_BASE_RELAY))
             return error("updatePath tx without previous update tx");
 
         if(vvchArgs[1].size() > MAX_XUNIT_LENGTH)
@@ -7883,15 +8015,8 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
             return error("expired alias, or there is a pending transaction on the alias");
         break;
     case OP_BASE_SET:
-        printf("conectinputspost 7\n");
         if(vvchArgs[1].size() > MAX_XUNIT_LENGTH)
             return error("createDataNode tx with value too long");
-        //CScript script;
-        //if(vvchPrevArgs.size() != 0)
-        //  script.SetBitcoinAddress(stringFromVch(vvchPrevArgs[2]));
-        //else
-        //  script.SetBitcoinAddress(stringFromVch(vvchArgs[2]));
-
         break;
     default:
         return error("alias transaction has unknown op");
@@ -7905,15 +8030,6 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
         if(!aliasTxPos(vtxPos, vTxindex[nInput].pos))
             return error("ConnectInputsPost() : tx %s rejected, since previous tx(%s) is not in the alias DB\n", tx.GetHash().ToString().c_str(), vTxPrev[nInput].GetHash().ToString().c_str());
     }
-    //if(!fBlock && op == OP_BASE_SET)
-    //{
-    //printf("conectinputspost 8\n");
-    //    vector<PathIndex> vtxPos;
-    //    if(ln1Db.lKey(vvchArgs[0])
-    //        && !ln1Db.lGet(vvchArgs[0], vtxPos))
-    //      return error("ConnectInputsPost() : failed to read from alias DB");
-    //printf("conectinputspost 9\n");
-    //}
     if(fBlock)
     {
         if(op == OP_ALIAS_SET || op == OP_ALIAS_RELAY || op == OP_BASE_SET || op == OP_BASE_RELAY)
@@ -7945,7 +8061,6 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
         }
     }
 
-    printf("conectinputspost 10\n");
     return true;
 }
 

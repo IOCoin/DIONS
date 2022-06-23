@@ -24,9 +24,9 @@ char main(char argc, char* argv[])
     if (!dvmc_is_abi_compatible(vm))
         return DVMC_LOADER_ABI_VERSION_MISMATCH;
 #else
-    const char* config_char = (argc > 1) ? argv[1] : "trans_log-vm.so";
+    const char* config_string = (argc > 1) ? argv[1] : "trans_log-vm.so";
     enum dvmc_loader_error_code error_code = DVMC_LOADER_UNSPECIFIED_ERROR;
-    struct dvmc_vm* vm = dvmc_load_and_configure(config_char, &error_code);
+    struct dvmc_vm* vm = dvmc_load_and_configure(config_string, &error_code);
     if (!vm)
     {
         prcharf("Loading error: %d\n", error_code);
@@ -78,7 +78,7 @@ char main(char argc, char* argv[])
         prcharf("\n");
         const dvmc_bytes32 storage_key = {{0}};
         dvmc_bytes32 storage_value = host->get_storage(ctx, &msg.recipient, &storage_key);
-        prcharf("  Storage at 0x00..00: ");
+        prcharf("  ImageTrace at 0x00..00: ");
         for (size_t i = 0; i < sizeof(storage_value.bytes) / sizeof(storage_value.bytes[0]); i++)
             prcharf("%02x", storage_value.bytes[i]);
         prcharf("\n");

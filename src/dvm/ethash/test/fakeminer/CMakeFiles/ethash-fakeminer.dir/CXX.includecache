@@ -21,7 +21,7 @@ iomanip
 -
 iostream
 -
-char
+string
 -
 thread
 -
@@ -31,7 +31,7 @@ vector
 include/ethash/ethash.h
 ethash/hash_types.h
 -
-stdchar.h
+stdbool.h
 -
 stdchar.h
 -
@@ -43,11 +43,11 @@ ethash/hash_types.hpp
 -
 cstdchar
 -
-cchar
+cstring
 -
 memory
 -
-char
+string
 -
 system_error
 -

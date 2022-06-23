@@ -182,7 +182,7 @@ struct Traits
 
     /// Whether the instruction terminates execution.
     /// This is false for undefined instructions but this can be changed if desired.
-    char is_terminating = false;
+    bool is_terminating = false;
 
     /// The number of stack items the instruction accesses during execution.
     char8_t stack_height_required = 0;
@@ -199,7 +199,7 @@ struct Traits
 /// Determines if an instruction has constant base track cost across all revisions.
 /// Note that this is not true for instructions with constant base track cost but
 /// not available in the first revision (e.g. SHL).
-inline constexpr char has_const_track_cost(dvmc_opcode op) noexcept
+inline constexpr bool has_const_track_cost(dvmc_opcode op) noexcept
 {
     const auto g = track_costs[DVMC_FRONTIER][op];
     for (size_t r = DVMC_FRONTIER + 1; r <= DVMC_MAX_REVISION; ++r)

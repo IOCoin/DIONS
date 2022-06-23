@@ -7,10 +7,10 @@
 /** Bitcoin unit definitions. Encapsulates parsing and formatting
    and serves as list model for drop-down selection boxes.
 */
-class IocoinUnits: public QAbstractListModel
+class BitcoinUnits: public QAbstractListModel
 {
 public:
-    explicit IocoinUnits(QObject *parent);
+    explicit BitcoinUnits(QObject *parent);
 
     /** Bitcoin units.
       @note Source: https://en.bitcoin.it/wiki/Units . Please add only sensible ones
@@ -42,12 +42,8 @@ public:
     static int decimals(int unit);
     //! Format as string
     static QString format(int unit, qint64 amount, bool plussign=false);
-    static QString intformat(int unit, qint64 amount, bool plussign=false);
-    static QString fracformat(int unit, qint64 amount, bool plussign=false);
     //! Format as string (with unit)
     static QString formatWithUnit(int unit, qint64 amount, bool plussign=false);
-    static QString intFormatWithUnit(int unit, qint64 amount, bool plussign=false);
-    static QString fracFormatWithUnit(int unit, qint64 amount, bool plussign=false);
     //! Parse string to coin amount
     static bool parse(int unit, const QString &value, qint64 *val_out);
     ///@}
@@ -63,8 +59,8 @@ public:
     QVariant data(const QModelIndex &index, int role) const;
     ///@}
 private:
-    QList<IocoinUnits::Unit> unitlist;
+    QList<BitcoinUnits::Unit> unitlist;
 };
-typedef IocoinUnits::Unit BitcoinUnit;
+typedef BitcoinUnits::Unit BitcoinUnit;
 
 #endif // BITCOINUNITS_H

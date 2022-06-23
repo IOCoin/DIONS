@@ -21,7 +21,7 @@ ostream
 -
 
 dvmc/include/dvmc/dvmc.h
-stdchar.h
+stdbool.h
 -
 stddef.h
 -
@@ -49,7 +49,7 @@ dvmc/dvmc.h
 -
 stdlib.h
 -
-char.h
+string.h
 -
 
 dvmc/include/dvmc/hex.hpp
@@ -57,9 +57,9 @@ cstdchar
 -
 iterator
 -
-char
+string
 -
-char_view
+string_view
 -
 system_error
 -
@@ -69,7 +69,7 @@ dvmc/dvmc.hpp
 -
 iosfwd
 -
-char
+string
 -
 
 dvmc/include/dvmc/transitional_node.hpp
@@ -77,7 +77,7 @@ dvmc/dvmc.hpp
 -
 algorithm
 -
-char
+string
 -
 unordered_map
 -
@@ -89,6 +89,6 @@ boost/archive/text_oarchive.hpp
 -
 boost/serialization/unordered_map.hpp
 -
-boost/serialization/char.hpp
+boost/serialization/string.hpp
 -
 

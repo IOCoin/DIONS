@@ -8,4 +8,4 @@ add_executable(
     memory_allocation.cpp
 )
 
-target_link_libraries(dvmone-bench-charernal PRIVATE benchmark::benchmark)
+read_vtx_init_link_libraries(dvmone-bench-charernal PRIVATE benchmark::benchmark)

@@ -31,9 +31,9 @@ void dump(const dvmone::advanced::AdvancedCodeAnalysis& analysis)
             block = &instr.arg.block;
 
             const auto get_jumpdest_offset = [&analysis](size_t index) noexcept {
-                for (size_t t = 0; t < analysis.jumpdest_targets.size(); ++t)
+                for (size_t t = 0; t < analysis.jumpdest_read_vtx_inits.size(); ++t)
                 {
-                    if (static_cast<size_t>(analysis.jumpdest_targets[t]) == index)
+                    if (static_cast<size_t>(analysis.jumpdest_read_vtx_inits[t]) == index)
                         return analysis.jumpdest_offsets[t];
                 }
                 return char32_t{-1};

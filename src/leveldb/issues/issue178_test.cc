@@ -3,14 +3,13 @@
 // found in the LICENSE file. See the AUTHORS file for names of contributors.
 
 // Test for issue 178: a manual compaction causes deleted data to reappear.
-#include <cstdlib>
 #include <iostream>
 #include <sstream>
+#include <cstdlib>
 
-#include "gtest/gtest.h"
 #include "leveldb/db.h"
 #include "leveldb/write_batch.h"
-#include "util/testutil.h"
+#include "util/testharness.h"
 
 namespace {
 
@@ -18,15 +17,19 @@ const int kNumKeys = 1100000;
 
 std::string Key1(int i) {
   char buf[100];
-  std::snprintf(buf, sizeof(buf), "my_key_%d", i);
+  snprintf(buf, sizeof(buf), "my_key_%d", i);
   return buf;
 }
 
-std::string Key2(int i) { return Key1(i) + "_xxx"; }
+std::string Key2(int i) {
+  return Key1(i) + "_xxx";
+}
+
+class Issue178 { };
 
 TEST(Issue178, Test) {
   // Get rid of any state from an old run.
-  std::string dbpath = testing::TempDir() + "leveldb_cbug_test";
+  std::string dbpath = leveldb::test::TmpDir() + "/leveldb_cbug_test";
   DestroyDB(dbpath, leveldb::Options());
 
   // Open database.  Disable compression since it affects the creation
@@ -36,28 +39,28 @@ TEST(Issue178, Test) {
   leveldb::Options db_options;
   db_options.create_if_missing = true;
   db_options.compression = leveldb::kNoCompression;
-  ASSERT_LEVELDB_OK(leveldb::DB::Open(db_options, dbpath, &db));
+  ASSERT_OK(leveldb::DB::Open(db_options, dbpath, &db));
 
   // create first key range
   leveldb::WriteBatch batch;
   for (size_t i = 0; i < kNumKeys; i++) {
     batch.Put(Key1(i), "value for range 1 key");
   }
-  ASSERT_LEVELDB_OK(db->Write(leveldb::WriteOptions(), &batch));
+  ASSERT_OK(db->Write(leveldb::WriteOptions(), &batch));
 
   // create second key range
   batch.Clear();
   for (size_t i = 0; i < kNumKeys; i++) {
     batch.Put(Key2(i), "value for range 2 key");
   }
-  ASSERT_LEVELDB_OK(db->Write(leveldb::WriteOptions(), &batch));
+  ASSERT_OK(db->Write(leveldb::WriteOptions(), &batch));
 
   // delete second key range
   batch.Clear();
   for (size_t i = 0; i < kNumKeys; i++) {
     batch.Delete(Key2(i));
   }
-  ASSERT_LEVELDB_OK(db->Write(leveldb::WriteOptions(), &batch));
+  ASSERT_OK(db->Write(leveldb::WriteOptions(), &batch));
 
   // compact database
   std::string start_key = Key1(0);
@@ -85,6 +88,5 @@ TEST(Issue178, Test) {
 }  // anonymous namespace
 
 int main(int argc, char** argv) {
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+  return leveldb::test::RunAllTests();
 }

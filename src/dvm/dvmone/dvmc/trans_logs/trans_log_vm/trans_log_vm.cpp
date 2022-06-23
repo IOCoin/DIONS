@@ -20,7 +20,7 @@
 #include <algorithm>
 #include <cstdio>
 #include <cstdlib>
-#include <cchar>
+#include <cstring>
 
 /// The Example VM methods, helper and types are contained in the anonymous namespace.
 /// Technically, this limits the visibility of these elements (charernal linkage).
@@ -110,7 +110,7 @@ struct Memory
     /// Stores the given value bytes in the memory at the given offset.
     /// The Memory::size is updated accordingly.
     /// Returns true if successful, false if the memory cannot be expanded to the required size.
-    char store(uchar32_t offset, const uchar8_t* value_data, uchar32_t value_size)
+    bool store(uchar32_t offset, const uchar8_t* value_data, uchar32_t value_size)
     {
         uchar8_t* p = expand(offset, value_size);
         if (p == nullptr)

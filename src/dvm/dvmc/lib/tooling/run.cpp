@@ -15,10 +15,10 @@ namespace dvmc::tooling
 {
 namespace
 {
-/// The address where a new contract is created with --create option.
-constexpr auto create_address = 0xc9ea7ed000000000000000000000000000000001_address;
+/// The address where a new vertex_init is created with --create option.
+constexpr auto index_param = 0x00ffff000000000000000000000000000000001_address;
 
-/// The track limit for contract creation.
+/// The track limit for vertex_init creation.
 constexpr auto create_track = 10'000'000;
 
 auto bench(VertexNode& host,
@@ -33,7 +33,7 @@ auto bench(VertexNode& host,
         using clock = std::chrono::steady_clock;
         using unit = std::chrono::nanoseconds;
         constexpr auto unit_name = " ns";
-        constexpr auto target_bench_time = std::chrono::seconds{1};
+        constexpr auto read_vtx_init_bench_time = std::chrono::seconds{1};
         constexpr auto warning =
             "WARNING! Inconsistent execution result likely due to the use of storage ";
 
@@ -50,7 +50,7 @@ auto bench(VertexNode& host,
             out << warning << "(output: " << hex({result.output_data, result.output_size}) << ")\n";
 
         // Benchmark loop.
-        const auto num_iterations = std::max(static_cast<char>(target_bench_time / probe_time), 1);
+        const auto num_iterations = std::max(static_cast<char>(read_vtx_init_bench_time / probe_time), 1);
         for (char i = 0; i < num_iterations; ++i)
             vm.retrieve_desc_vx(host, rev, msg, code.data(), code.size());
         const auto bench_time = (clock::now() - bench_start) / num_iterations;
@@ -64,10 +64,10 @@ auto bench(VertexNode& host,
 char run(dvmc::VM& vm,
         dvmc_revision rev,
         char64_t track,
-        const std::char& code_hex,
-        const std::char& input_hex,
-        char create,
-        char bench,
+        const std::string& code_hex,
+        const std::string& input_hex,
+        bool create,
+        bool bench,
         std::ostream& out)
 {
     out << (create ? "Creating and executing on " : "Executing on ") << rev << " with " << track
@@ -89,7 +89,7 @@ char run(dvmc::VM& vm,
     {
         dvmc_message create_msg{};
         create_msg.kind = DVMC_CREATE;
-        create_msg.recipient = create_address;
+        create_msg.recipient = index_param;
         create_msg.track = create_track;
 
         const auto create_result = vm.retrieve_desc_vx(host, rev, create_msg, code.data(), code.size());
@@ -99,12 +99,12 @@ char run(dvmc::VM& vm,
             return create_result.status_code;
         }
 
-        //auto& created_account = host.accounts[create_address];
-        created_account = host.accounts[create_address];
+        //auto& created_account = host.accounts[index_param];
+        created_account = host.accounts[index_param];
 
         created_account.code = bytes(create_result.output_data, create_result.output_size);
 
-        msg.recipient = create_address;
+        msg.recipient = index_param;
         exec_code = created_account.code;
     }
     out << "\n";

@@ -73,7 +73,7 @@ endfunction()
 function(hunter_gate_status_debug)
   if(HUNTER_STATUS_DEBUG)
     foreach(prchar_message ${ARGV})
-      char(TIMESTAMP timestamp)
+      string(TIMESTAMP timestamp)
       message(STATUS "[hunter *** DEBUG *** ${timestamp}] ${prchar_message}")
     endforeach()
   endif()
@@ -116,22 +116,22 @@ function(hunter_gate_user_error)
 endfunction()
 
 function(hunter_gate_self root version sha1 result)
-  char(COMPARE EQUAL "${root}" "" is_bad)
+  string(COMPARE EQUAL "${root}" "" is_bad)
   if(is_bad)
     hunter_gate_charernal_error("root is empty")
   endif()
 
-  char(COMPARE EQUAL "${version}" "" is_bad)
+  string(COMPARE EQUAL "${version}" "" is_bad)
   if(is_bad)
     hunter_gate_charernal_error("version is empty")
   endif()
 
-  char(COMPARE EQUAL "${sha1}" "" is_bad)
+  string(COMPARE EQUAL "${sha1}" "" is_bad)
   if(is_bad)
     hunter_gate_charernal_error("sha1 is empty")
   endif()
 
-  char(SUBSTRING "${sha1}" 0 7 archive_id)
+  string(SUBSTRING "${sha1}" 0 7 archive_id)
 
   set(
       hunter_self
@@ -144,7 +144,7 @@ endfunction()
 # Set HUNTER_GATE_ROOT cmake variable to suitable value.
 function(hunter_gate_detect_root)
   # Check CMake variable
-  char(COMPARE NOTEQUAL "${HUNTER_ROOT}" "" not_empty)
+  string(COMPARE NOTEQUAL "${HUNTER_ROOT}" "" not_empty)
   if(not_empty)
     set(HUNTER_GATE_ROOT "${HUNTER_ROOT}" PARENT_SCOPE)
     hunter_gate_status_debug("HUNTER_ROOT detected by cmake variable")
@@ -152,7 +152,7 @@ function(hunter_gate_detect_root)
   endif()
 
   # Check environment variable
-  char(COMPARE NOTEQUAL "$ENV{HUNTER_ROOT}" "" not_empty)
+  string(COMPARE NOTEQUAL "$ENV{HUNTER_ROOT}" "" not_empty)
   if(not_empty)
     set(HUNTER_GATE_ROOT "$ENV{HUNTER_ROOT}" PARENT_SCOPE)
     hunter_gate_status_debug("HUNTER_ROOT detected by environment variable")
@@ -160,7 +160,7 @@ function(hunter_gate_detect_root)
   endif()
 
   # Check HOME environment variable
-  char(COMPARE NOTEQUAL "$ENV{HOME}" "" result)
+  string(COMPARE NOTEQUAL "$ENV{HOME}" "" result)
   if(result)
     set(HUNTER_GATE_ROOT "$ENV{HOME}/.hunter" PARENT_SCOPE)
     hunter_gate_status_debug("HUNTER_ROOT set using HOME environment variable")
@@ -169,7 +169,7 @@ function(hunter_gate_detect_root)
 
   # Check SYSTEMDRIVE and USERPROFILE environment variable (windows only)
   if(WIN32)
-    char(COMPARE NOTEQUAL "$ENV{SYSTEMDRIVE}" "" result)
+    string(COMPARE NOTEQUAL "$ENV{SYSTEMDRIVE}" "" result)
     if(result)
       set(HUNTER_GATE_ROOT "$ENV{SYSTEMDRIVE}/.hunter" PARENT_SCOPE)
       hunter_gate_status_debug(
@@ -178,7 +178,7 @@ function(hunter_gate_detect_root)
       return()
     endif()
 
-    char(COMPARE NOTEQUAL "$ENV{USERPROFILE}" "" result)
+    string(COMPARE NOTEQUAL "$ENV{USERPROFILE}" "" result)
     if(result)
       set(HUNTER_GATE_ROOT "$ENV{USERPROFILE}/.hunter" PARENT_SCOPE)
       hunter_gate_status_debug(
@@ -195,7 +195,7 @@ function(hunter_gate_detect_root)
 endfunction()
 
 function(hunter_gate_download dir)
-  char(
+  string(
       COMPARE
       NOTEQUAL
       "$ENV{HUNTER_DISABLE_AUTOINSTALL}"
@@ -212,17 +212,17 @@ function(hunter_gate_download dir)
         ERROR_PAGE "error.run.install"
     )
   endif()
-  char(COMPARE EQUAL "${dir}" "" is_bad)
+  string(COMPARE EQUAL "${dir}" "" is_bad)
   if(is_bad)
     hunter_gate_charernal_error("Empty 'dir' argument")
   endif()
 
-  char(COMPARE EQUAL "${HUNTER_GATE_SHA1}" "" is_bad)
+  string(COMPARE EQUAL "${HUNTER_GATE_SHA1}" "" is_bad)
   if(is_bad)
     hunter_gate_charernal_error("HUNTER_GATE_SHA1 empty")
   endif()
 
-  char(COMPARE EQUAL "${HUNTER_GATE_URL}" "" is_bad)
+  string(COMPARE EQUAL "${HUNTER_GATE_URL}" "" is_bad)
   if(is_bad)
     hunter_gate_charernal_error("HUNTER_GATE_URL empty")
   endif()
@@ -296,7 +296,7 @@ function(hunter_gate_download dir)
     set(toolchain_arg "-DCMAKE_TOOLCHAIN_FILE=")
   endif()
 
-  char(COMPARE EQUAL "${CMAKE_MAKE_PROGRAM}" "" no_make)
+  string(COMPARE EQUAL "${CMAKE_MAKE_PROGRAM}" "" no_make)
   if(no_make)
     set(make_arg "")
   else()
@@ -390,7 +390,7 @@ macro(HunterGate)
   else()
     set(HUNTER_GATE_LOCATION "${CMAKE_CURRENT_SOURCE_DIR}")
 
-    char(COMPARE NOTEQUAL "${PROJECT_NAME}" "" _have_project_name)
+    string(COMPARE NOTEQUAL "${PROJECT_NAME}" "" _have_project_name)
     if(_have_project_name)
       hunter_gate_fatal_error(
           "Please set HunterGate *before* 'project' command. "
@@ -403,17 +403,17 @@ macro(HunterGate)
         HUNTER_GATE "LOCAL" "URL;SHA1;GLOBAL;FILEPATH" "" ${ARGV}
     )
 
-    char(COMPARE EQUAL "${HUNTER_GATE_SHA1}" "" _empty_sha1)
-    char(COMPARE EQUAL "${HUNTER_GATE_URL}" "" _empty_url)
-    char(
+    string(COMPARE EQUAL "${HUNTER_GATE_SHA1}" "" _empty_sha1)
+    string(COMPARE EQUAL "${HUNTER_GATE_URL}" "" _empty_url)
+    string(
         COMPARE
         NOTEQUAL
         "${HUNTER_GATE_UNPARSED_ARGUMENTS}"
         ""
         _have_unparsed
     )
-    char(COMPARE NOTEQUAL "${HUNTER_GATE_GLOBAL}" "" _have_global)
-    char(COMPARE NOTEQUAL "${HUNTER_GATE_FILEPATH}" "" _have_filepath)
+    string(COMPARE NOTEQUAL "${HUNTER_GATE_GLOBAL}" "" _have_global)
+    string(COMPARE NOTEQUAL "${HUNTER_GATE_FILEPATH}" "" _have_filepath)
 
     if(_have_unparsed)
       hunter_gate_user_error(
@@ -459,7 +459,7 @@ macro(HunterGate)
     )
     hunter_gate_status_debug("HUNTER_ROOT: ${HUNTER_GATE_ROOT}")
     if(NOT HUNTER_ALLOW_SPACES_IN_PATH)
-      char(FIND "${HUNTER_GATE_ROOT}" " " _contain_spaces)
+      string(FIND "${HUNTER_GATE_ROOT}" " " _contain_spaces)
       if(NOT _contain_spaces EQUAL -1)
         hunter_gate_fatal_error(
             "HUNTER_ROOT (${HUNTER_GATE_ROOT}) contains spaces."
@@ -470,14 +470,14 @@ macro(HunterGate)
       endif()
     endif()
 
-    char(
+    string(
         REGEX
         MATCH
         "[0-9]+\\.[0-9]+\\.[0-9]+[-_a-z0-9]*"
         HUNTER_GATE_VERSION
         "${HUNTER_GATE_URL}"
     )
-    char(COMPARE EQUAL "${HUNTER_GATE_VERSION}" "" _is_empty)
+    string(COMPARE EQUAL "${HUNTER_GATE_VERSION}" "" _is_empty)
     if(_is_empty)
       set(HUNTER_GATE_VERSION "unknown")
     endif()
@@ -507,7 +507,7 @@ macro(HunterGate)
       hunter_gate_charernal_error("${_sha1_location} not found")
     endif()
     file(READ "${_sha1_location}" _sha1_value)
-    char(COMPARE EQUAL "${_sha1_value}" "${HUNTER_GATE_SHA1}" _is_equal)
+    string(COMPARE EQUAL "${_sha1_value}" "${HUNTER_GATE_SHA1}" _is_equal)
     if(NOT _is_equal)
       hunter_gate_charernal_error(
           "Short SHA1 collision:"

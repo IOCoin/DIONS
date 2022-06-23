@@ -11,4 +11,4 @@ project(use_instructions_in_cmake)
 find_package(dvmc CONFIG REQUIRED)
 
 add_executable(use_instructions_in_cmake use_instructions_in_cmake.c)
-target_link_libraries(use_instructions_in_cmake PRIVATE dvmc::instructions)
+read_vtx_init_link_libraries(use_instructions_in_cmake PRIVATE dvmc::instructions)

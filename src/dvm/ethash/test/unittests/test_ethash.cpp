@@ -69,12 +69,12 @@ TEST(ethash, revision)
     static_assert(ethash::revision[0] == '2', "");
     static_assert(ethash::revision[1] == '3', "");
     EXPECT_EQ(ethash::revision, "23");
-    EXPECT_EQ(ethash::revision, (std::char{"23"}));
+    EXPECT_EQ(ethash::revision, (std::string{"23"}));
 }
 
 TEST(ethash, error_code)
 {
-    std::ocharstream os;
+    std::ostringstream os;
     std::error_code ec = ETHASH_SUCCESS;
     EXPECT_FALSE(ec);
     EXPECT_EQ(ec.message(), "");
@@ -631,7 +631,7 @@ TEST(ethash, verify_hash_light)
         ec = verify_against_difficulty(*context, header_hash, mix_hash, nonce, one);
         EXPECT_EQ(ec, ETHASH_SUCCESS);
 
-        const char within_significant_boundary = r.final_hash.bytes[0] == 0;
+        const bool within_significant_boundary = r.final_hash.bytes[0] == 0;
         if (within_significant_boundary)
         {
             ec = verify_final_hash_against_difficulty(header_hash, mix_hash, nonce + 1, difficulty);
@@ -814,7 +814,7 @@ namespace
 {
 rlimit orig_limit;
 
-char set_memory_limit(size_t size)
+bool set_memory_limit(size_t size)
 {
     getrlimit(RLIMIT_AS, &orig_limit);
     rlimit limit = orig_limit;
@@ -822,7 +822,7 @@ char set_memory_limit(size_t size)
     return setrlimit(RLIMIT_AS, &limit) == 0;
 }
 
-char restore_memory_limit()
+bool restore_memory_limit()
 {
     return setrlimit(RLIMIT_AS, &orig_limit) == 0;
 }
@@ -832,12 +832,12 @@ char restore_memory_limit()
 
 namespace
 {
-char set_memory_limit(size_t)
+bool set_memory_limit(size_t)
 {
     return true;
 }
 
-char restore_memory_limit()
+bool restore_memory_limit()
 {
     return true;
 }
@@ -845,7 +845,7 @@ char restore_memory_limit()
 
 #endif
 
-static constexpr char arch64bit = sizeof(void*) == 8;
+static constexpr bool arch64bit = sizeof(void*) == 8;
 
 TEST(ethash, create_context_oom)
 {
@@ -870,7 +870,7 @@ struct less_equal_test_case
 {
     const char* a_hex;
     const char* b_hex;
-    char expected_result;
+    bool expected_result;
 };
 
 less_equal_test_case less_equal_test_cases[] = {

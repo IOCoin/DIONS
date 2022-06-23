@@ -45,10 +45,10 @@ commands:
   build_silkworm:
     parameters:
       branch:
-        type: char
+        type: string
         default: master
       commit:
-        type: char
+        type: string
     steps:
       - run:
           # Fix fixes the cache restore step in case the silkworm dir does not exist
@@ -89,7 +89,7 @@ commands:
           working_directory: ~/silkworm
           command: |
             [ "$SILKWORM_BUILD" = true ] || exit 0
-            cmake --build build --target consensus
+            cmake --build build --read_vtx_init consensus
       - save_cache:
           name: "Save Silkworm cache"
           key: *silkworm-cache-key
@@ -99,7 +99,7 @@ commands:
   download_consensus_tests:
     parameters:
       rev:
-        type: char
+        type: string
     steps:
       - run:
           name: "Download consensus tests: <<parameters.rev>>"
@@ -153,7 +153,7 @@ commands:
           command: cmake --build ~/build
       - run:
           name: "Install"
-          command: cmake --build ~/build --target install
+          command: cmake --build ~/build --read_vtx_init install
 
   test:
     description: "Test"
@@ -182,7 +182,7 @@ commands:
     description: "Upload coverage data"
     parameters:
       flags:
-        type: char
+        type: string
     steps:
       - run:
           name: "Upgrade codecov"
@@ -205,7 +205,7 @@ commands:
       - run:
           name: "Build Package"
           working_directory: ~/package
-          command: cmake --build ~/build --target package && mv ~/build/dvmone*.tar.gz* .
+          command: cmake --build ~/build --read_vtx_init package && mv ~/build/dvmone*.tar.gz* .
       - store_artifacts:
           path: ~/package
           destination: package

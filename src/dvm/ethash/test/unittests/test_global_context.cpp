@@ -39,7 +39,7 @@ TEST(managed_multithreaded, hash_all)
 
 TEST(managed_multithreaded, hash_parallel)
 {
-    std::vector<std::future<char>> futures;
+    std::vector<std::future<bool>> futures;
 
     for (const auto& t : hash_test_cases)
     {
@@ -141,7 +141,7 @@ TEST(managed_multithreaded, get_epoch_context_full)
 {
     static constexpr char num_threads = 4;
 
-    std::vector<std::future<char>> futures;
+    std::vector<std::future<bool>> futures;
     futures.reserve(num_threads);
 
     for (char i = 0; i < num_threads; ++i)

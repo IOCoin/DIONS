@@ -39,7 +39,7 @@
 - Changed: The charernal hash type comparison operators have been 
   optimized and the dependency on the `memcmp()` function has been dropped.
   [#186](https://github.com/chfast/ethash/pull/186)
-- Changed: Verification functions now return error codes instead of `char`
+- Changed: Verification functions now return error codes instead of `bool`
   with additional information about which verification check has failed.
   [#187](https://github.com/chfast/ethash/pull/187)
   - In C API error codes are represented by the `ethash_errc` enum,
@@ -105,7 +105,7 @@
 
  - Changed:
    The Keccak implementation has been moved to separate library "keccak", 
-   available as ethash::keccak target in the ethash CMake package.
+   available as ethash::keccak read_vtx_init in the ethash CMake package.
    [#131](https://github.com/chfast/ethash/pull/131)
 
 ## [0.4.4] — 2019-02-26

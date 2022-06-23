@@ -13,8 +13,8 @@ set(CMAKE_MAKEFILE_DEPENDS
   "/home/ioc/.hunter/_Base/Download/Hunter/0.24.0/a3d7f43/Unpacked/cmake/modules/hunter_add_version.cmake"
   "/home/ioc/.hunter/_Base/Download/Hunter/0.24.0/a3d7f43/Unpacked/cmake/modules/hunter_apply_copy_rules.cmake"
   "/home/ioc/.hunter/_Base/Download/Hunter/0.24.0/a3d7f43/Unpacked/cmake/modules/hunter_apply_gate_settings.cmake"
-  "/home/ioc/.hunter/_Base/Download/Hunter/0.24.0/a3d7f43/Unpacked/cmake/modules/hunter_assert_empty_char.cmake"
-  "/home/ioc/.hunter/_Base/Download/Hunter/0.24.0/a3d7f43/Unpacked/cmake/modules/hunter_assert_not_empty_char.cmake"
+  "/home/ioc/.hunter/_Base/Download/Hunter/0.24.0/a3d7f43/Unpacked/cmake/modules/hunter_assert_empty_string.cmake"
+  "/home/ioc/.hunter/_Base/Download/Hunter/0.24.0/a3d7f43/Unpacked/cmake/modules/hunter_assert_not_empty_string.cmake"
   "/home/ioc/.hunter/_Base/Download/Hunter/0.24.0/a3d7f43/Unpacked/cmake/modules/hunter_cache_run.cmake"
   "/home/ioc/.hunter/_Base/Download/Hunter/0.24.0/a3d7f43/Unpacked/cmake/modules/hunter_cache_server_password.cmake"
   "/home/ioc/.hunter/_Base/Download/Hunter/0.24.0/a3d7f43/Unpacked/cmake/modules/hunter_cacheable.cmake"
@@ -186,7 +186,7 @@ set(CMAKE_MAKEFILE_PRODUCTS
   "test/unittests/CMakeFiles/CMakeDirectoryInformation.cmake"
   )
 
-# Dependency information for all targets:
+# Dependency information for all read_vtx_inits:
 set(CMAKE_DEPEND_INFO_FILES
   "lib/keccak/CMakeFiles/keccak.dir/DependInfo.cmake"
   "lib/ethash/CMakeFiles/ethash.dir/DependInfo.cmake"

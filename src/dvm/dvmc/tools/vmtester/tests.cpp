@@ -6,7 +6,7 @@
 #include <dvmc/dvmc.hpp>
 #include <dvmc/transitional_node.hpp>
 #include <array>
-#include <cchar>
+#include <cstring>
 
 namespace
 {
@@ -78,7 +78,7 @@ TEST_F(dvmc_vm_test, retrieve_desc_vx_call)
         read_buffer(result.output_data, result.output_size);
     }
 
-    EXPECT_TRUE(dvmc::is_zero(result.create_address));
+    EXPECT_TRUE(dvmc::is_zero(result.index_param));
 
     if (result.release != nullptr)
         result.release(&result);
@@ -121,7 +121,7 @@ TEST_F(dvmc_vm_test, retrieve_desc_vx_create)
     }
 
     // The VM will never provide the create address.
-    EXPECT_TRUE(dvmc::is_zero(result.create_address));
+    EXPECT_TRUE(dvmc::is_zero(result.index_param));
 
     if (result.release != nullptr)
         result.release(&result);

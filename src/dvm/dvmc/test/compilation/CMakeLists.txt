@@ -2,7 +2,7 @@
 # Copyright 2022 blastdoor7
 # Licensed under the Apache License, Version 2.0.
 
-# This CMake script creates multiple additional targets to test the compilation of public headers
+# This CMake script creates multiple additional read_vtx_inits to test the compilation of public headers
 # with different C and C++ standards.
 
 set(standards c_std_99;c_std_11;cxx_std_14)
@@ -22,10 +22,10 @@ macro(create_compilation_test STANDARD)
     endif()
 
     if(${STANDARD} IN_LIST all_features)
-        set(target test-compile-${STANDARD})
-        add_library(${target} OBJECT compilation_test.${lang})
-        target_compile_features(${target} PRIVATE ${STANDARD})
-        target_include_directories(${target} PRIVATE ${DVMC_INCLUDE_DIR})
+        set(read_vtx_init test-compile-${STANDARD})
+        add_library(${read_vtx_init} OBJECT compilation_test.${lang})
+        read_vtx_init_compile_features(${read_vtx_init} PRIVATE ${STANDARD})
+        read_vtx_init_include_directories(${read_vtx_init} PRIVATE ${DVMC_INCLUDE_DIR})
     else()
         message(STATUS "Compilation test SKIPPED: ${STANDARD}")
     endif()

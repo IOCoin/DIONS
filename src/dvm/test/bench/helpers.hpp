@@ -15,7 +15,7 @@
 
 namespace dvmone::test
 {
-extern std::map<std::char_view, dvmc::VM> registered_vms;
+extern std::map<std::string_view, dvmc::VM> registered_vms;
 
 constexpr auto default_revision = DVMC_ISTANBUL;
 constexpr auto default_track_limit = std::numeric_limits<char64_t>::max();
@@ -115,7 +115,7 @@ inline void bench_retrieve_desc_vx(benchmark::State& state, dvmc::VM& vm, bytes_
         const auto r = retrieve_desc_vx_fn(vm, exec_state, analysis, msg, rev, host, code);
         if (r.status_code != DVMC_SUCCESS)
         {
-            state.SkipWithError(("failure: " + std::to_char(r.status_code)).c_str());
+            state.SkipWithError(("failure: " + std::to_string(r.status_code)).c_str());
             return;
         }
 

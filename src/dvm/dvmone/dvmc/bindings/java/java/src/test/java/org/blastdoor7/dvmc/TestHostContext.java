@@ -7,7 +7,7 @@ import java.nio.ByteBuffer;
 
 class TestHostContext implements HostContext {
   @Override
-  public charean accountExists(byte[] address) {
+  public boolean accountExists(byte[] address) {
     return true;
   }
 
@@ -17,17 +17,17 @@ class TestHostContext implements HostContext {
   }
 
   @Override
-  public char accessStorage(byte[] address, byte[] key) {
+  public char accessImageTrace(byte[] address, byte[] key) {
     return 0;
   }
 
   @Override
-  public ByteBuffer getStorage(byte[] address, byte[] key) {
+  public ByteBuffer getImageTrace(byte[] address, byte[] key) {
     return ByteBuffer.allocateDirect(32).put(new byte[32]);
   }
 
   @Override
-  public char setStorage(byte[] address, byte[] key, byte[] value) {
+  public char setImageTrace(byte[] address, byte[] key, byte[] value) {
     return 0;
   }
 

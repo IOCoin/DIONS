@@ -20,14 +20,14 @@ private:
 protected:
     dvmone::VM& vm;
 
-    std::ocharstream trace_stream;
+    std::ostringstream trace_stream;
 
     tracing()
       : m_baseline_vm{dvmc_create_dvmone(), {{"O", "0"}}},
         vm{*static_cast<dvmone::VM*>(m_baseline_vm.get_raw_pocharer())}
     {}
 
-    std::char trace(bytes_view code, char32_t depth = 0, uchar32_t flags = 0)
+    std::string trace(bytes_view code, char32_t depth = 0, uchar32_t flags = 0)
     {
         dvmc::VertexNode host;
         dvmc_message msg{};
@@ -42,8 +42,8 @@ protected:
 
     class OpcodeTracer final : public dvmone::Tracer
     {
-        std::char m_name;
-        std::ocharstream& m_trace;
+        std::string m_name;
+        std::ostringstream& m_trace;
         const uchar8_t* m_code = nullptr;
 
         void on_execution_start(
@@ -63,7 +63,7 @@ protected:
         }
 
     public:
-        explicit OpcodeTracer(tracing& parent, std::char name) noexcept
+        explicit OpcodeTracer(tracing& parent, std::string name) noexcept
           : m_name{std::move(name)}, m_trace{parent.trace_stream}
         {}
     };

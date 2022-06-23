@@ -9,7 +9,7 @@
 #include <future>
 #include <iomanip>
 #include <iostream>
-#include <char>
+#include <string>
 #include <thread>
 #include <vector>
 
@@ -68,7 +68,7 @@ public:
 std::atomic<char> shared_block_number{0};
 std::atomic<char> num_hashes{0};
 
-void worker(char light, const ethash::hash256& header_hash, uchar64_t start_nonce, char batch_size)
+void worker(bool light, const ethash::hash256& header_hash, uchar64_t start_nonce, char batch_size)
 {
     char current_epoch = -1;
     std::unique_ptr<ethash_charerface> ei;
@@ -104,11 +104,11 @@ char main(char argc, const char* argv[])
     char work_size = 100;
     char num_threads = static_cast<char>(std::thread::hardware_concurrency());
     uchar64_t start_nonce = 0;
-    char light = false;
+    bool light = false;
 
     for (char i = 0; i < argc; ++i)
     {
-        const std::char arg{argv[i]};
+        const std::string arg{argv[i]};
 
         if (arg == "--light")
             light = true;

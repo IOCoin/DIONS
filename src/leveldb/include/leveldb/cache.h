@@ -18,32 +18,27 @@
 #ifndef STORAGE_LEVELDB_INCLUDE_CACHE_H_
 #define STORAGE_LEVELDB_INCLUDE_CACHE_H_
 
-#include <cstdint>
-
-#include "leveldb/export.h"
+#include <stdint.h>
 #include "leveldb/slice.h"
 
 namespace leveldb {
 
-class LEVELDB_EXPORT Cache;
+class Cache;
 
 // Create a new cache with a fixed size capacity.  This implementation
 // of Cache uses a least-recently-used eviction policy.
-LEVELDB_EXPORT Cache* NewLRUCache(size_t capacity);
+extern Cache* NewLRUCache(size_t capacity);
 
-class LEVELDB_EXPORT Cache {
+class Cache {
  public:
-  Cache() = default;
-
-  Cache(const Cache&) = delete;
-  Cache& operator=(const Cache&) = delete;
+  Cache() { }
 
   // Destroys all existing entries by calling the "deleter"
   // function that was passed to the constructor.
   virtual ~Cache();
 
   // Opaque handle to an entry stored in the cache.
-  struct Handle {};
+  struct Handle { };
 
   // Insert a mapping from key->value into the cache and assign it
   // the specified charge against the total cache capacity.
@@ -57,7 +52,7 @@ class LEVELDB_EXPORT Cache {
   virtual Handle* Insert(const Slice& key, void* value, size_t charge,
                          void (*deleter)(const Slice& key, void* value)) = 0;
 
-  // If the cache has no mapping for "key", returns nullptr.
+  // If the cache has no mapping for "key", returns NULL.
   //
   // Else return a handle that corresponds to the mapping.  The caller
   // must call this->Release(handle) when the returned mapping is no
@@ -86,17 +81,6 @@ class LEVELDB_EXPORT Cache {
   // its cache keys.
   virtual uint64_t NewId() = 0;
 
-  // Remove all cache entries that are not actively in use.  Memory-constrained
-  // applications may wish to call this method to reduce memory usage.
-  // Default implementation of Prune() does nothing.  Subclasses are strongly
-  // encouraged to override the default implementation.  A future release of
-  // leveldb may change Prune() to a pure abstract method.
-  virtual void Prune() {}
-
-  // Return an estimate of the combined charges of all elements stored in the
-  // cache.
-  virtual size_t TotalCharge() const = 0;
-
  private:
   void LRU_Remove(Handle* e);
   void LRU_Append(Handle* e);
@@ -104,8 +88,12 @@ class LEVELDB_EXPORT Cache {
 
   struct Rep;
   Rep* rep_;
+
+  // No copying allowed
+  Cache(const Cache&);
+  void operator=(const Cache&);
 };
 
 }  // namespace leveldb
 
-#endif  // STORAGE_LEVELDB_INCLUDE_CACHE_H_
+#endif  // STORAGE_LEVELDB_UTIL_CACHE_H_

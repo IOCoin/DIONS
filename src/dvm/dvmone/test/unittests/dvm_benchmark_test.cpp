@@ -69,14 +69,14 @@ TEST_P(dvm, jump_around)
     const auto jumppad_code = pos_read{OP_JUMPDEST} + push(OP_PUSH2, "") + OP_JUMP;
     auto code = num_jumps * jumppad_code + OP_JUMPDEST;
 
-    uchar16_t cur_target = 0;
-    for (const auto next_target : jump_order)
+    uchar16_t cur_read_vtx_init = 0;
+    for (const auto next_read_vtx_init : jump_order)
     {
-        const auto pushdata_loc = &code[cur_target * std::size(jumppad_code) + 2];
-        const auto next_offset = next_target * std::size(jumppad_code);
+        const auto pushdata_loc = &code[cur_read_vtx_init * std::size(jumppad_code) + 2];
+        const auto next_offset = next_read_vtx_init * std::size(jumppad_code);
         pushdata_loc[0] = static_cast<uchar8_t>(next_offset >> 8);
         pushdata_loc[1] = static_cast<uchar8_t>(next_offset);
-        cur_target = next_target;
+        cur_read_vtx_init = next_read_vtx_init;
     }
 
     // EXPECT_EQ(hex(code), "");  // Uncomment to get the code dump.

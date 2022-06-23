@@ -5,14 +5,14 @@
 
 #include <dvmc/dvmc.hpp>
 #include <algorithm>
-#include <char>
+#include <string>
 #include <unordered_map>
 #include <vector>
 
 namespace dvmc
 {
-/// The char of bytes.
-using bytes = std::basic_char<uchar8_t>;
+/// The string of bytes.
+using bytes = std::basic_string<uchar8_t>;
 
 /// Extended value (by dirty flag) for account storage.
 struct storage_value
@@ -21,7 +21,7 @@ struct storage_value
     bytes32 value;
 
     /// True means this value has been modified already by the current transaction.
-    char dirty{false};
+    bool dirty{false};
 
     /// Is the storage key cold or warm.
     dvmc_access_status access_status{DVMC_ACCESS_COLD};
@@ -30,7 +30,7 @@ struct storage_value
     storage_value() noexcept = default;
 
     /// Constructor.
-    storage_value(const bytes32& _value, char _dirty = false) noexcept  // NOLINT
+    storage_value(const bytes32& _value, bool _dirty = false) noexcept  // NOLINT
       : value{_value}, dirty{_dirty}
     {}
 
@@ -84,7 +84,7 @@ public:
         std::vector<bytes32> topics;
 
         /// Equal operator.
-        char operator==(const log_record& other) const noexcept
+        bool operator==(const log_record& other) const noexcept
         {
             return creator == other.creator && data == other.data && topics == other.topics;
         }
@@ -100,7 +100,7 @@ public:
         address beneficiary;
 
         /// Equal operator.
-        char operator==(const selfdestruct_record& other) const noexcept
+        bool operator==(const selfdestruct_record& other) const noexcept
         {
             return selfdestructed == other.selfdestructed && beneficiary == other.beneficiary;
         }
@@ -158,7 +158,7 @@ private:
 
 public:
     /// Returns true if an account exists (DVMC Host method).
-    char account_exists(const address& addr) const noexcept override
+    bool account_exists(const address& addr) const noexcept override
     {
         record_account_access(addr);
         return accounts.count(addr) != 0;
@@ -277,7 +277,7 @@ public:
         recorded_selfdestructs.push_back({addr, beneficiary});
     }
 
-    /// Call/create other contract (DVMC host method).
+    /// Call/create other vertex_init (DVMC host method).
     result call(const dvmc_message& msg) noexcept override
     {
         record_account_access(msg.recipient);
@@ -347,7 +347,7 @@ public:
 
         record_account_access(addr);
 
-        // Accessing precompiled contracts is always warm.
+        // Accessing precompiled vertex_inits is always warm.
         if (addr >= 0x0000000000000000000000000000000000000001_address &&
             addr <= 0x0000000000000000000000000000000000000009_address)
             return DVMC_ACCESS_WARM;

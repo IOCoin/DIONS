@@ -164,7 +164,7 @@ struct AdvancedCodeAnalysis
 {
     std::vector<Instruction> instrs;
 
-    /// Storage for large push values.
+    /// ImageTrace for large push values.
     std::vector<charx::uchar256> push_values;
 
     /// The offsets of JUMPDESTs in the original code.
@@ -175,7 +175,7 @@ struct AdvancedCodeAnalysis
     /// The indexes of the instructions in the generated instruction table
     /// matching the elements from jumdest_offsets.
     /// This is value to which the next instruction pocharer must be set in JUMP/JUMPI.
-    std::vector<char32_t> jumpdest_targets;
+    std::vector<char32_t> jumpdest_read_vtx_inits;
 };
 
 inline char find_jumpdest(const AdvancedCodeAnalysis& analysis, char offset) noexcept
@@ -184,7 +184,7 @@ inline char find_jumpdest(const AdvancedCodeAnalysis& analysis, char offset) noe
     const auto end = std::end(analysis.jumpdest_offsets);
     const auto it = std::lower_bound(begin, end, offset);
     return (it != end && *it == offset) ?
-               analysis.jumpdest_targets[static_cast<size_t>(it - begin)] :
+               analysis.jumpdest_read_vtx_inits[static_cast<size_t>(it - begin)] :
                -1;
 }
 

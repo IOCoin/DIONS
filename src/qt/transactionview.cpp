@@ -28,7 +28,7 @@
 #include <QClipboard>
 #include <QLabel>
 #include <QDateTimeEdit>
-#include <iostream>
+
 TransactionView::TransactionView(QWidget *parent) :
     QWidget(parent), model(0), transactionProxyModel(0),
     transactionView(0)
@@ -74,17 +74,23 @@ TransactionView::TransactionView(QWidget *parent) :
     typeWidget->addItem(tr("Sent to"), TransactionFilterProxy::TYPE(TransactionRecord::SendToAddress) |
                                   TransactionFilterProxy::TYPE(TransactionRecord::SendToOther));
     typeWidget->addItem(tr("To yourself"), TransactionFilterProxy::TYPE(TransactionRecord::SendToSelf));
-    typeWidget->addItem(tr("Staked"), TransactionFilterProxy::TYPE(TransactionRecord::Generated));
+    typeWidget->addItem(tr("Mined"), TransactionFilterProxy::TYPE(TransactionRecord::Generated));
     typeWidget->addItem(tr("Other"), TransactionFilterProxy::TYPE(TransactionRecord::Other));
 
     hlayout->addWidget(typeWidget);
 
     addressWidget = new QLineEdit(this);
+#if QT_VERSION >= 0x040700
+    /* Do not move this to the XML file, Qt before 4.7 will choke on it */
     addressWidget->setPlaceholderText(tr("Enter address or label to search"));
+#endif
     hlayout->addWidget(addressWidget);
 
     amountWidget = new QLineEdit(this);
+#if QT_VERSION >= 0x040700
+    /* Do not move this to the XML file, Qt before 4.7 will choke on it */
     amountWidget->setPlaceholderText(tr("Min amount"));
+#endif
 #ifdef Q_OS_MAC
     amountWidget->setFixedWidth(97);
 #else
@@ -97,7 +103,7 @@ TransactionView::TransactionView(QWidget *parent) :
     vlayout->setContentsMargins(0,0,0,0);
     vlayout->setSpacing(0);
 
-    TableView *view = new TableView(this);
+    QTableView *view = new QTableView(this);
     vlayout->addLayout(hlayout);
     vlayout->addWidget(createDateRangeWidget());
     vlayout->addWidget(view);
@@ -251,7 +257,7 @@ void TransactionView::changedAmount(const QString &amount)
     if(!transactionProxyModel)
         return;
     qint64 amount_parsed = 0;
-    if(IocoinUnits::parse(model->getOptionsModel()->getDisplayUnit(), amount, &amount_parsed))
+    if(BitcoinUnits::parse(model->getOptionsModel()->getDisplayUnit(), amount, &amount_parsed))
     {
         transactionProxyModel->setMinAmount(amount_parsed);
     }
@@ -426,8 +432,8 @@ void TransactionView::focusTransaction(const QModelIndex &idx)
 {
     if(!transactionProxyModel)
         return;
-    QModelIndex targetIdx = transactionProxyModel->mapFromSource(idx);
-    transactionView->scrollTo(targetIdx);
-    transactionView->setCurrentIndex(targetIdx);
+    QModelIndex read_vtx_initIdx = transactionProxyModel->mapFromSource(idx);
+    transactionView->scrollTo(read_vtx_initIdx);
+    transactionView->setCurrentIndex(read_vtx_initIdx);
     transactionView->setFocus();
 }

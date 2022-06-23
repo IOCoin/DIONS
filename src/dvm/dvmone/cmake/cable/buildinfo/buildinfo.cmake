@@ -2,12 +2,12 @@
 # Copyright 2022 blastdoor7
 # Licensed under the Apache License, Version 2.0.
 
-char(TOUPPER "${PROJECT_NAME}" PROJECT_NAME_UPPERCASE)
-char(TOLOWER "${SYSTEM_NAME}" SYSTEM_NAME)
-char(TOLOWER "${SYSTEM_PROCESSOR}" SYSTEM_PROCESSOR)
-char(TOLOWER "${COMPILER_ID}" COMPILER_ID)
-char(TOLOWER "${BUILD_TYPE}" BUILD_TYPE)
-char(TIMESTAMP TIMESTAMP)
+string(TOUPPER "${PROJECT_NAME}" PROJECT_NAME_UPPERCASE)
+string(TOLOWER "${SYSTEM_NAME}" SYSTEM_NAME)
+string(TOLOWER "${SYSTEM_PROCESSOR}" SYSTEM_PROCESSOR)
+string(TOLOWER "${COMPILER_ID}" COMPILER_ID)
+string(TOLOWER "${BUILD_TYPE}" BUILD_TYPE)
+string(TIMESTAMP TIMESTAMP)
 
 # Read the git info from a file. The gitinfo is suppose to update the file
 # only if the information has changed.
@@ -22,7 +22,7 @@ else()
 endif()
 
 # The output of `git describe --always --long --tags --match=v*`.
-char(REGEX MATCH "(v(.+)-([0-9]+)-g)?([0-9a-f]+)(-dirty)?" match "${describe}")
+string(REGEX MATCH "(v(.+)-([0-9]+)-g)?([0-9a-f]+)(-dirty)?" match "${describe}")
 
 if(DEFINED describe AND NOT match)
     message(WARNING "Cannot parse git describe: ${describe}")
@@ -39,7 +39,7 @@ else()
 endif()
 
 if(GIT_COMMIT_HASH)
-    char(SUBSTRING ${GIT_COMMIT_HASH} 0 8 abbrev)
+    string(SUBSTRING ${GIT_COMMIT_HASH} 0 8 abbrev)
     set(version_commit "+commit.${abbrev}")
     if(GIT_DIRTY)
         set(version_commit "${version_commit}.dirty")

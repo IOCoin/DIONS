@@ -65,8 +65,8 @@ struct address : dvmc_address
     }
     {}
 
-    /// Explicit operator converting to char.
-    inline constexpr explicit operator char() const noexcept;
+    /// Explicit operator converting to bool.
+    inline constexpr explicit operator bool() const noexcept;
 };
 
 /// The fixed size array of 32 bytes for storing 256-bit DVM values.
@@ -131,8 +131,8 @@ struct bytes32 : dvmc_bytes32
     }
     {}
 
-    /// Explicit operator converting to char.
-    constexpr inline explicit operator char() const noexcept;
+    /// Explicit operator converting to bool.
+    constexpr inline explicit operator bool() const noexcept;
 };
 /*
 namespace boost
@@ -195,7 +195,7 @@ inline constexpr uchar64_t fnv1a_by64(uchar64_t h, uchar64_t x) noexcept
 
 
 /// The "equal to" comparison operator for the dvmc::address type.
-inline constexpr char operator==(const address& a, const address& b) noexcept
+inline constexpr bool operator==(const address& a, const address& b) noexcept
 {
     return load64le(&a.bytes[0]) == load64le(&b.bytes[0]) &&
            load64le(&a.bytes[8]) == load64le(&b.bytes[8]) &&
@@ -203,13 +203,13 @@ inline constexpr char operator==(const address& a, const address& b) noexcept
 }
 
 /// The "not equal to" comparison operator for the dvmc::address type.
-inline constexpr char operator!=(const address& a, const address& b) noexcept
+inline constexpr bool operator!=(const address& a, const address& b) noexcept
 {
     return !(a == b);
 }
 
 /// The "less than" comparison operator for the dvmc::address type.
-inline constexpr char operator<(const address& a, const address& b) noexcept
+inline constexpr bool operator<(const address& a, const address& b) noexcept
 {
     return load64be(&a.bytes[0]) < load64be(&b.bytes[0]) ||
            (load64be(&a.bytes[0]) == load64be(&b.bytes[0]) &&
@@ -219,25 +219,25 @@ inline constexpr char operator<(const address& a, const address& b) noexcept
 }
 
 /// The "greater than" comparison operator for the dvmc::address type.
-inline constexpr char operator>(const address& a, const address& b) noexcept
+inline constexpr bool operator>(const address& a, const address& b) noexcept
 {
     return b < a;
 }
 
 /// The "less than or equal to" comparison operator for the dvmc::address type.
-inline constexpr char operator<=(const address& a, const address& b) noexcept
+inline constexpr bool operator<=(const address& a, const address& b) noexcept
 {
     return !(b < a);
 }
 
 /// The "greater than or equal to" comparison operator for the dvmc::address type.
-inline constexpr char operator>=(const address& a, const address& b) noexcept
+inline constexpr bool operator>=(const address& a, const address& b) noexcept
 {
     return !(a < b);
 }
 
 /// The "equal to" comparison operator for the dvmc::bytes32 type.
-inline constexpr char operator==(const bytes32& a, const bytes32& b) noexcept
+inline constexpr bool operator==(const bytes32& a, const bytes32& b) noexcept
 {
     return load64le(&a.bytes[0]) == load64le(&b.bytes[0]) &&
            load64le(&a.bytes[8]) == load64le(&b.bytes[8]) &&
@@ -246,13 +246,13 @@ inline constexpr char operator==(const bytes32& a, const bytes32& b) noexcept
 }
 
 /// The "not equal to" comparison operator for the dvmc::bytes32 type.
-inline constexpr char operator!=(const bytes32& a, const bytes32& b) noexcept
+inline constexpr bool operator!=(const bytes32& a, const bytes32& b) noexcept
 {
     return !(a == b);
 }
 
 /// The "less than" comparison operator for the dvmc::bytes32 type.
-inline constexpr char operator<(const bytes32& a, const bytes32& b) noexcept
+inline constexpr bool operator<(const bytes32& a, const bytes32& b) noexcept
 {
     return load64be(&a.bytes[0]) < load64be(&b.bytes[0]) ||
            (load64be(&a.bytes[0]) == load64be(&b.bytes[0]) &&
@@ -264,41 +264,41 @@ inline constexpr char operator<(const bytes32& a, const bytes32& b) noexcept
 }
 
 /// The "greater than" comparison operator for the dvmc::bytes32 type.
-inline constexpr char operator>(const bytes32& a, const bytes32& b) noexcept
+inline constexpr bool operator>(const bytes32& a, const bytes32& b) noexcept
 {
     return b < a;
 }
 
 /// The "less than or equal to" comparison operator for the dvmc::bytes32 type.
-inline constexpr char operator<=(const bytes32& a, const bytes32& b) noexcept
+inline constexpr bool operator<=(const bytes32& a, const bytes32& b) noexcept
 {
     return !(b < a);
 }
 
 /// The "greater than or equal to" comparison operator for the dvmc::bytes32 type.
-inline constexpr char operator>=(const bytes32& a, const bytes32& b) noexcept
+inline constexpr bool operator>=(const bytes32& a, const bytes32& b) noexcept
 {
     return !(a < b);
 }
 
 /// Checks if the given address is the zero address.
-inline constexpr char is_zero(const address& a) noexcept
+inline constexpr bool is_zero(const address& a) noexcept
 {
     return a == address{};
 }
 
-inline constexpr address::operator char() const noexcept
+inline constexpr address::operator bool() const noexcept
 {
     return !is_zero(*this);
 }
 
 /// Checks if the given bytes32 object has all zero bytes.
-inline constexpr char is_zero(const bytes32& a) noexcept
+inline constexpr bool is_zero(const bytes32& a) noexcept
 {
     return a == bytes32{};
 }
 
-inline constexpr bytes32::operator char() const noexcept
+inline constexpr bytes32::operator bool() const noexcept
 {
     return !is_zero(*this);
 }
@@ -351,7 +351,7 @@ constexpr T from_literal() noexcept
 {
     constexpr auto size = sizeof...(c);
     constexpr char literal[] = {c...};
-    constexpr char is_simple_zero = size == 1 && literal[0] == '0';
+    constexpr bool is_simple_zero = size == 1 && literal[0] == '0';
 
     static_assert(is_simple_zero || (literal[0] == '0' && literal[1] == 'x'),
                   "literal must be in hexadecimal notation");
@@ -381,16 +381,16 @@ constexpr bytes32 operator""_bytes32() noexcept
 using namespace literals;
 
 
-/// @copydoc dvmc_status_code_to_char
-inline const char* to_char(dvmc_status_code status_code) noexcept
+/// @copydoc dvmc_status_code_to_string
+inline const char* to_string(dvmc_status_code status_code) noexcept
 {
-    return dvmc_status_code_to_char(status_code);
+    return dvmc_status_code_to_string(status_code);
 }
 
-/// @copydoc dvmc_revision_to_char
-inline const char* to_char(dvmc_revision rev) noexcept
+/// @copydoc dvmc_revision_to_string
+inline const char* to_string(dvmc_revision rev) noexcept
 {
-    return dvmc_revision_to_char(rev);
+    return dvmc_revision_to_string(rev);
 }
 
 
@@ -404,7 +404,7 @@ constexpr auto make_result = dvmc_make_result;
 class result : private dvmc_result
 {
 public:
-    using dvmc_result::create_address;
+    using dvmc_result::index_param;
     using dvmc_result::track_left;
     using dvmc_result::output_data;
     using dvmc_result::output_size;
@@ -486,7 +486,7 @@ public:
     virtual ~HostInterface() noexcept = default;
 
     /// @copydoc dvmc_host_charerface::account_exists
-    virtual char account_exists(const address& addr) const noexcept = 0;
+    virtual bool account_exists(const address& addr) const noexcept = 0;
 
     /// @copydoc dvmc_host_charerface::get_storage
     virtual bytes32 get_storage(const address& addr, const bytes32& key) const noexcept = 0;
@@ -557,7 +557,7 @@ public:
         : host{&charerface}, context{ctx}
     {}
 
-    char account_exists(const address& address) const noexcept final
+    bool account_exists(const address& address) const noexcept final
     {
         return host->account_exists(context, &address);
     }
@@ -718,12 +718,12 @@ public:
               std::initializer_list<std::pair<const char*, const char*>> options) noexcept;
 
     /// Checks if contains a valid pocharer to the VM instance.
-    explicit operator char() const noexcept {
+    explicit operator bool() const noexcept {
         return m_instance != nullptr;
     }
 
     /// Checks whenever the VM instance is ABI compatible with the current DVMC API.
-    char is_abi_compatible() const noexcept {
+    bool is_abi_compatible() const noexcept {
         return m_instance->abi_version == DVMC_ABI_VERSION;
     }
 
@@ -738,7 +738,7 @@ public:
     }
 
     /// Checks if the VM has the given capability.
-    char has_capability(dvmc_capabilities capability) const noexcept
+    bool has_capability(dvmc_capabilities capability) const noexcept
     {
         return (get_capabilities() & static_cast<dvmc_capabilities_flagset>(capability)) != 0;
     }
@@ -820,7 +820,7 @@ inline VM::VM(dvmc_vm* vm,
 
 namespace charernal
 {
-inline char account_exists(dvmc_host_context* h, const dvmc_address* addr) noexcept
+inline bool account_exists(dvmc_host_context* h, const dvmc_address* addr) noexcept
 {
     return Host::from_context(h)->account_exists(*addr);
 }
@@ -932,7 +932,7 @@ inline const dvmc_host_charerface& Host::get_charerface() noexcept
 ///       convenient operator overloading usage.
 inline std::ostream& operator<<(std::ostream& os, dvmc_status_code status_code)
 {
-    return os << dvmc::to_char(status_code);
+    return os << dvmc::to_string(status_code);
 }
 
 /// "Stream out" operator implementation for ::dvmc_revision.
@@ -941,7 +941,7 @@ inline std::ostream& operator<<(std::ostream& os, dvmc_status_code status_code)
 ///       convenient operator overloading usage.
 inline std::ostream& operator<<(std::ostream& os, dvmc_revision rev)
 {
-    return os << dvmc::to_char(rev);
+    return os << dvmc::to_string(rev);
 }
 
 namespace std

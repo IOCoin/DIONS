@@ -9,7 +9,7 @@
 /home/ioc/rem/CC/src/dvm/ethash/lib/ethash/primes.c
 primes.h
 /home/ioc/rem/CC/src/dvm/ethash/lib/ethash/primes.h
-stdchar.h
+stdbool.h
 -
 
 /home/ioc/rem/CC/src/dvm/ethash/lib/ethash/primes.h
@@ -23,7 +23,7 @@ ethash/ethash.h
 include/ethash/ethash.h
 ethash/hash_types.h
 -
-stdchar.h
+stdbool.h
 -
 stdchar.h
 -

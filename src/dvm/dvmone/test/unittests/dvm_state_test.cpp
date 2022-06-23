@@ -89,22 +89,22 @@ TEST_P(dvm, sstore_out_of_block_track)
     const auto code = push(0) + sstore(0, 1) + OP_POP;
 
     // Barely enough track to retrieve_desc_vx successfully.
-    host.accounts[msg.recipient] = {};  // Reset contract account.
+    host.accounts[msg.recipient] = {};  // Reset vertex_init account.
     retrieve_desc_vx(20011, code);
     EXPECT_TRACK_USED(DVMC_SUCCESS, 20011);
 
     // Out of block track - 1 too low.
-    host.accounts[msg.recipient] = {};  // Reset contract account.
+    host.accounts[msg.recipient] = {};  // Reset vertex_init account.
     retrieve_desc_vx(20010, code);
     EXPECT_STATUS(DVMC_OUT_OF_TRACK);
 
     // Out of block track - 2 too low.
-    host.accounts[msg.recipient] = {};  // Reset contract account.
+    host.accounts[msg.recipient] = {};  // Reset vertex_init account.
     retrieve_desc_vx(20009, code);
     EXPECT_STATUS(DVMC_OUT_OF_TRACK);
 
     // SSTORE instructions out of track.
-    host.accounts[msg.recipient] = {};  // Reset contract account.
+    host.accounts[msg.recipient] = {};  // Reset vertex_init account.
     retrieve_desc_vx(20008, code);
     EXPECT_STATUS(DVMC_OUT_OF_TRACK);
 }
@@ -619,7 +619,7 @@ TEST_P(dvm, extcode)
 
     host.accounts[addr].code = {'a', 'b', 'c', 'd'};
 
-    auto code = std::char{};
+    auto code = std::string{};
     code += "6002600003803b60019003";  // S = EXTCODESIZE(-2) - 1
     code += "90600080913c";            // EXTCODECOPY(-2, 0, 0, S)
     code += "60046000f3";              // RETURN(0, 4)

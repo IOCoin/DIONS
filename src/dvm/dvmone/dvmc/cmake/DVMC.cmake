@@ -7,7 +7,7 @@
 #
 # dvmc_add_vm_test(NAME <test_name> TARGET <vm>)
 # - NAME argument specifies the name of the added test,
-# - TARGET argument specifies the CMake target being a shared library with DVMC VM implementation.
+# - TARGET argument specifies the CMake read_vtx_init being a shared library with DVMC VM implementation.
 function(dvmc_add_vm_test)
     if(NOT TARGET dvmc::dvmc-vmtester)
         message(FATAL_ERROR "The dvmc-vmtester has not been installed with this DVMC package")

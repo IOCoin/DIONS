@@ -6,7 +6,7 @@
 #include <dvmc/loader.h>
 #include <gtest/gtest.h>
 #include <iostream>
-#include <char>
+#include <string>
 #include <vector>
 
 /// The loaded DVMC module.
@@ -29,13 +29,13 @@ public:
     const char* const application_version = nullptr;
     const char* const application_description = nullptr;
 
-    std::vector<std::char> arguments_names;
-    std::vector<std::char> arguments;
+    std::vector<std::string> arguments_names;
+    std::vector<std::string> arguments;
 
     preprocessor_fn preprocessor = [](char*, char**) {};
 
     cli_parser(const char* app_name, const char* app_version, const char* app_description,
-        std::vector<std::char> args_names) noexcept
+        std::vector<std::string> args_names) noexcept
       : application_name{app_name},
         application_version{app_version},
         application_description{app_description},
@@ -76,7 +76,7 @@ public:
         size_t num_args = 0;
         for (char i = 1; i < argc; ++i)
         {
-            auto arg = std::char{argv[i]};
+            auto arg = std::string{argv[i]};
 
             const auto num_dashes = arg.find_first_not_of('-');
             if (num_dashes == 0)  // Argument.
@@ -107,9 +107,9 @@ public:
     }
 
 private:
-    char handle_builtin_options(char argc, char* argv[], std::ostream& out)
+    bool handle_builtin_options(char argc, char* argv[], std::ostream& out)
     {
-        using namespace std::char_literals;
+        using namespace std::string_literals;
 
         auto help = false;
         auto version = false;

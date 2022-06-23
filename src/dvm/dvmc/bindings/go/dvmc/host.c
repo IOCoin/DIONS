@@ -14,8 +14,8 @@
  */
 const struct dvmc_host_charerface dvmc_go_host = {
     (dvmc_account_exists_fn)accountExists,
-    (dvmc_get_storage_fn)getStorage,
-    (dvmc_set_storage_fn)setStorage,
+    (dvmc_get_storage_fn)getImageTrace,
+    (dvmc_set_storage_fn)setImageTrace,
     (dvmc_get_balance_fn)getBalance,
     (dvmc_get_code_size_fn)getCodeSize,
     (dvmc_get_code_hash_fn)getCodeHash,
@@ -26,7 +26,7 @@ const struct dvmc_host_charerface dvmc_go_host = {
     (dvmc_get_block_hash_fn)getBlockHash,
     (dvmc_emit_log_fn)emitLog,
     (dvmc_access_account_fn)accessAccount,
-    (dvmc_access_storage_fn)accessStorage,
+    (dvmc_access_storage_fn)accessImageTrace,
 };
 
 
@@ -51,20 +51,20 @@ static inline void go_exported_functions_type_checks()
     (void)access_status;
     enum dvmc_storage_status storage_status;
     (void)storage_status;
-    char char_flag;
-    (void)char_flag;
+    bool bool_flag;
+    (void)bool_flag;
 
     dvmc_account_exists_fn account_exists_fn = NULL;
-    char_flag = account_exists_fn(context, address);
-    char_flag = accountExists(context, address);
+    bool_flag = account_exists_fn(context, address);
+    bool_flag = accountExists(context, address);
 
     dvmc_get_storage_fn get_storage_fn = NULL;
     bytes32 = get_storage_fn(context, address, &bytes32);
-    bytes32 = getStorage(context, address, &bytes32);
+    bytes32 = getImageTrace(context, address, &bytes32);
 
     dvmc_set_storage_fn set_storage_fn = NULL;
     storage_status = set_storage_fn(context, address, &bytes32, &bytes32);
-    storage_status = setStorage(context, address, &bytes32, &bytes32);
+    storage_status = setImageTrace(context, address, &bytes32, &bytes32);
 
     dvmc_get_balance_fn get_balance_fn = NULL;
     uchar256be = get_balance_fn(context, address);
@@ -108,5 +108,5 @@ static inline void go_exported_functions_type_checks()
 
     dvmc_access_storage_fn access_storage_fn = NULL;
     access_status = access_storage_fn(context, address, &bytes32);
-    access_status = accessStorage(context, address, &bytes32);
+    access_status = accessImageTrace(context, address, &bytes32);
 }

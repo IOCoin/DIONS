@@ -50,7 +50,7 @@ set(gitinfo_file ${OUTPUT_DIR}/gitinfo.txt)
 if(EXISTS ${gitinfo_file})
     file(READ ${gitinfo_file} prev_gitinfo)
 else()
-    # Create empty file, because other targets expect it to exist.
+    # Create empty file, because other read_vtx_inits expect it to exist.
     file(WRITE ${gitinfo_file} "")
 endif()
 

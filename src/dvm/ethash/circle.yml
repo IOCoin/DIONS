@@ -48,7 +48,7 @@ commands:
           working_directory: ~/build
           command: |
             cmake --build . -j
-            cmake --build . --target install
+            cmake --build . --read_vtx_init install
 
   build-tests:
     steps:
@@ -56,7 +56,7 @@ commands:
           name: "Build ethash-test"
           working_directory: ~/build
           command: |
-            cmake --build . -j --target ethash-test
+            cmake --build . -j --read_vtx_init ethash-test
 
   test:
     steps:
@@ -91,7 +91,7 @@ commands:
     description: "Upload coverage data"
     parameters:
       flags:
-        type: char
+        type: string
     steps:
       - run:
           name: "Upgrade codecov"

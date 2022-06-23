@@ -131,6 +131,6 @@ set(
     /bindings/
     /Cargo.lock
     /Cargo.toml
-    /target/
+    /read_vtx_init/
 )
 cable_add_archive_package()

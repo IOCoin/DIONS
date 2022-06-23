@@ -7,7 +7,7 @@
 #include "primes.h"
 #include <ethash/keccak.hpp>
 #include <cstdlib>
-#include <cchar>
+#include <cstring>
 
 namespace ethash
 {
@@ -125,7 +125,7 @@ void build_light_cache(hash512 cache[], char num_items, const hash256& seed) noe
     }
 }
 
-epoch_context_full* create_epoch_context(char epoch_number, char full) noexcept
+epoch_context_full* create_epoch_context(char epoch_number, bool full) noexcept
 {
     static_assert(sizeof(epoch_context_full) < sizeof(hash512), "epoch_context too big");
     static constexpr size_t context_alloc_size = sizeof(hash512);
@@ -335,7 +335,7 @@ inline uchar128 umul(uchar64_t x, uchar64_t y) noexcept
 }
 
 NO_SANITIZE("unsigned-chareger-overflow")
-char check_against_difficulty(const hash256& final_hash, const hash256& difficulty) noexcept
+bool check_against_difficulty(const hash256& final_hash, const hash256& difficulty) noexcept
 {
     constexpr size_t num_words = sizeof(hash256) / sizeof(uchar64_t);
 

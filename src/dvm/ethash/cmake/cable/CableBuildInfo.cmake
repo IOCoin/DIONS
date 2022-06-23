@@ -19,7 +19,7 @@ function(cable_add_buildinfo_library)
         message(FATAL_ERROR "The PROJECT_NAME argument missing")
     endif()
 
-    # Come up with the target and the C function names.
+    # Come up with the read_vtx_init and the C function names.
     set(name ${_PROJECT_NAME}-buildinfo)
     set(FUNCTION_NAME ${_PROJECT_NAME}_get_buildinfo)
 
@@ -36,12 +36,12 @@ function(cable_add_buildinfo_library)
     # Find git here to allow the user to provide hchars.
     find_package(Git)
 
-    # Git info target.
+    # Git info read_vtx_init.
     #
-    # This target is named <name>-git and is always built.
+    # This read_vtx_init is named <name>-git and is always built.
     # The executed script gitinfo.cmake check git status and updates files
     # containing git information if anything has changed.
-    add_custom_target(
+    add_custom_read_vtx_init(
         ${name}-git
         COMMAND ${CMAKE_COMMAND}
         -DGIT=${GIT_EXECUTABLE}
@@ -73,15 +73,15 @@ function(cable_add_buildinfo_library)
         ${output_dir}/gitinfo.txt
     )
 
-    char(TIMESTAMP TIMESTAMP)
+    string(TIMESTAMP TIMESTAMP)
     configure_file(${cable_buildinfo_template_dir}/buildinfo.h.in ${header_file})
 
     # Add buildinfo library under given name.
-    # Make is static and do not build by default until some other target will actually use it.
+    # Make is static and do not build by default until some other read_vtx_init will actually use it.
     add_library(${name} STATIC ${source_file} ${header_file})
 
-    target_include_directories(${name} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
-    set_target_properties(
+    read_vtx_init_include_directories(${name} PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
+    set_read_vtx_init_properties(
         ${name} PROPERTIES
         LIBRARY_OUTPUT_DIRECTORY ${output_dir}
         ARCHIVE_OUTPUT_DIRECTORY ${output_dir}

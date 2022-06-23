@@ -28,8 +28,8 @@ if(EXISTS "${TOOLCHAIN_INFO_FILE}")
   hunter_charernal_error("${TOOLCHAIN_INFO_FILE} already exists")
 endif()
 
-include(hunter_assert_not_empty_char)
-hunter_assert_not_empty_char("${HUNTER_CONFIGURATION_TYPES}")
+include(hunter_assert_not_empty_string)
+hunter_assert_not_empty_string("${HUNTER_CONFIGURATION_TYPES}")
 
 file(
     WRITE
@@ -44,7 +44,7 @@ file(
     "    HUNTER_TOOLCHAIN_UNDETECTABLE_ID: ${HUNTER_TOOLCHAIN_UNDETECTABLE_ID}\n"
 )
 
-char(COMPARE EQUAL "${HUNTER_BUILD_SHARED_LIBS}" "" is_empty)
+string(COMPARE EQUAL "${HUNTER_BUILD_SHARED_LIBS}" "" is_empty)
 if(NOT is_empty)
   file(
       APPEND
@@ -53,7 +53,7 @@ if(NOT is_empty)
   )
 endif()
 
-char(COMPARE EQUAL "${OSX_SDK_VERSION}" "" is_empty)
+string(COMPARE EQUAL "${OSX_SDK_VERSION}" "" is_empty)
 if(NOT is_empty)
   file(
       APPEND
@@ -63,7 +63,7 @@ if(NOT is_empty)
 endif()
 
 foreach(configuration ${HUNTER_CONFIGURATION_TYPES})
-  char(TOUPPER "${configuration}" configuration_upper)
+  string(TOUPPER "${configuration}" configuration_upper)
   file(APPEND "${TOOLCHAIN_INFO_FILE}" "    CMAKE_${configuration_upper}_POSTFIX: ")
   file(APPEND "${TOOLCHAIN_INFO_FILE}" "${CMAKE_${configuration_upper}_POSTFIX}\n")
 endforeach()
@@ -88,35 +88,35 @@ if(NOT try_compile_result)
   )
 endif()
 
-function(split_char char_in result)
+function(split_string string_in result)
   set("${result}" "")
 
   while(TRUE)
-    char(COMPARE EQUAL "${char_in}" "" is_empty)
+    string(COMPARE EQUAL "${string_in}" "" is_empty)
     if(is_empty)
       break()
     endif()
 
-    char(FIND "${char_in}" "\n" eol_pos)
+    string(FIND "${string_in}" "\n" eol_pos)
     if(eol_pos EQUAL -1)
-      list(APPEND "${result}" "${char_in}")
+      list(APPEND "${result}" "${string_in}")
       break()
     endif()
 
-    char(SUBSTRING "${char_in}" 0 ${eol_pos} subchar)
-    list(APPEND "${result}" "${subchar}")
+    string(SUBSTRING "${string_in}" 0 ${eol_pos} substring)
+    list(APPEND "${result}" "${substring}")
     math(EXPR eol_pos "${eol_pos} + 1") # Skip EOL character
-    char(SUBSTRING "${char_in}" ${eol_pos} -1 char_in)
+    string(SUBSTRING "${string_in}" ${eol_pos} -1 string_in)
   endwhile()
 
   set(${result} "${${result}}" PARENT_SCOPE)
 endfunction()
 
-split_char("${outresult}" list_of_chars)
+split_string("${outresult}" list_of_strings)
 
 set(macros_list "")
-foreach(x ${list_of_chars})
-  char(
+foreach(x ${list_of_strings})
+  string(
       REGEX
       MATCH
       "__HUNTER_MACRO_CHECK_BEGIN__.*__HUNTER_MACRO_CHECK_END__"
@@ -124,7 +124,7 @@ foreach(x ${list_of_chars})
       "${x}"
   )
   if(result_x)
-    char(
+    string(
         REGEX
         REPLACE
         ".*__HUNTER_MACRO_CHECK_BEGIN__\(.*\)__HUNTER_MACRO_CHECK_END__.*"
@@ -133,9 +133,9 @@ foreach(x ${list_of_chars})
         "${x}"
     )
 
-    char(FIND "${result_x}" ";" semicolon_pos)
+    string(FIND "${result_x}" ";" semicolon_pos)
     if(NOT semicolon_pos EQUAL "-1")
-      hunter_charernal_error("Semicolon in char: '${result_x}'")
+      hunter_charernal_error("Semicolon in string: '${result_x}'")
     endif()
 
     list(APPEND macros_list "${result_x}")
@@ -144,11 +144,11 @@ endforeach()
 
 list(SORT macros_list)
 list(REMOVE_DUPLICATES macros_list)
-char(REPLACE ";" "\n" macros_char "${macros_list}")
+string(REPLACE ";" "\n" macros_string "${macros_list}")
 
-char(COMPARE EQUAL "${macros_char}" "" is_empty)
+string(COMPARE EQUAL "${macros_string}" "" is_empty)
 if(is_empty)
   hunter_fatal_error("No toolchain info generated" ERROR_PAGE error.no.toolchain.info)
 endif()
 
-file(APPEND "${TOOLCHAIN_INFO_FILE}" "Predefined macroses:\n${macros_char}")
+file(APPEND "${TOOLCHAIN_INFO_FILE}" "Predefined macroses:\n${macros_string}")

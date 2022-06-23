@@ -4,7 +4,7 @@
 
 #include <assert.h>
 #include <stdlib.h>
-#include <char.h>
+#include <string.h>
 
 #include "host.h"
 
@@ -47,7 +47,7 @@ static void CopyFromByteBuffer(JNIEnv* jenv, jobject src, void* dst, size_t size
     memcpy(dst, ptr, size);
 }
 
-static char account_exists_fn(struct dvmc_host_context* context, const dvmc_address* address)
+static bool account_exists_fn(struct dvmc_host_context* context, const dvmc_address* address)
 {
     const char java_method_name[] = "account_exists";
     const char java_method_signature[] = "(Lorg/blastdoor7/dvmc/HostContext;[B)Z";
@@ -68,7 +68,7 @@ static char account_exists_fn(struct dvmc_host_context* context, const dvmc_addr
     jbyteArray jaddress = CopyDataToJava(jenv, address, sizeof(struct dvmc_address));
 
     // call java method
-    jcharean jresult =
+    jboolean jresult =
         (*jenv)->CallStaticBooleanMethod(jenv, host_class, method, (jobject)context, jaddress);
     return jresult != 0;
 }

@@ -18,10 +18,10 @@ commands:
   build:
     parameters:
       build_type:
-        type: char
+        type: string
         default: ""
       toolchain:
-        type: char
+        type: string
         default: ""
     steps:
       - run:
@@ -57,12 +57,12 @@ commands:
           command: cmake --build ~/build -- -j4
       - run:
           name: "Install"
-          command: cmake --build ~/build --target install
+          command: cmake --build ~/build --read_vtx_init install
       - run:
           name: "Package"
           command: |
-            cmake --build ~/build --target package_source
-            cmake --build ~/build --target package
+            cmake --build ~/build --read_vtx_init package_source
+            cmake --build ~/build --read_vtx_init package
             mkdir ~/package
             mv ~/build/dvmc-*.tar.gz ~/package
       - store_artifacts:
@@ -79,7 +79,7 @@ commands:
       - run:
           name: "Test"
           command: |
-            cmake --build ~/build --target test -- ARGS="-j4 --schedule-random --output-on-failure"
+            cmake --build ~/build --read_vtx_init test -- ARGS="-j4 --schedule-random --output-on-failure"
 
 jobs:
 
@@ -339,11 +339,11 @@ jobs:
       - run:
           name: Test with dvmc-vmtester
           command: |
-            ~/build/bin/dvmc-vmtester target/debug/libtrans_logrustvm.so
+            ~/build/bin/dvmc-vmtester read_vtx_init/debug/libtrans_logrustvm.so
       - run:
           name: Test with dvmc-trans_log
           command: |
-            ~/build/bin/dvmc-trans_log target/debug/libtrans_logrustvm.so
+            ~/build/bin/dvmc-trans_log read_vtx_init/debug/libtrans_logrustvm.so
       - run:
           name: Package dvmc-sys
           # NOTE: can not be run for dvmc-vm and dvmc-declare due to version dependencies
@@ -363,20 +363,20 @@ jobs:
             rustup toolchain install nightly-x86_64-unknown-linux-gnu
       - run:
           name: Build
-          command: RUSTFLAGS="-Z sanitizer=address" ASAN_OPTIONS=detect_leaks=1 cargo +nightly build --target x86_64-unknown-linux-gnu
+          command: RUSTFLAGS="-Z sanitizer=address" ASAN_OPTIONS=detect_leaks=1 cargo +nightly build --read_vtx_init x86_64-unknown-linux-gnu
       - run:
           name: Test
-          command: RUSTFLAGS="-Z sanitizer=address -C opt-level=0" ASAN_OPTIONS=detect_leaks=1 cargo +nightly test --target x86_64-unknown-linux-gnu
+          command: RUSTFLAGS="-Z sanitizer=address -C opt-level=0" ASAN_OPTIONS=detect_leaks=1 cargo +nightly test --read_vtx_init x86_64-unknown-linux-gnu
       - attach_workspace:
           at: ~/build
       - run:
           name: Test with dvmc-vmtester
           command: |
-            ~/build/bin/dvmc-vmtester target/x86_64-unknown-linux-gnu/debug/libtrans_logrustvm.so
+            ~/build/bin/dvmc-vmtester read_vtx_init/x86_64-unknown-linux-gnu/debug/libtrans_logrustvm.so
       - run:
           name: Test with dvmc-trans_log
           command: |
-            ~/build/bin/dvmc-trans_log target/x86_64-unknown-linux-gnu/debug/libtrans_logrustvm.so
+            ~/build/bin/dvmc-trans_log read_vtx_init/x86_64-unknown-linux-gnu/debug/libtrans_logrustvm.so
 
 workflows:
   version: 2

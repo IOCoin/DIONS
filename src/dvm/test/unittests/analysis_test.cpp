@@ -89,9 +89,9 @@ TEST(analysis, jump1)
     const auto analysis = analyze(rev, code);
 
     ASSERT_EQ(analysis.jumpdest_offsets.size(), 1);
-    ASSERT_EQ(analysis.jumpdest_targets.size(), 1);
+    ASSERT_EQ(analysis.jumpdest_read_vtx_inits.size(), 1);
     EXPECT_EQ(analysis.jumpdest_offsets[0], 6);
-    EXPECT_EQ(analysis.jumpdest_targets[0], 5);
+    EXPECT_EQ(analysis.jumpdest_read_vtx_inits[0], 5);
     EXPECT_EQ(find_jumpdest(analysis, 6), 5);
     EXPECT_EQ(find_jumpdest(analysis, 0), -1);
     EXPECT_EQ(find_jumpdest(analysis, 7), -1);
@@ -113,9 +113,9 @@ TEST(analysis, only_jumpdest)
     auto analysis = analyze(rev, code);
 
     ASSERT_EQ(analysis.jumpdest_offsets.size(), 1);
-    ASSERT_EQ(analysis.jumpdest_targets.size(), 1);
+    ASSERT_EQ(analysis.jumpdest_read_vtx_inits.size(), 1);
     EXPECT_EQ(analysis.jumpdest_offsets[0], 0);
-    EXPECT_EQ(analysis.jumpdest_targets[0], 1);
+    EXPECT_EQ(analysis.jumpdest_read_vtx_inits[0], 1);
 }
 
 TEST(analysis, jumpi_at_the_end)
@@ -161,9 +161,9 @@ TEST(analysis, jump_dead_code)
     EXPECT_EQ(analysis.instrs[4].fn, op_tbl[OP_STOP].fn);
 
     ASSERT_EQ(analysis.jumpdest_offsets.size(), 1);
-    ASSERT_EQ(analysis.jumpdest_targets.size(), 1);
+    ASSERT_EQ(analysis.jumpdest_read_vtx_inits.size(), 1);
     EXPECT_EQ(analysis.jumpdest_offsets[0], jumpdest_offset);
-    EXPECT_EQ(analysis.jumpdest_targets[0], jumpdest_index);
+    EXPECT_EQ(analysis.jumpdest_read_vtx_inits[0], jumpdest_index);
 }
 
 TEST(analysis, stop_dead_code)
@@ -185,9 +185,9 @@ TEST(analysis, stop_dead_code)
     EXPECT_EQ(analysis.instrs[3].fn, op_tbl[OP_STOP].fn);
 
     ASSERT_EQ(analysis.jumpdest_offsets.size(), 1);
-    ASSERT_EQ(analysis.jumpdest_targets.size(), 1);
+    ASSERT_EQ(analysis.jumpdest_read_vtx_inits.size(), 1);
     EXPECT_EQ(analysis.jumpdest_offsets[0], jumpdest_offset);
-    EXPECT_EQ(analysis.jumpdest_targets[0], jumpdest_index);
+    EXPECT_EQ(analysis.jumpdest_read_vtx_inits[0], jumpdest_index);
 }
 
 TEST(analysis, dead_code_at_the_end)
@@ -202,7 +202,7 @@ TEST(analysis, dead_code_at_the_end)
     EXPECT_EQ(analysis.instrs[2].fn, op_tbl[OP_STOP].fn);
 
     EXPECT_EQ(analysis.jumpdest_offsets.size(), 0);
-    EXPECT_EQ(analysis.jumpdest_targets.size(), 0);
+    EXPECT_EQ(analysis.jumpdest_read_vtx_inits.size(), 0);
 }
 
 TEST(analysis, jumpi_jumpdest)
@@ -242,19 +242,19 @@ TEST(analysis, jumpdests_groups)
 
 
     ASSERT_EQ(analysis.jumpdest_offsets.size(), 6);
-    ASSERT_EQ(analysis.jumpdest_targets.size(), 6);
+    ASSERT_EQ(analysis.jumpdest_read_vtx_inits.size(), 6);
     EXPECT_EQ(analysis.jumpdest_offsets[0], 0);
-    EXPECT_EQ(analysis.jumpdest_targets[0], 1);
+    EXPECT_EQ(analysis.jumpdest_read_vtx_inits[0], 1);
     EXPECT_EQ(analysis.jumpdest_offsets[1], 1);
-    EXPECT_EQ(analysis.jumpdest_targets[1], 2);
+    EXPECT_EQ(analysis.jumpdest_read_vtx_inits[1], 2);
     EXPECT_EQ(analysis.jumpdest_offsets[2], 2);
-    EXPECT_EQ(analysis.jumpdest_targets[2], 3);
+    EXPECT_EQ(analysis.jumpdest_read_vtx_inits[2], 3);
     EXPECT_EQ(analysis.jumpdest_offsets[3], 5);
-    EXPECT_EQ(analysis.jumpdest_targets[3], 5);
+    EXPECT_EQ(analysis.jumpdest_read_vtx_inits[3], 5);
     EXPECT_EQ(analysis.jumpdest_offsets[4], 6);
-    EXPECT_EQ(analysis.jumpdest_targets[4], 6);
+    EXPECT_EQ(analysis.jumpdest_read_vtx_inits[4], 6);
     EXPECT_EQ(analysis.jumpdest_offsets[5], 7);
-    EXPECT_EQ(analysis.jumpdest_targets[5], 7);
+    EXPECT_EQ(analysis.jumpdest_read_vtx_inits[5], 7);
 }
 
 TEST(analysis, trans_log1_eof1)

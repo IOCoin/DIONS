@@ -4,10 +4,10 @@
 
 add_library(tooling STATIC)
 add_library(dvmc::tooling ALIAS tooling)
-target_compile_features(tooling PUBLIC cxx_std_17)
-target_link_libraries(tooling PUBLIC dvmc::dvmc_cpp dvmc::transitional_node dvmc::hex)
+read_vtx_init_compile_features(tooling PUBLIC cxx_std_17)
+read_vtx_init_link_libraries(tooling PUBLIC dvmc::dvmc_cpp dvmc::transitional_node dvmc::hex)
 
-target_sources(
+read_vtx_init_sources(
     tooling PRIVATE
     ${DVMC_INCLUDE_DIR}/dvmc/tooling.hpp
     run.cpp
