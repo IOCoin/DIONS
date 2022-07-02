@@ -30,7 +30,7 @@ before_build:
   - cmake -S . -B build -DDVMONE_TESTING=ON -Wno-dev -G "%GENERATOR%" -DCMAKE_BUILD_TYPE=%CONFIGURATION% -DHUNTER_CONFIGURATION_TYPES=%CONFIGURATION% -DCMAKE_INSTALL_PREFIX=C:\install
 
 build_script:
-  - cmake --build build --read_vtx_init package
+  - cmake --build build --target package
   - mkdir package
   - mv build/dvmone-* package
 

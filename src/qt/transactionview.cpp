@@ -432,8 +432,8 @@ void TransactionView::focusTransaction(const QModelIndex &idx)
 {
     if(!transactionProxyModel)
         return;
-    QModelIndex read_vtx_initIdx = transactionProxyModel->mapFromSource(idx);
-    transactionView->scrollTo(read_vtx_initIdx);
-    transactionView->setCurrentIndex(read_vtx_initIdx);
+    QModelIndex targetIdx = transactionProxyModel->mapFromSource(idx);
+    transactionView->scrollTo(targetIdx);
+    transactionView->setCurrentIndex(targetIdx);
     transactionView->setFocus();
 }

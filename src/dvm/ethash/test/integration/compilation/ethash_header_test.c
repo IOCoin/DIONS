@@ -5,11 +5,11 @@
 
 #include <ethash/ethash.h>
 
-char test(void);
+int test(void);
 
-char test()
+int test()
 {
-    char sum = 0;
+    int sum = 0;
     sum += ETHASH_EPOCH_LENGTH;
     sum += ETHASH_LIGHT_CACHE_ITEM_SIZE;
     sum += ETHASH_FULL_DATASET_ITEM_SIZE;

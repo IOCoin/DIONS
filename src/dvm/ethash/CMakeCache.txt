@@ -7,7 +7,7 @@
 # The syntax for the file is as follows:
 # KEY:TYPE=VALUE
 # KEY is the name of a variable in the cache.
-# TYPE is a hchar to GUIs for the type of VALUE, DO NOT EDIT TYPE!.
+# TYPE is a hint to GUIs for the type of VALUE, DO NOT EDIT TYPE!.
 # VALUE is the current value for the KEY.
 
 ########################
@@ -289,10 +289,10 @@ HUNTER_CONFIGURATION_TYPES:STRING=Release
 //Enable Hunter package manager support
 HUNTER_ENABLED:BOOL=ON
 
-//Prchar a lot info
+//Print a lot info
 HUNTER_STATUS_DEBUG:BOOL=OFF
 
-//Prchar working status
+//Print working status
 HUNTER_STATUS_PRINT:BOOL=ON
 
 //Enable/disable TLS certificate checking on downloads

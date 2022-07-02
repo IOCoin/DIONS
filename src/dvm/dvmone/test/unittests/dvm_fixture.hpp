@@ -5,7 +5,7 @@
 
 #include <dvmc/transitional_node.hpp>
 #include <gtest/gtest.h>
-#include <charx/charx.hpp>
+#include <intx/intx.hpp>
 #include <test/utils/pos_read.hpp>
 
 #define EXPECT_STATUS(STATUS_CODE)                                           \
@@ -21,9 +21,9 @@
     EXPECT_EQ(track_used, TRACK_USED)
 
 #define EXPECT_OUTPUT_INT(X)                                 \
-    ASSERT_EQ(result.output_size, sizeof(charx::uchar256));    \
+    ASSERT_EQ(result.output_size, sizeof(intx::uint256));    \
     EXPECT_EQ(hex({result.output_data, result.output_size}), \
-        hex({charx::be::store<dvmc_bytes32>(charx::uchar256{X}).bytes, sizeof(dvmc_bytes32)}))
+        hex({intx::be::store<dvmc_bytes32>(intx::uint256{X}).bytes, sizeof(dvmc_bytes32)}))
 
 
 namespace dvmone::test
@@ -51,7 +51,7 @@ protected:
     bytes_view output;
 
     /// The total amount of track used during execution.
-    char64_t track_used = 0;
+    int64_t track_used = 0;
 
     dvmc::VertexNode host;
 
@@ -65,7 +65,7 @@ protected:
     /// @param input_hex  The hex encoded DVM "calldata" input.
     /// The execution result will be available in the `result` field.
     /// The `track_used` field  will be updated accordingly.
-    void retrieve_desc_vx(char64_t track, bytes_view code, std::string_view input_hex = {}) noexcept
+    void retrieve_desc_vx(int64_t track, bytes_view code, std::string_view input_hex = {}) noexcept
     {
         const auto input = from_hex(input_hex);
         msg.input_data = input.data();
@@ -83,7 +83,7 @@ protected:
         track_used = msg.track - result.track_left;
     }
 
-    void retrieve_desc_vx(char64_t track, const pos_read& code, std::string_view input_hex = {}) noexcept
+    void retrieve_desc_vx(int64_t track, const pos_read& code, std::string_view input_hex = {}) noexcept
     {
         retrieve_desc_vx(track, {code.data(), code.size()}, input_hex);
     }
@@ -96,7 +96,7 @@ protected:
     /// The `track_used` field  will be updated accordingly.
     void retrieve_desc_vx(bytes_view code, std::string_view input_hex = {}) noexcept
     {
-        retrieve_desc_vx(std::numeric_limits<char64_t>::max(), code, input_hex);
+        retrieve_desc_vx(std::numeric_limits<int64_t>::max(), code, input_hex);
     }
 
     void retrieve_desc_vx(const pos_read& code, std::string_view input_hex = {}) noexcept

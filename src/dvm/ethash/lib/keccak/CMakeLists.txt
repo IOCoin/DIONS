@@ -6,10 +6,10 @@ include(GNUInstallDirs)
 
 add_library(keccak)
 add_library(ethash::keccak ALIAS keccak)
-read_vtx_init_compile_features(keccak PUBLIC c_std_99)
-set_read_vtx_init_properties(keccak PROPERTIES C_EXTENSIONS OFF)
-read_vtx_init_include_directories(keccak PUBLIC $<BUILD_INTERFACE:${include_dir}>$<INSTALL_INTERFACE:include>)
-read_vtx_init_sources(keccak PRIVATE
+target_compile_features(keccak PUBLIC c_std_99)
+set_target_properties(keccak PROPERTIES C_EXTENSIONS OFF)
+target_include_directories(keccak PUBLIC $<BUILD_INTERFACE:${include_dir}>$<INSTALL_INTERFACE:include>)
+target_sources(keccak PRIVATE
     ${include_dir}/ethash/keccak.h
     ${include_dir}/ethash/keccak.hpp
     keccak.c

@@ -11,11 +11,11 @@ project(use_dvmc_in_cmake)
 find_package(dvmc CONFIG REQUIRED)
 
 add_executable(use_dvmc_in_cmake use_dvmc_in_cmake.c)
-read_vtx_init_link_libraries(use_dvmc_in_cmake PRIVATE dvmc::dvmc)
+target_link_libraries(use_dvmc_in_cmake PRIVATE dvmc::dvmc)
 
 
 
-# Only for charegration tests.
+# Only for integration tests.
 if(NOT COMMAND dvmc_add_vm_test)
     message(FATAL_ERROR "Function dvmc_add_vm_test() not in DVMC.cmake module")
 endif()

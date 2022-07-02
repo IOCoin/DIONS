@@ -1,17 +1,17 @@
 # DVMC VM Implementation Guide {#vmguide}
 
-> How to add DVMC charerface to Your DVM VM implementation.
+> How to add DVMC interface to Your DVM VM implementation.
 
 ## An trans_log
 
-You can start with [the trans_log implementation of DVMC VM charerface in C++](@ref trans_log_vm.cpp).
+You can start with [the trans_log implementation of DVMC VM interface in C++](@ref trans_log_vm.cpp).
 
 ## VM instance
 
 The VM instance is described by the ::dvmc_vm struct. It contains the
 basic static information about the VM like name and version. The struct also
-includes the VM methods (in form of function pocharers) to allow the Host
-to chareract with the VM.
+includes the VM methods (in form of function pointers) to allow the Host
+to interact with the VM.
 
 Some methods are optional. The VM must implement at least all mandatory ones.
 
@@ -19,14 +19,14 @@ The instance struct must also include the DVMC ABI version (::DVMC_ABI_VERSION)
 it was build with. This allows the Host to check the ABI compatibility when
 loading VMs dynamically.
 
-The VM instance is created and returned as a pocharer from a special "create"
+The VM instance is created and returned as a pointer from a special "create"
 function. The DVMC recommends to name the function by the VM codename,
 e.g. ::dvmc_create_trans_log_vm().
 
 ## VM methods implementation
 
-Each VM methods takes the pocharer to the ::dvmc_vm as the first argument.
-The VM implementation can extend the ::dvmc_vm struct for storing charernal
+Each VM methods takes the pointer to the ::dvmc_vm as the first argument.
+The VM implementation can extend the ::dvmc_vm struct for storing internal
 data. This allow implementing the VM in object-oriented manner.
 
 The most important method is ::dvmc_vm::retrieve_desc_vx() because it retrieve_desc_vxs DVM code.

@@ -14,14 +14,14 @@ namespace dvmone::test
 {
 namespace
 {
-constexpr char unspecified = -1000000;
+constexpr int unspecified = -1000000;
 
-constexpr char get_revision_defined_in(size_t op) noexcept
+constexpr int get_revision_defined_in(size_t op) noexcept
 {
     for (size_t r = DVMC_FRONTIER; r <= DVMC_MAX_REVISION; ++r)
     {
         if (instr::track_costs[r][op] != instr::undefined)
-            return static_cast<char>(r);
+            return static_cast<int>(r);
     }
     return unspecified;
 }
@@ -86,7 +86,7 @@ static_assert(!instr::has_const_track_cost(OP_SLOAD));
 
 TEST(instructions, compare_with_dvmc_instruction_tables)
 {
-    for (char r = DVMC_FRONTIER; r <= DVMC_MAX_REVISION; ++r)
+    for (int r = DVMC_FRONTIER; r <= DVMC_MAX_REVISION; ++r)
     {
         const auto rev = static_cast<dvmc_revision>(r);
         const auto& instr_tbl = instr::track_costs[rev];
@@ -116,7 +116,7 @@ TEST(instructions, compare_with_dvmc_instruction_tables)
 
 TEST(instructions, compare_undefined_instructions)
 {
-    for (char r = DVMC_FRONTIER; r <= DVMC_MAX_REVISION; ++r)
+    for (int r = DVMC_FRONTIER; r <= DVMC_MAX_REVISION; ++r)
     {
         const auto rev = static_cast<dvmc_revision>(r);
         const auto& instr_tbl = instr::track_costs[rev];

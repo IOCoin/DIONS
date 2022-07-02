@@ -6,7 +6,7 @@ package org.blastdoor7.dvmc;
 import java.nio.ByteBuffer;
 
 /**
- * The Host charerface.
+ * The Host interface.
  *
  * <p>The set of all callback functions expected by VM instances.
  */
@@ -26,12 +26,12 @@ final class Host {
 
   /** Get storage callback function. */
   static ByteBuffer get_storage(HostContext context, byte[] address, byte[] key) {
-    return ensureDirectBuffer(context.getImageTrace(address, key));
+    return ensureDirectBuffer(context.getStorage(address, key));
   }
 
   /** Set storage callback function. */
-  static char set_storage(HostContext context, byte[] address, byte[] key, byte[] value) {
-    return context.setImageTrace(address, key, value);
+  static int set_storage(HostContext context, byte[] address, byte[] key, byte[] value) {
+    return context.setStorage(address, key, value);
   }
   /** Get balance callback function. */
   static ByteBuffer get_balance(HostContext context, byte[] address) {
@@ -39,7 +39,7 @@ final class Host {
   }
 
   /** Get code size callback function. */
-  static char get_code_size(HostContext context, byte[] address) {
+  static int get_code_size(HostContext context, byte[] address) {
     return context.getCodeSize(address);
   }
 
@@ -78,19 +78,19 @@ final class Host {
       HostContext context,
       byte[] address,
       byte[] data,
-      char data_size,
+      int data_size,
       byte[][] topics,
-      char topic_count) {
+      int topic_count) {
     context.emitLog(address, data, data_size, topics, topic_count);
   }
 
   /** Access account callback function. */
-  static char access_account(HostContext context, byte[] address) {
+  static int access_account(HostContext context, byte[] address) {
     return context.accessAccount(address);
   }
 
   /** Access storage callback function. */
-  static char access_storage(HostContext context, byte[] address, byte[] key) {
-    return context.accessImageTrace(address, key);
+  static int access_storage(HostContext context, byte[] address, byte[] key) {
+    return context.accessStorage(address, key);
   }
 }

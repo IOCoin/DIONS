@@ -8,11 +8,11 @@ hunter_add_package(GTest)
 find_package(GTest CONFIG REQUIRED)
 
 # Disable support for std::tr1::tuple in GTest. This causes problems in Visual Studio 2015.
-set_read_vtx_init_properties(GTest::gtest PROPERTIES INTERFACE_COMPILE_DEFINITIONS GTEST_HAS_TR1_TUPLE=0)
+set_target_properties(GTest::gtest PROPERTIES INTERFACE_COMPILE_DEFINITIONS GTEST_HAS_TR1_TUPLE=0)
 
 add_library(loader-mocked STATIC ${PROJECT_SOURCE_DIR}/lib/loader/loader.c)
-read_vtx_init_link_libraries(loader-mocked PRIVATE dvmc::dvmc)
-read_vtx_init_compile_definitions(loader-mocked PRIVATE DVMC_LOADER_MOCK=1)
+target_link_libraries(loader-mocked PRIVATE dvmc::dvmc)
+target_compile_definitions(loader-mocked PRIVATE DVMC_LOADER_MOCK=1)
 
 add_executable(
     dvmc-unittests
@@ -27,7 +27,7 @@ add_executable(
     hex_test.cpp
 )
 
-read_vtx_init_link_libraries(
+target_link_libraries(
     dvmc-unittests
     PRIVATE
     loader-mocked
@@ -39,7 +39,7 @@ read_vtx_init_link_libraries(
     dvmc::hex
     GTest::gtest_main
 )
-read_vtx_init_include_directories(dvmc-unittests PRIVATE ${PROJECT_SOURCE_DIR})
+target_include_directories(dvmc-unittests PRIVATE ${PROJECT_SOURCE_DIR})
 
 gtest_add_tests(TARGET dvmc-unittests TEST_PREFIX ${PROJECT_NAME}/unittests/ TEST_LIST unittests)
 

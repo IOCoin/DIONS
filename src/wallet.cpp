@@ -1372,6 +1372,8 @@ bool isPathTx(const __wx__Tx* tx)
         {
         case OP_BASE_SET:
         case OP_BASE_RELAY:
+        case OP_BASE_VERTEX_SET:
+        case OP_BASE_VERTEX_RELAY:
         case OP_ALIAS_SET:
         case OP_ALIAS_RELAY:
         case OP_ALIAS_ENCRYPTED:
@@ -1537,7 +1539,7 @@ bool __wx__::SelectCoinsMinConf(int64_t nTargetValue, unsigned int nSpendTime, i
 
     printf("SelectCoins vCoins.size %lu\n", vCoins.size());
 
-    // List of values less than read_vtx_init
+    // List of values less than target
     pair<int64_t, pair<const __wx__Tx*,unsigned int> > coinLowestLarger;
     coinLowestLarger.first = std::numeric_limits<int64_t>::max();
     coinLowestLarger.second.first = NULL;
@@ -1693,7 +1695,7 @@ bool __wx__::SelectCoinsForStaking(int64_t nTargetValue, unsigned int nSpendTime
 
         if (n >= nTargetValue)
         {
-            // If input value is greater or equal to read_vtx_init then simply insert
+            // If input value is greater or equal to target then simply insert
             //    it into the current subset and exit
             setCoinsRet.insert(coin.second);
             nValueRet += coin.first;
@@ -2253,7 +2255,6 @@ bool __wx__::CommitTransaction__(__wx__Tx& wtxNew, CReserveKey& reservekey)
 {
     {
         LOCK2(cs_main, cs_wallet);
-        printf("CommitTransaction:\n%s", wtxNew.ToString().c_str());
         {
             // This is only to keep the database open to defeat the auto-flush for the
             // duration of this scope.  This is the only place where this optimization
@@ -2304,7 +2305,6 @@ bool __wx__::CommitTransaction(__wx__Tx& wtxNew, CReserveKey& reservekey)
 {
     {
         LOCK2(cs_main, cs_wallet);
-        printf("CommitTransaction:\n%s", wtxNew.ToString().c_str());
         {
             // This is only to keep the database open to defeat the auto-flush for the
             // duration of this scope.  This is the only place where this optimization
@@ -3273,6 +3273,15 @@ __wx__Tx::aliasSet(int& op_ret, int& nOut, vector< vector<unsigned char> >& vv) 
             vv = vvch;
             s__ = true;
             break;
+        case OP_BASE_VERTEX_SET:
+            vv = vvch;
+            s__ = true;
+            break;
+
+        case OP_BASE_VERTEX_RELAY:
+            vv = vvch;
+            s__ = true;
+            break;
 
         case OP_ALIAS_RELAY:
             vv = vvch;
@@ -3318,6 +3327,17 @@ __wx__Tx::aliasSet(int& op_ret, int& nOut, vchType& nm, vchType& val) const
             break;
 
         case OP_BASE_RELAY:
+            vchPath = vvch[0];
+            vchValue = vvch[1];
+            s__ = true;
+            break;
+        case OP_BASE_VERTEX_SET:
+            vchPath = vvch[0];
+            vchValue = vvch[1];
+            s__ = true;
+            break;
+
+        case OP_BASE_VERTEX_RELAY:
             vchPath = vvch[0];
             vchValue = vvch[1];
             s__ = true;
@@ -3371,6 +3391,17 @@ __wx__Tx::aliasStream(int& r, int& p, vchType& v1, vchType& v2, vchType& vchS, v
             break;
 
         case OP_BASE_RELAY:
+            vchPath = vvch[0];
+            vchValue = vvch[1];
+            s__ = false;
+            break;
+        case OP_BASE_VERTEX_SET:
+            vchPath = vvch[0];
+            vchValue = vvch[1];
+            s__ = false;
+            break;
+
+        case OP_BASE_VERTEX_RELAY:
             vchPath = vvch[0];
             vchValue = vvch[1];
             s__ = false;

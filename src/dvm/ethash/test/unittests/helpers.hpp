@@ -16,22 +16,22 @@ inline std::string to_hex(const Hash& h)
     str.reserve(sizeof(h) * 2);
     for (auto b : h.bytes)
     {
-        str.push_back(hex_chars[uchar8_t(b) >> 4]);
-        str.push_back(hex_chars[uchar8_t(b) & 0xf]);
+        str.push_back(hex_chars[uint8_t(b) >> 4]);
+        str.push_back(hex_chars[uint8_t(b) & 0xf]);
     }
     return str;
 }
 
 inline ethash::hash256 to_hash256(const std::string& hex)
 {
-    auto parse_digit = [](char d) -> char { return d <= '9' ? (d - '0') : (d - 'a' + 10); };
+    auto parse_digit = [](char d) -> int { return d <= '9' ? (d - '0') : (d - 'a' + 10); };
 
     ethash::hash256 hash = {};
     for (size_t i = 1; i < hex.size(); i += 2)
     {
-        char h = parse_digit(hex[i - 1]);
-        char l = parse_digit(hex[i]);
-        hash.bytes[i / 2] = uchar8_t((h << 4) | l);
+        int h = parse_digit(hex[i - 1]);
+        int l = parse_digit(hex[i]);
+        hash.bytes[i / 2] = uint8_t((h << 4) | l);
     }
     return hash;
 }
@@ -47,32 +47,32 @@ inline bool operator!=(const ethash::hash256& a, const ethash::hash256& b) noexc
     return !(a == b);
 }
 
-NO_SANITIZE("unsigned-chareger-overflow")
+NO_SANITIZE("unsigned-integer-overflow")
 inline ethash::hash256 inc(const ethash::hash256& x) noexcept
 {
     ethash::hash256 z{};
     bool carry = true;
-    for (char i = 3; i >= 0; --i)
+    for (int i = 3; i >= 0; --i)
     {
-        const auto t = ethash::be::uchar64(x.word64s[i]);
+        const auto t = ethash::be::uint64(x.word64s[i]);
         const auto s = t + carry;
         carry = s < t;
-        z.word64s[i] = ethash::be::uchar64(s);
+        z.word64s[i] = ethash::be::uint64(s);
     }
     return z;
 }
 
-NO_SANITIZE("unsigned-chareger-overflow")
+NO_SANITIZE("unsigned-integer-overflow")
 inline ethash::hash256 dec(const ethash::hash256& x) noexcept
 {
     ethash::hash256 z{};
     bool borrow = true;
-    for (char i = 3; i >= 0; --i)
+    for (int i = 3; i >= 0; --i)
     {
-        const auto t = ethash::be::uchar64(x.word64s[i]);
+        const auto t = ethash::be::uint64(x.word64s[i]);
         const auto d = t - borrow;
         borrow = d > t;
-        z.word64s[i] = ethash::be::uchar64(d);
+        z.word64s[i] = ethash::be::uint64(d);
     }
     return z;
 }

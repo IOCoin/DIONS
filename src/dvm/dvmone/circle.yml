@@ -1,9 +1,9 @@
 version: 2.1
 
 executors:
-  lchar:
+  lint:
     docker:
-      - image: blastdoor7/cpp-build-env:17-lchar
+      - image: blastdoor7/cpp-build-env:17-lint
     resource_class: small
     environment:
       CMAKE_BUILD_PARALLEL_LEVEL: 2
@@ -89,7 +89,7 @@ commands:
           working_directory: ~/silkworm
           command: |
             [ "$SILKWORM_BUILD" = true ] || exit 0
-            cmake --build build --read_vtx_init consensus
+            cmake --build build --target consensus
       - save_cache:
           name: "Save Silkworm cache"
           key: *silkworm-cache-key
@@ -130,7 +130,7 @@ commands:
             echo $CMAKE_OPTIONS >> build.info
             $CXX --version >> build.info
             
-            prcharf '\n-----------\nbuild.info:\n'
+            printf '\n-----------\nbuild.info:\n'
             cat build.info
       - restore_cache:
           name: "Restore Hunter cache"
@@ -153,7 +153,7 @@ commands:
           command: cmake --build ~/build
       - run:
           name: "Install"
-          command: cmake --build ~/build --read_vtx_init install
+          command: cmake --build ~/build --target install
 
   test:
     description: "Test"
@@ -205,7 +205,7 @@ commands:
       - run:
           name: "Build Package"
           working_directory: ~/package
-          command: cmake --build ~/build --read_vtx_init package && mv ~/build/dvmone*.tar.gz* .
+          command: cmake --build ~/build --target package && mv ~/build/dvmone*.tar.gz* .
       - store_artifacts:
           path: ~/package
           destination: package
@@ -225,8 +225,8 @@ commands:
 
 jobs:
 
-  lchar:
-    executor: lchar
+  lint:
+    executor: lint
     steps:
     - checkout
     - run:
@@ -322,7 +322,7 @@ jobs:
     executor: linux-gcc-latest
     environment:
       BUILD_TYPE: Coverage
-      TESTS_FILTER: unittests|charegration
+      TESTS_FILTER: unittests|integration
     steps:
       - build
       - test
@@ -372,7 +372,7 @@ jobs:
     environment:
       CMAKE_BUILD_PARALLEL_LEVEL: 2
       BUILD_TYPE: Coverage
-      TESTS_FILTER: unittests|charegration
+      TESTS_FILTER: unittests|integration
     steps:
       - build
       # TODO: use `test` command
@@ -418,7 +418,7 @@ workflows:
   version: 2
   dvmone:
     jobs:
-      - lchar
+      - lint
       - release-linux:
           filters:
             tags:

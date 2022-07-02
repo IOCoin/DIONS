@@ -2,30 +2,30 @@ cmake_minimum_required(VERSION 3.0)
 project(HunterToolchain)
 
 if(NOT HUNTER_SELF)
-  # Emulate 'hunter_charernal_error'
+  # Emulate 'hunter_internal_error'
   message("[hunter ** INTERNAL **] HUNTER_SELF is empty")
   message("[hunter ** INTERNAL **] [Directory:${CMAKE_CURRENT_LIST_DIR}]")
   message("")
   message("------------------------------ ERROR ------------------------------")
-  message("    https://hunter.readthedocs.io/en/latest/reference/errors/error.charernal.html")
+  message("    https://hunter.readthedocs.io/en/latest/reference/errors/error.internal.html")
   message("-------------------------------------------------------------------")
   message(FATAL_ERROR "")
 endif()
 
 list(APPEND CMAKE_MODULE_PATH "${HUNTER_SELF}/cmake/modules")
 include(hunter_fatal_error)
-include(hunter_charernal_error)
+include(hunter_internal_error)
 
 if(NOT TOOLCHAIN_INFO_FILE)
-  hunter_charernal_error("TOOLCHAIN_INFO_FILE is empty")
+  hunter_internal_error("TOOLCHAIN_INFO_FILE is empty")
 endif()
 
 if(NOT CMAKE_BINARY_DIR)
-  hunter_charernal_error("CMAKE_BINARY_DIR empty")
+  hunter_internal_error("CMAKE_BINARY_DIR empty")
 endif()
 
 if(EXISTS "${TOOLCHAIN_INFO_FILE}")
-  hunter_charernal_error("${TOOLCHAIN_INFO_FILE} already exists")
+  hunter_internal_error("${TOOLCHAIN_INFO_FILE} already exists")
 endif()
 
 include(hunter_assert_not_empty_string)
@@ -70,7 +70,7 @@ endforeach()
 
 set(predefined "${HUNTER_SELF}/scripts/ShowPredefined.cpp")
 if(NOT EXISTS "${predefined}")
-  hunter_charernal_error("${predefined} not exists")
+  hunter_internal_error("${predefined} not exists")
 endif()
 
 try_compile(
@@ -82,7 +82,7 @@ try_compile(
 )
 
 if(NOT try_compile_result)
-  hunter_charernal_error(
+  hunter_internal_error(
       "Compilation of ${predefined} failed. Result: ${try_compile_result}\n"
       "Output:\n--- OUTPUT BEGIN ---\n${outresult}\n--- OUTPUT END ---"
   )
@@ -135,7 +135,7 @@ foreach(x ${list_of_strings})
 
     string(FIND "${result_x}" ";" semicolon_pos)
     if(NOT semicolon_pos EQUAL "-1")
-      hunter_charernal_error("Semicolon in string: '${result_x}'")
+      hunter_internal_error("Semicolon in string: '${result_x}'")
     endif()
 
     list(APPEND macros_list "${result_x}")

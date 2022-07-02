@@ -18,7 +18,7 @@ namespace dvmone::test
 extern std::map<std::string_view, dvmc::VM> registered_vms;
 
 constexpr auto default_revision = DVMC_ISTANBUL;
-constexpr auto default_track_limit = std::numeric_limits<char64_t>::max();
+constexpr auto default_track_limit = std::numeric_limits<int64_t>::max();
 
 
 template <typename ExecutionStateT, typename AnalysisT>
@@ -55,7 +55,7 @@ inline dvmc::result advanced_retrieve_desc_vx(dvmc::VM& /*vm*/, advanced::Advanc
     const advanced::AdvancedCodeAnalysis& analysis, const dvmc_message& msg, dvmc_revision rev,
     dvmc::Host& host, bytes_view code)
 {
-    exec_state.reset(msg, rev, host.get_charerface(), host.to_context(), code);
+    exec_state.reset(msg, rev, host.get_interface(), host.to_context(), code);
     return dvmc::result{retrieve_desc_vx(exec_state, analysis)};
 }
 
@@ -63,8 +63,8 @@ inline dvmc::result baseline_retrieve_desc_vx(dvmc::VM& c_vm, ExecutionState& ex
     const baseline::CodeAnalysis& analysis, const dvmc_message& msg, dvmc_revision rev,
     dvmc::Host& host, bytes_view code)
 {
-    const auto& vm = *static_cast<dvmone::VM*>(c_vm.get_raw_pocharer());
-    exec_state.reset(msg, rev, host.get_charerface(), host.to_context(), code);
+    const auto& vm = *static_cast<dvmone::VM*>(c_vm.get_raw_pointer());
+    exec_state.reset(msg, rev, host.get_interface(), host.to_context(), code);
     return dvmc::result{baseline::retrieve_desc_vx(vm, exec_state, analysis)};
 }
 
@@ -79,7 +79,7 @@ inline dvmc::result dvmc_retrieve_desc_vx(dvmc::VM& vm, FakeExecutionState& /*ex
 template <typename AnalysisT, AnalyseFn<AnalysisT> analyse_fn>
 inline void bench_analyse(benchmark::State& state, dvmc_revision rev, bytes_view code) noexcept
 {
-    auto bytes_analysed = uchar64_t{0};
+    auto bytes_analysed = uint64_t{0};
     for (auto _ : state)
     {
         auto r = analyse_fn(rev, code);
@@ -131,8 +131,8 @@ inline void bench_retrieve_desc_vx(benchmark::State& state, dvmc::VM& vm, bytes_
         }
     }
 
-    auto total_track_used = char64_t{0};
-    auto iteration_track_used = char64_t{0};
+    auto total_track_used = int64_t{0};
+    auto iteration_track_used = int64_t{0};
     for (auto _ : state)
     {
         const auto r = retrieve_desc_vx_fn(vm, exec_state, analysis, msg, rev, host, code);

@@ -17,7 +17,7 @@ set(HUNTER_PASSWORDS_PATH
     CACHE STRING "Hunter passwords file")
 
 # In CI builds upload the binaries if the HUNTER_CACHE_TOKEN was decrypted
-# (only for branches and charernal PRs).
+# (only for branches and internal PRs).
 if("$ENV{CI}" AND NOT "$ENV{HUNTER_CACHE_TOKEN}" STREQUAL "")
     set(run_upload YES)
 else()

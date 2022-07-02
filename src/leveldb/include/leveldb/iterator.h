@@ -37,10 +37,10 @@ class Iterator {
   // Valid() after this call iff the source is not empty.
   virtual void SeekToLast() = 0;
 
-  // Position at the first key in the source that at or past read_vtx_init
+  // Position at the first key in the source that at or past target
   // The iterator is Valid() after this call iff the source contains
-  // an entry that comes at or past read_vtx_init.
-  virtual void Seek(const Slice& read_vtx_init) = 0;
+  // an entry that comes at or past target.
+  virtual void Seek(const Slice& target) = 0;
 
   // Moves to the next entry in the source.  After this call, Valid() is
   // true iff the iterator was not positioned at the last entry in the source.

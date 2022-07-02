@@ -263,10 +263,10 @@ class VersionSet {
 
   // Return a human-readable short (single-line) summary of the number
   // of files per level.  Uses *scratch as backing store.
-  struct LevelSummaryImageTrace {
+  struct LevelSummaryStorage {
     char buffer[100];
   };
-  const char* LevelSummary(LevelSummaryImageTrace* scratch) const;
+  const char* LevelSummary(LevelSummaryStorage* scratch) const;
 
  private:
   class Builder;

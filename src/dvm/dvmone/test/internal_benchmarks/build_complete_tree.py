@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 # The PoC of generating complete binary trees from sorted list
-# and packing the tree charo an array.
+# and packing the tree into an array.
 # This transformation can be use to speed up jumpdest search.
 
 import sys
@@ -17,27 +17,27 @@ def hibit(n):
 
 
 def build_subtree(elems, arr, pos):
-    # prchar(elems)
+    # print(elems)
     size = len(elems)
     if size == 1:
         arr[pos] = elems[0]
-        prchar("* {}".format(elems[0]))
+        print("* {}".format(elems[0]))
         return
 
     perfect_tree_size = hibit(size + 1) - 1
-    # prchar(perfect_tree_size)
+    # print(perfect_tree_size)
 
     incomp_level_len = hibit(perfect_tree_size) * 2
     incomp_len = size - perfect_tree_size
     left_len = min(incomp_len, incomp_level_len // 2)
     right_len = max(incomp_len - incomp_level_len // 2, 0)
     balance = left_len - right_len
-    # prchar("incomplete {}/{} of {}: {}".format(left_len, right_len,
+    # print("incomplete {}/{} of {}: {}".format(left_len, right_len,
     #                                           incomp_level_len, balance))
 
     middle = size // 2 + balance // 2
     arr[pos] = elems[middle]
-    prchar("* {}".format(elems[middle]))
+    print("* {}".format(elems[middle]))
 
     left = elems[:middle]
     right = elems[middle + 1:]
@@ -51,17 +51,17 @@ def build_tree(size):
     arr = [-1] * size
     build_subtree(elems, arr, 0)
 
-    prchar(arr)
+    print(arr)
 
     l = 1
     q = 0
     for i in range(len(arr)):
-        prchar("{} ".format(arr[i]), end='')
+        print("{} ".format(arr[i]), end='')
         q += 1
         if q == l:
             l *= 2
             q = 0
-            prchar("")
+            print("")
 
 
-build_tree(char(sys.argv[1]))
+build_tree(int(sys.argv[1]))

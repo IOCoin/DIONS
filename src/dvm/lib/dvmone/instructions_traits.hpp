@@ -10,7 +10,7 @@
 namespace dvmone::instr
 {
 /// The special track cost value marking an DVM instruction as "undefined".
-constexpr char16_t undefined = -1;
+constexpr int16_t undefined = -1;
 
 /// EIP-2929 constants (https://eips.blastdoor7.org/EIPS/eip-2929).
 /// @{
@@ -28,7 +28,7 @@ inline constexpr auto additional_cold_account_access_cost =
 
 
 /// The table of instruction track costs per DVM revision.
-using GasCostTable = std::array<std::array<char16_t, 256>, DVMC_MAX_REVISION + 1>;
+using GasCostTable = std::array<std::array<int16_t, 256>, DVMC_MAX_REVISION + 1>;
 
 /// The DVM revision specific table of DVM instructions track costs. For instructions undefined
 /// in given DVM revision, the value is instr::undefined.
@@ -99,7 +99,7 @@ constexpr inline GasCostTable track_costs = []() noexcept {
     for (auto op = size_t{OP_SWAP1}; op <= OP_SWAP16; ++op)
         table[DVMC_FRONTIER][op] = 3;
     for (auto op = size_t{OP_LOG0}; op <= OP_LOG4; ++op)
-        table[DVMC_FRONTIER][op] = static_cast<char16_t>((op - OP_LOG0 + 1) * 375);
+        table[DVMC_FRONTIER][op] = static_cast<int16_t>((op - OP_LOG0 + 1) * 375);
     table[DVMC_FRONTIER][OP_CREATE] = 32000;
     table[DVMC_FRONTIER][OP_CALL] = 40;
     table[DVMC_FRONTIER][OP_CALLCODE] = 40;
@@ -178,17 +178,17 @@ struct Traits
     const char* name = nullptr;
 
     /// Size of the immediate argument in bytes.
-    uchar8_t immediate_size = 0;
+    uint8_t immediate_size = 0;
 
     /// Whether the instruction terminates execution.
     /// This is false for undefined instructions but this can be changed if desired.
     bool is_terminating = false;
 
     /// The number of stack items the instruction accesses during execution.
-    char8_t stack_height_required = 0;
+    int8_t stack_height_required = 0;
 
     /// The stack height change caused by the instruction execution. Can be negative.
-    char8_t stack_height_change = 0;
+    int8_t stack_height_change = 0;
 
     /// The DVM revision in which the instruction has been defined. For instructions available in
     /// every DVM revision the value is ::DVMC_FRONTIER. For undefined instructions the value is not

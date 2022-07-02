@@ -37,23 +37,23 @@ CodeAnalysis analyze_jumpdests(bytes_view code)
 
     // To find if op is any PUSH opcode (OP_PUSH1 <= op <= OP_PUSH32)
     // it can be noticed that OP_PUSH32 is INT8_MAX (0x7f) therefore
-    // static_cast<char8_t>(op) <= OP_PUSH32 is always true and can be skipped.
-    static_assert(OP_PUSH32 == std::numeric_limits<char8_t>::max());
+    // static_cast<int8_t>(op) <= OP_PUSH32 is always true and can be skipped.
+    static_assert(OP_PUSH32 == std::numeric_limits<int8_t>::max());
 
     CodeAnalysis::JumpdestMap map(code.size());  // Allocate and init bitmap with zeros.
     for (size_t i = 0; i < code.size(); ++i)
     {
         const auto op = code[i];
-        if (static_cast<char8_t>(op) >= OP_PUSH1)  // If any PUSH opcode (see explanation above).
+        if (static_cast<int8_t>(op) >= OP_PUSH1)  // If any PUSH opcode (see explanation above).
             i += op - size_t{OP_PUSH1 - 1};       // Skip PUSH data.
         else if (INTX_UNLIKELY(op == OP_JUMPDEST))
             map[i] = true;
     }
 
     // Using "raw" new operator instead of std::make_unique() to get uninitialized array.
-    std::unique_ptr<uchar8_t[]> padded_code{new uchar8_t[code.size() + padding]};
+    std::unique_ptr<uint8_t[]> padded_code{new uint8_t[code.size() + padding]};
     std::copy(std::begin(code), std::end(code), padded_code.get());
-    std::fill_n(&padded_code[code.size()], padding, uchar8_t{OP_STOP});
+    std::fill_n(&padded_code[code.size()], padding, uint8_t{OP_STOP});
 
     // TODO: The padded code buffer and jumpdest bitmap can be created with single allocation.
     return CodeAnalysis{std::move(padded_code), std::move(map)};
@@ -97,7 +97,7 @@ namespace
 ///          or DVMC_SUCCESS if everything is fine.
 template <dvmc_opcode Op>
 inline dvmc_status_code check_requirements(
-    const CostTable& cost_table, char64_t& track_left, ptrdiff_t stack_size) noexcept
+    const CostTable& cost_table, int64_t& track_left, ptrdiff_t stack_size) noexcept
 {
     static_assert(
         !(instr::has_const_track_cost(Op) && instr::track_costs[DVMC_FRONTIER][Op] == instr::undefined),
@@ -139,7 +139,7 @@ inline dvmc_status_code check_requirements(
 struct Position
 {
     code_iterator code_it;  ///< The position in the code.
-    uchar256* stack_top;     ///< The pocharer to the stack top.
+    uint256* stack_top;     ///< The pointer to the stack top.
 };
 
 /// Helpers for invoking instruction implementations of different signatures.
@@ -195,7 +195,7 @@ struct Position
 
 /// A helper to invoke the instruction implementation of the given opcode Op.
 template <dvmc_opcode Op>
-[[release_inline]] inline Position invoke(const CostTable& cost_table, const uchar256* stack_bottom,
+[[release_inline]] inline Position invoke(const CostTable& cost_table, const uint256* stack_bottom,
     Position pos, ExecutionState& state) noexcept
 {
     const auto stack_size = pos.stack_top - stack_bottom;
@@ -246,15 +246,15 @@ dvmc_result retrieve_desc_vx(const VM& vm, ExecutionState& state, const CodeAnal
     const auto* const code = state.code.data();
     const auto stack_bottom = state.stack_space.bottom();
 
-    // Code iterator and stack top pocharer for charerpreter loop.
+    // Code iterator and stack top pointer for interpreter loop.
     Position position{code, stack_bottom};
 
     while (true)  // Guaranteed to terminate because padded code ends with STOP.
     {
         if constexpr (TracingEnabled)
         {
-            const auto offset = static_cast<uchar32_t>(position.code_it - code);
-            const auto stack_height = static_cast<char>(position.stack_top - stack_bottom);
+            const auto offset = static_cast<uint32_t>(position.code_it - code);
+            const auto stack_height = static_cast<int>(position.stack_top - stack_bottom);
             if (offset < state.code.size())  // Skip STOP from code padding.
                 tracer->notify_instruction_start(offset, position.stack_top, stack_height, state);
         }
@@ -294,8 +294,8 @@ dvmc_result retrieve_desc_vx(const VM& vm, ExecutionState& state, const CodeAnal
     return retrieve_desc_vx<false>(vm, state, analysis);
 }
 
-dvmc_result retrieve_desc_vx(dvmc_vm* c_vm, const dvmc_host_charerface* host, dvmc_host_context* ctx,
-    dvmc_revision rev, const dvmc_message* msg, const uchar8_t* code, size_t code_size) noexcept
+dvmc_result retrieve_desc_vx(dvmc_vm* c_vm, const dvmc_host_interface* host, dvmc_host_context* ctx,
+    dvmc_revision rev, const dvmc_message* msg, const uint8_t* code, size_t code_size) noexcept
 {
     auto vm = static_cast<VM*>(c_vm);
     const auto jumpdest_map = analyze(rev, {code, code_size});

@@ -12,7 +12,7 @@ namespace
 dvmc::VM advanced_vm{dvmc_create_dvmone(), {{"O", "2"}}};
 dvmc::VM baseline_vm{dvmc_create_dvmone(), {{"O", "0"}}};
 
-const char* prchar_vm_name(const testing::TestParamInfo<dvmc::VM*>& info) noexcept
+const char* print_vm_name(const testing::TestParamInfo<dvmc::VM*>& info) noexcept
 {
     if (info.param == &advanced_vm)
         return "advanced";
@@ -22,5 +22,5 @@ const char* prchar_vm_name(const testing::TestParamInfo<dvmc::VM*>& info) noexce
 }
 }  // namespace
 
-INSTANTIATE_TEST_SUITE_P(dvmone, dvm, testing::Values(&advanced_vm, &baseline_vm), prchar_vm_name);
+INSTANTIATE_TEST_SUITE_P(dvmone, dvm, testing::Values(&advanced_vm, &baseline_vm), print_vm_name);
 }  // namespace dvmone::test

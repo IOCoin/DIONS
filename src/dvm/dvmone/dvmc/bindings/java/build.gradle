@@ -14,12 +14,12 @@ allprojects {
         mavenCentral()
     }
     sourceCompatibility = '11'
-    read_vtx_initCompatibility = '11'
+    targetCompatibility = '11'
     apply plugin: 'com.diffplug.gradle.spotless'
     spotless {
         java {
             // This path needs to be relative to each project
-            read_vtx_init fileTree('.') {
+            target fileTree('.') {
                 include '**/*.java'
                 exclude '**/.gradle/**'
             }
@@ -35,7 +35,7 @@ subprojects {
     tasks.withType(Test) {
         testLogging.showStandardStreams = true
         // If GRADLE_MAX_TEST_FORKS is not set, use half the available processors
-        maxParallelForks = (System.getenv('GRADLE_MAX_TEST_FORKS') ?: (Runtime.runtime.availableProcessors().chardiv(2) ?: 1)).toInteger()
+        maxParallelForks = (System.getenv('GRADLE_MAX_TEST_FORKS') ?: (Runtime.runtime.availableProcessors().intdiv(2) ?: 1)).toInteger()
         useJUnitPlatform()
         reports {
             junitXml.enabled = true

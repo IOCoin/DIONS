@@ -589,7 +589,6 @@ bool ydwiWhldw()
 
 void LocatorNodeDB::filter(CBlockIndex* p__)
 {
-    printf("filter 1\n");
     {
         CBlock block;
         block.ReadFromDisk(p__);
@@ -600,12 +599,11 @@ void LocatorNodeDB::filter(CBlockIndex* p__)
         {
             if(tx.nVersion == CTransaction::DION_TX_VERSION || tx.nVersion == CTransaction::CYCLE_TX_VERSION)
             {
-                printf("filter 2\n");
                 vector<vector<unsigned char> > vvchArgs;
                 int op, nOut;
 
                 aliasTx(tx, op, nOut, vvchArgs);
-                if((op == OP_ALIAS_SET || op == OP_ALIAS_RELAY || op == OP_BASE_SET || OP_BASE_RELAY))
+                if((op == OP_ALIAS_SET || op == OP_ALIAS_RELAY || op == OP_BASE_SET || OP_BASE_RELAY || op == OP_BASE_VERTEX_SET || OP_BASE_VERTEX_RELAY))
                 {
                     const vector<unsigned char>& v = vvchArgs[0];
                     string a = stringFromVch(v);
@@ -629,7 +627,7 @@ void LocatorNodeDB::filter(CBlockIndex* p__)
                             txPos2.vValue = vchValue;
                             txPos2.vAddress = s;
                             txPos2.txPos = txPos;
-                            if((op == OP_ALIAS_SET || op == OP_BASE_SET) && !lKey(vvchArgs[0]))
+                            if((op == OP_ALIAS_SET || op == OP_BASE_SET || op == OP_BASE_VERTEX_SET) && !lKey(vvchArgs[0]))
                             {
                                 vtxPos.push_back(txPos2);
                                 lPut(vvchArgs[0], vtxPos);
@@ -640,7 +638,7 @@ void LocatorNodeDB::filter(CBlockIndex* p__)
                                     lPut(vvchArgs[0], vtxPos);
                                 }
                             }
-                            else if((op == OP_ALIAS_SET || op == OP_BASE_SET) && lKey(vvchArgs[0]))
+                            else if((op == OP_ALIAS_SET || op == OP_BASE_SET || op == OP_BASE_VERTEX_SET) && lKey(vvchArgs[0]))
                             {
                                 vector<PathIndex> v;
                                 lGet(vvchArgs[0], v);
@@ -650,14 +648,14 @@ void LocatorNodeDB::filter(CBlockIndex* p__)
                                     vtxPos.push_back(txPos2);
                                     lPut(vvchArgs[0], vtxPos);
                                 }
-                                if(op == OP_BASE_SET)
+                                if(op == OP_BASE_SET || op == OP_BASE_VERTEX_SET)
                                 {
                                     txPos2.vValue = vvchArgs[1];
                                     vtxPos.push_back(txPos2);
                                     lPut(vvchArgs[0], vtxPos);
                                 }
                             }
-                            else if((op == OP_ALIAS_RELAY || op == OP_BASE_RELAY) && lKey(vvchArgs[0]))
+                            else if((op == OP_ALIAS_RELAY || op == OP_BASE_RELAY || op == OP_BASE_VERTEX_RELAY) && lKey(vvchArgs[0]))
                             {
                                 txPos2.vValue = vvchArgs[1];
                                 vtxPos.push_back(txPos2);

@@ -278,8 +278,8 @@ class KeyConvertingIterator: public Iterator {
   explicit KeyConvertingIterator(Iterator* iter) : iter_(iter) { }
   virtual ~KeyConvertingIterator() { delete iter_; }
   virtual bool Valid() const { return iter_->Valid(); }
-  virtual void Seek(const Slice& read_vtx_init) {
-    ParsedInternalKey ikey(read_vtx_init, kMaxSequenceNumber, kTypeValue);
+  virtual void Seek(const Slice& target) {
+    ParsedInternalKey ikey(target, kMaxSequenceNumber, kTypeValue);
     std::string encoded;
     AppendInternalKey(&encoded, ikey);
     iter_->Seek(encoded);

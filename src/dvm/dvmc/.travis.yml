@@ -17,7 +17,7 @@ install:
   - cmake --version
   - mkdir build && cd build
   - cmake .. -G "Visual Studio 15 2017 Win64" -DDVMC_TESTING=ON -DCMAKE_INSTALL_PREFIX=$HOME
-  - cmake --build . --config Release --read_vtx_init install
+  - cmake --build . --config Release --target install
 
 script:
   - ctest -C Release -j4 --schedule-random --output-on-failure

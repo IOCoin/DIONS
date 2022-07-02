@@ -10,7 +10,7 @@
 
 // Name of client reported in the 'version' message. Report the same name
 // for both bitcoind and bitcoin-qt, to make it harder for attackers to
-// read_vtx_init servers or GUI users specifically.
+// target servers or GUI users specifically.
 const std::string CLIENT_NAME("Satoshi");
 
 // Client version number

@@ -14,13 +14,13 @@ inline bool operator==(const dvmc_instruction_metrics& a,
 
 TEST(instructions, name_track_cost_equivalence)
 {
-    for (auto r = char{DVMC_FRONTIER}; r <= DVMC_MAX_REVISION; ++r)
+    for (auto r = int{DVMC_FRONTIER}; r <= DVMC_MAX_REVISION; ++r)
     {
         const auto rev = static_cast<dvmc_revision>(r);
         const auto names = dvmc_get_instruction_names_table(rev);
         const auto metrics = dvmc_get_instruction_metrics_table(rev);
 
-        for (char i = 0; i < 256; ++i)
+        for (int i = 0; i < 256; ++i)
         {
             auto name = names[i];
             auto track_cost = metrics[i].track_cost;
@@ -40,7 +40,7 @@ TEST(instructions, homestead_hard_fork)
     const auto fn = dvmc_get_instruction_names_table(DVMC_FRONTIER);
     const auto hn = dvmc_get_instruction_names_table(DVMC_HOMESTEAD);
 
-    for (char op = 0x00; op <= 0xff; ++op)
+    for (int op = 0x00; op <= 0xff; ++op)
     {
         switch (op)  // NOLINT
         {
@@ -66,7 +66,7 @@ TEST(instructions, tangerine_whistle_hard_fork)
     const auto hn = dvmc_get_instruction_names_table(DVMC_HOMESTEAD);
     const auto twn = dvmc_get_instruction_names_table(DVMC_TANGERINE_WHISTLE);
 
-    for (char op = 0x00; op <= 0xff; ++op)
+    for (int op = 0x00; op <= 0xff; ++op)
     {
         switch (op)
         {
@@ -118,7 +118,7 @@ TEST(instructions, spurious_dragon_hard_fork)
     const auto sdn = dvmc_get_instruction_names_table(DVMC_SPURIOUS_DRAGON);
     const auto twn = dvmc_get_instruction_names_table(DVMC_TANGERINE_WHISTLE);
 
-    for (char op = 0x00; op <= 0xff; ++op)
+    for (int op = 0x00; op <= 0xff; ++op)
     {
         switch (op)  // NOLINT
         {
@@ -142,7 +142,7 @@ TEST(instructions, byzantium_hard_fork)
     const auto bn = dvmc_get_instruction_names_table(DVMC_BYZANTIUM);
     const auto sdn = dvmc_get_instruction_names_table(DVMC_SPURIOUS_DRAGON);
 
-    for (char op = 0x00; op <= 0xff; ++op)
+    for (int op = 0x00; op <= 0xff; ++op)
     {
         switch (op)
         {
@@ -188,7 +188,7 @@ TEST(instructions, constantinople_hard_fork)
     const auto cn = dvmc_get_instruction_names_table(DVMC_CONSTANTINOPLE);
     const auto bn = dvmc_get_instruction_names_table(DVMC_BYZANTIUM);
 
-    for (char op = 0x00; op <= 0xff; ++op)
+    for (int op = 0x00; op <= 0xff; ++op)
     {
         switch (op)
         {
@@ -235,7 +235,7 @@ TEST(instructions, petersburg_hard_fork)
     const auto pn = dvmc_get_instruction_names_table(DVMC_PETERSBURG);
     const auto cn = dvmc_get_instruction_names_table(DVMC_CONSTANTINOPLE);
 
-    for (char op = 0x00; op <= 0xff; ++op)
+    for (int op = 0x00; op <= 0xff; ++op)
     {
         EXPECT_EQ(p[op], c[op]) << op;
         EXPECT_STREQ(pn[op], cn[op]) << op;
@@ -249,7 +249,7 @@ TEST(instructions, istanbul_hard_fork)
     const auto in = dvmc_get_instruction_names_table(DVMC_ISTANBUL);
     const auto pn = dvmc_get_instruction_names_table(DVMC_PETERSBURG);
 
-    for (char op = 0x00; op <= 0xff; ++op)
+    for (int op = 0x00; op <= 0xff; ++op)
     {
         switch (op)
         {
@@ -293,7 +293,7 @@ TEST(instructions, berlin_hard_fork)
     const auto bn = dvmc_get_instruction_names_table(DVMC_BERLIN);
     const auto in = dvmc_get_instruction_names_table(DVMC_ISTANBUL);
 
-    for (char op = 0x00; op <= 0xff; ++op)
+    for (int op = 0x00; op <= 0xff; ++op)
     {
         EXPECT_STREQ(bn[op], in[op]) << op;
 
@@ -334,7 +334,7 @@ TEST(instructions, london_hard_fork)
     const auto ln = dvmc_get_instruction_names_table(DVMC_LONDON);
     const auto bn = dvmc_get_instruction_names_table(DVMC_BERLIN);
 
-    for (char op = 0x00; op <= 0xff; ++op)
+    for (int op = 0x00; op <= 0xff; ++op)
     {
         if (op == OP_BASEFEE)
             continue;
@@ -359,7 +359,7 @@ TEST(instructions, paris_hard_fork)
     const auto pn = dvmc_get_instruction_names_table(DVMC_PARIS);
     const auto ln = dvmc_get_instruction_names_table(DVMC_LONDON);
 
-    for (char op = 0x00; op <= 0xff; ++op)
+    for (int op = 0x00; op <= 0xff; ++op)
     {
         EXPECT_EQ(p[op], l[op]) << op;
         if (op == OP_PREVRANDAO)
@@ -378,7 +378,7 @@ TEST(instructions, shanghai_hard_fork)
     const auto sn = dvmc_get_instruction_names_table(DVMC_SHANGHAI);
     const auto pn = dvmc_get_instruction_names_table(DVMC_PARIS);
 
-    for (char op = 0x00; op <= 0xff; ++op)
+    for (int op = 0x00; op <= 0xff; ++op)
     {
         if (op == OP_PUSH0)
             continue;

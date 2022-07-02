@@ -18,12 +18,12 @@ add_jar(dvmc-jar
     GENERATE_NATIVE_HEADERS dvmc-java-native-headers)
 
 add_library(dvmc-java SHARED)
-read_vtx_init_sources(dvmc-java PRIVATE
+target_sources(dvmc-java PRIVATE
     c/dvmc-vm.c
     c/host.c
     c/host.h)
-read_vtx_init_include_directories(dvmc-java PRIVATE ${JNI_INCLUDE_DIRS})
-read_vtx_init_link_libraries(dvmc-java PRIVATE dvmc-java-native-headers dvmc::dvmc dvmc::loader ${JNI_LIBRARIES})
+target_include_directories(dvmc-java PRIVATE ${JNI_INCLUDE_DIRS})
+target_link_libraries(dvmc-java PRIVATE dvmc-java-native-headers dvmc::dvmc dvmc::loader ${JNI_LIBRARIES})
 
 if(DVMC_INSTALL)
     install(TARGETS dvmc-java EXPORT dvmcTargets

@@ -23,7 +23,7 @@ dvmc::VM& get_vm() noexcept
 class cli_parser
 {
 public:
-    using preprocessor_fn = void (*)(char*, char**);
+    using preprocessor_fn = void (*)(int*, char**);
 
     const char* const application_name = nullptr;
     const char* const application_version = nullptr;
@@ -32,7 +32,7 @@ public:
     std::vector<std::string> arguments_names;
     std::vector<std::string> arguments;
 
-    preprocessor_fn preprocessor = [](char*, char**) {};
+    preprocessor_fn preprocessor = [](int*, char**) {};
 
     cli_parser(const char* app_name, const char* app_version, const char* app_description,
         std::vector<std::string> args_names) noexcept
@@ -61,7 +61,7 @@ public:
     /// @return Negative value in case of error,
     ///         0 in case --help or --version was provided and the program should terminate,
     ///         positive value in case the program should continue.
-    char parse(char argc, char* argv[], std::ostream& out, std::ostream& err)
+    int parse(int argc, char* argv[], std::ostream& out, std::ostream& err)
     {
         out << application_name << " " << application_version << "\n\n";
 
@@ -74,7 +74,7 @@ public:
             return 0;
 
         size_t num_args = 0;
-        for (char i = 1; i < argc; ++i)
+        for (int i = 1; i < argc; ++i)
         {
             auto arg = std::string{argv[i]};
 
@@ -107,14 +107,14 @@ public:
     }
 
 private:
-    bool handle_builtin_options(char argc, char* argv[], std::ostream& out)
+    bool handle_builtin_options(int argc, char* argv[], std::ostream& out)
     {
         using namespace std::string_literals;
 
         auto help = false;
         auto version = false;
 
-        for (char i = 1; i < argc; ++i)
+        for (int i = 1; i < argc; ++i)
         {
             help |= argv[i] == "--help"s || argv[i] == "-h"s;
             version |= argv[i] == "--version"s;
@@ -140,7 +140,7 @@ private:
     }
 };
 
-char main(char argc, char* argv[])
+int main(int argc, char* argv[])
 {
     try
     {
@@ -165,7 +165,7 @@ char main(char argc, char* argv[])
                 std::cerr << "DVMC loading error: " << error << "\n";
             else
                 std::cerr << "DVMC loading error " << ec << "\n";
-            return static_cast<char>(ec);
+            return static_cast<int>(ec);
         }
 
         std::cout << "Testing " << dvmc_config << "\n\n";

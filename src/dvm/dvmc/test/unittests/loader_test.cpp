@@ -17,8 +17,8 @@ static constexpr bool is_windows = false;
 #endif
 
 extern "C" {
-/// Declaration of charernal function defined in loader.c.
-char strcpy_sx(char* dest, size_t destsz, const char* src);
+/// Declaration of internal function defined in loader.c.
+int strcpy_sx(char* dest, size_t destsz, const char* src);
 
 /// The library path expected by mocked dvmc_test_load_library().
 extern const char* dvmc_test_library_path;
@@ -26,15 +26,15 @@ extern const char* dvmc_test_library_path;
 /// The symbol name expected by mocked dvmc_test_get_symbol_address().
 extern const char* dvmc_test_library_symbol;
 
-/// The pocharer to function returned by dvmc_test_get_symbol_address().
+/// The pointer to function returned by dvmc_test_get_symbol_address().
 extern dvmc_create_fn dvmc_test_create_fn;
 }
 
 class loader : public ::testing::Test
 {
 protected:
-    static char create_count;
-    static char destroy_count;
+    static int create_count;
+    static int destroy_count;
     static std::unordered_map<std::string, std::vector<std::string>> supported_options;
     static std::vector<std::pair<std::string, std::string>> recorded_options;
     static const std::string option_name_causing_unknown_error;
@@ -110,8 +110,8 @@ protected:
     }
 };
 
-char loader::create_count = 0;
-char loader::destroy_count = 0;
+int loader::create_count = 0;
+int loader::destroy_count = 0;
 std::unordered_map<std::string, std::vector<std::string>> loader::supported_options;
 std::vector<std::pair<std::string, std::string>> loader::recorded_options;
 
@@ -120,12 +120,12 @@ const std::string loader::option_name_causing_unknown_error{"raise_unknown"};
 
 static dvmc_vm* create_aaa()
 {
-    return recharerpret_cast<dvmc_vm*>(0xaaa);
+    return reinterpret_cast<dvmc_vm*>(0xaaa);
 }
 
 static dvmc_vm* create_eee_bbb()
 {
-    return recharerpret_cast<dvmc_vm*>(0xeeebbb);
+    return reinterpret_cast<dvmc_vm*>(0xeeebbb);
 }
 
 static dvmc_vm* create_failure()
@@ -211,7 +211,7 @@ TEST_F(loader, load_aaa)
         "unittests/libaaa.so",
     };
 
-    const auto expected_vm_ptr = recharerpret_cast<dvmc_vm*>(0xaaa);
+    const auto expected_vm_ptr = reinterpret_cast<dvmc_vm*>(0xaaa);
 
     for (auto& path : paths)
     {
@@ -236,7 +236,7 @@ TEST_F(loader, load_file_with_multiple_extensions)
         "unittests/aaa.extextextextextextextextextextextextextextextextext",
     };
 
-    const auto expected_vm_ptr = recharerpret_cast<dvmc_vm*>(0xaaa);
+    const auto expected_vm_ptr = reinterpret_cast<dvmc_vm*>(0xaaa);
 
     for (auto& path : paths)
     {
@@ -255,7 +255,7 @@ TEST_F(loader, load_eee_bbb)
     setup("unittests/eee-bbb.dll", "dvmc_create_eee_bbb", create_eee_bbb);
     dvmc_loader_error_code ec = DVMC_LOADER_UNSPECIFIED_ERROR;
     auto fn = dvmc_load(dvmc_test_library_path, &ec);
-    const auto expected_vm_ptr = recharerpret_cast<dvmc_vm*>(0xeeebbb);
+    const auto expected_vm_ptr = reinterpret_cast<dvmc_vm*>(0xeeebbb);
     ASSERT_TRUE(fn != nullptr);
     EXPECT_EQ(ec, DVMC_LOADER_SUCCESS);
     EXPECT_EQ(fn(), expected_vm_ptr);

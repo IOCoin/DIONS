@@ -27,6 +27,8 @@ static const int OP_VERTEX = 9;
 static const int OP_MAP_PROJECT = 10;
 static const int OP_BASE_SET = 11;
 static const int OP_BASE_RELAY = 12;
+static const int OP_BASE_VERTEX_SET = 13;
+static const int OP_BASE_VERTEX_RELAY = 14;
 static const int MIN_SET_DEPTH = 1;
 
 static const int UI_MAX_XUNIT_LENGTH = 520;

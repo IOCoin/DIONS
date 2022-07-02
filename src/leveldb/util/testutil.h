@@ -43,7 +43,7 @@ class ErrorEnv : public EnvWrapper {
       *result = NULL;
       return Status::IOError(fname, "fake error");
     }
-    return read_vtx_init()->NewWritableFile(fname, result);
+    return target()->NewWritableFile(fname, result);
   }
 };
 

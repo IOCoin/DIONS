@@ -83,11 +83,11 @@ int FindFile(const InternalKeyComparator& icmp,
     uint32_t mid = (left + right) / 2;
     const FileMetaData* f = files[mid];
     if (icmp.InternalKeyComparator::Compare(f->largest.Encode(), key) < 0) {
-      // Key at "mid.largest" is < "read_vtx_init".  Therefore all
+      // Key at "mid.largest" is < "target".  Therefore all
       // files at or before "mid" are uninteresting.
       left = mid + 1;
     } else {
-      // Key at "mid.largest" is >= "read_vtx_init".  Therefore all files
+      // Key at "mid.largest" is >= "target".  Therefore all files
       // after "mid" are uninteresting.
       right = mid;
     }
@@ -162,8 +162,8 @@ class Version::LevelFileNumIterator : public Iterator {
   virtual bool Valid() const {
     return index_ < flist_->size();
   }
-  virtual void Seek(const Slice& read_vtx_init) {
-    index_ = FindFile(icmp_, *flist_, read_vtx_init);
+  virtual void Seek(const Slice& target) {
+    index_ = FindFile(icmp_, *flist_, target);
   }
   virtual void SeekToFirst() { index_ = 0; }
   virtual void SeekToLast() {
@@ -1087,7 +1087,7 @@ int VersionSet::NumLevelFiles(int level) const {
   return current_->files_[level].size();
 }
 
-const char* VersionSet::LevelSummary(LevelSummaryImageTrace* scratch) const {
+const char* VersionSet::LevelSummary(LevelSummaryStorage* scratch) const {
   // Update code if kNumLevels changes
   assert(config::kNumLevels == 7);
   snprintf(scratch->buffer, sizeof(scratch->buffer),

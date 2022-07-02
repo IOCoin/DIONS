@@ -6,8 +6,8 @@ pub type Address = ffi::dvmc_address;
 /// DVMC 32 bytes value (used for hashes)
 pub type Bytes32 = ffi::dvmc_bytes32;
 
-/// DVMC big-endian 256-bit chareger
-pub type Uchar256 = ffi::dvmc_uchar256be;
+/// DVMC big-endian 256-bit integer
+pub type Uint256 = ffi::dvmc_uint256be;
 
 /// DVMC call kind.
 pub type MessageKind = ffi::dvmc_call_kind;
@@ -22,7 +22,7 @@ pub type StatusCode = ffi::dvmc_status_code;
 pub type AccessStatus = ffi::dvmc_access_status;
 
 /// DVMC storage status.
-pub type ImageTraceStatus = ffi::dvmc_storage_status;
+pub type StorageStatus = ffi::dvmc_storage_status;
 
 /// DVMC VM revision.
 pub type Revision = ffi::dvmc_revision;
@@ -47,9 +47,9 @@ mod tests {
     }
 
     #[test]
-    fn uchar26be_smoke_test() {
-        let a = ffi::dvmc_uchar256be::default();
-        let b = Uchar256::default();
+    fn uint26be_smoke_test() {
+        let a = ffi::dvmc_uint256be::default();
+        let b = Uint256::default();
         assert_eq!(a.clone(), b.clone());
     }
 
@@ -99,11 +99,11 @@ mod tests {
     #[test]
     fn storage_status() {
         assert_eq!(
-            ImageTraceStatus::DVMC_STORAGE_UNCHANGED,
+            StorageStatus::DVMC_STORAGE_UNCHANGED,
             ffi::dvmc_storage_status::DVMC_STORAGE_UNCHANGED
         );
         assert_eq!(
-            ImageTraceStatus::DVMC_STORAGE_MODIFIED,
+            StorageStatus::DVMC_STORAGE_MODIFIED,
             ffi::dvmc_storage_status::DVMC_STORAGE_MODIFIED
         );
     }

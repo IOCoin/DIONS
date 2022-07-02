@@ -43,7 +43,7 @@ class EmptyIterator : public Iterator {
  public:
   EmptyIterator(const Status& s) : status_(s) { }
   virtual bool Valid() const { return false; }
-  virtual void Seek(const Slice& read_vtx_init) { }
+  virtual void Seek(const Slice& target) { }
   virtual void SeekToFirst() { }
   virtual void SeekToLast() { }
   virtual void Next() { assert(false); }

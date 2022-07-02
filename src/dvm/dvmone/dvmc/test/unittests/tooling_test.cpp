@@ -12,9 +12,9 @@ using namespace dvmc::tooling;
 namespace
 {
 std::string out_pattern(const char* rev,
-                        char track_limit,
+                        int track_limit,
                         const char* status,
-                        char track_used,
+                        int track_used,
                         const char* output = nullptr,
                         bool create = false)
 {

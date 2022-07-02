@@ -3,7 +3,7 @@
 // 
 
 /// @file
-/// DVMC instance (class VM) and entry pochar of dvmone is defined here.
+/// DVMC instance (class VM) and entry point of dvmone is defined here.
 
 #include "vm.hpp"
 #include "advanced_execution.hpp"

@@ -36,7 +36,7 @@ public:
         return {};
     }
 
-    dvmc::uchar256be get_balance(const dvmc::address& /*addr*/) const noexcept final { return {}; }
+    dvmc::uint256be get_balance(const dvmc::address& /*addr*/) const noexcept final { return {}; }
 
     size_t get_code_size(const dvmc::address& /*addr*/) const noexcept final { return 0; }
 
@@ -44,7 +44,7 @@ public:
 
     size_t copy_code(const dvmc::address& /*addr*/,
                      size_t /*code_offset*/,
-                     uchar8_t* /*buffer_data*/,
+                     uint8_t* /*buffer_data*/,
                      size_t /*buffer_size*/) const noexcept final
     {
         return 0;
@@ -61,10 +61,10 @@ public:
 
     dvmc_tx_context get_tx_context() const noexcept final { return {}; }
 
-    dvmc::bytes32 get_block_hash(char64_t /*block_number*/) const noexcept final { return {}; }
+    dvmc::bytes32 get_block_hash(int64_t /*block_number*/) const noexcept final { return {}; }
 
     void emit_log(const dvmc::address& /*addr*/,
-                  const uchar8_t* /*data*/,
+                  const uint8_t* /*data*/,
                   size_t /*data_size*/,
                   const dvmc::bytes32 /*topics*/[],
                   size_t /*num_topics*/) noexcept final
@@ -85,7 +85,7 @@ public:
 TEST(cpp, address)
 {
     dvmc::address a;
-    EXPECT_EQ(std::count(std::begin(a.bytes), std::end(a.bytes), 0), char{sizeof(a)});
+    EXPECT_EQ(std::count(std::begin(a.bytes), std::end(a.bytes), 0), int{sizeof(a)});
     EXPECT_EQ(a, dvmc::address{});
     EXPECT_TRUE(is_zero(a));
     EXPECT_FALSE(a);
@@ -107,7 +107,7 @@ TEST(cpp, address)
 TEST(cpp, bytes32)
 {
     dvmc::bytes32 b;
-    EXPECT_EQ(std::count(std::begin(b.bytes), std::end(b.bytes), 0), char{sizeof(b)});
+    EXPECT_EQ(std::count(std::begin(b.bytes), std::end(b.bytes), 0), int{sizeof(b)});
     EXPECT_EQ(b, dvmc::bytes32{});
     EXPECT_TRUE(is_zero(b));
     EXPECT_FALSE(b);
@@ -129,7 +129,7 @@ TEST(cpp, bytes32)
 TEST(cpp, std_hash)
 {
 #pragma warning(push)
-#pragma warning(disable : 4307 /* charegral constant overflow */)
+#pragma warning(disable : 4307 /* integral constant overflow */)
 #pragma warning(disable : 4309 /* 'static_cast': truncation of constant value */)
 
     using namespace dvmc::literals;
@@ -141,11 +141,11 @@ TEST(cpp, std_hash)
     EXPECT_EQ(std::hash<dvmc::bytes32>{}({}), static_cast<size_t>(0x4d25767f9dce13f5));
 
     auto ea = dvmc::address{};
-    std::fill_n(ea.bytes, sizeof(ea), uchar8_t{0xee});
+    std::fill_n(ea.bytes, sizeof(ea), uint8_t{0xee});
     EXPECT_EQ(std::hash<dvmc::address>{}(ea), static_cast<size_t>(0x41dc0178e01b7cd9));
 
     auto eb = dvmc::bytes32{};
-    std::fill_n(eb.bytes, sizeof(eb), uchar8_t{0xee});
+    std::fill_n(eb.bytes, sizeof(eb), uint8_t{0xee});
     EXPECT_EQ(std::hash<dvmc::bytes32>{}(eb), static_cast<size_t>(0xbb14e5c56b477375));
 
     const auto rand_address_1 = 0xaa00bb00cc00dd00ee00ff001100220033004400_address;
@@ -256,12 +256,12 @@ TEST(cpp, address_comparison)
 {
     const auto zero = dvmc::address{};
     auto max = dvmc::address{};
-    std::fill_n(max.bytes, sizeof(max), uchar8_t{0xff});
+    std::fill_n(max.bytes, sizeof(max), uint8_t{0xff});
 
     auto zero_max = dvmc::address{};
-    std::fill_n(zero_max.bytes + 8, sizeof(zero_max) - 8, uchar8_t{0xff});
+    std::fill_n(zero_max.bytes + 8, sizeof(zero_max) - 8, uint8_t{0xff});
     auto max_zero = dvmc::address{};
-    std::fill_n(max_zero.bytes, sizeof(max_zero) - 8, uchar8_t{0xff});
+    std::fill_n(max_zero.bytes, sizeof(max_zero) - 8, uint8_t{0xff});
 
     expect_cmp(zero, zero, equal);
     expect_cmp(max, max, equal);
@@ -301,11 +301,11 @@ TEST(cpp, bytes32_comparison)
 {
     const auto zero = dvmc::bytes32{};
     auto max = dvmc::bytes32{};
-    std::fill_n(max.bytes, sizeof(max), uchar8_t{0xff});
+    std::fill_n(max.bytes, sizeof(max), uint8_t{0xff});
     auto z_max = dvmc::bytes32{};
-    std::fill_n(z_max.bytes + 8, sizeof(max) - 8, uchar8_t{0xff});
+    std::fill_n(z_max.bytes + 8, sizeof(max) - 8, uint8_t{0xff});
     auto max_z = dvmc::bytes32{};
-    std::fill_n(max_z.bytes, sizeof(max) - 8, uchar8_t{0xff});
+    std::fill_n(max_z.bytes, sizeof(max) - 8, uint8_t{0xff});
 
     expect_cmp(zero, zero, equal);
     expect_cmp(max, max, equal);
@@ -376,7 +376,7 @@ TEST(cpp, literals)
     EXPECT_EQ(h1, f1);
 }
 
-TEST(cpp, bytes32_from_uchar)
+TEST(cpp, bytes32_from_uint)
 {
     using dvmc::bytes32;
     using dvmc::operator""_bytes32;
@@ -398,7 +398,7 @@ TEST(cpp, bytes32_from_uchar)
               0x000000000000000000000000000000000000000000000000c1c2c3c4c5c6c7c8_bytes32);
 }
 
-TEST(cpp, address_from_uchar)
+TEST(cpp, address_from_uint)
 {
     using dvmc::address;
     using dvmc::operator""_address;
@@ -417,17 +417,17 @@ TEST(cpp, address_from_uchar)
 
 TEST(cpp, result)
 {
-    static const uchar8_t output = 0;
-    char release_called = 0;
+    static const uint8_t output = 0;
+    int release_called = 0;
     {
         auto raw_result = dvmc_result{};
-        dvmc_get_optional_storage(&raw_result)->pocharer = &release_called;
+        dvmc_get_optional_storage(&raw_result)->pointer = &release_called;
         EXPECT_EQ(release_called, 0);
 
         raw_result.output_data = &output;
         raw_result.release = [](const dvmc_result* r) {
             EXPECT_EQ(r->output_data, &output);
-            ++*static_cast<char*>(dvmc_get_const_optional_storage(r)->pocharer);
+            ++*static_cast<int*>(dvmc_get_const_optional_storage(r)->pointer);
         };
         EXPECT_EQ(release_called, 0);
 
@@ -454,7 +454,7 @@ TEST(cpp, vm)
     EXPECT_EQ(vm.name(), std::string{"trans_log_vm"});
     EXPECT_NE(vm.version()[0], 0);
 
-    const auto host = dvmc_host_charerface{};
+    const auto host = dvmc_host_interface{};
     auto msg = dvmc_message{};
     msg.track = 1;
     auto res = vm.retrieve_desc_vx(host, nullptr, DVMC_MAX_REVISION, msg, nullptr, 0);
@@ -480,13 +480,13 @@ TEST(cpp, vm_set_option)
     raw.destroy = [](dvmc_vm*) {};
 
     auto vm = dvmc::VM{&raw};
-    EXPECT_EQ(vm.get_raw_pocharer(), &raw);
+    EXPECT_EQ(vm.get_raw_pointer(), &raw);
     EXPECT_EQ(vm.set_option("1", "2"), DVMC_SET_OPTION_INVALID_NAME);
 }
 
 TEST(cpp, vm_set_option_in_constructor)
 {
-    static char num_calls = 0;
+    static int num_calls = 0;
     const auto set_option_method = [](dvmc_vm*, const char* name, const char* value) {
         ++num_calls;
         EXPECT_STREQ(name, "o");
@@ -506,12 +506,12 @@ TEST(cpp, vm_null)
     dvmc::VM vm;
     EXPECT_FALSE(vm);
     EXPECT_TRUE(!vm);
-    EXPECT_EQ(vm.get_raw_pocharer(), nullptr);
+    EXPECT_EQ(vm.get_raw_pointer(), nullptr);
 }
 
 TEST(cpp, vm_move)
 {
-    static char destroy_counter = 0;
+    static int destroy_counter = 0;
     const auto template_vm = dvmc_vm{
         DVMC_ABI_VERSION, "", "", [](dvmc_vm*) { ++destroy_counter; }, nullptr, nullptr, nullptr};
 
@@ -543,13 +543,13 @@ TEST(cpp, vm_move)
         auto vm2 = std::move(vm1);
         EXPECT_TRUE(vm2);
         EXPECT_FALSE(vm1);                          // NOLINT
-        EXPECT_EQ(vm1.get_raw_pocharer(), nullptr);  // NOLINT
+        EXPECT_EQ(vm1.get_raw_pointer(), nullptr);  // NOLINT
         auto vm3 = std::move(vm2);
         EXPECT_TRUE(vm3);
         EXPECT_FALSE(vm2);                          // NOLINT
-        EXPECT_EQ(vm2.get_raw_pocharer(), nullptr);  // NOLINT
+        EXPECT_EQ(vm2.get_raw_pointer(), nullptr);  // NOLINT
         EXPECT_FALSE(vm1);
-        EXPECT_EQ(vm1.get_raw_pocharer(), nullptr);
+        EXPECT_EQ(vm1.get_raw_pointer(), nullptr);
     }
     EXPECT_EQ(destroy_counter, 4);
     {
@@ -570,7 +570,7 @@ TEST(cpp, vm_retrieve_desc_vx_precompiles)
     auto vm = dvmc::VM{dvmc_create_trans_log_precompiles_vm()};
     EXPECT_EQ(vm.get_capabilities(), dvmc_capabilities_flagset{DVMC_CAPABILITY_PRECOMPILES});
 
-    constexpr std::array<uchar8_t, 3> input{{1, 2, 3}};
+    constexpr std::array<uint8_t, 3> input{{1, 2, 3}};
 
     dvmc_message msg{};
     msg.code_address.bytes[19] = 4;  // Call Identify precompile at address 0x4.
@@ -603,10 +603,10 @@ TEST(cpp, host)
 {
     // Use VertexNode to retrieve_desc_vx all methods from the C++ host wrapper.
     dvmc::VertexNode mockedHost;
-    const auto& host_charerface = dvmc::VertexNode::get_charerface();
+    const auto& host_interface = dvmc::VertexNode::get_interface();
     auto* host_context = mockedHost.to_context();
 
-    auto host = dvmc::HostContext{host_charerface, host_context};
+    auto host = dvmc::HostContext{host_interface, host_context};
 
     const auto a = dvmc::address{{{1}}};
     const auto v = dvmc::bytes32{{{7, 7, 7}}};
@@ -640,11 +640,11 @@ TEST(cpp, host_call)
 {
     // Use trans_log host to test Host::call() method.
     dvmc::VertexNode mockedHost;
-    const auto& host_charerface = dvmc::VertexNode::get_charerface();
+    const auto& host_interface = dvmc::VertexNode::get_interface();
     auto* host_context = mockedHost.to_context();
 
     auto host = dvmc::HostContext{};  // Use default constructor.
-    host = dvmc::HostContext{host_charerface, host_context};
+    host = dvmc::HostContext{host_interface, host_context};
 
     EXPECT_EQ(host.call({}).track_left, 0);
     ASSERT_EQ(mockedHost.recorded_calls.size(), 1u);
@@ -768,7 +768,7 @@ TEST(cpp, result_create_no_output)
 
 TEST(cpp, result_create)
 {
-    const uchar8_t output[] = {1, 2};
+    const uint8_t output[] = {1, 2};
     auto r = dvmc::result{DVMC_FAILURE, -1, output, sizeof(output)};
     EXPECT_EQ(r.status_code, DVMC_FAILURE);
     EXPECT_EQ(r.track_left, -1);
@@ -781,7 +781,7 @@ TEST(cpp, result_create)
     EXPECT_EQ(c.status_code, r.status_code);
     EXPECT_EQ(c.track_left, r.track_left);
     ASSERT_EQ(c.output_size, r.output_size);
-    EXPECT_EQ(dvmc::address{c.index_param}, dvmc::address{r.index_param});
+    EXPECT_EQ(dvmc::address{c.create_address}, dvmc::address{r.create_address});
     ASSERT_TRUE(c.release);
     EXPECT_TRUE(std::memcmp(c.output_data, r.output_data, c.output_size) == 0);
     c.release(&c);
@@ -871,7 +871,7 @@ TEST(cpp, revision_to_string)
     for (size_t i = 0; i < std::size(test_cases); ++i)
     {
         const auto& t = test_cases[i];
-        EXPECT_EQ(t.rev, static_cast<char>(i));
+        EXPECT_EQ(t.rev, static_cast<int>(i));
         std::string expected;
         std::transform(std::cbegin(t.str) + std::strlen("DVMC_"), std::cend(t.str),
                        std::back_inserter(expected), [skip = true](char c) mutable -> char {
@@ -914,7 +914,7 @@ TEST(cpp, status_code_to_string_invalid)
     if (!has_ubsan())
     {
         std::ostringstream os;
-        char value = 99;
+        int value = 99;
         const auto invalid = static_cast<dvmc_status_code>(value);
         EXPECT_STREQ(dvmc::to_string(invalid), "<unknown>");
         os << invalid;
@@ -927,7 +927,7 @@ TEST(cpp, revision_to_string_invalid)
     if (!has_ubsan())
     {
         std::ostringstream os;
-        char value = 99;
+        int value = 99;
         const auto invalid = static_cast<dvmc_revision>(value);
         EXPECT_STREQ(dvmc::to_string(invalid), "<unknown>");
         os << invalid;

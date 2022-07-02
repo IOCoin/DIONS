@@ -73,7 +73,7 @@ std::string to_string(const CodeParams& params)
 {
     return std::string{instr::traits[params.opcode].name} + '/' +
            static_cast<char>(get_instruction_category(params.opcode)) +
-           std::to_string(static_cast<char>(params.mode));
+           std::to_string(static_cast<int>(params.mode));
 }
 
 /// Generates the DVM benchmark loop inner code for the given opcode and "mode".

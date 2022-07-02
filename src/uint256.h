@@ -24,8 +24,8 @@ class base_uint
 {
 protected:
     enum { WIDTH=BITS/32 };
-    unsigned int pn[WIDTH];
 public:
+    unsigned int pn[WIDTH];
 
     bool operator!() const
     {

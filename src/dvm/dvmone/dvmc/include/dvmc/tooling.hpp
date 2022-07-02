@@ -8,9 +8,9 @@
 
 namespace dvmc::tooling
 {
-char run(dvmc::VM& vm,
+int run(dvmc::VM& vm,
         dvmc_revision rev,
-        char64_t track,
+        int64_t track,
         const std::string& code_hex,
         const std::string& input_hex,
         bool create,

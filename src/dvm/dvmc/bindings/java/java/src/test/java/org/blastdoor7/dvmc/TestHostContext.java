@@ -12,22 +12,22 @@ class TestHostContext implements HostContext {
   }
 
   @Override
-  public char accessAccount(byte[] address) {
+  public int accessAccount(byte[] address) {
     return 0;
   }
 
   @Override
-  public char accessImageTrace(byte[] address, byte[] key) {
+  public int accessStorage(byte[] address, byte[] key) {
     return 0;
   }
 
   @Override
-  public ByteBuffer getImageTrace(byte[] address, byte[] key) {
+  public ByteBuffer getStorage(byte[] address, byte[] key) {
     return ByteBuffer.allocateDirect(32).put(new byte[32]);
   }
 
   @Override
-  public char setImageTrace(byte[] address, byte[] key, byte[] value) {
+  public int setStorage(byte[] address, byte[] key, byte[] value) {
     return 0;
   }
 
@@ -37,7 +37,7 @@ class TestHostContext implements HostContext {
   }
 
   @Override
-  public char getCodeSize(byte[] address) {
+  public int getCodeSize(byte[] address) {
     return address.length;
   }
 
@@ -70,5 +70,5 @@ class TestHostContext implements HostContext {
   }
 
   @Override
-  public void emitLog(byte[] address, byte[] data, char dataSize, byte[][] topics, char topicCount) {}
+  public void emitLog(byte[] address, byte[] data, int dataSize, byte[][] topics, int topicCount) {}
 }

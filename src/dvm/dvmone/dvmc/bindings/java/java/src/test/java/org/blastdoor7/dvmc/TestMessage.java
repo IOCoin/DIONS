@@ -9,9 +9,9 @@ import java.nio.CharBuffer;
 import java.nio.charset.StandardCharsets;
 
 public class TestMessage {
-  char kind;
-  char flags;
-  char depth;
+  int kind;
+  int flags;
+  int depth;
   long track;
   char[] recipient;
   char[] sender;
@@ -22,13 +22,13 @@ public class TestMessage {
   byte[] codeAddress;
 
   public TestMessage(
-      char kind,
+      int kind,
       char[] sender,
       char[] recipient,
       char[] value,
       char[] inputData,
       long track,
-      char depth) {
+      int depth) {
     this.kind = kind;
     this.flags = 0;
     this.depth = depth;

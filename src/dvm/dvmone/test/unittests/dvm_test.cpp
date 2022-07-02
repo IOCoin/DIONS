@@ -4,12 +4,12 @@
 
 #include "dvm_fixture.hpp"
 #include <dvmc/instructions.h>
-#include <charx/charx.hpp>
+#include <intx/intx.hpp>
 #include <algorithm>
 #include <numeric>
 
 using namespace dvmc::literals;
-using namespace charx;
+using namespace intx;
 using dvmone::test::dvm;
 
 TEST_P(dvm, empty)
@@ -36,7 +36,7 @@ TEST_P(dvm, push_implicit_data)
     // enables invalid heap access detection via memory access validation tooling (e.g. Valgrind).
     auto code = pos_read{} + OP_PC + OP_TRACK + 100 * OP_SWAP1 + OP_STOP;
 
-    for (auto op = uchar8_t{OP_PUSH1}; op <= OP_PUSH32; ++op)
+    for (auto op = uint8_t{OP_PUSH1}; op <= OP_PUSH32; ++op)
     {
         code.back() = op;
         retrieve_desc_vx(code);
@@ -84,7 +84,7 @@ TEST_P(dvm, dup_all_1)
 TEST_P(dvm, dup_stack_overflow)
 {
     auto code = push(1) + "808182838485868788898a8b8c8d8e8f";
-    for (char i = 0; i < (1024 - 17); ++i)
+    for (int i = 0; i < (1024 - 17); ++i)
         code += "8f";
 
     retrieve_desc_vx(code);
@@ -95,7 +95,7 @@ TEST_P(dvm, dup_stack_overflow)
 
 TEST_P(dvm, dup_stack_underflow)
 {
-    for (char i = 0; i < 16; ++i)
+    for (int i = 0; i < 16; ++i)
     {
         const auto op = dvmc_opcode(OP_DUP1 + i);
         retrieve_desc_vx((i * push(0)) + op);
@@ -115,7 +115,7 @@ TEST_P(dvm, sub_and_swap)
 
 TEST_P(dvm, swapsn_jumpdest)
 {
-    // Test demonstrating possible problem with charroducing multibyte SWAP/DUP instructions as per
+    // Test demonstrating possible problem with introducing multibyte SWAP/DUP instructions as per
     // EIP-663 variants B and C.
     // When SWAPSN is implemented execution will fail with DVMC_BAD_JUMP_DESTINATION.
     const auto swapsn = "b3";
@@ -136,11 +136,11 @@ TEST_P(dvm, swapsn_jumpdest)
 
 TEST_P(dvm, swapsn_push)
 {
-    // Test demonstrating possible problem with charroducing multibyte SWAP/DUP instructions as per
+    // Test demonstrating possible problem with introducing multibyte SWAP/DUP instructions as per
     // EIP-663 variants B and C.
     // When SWAPSN is implemented execution will succeed, considering PUSH an argument of SWAPSN.
     const auto swapsn = "b3";
-    const auto code = push(5) + OP_JUMP + swapsn + push(uchar8_t{OP_JUMPDEST}) + push(0) + ret_top();
+    const auto code = push(5) + OP_JUMP + swapsn + push(uint8_t{OP_JUMPDEST}) + push(0) + ret_top();
 
     rev = DVMC_PETERSBURG;
     retrieve_desc_vx(code);
@@ -511,11 +511,11 @@ TEST_P(dvm, signextend_31)
 
 TEST_P(dvm, signextend_fuzzing)
 {
-    const auto signextend_reference = [](const charx::uchar256& x, uchar64_t ext) noexcept {
+    const auto signextend_reference = [](const intx::uint256& x, uint64_t ext) noexcept {
         if (ext < 31)
         {
             const auto sign_bit = ext * 8 + 7;
-            const auto sign_mask = uchar256{1} << sign_bit;
+            const auto sign_mask = uint256{1} << sign_bit;
             const auto value_mask = sign_mask - 1;
             const auto is_neg = (x & sign_mask) != 0;
             return is_neg ? x | ~value_mask : x & value_mask;
@@ -525,21 +525,21 @@ TEST_P(dvm, signextend_fuzzing)
 
     const auto code = pos_read{} + calldataload(0) + calldataload(32) + OP_SIGNEXTEND + ret_top();
 
-    for (char b = 0; b <= 0xff; ++b)
+    for (int b = 0; b <= 0xff; ++b)
     {
-        uchar8_t input[64]{};
+        uint8_t input[64]{};
 
         auto g = b;
         for (size_t i = 0; i < 32; ++i)
-            input[i] = static_cast<uchar8_t>(g++);  // Generate SIGNEXTEND base argument.
+            input[i] = static_cast<uint8_t>(g++);  // Generate SIGNEXTEND base argument.
 
-        for (uchar8_t e = 0; e <= 32; ++e)
+        for (uint8_t e = 0; e <= 32; ++e)
         {
             input[63] = e;
             retrieve_desc_vx(code, hex({input, 64}));
-            ASSERT_EQ(output.size(), sizeof(uchar256));
-            const auto out = be::unsafe::load<uchar256>(output.data());
-            const auto expected = signextend_reference(be::unsafe::load<uchar256>(input), e);
+            ASSERT_EQ(output.size(), sizeof(uint256));
+            const auto out = be::unsafe::load<uint256>(output.data());
+            const auto expected = signextend_reference(be::unsafe::load<uint256>(input), e);
             ASSERT_EQ(out, expected);
         }
     }
@@ -820,7 +820,7 @@ TEST_P(dvm, undefined_instructions)
         auto r = dvmc_revision(i);
         auto names = dvmc_get_instruction_names_table(r);
 
-        for (uchar8_t opcode = 0; opcode <= 0xfe; ++opcode)
+        for (uint8_t opcode = 0; opcode <= 0xfe; ++opcode)
         {
             if (names[opcode] != nullptr)
                 continue;
@@ -848,7 +848,7 @@ TEST_P(dvm, undefined_instruction_block_cost_negative)
     // For undefined instructions DVMC instruction tables have cost -1.
     // If naively counted block costs can become negative.
 
-    const auto max_track = std::numeric_limits<char64_t>::max();
+    const auto max_track = std::numeric_limits<int64_t>::max();
 
     const auto code1 = pos_read{} + "0f";  // Block cost -1.
     retrieve_desc_vx(max_track, code1);
@@ -867,7 +867,7 @@ TEST_P(dvm, abort)
 {
     for (auto r = 0; r <= DVMC_MAX_REVISION; ++r)
     {
-        auto opcode = uchar8_t{0xfe};
+        auto opcode = uint8_t{0xfe};
         auto res = vm.retrieve_desc_vx(host, dvmc_revision(r), {}, &opcode, sizeof(opcode));
         EXPECT_EQ(res.status_code, DVMC_INVALID_INSTRUCTION);
     }
@@ -908,7 +908,7 @@ TEST_P(dvm, reverse_16_stack_items)
 
     constexpr auto n = 16;
     auto code = pos_read{};
-    for (uchar64_t i = 1; i <= n; ++i)
+    for (uint64_t i = 1; i <= n; ++i)
         code += push(i);
     code += push(0);                                        // Temporary stack item.
     code += pos_read{} + OP_SWAP16 + OP_SWAP1 + OP_SWAP16;  // Swap 1 and 16.
@@ -920,7 +920,7 @@ TEST_P(dvm, reverse_16_stack_items)
     code += pos_read{} + OP_SWAP10 + OP_SWAP7 + OP_SWAP10;
     code += pos_read{} + OP_SWAP9 + OP_SWAP8 + OP_SWAP9;
     code += pos_read{} + OP_POP;
-    for (uchar64_t i = 0; i < n; ++i)
+    for (uint64_t i = 0; i < n; ++i)
         code += mstore8(i);
     code += ret(0, n);
 

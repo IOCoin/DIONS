@@ -90,9 +90,9 @@ class Env {
   // Store the size of fname in *file_size.
   virtual Status GetFileSize(const std::string& fname, uint64_t* file_size) = 0;
 
-  // Rename file src to read_vtx_init.
+  // Rename file src to target.
   virtual Status RenameFile(const std::string& src,
-                            const std::string& read_vtx_init) = 0;
+                            const std::string& target) = 0;
 
   // Lock the specified file.  Used to prevent concurrent access to
   // the same db by multiple processes.  On failure, stores NULL in
@@ -273,59 +273,59 @@ extern Status ReadFileToString(Env* env, const std::string& fname,
 class EnvWrapper : public Env {
  public:
   // Initialize an EnvWrapper that delegates all calls to *t
-  explicit EnvWrapper(Env* t) : read_vtx_init_(t) { }
+  explicit EnvWrapper(Env* t) : target_(t) { }
   virtual ~EnvWrapper();
 
-  // Return the read_vtx_init to which this Env forwards all calls
-  Env* read_vtx_init() const { return read_vtx_init_; }
+  // Return the target to which this Env forwards all calls
+  Env* target() const { return target_; }
 
-  // The following text is boilerplate that forwards all methods to read_vtx_init()
+  // The following text is boilerplate that forwards all methods to target()
   Status NewSequentialFile(const std::string& f, SequentialFile** r) {
-    return read_vtx_init_->NewSequentialFile(f, r);
+    return target_->NewSequentialFile(f, r);
   }
   Status NewRandomAccessFile(const std::string& f, RandomAccessFile** r) {
-    return read_vtx_init_->NewRandomAccessFile(f, r);
+    return target_->NewRandomAccessFile(f, r);
   }
   Status NewWritableFile(const std::string& f, WritableFile** r) {
-    return read_vtx_init_->NewWritableFile(f, r);
+    return target_->NewWritableFile(f, r);
   }
-  bool FileExists(const std::string& f) { return read_vtx_init_->FileExists(f); }
+  bool FileExists(const std::string& f) { return target_->FileExists(f); }
   Status GetChildren(const std::string& dir, std::vector<std::string>* r) {
-    return read_vtx_init_->GetChildren(dir, r);
+    return target_->GetChildren(dir, r);
   }
-  Status DeleteFile(const std::string& f) { return read_vtx_init_->DeleteFile(f); }
-  Status CreateDir(const std::string& d) { return read_vtx_init_->CreateDir(d); }
-  Status DeleteDir(const std::string& d) { return read_vtx_init_->DeleteDir(d); }
+  Status DeleteFile(const std::string& f) { return target_->DeleteFile(f); }
+  Status CreateDir(const std::string& d) { return target_->CreateDir(d); }
+  Status DeleteDir(const std::string& d) { return target_->DeleteDir(d); }
   Status GetFileSize(const std::string& f, uint64_t* s) {
-    return read_vtx_init_->GetFileSize(f, s);
+    return target_->GetFileSize(f, s);
   }
   Status RenameFile(const std::string& s, const std::string& t) {
-    return read_vtx_init_->RenameFile(s, t);
+    return target_->RenameFile(s, t);
   }
   Status LockFile(const std::string& f, FileLock** l) {
-    return read_vtx_init_->LockFile(f, l);
+    return target_->LockFile(f, l);
   }
-  Status UnlockFile(FileLock* l) { return read_vtx_init_->UnlockFile(l); }
+  Status UnlockFile(FileLock* l) { return target_->UnlockFile(l); }
   void Schedule(void (*f)(void*), void* a) {
-    return read_vtx_init_->Schedule(f, a);
+    return target_->Schedule(f, a);
   }
   void StartThread(void (*f)(void*), void* a) {
-    return read_vtx_init_->StartThread(f, a);
+    return target_->StartThread(f, a);
   }
   virtual Status GetTestDirectory(std::string* path) {
-    return read_vtx_init_->GetTestDirectory(path);
+    return target_->GetTestDirectory(path);
   }
   virtual Status NewLogger(const std::string& fname, Logger** result) {
-    return read_vtx_init_->NewLogger(fname, result);
+    return target_->NewLogger(fname, result);
   }
   uint64_t NowMicros() {
-    return read_vtx_init_->NowMicros();
+    return target_->NowMicros();
   }
   void SleepForMicroseconds(int micros) {
-    read_vtx_init_->SleepForMicroseconds(micros);
+    target_->SleepForMicroseconds(micros);
   }
  private:
-  Env* read_vtx_init_;
+  Env* target_;
 };
 
 }  // namespace leveldb

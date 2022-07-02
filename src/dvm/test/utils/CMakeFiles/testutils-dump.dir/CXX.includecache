@@ -6,14 +6,14 @@
 
 #IncludeRegexTransform: 
 
-/home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/charx/charx.hpp
+/home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/intx/intx.hpp
 algorithm
 -
 cassert
 -
 climits
 -
-cstdchar
+cstdint
 -
 cstring
 -
@@ -27,7 +27,7 @@ tuple
 -
 type_traits
 -
-charrin.h
+intrin.h
 -
 
 /home/ioc/rem/CC/src/dvm/test/utils/dump.cpp
@@ -53,7 +53,7 @@ stdbool.h
 -
 stddef.h
 -
-stdchar.h
+stdint.h
 -
 
 dvmc/include/dvmc/dvmc.hpp
@@ -81,7 +81,7 @@ string.h
 -
 
 dvmc/include/dvmc/hex.hpp
-cstdchar
+cstdint
 -
 iterator
 -
@@ -109,11 +109,11 @@ dvmc/instructions.h
 -
 dvmc/utils.h
 -
-charx/charx.hpp
+intx/intx.hpp
 -
 array
 -
-cstdchar
+cstdint
 -
 vector
 -
@@ -121,7 +121,7 @@ vector
 lib/dvmone/execution_state.hpp
 dvmc/dvmc.hpp
 -
-charx/charx.hpp
+intx/intx.hpp
 -
 string
 -

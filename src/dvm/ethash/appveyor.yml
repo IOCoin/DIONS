@@ -40,7 +40,7 @@ before_build:
   - cmake -S . -B build -G Ninja -Wno-dev -DTOOLCHAIN=%TOOLCHAIN% -DCMAKE_INSTALL_PREFIX=./dist -DCMAKE_BUILD_TYPE=%CONFIGURATION% -DHUNTER_CONFIGURATION_TYPES=%CONFIGURATION%
 
 build_script:
-  - cmake --build build --read_vtx_init install
+  - cmake --build build --target install
   - if defined PYTHON bash scripts/ci/python_build_wheels.sh
 
 test_script:

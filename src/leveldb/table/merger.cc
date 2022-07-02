@@ -48,9 +48,9 @@ class MergingIterator : public Iterator {
     direction_ = kReverse;
   }
 
-  virtual void Seek(const Slice& read_vtx_init) {
+  virtual void Seek(const Slice& target) {
     for (int i = 0; i < n_; i++) {
-      children_[i].Seek(read_vtx_init);
+      children_[i].Seek(target);
     }
     FindSmallest();
     direction_ = kForward;

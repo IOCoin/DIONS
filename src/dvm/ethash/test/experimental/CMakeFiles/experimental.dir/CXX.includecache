@@ -21,7 +21,7 @@ difficulty.h
 /home/ioc/rem/CC/src/dvm/ethash/test/experimental/difficulty.h
 ../../lib/ethash/endianness.hpp
 /home/ioc/rem/CC/src/dvm/ethash/lib/ethash/endianness.hpp
-charrin.h
+intrin.h
 -
 
 /home/ioc/rem/CC/src/dvm/ethash/test/experimental/difficulty.h
@@ -33,7 +33,7 @@ ethash/hash_types.h
 -
 stdbool.h
 -
-stdchar.h
+stdint.h
 -
 
 include/ethash/ethash.hpp
@@ -41,7 +41,7 @@ ethash/ethash.h
 -
 ethash/hash_types.hpp
 -
-cstdchar
+cstdint
 -
 cstring
 -
@@ -53,7 +53,7 @@ system_error
 -
 
 include/ethash/hash_types.h
-stdchar.h
+stdint.h
 -
 
 include/ethash/hash_types.hpp

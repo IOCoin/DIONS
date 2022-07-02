@@ -57,12 +57,12 @@ commands:
           command: cmake --build ~/build -- -j4
       - run:
           name: "Install"
-          command: cmake --build ~/build --read_vtx_init install
+          command: cmake --build ~/build --target install
       - run:
           name: "Package"
           command: |
-            cmake --build ~/build --read_vtx_init package_source
-            cmake --build ~/build --read_vtx_init package
+            cmake --build ~/build --target package_source
+            cmake --build ~/build --target package
             mkdir ~/package
             mv ~/build/dvmc-*.tar.gz ~/package
       - store_artifacts:
@@ -79,11 +79,11 @@ commands:
       - run:
           name: "Test"
           command: |
-            cmake --build ~/build --read_vtx_init test -- ARGS="-j4 --schedule-random --output-on-failure"
+            cmake --build ~/build --target test -- ARGS="-j4 --schedule-random --output-on-failure"
 
 jobs:
 
-  lchar:
+  lint:
     executor: linux-clang-latest
     steps:
     - checkout
@@ -109,7 +109,7 @@ jobs:
         command: |
           cat Doxyfile | sed 's/HTML_OUTPUT            = ./HTML_OUTPUT            = ..\/docs/' | doxygen - > doxygen.log 2> doxygen.warnings
           if [ -s doxygen.warnings ]; then
-            prcharf '\n\nDoxygen warnings:\n\n'
+            printf '\n\nDoxygen warnings:\n\n'
             cat doxygen.warnings
             exit 1
           fi
@@ -190,7 +190,7 @@ jobs:
   build-clang-sanitizers:
     executor: linux-clang-latest
     environment:
-      CMAKE_OPTIONS: -DSANITIZE=address,undefined,nullability,implicit-unsigned-chareger-truncation,implicit-signed-chareger-truncation
+      CMAKE_OPTIONS: -DSANITIZE=address,undefined,nullability,implicit-unsigned-integer-truncation,implicit-signed-integer-truncation
       UBSAN_OPTIONS: halt_on_error=1
     steps:
       - checkout
@@ -263,7 +263,7 @@ jobs:
             go generate -v ./bindings/go/dvmc
             go test -v ./bindings/go/dvmc
       - run:
-          name: "Go module charegration test"
+          name: "Go module integration test"
           working_directory: test/gomod
           command: |
             test -z "$CIRCLE_PR_USERNAME" || { echo "Skip for PRs from forks"; exit 0; }
@@ -303,8 +303,8 @@ jobs:
       - build
       - test
       - run:
-          name: "Java Lchar (spotlessCheck)"
-          command: cd bindings/java && make lchar
+          name: "Java Lint (spotlessCheck)"
+          command: cd bindings/java && make lint
       - run:
           name: "Java Build"
           command: cd bindings/java && make clean build
@@ -339,11 +339,11 @@ jobs:
       - run:
           name: Test with dvmc-vmtester
           command: |
-            ~/build/bin/dvmc-vmtester read_vtx_init/debug/libtrans_logrustvm.so
+            ~/build/bin/dvmc-vmtester target/debug/libtrans_logrustvm.so
       - run:
           name: Test with dvmc-trans_log
           command: |
-            ~/build/bin/dvmc-trans_log read_vtx_init/debug/libtrans_logrustvm.so
+            ~/build/bin/dvmc-trans_log target/debug/libtrans_logrustvm.so
       - run:
           name: Package dvmc-sys
           # NOTE: can not be run for dvmc-vm and dvmc-declare due to version dependencies
@@ -363,26 +363,26 @@ jobs:
             rustup toolchain install nightly-x86_64-unknown-linux-gnu
       - run:
           name: Build
-          command: RUSTFLAGS="-Z sanitizer=address" ASAN_OPTIONS=detect_leaks=1 cargo +nightly build --read_vtx_init x86_64-unknown-linux-gnu
+          command: RUSTFLAGS="-Z sanitizer=address" ASAN_OPTIONS=detect_leaks=1 cargo +nightly build --target x86_64-unknown-linux-gnu
       - run:
           name: Test
-          command: RUSTFLAGS="-Z sanitizer=address -C opt-level=0" ASAN_OPTIONS=detect_leaks=1 cargo +nightly test --read_vtx_init x86_64-unknown-linux-gnu
+          command: RUSTFLAGS="-Z sanitizer=address -C opt-level=0" ASAN_OPTIONS=detect_leaks=1 cargo +nightly test --target x86_64-unknown-linux-gnu
       - attach_workspace:
           at: ~/build
       - run:
           name: Test with dvmc-vmtester
           command: |
-            ~/build/bin/dvmc-vmtester read_vtx_init/x86_64-unknown-linux-gnu/debug/libtrans_logrustvm.so
+            ~/build/bin/dvmc-vmtester target/x86_64-unknown-linux-gnu/debug/libtrans_logrustvm.so
       - run:
           name: Test with dvmc-trans_log
           command: |
-            ~/build/bin/dvmc-trans_log read_vtx_init/x86_64-unknown-linux-gnu/debug/libtrans_logrustvm.so
+            ~/build/bin/dvmc-trans_log target/x86_64-unknown-linux-gnu/debug/libtrans_logrustvm.so
 
 workflows:
   version: 2
   dvmc:
     jobs:
-      - lchar
+      - lint
       - build-clang-coverage
       - build-gcc8
       - build-gcc-sanitizers
@@ -409,7 +409,7 @@ workflows:
             - build-clang9-asan
       - upload-docs:
           requires:
-            - lchar
+            - lint
           filters:
             branches:
               only:

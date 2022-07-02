@@ -17,7 +17,7 @@
 extern "C" {
 #endif
 
-/** The function pocharer type for DVMC create functions. */
+/** The function pointer type for DVMC create functions. */
 typedef struct dvmc_vm* (*dvmc_create_fn)(void);
 
 /// Error codes for the DVMC loader.
@@ -67,18 +67,18 @@ enum dvmc_loader_error_code
  * After the DLL is successfully loaded the function tries to find the DVM create function in the
  * library. The `filename` is used to guess the DVM name and the name of the create function.
  * The create function name is constructed by the following rules. Consider trans_log path:
- * "/blastdoor7/libtrans_log-charerpreter.so.1.0".
+ * "/blastdoor7/libtrans_log-interpreter.so.1.0".
  * - the filename is taken from the path:
- *   "libtrans_log-charerpreter.so.1.0",
+ *   "libtrans_log-interpreter.so.1.0",
  * - the "lib" prefix and all file extensions are stripped from the name:
- *   "trans_log-charerpreter"
+ *   "trans_log-interpreter"
  * - all "-" are replaced with "_" to construct _base name_:
- *   "trans_log_charerpreter",
+ *   "trans_log_interpreter",
  * - the function name "dvmc_create_" + _base name_ is searched in the library:
- *   "dvmc_create_trans_log_charerpreter",
+ *   "dvmc_create_trans_log_interpreter",
  * - if the function is not found, the function name "dvmc_create" is searched in the library.
  *
- * If the create function is found in the library, the pocharer to the function is returned.
+ * If the create function is found in the library, the pointer to the function is returned.
  * Otherwise, the ::DVMC_LOADER_SYMBOL_NOT_FOUND error code is signaled and NULL is returned.
  *
  * It is safe to call this function with the same filename argument multiple times
@@ -88,9 +88,9 @@ enum dvmc_loader_error_code
  *                    (dynamically loaded library) containing the VM implementation.
  *                    If the value is NULL, an empty C-string or longer than the path maximum length
  *                    the ::DVMC_LOADER_INVALID_ARGUMENT is signaled.
- * @param error_code  The pocharer to the error code. If not NULL the value is set to
+ * @param error_code  The pointer to the error code. If not NULL the value is set to
  *                    ::DVMC_LOADER_SUCCESS on success or any other error code as described above.
- * @return            The pocharer to the DVM create function or NULL in case of error.
+ * @return            The pointer to the DVM create function or NULL in case of error.
  */
 dvmc_create_fn dvmc_load(const char* filename, enum dvmc_loader_error_code* error_code);
 
@@ -111,9 +111,9 @@ dvmc_create_fn dvmc_load(const char* filename, enum dvmc_loader_error_code* erro
  *                    (dynamically loaded library) containing the VM implementation.
  *                    If the value is NULL, an empty C-string or longer than the path maximum length
  *                    the ::DVMC_LOADER_INVALID_ARGUMENT is signaled.
- * @param error_code  The pocharer to the error code. If not NULL the value is set to
+ * @param error_code  The pointer to the error code. If not NULL the value is set to
  *                    ::DVMC_LOADER_SUCCESS on success or any other error code as described above.
- * @return            The pocharer to the created VM or NULL in case of error.
+ * @return            The pointer to the created VM or NULL in case of error.
  */
 struct dvmc_vm* dvmc_load_and_create(const char* filename, enum dvmc_loader_error_code* error_code);
 
@@ -147,9 +147,9 @@ struct dvmc_vm* dvmc_load_and_create(const char* filename, enum dvmc_loader_erro
 
  *
  * @param config      The path to the DVMC module with additional configuration options.
- * @param error_code  The pocharer to the error code. If not NULL the value is set to
+ * @param error_code  The pointer to the error code. If not NULL the value is set to
  *                    ::DVMC_LOADER_SUCCESS on success or any other error code as described above.
- * @return            The pocharer to the created VM or NULL in case of error.
+ * @return            The pointer to the created VM or NULL in case of error.
  */
 struct dvmc_vm* dvmc_load_and_configure(const char* config,
                                         enum dvmc_loader_error_code* error_code);
@@ -165,7 +165,7 @@ struct dvmc_vm* dvmc_load_and_configure(const char* config,
  * This function is not thread-safe.
  *
  * @return Error message or NULL if no additional information is available.
- *         The returned pocharer MUST NOT be freed by the caller.
+ *         The returned pointer MUST NOT be freed by the caller.
  */
 const char* dvmc_last_error_msg(void);
 

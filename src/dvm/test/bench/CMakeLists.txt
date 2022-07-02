@@ -5,9 +5,9 @@
 include(CheckIncludeFileCXX)
 
 add_executable(dvmone-bench)
-read_vtx_init_include_directories(dvmone-bench PRIVATE ${dvmone_private_include_dir})
-read_vtx_init_link_libraries(dvmone-bench PRIVATE dvmone testutils dvmc::loader benchmark::benchmark)
-read_vtx_init_sources(
+target_include_directories(dvmone-bench PRIVATE ${dvmone_private_include_dir})
+target_link_libraries(dvmone-bench PRIVATE dvmone testutils dvmc::loader benchmark::benchmark)
+target_sources(
     dvmone-bench PRIVATE
     bench.cpp
     helpers.hpp
@@ -26,7 +26,7 @@ if(NOT APPLE)
     endif()
 endif()
 
-read_vtx_init_compile_definitions(dvmone-bench PRIVATE HAVE_STD_FILESYSTEM=${HAVE_STD_FILESYSTEM})
+target_compile_definitions(dvmone-bench PRIVATE HAVE_STD_FILESYSTEM=${HAVE_STD_FILESYSTEM})
 
 if(NOT HAVE_STD_FILESYSTEM)
     file(
@@ -35,9 +35,9 @@ if(NOT HAVE_STD_FILESYSTEM)
         ${CMAKE_CURRENT_BINARY_DIR}/filesystem.hpp
         EXPECTED_HASH SHA256=adc78f68ac26189c18679a87400d83b072f047f2ecd00b3ce6b1da16799dc217
     )
-    read_vtx_init_include_directories(dvmone-bench SYSTEM PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+    target_include_directories(dvmone-bench SYSTEM PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 elseif(UNIX AND NOT APPLE)
-    read_vtx_init_link_libraries(dvmone-bench PRIVATE stdc++fs)
+    target_link_libraries(dvmone-bench PRIVATE stdc++fs)
 endif()
 
 
@@ -57,7 +57,7 @@ set_tests_properties(${PREFIX}/no_dir PROPERTIES PASS_REGULAR_EXPRESSION "total/
 add_test(NAME ${PREFIX}/dirname_empty COMMAND dvmone-bench "" --benchmark_list_tests)
 set_tests_properties(${PREFIX}/dirname_empty PROPERTIES PASS_REGULAR_EXPRESSION "total/synth")
 
-# Run all benchmark cases split charo groups to check if none of them crashes.
+# Run all benchmark cases split into groups to check if none of them crashes.
 set(BENCHMARK_SUITE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../benchmarks)
 add_test(NAME ${PREFIX}/synth COMMAND dvmone-bench --benchmark_min_time=0 --benchmark_filter=synth)
 add_test(NAME ${PREFIX}/micro COMMAND dvmone-bench --benchmark_min_time=0 --benchmark_filter=micro ${BENCHMARK_SUITE_DIR})

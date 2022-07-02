@@ -15,7 +15,7 @@ extern "C" {
 ///
 /// The function is for testing purposes. The division is done using Knuth's D algorithm
 /// with 32-bit words for portability. Using 64-bit words and precomputing divisor's inversion
-/// (see charx library) would be much more efficient. Especially for Mainnet difficulty values
+/// (see intx library) would be much more efficient. Especially for Mainnet difficulty values
 /// having ~53 bits.
 ///
 /// @param difficulty  The difficulty value as big-endian 256-bit number.

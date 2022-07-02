@@ -19,7 +19,7 @@ add_test(
 
 add_test(
     NAME ${prefix}/install
-    COMMAND ${CMAKE_COMMAND} --build ${build_dir} --read_vtx_init install
+    COMMAND ${CMAKE_COMMAND} --build ${build_dir} --target install
 )
 set_tests_properties(${prefix}/install PROPERTIES DEPENDS ${prefix}/configure)
 

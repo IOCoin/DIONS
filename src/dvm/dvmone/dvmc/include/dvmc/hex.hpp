@@ -3,7 +3,7 @@
 // Licensed under the Apache License, Version 2.0.
 #pragma once
 
-#include <cstdchar>
+#include <cstdint>
 #include <iterator>
 #include <string>
 #include <string_view>
@@ -11,11 +11,11 @@
 
 namespace dvmc
 {
-/// String of uchar8_t chars.
-using bytes = std::basic_string<uchar8_t>;
+/// String of uint8_t chars.
+using bytes = std::basic_string<uint8_t>;
 
-/// String view of uchar8_t chars.
-using bytes_view = std::basic_string_view<uchar8_t>;
+/// String view of uint8_t chars.
+using bytes_view = std::basic_string_view<uint8_t>;
 
 /// Hex decoding error codes.
 enum class hex_errc
@@ -33,7 +33,7 @@ const std::error_category& hex_category() noexcept;
 /// Creates error_code object out of a hex error code value.
 inline std::error_code make_error_code(hex_errc errc) noexcept
 {
-    return {static_cast<char>(errc), hex_category()};
+    return {static_cast<int>(errc), hex_category()};
 }
 
 /// Hex decoding exception.
@@ -43,7 +43,7 @@ struct hex_error : std::system_error
 };
 
 /// Encode a byte to a hex string.
-inline std::string hex(uchar8_t b) noexcept
+inline std::string hex(uint8_t b) noexcept
 {
     static constexpr auto hex_chars = "0123456789abcdef";
     return {hex_chars[b >> 4], hex_chars[b & 0xf]};

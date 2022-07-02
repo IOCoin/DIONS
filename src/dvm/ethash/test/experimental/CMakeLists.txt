@@ -4,8 +4,8 @@
 
 add_library(experimental STATIC)
 add_library(ethash::experimental ALIAS experimental)
-read_vtx_init_link_libraries(experimental PUBLIC ethash::ethash)
-read_vtx_init_sources(
+target_link_libraries(experimental PUBLIC ethash::ethash)
+target_sources(
     experimental PRIVATE
     difficulty.cpp
     difficulty.h

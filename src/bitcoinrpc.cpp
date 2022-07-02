@@ -355,7 +355,7 @@ static const CRPCCommand vRPCCommands[] =
     { "simplexU_cycle",     &simplexU_cycle,     false,  false },
     { "decryptPath",     &decryptPath,     false,  false },
     { "decryptPath_cycle",     &decryptPath_cycle,     false,  false },
-    { "lookupImageTracePath",     &lookupImageTracePath,     false,  false },
+    { "lookupStoragePath",     &lookupStoragePath,     false,  false },
     { "transferPath",     &transferPath,     false,  false },
     { "updatePath",     &updatePath,     false,  false },
     { "updatePathFile",     &updatePathFile,     false,  false },

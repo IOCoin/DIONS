@@ -6,7 +6,7 @@
 
 #include <dvmc/dvmc.h>
 
-char main()
+int main()
 {
     struct dvmc_vm vm = {.abi_version = DVMC_ABI_VERSION};
     return vm.abi_version - DVMC_ABI_VERSION;

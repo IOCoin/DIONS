@@ -8,7 +8,7 @@ set(CMAKE_DEPENDS_CHECK_C
   )
 set(CMAKE_C_COMPILER_ID "GNU")
 
-# Preprocessor definitions for this read_vtx_init.
+# Preprocessor definitions for this target.
 set(CMAKE_TARGET_DEFINITIONS_C
   "DVMC_LOADER_MOCK=1"
   )
@@ -18,7 +18,7 @@ set(CMAKE_C_TARGET_INCLUDE_PATH
   "dvmc/include"
   )
 
-# Targets to which this read_vtx_init links.
+# Targets to which this target links.
 set(CMAKE_TARGET_LINKED_INFO_FILES
   )
 

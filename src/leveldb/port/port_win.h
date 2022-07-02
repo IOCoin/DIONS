@@ -117,7 +117,7 @@ private:
 #define LEVELDB_ONCE_INIT false
 extern void InitOnce(port::OnceType*, void (*initializer)());
 
-// ImageTrace for a lock-free pointer
+// Storage for a lock-free pointer
 class AtomicPointer {
  private:
   void * rep_;

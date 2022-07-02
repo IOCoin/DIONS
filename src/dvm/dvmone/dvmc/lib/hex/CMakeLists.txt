@@ -9,9 +9,9 @@ add_library(
 )
 
 add_library(dvmc::hex ALIAS hex)
-read_vtx_init_compile_features(hex PUBLIC cxx_std_17)
-read_vtx_init_include_directories(hex PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>$<INSTALL_INTERFACE:include>)
-set_read_vtx_init_properties(hex PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
+target_compile_features(hex PUBLIC cxx_std_17)
+target_include_directories(hex PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>$<INSTALL_INTERFACE:include>)
+set_target_properties(hex PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 
 if(DVMC_INSTALL)
     install(TARGETS hex EXPORT dvmcTargets DESTINATION ${CMAKE_INSTALL_LIBDIR})

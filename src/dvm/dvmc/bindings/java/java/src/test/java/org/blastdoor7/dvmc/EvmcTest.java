@@ -38,7 +38,7 @@ final class EvmcTest {
   @Test
   void testAbiVersion() throws Exception {
     try (EvmcVm vm = EvmcVm.create(trans_logVmPath)) {
-      char abiVersion = vm.abi_version();
+      int abiVersion = vm.abi_version();
       assert (abiVersion > 0);
     }
   }
@@ -64,15 +64,15 @@ final class EvmcTest {
   void testExecute_returnAddress() throws Exception {
     try (EvmcVm vm = EvmcVm.create(trans_logVmPath)) {
       HostContext context = new TestHostContext();
-      char BYZANTIUM = 4;
-      char DVMC_CALL = 0;
-      char kind = DVMC_CALL;
+      int BYZANTIUM = 4;
+      int DVMC_CALL = 0;
+      int kind = DVMC_CALL;
       char[] sender = "39bf71de1b7d7be3b51\0".toCharArray();
       char[] recipient = "53cf77204eEef952e25\0".toCharArray();
       char[] value = "1\0".toCharArray();
       char[] inputData = "hello w\0".toCharArray();
       long track = 200000;
-      char depth = 0;
+      int depth = 0;
       ByteBuffer msg =
           new TestMessage(kind, sender, recipient, value, inputData, track, depth).toByteBuffer();
 
@@ -81,7 +81,7 @@ final class EvmcTest {
 
       ByteBuffer result =
           vm.retrieve_desc_vx(context, BYZANTIUM, msg, bbcode).order(ByteOrder.nativeOrder());
-      char statusCode = result.getInt();
+      int statusCode = result.getInt();
       result.getInt(); // padding
       long trackLeft = result.getLong();
       assert (statusCode == 0);
@@ -94,15 +94,15 @@ final class EvmcTest {
   void testExecute_counter() throws Exception {
     try (EvmcVm vm = EvmcVm.create(trans_logVmPath)) {
       HostContext context = new TestHostContext();
-      char BYZANTIUM = 4;
-      char DVMC_CALL = 0;
-      char kind = DVMC_CALL;
+      int BYZANTIUM = 4;
+      int DVMC_CALL = 0;
+      int kind = DVMC_CALL;
       char[] sender = "39bf71de1b7d7be3b51\0".toCharArray();
       char[] recipient = "53cf77204eEef952e25\0".toCharArray();
       char[] value = "1\0".toCharArray();
       char[] inputData = "hello w\0".toCharArray();
       long track = 200000;
-      char depth = 0;
+      int depth = 0;
       ByteBuffer msg =
           new TestMessage(kind, sender, recipient, value, inputData, track, depth).toByteBuffer();
 
@@ -111,7 +111,7 @@ final class EvmcTest {
 
       ByteBuffer result =
           vm.retrieve_desc_vx(context, BYZANTIUM, msg, bbcode).order(ByteOrder.nativeOrder());
-      char statusCode = result.getInt();
+      int statusCode = result.getInt();
       result.getInt(); // padding
       long trackLeft = result.getLong();
       assert (statusCode == 0);
@@ -124,15 +124,15 @@ final class EvmcTest {
   void testExecute_returnBlockNumber() throws Exception {
     try (EvmcVm vm = EvmcVm.create(trans_logVmPath)) {
       HostContext context = new TestHostContext();
-      char BYZANTIUM = 4;
-      char DVMC_CALL = 0;
-      char kind = DVMC_CALL;
+      int BYZANTIUM = 4;
+      int DVMC_CALL = 0;
+      int kind = DVMC_CALL;
       char[] sender = "39bf71de1b7d7be3b51\0".toCharArray();
       char[] recipient = "53cf77204eEef952e25\0".toCharArray();
       char[] value = "1\0".toCharArray();
       char[] inputData = "hello w\0".toCharArray();
       long track = 200000;
-      char depth = 0;
+      int depth = 0;
       ByteBuffer msg =
           new TestMessage(kind, sender, recipient, value, inputData, track, depth).toByteBuffer();
 
@@ -141,7 +141,7 @@ final class EvmcTest {
 
       ByteBuffer result =
           vm.retrieve_desc_vx(context, BYZANTIUM, msg, bbcode).order(ByteOrder.nativeOrder());
-      char statusCode = result.getInt();
+      int statusCode = result.getInt();
       result.getInt(); // padding
       long trackLeft = result.getLong();
       assert (statusCode == 0);
@@ -154,15 +154,15 @@ final class EvmcTest {
   void testExecute_saveReturnBlockNumber() throws Exception {
     try (EvmcVm vm = EvmcVm.create(trans_logVmPath)) {
       HostContext context = new TestHostContext();
-      char BYZANTIUM = 4;
-      char DVMC_CALL = 0;
-      char kind = DVMC_CALL;
+      int BYZANTIUM = 4;
+      int DVMC_CALL = 0;
+      int kind = DVMC_CALL;
       char[] sender = "39bf71de1b7d7be3b51\0".toCharArray();
       char[] recipient = "53cf77204eEef952e25\0".toCharArray();
       char[] value = "1\0".toCharArray();
       char[] inputData = "hello w\0".toCharArray();
       long track = 200000;
-      char depth = 0;
+      int depth = 0;
       ByteBuffer msg =
           new TestMessage(kind, sender, recipient, value, inputData, track, depth).toByteBuffer();
 
@@ -173,7 +173,7 @@ final class EvmcTest {
 
       ByteBuffer result =
           vm.retrieve_desc_vx(context, BYZANTIUM, msg, bbcode).order(ByteOrder.nativeOrder());
-      char statusCode = result.getInt();
+      int statusCode = result.getInt();
       result.getInt(); // padding
       long trackLeft = result.getLong();
       assert (statusCode == 0);
@@ -186,15 +186,15 @@ final class EvmcTest {
   void testExecute_makeCall() throws Exception {
     try (EvmcVm vm = EvmcVm.create(trans_logVmPath)) {
       HostContext context = new TestHostContext();
-      char BYZANTIUM = 4;
-      char DVMC_CALL = 0;
-      char kind = DVMC_CALL;
+      int BYZANTIUM = 4;
+      int DVMC_CALL = 0;
+      int kind = DVMC_CALL;
       char[] sender = "39bf71de1b7d7be3b51\0".toCharArray();
       char[] recipient = "53cf77204eEef952e25\0".toCharArray();
       char[] value = "1\0".toCharArray();
       char[] inputData = "hello w\0".toCharArray();
       long track = 200000;
-      char depth = 0;
+      int depth = 0;
       ByteBuffer msg =
           new TestMessage(kind, sender, recipient, value, inputData, track, depth).toByteBuffer();
       byte[] code = {
@@ -212,7 +212,7 @@ final class EvmcTest {
 
       ByteBuffer result =
           vm.retrieve_desc_vx(context, BYZANTIUM, msg, bbcode).order(ByteOrder.nativeOrder());
-      char statusCode = result.getInt();
+      int statusCode = result.getInt();
       result.getInt(); // padding
       long trackLeft = result.getLong();
       assert (statusCode == 0);
@@ -224,15 +224,15 @@ final class EvmcTest {
   void testExecute_DVMC_CREATE() throws Exception {
     try (EvmcVm vm = EvmcVm.create(trans_logVmPath)) {
       HostContext context = new TestHostContext();
-      char BYZANTIUM = 4;
-      char DVMC_CREATE = 3;
-      char kind = DVMC_CREATE;
+      int BYZANTIUM = 4;
+      int DVMC_CREATE = 3;
+      int kind = DVMC_CREATE;
       char[] sender = "39bf71de1b7d7be3b51\\0".toCharArray();
       char[] recipient = "53cf77204eEef952e25\0".toCharArray();
       char[] value = "1\0".toCharArray();
       char[] inputData = "hello w\0".toCharArray();
       long track = 200000;
-      char depth = 0;
+      int depth = 0;
       ByteBuffer msg =
           new TestMessage(kind, sender, recipient, value, inputData, track, depth).toByteBuffer();
       byte[] code = {0x00};
@@ -240,7 +240,7 @@ final class EvmcTest {
 
       ByteBuffer result =
           vm.retrieve_desc_vx(context, BYZANTIUM, msg, bbcode).order(ByteOrder.nativeOrder());
-      char statusCode = result.getInt();
+      int statusCode = result.getInt();
       result.getInt(); // padding
       long trackLeft = result.getLong();
       assert (statusCode == 0);
@@ -251,7 +251,7 @@ final class EvmcTest {
   @Test
   void testGetCapabilities() throws Exception {
     try (EvmcVm vm = EvmcVm.create(trans_logVmPath)) {
-      char capabilities = vm.get_capabilities();
+      int capabilities = vm.get_capabilities();
       assert (capabilities > 0);
     }
   }
@@ -259,7 +259,7 @@ final class EvmcTest {
   @Test
   void testSetOption() throws Exception {
     try (EvmcVm vm = EvmcVm.create(trans_logVmPath)) {
-      char result = vm.set_option("verbose", "1");
+      int result = vm.set_option("verbose", "1");
       assert (result == 0);
     }
   }

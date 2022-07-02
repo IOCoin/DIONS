@@ -4,7 +4,7 @@
 
 #include "helpers.hpp"
 #include "test_cases.hpp"
-#include <ethash/ethash-charernal.hpp>
+#include <ethash/ethash-internal.hpp>
 #include <ethash/global_context.hpp>
 #include <gtest/gtest.h>
 #include <array>
@@ -24,8 +24,8 @@ TEST(managed_multithreaded, hash_all)
             for (const auto& t : hash_test_cases)
             {
                 const hash256 header_hash = to_hash256(t.header_hash_hex);
-                const uchar64_t nonce = std::stoull(t.nonce_hex, nullptr, 16);
-                const char epoch_number = get_epoch_number(t.block_number);
+                const uint64_t nonce = std::stoull(t.nonce_hex, nullptr, 16);
+                const int epoch_number = get_epoch_number(t.block_number);
                 auto& context = get_global_epoch_context(epoch_number);
                 const result res = hash(context, header_hash, nonce);
                 EXPECT_EQ(to_hex(res.mix_hash), t.mix_hash_hex);
@@ -45,8 +45,8 @@ TEST(managed_multithreaded, hash_parallel)
     {
         futures.emplace_back(std::async(std::launch::async, [&t] {
             const hash256 header_hash = to_hash256(t.header_hash_hex);
-            const uchar64_t nonce = std::stoull(t.nonce_hex, nullptr, 16);
-            const char epoch_number = get_epoch_number(t.block_number);
+            const uint64_t nonce = std::stoull(t.nonce_hex, nullptr, 16);
+            const int epoch_number = get_epoch_number(t.block_number);
             auto& context = get_global_epoch_context(epoch_number);
             const result res = hash(context, header_hash, nonce);
             return (to_hex(res.mix_hash) == t.mix_hash_hex) &&
@@ -71,9 +71,9 @@ TEST(managed_multithreaded, verify_all)
                 const hash256 header_hash = to_hash256(t.header_hash_hex);
                 const hash256 mix_hash = to_hash256(t.mix_hash_hex);
                 const hash256 final_hash = to_hash256(t.final_hash_hex);
-                const uchar64_t nonce = std::stoull(t.nonce_hex, nullptr, 16);
+                const uint64_t nonce = std::stoull(t.nonce_hex, nullptr, 16);
                 const hash256 boundary = final_hash;
-                const char epoch_number = get_epoch_number(t.block_number);
+                const int epoch_number = get_epoch_number(t.block_number);
                 auto& context = get_global_epoch_context(epoch_number);
                 const auto ec =
                     verify_against_boundary(context, header_hash, mix_hash, nonce, boundary);
@@ -95,9 +95,9 @@ TEST(managed_multithreaded, verify_parallel)
             const hash256 header_hash = to_hash256(t.header_hash_hex);
             const hash256 mix_hash = to_hash256(t.mix_hash_hex);
             const hash256 final_hash = to_hash256(t.final_hash_hex);
-            const uchar64_t nonce = std::stoull(t.nonce_hex, nullptr, 16);
+            const uint64_t nonce = std::stoull(t.nonce_hex, nullptr, 16);
             const hash256 boundary = final_hash;
-            const char epoch_number = get_epoch_number(t.block_number);
+            const int epoch_number = get_epoch_number(t.block_number);
             auto& context = get_global_epoch_context(epoch_number);
             return verify_against_boundary(context, header_hash, mix_hash, nonce, boundary);
         }));
@@ -109,19 +109,19 @@ TEST(managed_multithreaded, verify_parallel)
 
 TEST(managed_multithreaded, get_epoch_context_random)
 {
-    static constexpr char num_threads = 4;
+    static constexpr int num_threads = 4;
 
-    std::vector<std::future<char>> futures;
+    std::vector<std::future<int>> futures;
     futures.reserve(num_threads);
 
-    for (char i = 0; i < num_threads; ++i)
+    for (int i = 0; i < num_threads; ++i)
     {
         futures.emplace_back(std::async(std::launch::async, [] {
-            char sum = 0;
-            for (char j = 0; j < 10; ++j)
+            int sum = 0;
+            for (int j = 0; j < 10; ++j)
             {
                 // Epoch number sequence: 0, 0, 1, 1, 0, 0, 1, 1, ...
-                char epoch_number = (j / 2) % 2;
+                int epoch_number = (j / 2) % 2;
                 get_global_epoch_context(epoch_number);
                 sum += epoch_number;
 
@@ -139,12 +139,12 @@ TEST(managed_multithreaded, get_epoch_context_random)
 
 TEST(managed_multithreaded, get_epoch_context_full)
 {
-    static constexpr char num_threads = 4;
+    static constexpr int num_threads = 4;
 
     std::vector<std::future<bool>> futures;
     futures.reserve(num_threads);
 
-    for (char i = 0; i < num_threads; ++i)
+    for (int i = 0; i < num_threads; ++i)
     {
         futures.emplace_back(std::async(std::launch::async, [] {
             hash1024* full_dataset1 = get_global_epoch_context_full(7).full_dataset;

@@ -2,9 +2,9 @@
 # Copyright 2022 blastdoor7
 # 
 
-set(PREFIX ${PROJECT_NAME}/charegration)
+set(PREFIX ${PROJECT_NAME}/integration)
 
-get_read_vtx_init_property(DVMONE_LIB_TYPE dvmone TYPE)
+get_target_property(DVMONE_LIB_TYPE dvmone TYPE)
 if(DVMONE_LIB_TYPE STREQUAL SHARED_LIBRARY)
 
     add_test(NAME ${PREFIX}/histogram COMMAND $<TARGET_FILE:dvmc::tool> --vm $<TARGET_FILE:dvmone>,O=0,histogram run 6000808080800101010200)
@@ -33,5 +33,5 @@ DUP1,4
 
 
     get_property(ALL_TESTS DIRECTORY PROPERTY TESTS)
-    set_tests_properties(${ALL_TESTS} PROPERTIES ENVIRONMENT LLVM_PROFILE_FILE=${CMAKE_BINARY_DIR}/charegration-%p.profraw)
+    set_tests_properties(${ALL_TESTS} PROPERTIES ENVIRONMENT LLVM_PROFILE_FILE=${CMAKE_BINARY_DIR}/integration-%p.profraw)
 endif()

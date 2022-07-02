@@ -54,7 +54,7 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/ioc/rem/CC/src/dvm/ethash/test/charegration/cmake_install.cmake")
+  include("/home/ioc/rem/CC/src/dvm/ethash/test/integration/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)

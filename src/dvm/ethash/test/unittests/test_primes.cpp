@@ -14,7 +14,7 @@ TEST(primes, find_largest_prime)
     /// Test pairs for find_largest_prime() are taken from generated ethash
     /// light cache and full dataset sizes, picked 50 at random from each collection.
     /// See https://github.com/ethereum/wiki/wiki/Ethash#data-sizes.
-    static std::pair<char, char> test_pairs[] = {{262144, 262139}, {415744, 415729}, {440320, 440311},
+    static std::pair<int, int> test_pairs[] = {{262144, 262139}, {415744, 415729}, {440320, 440311},
         {505856, 505823}, {593920, 593903}, {667648, 667643}, {970752, 970747}, {972800, 972799},
         {1064960, 1064957}, {1083392, 1083391}, {1112064, 1112057}, {1122304, 1122287},
         {1220608, 1220599}, {1335296, 1335289}, {1464320, 1464299}, {1517568, 1517567},
@@ -45,7 +45,7 @@ TEST(primes, find_largest_prime)
 
     for (const auto& t : test_pairs)
     {
-        char prime = ethash_find_largest_prime(t.first);
+        int prime = ethash_find_largest_prime(t.first);
         EXPECT_EQ(prime, t.second);
     }
 }

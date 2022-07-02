@@ -34,7 +34,7 @@ pub struct ExecutionResult {
     status_code: StatusCode,
     track_left: i64,
     output: Option<Vec<u8>>,
-    index_param: Option<Address>,
+    create_address: Option<Address>,
 }
 
 /// DVMC execution message structure.
@@ -47,7 +47,7 @@ pub struct ExecutionMessage {
     recipient: Address,
     sender: Address,
     input: Option<Vec<u8>>,
-    value: Uchar256,
+    value: Uint256,
     create2_salt: Bytes32,
     code_address: Address,
 }
@@ -58,7 +58,7 @@ pub type ExecutionTxContext = ffi::dvmc_tx_context;
 /// DVMC context structure. Exposes the DVMC host functions, message data, and transaction context
 /// to the executing VM.
 pub struct ExecutionContext<'a> {
-    host: &'a ffi::dvmc_host_charerface,
+    host: &'a ffi::dvmc_host_interface,
     context: *mut ffi::dvmc_host_context,
     tx_context: ExecutionTxContext,
 }
@@ -74,7 +74,7 @@ impl ExecutionResult {
             } else {
                 None
             },
-            index_param: None,
+            create_address: None,
         }
     }
 
@@ -110,8 +110,8 @@ impl ExecutionResult {
 
     /// Read the address of the created account. This will likely be set when
     /// returned from a CREATE/CREATE2.
-    pub fn index_param(&self) -> Option<&Address> {
-        self.index_param.as_ref()
+    pub fn create_address(&self) -> Option<&Address> {
+        self.create_address.as_ref()
     }
 }
 
@@ -124,7 +124,7 @@ impl ExecutionMessage {
         recipient: Address,
         sender: Address,
         input: Option<&[u8]>,
-        value: Uchar256,
+        value: Uint256,
         create2_salt: Bytes32,
         code_address: Address,
     ) -> Self {
@@ -182,7 +182,7 @@ impl ExecutionMessage {
     }
 
     /// Read the value of the message.
-    pub fn value(&self) -> &Uchar256 {
+    pub fn value(&self) -> &Uint256 {
         &self.value
     }
 
@@ -198,7 +198,7 @@ impl ExecutionMessage {
 }
 
 impl<'a> ExecutionContext<'a> {
-    pub fn new(host: &'a ffi::dvmc_host_charerface, _context: *mut ffi::dvmc_host_context) -> Self {
+    pub fn new(host: &'a ffi::dvmc_host_interface, _context: *mut ffi::dvmc_host_context) -> Self {
         let _tx_context = unsafe {
             assert!((*host).get_tx_context.is_some());
             (*host).get_tx_context.unwrap()(_context)
@@ -242,7 +242,7 @@ impl<'a> ExecutionContext<'a> {
         address: &Address,
         key: &Bytes32,
         value: &Bytes32,
-    ) -> ImageTraceStatus {
+    ) -> StorageStatus {
         unsafe {
             assert!((*self.host).set_storage.is_some());
             (*self.host).set_storage.unwrap()(
@@ -255,7 +255,7 @@ impl<'a> ExecutionContext<'a> {
     }
 
     /// Get balance of an account.
-    pub fn get_balance(&self, address: &Address) -> Uchar256 {
+    pub fn get_balance(&self, address: &Address) -> Uint256 {
         unsafe {
             assert!((*self.host).get_balance.is_some());
             (*self.host).get_balance.unwrap()(self.context, address as *const Address)
@@ -308,7 +308,7 @@ impl<'a> ExecutionContext<'a> {
     /// Call to another account.
     pub fn call(&mut self, message: &ExecutionMessage) -> ExecutionResult {
         // There is no need to make any kind of copies here, because the caller
-        // won't go out of scope and ensures these pocharers remain valid.
+        // won't go out of scope and ensures these pointers remain valid.
         let input = message.input();
         let input_size = if let Some(input) = input {
             input.len()
@@ -337,7 +337,7 @@ impl<'a> ExecutionContext<'a> {
         };
         unsafe {
             assert!((*self.host).call.is_some());
-            (*self.host).call.unwrap()(self.context, &message as *const ffi::dvmc_message).charo()
+            (*self.host).call.unwrap()(self.context, &message as *const ffi::dvmc_message).into()
         }
     }
 
@@ -400,7 +400,7 @@ impl From<ffi::dvmc_result> for ExecutionResult {
                 Some(from_buf_raw::<u8>(result.output_data, result.output_size))
             },
             // Consider it is always valid.
-            index_param: Some(result.index_param),
+            create_address: Some(result.create_address),
         };
 
         // Release allocated ffi struct.
@@ -422,7 +422,7 @@ fn allocate_output_data(output: Option<&Vec<u8>>) -> (*const u8, usize) {
         let memlayout = std::alloc::Layout::from_size_align(buf_len, 1).expect("Bad layout");
         let new_buf = unsafe { std::alloc::alloc(memlayout) };
         unsafe {
-            // Copy the data charo the allocated buffer.
+            // Copy the data into the allocated buffer.
             std::ptr::copy(buf.as_ptr(), new_buf, buf_len);
         }
 
@@ -439,12 +439,12 @@ unsafe fn deallocate_output_data(ptr: *const u8, size: usize) {
     }
 }
 
-/// Returns a pocharer to a heap-allocated dvmc_result.
+/// Returns a pointer to a heap-allocated dvmc_result.
 impl Into<*const ffi::dvmc_result> for ExecutionResult {
-    fn charo(self) -> *const ffi::dvmc_result {
-        let mut result: ffi::dvmc_result = self.charo();
+    fn into(self) -> *const ffi::dvmc_result {
+        let mut result: ffi::dvmc_result = self.into();
         result.release = Some(release_heap_result);
-        Box::charo_raw(Box::new(result))
+        Box::into_raw(Box::new(result))
     }
 }
 
@@ -456,9 +456,9 @@ extern "C" fn release_heap_result(result: *const ffi::dvmc_result) {
     }
 }
 
-/// Returns a pocharer to a stack-allocated dvmc_result.
+/// Returns a pointer to a stack-allocated dvmc_result.
 impl Into<ffi::dvmc_result> for ExecutionResult {
-    fn charo(self) -> ffi::dvmc_result {
+    fn into(self) -> ffi::dvmc_result {
         let (buffer, len) = allocate_output_data(self.output.as_ref());
         ffi::dvmc_result {
             status_code: self.status_code,
@@ -466,8 +466,8 @@ impl Into<ffi::dvmc_result> for ExecutionResult {
             output_data: buffer,
             output_size: len,
             release: Some(release_stack_result),
-            index_param: if self.index_param.is_some() {
-                self.index_param.unwrap()
+            create_address: if self.create_address.is_some() {
+                self.create_address.unwrap()
             } else {
                 Address { bytes: [0u8; 20] }
             },
@@ -531,7 +531,7 @@ mod tests {
         assert_eq!(r.status_code(), StatusCode::DVMC_FAILURE);
         assert_eq!(r.track_left(), 420);
         assert!(r.output().is_none());
-        assert!(r.index_param().is_none());
+        assert!(r.create_address().is_none());
     }
 
     // Test-specific helper to dispose of execution results in unit tests
@@ -553,31 +553,31 @@ mod tests {
         let f = ffi::dvmc_result {
             status_code: StatusCode::DVMC_SUCCESS,
             track_left: 1337,
-            output_data: Box::charo_raw(Box::new([0xde, 0xad, 0xbe, 0xef])) as *const u8,
+            output_data: Box::into_raw(Box::new([0xde, 0xad, 0xbe, 0xef])) as *const u8,
             output_size: 4,
             release: Some(test_result_dispose),
-            index_param: Address { bytes: [0u8; 20] },
+            create_address: Address { bytes: [0u8; 20] },
             padding: [0u8; 4],
         };
 
-        let r: ExecutionResult = f.charo();
+        let r: ExecutionResult = f.into();
 
         assert_eq!(r.status_code(), StatusCode::DVMC_SUCCESS);
         assert_eq!(r.track_left(), 1337);
         assert!(r.output().is_some());
         assert_eq!(r.output().unwrap().len(), 4);
-        assert!(r.index_param().is_some());
+        assert!(r.create_address().is_some());
     }
 
     #[test]
-    fn result_charo_heap_ffi() {
+    fn result_into_heap_ffi() {
         let r = ExecutionResult::new(
             StatusCode::DVMC_FAILURE,
             420,
             Some(&[0xc0, 0xff, 0xee, 0x71, 0x75]),
         );
 
-        let f: *const ffi::dvmc_result = r.charo();
+        let f: *const ffi::dvmc_result = r.into();
         assert!(!f.is_null());
         unsafe {
             assert_eq!((*f).status_code, StatusCode::DVMC_FAILURE);
@@ -588,7 +588,7 @@ mod tests {
                 std::slice::from_raw_parts((*f).output_data, 5) as &[u8],
                 &[0xc0, 0xff, 0xee, 0x71, 0x75]
             );
-            assert_eq!((*f).index_param.bytes, [0u8; 20]);
+            assert_eq!((*f).create_address.bytes, [0u8; 20]);
             if (*f).release.is_some() {
                 (*f).release.unwrap()(f);
             }
@@ -596,17 +596,17 @@ mod tests {
     }
 
     #[test]
-    fn result_charo_heap_ffi_empty_data() {
+    fn result_into_heap_ffi_empty_data() {
         let r = ExecutionResult::new(StatusCode::DVMC_FAILURE, 420, None);
 
-        let f: *const ffi::dvmc_result = r.charo();
+        let f: *const ffi::dvmc_result = r.into();
         assert!(!f.is_null());
         unsafe {
             assert_eq!((*f).status_code, StatusCode::DVMC_FAILURE);
             assert_eq!((*f).track_left, 420);
             assert!((*f).output_data.is_null());
             assert_eq!((*f).output_size, 0);
-            assert_eq!((*f).index_param.bytes, [0u8; 20]);
+            assert_eq!((*f).create_address.bytes, [0u8; 20]);
             if (*f).release.is_some() {
                 (*f).release.unwrap()(f);
             }
@@ -614,14 +614,14 @@ mod tests {
     }
 
     #[test]
-    fn result_charo_stack_ffi() {
+    fn result_into_stack_ffi() {
         let r = ExecutionResult::new(
             StatusCode::DVMC_FAILURE,
             420,
             Some(&[0xc0, 0xff, 0xee, 0x71, 0x75]),
         );
 
-        let f: ffi::dvmc_result = r.charo();
+        let f: ffi::dvmc_result = r.into();
         unsafe {
             assert_eq!(f.status_code, StatusCode::DVMC_FAILURE);
             assert_eq!(f.track_left, 420);
@@ -631,7 +631,7 @@ mod tests {
                 std::slice::from_raw_parts(f.output_data, 5) as &[u8],
                 &[0xc0, 0xff, 0xee, 0x71, 0x75]
             );
-            assert_eq!(f.index_param.bytes, [0u8; 20]);
+            assert_eq!(f.create_address.bytes, [0u8; 20]);
             if f.release.is_some() {
                 f.release.unwrap()(&f);
             }
@@ -639,16 +639,16 @@ mod tests {
     }
 
     #[test]
-    fn result_charo_stack_ffi_empty_data() {
+    fn result_into_stack_ffi_empty_data() {
         let r = ExecutionResult::new(StatusCode::DVMC_FAILURE, 420, None);
 
-        let f: ffi::dvmc_result = r.charo();
+        let f: ffi::dvmc_result = r.into();
         unsafe {
             assert_eq!(f.status_code, StatusCode::DVMC_FAILURE);
             assert_eq!(f.track_left, 420);
             assert!(f.output_data.is_null());
             assert_eq!(f.output_size, 0);
-            assert_eq!(f.index_param.bytes, [0u8; 20]);
+            assert_eq!(f.create_address.bytes, [0u8; 20]);
             if f.release.is_some() {
                 f.release.unwrap()(&f);
             }
@@ -660,7 +660,7 @@ mod tests {
         let input = vec![0xc0, 0xff, 0xee];
         let recipient = Address { bytes: [32u8; 20] };
         let sender = Address { bytes: [128u8; 20] };
-        let value = Uchar256 { bytes: [0u8; 32] };
+        let value = Uint256 { bytes: [0u8; 32] };
         let create2_salt = Bytes32 { bytes: [255u8; 32] };
         let code_address = Address { bytes: [64u8; 20] };
 
@@ -694,7 +694,7 @@ mod tests {
     fn message_from_ffi() {
         let recipient = Address { bytes: [32u8; 20] };
         let sender = Address { bytes: [128u8; 20] };
-        let value = Uchar256 { bytes: [0u8; 32] };
+        let value = Uint256 { bytes: [0u8; 32] };
         let create2_salt = Bytes32 { bytes: [255u8; 32] };
         let code_address = Address { bytes: [64u8; 20] };
 
@@ -712,7 +712,7 @@ mod tests {
             code_address: code_address,
         };
 
-        let ret: ExecutionMessage = (&msg).charo();
+        let ret: ExecutionMessage = (&msg).into();
 
         assert_eq!(ret.kind(), msg.kind);
         assert_eq!(ret.flags(), msg.flags);
@@ -731,7 +731,7 @@ mod tests {
         let input = vec![0xc0, 0xff, 0xee];
         let recipient = Address { bytes: [32u8; 20] };
         let sender = Address { bytes: [128u8; 20] };
-        let value = Uchar256 { bytes: [0u8; 32] };
+        let value = Uint256 { bytes: [0u8; 32] };
         let create2_salt = Bytes32 { bytes: [255u8; 32] };
         let code_address = Address { bytes: [64u8; 20] };
 
@@ -749,7 +749,7 @@ mod tests {
             code_address: code_address,
         };
 
-        let ret: ExecutionMessage = (&msg).charo();
+        let ret: ExecutionMessage = (&msg).into();
 
         assert_eq!(ret.kind(), msg.kind);
         assert_eq!(ret.flags(), msg.flags);
@@ -768,15 +768,15 @@ mod tests {
         _context: *mut ffi::dvmc_host_context,
     ) -> ffi::dvmc_tx_context {
         ffi::dvmc_tx_context {
-            tx_track_log: Uchar256 { bytes: [0u8; 32] },
+            tx_track_log: Uint256 { bytes: [0u8; 32] },
             tx_origin: Address { bytes: [0u8; 20] },
             block_coinbase: Address { bytes: [0u8; 20] },
             block_number: 42,
             block_timestamp: 235117,
             block_track_limit: 105023,
-            block_prev_randao: Uchar256 { bytes: [0xaa; 32] },
-            chain_id: Uchar256::default(),
-            block_base_fee: Uchar256::default(),
+            block_prev_randao: Uint256 { bytes: [0xaa; 32] },
+            chain_id: Uint256::default(),
+            block_base_fee: Uint256::default(),
         }
     }
 
@@ -808,18 +808,18 @@ mod tests {
                 StatusCode::DVMC_INTERNAL_ERROR
             },
             track_left: 2,
-            // NOTE: we are passing the input pocharer here, but for testing the lifetime is ok
+            // NOTE: we are passing the input pointer here, but for testing the lifetime is ok
             output_data: msg.input_data,
             output_size: msg.input_size,
             release: None,
-            index_param: Address::default(),
+            create_address: Address::default(),
             padding: [0u8; 4],
         }
     }
 
     // Update these when needed for tests
-    fn get_dummy_host_charerface() -> ffi::dvmc_host_charerface {
-        ffi::dvmc_host_charerface {
+    fn get_dummy_host_interface() -> ffi::dvmc_host_interface {
+        ffi::dvmc_host_interface {
             account_exists: None,
             get_storage: None,
             set_storage: None,
@@ -840,8 +840,8 @@ mod tests {
     #[test]
     fn execution_context() {
         let host_context = std::ptr::null_mut();
-        let host_charerface = get_dummy_host_charerface();
-        let exe_context = ExecutionContext::new(&host_charerface, host_context);
+        let host_interface = get_dummy_host_interface();
+        let exe_context = ExecutionContext::new(&host_interface, host_context);
         let a = exe_context.get_tx_context();
 
         let b = unsafe { get_dummy_tx_context(host_context) };
@@ -853,9 +853,9 @@ mod tests {
 
     #[test]
     fn get_code_size() {
-        // This address is useless. Just a dummy parameter for the charerface function.
+        // This address is useless. Just a dummy parameter for the interface function.
         let test_addr = Address { bytes: [0u8; 20] };
-        let host = get_dummy_host_charerface();
+        let host = get_dummy_host_interface();
         let host_context = std::ptr::null_mut();
 
         let mut exe_context = ExecutionContext::new(&host, host_context);
@@ -868,9 +868,9 @@ mod tests {
 
     #[test]
     fn test_call_empty_data() {
-        // This address is useless. Just a dummy parameter for the charerface function.
+        // This address is useless. Just a dummy parameter for the interface function.
         let test_addr = Address::default();
-        let host = get_dummy_host_charerface();
+        let host = get_dummy_host_interface();
         let host_context = std::ptr::null_mut();
         let mut exe_context = ExecutionContext::new(&host, host_context);
 
@@ -882,7 +882,7 @@ mod tests {
             test_addr,
             test_addr,
             None,
-            Uchar256::default(),
+            Uint256::default(),
             Bytes32::default(),
             test_addr,
         );
@@ -892,15 +892,15 @@ mod tests {
         assert_eq!(b.status_code(), StatusCode::DVMC_SUCCESS);
         assert_eq!(b.track_left(), 2);
         assert!(b.output().is_none());
-        assert!(b.index_param().is_some());
-        assert_eq!(b.index_param().unwrap(), &Address::default());
+        assert!(b.create_address().is_some());
+        assert_eq!(b.create_address().unwrap(), &Address::default());
     }
 
     #[test]
     fn test_call_with_data() {
-        // This address is useless. Just a dummy parameter for the charerface function.
+        // This address is useless. Just a dummy parameter for the interface function.
         let test_addr = Address::default();
-        let host = get_dummy_host_charerface();
+        let host = get_dummy_host_interface();
         let host_context = std::ptr::null_mut();
         let mut exe_context = ExecutionContext::new(&host, host_context);
 
@@ -914,7 +914,7 @@ mod tests {
             test_addr,
             test_addr,
             Some(&data),
-            Uchar256::default(),
+            Uint256::default(),
             Bytes32::default(),
             test_addr,
         );
@@ -925,7 +925,7 @@ mod tests {
         assert_eq!(b.track_left(), 2);
         assert!(b.output().is_some());
         assert_eq!(b.output().unwrap(), &data);
-        assert!(b.index_param().is_some());
-        assert_eq!(b.index_param().unwrap(), &Address::default());
+        assert!(b.create_address().is_some());
+        assert_eq!(b.create_address().unwrap(), &Address::default());
     }
 }

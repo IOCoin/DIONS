@@ -12,7 +12,7 @@
 namespace dvmc
 {
 /// The string of bytes.
-using bytes = std::basic_string<uchar8_t>;
+using bytes = std::basic_string<uint8_t>;
 
 /// Extended value (by dirty flag) for account storage.
 struct storage_value
@@ -44,7 +44,7 @@ struct storage_value
 struct TransitionalNode
 {
     /// The account nonce.
-    char nonce = 0;
+    int nonce = 0;
 
     /// The account code.
     bytes code;
@@ -53,17 +53,17 @@ struct TransitionalNode
     bytes32 codehash;
 
     /// The account balance.
-    uchar256be balance;
+    uint256be balance;
 
     /// The account storage map.
     std::unordered_map<bytes32, storage_value> storage;
 
     /// Helper method for setting balance by numeric type.
-    void set_balance(uchar64_t x) noexcept
+    void set_balance(uint64_t x) noexcept
     {
-        balance = uchar256be{};
+        balance = uint256be{};
         for (std::size_t i = 0; i < sizeof(x); ++i)
-            balance.bytes[sizeof(balance) - 1 - i] = static_cast<uchar8_t>(x >> (8 * i));
+            balance.bytes[sizeof(balance) - 1 - i] = static_cast<uint8_t>(x >> (8 * i));
     }
 };
 
@@ -119,7 +119,7 @@ public:
     dvmc_result call_result = {};
 
     /// The record of all block numbers for which get_block_hash() was called.
-    mutable std::vector<char64_t> recorded_blockhashes;
+    mutable std::vector<int64_t> recorded_blockhashes;
 
     /// The record of all account accesses.
     mutable std::vector<address> recorded_account_accesses;
@@ -217,7 +217,7 @@ public:
     }
 
     /// Get the account's balance (DVMC Host method).
-    uchar256be get_balance(const address& addr) const noexcept override
+    uint256be get_balance(const address& addr) const noexcept override
     {
         record_account_access(addr);
         const auto it = accounts.find(addr);
@@ -250,7 +250,7 @@ public:
     /// Copy the account's code to the given buffer (DVMC host method).
     size_t copy_code(const address& addr,
                      size_t code_offset,
-                     uchar8_t* buffer_data,
+                     uint8_t* buffer_data,
                      size_t buffer_size) const noexcept override
     {
         record_account_access(addr);
@@ -277,7 +277,7 @@ public:
         recorded_selfdestructs.push_back({addr, beneficiary});
     }
 
-    /// Call/create other vertex_init (DVMC host method).
+    /// Call/create other contract (DVMC host method).
     result call(const dvmc_message& msg) noexcept override
     {
         record_account_access(msg.recipient);
@@ -306,7 +306,7 @@ public:
     dvmc_tx_context get_tx_context() const noexcept override { return tx_context; }
 
     /// Get the block header hash (DVMC host method).
-    bytes32 get_block_hash(char64_t block_number) const noexcept override
+    bytes32 get_block_hash(int64_t block_number) const noexcept override
     {
         recorded_blockhashes.emplace_back(block_number);
         return block_hash;
@@ -314,7 +314,7 @@ public:
 
     /// Emit LOG (DVMC host method).
     void emit_log(const address& addr,
-                  const uchar8_t* data,
+                  const uint8_t* data,
                   size_t data_size,
                   const bytes32 topics[],
                   size_t topics_count) noexcept override
@@ -324,7 +324,7 @@ public:
 
     /// Record an account access.
     ///
-    /// This method is required by EIP-2929 charroduced in ::DVMC_BERLIN. It will record the account
+    /// This method is required by EIP-2929 introduced in ::DVMC_BERLIN. It will record the account
     /// access in VertexNode::recorded_account_accesses and return previous access status.
     /// This methods returns ::DVMC_ACCESS_WARM for known addresses of precompiles.
     /// The EIP-2929 specifies that dvmc_message::sender and dvmc_message::recipient are always
@@ -347,7 +347,7 @@ public:
 
         record_account_access(addr);
 
-        // Accessing precompiled vertex_inits is always warm.
+        // Accessing precompiled contracts is always warm.
         if (addr >= 0x0000000000000000000000000000000000000001_address &&
             addr <= 0x0000000000000000000000000000000000000009_address)
             return DVMC_ACCESS_WARM;
@@ -357,7 +357,7 @@ public:
 
     /// Access the account's storage value at the given key.
     ///
-    /// This method is required by EIP-2929 charroduced in ::DVMC_BERLIN. In records that the given
+    /// This method is required by EIP-2929 introduced in ::DVMC_BERLIN. In records that the given
     /// account's storage key has been access and returns the previous access status.
     /// To mock storage access list (EIP-2930), you can pre-init account's storage values with
     /// the ::DVMC_ACCESS_WARM flag:

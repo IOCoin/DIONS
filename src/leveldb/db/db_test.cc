@@ -149,7 +149,7 @@ class SpecialEnv : public EnvWrapper {
       return Status::IOError("simulated write error");
     }
 
-    Status s = read_vtx_init()->NewWritableFile(f, r);
+    Status s = target()->NewWritableFile(f, r);
     if (s.ok()) {
       if (strstr(f.c_str(), ".ldb") != NULL ||
           strstr(f.c_str(), ".log") != NULL) {
@@ -164,21 +164,21 @@ class SpecialEnv : public EnvWrapper {
   Status NewRandomAccessFile(const std::string& f, RandomAccessFile** r) {
     class CountingFile : public RandomAccessFile {
      private:
-      RandomAccessFile* read_vtx_init_;
+      RandomAccessFile* target_;
       AtomicCounter* counter_;
      public:
-      CountingFile(RandomAccessFile* read_vtx_init, AtomicCounter* counter)
-          : read_vtx_init_(read_vtx_init), counter_(counter) {
+      CountingFile(RandomAccessFile* target, AtomicCounter* counter)
+          : target_(target), counter_(counter) {
       }
-      virtual ~CountingFile() { delete read_vtx_init_; }
+      virtual ~CountingFile() { delete target_; }
       virtual Status Read(uint64_t offset, size_t n, Slice* result,
                           char* scratch) const {
         counter_->Increment();
-        return read_vtx_init_->Read(offset, n, result, scratch);
+        return target_->Read(offset, n, result, scratch);
       }
     };
 
-    Status s = read_vtx_init()->NewRandomAccessFile(f, r);
+    Status s = target()->NewRandomAccessFile(f, r);
     if (s.ok() && count_random_reads_) {
       *r = new CountingFile(*r, &random_read_counter_);
     }
@@ -335,8 +335,8 @@ class DBTest {
 
   std::string AllEntriesFor(const Slice& user_key) {
     Iterator* iter = dbfull()->TEST_NewInternalIterator();
-    InternalKey read_vtx_init(user_key, kMaxSequenceNumber, kTypeValue);
-    iter->Seek(read_vtx_init.Encode());
+    InternalKey target(user_key, kMaxSequenceNumber, kTypeValue);
+    iter->Seek(target.Encode());
     std::string result;
     if (!iter->status().ok()) {
       result = iter->status().ToString();

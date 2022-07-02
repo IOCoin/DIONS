@@ -6,38 +6,38 @@ endif()
 cmake_policy(PUSH)
 cmake_policy(VERSION 2.6)
 #----------------------------------------------------------------
-# Generated CMake read_vtx_init import file.
+# Generated CMake target import file.
 #----------------------------------------------------------------
 
 # Commands may need to know the format version.
 set(CMAKE_IMPORT_FILE_VERSION 1)
 
-# Protect against multiple inclusion, which would fail when already imported read_vtx_inits are added once more.
-set(_read_vtx_initsDefined)
-set(_read_vtx_initsNotDefined)
+# Protect against multiple inclusion, which would fail when already imported targets are added once more.
+set(_targetsDefined)
+set(_targetsNotDefined)
 set(_expectedTargets)
 foreach(_expectedTarget ethash::keccak ethash::ethash ethash::global-context)
   list(APPEND _expectedTargets ${_expectedTarget})
   if(NOT TARGET ${_expectedTarget})
-    list(APPEND _read_vtx_initsNotDefined ${_expectedTarget})
+    list(APPEND _targetsNotDefined ${_expectedTarget})
   endif()
   if(TARGET ${_expectedTarget})
-    list(APPEND _read_vtx_initsDefined ${_expectedTarget})
+    list(APPEND _targetsDefined ${_expectedTarget})
   endif()
 endforeach()
-if("${_read_vtx_initsDefined}" STREQUAL "${_expectedTargets}")
-  unset(_read_vtx_initsDefined)
-  unset(_read_vtx_initsNotDefined)
+if("${_targetsDefined}" STREQUAL "${_expectedTargets}")
+  unset(_targetsDefined)
+  unset(_targetsNotDefined)
   unset(_expectedTargets)
   set(CMAKE_IMPORT_FILE_VERSION)
   cmake_policy(POP)
   return()
 endif()
-if(NOT "${_read_vtx_initsDefined}" STREQUAL "")
-  message(FATAL_ERROR "Some (but not all) read_vtx_inits in this export set were already defined.\nTargets Defined: ${_read_vtx_initsDefined}\nTargets not yet defined: ${_read_vtx_initsNotDefined}\n")
+if(NOT "${_targetsDefined}" STREQUAL "")
+  message(FATAL_ERROR "Some (but not all) targets in this export set were already defined.\nTargets Defined: ${_targetsDefined}\nTargets not yet defined: ${_targetsNotDefined}\n")
 endif()
-unset(_read_vtx_initsDefined)
-unset(_read_vtx_initsNotDefined)
+unset(_targetsDefined)
+unset(_targetsNotDefined)
 unset(_expectedTargets)
 
 
@@ -50,27 +50,27 @@ if(_IMPORT_PREFIX STREQUAL "/")
   set(_IMPORT_PREFIX "")
 endif()
 
-# Create imported read_vtx_init ethash::keccak
+# Create imported target ethash::keccak
 add_library(ethash::keccak STATIC IMPORTED)
 
-set_read_vtx_init_properties(ethash::keccak PROPERTIES
+set_target_properties(ethash::keccak PROPERTIES
   INTERFACE_COMPILE_FEATURES "c_std_99"
   INTERFACE_INCLUDE_DIRECTORIES "${_IMPORT_PREFIX}/include"
 )
 
-# Create imported read_vtx_init ethash::ethash
+# Create imported target ethash::ethash
 add_library(ethash::ethash STATIC IMPORTED)
 
-set_read_vtx_init_properties(ethash::ethash PROPERTIES
+set_target_properties(ethash::ethash PROPERTIES
   INTERFACE_COMPILE_FEATURES "c_std_11;cxx_std_14"
   INTERFACE_INCLUDE_DIRECTORIES "${_IMPORT_PREFIX}/include"
   INTERFACE_LINK_LIBRARIES "\$<LINK_ONLY:ethash::keccak>"
 )
 
-# Create imported read_vtx_init ethash::global-context
+# Create imported target ethash::global-context
 add_library(ethash::global-context STATIC IMPORTED)
 
-set_read_vtx_init_properties(ethash::global-context PROPERTIES
+set_target_properties(ethash::global-context PROPERTIES
   INTERFACE_INCLUDE_DIRECTORIES "${_IMPORT_PREFIX}/include"
   INTERFACE_LINK_LIBRARIES "ethash::ethash"
 )
@@ -90,10 +90,10 @@ endforeach()
 set(_IMPORT_PREFIX)
 
 # Loop over all imported files and verify that they actually exist
-foreach(read_vtx_init ${_IMPORT_CHECK_TARGETS} )
-  foreach(file ${_IMPORT_CHECK_FILES_FOR_${read_vtx_init}} )
+foreach(target ${_IMPORT_CHECK_TARGETS} )
+  foreach(file ${_IMPORT_CHECK_FILES_FOR_${target}} )
     if(NOT EXISTS "${file}" )
-      message(FATAL_ERROR "The imported read_vtx_init \"${read_vtx_init}\" references the file
+      message(FATAL_ERROR "The imported target \"${target}\" references the file
    \"${file}\"
 but this file does not exist.  Possible reasons include:
 * The file was deleted, renamed, or moved to another location.
@@ -104,13 +104,13 @@ but not all the files it references.
 ")
     endif()
   endforeach()
-  unset(_IMPORT_CHECK_FILES_FOR_${read_vtx_init})
+  unset(_IMPORT_CHECK_FILES_FOR_${target})
 endforeach()
 unset(_IMPORT_CHECK_TARGETS)
 
-# This file does not depend on other imported read_vtx_inits which have
+# This file does not depend on other imported targets which have
 # been exported from the same project but in a separate export set.
 
-# Commands beyond this pochar should not need to know the version.
+# Commands beyond this point should not need to know the version.
 set(CMAKE_IMPORT_FILE_VERSION)
 cmake_policy(POP)

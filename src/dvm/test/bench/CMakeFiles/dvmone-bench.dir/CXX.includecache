@@ -7,7 +7,7 @@
 #IncludeRegexTransform: 
 
 /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/benchmark/benchmark.h
-stdchar.h
+stdint.h
 -
 algorithm
 -
@@ -37,17 +37,17 @@ type_traits
 -
 utility
 -
-charrin.h
+intrin.h
 -
 
-/home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/charx/charx.hpp
+/home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/intx/intx.hpp
 algorithm
 -
 cassert
 -
 climits
 -
-cstdchar
+cstdint
 -
 cstring
 -
@@ -61,7 +61,7 @@ tuple
 -
 type_traits
 -
-charrin.h
+intrin.h
 -
 
 /home/ioc/rem/CC/src/dvm/test/bench/bench.cpp
@@ -127,7 +127,7 @@ stdbool.h
 -
 stddef.h
 -
-stdchar.h
+stdint.h
 -
 
 dvmc/include/dvmc/dvmc.hpp
@@ -155,7 +155,7 @@ string.h
 -
 
 dvmc/include/dvmc/hex.hpp
-cstdchar
+cstdint
 -
 iterator
 -
@@ -211,11 +211,11 @@ dvmc/instructions.h
 -
 dvmc/utils.h
 -
-charx/charx.hpp
+intx/intx.hpp
 -
 array
 -
-cstdchar
+cstdint
 -
 vector
 -
@@ -245,7 +245,7 @@ dvmc/utils.h
 -
 cstddef
 -
-cstdchar
+cstdint
 -
 string
 -
@@ -253,7 +253,7 @@ string
 lib/dvmone/execution_state.hpp
 dvmc/dvmc.hpp
 -
-charx/charx.hpp
+intx/intx.hpp
 -
 string
 -
@@ -271,7 +271,7 @@ optional
 lib/dvmone/tracing.hpp
 dvmc/instructions.h
 -
-charx/charx.hpp
+intx/intx.hpp
 -
 memory
 -
@@ -291,7 +291,7 @@ dvmc/dvmc.hpp
 -
 dvmc/instructions.h
 -
-charx/charx.hpp
+intx/intx.hpp
 -
 test/utils/utils.hpp
 -

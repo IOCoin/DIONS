@@ -408,9 +408,9 @@ class PosixEnv : public Env {
     return s;
   }
 
-  virtual Status RenameFile(const std::string& src, const std::string& read_vtx_init) {
+  virtual Status RenameFile(const std::string& src, const std::string& target) {
     Status result;
-    if (rename(src.c_str(), read_vtx_init.c_str()) != 0) {
+    if (rename(src.c_str(), target.c_str()) != 0) {
       result = IOError(src, errno);
     }
     return result;

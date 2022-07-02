@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning].
 
 ### Removed
 
-- `dvmone-fuzzer` has removed [aleth-charerpreter][dvm] as it is not macharained and lacks the latest DVM features.
+- `dvmone-fuzzer` has removed [aleth-interpreter][dvm] as it is not maintained and lacks the latest DVM features.
   [#453](https://github.com/blastdoor7/dvmone/pull/453)
 
 
@@ -55,13 +55,13 @@ and this project adheres to [Semantic Versioning].
 
 - Improvements to semi-public `dvmone::baseline` API.
   [#314](https://github.com/blastdoor7/dvmone/pull/314)
-- The [charx] has been upgraded to version [0.6.0][charx 0.6.0]
+- The [intx] has been upgraded to version [0.6.0][intx 0.6.0]
   which increases performance of `ADDMOD` instruction.
   [#345](https://github.com/blastdoor7/dvmone/pull/345)
 - The [ethash] has been upgraded to version [0.7.0][ethash 0.7.0]
   which provides faster `KECCAK256` implementation.
   [#332](https://github.com/blastdoor7/dvmone/pull/332)
-- Optimizations in Baseline charerpreter.
+- Optimizations in Baseline interpreter.
   [#315](https://github.com/blastdoor7/dvmone/pull/315)
   [#341](https://github.com/blastdoor7/dvmone/pull/341)
   [#344](https://github.com/blastdoor7/dvmone/pull/344)
@@ -82,21 +82,21 @@ and this project adheres to [Semantic Versioning].
 - [DVMC] has been upgraded to version [8.0.0][DVMC 8.0.0]. This ABI breaking
   change has been required to support **Berlin** revision.
   [#309](https://github.com/blastdoor7/dvmone/pull/309)
-- Optimizations to basic `JUMPDEST` analysis used by Baseline charerpreter.
+- Optimizations to basic `JUMPDEST` analysis used by Baseline interpreter.
   [#306](https://github.com/blastdoor7/dvmone/pull/306)
   [#308](https://github.com/blastdoor7/dvmone/pull/308)
-- The Baseline charerpreter API has been modified to allow caching
+- The Baseline interpreter API has been modified to allow caching
   of the `JUMPDEST` analysis.
   [#305](https://github.com/blastdoor7/dvmone/pull/305)
 - The consensus testing is now driven by [Silkworm] as a replacement of 
-  the unmacharained [dvm]. The DVM Consensus Tests [8.0.4][tests 8.0.4] are currently being used.
+  the unmaintained [dvm]. The DVM Consensus Tests [8.0.4][tests 8.0.4] are currently being used.
 
 
 ## [0.6.0] — 2021-04-07
 
 ### Added
 
-- New experimental **Baseline** charerpreter has been added to the project.
+- New experimental **Baseline** interpreter has been added to the project.
   It provides relatively straight-forward DVM implementation and
   can be enabled with `O=0` option.
   [#261](https://github.com/blastdoor7/dvmone/pull/261)
@@ -104,7 +104,7 @@ and this project adheres to [Semantic Versioning].
 - A set of DVM synthetic benchmarks stressing individual
   low-level DVM instructions.
   [#278](https://github.com/blastdoor7/dvmone/pull/278)
-- [Silkworm]-driven charegration and DVM consensus testing.
+- [Silkworm]-driven integration and DVM consensus testing.
   [#290](https://github.com/blastdoor7/dvmone/pull/290)
 
 ### Changed
@@ -116,14 +116,14 @@ and this project adheres to [Semantic Versioning].
   [#287](https://github.com/blastdoor7/dvmone/pull/287)
   [#288](https://github.com/blastdoor7/dvmone/pull/288)
 - A lot of instructions implementation refactoring to allow code sharing
-  between Baseline and Advanced charerpreters.
+  between Baseline and Advanced interpreters.
 
 
 ## [0.5.0] — 2020-06-24
 
 ### Changed
 
-- [charx] upgraded to version [0.5.0][charx 0.5.0], small performance increase for
+- [intx] upgraded to version [0.5.0][intx 0.5.0], small performance increase for
   `ADDMOD` and `MULMOD` instructions expected.
   [#239](https://github.com/blastdoor7/dvmone/pull/239)
 - [DVMC] upgraded to version [7.4.0][DVMC 7.4.0].
@@ -138,7 +138,7 @@ and this project adheres to [Semantic Versioning].
 ### Fixed
 
 - The release binaries for Windows are now built without AVX instruction set
-  enabled. That was never charended and is consistent with binaries for other 
+  enabled. That was never intended and is consistent with binaries for other 
   operating systems.
   [#230](https://github.com/blastdoor7/dvmone/pull/230)
 
@@ -147,9 +147,9 @@ and this project adheres to [Semantic Versioning].
 ### Fixed
 
 - In previous versions dvmone incorrectly assumed that code size cannot exceed
-  24576 bytes (0x6000) — the limit charroduced for the size of newly deployed
-  vertex_inits by [EIP-170] in [Spurious Dragon]. The limit do not apply to
-  vertex_init creating init code (i.e. in context of "create" transaction or CREATE
+  24576 bytes (0x6000) — the limit introduced for the size of newly deployed
+  contracts by [EIP-170] in [Spurious Dragon]. The limit do not apply to
+  contract creating init code (i.e. in context of "create" transaction or CREATE
   instruction). Therefore, the pre-processing phase in dvmone has been reworked
   to raise the technical limits or eliminated them entirely. From now on, only
   blocks of instruction with total base track cost exceeding 4294967295 (2³² - 1)
@@ -194,7 +194,7 @@ This release of dvmone is binary compatible with 0.1 and delivers big performanc
 
 - **dvm-test** – the testing tool for [DVMC]-compatible DVM implementations.
   [#85](https://github.com/blastdoor7/dvmone/pull/85)
-- **dvmone-fuzzer** – the testing tool that fuzzes dvmone execution against [aleth-charerpreter][dvm] execution.
+- **dvmone-fuzzer** – the testing tool that fuzzes dvmone execution against [aleth-interpreter][dvm] execution.
   Any other [DVMC]-compatible DVM implementation can be added easily.
   [#162](https://github.com/blastdoor7/dvmone/pull/162)
   [#184](https://github.com/blastdoor7/dvmone/pull/184)
@@ -217,9 +217,9 @@ This release of dvmone is binary compatible with 0.1 and delivers big performanc
 - Instead of checking basic block preconditions (base track cost, stack requirements) in the dispatch loop, 
   this is now done in the special "BEGINBLOCK" instruction — execution time reduction **-2–8%**.
   [#74](https://github.com/blastdoor7/dvmone/pull/74)
-- New DVM stack implementation has replaced naïve usage of `std::vector<charx::uchar256>` — **-8–16%**.
+- New DVM stack implementation has replaced naïve usage of `std::vector<intx::uint256>` — **-8–16%**.
   [#79](https://github.com/blastdoor7/dvmone/pull/79)
-- Improvements to charerpreter's dispatch loop — **-4–9%**.
+- Improvements to interpreter's dispatch loop — **-4–9%**.
   [#107](https://github.com/blastdoor7/dvmone/pull/107)
 - Optimization of the JUMPDEST map — up to **-34%**.
   [#80](https://github.com/blastdoor7/dvmone/pull/80)
@@ -232,7 +232,7 @@ This release of dvmone is binary compatible with 0.1 and delivers big performanc
 - Push instructions with values up to 8 bytes (PUSH1–PUSH8)
   are now handled much more efficiently — up to **-9%**.
   [#122](https://github.com/blastdoor7/dvmone/pull/122)
-- Pocharer to next instruction is now obtained in instruction implementations 
+- Pointer to next instruction is now obtained in instruction implementations 
   (instead of the dispatch loop) and is kept in CPU registers only — **-3–7%**.
   [#133](https://github.com/blastdoor7/dvmone/pull/133)
 - The run-time information about basic blocks has been compressed.
@@ -249,7 +249,7 @@ This release of dvmone is binary compatible with 0.1 and delivers big performanc
   [#129](https://github.com/blastdoor7/dvmone/pull/129)
   [#77](https://github.com/blastdoor7/dvmone/pull/77)
   [#96](https://github.com/blastdoor7/dvmone/pull/96)
-- [charx] upgraded to version [0.4.0](https://github.com/chfast/charx/releases/tag/v0.4.0).
+- [intx] upgraded to version [0.4.0](https://github.com/chfast/intx/releases/tag/v0.4.0).
   [#131](https://github.com/blastdoor7/dvmone/pull/131)
 - The ability to provide custom opcode table for code preprocessing has been dropped.
   [#167](https://github.com/blastdoor7/dvmone/pull/167)
@@ -287,7 +287,7 @@ It delivers fully-compatible and high-speed DVM implementation.
 
 - Support for all current DVM revisions up to [Petersburg].
 - Exposes [DVMC] 6 ABI.
-- The [charx 0.2.0](https://github.com/chfast/charx/releases/tag/v0.2.0) library is used for 256-bit precision arithmetic. 
+- The [intx 0.2.0](https://github.com/chfast/intx/releases/tag/v0.2.0) library is used for 256-bit precision arithmetic. 
 
 
 [0.9.0]: https://github.com/blastdoor7/dvmone/compare/v0.8.2..master
@@ -324,9 +324,9 @@ It delivers fully-compatible and high-speed DVM implementation.
 [DVMC 7.4.0]: https://github.com/blastdoor7/dvmc/releases/tag/v7.4.0
 [DVMC 7.1.0]: https://github.com/blastdoor7/dvmc/releases/tag/v7.1.0
 [DVMC 7.0.0]: https://github.com/blastdoor7/dvmc/releases/tag/v7.0.0
-[charx]: https://github.com/chfast/charx
-[charx 0.6.0]: https://github.com/chfast/charx/releases/tag/v0.6.0
-[charx 0.5.0]: https://github.com/chfast/charx/releases/tag/v0.5.0
+[intx]: https://github.com/chfast/intx
+[intx 0.6.0]: https://github.com/chfast/intx/releases/tag/v0.6.0
+[intx 0.5.0]: https://github.com/chfast/intx/releases/tag/v0.5.0
 [ethash]: https://github.com/chfast/ethash
 [ethash 0.7.0]: https://github.com/chfast/ethash/releases/tag/v0.7.0
 [Silkworm]: https://github.com/torquem-ch/silkworm

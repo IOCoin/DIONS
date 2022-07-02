@@ -13,7 +13,7 @@ set(CMAKE_C_TARGET_INCLUDE_PATH
   "dvmc/include"
   )
 
-# Targets to which this read_vtx_init links.
+# Targets to which this target links.
 set(CMAKE_TARGET_LINKED_INFO_FILES
   "/home/ioc/dvmone/dvmc/trans_logs/CMakeFiles/dvmc-trans_log-host.dir/DependInfo.cmake"
   "/home/ioc/dvmone/dvmc/lib/loader/CMakeFiles/loader.dir/DependInfo.cmake"

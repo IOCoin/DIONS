@@ -24,10 +24,10 @@ protected:
 
     tracing()
       : m_baseline_vm{dvmc_create_dvmone(), {{"O", "0"}}},
-        vm{*static_cast<dvmone::VM*>(m_baseline_vm.get_raw_pocharer())}
+        vm{*static_cast<dvmone::VM*>(m_baseline_vm.get_raw_pointer())}
     {}
 
-    std::string trace(bytes_view code, char32_t depth = 0, uchar32_t flags = 0)
+    std::string trace(bytes_view code, int32_t depth = 0, uint32_t flags = 0)
     {
         dvmc::VertexNode host;
         dvmc_message msg{};
@@ -44,7 +44,7 @@ protected:
     {
         std::string m_name;
         std::ostringstream& m_trace;
-        const uchar8_t* m_code = nullptr;
+        const uint8_t* m_code = nullptr;
 
         void on_execution_start(
             dvmc_revision /*rev*/, const dvmc_message& /*msg*/, bytes_view code) noexcept override
@@ -54,8 +54,8 @@ protected:
 
         void on_execution_end(const dvmc_result& /*result*/) noexcept override { m_code = nullptr; }
 
-        void on_instruction_start(uchar32_t pc, const charx::uchar256* /*stack_top*/,
-            char /*stack_height*/, const dvmone::ExecutionState& /*state*/) noexcept override
+        void on_instruction_start(uint32_t pc, const intx::uint256* /*stack_top*/,
+            int /*stack_height*/, const dvmone::ExecutionState& /*state*/) noexcept override
         {
             const auto opcode = m_code[pc];
             m_trace << m_name << pc << ":"
@@ -124,7 +124,7 @@ opcode,count
 )");
 }
 
-TEST_F(tracing, histogram_charernal_call)
+TEST_F(tracing, histogram_internal_call)
 {
     vm.add_tracer(dvmone::create_histogram_tracer(trace_stream));
     trace_stream << '\n';

@@ -3,7 +3,7 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 
-# Targets to which this read_vtx_init links.
+# Targets to which this target links.
 set(CMAKE_TARGET_LINKED_INFO_FILES
   )
 

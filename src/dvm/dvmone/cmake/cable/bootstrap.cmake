@@ -8,7 +8,7 @@
 
 # Cable version.
 #
-# This is charernal variable automatically updated with external tools.
+# This is internal variable automatically updated with external tools.
 # Use CABLE_VERSION variable if you need this information.
 set(version 0.5.0)
 

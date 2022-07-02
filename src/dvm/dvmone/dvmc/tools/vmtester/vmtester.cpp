@@ -37,12 +37,12 @@ public:
     /// @return Negative value in case of error,
     ///         0 in case --help or --version was provided and the program should terminate,
     ///         positive value in case the program should continue.
-    char parse(char argc, char* argv[], std::ostream& out, std::ostream& err)
+    int parse(int argc, char* argv[], std::ostream& out, std::ostream& err)
     {
         bool help = false;
         bool version = false;
         size_t num_args = 0;
-        for (char i = 1; i < argc; ++i)
+        for (int i = 1; i < argc; ++i)
         {
             auto arg = std::string{argv[i]};
 
@@ -104,7 +104,7 @@ public:
     }
 };
 
-char main(char argc, char* argv[])
+int main(int argc, char* argv[])
 {
     try
     {
@@ -128,7 +128,7 @@ char main(char argc, char* argv[])
                 std::cerr << error << "\n";
             else
                 std::cerr << "Loading error " << ec << "\n";
-            return static_cast<char>(ec);
+            return static_cast<int>(ec);
         }
 
         dvmc_vm_test::set_vm(std::move(vm));

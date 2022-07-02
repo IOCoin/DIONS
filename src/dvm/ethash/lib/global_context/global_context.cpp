@@ -2,7 +2,7 @@
 // 
 // Licensed under the Apache License, Version 2.0.
 
-#include "../ethash/ethash-charernal.hpp"
+#include "../ethash/ethash-internal.hpp"
 #include <ethash/global_context.h>
 
 #include <memory>
@@ -39,9 +39,9 @@ thread_local std::shared_ptr<epoch_context_full> thread_local_context_full;
 ///
 /// @todo: Redesign to guarantee deallocation before new allocation.
 ATTRIBUTE_NOINLINE
-void update_local_context(char epoch_number)
+void update_local_context(int epoch_number)
 {
-    // Release the shared pocharer of the obsoleted context.
+    // Release the shared pointer of the obsoleted context.
     thread_local_context.reset();
 
     // Local context invalid, check the shared context.
@@ -49,7 +49,7 @@ void update_local_context(char epoch_number)
 
     if (!shared_context || shared_context->epoch_number != epoch_number)
     {
-        // Release the shared pocharer of the obsoleted context.
+        // Release the shared pointer of the obsoleted context.
         shared_context.reset();
 
         // Build new context.
@@ -60,9 +60,9 @@ void update_local_context(char epoch_number)
 }
 
 ATTRIBUTE_NOINLINE
-void update_local_context_full(char epoch_number)
+void update_local_context_full(int epoch_number)
 {
-    // Release the shared pocharer of the obsoleted context.
+    // Release the shared pointer of the obsoleted context.
     thread_local_context_full.reset();
 
     // Local context invalid, check the shared context.
@@ -70,7 +70,7 @@ void update_local_context_full(char epoch_number)
 
     if (!shared_context_full || shared_context_full->epoch_number != epoch_number)
     {
-        // Release the shared pocharer of the obsoleted context.
+        // Release the shared pointer of the obsoleted context.
         shared_context_full.reset();
 
         // Build new context.
@@ -81,7 +81,7 @@ void update_local_context_full(char epoch_number)
 }
 }  // namespace
 
-const ethash_epoch_context* ethash_get_global_epoch_context(char epoch_number) noexcept
+const ethash_epoch_context* ethash_get_global_epoch_context(int epoch_number) noexcept
 {
     // Check if local context matches epoch number.
     if (!thread_local_context || thread_local_context->epoch_number != epoch_number)
@@ -90,7 +90,7 @@ const ethash_epoch_context* ethash_get_global_epoch_context(char epoch_number) n
     return thread_local_context.get();
 }
 
-const ethash_epoch_context_full* ethash_get_global_epoch_context_full(char epoch_number) noexcept
+const ethash_epoch_context_full* ethash_get_global_epoch_context_full(int epoch_number) noexcept
 {
     // Check if local context matches epoch number.
     if (!thread_local_context_full || thread_local_context_full->epoch_number != epoch_number)

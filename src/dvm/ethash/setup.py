@@ -55,7 +55,7 @@ class build_ext(setuptools_build_ext):
                 raise CCompilerError(
                     "cmake configuration failed with exit status {}".format(r))
             r = subprocess.call(
-                [cmake_cmd, '--build', build_dir, '--read_vtx_init', 'install',
+                [cmake_cmd, '--build', build_dir, '--target', 'install',
                  '--config', 'Release'])
             if r != 0:
                 raise CCompilerError(

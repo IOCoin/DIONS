@@ -311,7 +311,7 @@ bool SetStartOnSystemStartup(bool fAutoStart)
 
             TCHAR pszArgs[5] = TEXT("-min");
 
-            // Set the path to the shortcut read_vtx_init
+            // Set the path to the shortcut target
             psl->SetPath(pszExePath);
             PathRemoveFileSpec(pszExePath);
             psl->SetWorkingDirectory(pszExePath);

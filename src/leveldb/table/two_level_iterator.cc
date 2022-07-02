@@ -25,7 +25,7 @@ class TwoLevelIterator: public Iterator {
 
   virtual ~TwoLevelIterator();
 
-  virtual void Seek(const Slice& read_vtx_init);
+  virtual void Seek(const Slice& target);
   virtual void SeekToFirst();
   virtual void SeekToLast();
   virtual void Next();
@@ -88,10 +88,10 @@ TwoLevelIterator::TwoLevelIterator(
 TwoLevelIterator::~TwoLevelIterator() {
 }
 
-void TwoLevelIterator::Seek(const Slice& read_vtx_init) {
-  index_iter_.Seek(read_vtx_init);
+void TwoLevelIterator::Seek(const Slice& target) {
+  index_iter_.Seek(target);
   InitDataBlock();
-  if (data_iter_.iter() != NULL) data_iter_.Seek(read_vtx_init);
+  if (data_iter_.iter() != NULL) data_iter_.Seek(target);
   SkipEmptyDataBlocksForward();
 }
 

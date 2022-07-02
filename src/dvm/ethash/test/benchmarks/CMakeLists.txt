@@ -14,6 +14,6 @@ add_executable(ethash-bench
     threadsync_benchmarks.cpp
     threadsync_utils.hpp
     threadsync_utils.cpp)
-read_vtx_init_link_libraries(ethash-bench PRIVATE ethash::global-context benchmark::benchmark)
-read_vtx_init_include_directories(ethash-bench PRIVATE ${ETHASH_PRIVATE_INCLUDE_DIR})
-set_read_vtx_init_properties(ethash-bench PROPERTIES RUNTIME_OUTPUT_DIRECTORY ..)
+target_link_libraries(ethash-bench PRIVATE ethash::global-context benchmark::benchmark)
+target_include_directories(ethash-bench PRIVATE ${ETHASH_PRIVATE_INCLUDE_DIR})
+set_target_properties(ethash-bench PROPERTIES RUNTIME_OUTPUT_DIRECTORY ..)

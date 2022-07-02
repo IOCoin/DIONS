@@ -568,7 +568,7 @@ hunter_final_config(
     VERSION "1.0.0"
 )
 hunter_final_config(
-    PACKAGE "android_google_apis_charel_x86_atom_system_image_packer"
+    PACKAGE "android_google_apis_intel_x86_atom_system_image_packer"
     VERSION "1.0.0"
 )
 hunter_final_config(
@@ -580,7 +580,7 @@ hunter_final_config(
     VERSION "1.0.0"
 )
 hunter_final_config(
-    PACKAGE "android_charel_x86_atom_system_image_packer"
+    PACKAGE "android_intel_x86_atom_system_image_packer"
     VERSION "1.0.0"
 )
 hunter_final_config(
@@ -1146,15 +1146,15 @@ hunter_final_config(
     VERSION "2.3"
 )
 hunter_final_config(
-    PACKAGE "charltool"
+    PACKAGE "intltool"
     VERSION "0.51.0"
 )
 hunter_final_config(
-    PACKAGE "charsizeof"
+    PACKAGE "intsizeof"
     VERSION "2.0.2"
 )
 hunter_final_config(
-    PACKAGE "charx"
+    PACKAGE "intx"
     VERSION "0.5.0"
 )
 hunter_final_config(
@@ -1534,7 +1534,7 @@ hunter_final_config(
     VERSION "3.0.4"
 )
 hunter_final_config(
-    PACKAGE "pip_cpplchar"
+    PACKAGE "pip_cpplint"
     VERSION "1.4.4"
 )
 hunter_final_config(
@@ -1570,7 +1570,7 @@ hunter_final_config(
     VERSION "1.17.5"
 )
 hunter_final_config(
-    PACKAGE "pip_pylchar"
+    PACKAGE "pip_pylint"
     VERSION "2.3.1"
 )
 hunter_final_config(

@@ -28,21 +28,21 @@ where
         })
     }
 
-    /// Take ownership of the given pocharer and return a box.
+    /// Take ownership of the given pointer and return a box.
     ///
     /// # Safety
     /// This function expects a valid instance to be passed.
-    pub unsafe fn from_ffi_pocharer(instance: *mut ::dvmc_sys::dvmc_vm) -> Box<Self> {
-        assert!(!instance.is_null(), "from_ffi_pocharer received NULL");
+    pub unsafe fn from_ffi_pointer(instance: *mut ::dvmc_sys::dvmc_vm) -> Box<Self> {
+        assert!(!instance.is_null(), "from_ffi_pointer received NULL");
         Box::from_raw(instance as *mut EvmcContainer<T>)
     }
 
-    /// Convert boxed self charo an FFI pocharer, surrendering ownership of the heap data.
+    /// Convert boxed self into an FFI pointer, surrendering ownership of the heap data.
     ///
     /// # Safety
-    /// This function will return a valid instance pocharer.
-    pub unsafe fn charo_ffi_pocharer(boxed: Box<Self>) -> *mut ::dvmc_sys::dvmc_vm {
-        Box::charo_raw(boxed) as *mut ::dvmc_sys::dvmc_vm
+    /// This function will return a valid instance pointer.
+    pub unsafe fn into_ffi_pointer(boxed: Box<Self>) -> *mut ::dvmc_sys::dvmc_vm {
+        Box::into_raw(boxed) as *mut ::dvmc_sys::dvmc_vm
     }
 }
 
@@ -84,15 +84,15 @@ mod tests {
         _context: *mut dvmc_sys::dvmc_host_context,
     ) -> dvmc_sys::dvmc_tx_context {
         dvmc_sys::dvmc_tx_context {
-            tx_track_log: Uchar256::default(),
+            tx_track_log: Uint256::default(),
             tx_origin: Address::default(),
             block_coinbase: Address::default(),
             block_number: 0,
             block_timestamp: 0,
             block_track_limit: 0,
-            block_prev_randao: Uchar256::default(),
-            chain_id: Uchar256::default(),
-            block_base_fee: Uchar256::default(),
+            block_prev_randao: Uint256::default(),
+            chain_id: Uint256::default(),
+            block_base_fee: Uint256::default(),
         }
     }
 
@@ -119,13 +119,13 @@ mod tests {
             sender: ::dvmc_sys::dvmc_address::default(),
             input_data: std::ptr::null(),
             input_size: 0,
-            value: ::dvmc_sys::dvmc_uchar256be::default(),
+            value: ::dvmc_sys::dvmc_uint256be::default(),
             create2_salt: ::dvmc_sys::dvmc_bytes32::default(),
             code_address: ::dvmc_sys::dvmc_address::default(),
         };
-        let message: ExecutionMessage = (&message).charo();
+        let message: ExecutionMessage = (&message).into();
 
-        let host = ::dvmc_sys::dvmc_host_charerface {
+        let host = ::dvmc_sys::dvmc_host_interface {
             account_exists: None,
             get_storage: None,
             set_storage: None,
@@ -157,10 +157,10 @@ mod tests {
             ::dvmc_sys::dvmc_status_code::DVMC_FAILURE
         );
 
-        let ptr = unsafe { EvmcContainer::charo_ffi_pocharer(container) };
+        let ptr = unsafe { EvmcContainer::into_ffi_pointer(container) };
 
         let mut context = ExecutionContext::new(&host, host_context);
-        let container = unsafe { EvmcContainer::<TestVm>::from_ffi_pocharer(ptr) };
+        let container = unsafe { EvmcContainer::<TestVm>::from_ffi_pointer(ptr) };
         assert_eq!(
             container
                 .retrieve_desc_vx(

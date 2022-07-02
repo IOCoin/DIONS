@@ -151,7 +151,7 @@ macro(cable_configure_compiler)
             if(NOT ${test_name})
                 message(FATAL_ERROR "Unsupported sanitizer: ${SANITIZE}")
             endif()
-            add_compile_options(-fno-omit-frame-pocharer -fsanitize=${SANITIZE})
+            add_compile_options(-fno-omit-frame-pointer -fsanitize=${SANITIZE})
 
             set(blacklist_file ${PROJECT_SOURCE_DIR}/sanitizer-blacklist.txt)
             if(EXISTS ${blacklist_file})

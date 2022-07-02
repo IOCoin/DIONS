@@ -41,7 +41,7 @@ protected:
         msg.recipient = 0xd00000000000000000000000000000000000000d_address;
     }
 
-    dvmc::result retrieve_desc_vx_in_trans_log_vm(char64_t track,
+    dvmc::result retrieve_desc_vx_in_trans_log_vm(int64_t track,
                                        const char* code_hex,
                                        const char* input_hex = "") noexcept
     {
@@ -158,7 +158,7 @@ TEST_F(trans_log_vm, call)
     EXPECT_EQ(r.track_left, 89);
     EXPECT_EQ(r, Output("000000aabbcc"));
     ASSERT_EQ(host.recorded_calls.size(), size_t{1});
-    EXPECT_EQ(host.recorded_calls[0].flags, uchar32_t{0});
+    EXPECT_EQ(host.recorded_calls[0].flags, uint32_t{0});
     EXPECT_EQ(host.recorded_calls[0].track, 3);
     EXPECT_EQ(host.recorded_calls[0].value,
               0x0000000000000000000000000000000000000000000000000000000000000003_bytes32);

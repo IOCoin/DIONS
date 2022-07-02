@@ -230,7 +230,7 @@ constexpr auto cli_parsing_error = -3;
 ///    Uses dvmone VMs, registers custom benchmark with the code from the given file,
 ///    and the given input. The benchmark will compare the output with the provided
 ///    expected one.
-std::tuple<char, std::vector<BenchmarkCase>> parseargs(char argc, char** argv)
+std::tuple<int, std::vector<BenchmarkCase>> parseargs(int argc, char** argv)
 {
     // Arguments' placeholders:
     std::string dvmc_config;
@@ -272,7 +272,7 @@ std::tuple<char, std::vector<BenchmarkCase>> parseargs(char argc, char** argv)
                 std::cerr << "DVMC loading error: " << error << "\n";
             else
                 std::cerr << "DVMC loading error " << ec << "\n";
-            return {static_cast<char>(ec), {}};
+            return {static_cast<int>(ec), {}};
         }
 
         std::cout << "External VM: " << dvmc_config << "\n";
@@ -303,7 +303,7 @@ std::tuple<char, std::vector<BenchmarkCase>> parseargs(char argc, char** argv)
 }  // namespace
 }  // namespace dvmone::test
 
-char main(char argc, char** argv)
+int main(int argc, char** argv)
 {
     using namespace dvmone::test;
     try

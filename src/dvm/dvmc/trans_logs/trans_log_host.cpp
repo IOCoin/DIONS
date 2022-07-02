@@ -21,8 +21,8 @@ struct account
 {
     virtual ~account() = default;
 
-    dvmc::uchar256be balance = {};
-    std::vector<uchar8_t> code;
+    dvmc::uint256be balance = {};
+    std::vector<uint8_t> code;
     std::map<dvmc::bytes32, dvmc::bytes32> storage;
 
     virtual dvmc::bytes32 code_hash() const
@@ -80,7 +80,7 @@ public:
         return (prev_value == value) ? DVMC_STORAGE_UNCHANGED : DVMC_STORAGE_MODIFIED;
     }
 
-    dvmc::uchar256be get_balance(const dvmc::address& addr) const noexcept final
+    dvmc::uint256be get_balance(const dvmc::address& addr) const noexcept final
     {
         auto it = accounts.find(addr);
         if (it != accounts.end())
@@ -106,7 +106,7 @@ public:
 
     size_t copy_code(const dvmc::address& addr,
                      size_t code_offset,
-                     uchar8_t* buffer_data,
+                     uint8_t* buffer_data,
                      size_t buffer_size) const noexcept final
     {
         const auto it = accounts.find(addr);
@@ -138,9 +138,9 @@ public:
 
     dvmc_tx_context get_tx_context() const noexcept final { return tx_context; }
 
-    dvmc::bytes32 get_block_hash(char64_t number) const noexcept final
+    dvmc::bytes32 get_block_hash(int64_t number) const noexcept final
     {
-        const char64_t current_block_number = get_tx_context().block_number;
+        const int64_t current_block_number = get_tx_context().block_number;
 
         return (number < current_block_number && number >= current_block_number - 256) ?
                    0xb10c8a5fb10c8a5fb10c8a5fb10c8a5fb10c8a5fb10c8a5fb10c8a5fb10c8a5f_bytes32 :
@@ -148,7 +148,7 @@ public:
     }
 
     void emit_log(const dvmc::address& addr,
-                  const uchar8_t* data,
+                  const uint8_t* data,
                   size_t data_size,
                   const dvmc::bytes32 topics[],
                   size_t topics_count) noexcept final
@@ -178,9 +178,9 @@ public:
 
 extern "C" {
 
-const dvmc_host_charerface* trans_log_host_get_charerface()
+const dvmc_host_interface* trans_log_host_get_interface()
 {
-    return &dvmc::Host::get_charerface();
+    return &dvmc::Host::get_interface();
 }
 
 dvmc_host_context* trans_log_host_create_context(dvmc_tx_context tx_context)

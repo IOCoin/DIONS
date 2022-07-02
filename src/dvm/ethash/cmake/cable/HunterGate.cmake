@@ -56,25 +56,25 @@ endif()
 
 include(CMakeParseArguments) # cmake_parse_arguments
 
-option(HUNTER_STATUS_PRINT "Prchar working status" ON)
-option(HUNTER_STATUS_DEBUG "Prchar a lot info" OFF)
+option(HUNTER_STATUS_PRINT "Print working status" ON)
+option(HUNTER_STATUS_DEBUG "Print a lot info" OFF)
 option(HUNTER_TLS_VERIFY "Enable/disable TLS certificate checking on downloads" ON)
 
 set(HUNTER_ERROR_PAGE "https://docs.hunter.sh/en/latest/reference/errors")
 
-function(hunter_gate_status_prchar)
+function(hunter_gate_status_print)
   if(HUNTER_STATUS_PRINT OR HUNTER_STATUS_DEBUG)
-    foreach(prchar_message ${ARGV})
-      message(STATUS "[hunter] ${prchar_message}")
+    foreach(print_message ${ARGV})
+      message(STATUS "[hunter] ${print_message}")
     endforeach()
   endif()
 endfunction()
 
 function(hunter_gate_status_debug)
   if(HUNTER_STATUS_DEBUG)
-    foreach(prchar_message ${ARGV})
+    foreach(print_message ${ARGV})
       string(TIMESTAMP timestamp)
-      message(STATUS "[hunter *** DEBUG *** ${timestamp}] ${prchar_message}")
+      message(STATUS "[hunter *** DEBUG *** ${timestamp}] ${print_message}")
     endforeach()
   endif()
 endfunction()
@@ -87,20 +87,20 @@ function(hunter_gate_error_page error_page)
   message(FATAL_ERROR "")
 endfunction()
 
-function(hunter_gate_charernal_error)
+function(hunter_gate_internal_error)
   message("")
-  foreach(prchar_message ${ARGV})
-    message("[hunter ** INTERNAL **] ${prchar_message}")
+  foreach(print_message ${ARGV})
+    message("[hunter ** INTERNAL **] ${print_message}")
   endforeach()
   message("[hunter ** INTERNAL **] [Directory:${CMAKE_CURRENT_LIST_DIR}]")
   message("")
-  hunter_gate_error_page("error.charernal")
+  hunter_gate_error_page("error.internal")
 endfunction()
 
 function(hunter_gate_fatal_error)
   cmake_parse_arguments(hunter "" "ERROR_PAGE" "" "${ARGV}")
   if("${hunter_ERROR_PAGE}" STREQUAL "")
-    hunter_gate_charernal_error("Expected ERROR_PAGE")
+    hunter_gate_internal_error("Expected ERROR_PAGE")
   endif()
   message("")
   foreach(x ${hunter_UNPARSED_ARGUMENTS})
@@ -118,17 +118,17 @@ endfunction()
 function(hunter_gate_self root version sha1 result)
   string(COMPARE EQUAL "${root}" "" is_bad)
   if(is_bad)
-    hunter_gate_charernal_error("root is empty")
+    hunter_gate_internal_error("root is empty")
   endif()
 
   string(COMPARE EQUAL "${version}" "" is_bad)
   if(is_bad)
-    hunter_gate_charernal_error("version is empty")
+    hunter_gate_internal_error("version is empty")
   endif()
 
   string(COMPARE EQUAL "${sha1}" "" is_bad)
   if(is_bad)
-    hunter_gate_charernal_error("sha1 is empty")
+    hunter_gate_internal_error("sha1 is empty")
   endif()
 
   string(SUBSTRING "${sha1}" 0 7 archive_id)
@@ -214,17 +214,17 @@ function(hunter_gate_download dir)
   endif()
   string(COMPARE EQUAL "${dir}" "" is_bad)
   if(is_bad)
-    hunter_gate_charernal_error("Empty 'dir' argument")
+    hunter_gate_internal_error("Empty 'dir' argument")
   endif()
 
   string(COMPARE EQUAL "${HUNTER_GATE_SHA1}" "" is_bad)
   if(is_bad)
-    hunter_gate_charernal_error("HUNTER_GATE_SHA1 empty")
+    hunter_gate_internal_error("HUNTER_GATE_SHA1 empty")
   endif()
 
   string(COMPARE EQUAL "${HUNTER_GATE_URL}" "" is_bad)
   if(is_bad)
-    hunter_gate_charernal_error("HUNTER_GATE_URL empty")
+    hunter_gate_internal_error("HUNTER_GATE_URL empty")
   endif()
 
   set(done_location "${dir}/DONE")
@@ -318,14 +318,14 @@ function(hunter_gate_download dir)
   )
 
   if(NOT download_result EQUAL 0)
-    hunter_gate_charernal_error(
+    hunter_gate_internal_error(
         "Configure project failed."
         "To reproduce the error run: ${CMAKE_COMMAND} -H${dir} -B${build_dir} -G${CMAKE_GENERATOR} ${toolchain_arg} ${make_arg}"
         "In directory ${dir}"
     )
   endif()
 
-  hunter_gate_status_prchar(
+  hunter_gate_status_print(
       "Initializing Hunter workspace (${HUNTER_GATE_SHA1})"
       "  ${HUNTER_GATE_URL}"
       "  -> ${dir}"
@@ -338,7 +338,7 @@ function(hunter_gate_download dir)
   )
 
   if(NOT download_result EQUAL 0)
-    hunter_gate_charernal_error("Build project failed")
+    hunter_gate_internal_error("Build project failed")
   endif()
 
   file(REMOVE_RECURSE "${build_dir}")
@@ -500,16 +500,16 @@ macro(HunterGate)
     endif()
 
     if(NOT EXISTS "${_done_location}")
-      hunter_gate_charernal_error("hunter_gate_download failed")
+      hunter_gate_internal_error("hunter_gate_download failed")
     endif()
 
     if(NOT EXISTS "${_sha1_location}")
-      hunter_gate_charernal_error("${_sha1_location} not found")
+      hunter_gate_internal_error("${_sha1_location} not found")
     endif()
     file(READ "${_sha1_location}" _sha1_value)
     string(COMPARE EQUAL "${_sha1_value}" "${HUNTER_GATE_SHA1}" _is_equal)
     if(NOT _is_equal)
-      hunter_gate_charernal_error(
+      hunter_gate_internal_error(
           "Short SHA1 collision:"
           "  ${_sha1_value} (from ${_sha1_location})"
           "  ${HUNTER_GATE_SHA1} (HunterGate)"

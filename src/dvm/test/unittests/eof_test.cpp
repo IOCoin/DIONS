@@ -44,8 +44,8 @@ TEST(eof, read_valid_eof1_header)
     struct TestCase
     {
         std::string code;
-        uchar16_t code_size;
-        uchar16_t data_size;
+        uint16_t code_size;
+        uint16_t data_size;
     };
     const TestCase test_cases[] = {
         {"EF00 01 010001 00 00", 1, 0},

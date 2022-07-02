@@ -16,7 +16,7 @@ stdbool.h
 ethash/ethash.h
 -
 
-/home/ioc/rem/CC/src/dvm/ethash/test/charegration/compilation/ethash_header_test.c
+/home/ioc/rem/CC/src/dvm/ethash/test/integration/compilation/ethash_header_test.c
 ethash/ethash.h
 -
 
@@ -25,10 +25,10 @@ ethash/hash_types.h
 -
 stdbool.h
 -
-stdchar.h
+stdint.h
 -
 
 include/ethash/hash_types.h
-stdchar.h
+stdint.h
 -
 

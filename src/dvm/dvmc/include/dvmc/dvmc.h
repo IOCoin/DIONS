@@ -26,7 +26,7 @@
 
 #include <stdbool.h> /* Definition of bool, true and false. */
 #include <stddef.h>  /* Definition of size_t. */
-#include <stdchar.h>  /* Definition of char64_t, uchar64_t. */
+#include <stdint.h>  /* Definition of int64_t, uint64_t. */
 
 #ifdef __cplusplus
 extern "C" {
@@ -37,7 +37,7 @@ extern "C" {
 enum
 {
     /**
-     * The DVMC ABI version number of the charerface declared in this file.
+     * The DVMC ABI version number of the interface declared in this file.
      *
      * The DVMC ABI version always equals the major version number of the DVMC project.
      * The Host SHOULD check if the ABI versions match when dynamically loading VMs.
@@ -56,19 +56,19 @@ enum
 typedef struct dvmc_bytes32
 {
     /** The 32 bytes. */
-    uchar8_t bytes[32];
+    uint8_t bytes[32];
 } dvmc_bytes32;
 
 /**
- * The alias for dvmc_bytes32 to represent a big-endian 256-bit chareger.
+ * The alias for dvmc_bytes32 to represent a big-endian 256-bit integer.
  */
-typedef struct dvmc_bytes32 dvmc_uchar256be;
+typedef struct dvmc_bytes32 dvmc_uint256be;
 
 /** Big-endian 160-bit hash suitable for keeping an DVM address. */
 typedef struct dvmc_address
 {
     /** The 20 bytes of the hash. */
-    uchar8_t bytes[20];
+    uint8_t bytes[20];
 } dvmc_address;
 
 /** The kind of call-like instruction. */
@@ -102,21 +102,21 @@ struct dvmc_message
      * Additional flags modifying the call execution behavior.
      * In the current version the only valid values are ::DVMC_STATIC or 0.
      */
-    uchar32_t flags;
+    uint32_t flags;
 
     /**
      * The present depth of the message call stack.
      *
      * Defined as `e` in the Yellow Paper.
      */
-    char32_t depth;
+    int32_t depth;
 
     /**
      * The amount of track available to the message execution.
      *
      * Defined as `g` in the Yellow Paper.
      */
-    char64_t track;
+    int64_t track;
 
     /**
      * The recipient of the message.
@@ -148,7 +148,7 @@ struct dvmc_message
      * defined as `d` in the Yellow Paper.
      * This MAY be NULL.
      */
-    const uchar8_t* input_data;
+    const uint8_t* input_data;
 
     /**
      * The size of the message input data.
@@ -163,10 +163,10 @@ struct dvmc_message
      * This is transferred value for ::DVMC_CALL or apparent value for ::DVMC_DELEGATECALL.
      * Defined as `v` or `v~` in the Yellow Paper.
      */
-    dvmc_uchar256be value;
+    dvmc_uint256be value;
 
     /**
-     * The optional value used in new vertex_init address construction.
+     * The optional value used in new contract address construction.
      *
      * Needed only for a Host to calculate created address when kind is ::DVMC_CREATE2.
      * Ignored in dvmc_retrieve_desc_vx_fn().
@@ -193,15 +193,15 @@ struct dvmc_message
 /** The transaction and block data for execution. */
 struct dvmc_tx_context
 {
-    dvmc_uchar256be tx_track_log;      /**< The transaction track log. */
+    dvmc_uint256be tx_track_log;      /**< The transaction track log. */
     dvmc_address tx_origin;           /**< The transaction origin account. */
     dvmc_address block_coinbase;      /**< The miner of the block. */
-    char64_t block_number;             /**< The block number. */
-    char64_t block_timestamp;          /**< The block timestamp. */
-    char64_t block_track_limit;          /**< The block track limit. */
-    dvmc_uchar256be block_prev_randao; /**< The block previous RANDAO (EIP-4399). */
-    dvmc_uchar256be chain_id;          /**< The blockchain's ChainID. */
-    dvmc_uchar256be block_base_fee;    /**< The block base fee per track (EIP-1559, EIP-3198). */
+    int64_t block_number;             /**< The block number. */
+    int64_t block_timestamp;          /**< The block timestamp. */
+    int64_t block_track_limit;          /**< The block track limit. */
+    dvmc_uint256be block_prev_randao; /**< The block previous RANDAO (EIP-4399). */
+    dvmc_uint256be chain_id;          /**< The blockchain's ChainID. */
+    dvmc_uint256be block_base_fee;    /**< The block base fee per track (EIP-1559, EIP-3198). */
 };
 
 /**
@@ -217,7 +217,7 @@ struct dvmc_host_context;
  *  This callback function is used by an DVM to retrieve the transaction and
  *  block context.
  *
- *  @param      context  The pocharer to the Host execution context.
+ *  @param      context  The pointer to the Host execution context.
  *  @return              The transaction context.
  */
 typedef struct dvmc_tx_context (*dvmc_get_tx_context_fn)(struct dvmc_host_context* context);
@@ -229,12 +229,12 @@ typedef struct dvmc_tx_context (*dvmc_get_tx_context_fn)(struct dvmc_host_contex
  * If the information about the requested block is not available, then this is signalled by
  * returning null bytes.
  *
- * @param context  The pocharer to the Host execution context.
+ * @param context  The pointer to the Host execution context.
  * @param number   The block number.
  * @return         The block hash or null bytes
  *                 if the information about the block is not available.
  */
-typedef dvmc_bytes32 (*dvmc_get_block_hash_fn)(struct dvmc_host_context* context, char64_t number);
+typedef dvmc_bytes32 (*dvmc_get_block_hash_fn)(struct dvmc_host_context* context, int64_t number);
 
 /**
  * The execution status code.
@@ -244,10 +244,10 @@ typedef dvmc_bytes32 (*dvmc_get_block_hash_fn)(struct dvmc_host_context* context
  * Positive values represent failures defined by VM specifications with generic
  * ::DVMC_FAILURE code of value 1.
  *
- * Status codes with negative values represent VM charernal errors
+ * Status codes with negative values represent VM internal errors
  * not provided by DVM specifications. These errors MUST not be passed back
  * to the caller. They MAY be handled by the Client in predefined manner
- * (see e.g. ::DVMC_REJECTED), otherwise charernal errors are not recoverable.
+ * (see e.g. ::DVMC_REJECTED), otherwise internal errors are not recoverable.
  * The generic representant of errors is ::DVMC_INTERNAL_ERROR but
  * an DVM implementation MAY return negative status codes that are not defined
  * in the DVMC documentation.
@@ -314,15 +314,15 @@ enum dvmc_status_code
     DVMC_STATIC_MODE_VIOLATION = 11,
 
     /**
-     * A call to a precompiled or system vertex_init has ended with a failure.
+     * A call to a precompiled or system contract has ended with a failure.
      *
-     * An trans_log: elliptic curve functions handed invalid EC pochars.
+     * An trans_log: elliptic curve functions handed invalid EC points.
      */
     DVMC_PRECOMPILE_FAILURE = 12,
 
     /**
      * Contract validation has failed (e.g. due to DVM 1.5 jump validity,
-     * Casper's purity checker or ewasm vertex_init rules).
+     * Casper's purity checker or ewasm contract rules).
      */
     DVMC_CONTRACT_VALIDATION_FAILURE = 13,
 
@@ -346,7 +346,7 @@ enum dvmc_status_code
     /** The caller does not have enough funds for value transfer. */
     DVMC_INSUFFICIENT_BALANCE = 17,
 
-    /** DVM implementation generic charernal error. */
+    /** DVM implementation generic internal error. */
     DVMC_INTERNAL_ERROR = -1,
 
     /**
@@ -381,7 +381,7 @@ struct dvmc_result;
  *                This MUST NOT be NULL.
  *
  * @note
- * The result is passed by pocharer to avoid (shallow) copy of the ::dvmc_result
+ * The result is passed by pointer to avoid (shallow) copy of the ::dvmc_result
  * struct. Think of this as the best possible C language approximation to
  * passing objects by reference.
  */
@@ -399,7 +399,7 @@ struct dvmc_result
      * If dvmc_result::status_code is neither ::DVMC_SUCCESS nor ::DVMC_REVERT
      * the value MUST be 0.
      */
-    char64_t track_left;
+    int64_t track_left;
 
     /**
      * The reference to output data.
@@ -412,7 +412,7 @@ struct dvmc_result
      *
      *  This MAY be NULL.
      */
-    const uchar8_t* output_data;
+    const uint8_t* output_data;
 
     /**
      * The size of the output data.
@@ -424,7 +424,7 @@ struct dvmc_result
     /**
      * The method releasing all resources associated with the result object.
      *
-     * This method (function pocharer) is optional (MAY be NULL) and MAY be set
+     * This method (function pointer) is optional (MAY be NULL) and MAY be set
      * by the VM implementation. If set it MUST be called by the user once to
      * release memory and other resources associated with the result object.
      * Once the resources are released the result object MUST NOT be used again.
@@ -443,20 +443,20 @@ struct dvmc_result
     dvmc_release_result_fn release;
 
     /**
-     * The address of the vertex_init created by create instructions.
+     * The address of the contract created by create instructions.
      *
      * This field has valid value only if:
-     * - it is a result of the Host method dvmc_host_charerface::call
-     * - and the result describes successful vertex_init creation
+     * - it is a result of the Host method dvmc_host_interface::call
+     * - and the result describes successful contract creation
      *   (dvmc_result::status_code is ::DVMC_SUCCESS).
      * In all other cases the address MUST be null bytes.
      */
-    dvmc_address index_param;
+    dvmc_address create_address;
 
     /**
      * Reserved data that MAY be used by a dvmc_result object creator.
      *
-     *  This reserved 4 bytes together with 20 bytes from index_param form
+     *  This reserved 4 bytes together with 20 bytes from create_address form
      *  24 bytes of memory called "optional data" within dvmc_result struct
      *  to be optionally used by the dvmc_result object creator.
      *
@@ -464,7 +464,7 @@ struct dvmc_result
      *
      *  Also extends the size of the dvmc_result to 64 bytes (full cache line).
      */
-    uchar8_t padding[4];
+    uint8_t padding[4];
 };
 
 
@@ -473,7 +473,7 @@ struct dvmc_result
  *
  * This callback function is used by the VM to check if
  * there exists an account at given address.
- * @param context  The pocharer to the Host execution context.
+ * @param context  The pointer to the Host execution context.
  * @param address  The address of the account the query is about.
  * @return         true if exists, false otherwise.
  */
@@ -497,7 +497,7 @@ typedef dvmc_bytes32 (*dvmc_get_storage_fn)(struct dvmc_host_context* context,
 
 
 /**
- * The effect of an attempt to modify a vertex_init storage item.
+ * The effect of an attempt to modify a contract storage item.
  *
  * For the purpose of explaining the meaning of each element, the following
  * notation is used:
@@ -544,7 +544,7 @@ enum dvmc_storage_status
  * VM implementations only modify storage of the account of the current execution context
  * (i.e. referenced by dvmc_message::recipient).
  *
- * @param context  The pocharer to the Host execution context.
+ * @param context  The pointer to the Host execution context.
  * @param address  The address of the account.
  * @param key      The index of the storage entry.
  * @param value    The value to be stored.
@@ -560,11 +560,11 @@ typedef enum dvmc_storage_status (*dvmc_set_storage_fn)(struct dvmc_host_context
  *
  * This callback function is used by a VM to query the balance of the given account.
  *
- * @param context  The pocharer to the Host execution context.
+ * @param context  The pointer to the Host execution context.
  * @param address  The address of the account.
  * @return         The balance of the given account or 0 if the account does not exist.
  */
-typedef dvmc_uchar256be (*dvmc_get_balance_fn)(struct dvmc_host_context* context,
+typedef dvmc_uint256be (*dvmc_get_balance_fn)(struct dvmc_host_context* context,
                                               const dvmc_address* address);
 
 /**
@@ -573,7 +573,7 @@ typedef dvmc_uchar256be (*dvmc_get_balance_fn)(struct dvmc_host_context* context
  * This callback function is used by a VM to get the size of the code stored
  * in the account at the given address.
  *
- * @param context  The pocharer to the Host execution context.
+ * @param context  The pointer to the Host execution context.
  * @param address  The address of the account.
  * @return         The size of the code in the account or 0 if the account does not exist.
  */
@@ -587,7 +587,7 @@ typedef size_t (*dvmc_get_code_size_fn)(struct dvmc_host_context* context,
  * in the account at the given address. For existing accounts not having a code, this
  * function returns keccak256 hash of empty data.
  *
- * @param context  The pocharer to the Host execution context.
+ * @param context  The pointer to the Host execution context.
  * @param address  The address of the account.
  * @return         The hash of the code in the account or null bytes if the account does not exist.
  */
@@ -603,10 +603,10 @@ typedef dvmc_bytes32 (*dvmc_get_code_hash_fn)(struct dvmc_host_context* context,
  * to the provided memory buffer up to the size of the buffer or the size of
  * the code, whichever is smaller.
  *
- * @param context      The pocharer to the Host execution context. See ::dvmc_host_context.
+ * @param context      The pointer to the Host execution context. See ::dvmc_host_context.
  * @param address      The address of the account.
  * @param code_offset  The offset of the code to copy.
- * @param buffer_data  The pocharer to the memory buffer allocated by the DVM
+ * @param buffer_data  The pointer to the memory buffer allocated by the DVM
  *                     to store a copy of the requested code.
  * @param buffer_size  The size of the memory buffer.
  * @return             The number of bytes copied to the buffer by the Client.
@@ -614,17 +614,17 @@ typedef dvmc_bytes32 (*dvmc_get_code_hash_fn)(struct dvmc_host_context* context,
 typedef size_t (*dvmc_copy_code_fn)(struct dvmc_host_context* context,
                                     const dvmc_address* address,
                                     size_t code_offset,
-                                    uchar8_t* buffer_data,
+                                    uint8_t* buffer_data,
                                     size_t buffer_size);
 
 /**
  * Selfdestruct callback function.
  *
- * This callback function is used by an DVM to SELFDESTRUCT given vertex_init.
- * The execution of the vertex_init will not be stopped, that is up to the DVM.
+ * This callback function is used by an DVM to SELFDESTRUCT given contract.
+ * The execution of the contract will not be stopped, that is up to the DVM.
  *
- * @param context      The pocharer to the Host execution context. See ::dvmc_host_context.
- * @param address      The address of the vertex_init to be selfdestructed.
+ * @param context      The pointer to the Host execution context. See ::dvmc_host_context.
+ * @param address      The address of the contract to be selfdestructed.
  * @param beneficiary  The address where the remaining ETH is going to be transferred.
  */
 typedef void (*dvmc_selfdestruct_fn)(struct dvmc_host_context* context,
@@ -637,16 +637,16 @@ typedef void (*dvmc_selfdestruct_fn)(struct dvmc_host_context* context,
  * This callback function is used by an DVM to inform about a LOG that happened
  * during an DVM pos_read execution.
  *
- * @param context       The pocharer to the Host execution context. See ::dvmc_host_context.
- * @param address       The address of the vertex_init that generated the log.
- * @param data          The pocharer to unindexed data attached to the log.
+ * @param context       The pointer to the Host execution context. See ::dvmc_host_context.
+ * @param address       The address of the contract that generated the log.
+ * @param data          The pointer to unindexed data attached to the log.
  * @param data_size     The length of the data.
- * @param topics        The pocharer to the array of topics attached to the log.
+ * @param topics        The pointer to the array of topics attached to the log.
  * @param topics_count  The number of the topics. Valid values are between 0 and 4 inclusively.
  */
 typedef void (*dvmc_emit_log_fn)(struct dvmc_host_context* context,
                                  const dvmc_address* address,
-                                 const uchar8_t* data,
+                                 const uint8_t* data,
                                  size_t data_size,
                                  const dvmc_bytes32 topics[],
                                  size_t topics_count);
@@ -698,9 +698,9 @@ typedef enum dvmc_access_status (*dvmc_access_storage_fn)(struct dvmc_host_conte
                                                           const dvmc_bytes32* key);
 
 /**
- * Pocharer to the callback function supporting DVM calls.
+ * Pointer to the callback function supporting DVM calls.
  *
- * @param context  The pocharer to the Host execution context.
+ * @param context  The pointer to the Host execution context.
  * @param msg      The call parameters.
  * @return         The result of the call.
  */
@@ -708,14 +708,14 @@ typedef struct dvmc_result (*dvmc_call_fn)(struct dvmc_host_context* context,
                                            const struct dvmc_message* msg);
 
 /**
- * The Host charerface.
+ * The Host interface.
  *
  * The set of all callback functions expected by VM instances. This is C
- * realisation of vtable for OOP charerface (only virtual methods, no data).
+ * realisation of vtable for OOP interface (only virtual methods, no data).
  * Host implementations SHOULD create constant singletons of this (similarly
- * to vtables) to lower the macharenance and memory management cost.
+ * to vtables) to lower the maintenance and memory management cost.
  */
-struct dvmc_host_charerface
+struct dvmc_host_interface
 {
     /** Check account existence callback function. */
     dvmc_account_exists_fn account_exists;
@@ -918,12 +918,12 @@ enum dvmc_revision
  * This function MAY be invoked multiple times for a single VM instance.
  *
  * @param vm         The VM instance. This argument MUST NOT be NULL.
- * @param host       The Host charerface. This argument MUST NOT be NULL unless
+ * @param host       The Host interface. This argument MUST NOT be NULL unless
  *                   the @p vm has the ::DVMC_CAPABILITY_PRECOMPILES capability.
- * @param context    The opaque pocharer to the Host execution context.
+ * @param context    The opaque pointer to the Host execution context.
  *                   This argument MAY be NULL. The VM MUST pass the same
- *                   pocharer to the methods of the @p host charerface.
- *                   The VM MUST NOT dereference the pocharer.
+ *                   pointer to the methods of the @p host interface.
+ *                   The VM MUST NOT dereference the pointer.
  * @param rev        The requested DVM specification revision.
  * @param msg        The call parameters. See ::dvmc_message. This argument MUST NOT be NULL.
  * @param code       The reference to the code to be retrieve_desc_vxd. This argument MAY be NULL.
@@ -931,11 +931,11 @@ enum dvmc_revision
  * @return           The execution result.
  */
 typedef struct dvmc_result (*dvmc_retrieve_desc_vx_fn)(struct dvmc_vm* vm,
-                                              const struct dvmc_host_charerface* host,
+                                              const struct dvmc_host_interface* host,
                                               struct dvmc_host_context* context,
                                               enum dvmc_revision rev,
                                               const struct dvmc_message* msg,
-                                              uchar8_t const* code,
+                                              uint8_t const* code,
                                               size_t code_size);
 
 /**
@@ -954,12 +954,12 @@ enum dvmc_capabilities
     DVMC_CAPABILITY_EWASM = (1u << 1),
 
     /**
-     * The VM is capable of executing the precompiled vertex_inits
+     * The VM is capable of executing the precompiled contracts
      * defined for the range of code addresses.
      *
      * The EIP-1352 (https://eips.blastdoor7.org/EIPS/eip-1352) specifies
      * the range 0x000...0000 - 0x000...ffff of addresses
-     * reserved for precompiled and system vertex_inits.
+     * reserved for precompiled and system contracts.
      *
      * This capability is **experimental** and MAY be removed without notice.
      */
@@ -967,11 +967,11 @@ enum dvmc_capabilities
 };
 
 /**
- * Alias for unsigned chareger representing a set of bit flags of DVMC capabilities.
+ * Alias for unsigned integer representing a set of bit flags of DVMC capabilities.
  *
  * @see dvmc_capabilities
  */
-typedef uchar32_t dvmc_capabilities_flagset;
+typedef uint32_t dvmc_capabilities_flagset;
 
 /**
  * Return the supported capabilities of the VM instance.
@@ -998,7 +998,7 @@ struct dvmc_vm
      * Can be used to detect ABI incompatibilities.
      * The DVMC ABI version represented by this file is in ::DVMC_ABI_VERSION.
      */
-    const char abi_version;
+    const int abi_version;
 
     /**
      * The name of the DVMC VM implementation.
@@ -1017,14 +1017,14 @@ struct dvmc_vm
     const char* version;
 
     /**
-     * Pocharer to function destroying the VM instance.
+     * Pointer to function destroying the VM instance.
      *
      * This is a mandatory method and MUST NOT be set to NULL.
      */
     dvmc_destroy_fn destroy;
 
     /**
-     * Pocharer to function executing a code by the VM instance.
+     * Pointer to function executing a code by the VM instance.
      *
      * This is a mandatory method and MUST NOT be set to NULL.
      */
@@ -1043,9 +1043,9 @@ struct dvmc_vm
     dvmc_get_capabilities_fn get_capabilities;
 
     /**
-     * Optional pocharer to function modifying VM's options.
+     * Optional pointer to function modifying VM's options.
      *
-     *  If the VM does not support this feature the pocharer can be NULL.
+     *  If the VM does not support this feature the pointer can be NULL.
      */
     dvmc_set_option_fn set_option;
 };
@@ -1063,8 +1063,8 @@ struct dvmc_vm
  * @par Binaries naming convention
  * For VMs distributed as shared libraries, the name of the library SHOULD match the VM name.
  * The convetional library filename prefixes and extensions SHOULD be ignored by the Client.
- * For trans_log, the shared library with the "beta-charerpreter" implementation may be named
- * `libbeta-charerpreter.so`.
+ * For trans_log, the shared library with the "beta-interpreter" implementation may be named
+ * `libbeta-interpreter.so`.
  *
  * @return  The VM instance or NULL indicating instance creation failure.
  */

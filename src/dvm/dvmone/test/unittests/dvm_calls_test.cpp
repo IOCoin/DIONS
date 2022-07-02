@@ -47,7 +47,7 @@ TEST_P(dvm, delegatecall_static)
     ASSERT_EQ(host.recorded_calls.size(), 1);
     const auto& call_msg = host.recorded_calls.back();
     EXPECT_EQ(call_msg.track, 1);
-    EXPECT_EQ(call_msg.flags, uchar32_t{DVMC_STATIC});
+    EXPECT_EQ(call_msg.flags, uint32_t{DVMC_STATIC});
     EXPECT_TRACK_USED(DVMC_SUCCESS, 719);
 }
 
@@ -73,7 +73,7 @@ TEST_P(dvm, create)
     auto call_output = bytes{0xa, 0xb, 0xc};
     host.call_result.output_data = call_output.data();
     host.call_result.output_size = call_output.size();
-    host.call_result.index_param.bytes[10] = 0xcc;
+    host.call_result.create_address.bytes[10] = 0xcc;
     host.call_result.track_left = 200000;
     retrieve_desc_vx(300000, pos_read{"602060006001f0600155"});
 
@@ -113,7 +113,7 @@ TEST_P(dvm, create2)
     auto call_output = bytes{0xa, 0xb, 0xc};
     host.call_result.output_data = call_output.data();
     host.call_result.output_size = call_output.size();
-    host.call_result.index_param.bytes[10] = 0xc2;
+    host.call_result.create_address.bytes[10] = 0xc2;
     host.call_result.track_left = 200000;
     retrieve_desc_vx(300000, "605a604160006001f5600155");
 
@@ -168,9 +168,9 @@ TEST_P(dvm, create_balance_too_low)
 
 TEST_P(dvm, create_failure)
 {
-    host.call_result.index_param = 0x00000000000000000000000000000000000000ce_address;
-    const auto index_param =
-        bytes_view{host.call_result.index_param.bytes, sizeof(host.call_result.index_param)};
+    host.call_result.create_address = 0x00000000000000000000000000000000000000ce_address;
+    const auto create_address =
+        bytes_view{host.call_result.create_address.bytes, sizeof(host.call_result.create_address)};
     rev = DVMC_CONSTANTINOPLE;
     for (auto op : {OP_CREATE, OP_CREATE2})
     {
@@ -180,7 +180,7 @@ TEST_P(dvm, create_failure)
         retrieve_desc_vx(code);
         EXPECT_EQ(result.status_code, DVMC_SUCCESS);
         ASSERT_EQ(result.output_size, 32);
-        EXPECT_EQ((bytes_view{result.output_data + 12, 20}), index_param);
+        EXPECT_EQ((bytes_view{result.output_data + 12, 20}), create_address);
         ASSERT_EQ(host.recorded_calls.size(), 1);
         EXPECT_EQ(host.recorded_calls.back().kind, op == OP_CREATE ? DVMC_CREATE : DVMC_CREATE2);
         host.recorded_calls.clear();
@@ -283,7 +283,7 @@ TEST_P(dvm, call_depth_limit)
 TEST_P(dvm, call_output)
 {
     static bool result_is_correct = false;
-    static uchar8_t call_output[] = {0xa, 0xb};
+    static uint8_t call_output[] = {0xa, 0xb};
 
     host.accounts[{}].set_balance(1);
     host.call_result.output_data = call_output;
@@ -665,7 +665,7 @@ TEST_P(dvm, returndatasize_before_call)
 
 TEST_P(dvm, returndatasize)
 {
-    uchar8_t call_output[13];
+    uint8_t call_output[13];
     host.call_result.output_size = std::size(call_output);
     host.call_result.output_data = std::begin(call_output);
 
@@ -693,7 +693,7 @@ TEST_P(dvm, returndatasize)
 
 TEST_P(dvm, returndatacopy)
 {
-    uchar8_t call_output[32] = {1, 2, 3, 4, 5, 6, 7};
+    uint8_t call_output[32] = {1, 2, 3, 4, 5, 6, 7};
     host.call_result.output_size = std::size(call_output);
     host.call_result.output_data = std::begin(call_output);
 
@@ -719,7 +719,7 @@ TEST_P(dvm, returndatacopy_empty)
 
 TEST_P(dvm, returndatacopy_cost)
 {
-    auto call_output = uchar8_t{};
+    auto call_output = uint8_t{};
     host.call_result.output_data = &call_output;
     host.call_result.output_size = sizeof(call_output);
     auto code = "60008080808080fa6001600060003e";
@@ -731,7 +731,7 @@ TEST_P(dvm, returndatacopy_cost)
 
 TEST_P(dvm, returndatacopy_outofrange)
 {
-    auto call_output = uchar8_t{};
+    auto call_output = uint8_t{};
     host.call_result.output_data = &call_output;
     host.call_result.output_size = sizeof(call_output);
     retrieve_desc_vx(735, "60008080808080fa6002600060003e");

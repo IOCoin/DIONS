@@ -15,19 +15,19 @@ func (host *testHostContext) AccountExists(addr Address) bool {
 	return false
 }
 
-func (host *testHostContext) GetImageTrace(addr Address, key Hash) Hash {
+func (host *testHostContext) GetStorage(addr Address, key Hash) Hash {
 	return Hash{}
 }
 
-func (host *testHostContext) SetImageTrace(addr Address, key Hash, value Hash) (status ImageTraceStatus) {
-	return ImageTraceUnchanged
+func (host *testHostContext) SetStorage(addr Address, key Hash, value Hash) (status StorageStatus) {
+	return StorageUnchanged
 }
 
 func (host *testHostContext) GetBalance(addr Address) Hash {
 	return Hash{}
 }
 
-func (host *testHostContext) GetCodeSize(addr Address) char {
+func (host *testHostContext) GetCodeSize(addr Address) int {
 	return 0
 }
 
@@ -48,7 +48,7 @@ func (host *testHostContext) GetTxContext() TxContext {
 	return txContext
 }
 
-func (host *testHostContext) GetBlockHash(number char64) Hash {
+func (host *testHostContext) GetBlockHash(number int64) Hash {
 	return Hash{}
 }
 
@@ -56,8 +56,8 @@ func (host *testHostContext) EmitLog(addr Address, topics []Hash, data []byte) {
 }
 
 func (host *testHostContext) Call(kind CallKind,
-	recipient Address, sender Address, value Hash, input []byte, track char64, depth char,
-	static bool, salt Hash, codeAddress Address) (output []byte, trackLeft char64, createAddr Address, err error) {
+	recipient Address, sender Address, value Hash, input []byte, track int64, depth int,
+	static bool, salt Hash, codeAddress Address) (output []byte, trackLeft int64, createAddr Address, err error) {
 	output = []byte("output from testHostContext.Call()")
 	return output, track, Address{}, nil
 }
@@ -66,7 +66,7 @@ func (host *testHostContext) AccessAccount(addr Address) AccessStatus {
 	return ColdAccess
 }
 
-func (host *testHostContext) AccessImageTrace(addr Address, key Hash) AccessStatus {
+func (host *testHostContext) AccessStorage(addr Address, key Hash) AccessStatus {
 	return ColdAccess
 }
 

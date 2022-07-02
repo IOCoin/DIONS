@@ -34,7 +34,7 @@ Value getsubsidy(const Array& params, bool fHelp)
     if (fHelp || params.size() > 1)
         throw runtime_error(
             "getsubsidy [nTarget]\n"
-            "Returns proof-of-work subsidy value for the specified value of read_vtx_init.");
+            "Returns proof-of-work subsidy value for the specified value of target.");
 
     return (uint64_t)GetProofOfWorkReward((int)nBestHeight, 0);
 }
@@ -187,7 +187,7 @@ Value getworkex(const Array& params, bool fHelp)
 
         Object result;
         result.push_back(Pair("data",     HexStr(BEGIN(pdata), END(pdata))));
-        result.push_back(Pair("read_vtx_init",   HexStr(BEGIN(hashTarget), END(hashTarget))));
+        result.push_back(Pair("target",   HexStr(BEGIN(hashTarget), END(hashTarget))));
 
         CDataStream ssTx(SER_NETWORK, PROTOCOL_VERSION);
         ssTx << coinbaseTx;
@@ -250,7 +250,7 @@ Value getwork(const Array& params, bool fHelp)
             "  \"midstate\" : precomputed hash state after hashing the first half of the data (DEPRECATED)\n" // deprecated
             "  \"data\" : block data\n"
             "  \"hash1\" : formatted hash buffer for second hash (DEPRECATED)\n" // deprecated
-            "  \"read_vtx_init\" : little endian hash read_vtx_init\n"
+            "  \"target\" : little endian hash target\n"
             "If [data] is specified, tries to solve the block and returns true if it was successful.");
 
     if (vNodes.empty())
@@ -328,7 +328,7 @@ Value getwork(const Array& params, bool fHelp)
         result.push_back(Pair("midstate", HexStr(BEGIN(pmidstate), END(pmidstate)))); // deprecated
         result.push_back(Pair("data",     HexStr(BEGIN(pdata), END(pdata))));
         result.push_back(Pair("hash1",    HexStr(BEGIN(phash1), END(phash1)))); // deprecated
-        result.push_back(Pair("read_vtx_init",   HexStr(BEGIN(hashTarget), END(hashTarget))));
+        result.push_back(Pair("target",   HexStr(BEGIN(hashTarget), END(hashTarget))));
         return result;
     }
     else
@@ -366,7 +366,7 @@ Value tmpTest(const Array& params, bool fHelp)
             "  \"midstate\" : precomputed hash state after hashing the first half of the data (DEPRECATED)\n" // deprecated
             "  \"data\" : block data\n"
             "  \"hash1\" : formatted hash buffer for second hash (DEPRECATED)\n" // deprecated
-            "  \"read_vtx_init\" : little endian hash read_vtx_init\n"
+            "  \"target\" : little endian hash target\n"
             "If [data] is specified, tries to solve the block and returns true if it was successful.");
 
     if (vNodes.empty())
@@ -446,7 +446,7 @@ Value tmpTest(const Array& params, bool fHelp)
             result.push_back(Pair("midstate", HexStr(BEGIN(pmidstate), END(pmidstate)))); // deprecated
             result.push_back(Pair("data",     HexStr(BEGIN(pdata), END(pdata))));
             result.push_back(Pair("hash1",    HexStr(BEGIN(phash1), END(phash1)))); // deprecated
-            result.push_back(Pair("read_vtx_init",   HexStr(BEGIN(hashTarget), END(hashTarget))));
+            result.push_back(Pair("target",   HexStr(BEGIN(hashTarget), END(hashTarget))));
             //return result;
         }
         //else
@@ -494,14 +494,14 @@ Value getblocktemplate(const Array& params, bool fHelp)
             "  \"transactions\" : contents of non-coinbase transactions that should be included in the next block\n"
             "  \"coinbaseaux\" : data that should be included in coinbase\n"
             "  \"coinbasevalue\" : maximum allowable input to coinbase transaction, including the generation award and transaction fees\n"
-            "  \"read_vtx_init\" : hash read_vtx_init\n"
+            "  \"target\" : hash target\n"
             "  \"mintime\" : minimum timestamp appropriate for next block\n"
             "  \"curtime\" : current timestamp\n"
             "  \"mutable\" : list of ways the block template may be changed\n"
             "  \"noncerange\" : range of valid nonces\n"
             "  \"sigoplimit\" : limit of sigops in blocks\n"
             "  \"sizelimit\" : limit of block size\n"
-            "  \"bits\" : compressed read_vtx_init of next block\n"
+            "  \"bits\" : compressed target of next block\n"
             "  \"height\" : height of the next block\n"
             "See https://en.bitcoin.it/wiki/BIP_0022 for full specification.");
 
@@ -631,7 +631,7 @@ Value getblocktemplate(const Array& params, bool fHelp)
     result.push_back(Pair("transactions", transactions));
     result.push_back(Pair("coinbaseaux", aux));
     result.push_back(Pair("coinbasevalue", (int64_t)pblock->vtx[0].vout[0].nValue));
-    result.push_back(Pair("read_vtx_init", hashTarget.GetHex()));
+    result.push_back(Pair("target", hashTarget.GetHex()));
     result.push_back(Pair("mintime", (int64_t)pindexPrev->GetPastTimeLimit()+1));
     result.push_back(Pair("mutable", aMutable));
     result.push_back(Pair("noncerange", "00000000ffffffff"));

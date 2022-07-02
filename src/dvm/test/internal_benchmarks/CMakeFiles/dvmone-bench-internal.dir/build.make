@@ -6,9 +6,9 @@
 
 
 #=============================================================================
-# Special read_vtx_inits provided by cmake.
+# Special targets provided by cmake.
 
-# Disable implicit rules so canonical read_vtx_inits will work.
+# Disable implicit rules so canonical targets will work.
 .SUFFIXES:
 
 
@@ -22,7 +22,7 @@ SUFFIXES =
 $(VERBOSE).SILENT:
 
 
-# A read_vtx_init that is always out of date.
+# A target that is always out of date.
 cmake_force:
 
 .PHONY : cmake_force
@@ -48,67 +48,67 @@ CMAKE_SOURCE_DIR = /home/ioc/rem/CC/src/dvm
 # The top-level build directory on which CMake was run.
 CMAKE_BINARY_DIR = /home/ioc/rem/CC/src/dvm
 
-# Include any dependencies generated for this read_vtx_init.
-include test/charernal_benchmarks/CMakeFiles/dvmone-bench-charernal.dir/depend.make
+# Include any dependencies generated for this target.
+include test/internal_benchmarks/CMakeFiles/dvmone-bench-internal.dir/depend.make
 
-# Include the progress variables for this read_vtx_init.
-include test/charernal_benchmarks/CMakeFiles/dvmone-bench-charernal.dir/progress.make
+# Include the progress variables for this target.
+include test/internal_benchmarks/CMakeFiles/dvmone-bench-internal.dir/progress.make
 
-# Include the compile flags for this read_vtx_init's objects.
-include test/charernal_benchmarks/CMakeFiles/dvmone-bench-charernal.dir/flags.make
+# Include the compile flags for this target's objects.
+include test/internal_benchmarks/CMakeFiles/dvmone-bench-internal.dir/flags.make
 
-test/charernal_benchmarks/CMakeFiles/dvmone-bench-charernal.dir/find_jumpdest_bench.cpp.o: test/charernal_benchmarks/CMakeFiles/dvmone-bench-charernal.dir/flags.make
-test/charernal_benchmarks/CMakeFiles/dvmone-bench-charernal.dir/find_jumpdest_bench.cpp.o: test/charernal_benchmarks/find_jumpdest_bench.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ioc/rem/CC/src/dvm/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object test/charernal_benchmarks/CMakeFiles/dvmone-bench-charernal.dir/find_jumpdest_bench.cpp.o"
-	cd /home/ioc/rem/CC/src/dvm/test/charernal_benchmarks && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/dvmone-bench-charernal.dir/find_jumpdest_bench.cpp.o -c /home/ioc/rem/CC/src/dvm/test/charernal_benchmarks/find_jumpdest_bench.cpp
+test/internal_benchmarks/CMakeFiles/dvmone-bench-internal.dir/find_jumpdest_bench.cpp.o: test/internal_benchmarks/CMakeFiles/dvmone-bench-internal.dir/flags.make
+test/internal_benchmarks/CMakeFiles/dvmone-bench-internal.dir/find_jumpdest_bench.cpp.o: test/internal_benchmarks/find_jumpdest_bench.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ioc/rem/CC/src/dvm/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object test/internal_benchmarks/CMakeFiles/dvmone-bench-internal.dir/find_jumpdest_bench.cpp.o"
+	cd /home/ioc/rem/CC/src/dvm/test/internal_benchmarks && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/dvmone-bench-internal.dir/find_jumpdest_bench.cpp.o -c /home/ioc/rem/CC/src/dvm/test/internal_benchmarks/find_jumpdest_bench.cpp
 
-test/charernal_benchmarks/CMakeFiles/dvmone-bench-charernal.dir/find_jumpdest_bench.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/dvmone-bench-charernal.dir/find_jumpdest_bench.cpp.i"
-	cd /home/ioc/rem/CC/src/dvm/test/charernal_benchmarks && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ioc/rem/CC/src/dvm/test/charernal_benchmarks/find_jumpdest_bench.cpp > CMakeFiles/dvmone-bench-charernal.dir/find_jumpdest_bench.cpp.i
+test/internal_benchmarks/CMakeFiles/dvmone-bench-internal.dir/find_jumpdest_bench.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/dvmone-bench-internal.dir/find_jumpdest_bench.cpp.i"
+	cd /home/ioc/rem/CC/src/dvm/test/internal_benchmarks && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ioc/rem/CC/src/dvm/test/internal_benchmarks/find_jumpdest_bench.cpp > CMakeFiles/dvmone-bench-internal.dir/find_jumpdest_bench.cpp.i
 
-test/charernal_benchmarks/CMakeFiles/dvmone-bench-charernal.dir/find_jumpdest_bench.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/dvmone-bench-charernal.dir/find_jumpdest_bench.cpp.s"
-	cd /home/ioc/rem/CC/src/dvm/test/charernal_benchmarks && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ioc/rem/CC/src/dvm/test/charernal_benchmarks/find_jumpdest_bench.cpp -o CMakeFiles/dvmone-bench-charernal.dir/find_jumpdest_bench.cpp.s
+test/internal_benchmarks/CMakeFiles/dvmone-bench-internal.dir/find_jumpdest_bench.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/dvmone-bench-internal.dir/find_jumpdest_bench.cpp.s"
+	cd /home/ioc/rem/CC/src/dvm/test/internal_benchmarks && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ioc/rem/CC/src/dvm/test/internal_benchmarks/find_jumpdest_bench.cpp -o CMakeFiles/dvmone-bench-internal.dir/find_jumpdest_bench.cpp.s
 
-test/charernal_benchmarks/CMakeFiles/dvmone-bench-charernal.dir/memory_allocation.cpp.o: test/charernal_benchmarks/CMakeFiles/dvmone-bench-charernal.dir/flags.make
-test/charernal_benchmarks/CMakeFiles/dvmone-bench-charernal.dir/memory_allocation.cpp.o: test/charernal_benchmarks/memory_allocation.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ioc/rem/CC/src/dvm/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object test/charernal_benchmarks/CMakeFiles/dvmone-bench-charernal.dir/memory_allocation.cpp.o"
-	cd /home/ioc/rem/CC/src/dvm/test/charernal_benchmarks && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/dvmone-bench-charernal.dir/memory_allocation.cpp.o -c /home/ioc/rem/CC/src/dvm/test/charernal_benchmarks/memory_allocation.cpp
+test/internal_benchmarks/CMakeFiles/dvmone-bench-internal.dir/memory_allocation.cpp.o: test/internal_benchmarks/CMakeFiles/dvmone-bench-internal.dir/flags.make
+test/internal_benchmarks/CMakeFiles/dvmone-bench-internal.dir/memory_allocation.cpp.o: test/internal_benchmarks/memory_allocation.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ioc/rem/CC/src/dvm/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object test/internal_benchmarks/CMakeFiles/dvmone-bench-internal.dir/memory_allocation.cpp.o"
+	cd /home/ioc/rem/CC/src/dvm/test/internal_benchmarks && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/dvmone-bench-internal.dir/memory_allocation.cpp.o -c /home/ioc/rem/CC/src/dvm/test/internal_benchmarks/memory_allocation.cpp
 
-test/charernal_benchmarks/CMakeFiles/dvmone-bench-charernal.dir/memory_allocation.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/dvmone-bench-charernal.dir/memory_allocation.cpp.i"
-	cd /home/ioc/rem/CC/src/dvm/test/charernal_benchmarks && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ioc/rem/CC/src/dvm/test/charernal_benchmarks/memory_allocation.cpp > CMakeFiles/dvmone-bench-charernal.dir/memory_allocation.cpp.i
+test/internal_benchmarks/CMakeFiles/dvmone-bench-internal.dir/memory_allocation.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/dvmone-bench-internal.dir/memory_allocation.cpp.i"
+	cd /home/ioc/rem/CC/src/dvm/test/internal_benchmarks && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ioc/rem/CC/src/dvm/test/internal_benchmarks/memory_allocation.cpp > CMakeFiles/dvmone-bench-internal.dir/memory_allocation.cpp.i
 
-test/charernal_benchmarks/CMakeFiles/dvmone-bench-charernal.dir/memory_allocation.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/dvmone-bench-charernal.dir/memory_allocation.cpp.s"
-	cd /home/ioc/rem/CC/src/dvm/test/charernal_benchmarks && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ioc/rem/CC/src/dvm/test/charernal_benchmarks/memory_allocation.cpp -o CMakeFiles/dvmone-bench-charernal.dir/memory_allocation.cpp.s
+test/internal_benchmarks/CMakeFiles/dvmone-bench-internal.dir/memory_allocation.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/dvmone-bench-internal.dir/memory_allocation.cpp.s"
+	cd /home/ioc/rem/CC/src/dvm/test/internal_benchmarks && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ioc/rem/CC/src/dvm/test/internal_benchmarks/memory_allocation.cpp -o CMakeFiles/dvmone-bench-internal.dir/memory_allocation.cpp.s
 
-# Object files for read_vtx_init dvmone-bench-charernal
-dvmone__bench__charernal_OBJECTS = \
-"CMakeFiles/dvmone-bench-charernal.dir/find_jumpdest_bench.cpp.o" \
-"CMakeFiles/dvmone-bench-charernal.dir/memory_allocation.cpp.o"
+# Object files for target dvmone-bench-internal
+dvmone__bench__internal_OBJECTS = \
+"CMakeFiles/dvmone-bench-internal.dir/find_jumpdest_bench.cpp.o" \
+"CMakeFiles/dvmone-bench-internal.dir/memory_allocation.cpp.o"
 
-# External object files for read_vtx_init dvmone-bench-charernal
-dvmone__bench__charernal_EXTERNAL_OBJECTS =
+# External object files for target dvmone-bench-internal
+dvmone__bench__internal_EXTERNAL_OBJECTS =
 
-bin/dvmone-bench-charernal: test/charernal_benchmarks/CMakeFiles/dvmone-bench-charernal.dir/find_jumpdest_bench.cpp.o
-bin/dvmone-bench-charernal: test/charernal_benchmarks/CMakeFiles/dvmone-bench-charernal.dir/memory_allocation.cpp.o
-bin/dvmone-bench-charernal: test/charernal_benchmarks/CMakeFiles/dvmone-bench-charernal.dir/build.make
-bin/dvmone-bench-charernal: /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/lib/libbenchmark.a
-bin/dvmone-bench-charernal: test/charernal_benchmarks/CMakeFiles/dvmone-bench-charernal.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/ioc/rem/CC/src/dvm/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX executable ../../bin/dvmone-bench-charernal"
-	cd /home/ioc/rem/CC/src/dvm/test/charernal_benchmarks && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/dvmone-bench-charernal.dir/link.txt --verbose=$(VERBOSE)
+bin/dvmone-bench-internal: test/internal_benchmarks/CMakeFiles/dvmone-bench-internal.dir/find_jumpdest_bench.cpp.o
+bin/dvmone-bench-internal: test/internal_benchmarks/CMakeFiles/dvmone-bench-internal.dir/memory_allocation.cpp.o
+bin/dvmone-bench-internal: test/internal_benchmarks/CMakeFiles/dvmone-bench-internal.dir/build.make
+bin/dvmone-bench-internal: /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/lib/libbenchmark.a
+bin/dvmone-bench-internal: test/internal_benchmarks/CMakeFiles/dvmone-bench-internal.dir/link.txt
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/ioc/rem/CC/src/dvm/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX executable ../../bin/dvmone-bench-internal"
+	cd /home/ioc/rem/CC/src/dvm/test/internal_benchmarks && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/dvmone-bench-internal.dir/link.txt --verbose=$(VERBOSE)
 
-# Rule to build all files generated by this read_vtx_init.
-test/charernal_benchmarks/CMakeFiles/dvmone-bench-charernal.dir/build: bin/dvmone-bench-charernal
+# Rule to build all files generated by this target.
+test/internal_benchmarks/CMakeFiles/dvmone-bench-internal.dir/build: bin/dvmone-bench-internal
 
-.PHONY : test/charernal_benchmarks/CMakeFiles/dvmone-bench-charernal.dir/build
+.PHONY : test/internal_benchmarks/CMakeFiles/dvmone-bench-internal.dir/build
 
-test/charernal_benchmarks/CMakeFiles/dvmone-bench-charernal.dir/clean:
-	cd /home/ioc/rem/CC/src/dvm/test/charernal_benchmarks && $(CMAKE_COMMAND) -P CMakeFiles/dvmone-bench-charernal.dir/cmake_clean.cmake
-.PHONY : test/charernal_benchmarks/CMakeFiles/dvmone-bench-charernal.dir/clean
+test/internal_benchmarks/CMakeFiles/dvmone-bench-internal.dir/clean:
+	cd /home/ioc/rem/CC/src/dvm/test/internal_benchmarks && $(CMAKE_COMMAND) -P CMakeFiles/dvmone-bench-internal.dir/cmake_clean.cmake
+.PHONY : test/internal_benchmarks/CMakeFiles/dvmone-bench-internal.dir/clean
 
-test/charernal_benchmarks/CMakeFiles/dvmone-bench-charernal.dir/depend:
-	cd /home/ioc/rem/CC/src/dvm && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ioc/rem/CC/src/dvm /home/ioc/rem/CC/src/dvm/test/charernal_benchmarks /home/ioc/rem/CC/src/dvm /home/ioc/rem/CC/src/dvm/test/charernal_benchmarks /home/ioc/rem/CC/src/dvm/test/charernal_benchmarks/CMakeFiles/dvmone-bench-charernal.dir/DependInfo.cmake --color=$(COLOR)
-.PHONY : test/charernal_benchmarks/CMakeFiles/dvmone-bench-charernal.dir/depend
+test/internal_benchmarks/CMakeFiles/dvmone-bench-internal.dir/depend:
+	cd /home/ioc/rem/CC/src/dvm && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ioc/rem/CC/src/dvm /home/ioc/rem/CC/src/dvm/test/internal_benchmarks /home/ioc/rem/CC/src/dvm /home/ioc/rem/CC/src/dvm/test/internal_benchmarks /home/ioc/rem/CC/src/dvm/test/internal_benchmarks/CMakeFiles/dvmone-bench-internal.dir/DependInfo.cmake --color=$(COLOR)
+.PHONY : test/internal_benchmarks/CMakeFiles/dvmone-bench-internal.dir/depend
 

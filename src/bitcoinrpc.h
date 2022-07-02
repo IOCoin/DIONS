@@ -287,7 +287,7 @@ extern json_spirit::Value transferEncryptedPath(const json_spirit::Array& params
 extern json_spirit::Value psimplex(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value psimplex_cycle(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value transferEncryptedExtPredicate(const json_spirit::Array& params, bool fHelp);
-extern json_spirit::Value lookupImageTracePath(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value lookupStoragePath(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value createDataNode(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value updateDataNode(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value decryptPath(const json_spirit::Array& params, bool fHelp);

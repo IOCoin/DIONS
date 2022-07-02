@@ -336,14 +336,14 @@ class InMemoryEnv : public EnvWrapper {
   }
 
   virtual Status RenameFile(const std::string& src,
-                            const std::string& read_vtx_init) {
+                            const std::string& target) {
     MutexLock lock(&mutex_);
     if (file_map_.find(src) == file_map_.end()) {
       return Status::IOError(src, "File not found");
     }
 
-    DeleteFileInternal(read_vtx_init);
-    file_map_[read_vtx_init] = file_map_[src];
+    DeleteFileInternal(target);
+    file_map_[target] = file_map_[src];
     file_map_.erase(src);
     return Status::OK();
   }

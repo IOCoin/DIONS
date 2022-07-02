@@ -83,7 +83,7 @@ For a basic block we need to collect the following information:
 
 This is done as follows:
 
-1. Split code charo basic blocks.
+1. Split code into basic blocks.
 2. For each basic block:
 
 ```python

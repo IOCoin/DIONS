@@ -162,9 +162,9 @@ class Block::Iter : public Iterator {
     } while (ParseNextKey() && NextEntryOffset() < original);
   }
 
-  virtual void Seek(const Slice& read_vtx_init) {
+  virtual void Seek(const Slice& target) {
     // Binary search in restart array to find the last restart point
-    // with a key < read_vtx_init
+    // with a key < target
     uint32_t left = 0;
     uint32_t right = num_restarts_ - 1;
     while (left < right) {
@@ -179,24 +179,24 @@ class Block::Iter : public Iterator {
         return;
       }
       Slice mid_key(key_ptr, non_shared);
-      if (Compare(mid_key, read_vtx_init) < 0) {
-        // Key at "mid" is smaller than "read_vtx_init".  Therefore all
+      if (Compare(mid_key, target) < 0) {
+        // Key at "mid" is smaller than "target".  Therefore all
         // blocks before "mid" are uninteresting.
         left = mid;
       } else {
-        // Key at "mid" is >= "read_vtx_init".  Therefore all blocks at or
+        // Key at "mid" is >= "target".  Therefore all blocks at or
         // after "mid" are uninteresting.
         right = mid - 1;
       }
     }
 
-    // Linear search (within restart block) for first key >= read_vtx_init
+    // Linear search (within restart block) for first key >= target
     SeekToRestartPoint(left);
     while (true) {
       if (!ParseNextKey()) {
         return;
       }
-      if (Compare(key_, read_vtx_init) >= 0) {
+      if (Compare(key_, target) >= 0) {
         return;
       }
     }

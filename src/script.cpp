@@ -1749,14 +1749,12 @@ bool SignN(const vector<valtype>& multisigdata, const CKeyStore& keystore, uint2
 bool Solver(const CKeyStore& keystore, const CScript& scriptPubKey, uint256 hash, int nHashType,
             CScript& scriptSigRet, txnouttype& whichTypeRet)
 {
-    printf("XXX solver 1\n");
     scriptSigRet.clear();
 
     vector<valtype> vSolutions;
     if (!Solver(scriptPubKey, whichTypeRet, vSolutions))
         return false;
 
-    printf("XXX solver 2\n");
     CKeyID keyID;
     switch (whichTypeRet)
     {
@@ -1764,20 +1762,15 @@ bool Solver(const CKeyStore& keystore, const CScript& scriptPubKey, uint256 hash
     case TX_NULL_DATA:
         return false;
     case TX_PUBKEY:
-        printf("XXX solver 3\n");
         keyID = CPubKey(vSolutions[0]).GetID();
-        printf("XXX solver 4\n");
         return Sign1(keyID, keystore, hash, nHashType, scriptSigRet);
     case TX_PUBKEYHASH:
-        printf("XXX solver 5\n");
         keyID = CKeyID(uint160(vSolutions[0]));
-        printf("XXX solver 6\n");
         keyID = CKeyID(uint160(vSolutions[0]));
         if (!Sign1(keyID, keystore, hash, nHashType, scriptSigRet))
             return false;
         else
         {
-            printf("XXX solver 7\n");
             CPubKey vch;
             keystore.GetPubKey(keyID, vch);
             scriptSigRet << vch;
@@ -1790,7 +1783,6 @@ bool Solver(const CKeyStore& keystore, const CScript& scriptPubKey, uint256 hash
         scriptSigRet << OP_0; // workaround CHECKMULTISIG bug
         return (SignN(vSolutions, keystore, hash, nHashType, scriptSigRet));
     }
-    printf("XXX solver 8\n");
     return false;
 }
 
@@ -1877,7 +1869,6 @@ bool IsMine(const CKeyStore &keystore, const CScript& scriptPubKey)
     std::vector<vchType> vvch;
     CScript::const_iterator pc = scriptPubKey.begin ();
     CScript rawScript;
-    printf("ismine 1\n");
     if (aliasScript (scriptPubKey, op, vvch, pc))
         rawScript = CScript(pc, scriptPubKey.end ());
     else
@@ -2079,7 +2070,6 @@ bool SignSignature(const CKeyStore &keystore, const CScript& fromPubKey, CTransa
     std::vector<vchType> vvch;
     CScript::const_iterator pc = fromPubKey.begin ();
     CScript rawScript;
-    printf("signsig 1\n");
     if (aliasScript (fromPubKey, op, vvch, pc))
         rawScript = CScript(pc, fromPubKey.end ());
     else
@@ -2092,7 +2082,6 @@ bool SignSignature(const CKeyStore &keystore, const CScript& fromPubKey, CTransa
     txnouttype whichType;
     if (!Solver(keystore, rawScript, hash, nHashType, txin.scriptSig, whichType))
     {
-        printf("SignSignature, Solver return false\n");
         return false;
     }
 
@@ -2113,7 +2102,6 @@ bool SignSignature(const CKeyStore &keystore, const CScript& fromPubKey, CTransa
         txin.scriptSig << static_cast<valtype>(subscript);
         if (!fSolved)
         {
-            printf("SignSignature, fSolved return false\n");
             return false;
         }
     }

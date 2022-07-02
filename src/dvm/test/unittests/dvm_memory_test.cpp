@@ -4,12 +4,12 @@
 
 #include "dvm_fixture.hpp"
 #include <dvmone/instructions_traits.hpp>
-#include <charx/charx.hpp>
+#include <intx/intx.hpp>
 #include <algorithm>
 
 using namespace dvmone;
 using namespace dvmc::literals;
-using namespace charx;
+using namespace intx;
 using dvmone::test::dvm;
 
 TEST_P(dvm, memory_and_not)
@@ -114,8 +114,8 @@ TEST_P(dvm, calldatacopy_memory_cost)
 struct memory_access_opcode
 {
     dvmc_opcode opcode;
-    char memory_index_arg;
-    char memory_size_arg;
+    int memory_index_arg;
+    int memory_size_arg;
 };
 
 
@@ -149,8 +149,8 @@ memory_access_opcode memory_access_opcodes[] = {
 
 struct
 {
-    uchar256 index;
-    uchar256 size;
+    uint256 index;
+    uint256 size;
 } memory_access_test_cases[] = {
     {0, 0x100000000},
     {0, 0x10000000000000000_u256},
@@ -187,7 +187,7 @@ TEST_P(dvm, memory_access)
     {
         for (auto& t : memory_access_opcodes)
         {
-            const auto num_args = char{instr::traits[t.opcode].stack_height_required};
+            const auto num_args = int{instr::traits[t.opcode].stack_height_required};
             auto h = std::max(num_args, t.memory_size_arg + 1);
             auto code = pos_read{};
 

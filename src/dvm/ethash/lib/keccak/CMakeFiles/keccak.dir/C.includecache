@@ -17,7 +17,7 @@ string.h
 /home/ioc/rem/CC/src/dvm/ethash/lib/support/attributes.h
 
 include/ethash/hash_types.h
-stdchar.h
+stdint.h
 -
 
 include/ethash/keccak.h

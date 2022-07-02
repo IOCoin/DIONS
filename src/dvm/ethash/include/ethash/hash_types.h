@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include <stdchar.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -13,26 +13,26 @@ extern "C" {
 
 union ethash_hash256
 {
-    uchar64_t word64s[4];
-    uchar32_t word32s[8];
-    uchar8_t bytes[32];
+    uint64_t word64s[4];
+    uint32_t word32s[8];
+    uint8_t bytes[32];
     char str[32];
 };
 
 union ethash_hash512
 {
-    uchar64_t word64s[8];
-    uchar32_t word32s[16];
-    uchar8_t bytes[64];
+    uint64_t word64s[8];
+    uint32_t word32s[16];
+    uint8_t bytes[64];
     char str[64];
 };
 
 union ethash_hash1024
 {
     union ethash_hash512 hash512s[2];
-    uchar64_t word64s[16];
-    uchar32_t word32s[32];
-    uchar8_t bytes[128];
+    uint64_t word64s[16];
+    uint32_t word32s[32];
+    uint8_t bytes[128];
     char str[128];
 };
 

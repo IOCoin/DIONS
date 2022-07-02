@@ -74,8 +74,8 @@ class SkipList {
     // REQUIRES: Valid()
     void Prev();
 
-    // Advance to the first entry with a key >= read_vtx_init
-    void Seek(const Key& read_vtx_init);
+    // Advance to the first entry with a key >= target
+    void Seek(const Key& target);
 
     // Position at the first entry in list.
     // Final state of iterator is Valid() iff list is not empty.
@@ -219,8 +219,8 @@ inline void SkipList<Key,Comparator>::Iterator::Prev() {
 }
 
 template<typename Key, class Comparator>
-inline void SkipList<Key,Comparator>::Iterator::Seek(const Key& read_vtx_init) {
-  node_ = list_->FindGreaterOrEqual(read_vtx_init, NULL);
+inline void SkipList<Key,Comparator>::Iterator::Seek(const Key& target) {
+  node_ = list_->FindGreaterOrEqual(target, NULL);
 }
 
 template<typename Key, class Comparator>

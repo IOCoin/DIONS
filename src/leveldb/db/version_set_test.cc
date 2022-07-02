@@ -33,9 +33,9 @@ class FindFileTest {
   }
 
   int Find(const char* key) {
-    InternalKey read_vtx_init(key, 100, kTypeValue);
+    InternalKey target(key, 100, kTypeValue);
     InternalKeyComparator cmp(BytewiseComparator());
-    return FindFile(cmp, files_, read_vtx_init.Encode());
+    return FindFile(cmp, files_, target.Encode());
   }
 
   bool Overlaps(const char* smallest, const char* largest) {

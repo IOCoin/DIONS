@@ -1801,7 +1801,6 @@ Value nodeValidate(const Array& params, bool fHelp)
                 vchType vchRand;
 
                 const int ex = nHeight + scaleMonitor() - pindexBest->nHeight;
-                aliasObj.push_back(Pair("expires_in", ex));
                 if(ex <= 0)
                     aliasObj.push_back(Pair("expired", 1));
 
@@ -1966,7 +1965,6 @@ Value nodeRetrieve(const Array& params, bool fHelp)
                 vchType vchRand;
 
                 const int expiresIn = nHeight + scaleMonitor() - pindexBest->nHeight;
-                aliasObj.push_back(Pair("expires_in", expiresIn));
                 if(expiresIn <= 0)
                     aliasObj.push_back(Pair("expired", 1));
 
@@ -2109,7 +2107,6 @@ Value getNodeRecord(const Array& params, bool fHelp)
                 vchType vchRand;
 
                 const int expiresIn = nHeight + scaleMonitor() - pindexBest->nHeight;
-                aliasObj.push_back(Pair("expires_in", expiresIn));
                 if(expiresIn <= 0)
                     aliasObj.push_back(Pair("expired", 1));
 
@@ -2501,7 +2498,6 @@ Value aliasList__(const Array& params, bool fHelp)
                 vchType vchRand;
 
                 const int ex = nHeight + scaleMonitor() - pindexBest->nHeight;
-                aliasObj.push_back(Pair("expires_in", ex));
                 if(ex <= 0)
                     aliasObj.push_back(Pair("expired", 1));
                 if(tunnelSwitch__(ex))
@@ -2543,7 +2539,7 @@ Value aliasList__(const Array& params, bool fHelp)
 
     return oRes;
 }
-Value lookupImageTracePath(const Array& params, bool fHelp)
+Value lookupStoragePath(const Array& params, bool fHelp)
 {
     if(fHelp || params.size() > 1)
         throw runtime_error(
@@ -2707,7 +2703,6 @@ Value aliasList(const Array& params, bool fHelp)
                 vchType vchRand;
 
                 const int ex = nHeight + scaleMonitor() - pindexBest->nHeight;
-                aliasObj.push_back(Pair("expires_in", ex));
                 if(ex <= 0)
                     aliasObj.push_back(Pair("expired", 1));
                 if(tunnelSwitch__(ex))
@@ -5569,6 +5564,84 @@ Value registerVertex(const Array& params, bool fHelp)
     res.push_back(vertex.GetHash().GetHex());
     return res;
 }
+bool validate_serial_trc_n(const string& origin, const string& data, __wx__Tx& serial_n)
+{
+    string locatorStr = "descriptor_" + origin;
+    string indexStr = data;
+
+    if(isOnlyWhiteSpace(locatorStr))
+    {
+        string err = "Attempt to register alias consisting only of white space";
+
+        throw JSONRPCError(RPC_WALLET_ERROR, err);
+    }
+    else if(locatorStr.size() > 255)
+    {
+        string err = "Attempt to register alias more than 255 chars";
+
+        throw JSONRPCError(RPC_WALLET_ERROR, err);
+    }
+
+    uint256 wtxInHash__;
+
+    vector<Value> res;
+    LocatorNodeDB aliasCacheDB("r");
+    CTransaction tx;
+    if(aliasTx(aliasCacheDB, vchFromString(locatorStr), tx))
+    {
+        string err = "Attempt to register alias : " + locatorStr + ", this alias is already active with tx " + tx.GetHash().GetHex();
+
+        throw JSONRPCError(RPC_WALLET_ERROR, err);
+    }
+
+    CPubKey vchPubKey;
+    CReserveKey reservekey(pwalletMain);
+    if(!reservekey.GetReservedKey(vchPubKey))
+    {
+        return false;
+    }
+
+    reservekey.KeepKey();
+
+    cba keyAddress(vchPubKey.GetID());
+    CKeyID keyID;
+    keyAddress.GetKeyID(keyID);
+    pwalletMain->SetAddressBookName(keyID, "");
+
+    __wx__DB walletdb(pwalletMain->strWalletFile, "r+");
+
+    CKey key;
+    if(!pwalletMain->GetKey(keyID, key))
+        throw JSONRPCError(RPC_WALLET_ERROR, "Private key not available");
+
+    serial_n.nVersion = CTransaction::DION_TX_VERSION;
+
+    CScript scriptPubKeyOrig;
+    scriptPubKeyOrig.SetBitcoinAddress(vchPubKey.Raw());
+    CScript scriptPubKey;
+    vchType vchPath = vchFromString(locatorStr);
+    vchType vchValue = vchFromString(indexStr);
+
+    scriptPubKey << OP_BASE_VERTEX_SET << vchPath << vchValue << OP_2DROP << OP_DROP;
+    scriptPubKey += scriptPubKeyOrig;
+
+    ENTER_CRITICAL_SECTION(cs_main)
+    {
+        EnsureWalletIsUnlocked();
+
+        string strError = pwalletMain->generateSM__(scriptPubKey, CTRL__, serial_n, false);
+
+        if(strError != "")
+        {
+            LEAVE_CRITICAL_SECTION(cs_main)
+            throw JSONRPCError(RPC_WALLET_ERROR, strError);
+        }
+        mapLocator[vchPath] = serial_n.GetHash();
+    }
+    LEAVE_CRITICAL_SECTION(cs_main)
+
+    return true;
+}
 
 bool validate_serial_n(const string& origin, const string& data, __wx__Tx& serial_n)
 {
@@ -6749,6 +6822,85 @@ bool sign_verifymessage(string address)
 
     return(key__.GetPubKey().GetID() == keyID__);
 }
+bool read_serial_trc_n(const string& origin, const string& data, __wx__Tx& serial_n)
+{
+    uint256 wtx__;
+    string locatorStr = "descriptor_";
+    locatorStr += origin;
+    const vchType vchPath = vchFromValue(locatorStr);
+
+    const vchType vchValue = vchFromValue(data);
+
+    serial_n.nVersion = CTransaction::DION_TX_VERSION;
+    CScript scriptPubKeyOrig;
+
+    CScript scriptPubKey;
+    scriptPubKey << OP_BASE_VERTEX_RELAY << vchPath << vchValue << OP_2DROP << OP_DROP;
+
+    ENTER_CRITICAL_SECTION(cs_main)
+    {
+        ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
+        {
+            if(mapState.count(vchPath) && mapState[vchPath].size())
+            {
+                error("updatePath() : there are %lu pending operations on that alias, including %s",
+                      mapState[vchPath].size(),
+                      mapState[vchPath].begin()->GetHex().c_str());
+                LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+                LEAVE_CRITICAL_SECTION(cs_main)
+                throw runtime_error("there are pending operations on that alias");
+            }
+
+            EnsureWalletIsUnlocked();
+
+            LocatorNodeDB aliasCacheDB("r");
+            CTransaction tx;
+            if(!aliasTx(aliasCacheDB, vchPath, tx))
+            {
+                LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+                LEAVE_CRITICAL_SECTION(cs_main)
+                throw runtime_error("could not find a coin with this alias 5 " + stringFromVch(vchPath));
+            }
+
+            uint256 wtxInHash = tx.GetHash();
+
+            if(!pwalletMain->mapWallet.count(wtxInHash))
+            {
+                error("updatePath() : this coin is not in your wallet %s",
+                      wtxInHash.GetHex().c_str());
+                LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+                LEAVE_CRITICAL_SECTION(cs_main)
+                throw runtime_error("this coin is not in your wallet");
+            }
+
+            {
+                string strAddress = "";
+                aliasAddress(tx, strAddress);
+                if(strAddress == "")
+                    throw runtime_error("alias has no associated address");
+
+                uint160 hash160;
+                bool isValid = AddressToHash160(strAddress, hash160);
+                if(!isValid)
+                    throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid dions address");
+                scriptPubKeyOrig.SetBitcoinAddress(strAddress);
+            }
+
+            __wx__Tx& wtxIn = pwalletMain->mapWallet[wtxInHash];
+            scriptPubKey += scriptPubKeyOrig;
+            string strError = txRelay_no_commit(scriptPubKey, CTRL__, wtxIn, serial_n, false);
+            if(strError != "")
+            {
+                LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+                LEAVE_CRITICAL_SECTION(cs_main)
+                throw JSONRPCError(RPC_WALLET_ERROR, strError);
+            }
+        }
+        LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    }
+    LEAVE_CRITICAL_SECTION(cs_main)
+    return true;
+}
 bool read_serial_n(const string& origin, const string& data, __wx__Tx& serial_n)
 {
     uint256 wtx__;
@@ -7346,7 +7498,9 @@ bool aliasScript(const CScript& script, int& op, vector<vector<unsigned char> > 
             (op == OP_ALIAS_SET && vvch.size() == 5) ||
             (op == OP_MESSAGE) ||
             (op == OP_BASE_SET) ||
+            (op == OP_BASE_VERTEX_SET) ||
             (op == OP_BASE_RELAY) ||
+            (op == OP_BASE_VERTEX_RELAY) ||
             (op == OP_ENCRYPTED_MESSAGE) ||
             (op == OP_MAP_PROJECT) ||
             (op == OP_PUBLIC_KEY) ||
@@ -7437,6 +7591,12 @@ bool aliasTxValue(const CTransaction& tx, vector<unsigned char>& value)
         value = vvch[1];
         return true;
     case OP_BASE_RELAY:
+        value = vvch[1];
+        return true;
+    case OP_BASE_VERTEX_SET:
+        value = vvch[1];
+        return true;
+    case OP_BASE_VERTEX_RELAY:
         value = vvch[1];
         return true;
     default:
@@ -7581,7 +7741,7 @@ AcceptToMemoryPoolPost(const CTransaction& tx)
         if(nPrevHeight >= 0 && nBestHeight - nPrevHeight < scaleMonitor())
             return false;
     }
-    if(op == OP_BASE_SET)
+    if(op == OP_BASE_SET || op == OP_BASE_VERTEX_SET)
     {
         if(vvch[0].size() > MAX_LOCATOR_LENGTH)
             return error("locator too long");
@@ -7675,7 +7835,7 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
         }
 
         if(found)
-          return error("ConnectInputsPost() : detected non-dions with dions script");
+            printf("encountered non-dions transaction with a dions input");
 
         return true;
     }
@@ -8018,6 +8178,30 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
         if(vvchArgs[1].size() > MAX_XUNIT_LENGTH)
             return error("createDataNode tx with value too long");
         break;
+    case OP_BASE_VERTEX_RELAY:
+	    if(!fBlock)
+              return tx.DoS(100, error("ConnectInputsPost() : op vertex inconsistent"));
+        if(!found || !(prevOp == OP_BASE_VERTEX_SET || prevOp == OP_BASE_VERTEX_RELAY))
+            return error("updatePath tx without previous update tx");
+
+        if(vvchArgs[1].size() > MAX_XUNIT_LENGTH)
+            return error("updatePath tx with value too long");
+
+        if(vvchPrevArgs[0] != vvchArgs[0])
+        {
+            return error("alias mismatch");
+        }
+
+        nDepth = CheckTransactionAtRelativeDepth(pindexBlock, vTxindex[nInput], scaleMonitor());
+        if((fBlock || fMiner) && nDepth < 0)
+            return error("expired alias, or there is a pending transaction on the alias");
+        break;
+    case OP_BASE_VERTEX_SET:
+	    if(!fBlock)
+              return tx.DoS(100, error("ConnectInputsPost() : op vertex inconsistent"));
+        if(vvchArgs[1].size() > MAX_XUNIT_LENGTH)
+            return error("createDataNode tx with value too long");
+        break;
     default:
         return error("alias transaction has unknown op");
     }
@@ -8032,12 +8216,12 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
     }
     if(fBlock)
     {
-        if(op == OP_ALIAS_SET || op == OP_ALIAS_RELAY || op == OP_BASE_SET || op == OP_BASE_RELAY)
+        if(op == OP_ALIAS_SET || op == OP_ALIAS_RELAY || op == OP_BASE_SET || op == OP_BASE_RELAY || op == OP_BASE_VERTEX_SET || op == OP_BASE_VERTEX_RELAY)
         {
 
             string locatorStr = stringFromVch(vvchArgs[0]);
 
-            if(op == OP_ALIAS_SET || OP_BASE_SET)
+            if(op == OP_ALIAS_SET || OP_BASE_SET || OP_BASE_VERTEX_SET)
             {
                 CTransaction tx;
                 if(aliasTx(ln1Db, vchFromString(locatorStr), tx))

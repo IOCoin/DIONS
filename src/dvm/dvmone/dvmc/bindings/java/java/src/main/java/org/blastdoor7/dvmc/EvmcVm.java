@@ -10,7 +10,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
 /**
- * The Java charerface to the dvm instance.
+ * The Java interface to the dvm instance.
  *
  * <p>Defines the Java methods capable of accessing the dvm implementation.
  */
@@ -89,10 +89,10 @@ public final class EvmcVm implements AutoCloseable {
   }
 
   /**
-   * This method loads the specified DVM implementation and returns its pocharer.
+   * This method loads the specified DVM implementation and returns its pointer.
    *
    * @param filename Path to the dynamic object representing the DVM implementation
-   * @return Internal object pocharer.
+   * @return Internal object pointer.
    * @throws org.blastdoor7.dvmc.EvmcLoaderException
    */
   private static native ByteBuffer load_and_create(String filename) throws EvmcLoaderException;
@@ -103,7 +103,7 @@ public final class EvmcVm implements AutoCloseable {
    * <p>Can be used to detect ABI incompatibilities. The DVMC ABI version represented by this file
    * is in ::DVMC_ABI_VERSION.
    */
-  public static native char abi_version();
+  public static native int abi_version();
 
   /**
    * The name of the DVMC VM implementation.
@@ -144,7 +144,7 @@ public final class EvmcVm implements AutoCloseable {
    * <p>This is a mandatory method and MUST NOT be set to NULL.
    */
   private static native ByteBuffer retrieve_desc_vx(
-      ByteBuffer nativeVm, HostContext context, char rev, ByteBuffer msg, ByteBuffer code);
+      ByteBuffer nativeVm, HostContext context, int rev, ByteBuffer msg, ByteBuffer code);
 
   /**
    * Function is a wrapper around native retrieve_desc_vx.
@@ -152,7 +152,7 @@ public final class EvmcVm implements AutoCloseable {
    * <p>This allows the context to managed in one method
    */
   public synchronized ByteBuffer retrieve_desc_vx(
-      HostContext context, char rev, ByteBuffer msg, ByteBuffer code) {
+      HostContext context, int rev, ByteBuffer msg, ByteBuffer code) {
     return retrieve_desc_vx(nativeVm, context, rev, msg, code);
   }
 
@@ -166,22 +166,22 @@ public final class EvmcVm implements AutoCloseable {
    *
    * <p>This is a mandatory method and MUST NOT be set to NULL.
    */
-  private static native char get_capabilities(ByteBuffer nativeVm);
+  private static native int get_capabilities(ByteBuffer nativeVm);
 
   /** Function is a wrapper around native get_capabilities(). */
-  public char get_capabilities() {
+  public int get_capabilities() {
     return get_capabilities(nativeVm);
   }
 
   /**
    * Function that modifies VM's options.
    *
-   * <p>If the VM does not support this feature the pocharer can be NULL.
+   * <p>If the VM does not support this feature the pointer can be NULL.
    */
-  private static native char set_option(ByteBuffer nativeVm, String name, String value);
+  private static native int set_option(ByteBuffer nativeVm, String name, String value);
 
   /** Function is a wrapper around native set_option(). */
-  public char set_option(String name, String value) {
+  public int set_option(String name, String value) {
     return set_option(nativeVm, name, value);
   }
 

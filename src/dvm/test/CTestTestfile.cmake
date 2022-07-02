@@ -6,6 +6,6 @@
 # testing this directory and lists subdirectories to be tested as well.
 subdirs("utils")
 subdirs("bench")
-subdirs("charegration")
-subdirs("charernal_benchmarks")
+subdirs("integration")
+subdirs("internal_benchmarks")
 subdirs("unittests")

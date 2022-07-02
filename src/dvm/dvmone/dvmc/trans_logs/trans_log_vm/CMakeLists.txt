@@ -4,13 +4,13 @@
 
 add_library(trans_log-vm SHARED trans_log_vm.cpp trans_log_vm.h)
 add_library(dvmc::trans_log-vm ALIAS trans_log-vm)
-read_vtx_init_compile_features(trans_log-vm PRIVATE cxx_std_11)
-read_vtx_init_link_libraries(trans_log-vm PRIVATE dvmc::dvmc)
+target_compile_features(trans_log-vm PRIVATE cxx_std_11)
+target_link_libraries(trans_log-vm PRIVATE dvmc::dvmc)
 
 add_library(trans_log-vm-static STATIC trans_log_vm.cpp trans_log_vm.h)
 add_library(dvmc::trans_log-vm-static ALIAS trans_log-vm-static)
-read_vtx_init_compile_features(trans_log-vm-static PRIVATE cxx_std_11)
-read_vtx_init_link_libraries(trans_log-vm-static PRIVATE dvmc::dvmc)
+target_compile_features(trans_log-vm-static PRIVATE cxx_std_11)
+target_link_libraries(trans_log-vm-static PRIVATE dvmc::dvmc)
 
 set_source_files_properties(trans_log_vm.cpp PROPERTIES
     COMPILE_DEFINITIONS PROJECT_VERSION="${PROJECT_VERSION}")

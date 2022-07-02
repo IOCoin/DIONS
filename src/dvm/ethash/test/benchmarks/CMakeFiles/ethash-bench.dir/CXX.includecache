@@ -7,7 +7,7 @@
 #IncludeRegexTransform: 
 
 /home/ioc/.hunter/_Base/a3d7f43/97671df/104ac99/Install/include/benchmark/benchmark.h
-stdchar.h
+stdint.h
 -
 algorithm
 -
@@ -35,7 +35,7 @@ type_traits
 -
 utility
 -
-charrin.h
+intrin.h
 -
 
 /home/ioc/rem/CC/src/dvm/ethash/lib/ethash/endianness.hpp
@@ -53,7 +53,7 @@ stdlib.h
 /home/ioc/rem/CC/src/dvm/ethash/test/unittests/helpers.hpp
 benchmark/benchmark.h
 -
-ethash/ethash-charernal.hpp
+ethash/ethash-internal.hpp
 -
 ethash/global_context.hpp
 -
@@ -75,7 +75,7 @@ ethash/hash_types.h
 -
 stdbool.h
 -
-stdchar.h
+stdint.h
 -
 
 include/ethash/ethash.hpp
@@ -83,7 +83,7 @@ ethash/ethash.h
 -
 ethash/hash_types.hpp
 -
-cstdchar
+cstdint
 -
 cstring
 -
@@ -103,7 +103,7 @@ ethash/global_context.h
 -
 
 include/ethash/hash_types.h
-stdchar.h
+stdint.h
 -
 
 include/ethash/hash_types.hpp
@@ -130,7 +130,7 @@ ethash/ethash.hpp
 stdlib.h
 -
 
-lib/ethash/ethash-charernal.hpp
+lib/ethash/ethash-internal.hpp
 endianness.hpp
 lib/ethash/endianness.hpp
 ethash/ethash.hpp

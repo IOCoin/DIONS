@@ -272,10 +272,10 @@ class ConcurrentTest {
         iter.Next();
         pos = MakeKey(key(pos), gen(pos) + 1);
       } else {
-        Key new_read_vtx_init = RandomTarget(rnd);
-        if (new_read_vtx_init > pos) {
-          pos = new_read_vtx_init;
-          iter.Seek(new_read_vtx_init);
+        Key new_target = RandomTarget(rnd);
+        if (new_target > pos) {
+          pos = new_target;
+          iter.Seek(new_target);
         }
       }
     }

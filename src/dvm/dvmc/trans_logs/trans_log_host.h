@@ -8,7 +8,7 @@
 extern "C" {
 #endif
 
-const struct dvmc_host_charerface* trans_log_host_get_charerface();
+const struct dvmc_host_interface* trans_log_host_get_interface();
 
 struct dvmc_host_context* trans_log_host_create_context(struct dvmc_tx_context tx_context);
 

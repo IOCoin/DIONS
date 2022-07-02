@@ -8,7 +8,7 @@
 
 namespace dvmone::baseline
 {
-using CostTable = std::array<char16_t, 256>;
+using CostTable = std::array<int16_t, 256>;
 
 const CostTable& get_baseline_cost_table(dvmc_revision rev) noexcept;
 }  // namespace dvmone::baseline

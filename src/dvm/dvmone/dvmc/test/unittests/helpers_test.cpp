@@ -15,14 +15,14 @@ static_assert(sizeof(dvmc_vm) <= 64, "dvmc_vm does not fit cache line");
 static_assert(offsetof(dvmc_message, value) % sizeof(size_t) == 0,
               "dvmc_message.value not aligned");
 
-// Check enums match char size.
-// On GCC/clang the underlying type should be unsigned char, on MSVC char
-static_assert(sizeof(dvmc_call_kind) == sizeof(char),
-              "Enum `dvmc_call_kind` is not the size of char");
-static_assert(sizeof(dvmc_revision) == sizeof(char), "Enum `dvmc_revision` is not the size of char");
+// Check enums match int size.
+// On GCC/clang the underlying type should be unsigned int, on MSVC int
+static_assert(sizeof(dvmc_call_kind) == sizeof(int),
+              "Enum `dvmc_call_kind` is not the size of int");
+static_assert(sizeof(dvmc_revision) == sizeof(int), "Enum `dvmc_revision` is not the size of int");
 
 static constexpr size_t optionalDataSize =
-    sizeof(dvmc_result) - offsetof(dvmc_result, index_param);
+    sizeof(dvmc_result) - offsetof(dvmc_result, create_address);
 static_assert(optionalDataSize >= sizeof(dvmc_result_optional_storage),
               "dvmc_result's optional data space is too small");
 

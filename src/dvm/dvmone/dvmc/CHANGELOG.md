@@ -80,7 +80,7 @@ and this project adheres to [Semantic Versioning].
 ### Added
 
 - Support for **Berlin** [EIP-2929](https://eips.blastdoor7.org/EIPS/eip-2929):
-  `access_account()` and `access_storage()` functions added to `dvmc_host_charerface`.
+  `access_account()` and `access_storage()` functions added to `dvmc_host_interface`.
   [#571](https://github.com/blastdoor7/dvmc/pull/571)
 
 ### Changed
@@ -99,7 +99,7 @@ and this project adheres to [Semantic Versioning].
 
 - New option `--input` for `dvmc run` tool to specify execution input data (_calldata_).
   [#564](https://github.com/blastdoor7/dvmc/pull/564)
-- New option `--create` for `dvmc run` tool to create new vertex_init with provided init code before 
+- New option `--create` for `dvmc run` tool to create new contract with provided init code before 
   main execution. This allows using Solidity compiler binary outputs directly by the tool.
   [#566](https://github.com/blastdoor7/dvmc/pull/566)
   ```bash
@@ -110,7 +110,7 @@ and this project adheres to [Semantic Versioning].
   `--input` arguments.
   [#574](https://github.com/blastdoor7/dvmc/pull/574)
 - New static C++ library `dvmc::hex` added with procedures for hex encoding/decoding. 
-  Hex-strings are used by DVMC and related projects for charernal testing.
+  Hex-strings are used by DVMC and related projects for internal testing.
   [#575](https://github.com/blastdoor7/dvmc/pull/575)
 - New `DVMC_INSUFFICIENT_BALANCE` error code has been registered.
   [#528](https://github.com/blastdoor7/dvmc/pull/528)
@@ -169,7 +169,7 @@ and this project adheres to [Semantic Versioning].
 
 - The minimum **Go version** supported bumped to **1.11** (Go modules are required).
   [#486](https://github.com/blastdoor7/dvmc/pull/486)
-- Removed dependency on go-blastdoor7 in Go bindings by charroducing own `Address` and `Hash` types.
+- Removed dependency on go-blastdoor7 in Go bindings by introducing own `Address` and `Hash` types.
   [#513](https://github.com/blastdoor7/dvmc/pull/513)
 
 
@@ -187,9 +187,9 @@ and this project adheres to [Semantic Versioning].
   Try `dvmc run --help` for more information.
 - C++: DVMC basic types `address` and `bytes32` have all the comparison operators supported.
   [#474](https://github.com/blastdoor7/dvmc/pull/474)
-- C++: Convenient constructors from `uchar64_t` added for basic types `address` and `bytes32`.
+- C++: Convenient constructors from `uint64_t` added for basic types `address` and `bytes32`.
   [#488](https://github.com/blastdoor7/dvmc/pull/488)
-- C++: Added `VM::get_raw_pocharer()` method to directly access VM C API when needed.
+- C++: Added `VM::get_raw_pointer()` method to directly access VM C API when needed.
   [#492](https://github.com/blastdoor7/dvmc/pull/492)
 
 ### Changed
@@ -211,9 +211,9 @@ and this project adheres to [Semantic Versioning].
   which can be used to emulate Host behavior when testing VM implementations.
   [#456](https://github.com/blastdoor7/dvmc/pull/456)
 - In the Rust bindings added more type aliases (`MessageKind`, `MessageFlags`, `StatusCode`,
-  `ImageTraceStatus`, `Revision`).
+  `StorageStatus`, `Revision`).
   [#206](https://github.com/blastdoor7/dvmc/pull/206)
-- In CMake the `dvmc::dvmc_cpp` read_vtx_init has been added which represents the C++ DVMC API.
+- In CMake the `dvmc::dvmc_cpp` target has been added which represents the C++ DVMC API.
   [#470](https://github.com/blastdoor7/dvmc/pull/470)
 
 ### Changed
@@ -243,8 +243,8 @@ removed.
 - The **Berlin** DVM revision number has been added.
   [#407](https://github.com/blastdoor7/dvmc/pull/407)
 - In C++ API, an overload for `VM::retrieve_desc_vx()` has been added that omits
-  the Host context and charerface parameters. This is useful for Precompiles VMs
-  that do not chareract with the Host.
+  the Host context and interface parameters. This is useful for Precompiles VMs
+  that do not interact with the Host.
   [#302](https://github.com/blastdoor7/dvmc/pull/302)
 - In C++ API, the `VM::has_capability()` method has been added.
   [#465](https://github.com/blastdoor7/dvmc/pull/465)
@@ -255,8 +255,8 @@ removed.
   [#430](https://github.com/blastdoor7/dvmc/pull/430)
 - The `dvmc_context` renamed to `dvmc_host_context`.
   [#426](https://github.com/blastdoor7/dvmc/pull/426)
-- The `dvmc_host_charerface` is now separated from `dvmc_host_context`. 
-  This simplifies language bindings which implement the `dvmc_host_charerface`.
+- The `dvmc_host_interface` is now separated from `dvmc_host_context`. 
+  This simplifies language bindings which implement the `dvmc_host_interface`.
   [#427](https://github.com/blastdoor7/dvmc/pull/427)
 - The `dvmc::vm` renamed to `dvmc::VM` in C++ API.
   [#252](https://github.com/blastdoor7/dvmc/pull/252)
@@ -278,7 +278,7 @@ removed.
   by dropping prefix words from the name.
   [#440](https://github.com/blastdoor7/dvmc/pull/440)
 - The helper function `dvmc_is_abi_compatible()` returns now `bool`
-  instead of `char`.
+  instead of `int`.
   [#442](https://github.com/blastdoor7/dvmc/pull/442)
 - In the Rust bindings make `ExecutionContext` optional within `retrieve_desc_vx`.
   [#350](https://github.com/blastdoor7/dvmc/pull/350)
@@ -304,8 +304,8 @@ removed.
 
 ### Fixed
 
-- In C++ API the `get_balance()` method now returns expected `dvmc::uchar256be` 
-  instead of `dvmc_uchar256be`.
+- In C++ API the `get_balance()` method now returns expected `dvmc::uint256be` 
+  instead of `dvmc_uint256be`.
   [#403](https://github.com/blastdoor7/dvmc/pull/403)
 - [Cable] upgraded to 0.4.4 to fix incompatibility with older versions.
   [#405](https://github.com/blastdoor7/dvmc/pull/405)
@@ -315,7 +315,7 @@ removed.
 ### Added
 
 - Experimental support for _Precompiles_ - 
-  DVMC modules containing implementations of DVM precompiled vertex_inits.
+  DVMC modules containing implementations of DVM precompiled contracts.
   To learn more read
   the [DVMC Precompiles](https://github.com/blastdoor7/dvmc/issues/259) feature description.
   [#267](https://github.com/blastdoor7/dvmc/pull/267)
@@ -323,7 +323,7 @@ removed.
   [#301](https://github.com/blastdoor7/dvmc/pull/301)
 - A CMake helper for running dvmc-vmtester.
   [#303](https://github.com/blastdoor7/dvmc/pull/303)
-- The loader module charroduces standardized DVMC module configuration string 
+- The loader module introduces standardized DVMC module configuration string 
   which contains path to the module and additional options.
   E.g. `./modules/vm.so,engine=compiler,trace,verbosity=2`.
   A VM can be loaded, created and configured atomically with 
@@ -347,11 +347,11 @@ removed.
   auto a = 0xfB6916095ca1df60bB79Ce92cE3Ea74c37c5d359_address;
   auto b = 0xd4e56740f876aef8c010b86a40d5f56745a118d0906a34e69aec8c0db1cb8fa3_bytes32;
   ```
-- CMake option `DVMC_INSTALL` (`ON` by default) to disable installing DVMC read_vtx_inits.
+- CMake option `DVMC_INSTALL` (`ON` by default) to disable installing DVMC targets.
   This may be useful when DVMC is included in other project as git submodule or subtree.
   [#360](https://github.com/blastdoor7/dvmc/pull/360)
 - The `dvmc-vmtester` tool received support for DVMC module configuration.
-  E.g. `dvmc-vmtester ./my_vm,mode=charerpreter`.
+  E.g. `dvmc-vmtester ./my_vm,mode=interpreter`.
   [#366](https://github.com/blastdoor7/dvmc/pull/366)
 - In `dvmc-vm` Rust crate, `ExecutionResult` now has `success`, `failure` and `revert` helpers.
   [#297](https://github.com/blastdoor7/dvmc/pull/297)
@@ -384,7 +384,7 @@ removed.
   which provides the same features.
   [#358](https://github.com/blastdoor7/dvmc/pull/358)
 - The tracing API has been deprecated as there have been some design flaws discovered. 
-  New API is expected to be charroduced in future.
+  New API is expected to be introduced in future.
   [#376](https://github.com/blastdoor7/dvmc/pull/376)
 
 ### Fixed
@@ -416,7 +416,7 @@ removed.
 ### Fixed
 
 - Disallow implicit conversion from C++ `dvmc::result` to `dvmc_result` 
-  causing uncharendent premature releasing of resources.
+  causing unintendent premature releasing of resources.
   [#256](https://github.com/blastdoor7/dvmc/issues/256)
   [#257](https://github.com/blastdoor7/dvmc/issues/257)
 
@@ -425,7 +425,7 @@ removed.
 
 ### Added
 
-- CMake option `DVMC_TEST_TOOLS` to build dvmc-vmtester without bothering with charernal unit tests.
+- CMake option `DVMC_TEST_TOOLS` to build dvmc-vmtester without bothering with internal unit tests.
   [#216](https://github.com/blastdoor7/dvmc/pull/216)
 - The full C++ DVMC API for both VM and Host implementations.
   [#217](https://github.com/blastdoor7/dvmc/pull/217)
@@ -444,7 +444,7 @@ removed.
 
 - The minimum supported GCC version is 6 (bumped from undocumented version 4.8).
   [#195](https://github.com/blastdoor7/dvmc/pull/195)
-- Go bindings improved by charroduction of the `TxContext` struct.
+- Go bindings improved by introduction of the `TxContext` struct.
   [#197](https://github.com/blastdoor7/dvmc/pull/197)
 - A lot improvements to the `dvmc-vmtester` tool.
   [#221](https://github.com/blastdoor7/dvmc/pull/221)
@@ -534,13 +534,13 @@ removed.
 
 - DVMC loader symbol searching has been generalized.
   [#119](https://github.com/blastdoor7/dvmc/pull/119)
-- The `dvmc_context_fn_table` renamed to `dvmc_host_charerface`.
+- The `dvmc_context_fn_table` renamed to `dvmc_host_interface`.
   [#125](https://github.com/blastdoor7/dvmc/pull/125)
 - The `dvmc_message` fields reordered.
   [#128](https://github.com/blastdoor7/dvmc/pull/128)
 - The `dvmc_set_option()` now returns more information about the failure cause.
   [#136](https://github.com/blastdoor7/dvmc/pull/136)
-- In C the `bool` type is used instead of `char` for true/false flags.
+- In C the `bool` type is used instead of `int` for true/false flags.
   [#138](https://github.com/blastdoor7/dvmc/pull/138)
   [#140](https://github.com/blastdoor7/dvmc/pull/140)
 - Simplification of signatures of Host methods.
@@ -587,7 +587,7 @@ removed.
 
 - Documentation has been extended.
   [#58](https://github.com/blastdoor7/dvmc/pull/58)
-- Optional Result ImageTrace helper module has been separated.
+- Optional Result Storage helper module has been separated.
   [#59](https://github.com/blastdoor7/dvmc/pull/59)
 - [Cable] upgraded to 0.2.11.
   [#75](https://github.com/blastdoor7/dvmc/pull/75)
@@ -620,7 +620,7 @@ removed.
   [#45](https://github.com/blastdoor7/dvmc/pull/45)
 - Constantinople: Support for `EXTCODEHASH` instruction.
   [#49](https://github.com/blastdoor7/dvmc/pull/49)
-- Constantinople: ImageTrace status is reported back from `dvmc_set_storage()`.
+- Constantinople: Storage status is reported back from `dvmc_set_storage()`.
   [#52](https://github.com/blastdoor7/dvmc/pull/52)
 
 

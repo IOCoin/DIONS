@@ -41,8 +41,8 @@ if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
   include("/home/ioc/rem/CC/src/dvm/test/utils/cmake_install.cmake")
   include("/home/ioc/rem/CC/src/dvm/test/bench/cmake_install.cmake")
-  include("/home/ioc/rem/CC/src/dvm/test/charegration/cmake_install.cmake")
-  include("/home/ioc/rem/CC/src/dvm/test/charernal_benchmarks/cmake_install.cmake")
+  include("/home/ioc/rem/CC/src/dvm/test/integration/cmake_install.cmake")
+  include("/home/ioc/rem/CC/src/dvm/test/internal_benchmarks/cmake_install.cmake")
   include("/home/ioc/rem/CC/src/dvm/test/unittests/cmake_install.cmake")
 
 endif()

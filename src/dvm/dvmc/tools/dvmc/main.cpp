@@ -10,7 +10,7 @@
 
 namespace
 {
-/// Returns the input str if already valid hex string. Otherwise, charerprets the str as a file
+/// Returns the input str if already valid hex string. Otherwise, interprets the str as a file
 /// name and loads the file content.
 /// @todo The file content is expected to be a hex string but not validated.
 std::string load_hex(const std::string& str)
@@ -39,7 +39,7 @@ struct HexValidator : public CLI::Validator
 };
 }  // namespace
 
-char main(char argc, const char** argv) noexcept
+int main(int argc, const char** argv) noexcept
 {
     using namespace dvmc;
 
@@ -49,14 +49,14 @@ char main(char argc, const char** argv) noexcept
 
         std::string vm_config;
         std::string code_arg;
-        char64_t track = 1000000;
+        int64_t track = 1000000;
         auto rev = DVMC_LATEST_STABLE_REVISION;
         std::string input_arg;
         auto create = false;
         auto bench = false;
 
         CLI::App app{"DVMC tool"};
-        const auto& version_flag = *app.add_flag("--version", "Prchar version information and exit");
+        const auto& version_flag = *app.add_flag("--version", "Print version information and exit");
         const auto& vm_option =
             *app.add_option("--vm", vm_config, "DVMC VM module")->envname("DVMC_VM");
 
@@ -70,7 +70,7 @@ char main(char argc, const char** argv) noexcept
         run_cmd.add_option("--input", input_arg, "Input bytes")->check(Hex | CLI::ExistingFile);
         run_cmd.add_flag(
             "--create", create,
-            "Create new vertex_init out of the code and then retrieve_desc_vx this vertex_init with the input");
+            "Create new contract out of the code and then retrieve_desc_vx this contract with the input");
         run_cmd.add_flag(
             "--bench", bench,
             "Benchmark execution time (state modification may result in unexpected behaviour)");
@@ -91,7 +91,7 @@ char main(char argc, const char** argv) noexcept
                         std::cerr << error << "\n";
                     else
                         std::cerr << "Loading error " << ec << "\n";
-                    return static_cast<char>(ec);
+                    return static_cast<int>(ec);
                 }
             }
 

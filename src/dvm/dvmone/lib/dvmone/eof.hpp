@@ -6,17 +6,17 @@
 #include <dvmc/dvmc.h>
 #include <dvmc/utils.h>
 #include <cstddef>
-#include <cstdchar>
+#include <cstdint>
 #include <string>
 
 namespace dvmone
 {
-using bytes_view = std::basic_string_view<uchar8_t>;
+using bytes_view = std::basic_string_view<uint8_t>;
 
 struct EOF1Header
 {
-    uchar16_t code_size = 0;
-    uchar16_t data_size = 0;
+    uint16_t code_size = 0;
+    uint16_t data_size = 0;
 
     /// Returns offset of code section start.
     [[nodiscard]] DVMC_EXPORT size_t code_begin() const noexcept;
@@ -26,7 +26,7 @@ struct EOF1Header
 [[nodiscard]] DVMC_EXPORT bool is_eof_code(bytes_view code) noexcept;
 
 /// Reads the section sizes assuming that code has valid format.
-/// (must be true for all EOF vertex_inits on-chain)
+/// (must be true for all EOF contracts on-chain)
 [[nodiscard]] DVMC_EXPORT EOF1Header read_valid_eof1_header(
     bytes_view::const_iterator code) noexcept;
 
@@ -54,7 +54,7 @@ enum class EOFValidationError
 
 /// Determines the EOF version of the container by inspecting container's EOF prefix.
 /// If the prefix is missing or invalid, 0 is returned meaning legacy code.
-[[nodiscard]] uchar8_t get_eof_version(bytes_view container) noexcept;
+[[nodiscard]] uint8_t get_eof_version(bytes_view container) noexcept;
 
 /// Validates whether given container is a valid EOF according to the rules of given revision.
 [[nodiscard]] DVMC_EXPORT EOFValidationError validate_eof(

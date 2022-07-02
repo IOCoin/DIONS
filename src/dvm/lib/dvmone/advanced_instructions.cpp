@@ -62,7 +62,7 @@ inline code_iterator impl(AdvancedExecutionState& state, code_iterator pos) noex
 }  // namespace instr
 
 /// Fake wrap for generic instruction implementations accessing current code location.
-/// This is to make any op<...> compile, but pocharers must be replaced with Advanced-specific
+/// This is to make any op<...> compile, but pointers must be replaced with Advanced-specific
 /// implementation. Definition not provided.
 template <code_iterator InstrFn(AdvancedExecutionState&, code_iterator)>
 const Instruction* op(const Instruction* /*instr*/, AdvancedExecutionState& state) noexcept;
@@ -117,10 +117,10 @@ const Instruction* opx_beginblock(const Instruction* instr, AdvancedExecutionSta
     if ((state.track_left -= block.track_cost) < 0)
         return state.exit(DVMC_OUT_OF_TRACK);
 
-    if (static_cast<char>(state.stack.size()) < block.stack_req)
+    if (static_cast<int>(state.stack.size()) < block.stack_req)
         return state.exit(DVMC_STACK_UNDERFLOW);
 
-    if (static_cast<char>(state.stack.size()) + block.stack_max_growth > StackSpace::limit)
+    if (static_cast<int>(state.stack.size()) + block.stack_max_growth > StackSpace::limit)
         return state.exit(DVMC_STACK_OVERFLOW);
 
     state.current_block_cost = block.track_cost;
@@ -131,8 +131,8 @@ const Instruction* op_jump(const Instruction*, AdvancedExecutionState& state) no
 {
     const auto dst = state.stack.pop();
     auto pc = -1;
-    if (std::numeric_limits<char>::max() < dst ||
-        (pc = find_jumpdest(*state.analysis.advanced, static_cast<char>(dst))) < 0)
+    if (std::numeric_limits<int>::max() < dst ||
+        (pc = find_jumpdest(*state.analysis.advanced, static_cast<int>(dst))) < 0)
         return state.exit(DVMC_BAD_JUMP_DESTINATION);
 
     return &state.analysis.advanced->instrs[static_cast<size_t>(pc)];
@@ -165,7 +165,7 @@ const Instruction* op_pc(const Instruction* instr, AdvancedExecutionState& state
 const Instruction* op_track(const Instruction* instr, AdvancedExecutionState& state) noexcept
 {
     const auto correction = state.current_block_cost - instr->arg.number;
-    const auto track = static_cast<uchar64_t>(state.track_left + correction);
+    const auto track = static_cast<uint64_t>(state.track_left + correction);
     state.stack.push(track);
     return ++instr;
 }

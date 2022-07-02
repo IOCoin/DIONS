@@ -13,14 +13,14 @@ namespace dvmone
 {
 namespace
 {
-constexpr uchar8_t FORMAT = 0xef;
-constexpr uchar8_t MAGIC = 0x00;
-constexpr uchar8_t TERMINATOR = 0x00;
-constexpr uchar8_t CODE_SECTION = 0x01;
-constexpr uchar8_t DATA_SECTION = 0x02;
-constexpr uchar8_t MAX_SECTION = DATA_SECTION;
+constexpr uint8_t FORMAT = 0xef;
+constexpr uint8_t MAGIC = 0x00;
+constexpr uint8_t TERMINATOR = 0x00;
+constexpr uint8_t CODE_SECTION = 0x01;
+constexpr uint8_t DATA_SECTION = 0x02;
+constexpr uint8_t MAX_SECTION = DATA_SECTION;
 
-using EOFSectionHeaders = std::array<uchar16_t, MAX_SECTION + 1>;
+using EOFSectionHeaders = std::array<uint16_t, MAX_SECTION + 1>;
 
 std::pair<EOFSectionHeaders, EOFValidationError> validate_eof_headers(bytes_view container) noexcept
 {
@@ -32,7 +32,7 @@ std::pair<EOFSectionHeaders, EOFValidationError> validate_eof_headers(bytes_view
     };
 
     auto state = State::section_id;
-    uchar8_t section_id = 0;
+    uint8_t section_id = 0;
     EOFSectionHeaders section_headers{};
     const auto container_end = container.end();
     auto it = container.begin() + 1 + sizeof(MAGIC) + 1;  // FORMAT + MAGIC + VERSION
@@ -73,7 +73,7 @@ std::pair<EOFSectionHeaders, EOFValidationError> validate_eof_headers(bytes_view
             if (it == container_end)
                 return {{}, EOFValidationError::incomplete_section_size};
             const auto size_lo = *it++;
-            const auto section_size = static_cast<uchar16_t>((size_hi << 8) | size_lo);
+            const auto section_size = static_cast<uint16_t>((size_hi << 8) | size_lo);
             if (section_size == 0)
                 return {{}, EOFValidationError::zero_section_size};
 
@@ -102,7 +102,7 @@ EOFValidationError validate_instructions(dvmc_revision rev, bytes_view code) noe
     assert(code.size() > 0);  // guaranteed by EOF headers validation
 
     size_t i = 0;
-    uchar8_t op = code[0];
+    uint8_t op = code[0];
     while (i < code.size())
     {
         op = code[i];
@@ -159,17 +159,17 @@ EOF1Header read_valid_eof1_header(bytes_view::const_iterator code) noexcept
     EOF1Header header;
     const auto code_size_offset = 4;  // FORMAT + MAGIC + VERSION + CODE_SECTION_ID
     header.code_size =
-        static_cast<uchar16_t>((code[code_size_offset] << 8) | code[code_size_offset + 1]);
+        static_cast<uint16_t>((code[code_size_offset] << 8) | code[code_size_offset + 1]);
     if (code[code_size_offset + 2] == 2)  // is data section present
     {
         const auto data_size_offset = code_size_offset + 3;
         header.data_size =
-            static_cast<uchar16_t>((code[data_size_offset] << 8) | code[data_size_offset + 1]);
+            static_cast<uint16_t>((code[data_size_offset] << 8) | code[data_size_offset + 1]);
     }
     return header;
 }
 
-uchar8_t get_eof_version(bytes_view container) noexcept
+uint8_t get_eof_version(bytes_view container) noexcept
 {
     return (container.size() >= 3 && container[0] == FORMAT && container[1] == MAGIC) ?
                container[2] :

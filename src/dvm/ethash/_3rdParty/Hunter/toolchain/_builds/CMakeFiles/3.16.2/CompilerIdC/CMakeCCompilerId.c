@@ -315,9 +315,9 @@
 #endif
 
 /* Construct the string literal in pieces to prevent the source from
-   getting matched.  Store it in a pocharer rather than an array
+   getting matched.  Store it in a pointer rather than an array
    because some compilers will just produce instructions to fill the
-   array rather than assigning a pocharer to a static array.  */
+   array rather than assigning a pointer to a static array.  */
 char const* info_compiler = "INFO" ":" "compiler[" COMPILER_ID "]";
 #ifdef SIMULATE_ID
 char const* info_simulate = "INFO" ":" "simulate[" SIMULATE_ID "]";
@@ -540,7 +540,7 @@ char const *info_cray = "INFO" ":" "compiler_wrapper[CrayPrgEnv]";
 #  define ARCHITECTURE_ID
 #endif
 
-/* Convert chareger to decimal digit literals.  */
+/* Convert integer to decimal digit literals.  */
 #define DEC(n)                   \
   ('0' + (((n) / 10000000)%10)), \
   ('0' + (((n) / 1000000)%10)),  \
@@ -551,7 +551,7 @@ char const *info_cray = "INFO" ":" "compiler_wrapper[CrayPrgEnv]";
   ('0' + (((n) / 10)%10)),       \
   ('0' +  ((n) % 10))
 
-/* Convert chareger to hex digit literals.  */
+/* Convert integer to hex digit literals.  */
 #define HEX(n)             \
   ('0' + ((n)>>28 & 0xF)), \
   ('0' + ((n)>>24 & 0xF)), \
@@ -580,9 +580,9 @@ char const info_version[] = {
   ']','\0'};
 #endif
 
-/* Construct a string literal encoding the charernal version number. */
+/* Construct a string literal encoding the internal version number. */
 #ifdef COMPILER_VERSION_INTERNAL
-char const info_version_charernal[] = {
+char const info_version_internal[] = {
   'I', 'N', 'F', 'O', ':',
   'c','o','m','p','i','l','e','r','_','v','e','r','s','i','o','n','_',
   'i','n','t','e','r','n','a','l','[',
@@ -608,9 +608,9 @@ char const info_simulate_version[] = {
 #endif
 
 /* Construct the string literal in pieces to prevent the source from
-   getting matched.  Store it in a pocharer rather than an array
+   getting matched.  Store it in a pointer rather than an array
    because some compilers will just produce instructions to fill the
-   array rather than assigning a pocharer to a static array.  */
+   array rather than assigning a pointer to a static array.  */
 char const* info_platform = "INFO" ":" "platform[" PLATFORM_ID "]";
 char const* info_arch = "INFO" ":" "arch[" ARCHITECTURE_ID "]";
 
@@ -640,12 +640,12 @@ const char* info_language_dialect_default =
 void main() {}
 #else
 # if defined(__CLASSIC_C__)
-char main(argc, argv) char argc; char *argv[];
+int main(argc, argv) int argc; char *argv[];
 # else
-char main(char argc, char* argv[])
+int main(int argc, char* argv[])
 # endif
 {
-  char require = 0;
+  int require = 0;
   require += info_compiler[argc];
   require += info_platform[argc];
   require += info_arch[argc];
@@ -653,7 +653,7 @@ char main(char argc, char* argv[])
   require += info_version[argc];
 #endif
 #ifdef COMPILER_VERSION_INTERNAL
-  require += info_version_charernal[argc];
+  require += info_version_internal[argc];
 #endif
 #ifdef SIMULATE_ID
   require += info_simulate[argc];

@@ -3,7 +3,7 @@
 // Licensed under the Apache License, Version 2.0.
 
 /// @file
-/// Contains declarations of charernal ethash functions to allow them to be
+/// Contains declarations of internal ethash functions to allow them to be
 /// unit-tested.
 
 #pragma once
@@ -16,8 +16,8 @@ extern "C" struct ethash_epoch_context_full : ethash_epoch_context
 {
     ethash_hash1024* full_dataset;
 
-    constexpr ethash_epoch_context_full(char epoch, char light_num_items, const ethash_hash512* light,
-        char dataset_num_items, ethash_hash1024* dataset) noexcept
+    constexpr ethash_epoch_context_full(int epoch, int light_num_items, const ethash_hash512* light,
+        int dataset_num_items, ethash_hash1024* dataset) noexcept
       : ethash_epoch_context{epoch, light_num_items, light, dataset_num_items},
         full_dataset{dataset}
     {}
@@ -30,9 +30,9 @@ inline bool less_equal(const hash256& a, const hash256& b) noexcept
 {
     for (size_t i = 0; i < (sizeof(a) / sizeof(a.word64s[0])); ++i)
     {
-        if (be::uchar64(a.word64s[i]) > be::uchar64(b.word64s[i]))
+        if (be::uint64(a.word64s[i]) > be::uint64(b.word64s[i]))
             return false;
-        if (be::uchar64(a.word64s[i]) < be::uchar64(b.word64s[i]))
+        if (be::uint64(a.word64s[i]) < be::uint64(b.word64s[i]))
             return true;
     }
     return true;
@@ -47,6 +47,6 @@ inline bool equal(const hash256& a, const hash256& b) noexcept
 
 bool check_against_difficulty(const hash256& final_hash, const hash256& difficulty) noexcept;
 
-hash1024 calculate_dataset_item_1024(const epoch_context& context, uchar32_t index) noexcept;
+hash1024 calculate_dataset_item_1024(const epoch_context& context, uint32_t index) noexcept;
 
 }  // namespace ethash

@@ -4,8 +4,8 @@
 
 include(LibraryTools)
 
-hunter_add_package(charx)
-find_package(charx CONFIG REQUIRED)
+hunter_add_package(intx)
+find_package(intx CONFIG REQUIRED)
 
 add_library(dvmone
     ${include_dir}/dvmone/dvmone.h
@@ -30,22 +30,22 @@ add_library(dvmone
     vm.cpp
     vm.hpp
 )
-read_vtx_init_link_libraries(dvmone PUBLIC dvmc::dvmc charx::charx PRIVATE dvmc::instructions dvmc::hex ethash::keccak)
-read_vtx_init_include_directories(dvmone PUBLIC
+target_link_libraries(dvmone PUBLIC dvmc::dvmc intx::intx PRIVATE dvmc::instructions dvmc::hex ethash::keccak)
+target_include_directories(dvmone PUBLIC
     $<BUILD_INTERFACE:${include_dir}>$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 if(CABLE_COMPILER_GNULIKE)
-    read_vtx_init_compile_options(
+    target_compile_options(
         dvmone PRIVATE
         -fno-exceptions
         $<$<CXX_COMPILER_ID:GNU>:-Wstack-usage=2500>
     )
     if(NOT SANITIZE MATCHES undefined)
-        # RTTI can be disabled except for UBSan which checks vptr charegrity.
-        read_vtx_init_compile_options(dvmone PRIVATE -fno-rtti)
+        # RTTI can be disabled except for UBSan which checks vptr integrity.
+        target_compile_options(dvmone PRIVATE -fno-rtti)
     endif()
 endif()
-set_read_vtx_init_properties(
+set_target_properties(
     dvmone
     PROPERTIES
     VERSION ${PROJECT_VERSION}
@@ -54,7 +54,7 @@ set_read_vtx_init_properties(
 
 if(NOT SANITIZE)
     # On Linux, check if all symbols in dvmone are resolved during linking.
-    read_vtx_init_link_options(dvmone PRIVATE $<$<PLATFORM_ID:Linux>:LINKER:--no-undefined>)
+    target_link_options(dvmone PRIVATE $<$<PLATFORM_ID:Linux>:LINKER:--no-undefined>)
 endif()
 
 set_source_files_properties(vm.cpp PROPERTIES COMPILE_DEFINITIONS PROJECT_VERSION="${PROJECT_VERSION}")

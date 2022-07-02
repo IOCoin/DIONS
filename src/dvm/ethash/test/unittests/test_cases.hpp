@@ -13,7 +13,7 @@ namespace
 {
 struct hash_test_case
 {
-    char block_number;
+    int block_number;
     const char* header_hash_hex;
     const char* nonce_hex;
     const char* mix_hash_hex;

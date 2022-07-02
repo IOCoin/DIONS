@@ -192,7 +192,7 @@ public:
     virtual Status GetFileSize(const std::string& fname, uint64_t* file_size);
 
     virtual Status RenameFile(const std::string& src,
-        const std::string& read_vtx_init);
+        const std::string& target);
 
     virtual Status LockFile(const std::string& fname, FileLock** lock);
 
@@ -215,16 +215,16 @@ public:
     virtual void SleepForMicroseconds(int micros);
 };
 
-void ToWidePath(const std::string& value, std::wstring& read_vtx_init) {
+void ToWidePath(const std::string& value, std::wstring& target) {
 	wchar_t buffer[MAX_PATH];
 	MultiByteToWideChar(CP_ACP, 0, value.c_str(), -1, buffer, MAX_PATH);
-	read_vtx_init = buffer;
+	target = buffer;
 }
 
-void ToNarrowPath(const std::wstring& value, std::string& read_vtx_init) {
+void ToNarrowPath(const std::wstring& value, std::string& target) {
 	char buffer[MAX_PATH];
 	WideCharToMultiByte(CP_ACP, 0, value.c_str(), -1, buffer, MAX_PATH, NULL, NULL);
-	read_vtx_init = buffer;
+	target = buffer;
 }
 
 std::string GetCurrentDir()
@@ -829,23 +829,23 @@ Status Win32Env::GetFileSize( const std::string& fname, uint64_t* file_size )
     return sRet;
 }
 
-Status Win32Env::RenameFile( const std::string& src, const std::string& read_vtx_init )
+Status Win32Env::RenameFile( const std::string& src, const std::string& target )
 {
     Status sRet;
     std::string src_path = src;
     std::wstring wsrc_path;
 	ToWidePath(ModifyPath(src_path), wsrc_path);
-	std::string read_vtx_init_path = read_vtx_init;
-    std::wstring wread_vtx_init_path;
-	ToWidePath(ModifyPath(read_vtx_init_path), wread_vtx_init_path);
+	std::string target_path = target;
+    std::wstring wtarget_path;
+	ToWidePath(ModifyPath(target_path), wtarget_path);
 
-    if(!MoveFileW(wsrc_path.c_str(), wread_vtx_init_path.c_str() ) ){
+    if(!MoveFileW(wsrc_path.c_str(), wtarget_path.c_str() ) ){
         DWORD err = GetLastError();
         if(err == 0x000000b7){
-            if(!::DeleteFileW(wread_vtx_init_path.c_str() ) )
+            if(!::DeleteFileW(wtarget_path.c_str() ) )
                 sRet = Status::IOError(src, "Could not rename file.");
 			else if(!::MoveFileW(wsrc_path.c_str(),
-                                 wread_vtx_init_path.c_str() ) )
+                                 wtarget_path.c_str() ) )
                 sRet = Status::IOError(src, "Could not rename file.");    
         }
     }

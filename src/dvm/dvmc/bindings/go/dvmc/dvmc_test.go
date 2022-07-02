@@ -80,6 +80,6 @@ func TestErrorMessage(t *testing.T) {
 	check(Failure, "failure")
 	check(Revert, "revert")
 	check(Error(3), "out of track")
-	check(Error(-1), "charernal error")
+	check(Error(-1), "internal error")
 	check(Error(1000), "<unknown>")
 }

@@ -17,7 +17,7 @@ dvmc/hex.hpp
 -
 
 dvmc/include/dvmc/hex.hpp
-cstdchar
+cstdint
 -
 iterator
 -

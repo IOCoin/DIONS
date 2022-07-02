@@ -23,14 +23,14 @@ static inline enum dvmc_set_option_result set_option(struct dvmc_vm* vm, char* n
 	return ret;
 }
 
-extern const struct dvmc_host_charerface dvmc_go_host;
+extern const struct dvmc_host_interface dvmc_go_host;
 
 static struct dvmc_result retrieve_desc_vx_wrapper(struct dvmc_vm* vm,
-	ucharptr_t context_index, enum dvmc_revision rev,
-	enum dvmc_call_kind kind, uchar32_t flags, char32_t depth, char64_t track,
+	uintptr_t context_index, enum dvmc_revision rev,
+	enum dvmc_call_kind kind, uint32_t flags, int32_t depth, int64_t track,
 	const dvmc_address* recipient, const dvmc_address* sender,
-	const uchar8_t* input_data, size_t input_size, const dvmc_uchar256be* value,
-	const uchar8_t* code, size_t code_size)
+	const uint8_t* input_data, size_t input_size, const dvmc_uint256be* value,
+	const uint8_t* code, size_t code_size)
 {
 	struct dvmc_message msg = {
 		kind,
@@ -59,7 +59,7 @@ import (
 )
 
 // Hash represents the 32 bytes of arbitrary data (e.g. the result of Keccak256
-// hash). It occasionally is used to represent 256-bit unsigned chareger values
+// hash). It occasionally is used to represent 256-bit unsigned integer values
 // stored in big-endian byte order.
 type Hash [32]byte
 
@@ -69,15 +69,15 @@ type Address [20]byte
 // Static asserts.
 const (
 	// The size of dvmc_bytes32 equals the size of Hash.
-	_ = uchar(len(Hash{}) - C.sizeof_dvmc_bytes32)
-	_ = uchar(C.sizeof_dvmc_bytes32 - len(Hash{}))
+	_ = uint(len(Hash{}) - C.sizeof_dvmc_bytes32)
+	_ = uint(C.sizeof_dvmc_bytes32 - len(Hash{}))
 
 	// The size of dvmc_address equals the size of Address.
-	_ = uchar(len(Address{}) - C.sizeof_dvmc_address)
-	_ = uchar(C.sizeof_dvmc_address - len(Address{}))
+	_ = uint(len(Address{}) - C.sizeof_dvmc_address)
+	_ = uint(C.sizeof_dvmc_address - len(Address{}))
 )
 
-type Error char32
+type Error int32
 
 func (err Error) IsInternalError() bool {
 	return err < 0
@@ -92,7 +92,7 @@ const (
 	Revert  = Error(C.DVMC_REVERT)
 )
 
-type Revision char32
+type Revision int32
 
 const (
 	Frontier             Revision = C.DVMC_FRONTIER
@@ -120,7 +120,7 @@ func Load(filename string) (vm *VM, err error) {
 	cfilename := C.CString(filename)
 	loaderErr := C.enum_dvmc_loader_error_code(C.DVMC_LOADER_UNSPECIFIED_ERROR)
 	handle := C.dvmc_load_and_create(cfilename, &loaderErr)
-	C.free(unsafe.Pocharer(cfilename))
+	C.free(unsafe.Pointer(cfilename))
 
 	if loaderErr == C.DVMC_LOADER_SUCCESS {
 		vm = &VM{handle}
@@ -129,7 +129,7 @@ func Load(filename string) (vm *VM, err error) {
 		if errMsg != nil {
 			err = fmt.Errorf("DVMC loading error: %s", C.GoString(errMsg))
 		} else {
-			err = fmt.Errorf("DVMC loading error %d", char(loaderErr))
+			err = fmt.Errorf("DVMC loading error %d", int(loaderErr))
 		}
 	}
 
@@ -140,7 +140,7 @@ func LoadAndConfigure(config string) (vm *VM, err error) {
 	cconfig := C.CString(config)
 	loaderErr := C.enum_dvmc_loader_error_code(C.DVMC_LOADER_UNSPECIFIED_ERROR)
 	handle := C.dvmc_load_and_configure(cconfig, &loaderErr)
-	C.free(unsafe.Pocharer(cconfig))
+	C.free(unsafe.Pointer(cconfig))
 
 	if loaderErr == C.DVMC_LOADER_SUCCESS {
 		vm = &VM{handle}
@@ -149,7 +149,7 @@ func LoadAndConfigure(config string) (vm *VM, err error) {
 		if errMsg != nil {
 			err = fmt.Errorf("DVMC loading error: %s", C.GoString(errMsg))
 		} else {
-			err = fmt.Errorf("DVMC loading error %d", char(loaderErr))
+			err = fmt.Errorf("DVMC loading error %d", int(loaderErr))
 		}
 	}
 
@@ -170,7 +170,7 @@ func (vm *VM) Version() string {
 	return C.GoString(vm.handle.version)
 }
 
-type Capability uchar32
+type Capability uint32
 
 const (
 	CapabilityDVM1  Capability = C.DVMC_CAPABILITY_DVM1
@@ -178,7 +178,7 @@ const (
 )
 
 func (vm *VM) HasCapability(capability Capability) bool {
-	return bool(C.dvmc_vm_has_capability(vm.handle, uchar32(capability)))
+	return bool(C.dvmc_vm_has_capability(vm.handle, uint32(capability)))
 }
 
 func (vm *VM) SetOption(name string, value string) (err error) {
@@ -195,28 +195,28 @@ func (vm *VM) SetOption(name string, value string) (err error) {
 }
 
 func (vm *VM) Execute(ctx HostContext, rev Revision,
-	kind CallKind, static bool, depth char, track char64,
+	kind CallKind, static bool, depth int, track int64,
 	recipient Address, sender Address, input []byte, value Hash,
-	code []byte) (output []byte, trackLeft char64, err error) {
+	code []byte) (output []byte, trackLeft int64, err error) {
 
-	flags := C.uchar32_t(0)
+	flags := C.uint32_t(0)
 	if static {
 		flags |= C.DVMC_STATIC
 	}
 
 	ctxId := addHostContext(ctx)
-	// FIXME: Clarify passing by pocharer vs passing by value.
+	// FIXME: Clarify passing by pointer vs passing by value.
 	dvmcRecipient := dvmcAddress(recipient)
 	dvmcSender := dvmcAddress(sender)
 	dvmcValue := dvmcBytes32(value)
-	result := C.retrieve_desc_vx_wrapper(vm.handle, C.ucharptr_t(ctxId), uchar32(rev),
-		C.enum_dvmc_call_kind(kind), flags, C.char32_t(depth), C.char64_t(track),
+	result := C.retrieve_desc_vx_wrapper(vm.handle, C.uintptr_t(ctxId), uint32(rev),
+		C.enum_dvmc_call_kind(kind), flags, C.int32_t(depth), C.int64_t(track),
 		&dvmcRecipient, &dvmcSender, bytesPtr(input), C.size_t(len(input)), &dvmcValue,
 		bytesPtr(code), C.size_t(len(code)))
 	removeHostContext(ctxId)
 
-	output = C.GoBytes(unsafe.Pocharer(result.output_data), C.char(result.output_size))
-	trackLeft = char64(result.track_left)
+	output = C.GoBytes(unsafe.Pointer(result.output_data), C.int(result.output_size))
+	trackLeft = int64(result.track_left)
 	if result.status_code != C.DVMC_SUCCESS {
 		err = Error(result.status_code)
 	}
@@ -229,12 +229,12 @@ func (vm *VM) Execute(ctx HostContext, rev Revision,
 }
 
 var (
-	hostContextCounter ucharptr
-	hostContextMap     = map[ucharptr]HostContext{}
+	hostContextCounter uintptr
+	hostContextMap     = map[uintptr]HostContext{}
 	hostContextMapMu   sync.Mutex
 )
 
-func addHostContext(ctx HostContext) ucharptr {
+func addHostContext(ctx HostContext) uintptr {
 	hostContextMapMu.Lock()
 	id := hostContextCounter
 	hostContextCounter++
@@ -243,13 +243,13 @@ func addHostContext(ctx HostContext) ucharptr {
 	return id
 }
 
-func removeHostContext(id ucharptr) {
+func removeHostContext(id uintptr) {
 	hostContextMapMu.Lock()
 	delete(hostContextMap, id)
 	hostContextMapMu.Unlock()
 }
 
-func getHostContext(idx ucharptr) HostContext {
+func getHostContext(idx uintptr) HostContext {
 	hostContextMapMu.Lock()
 	ctx := hostContextMap[idx]
 	hostContextMapMu.Unlock()
@@ -259,7 +259,7 @@ func getHostContext(idx ucharptr) HostContext {
 func dvmcBytes32(in Hash) C.dvmc_bytes32 {
 	out := C.dvmc_bytes32{}
 	for i := 0; i < len(in); i++ {
-		out.bytes[i] = C.uchar8_t(in[i])
+		out.bytes[i] = C.uint8_t(in[i])
 	}
 	return out
 }
@@ -267,14 +267,14 @@ func dvmcBytes32(in Hash) C.dvmc_bytes32 {
 func dvmcAddress(address Address) C.dvmc_address {
 	r := C.dvmc_address{}
 	for i := 0; i < len(address); i++ {
-		r.bytes[i] = C.uchar8_t(address[i])
+		r.bytes[i] = C.uint8_t(address[i])
 	}
 	return r
 }
 
-func bytesPtr(bytes []byte) *C.uchar8_t {
+func bytesPtr(bytes []byte) *C.uint8_t {
 	if len(bytes) == 0 {
 		return nil
 	}
-	return (*C.uchar8_t)(unsafe.Pocharer(&bytes[0]))
+	return (*C.uint8_t)(unsafe.Pointer(&bytes[0]))
 }

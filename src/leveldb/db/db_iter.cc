@@ -81,7 +81,7 @@ class DBIter: public Iterator {
 
   virtual void Next();
   virtual void Prev();
-  virtual void Seek(const Slice& read_vtx_init);
+  virtual void Seek(const Slice& target);
   virtual void SeekToFirst();
   virtual void SeekToLast();
 
@@ -271,12 +271,12 @@ void DBIter::FindPrevUserEntry() {
   }
 }
 
-void DBIter::Seek(const Slice& read_vtx_init) {
+void DBIter::Seek(const Slice& target) {
   direction_ = kForward;
   ClearSavedValue();
   saved_key_.clear();
   AppendInternalKey(
-      &saved_key_, ParsedInternalKey(read_vtx_init, sequence_, kValueTypeForSeek));
+      &saved_key_, ParsedInternalKey(target, sequence_, kValueTypeForSeek));
   iter_->Seek(saved_key_);
   if (iter_->Valid()) {
     FindNextUserEntry(false, &saved_key_ /* temporary storage */);

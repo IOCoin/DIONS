@@ -107,25 +107,25 @@ endif()
 
 # INSTALL
 
-set(install_read_vtx_inits dvmone)
+set(install_targets dvmone)
 if(TARGET dvmone-standalone)
-    list(APPEND install_read_vtx_inits dvmone-standalone)
+    list(APPEND install_targets dvmone-standalone)
 endif()
 if(TARGET dvm-test)
-    list(APPEND install_read_vtx_inits dvm-test)
+    list(APPEND install_targets dvm-test)
 endif()
 if(TARGET dvmone-bench)
-    list(APPEND install_read_vtx_inits dvmone-bench)
+    list(APPEND install_targets dvmone-bench)
 endif()
 
-set_read_vtx_init_properties(
-    ${install_read_vtx_inits} PROPERTIES
+set_target_properties(
+    ${install_targets} PROPERTIES
     ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}
     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR}
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_INSTALL_BINDIR}
 )
 
-install(TARGETS ${install_read_vtx_inits} EXPORT dvmoneTargets
+install(TARGETS ${install_targets} EXPORT dvmoneTargets
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})

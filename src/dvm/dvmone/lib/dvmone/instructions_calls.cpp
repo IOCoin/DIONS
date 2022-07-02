@@ -13,7 +13,7 @@ dvmc_status_code call_impl(StackTop stack, ExecutionState& state) noexcept
         Op == OP_CALL || Op == OP_CALLCODE || Op == OP_DELEGATECALL || Op == OP_STATICCALL);
 
     const auto track = stack.pop();
-    const auto dst = charx::be::trunc<dvmc::address>(stack.pop());
+    const auto dst = intx::be::trunc<dvmc::address>(stack.pop());
     const auto value = (Op == OP_STATICCALL || Op == OP_DELEGATECALL) ? 0 : stack.pop();
     const auto has_value = value != 0;
     const auto input_offset = stack.pop();
@@ -39,13 +39,13 @@ dvmc_status_code call_impl(StackTop stack, ExecutionState& state) noexcept
     msg.kind = (Op == OP_DELEGATECALL) ? DVMC_DELEGATECALL :
                (Op == OP_CALLCODE)     ? DVMC_CALLCODE :
                                          DVMC_CALL;
-    msg.flags = (Op == OP_STATICCALL) ? uchar32_t{DVMC_STATIC} : state.msg->flags;
+    msg.flags = (Op == OP_STATICCALL) ? uint32_t{DVMC_STATIC} : state.msg->flags;
     msg.depth = state.msg->depth + 1;
     msg.recipient = (Op == OP_CALL || Op == OP_STATICCALL) ? dst : state.msg->recipient;
     msg.code_address = dst;
     msg.sender = (Op == OP_DELEGATECALL) ? state.msg->sender : state.msg->recipient;
     msg.value =
-        (Op == OP_DELEGATECALL) ? state.msg->value : charx::be::store<dvmc::uchar256be>(value);
+        (Op == OP_DELEGATECALL) ? state.msg->value : intx::be::store<dvmc::uint256be>(value);
 
     if (size_t(input_size) > 0)
     {
@@ -67,9 +67,9 @@ dvmc_status_code call_impl(StackTop stack, ExecutionState& state) noexcept
     if ((state.track_left -= cost) < 0)
         return DVMC_OUT_OF_TRACK;
 
-    msg.track = std::numeric_limits<char64_t>::max();
+    msg.track = std::numeric_limits<int64_t>::max();
     if (track < msg.track)
-        msg.track = static_cast<char64_t>(track);
+        msg.track = static_cast<int64_t>(track);
 
     if (state.rev >= DVMC_TANGERINE_WHISTLE)  // TODO: Always true for STATICCALL.
         msg.track = std::min(msg.track, state.track_left - state.track_left / 64);
@@ -87,7 +87,7 @@ dvmc_status_code call_impl(StackTop stack, ExecutionState& state) noexcept
     if (state.msg->depth >= 1024)
         return DVMC_SUCCESS;
 
-    if (has_value && charx::be::load<uchar256>(state.host.get_balance(state.msg->recipient)) < value)
+    if (has_value && intx::be::load<uint256>(state.host.get_balance(state.msg->recipient)) < value)
         return DVMC_SUCCESS;
 
     const auto result = state.host.call(msg);
@@ -124,7 +124,7 @@ dvmc_status_code create_impl(StackTop stack, ExecutionState& state) noexcept
     if (!check_memory(state, init_code_offset, init_code_size))
         return DVMC_OUT_OF_TRACK;
 
-    auto salt = uchar256{};
+    auto salt = uint256{};
     if constexpr (Op == OP_CREATE2)
     {
         salt = stack.pop();
@@ -140,7 +140,7 @@ dvmc_status_code create_impl(StackTop stack, ExecutionState& state) noexcept
         return DVMC_SUCCESS;
 
     if (endowment != 0 &&
-        charx::be::load<uchar256>(state.host.get_balance(state.msg->recipient)) < endowment)
+        intx::be::load<uint256>(state.host.get_balance(state.msg->recipient)) < endowment)
         return DVMC_SUCCESS;
 
     auto msg = dvmc_message{};
@@ -156,15 +156,15 @@ dvmc_status_code create_impl(StackTop stack, ExecutionState& state) noexcept
     }
     msg.sender = state.msg->recipient;
     msg.depth = state.msg->depth + 1;
-    msg.create2_salt = charx::be::store<dvmc::bytes32>(salt);
-    msg.value = charx::be::store<dvmc::uchar256be>(endowment);
+    msg.create2_salt = intx::be::store<dvmc::bytes32>(salt);
+    msg.value = intx::be::store<dvmc::uint256be>(endowment);
 
     const auto result = state.host.call(msg);
     state.track_left -= msg.track - result.track_left;
 
     state.return_data.assign(result.output_data, result.output_size);
     if (result.status_code == DVMC_SUCCESS)
-        stack.top() = charx::be::load<uchar256>(result.index_param);
+        stack.top() = intx::be::load<uint256>(result.create_address);
 
     return DVMC_SUCCESS;
 }

@@ -16,27 +16,27 @@
 #define to_le64(X) X
 #endif
 
-/// Loads 64-bit chareger from given memory location as little-endian number.
-static inline ALWAYS_INLINE uchar64_t load_le(const uchar8_t* data)
+/// Loads 64-bit integer from given memory location as little-endian number.
+static inline ALWAYS_INLINE uint64_t load_le(const uint8_t* data)
 {
-    /* memcpy is the best way of expressing the charention. Every compiler will
-       optimize is to single load instruction if the read_vtx_init architecture
+    /* memcpy is the best way of expressing the intention. Every compiler will
+       optimize is to single load instruction if the target architecture
        supports unaligned memory access (GCC and clang even in O0).
        This is great trick because we are violating C/C++ memory alignment
        restrictions with no performance penalty. */
-    uchar64_t word;
+    uint64_t word;
     __builtin_memcpy(&word, data, sizeof(word));
     return to_le64(word);
 }
 
 /// Rotates the bits of x left by the count value specified by s.
 /// The s must be in range <0, 64> exclusively, otherwise the result is undefined.
-static inline uchar64_t rol(uchar64_t x, unsigned s)
+static inline uint64_t rol(uint64_t x, unsigned s)
 {
     return (x << s) | (x >> (64 - s));
 }
 
-static const uchar64_t round_constants[24] = {  //
+static const uint64_t round_constants[24] = {  //
     0x0000000000000001, 0x0000000000008082, 0x800000000000808a, 0x8000000080008000,
     0x000000000000808b, 0x0000000080000001, 0x8000000080008081, 0x8000000000008009,
     0x000000000000008a, 0x0000000000000088, 0x0000000080008009, 0x000000008000000a,
@@ -55,23 +55,23 @@ static const uchar64_t round_constants[24] = {  //
 /// The implementation based on:
 /// - "simple" implementation by Ronny Van Keer, included in "Reference and optimized code in C",
 ///   https://keccak.team/archives.html, CC0-1.0 / Public Domain.
-static inline ALWAYS_INLINE void keccakf1600_implementation(uchar64_t state[25])
+static inline ALWAYS_INLINE void keccakf1600_implementation(uint64_t state[25])
 {
-    uchar64_t Aba, Abe, Abi, Abo, Abu;
-    uchar64_t Aga, Age, Agi, Ago, Agu;
-    uchar64_t Aka, Ake, Aki, Ako, Aku;
-    uchar64_t Ama, Ame, Ami, Amo, Amu;
-    uchar64_t Asa, Ase, Asi, Aso, Asu;
+    uint64_t Aba, Abe, Abi, Abo, Abu;
+    uint64_t Aga, Age, Agi, Ago, Agu;
+    uint64_t Aka, Ake, Aki, Ako, Aku;
+    uint64_t Ama, Ame, Ami, Amo, Amu;
+    uint64_t Asa, Ase, Asi, Aso, Asu;
 
-    uchar64_t Eba, Ebe, Ebi, Ebo, Ebu;
-    uchar64_t Ega, Ege, Egi, Ego, Egu;
-    uchar64_t Eka, Eke, Eki, Eko, Eku;
-    uchar64_t Ema, Eme, Emi, Emo, Emu;
-    uchar64_t Esa, Ese, Esi, Eso, Esu;
+    uint64_t Eba, Ebe, Ebi, Ebo, Ebu;
+    uint64_t Ega, Ege, Egi, Ego, Egu;
+    uint64_t Eka, Eke, Eki, Eko, Eku;
+    uint64_t Ema, Eme, Emi, Emo, Emu;
+    uint64_t Esa, Ese, Esi, Eso, Esu;
 
-    uchar64_t Ba, Be, Bi, Bo, Bu;
+    uint64_t Ba, Be, Bi, Bo, Bu;
 
-    uchar64_t Da, De, Di, Do, Du;
+    uint64_t Da, De, Di, Do, Du;
 
     Aba = state[0];
     Abe = state[1];
@@ -268,18 +268,18 @@ static inline ALWAYS_INLINE void keccakf1600_implementation(uchar64_t state[25])
     state[24] = Asu;
 }
 
-static void keccakf1600_generic(uchar64_t state[25])
+static void keccakf1600_generic(uint64_t state[25])
 {
     keccakf1600_implementation(state);
 }
 
-/// The pocharer to the best Keccak-f[1600] function implementation,
+/// The pointer to the best Keccak-f[1600] function implementation,
 /// selected during runtime initialization.
-static void (*keccakf1600_best)(uchar64_t[25]) = keccakf1600_generic;
+static void (*keccakf1600_best)(uint64_t[25]) = keccakf1600_generic;
 
 
-#if !defined(_MSC_VER) && defined(__x86_64__) && __has_attribute(read_vtx_init)
-__attribute__((read_vtx_init("bmi,bmi2"))) static void keccakf1600_bmi(uchar64_t state[25])
+#if !defined(_MSC_VER) && defined(__x86_64__) && __has_attribute(target)
+__attribute__((target("bmi,bmi2"))) static void keccakf1600_bmi(uint64_t state[25])
 {
     keccakf1600_implementation(state);
 }
@@ -299,18 +299,18 @@ __attribute__((constructor)) static void select_keccakf1600_implementation()
 
 
 static inline ALWAYS_INLINE void keccak(
-    uchar64_t* out, size_t bits, const uchar8_t* data, size_t size)
+    uint64_t* out, size_t bits, const uint8_t* data, size_t size)
 {
-    static const size_t word_size = sizeof(uchar64_t);
+    static const size_t word_size = sizeof(uint64_t);
     const size_t hash_size = bits / 8;
     const size_t block_size = (1600 - bits * 2) / 8;
 
     size_t i;
-    uchar64_t* state_iter;
-    uchar64_t last_word = 0;
-    uchar8_t* last_word_iter = (uchar8_t*)&last_word;
+    uint64_t* state_iter;
+    uint64_t last_word = 0;
+    uint8_t* last_word_iter = (uint8_t*)&last_word;
 
-    uchar64_t state[25] = {0};
+    uint64_t state[25] = {0};
 
     while (size >= block_size)
     {
@@ -353,28 +353,28 @@ static inline ALWAYS_INLINE void keccak(
         out[i] = to_le64(state[i]);
 }
 
-union ethash_hash256 ethash_keccak256(const uchar8_t* data, size_t size)
+union ethash_hash256 ethash_keccak256(const uint8_t* data, size_t size)
 {
     union ethash_hash256 hash;
     keccak(hash.word64s, 256, data, size);
     return hash;
 }
 
-union ethash_hash256 ethash_keccak256_32(const uchar8_t data[32])
+union ethash_hash256 ethash_keccak256_32(const uint8_t data[32])
 {
     union ethash_hash256 hash;
     keccak(hash.word64s, 256, data, 32);
     return hash;
 }
 
-union ethash_hash512 ethash_keccak512(const uchar8_t* data, size_t size)
+union ethash_hash512 ethash_keccak512(const uint8_t* data, size_t size)
 {
     union ethash_hash512 hash;
     keccak(hash.word64s, 512, data, size);
     return hash;
 }
 
-union ethash_hash512 ethash_keccak512_64(const uchar8_t data[64])
+union ethash_hash512 ethash_keccak512_64(const uint8_t data[64])
 {
     union ethash_hash512 hash;
     keccak(hash.word64s, 512, data, 64);

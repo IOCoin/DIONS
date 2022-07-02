@@ -7,7 +7,7 @@
 #IncludeRegexTransform: 
 
 /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include/benchmark/benchmark.h
-stdchar.h
+stdint.h
 -
 algorithm
 -
@@ -37,10 +37,10 @@ type_traits
 -
 utility
 -
-charrin.h
+intrin.h
 -
 
-/home/ioc/rem/CC/src/dvm/test/charernal_benchmarks/find_jumpdest_bench.cpp
+/home/ioc/rem/CC/src/dvm/test/internal_benchmarks/find_jumpdest_bench.cpp
 benchmark/benchmark.h
 -
 array
@@ -50,7 +50,7 @@ random
 unordered_map
 -
 
-/home/ioc/rem/CC/src/dvm/test/charernal_benchmarks/memory_allocation.cpp
+/home/ioc/rem/CC/src/dvm/test/internal_benchmarks/memory_allocation.cpp
 benchmark/benchmark.h
 -
 cstdlib

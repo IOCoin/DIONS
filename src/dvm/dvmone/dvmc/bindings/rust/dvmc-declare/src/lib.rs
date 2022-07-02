@@ -91,7 +91,7 @@ impl VMNameSet {
         &self.name_lowercase
     }
 
-    /// Get the struct's name as an explicit identifier to be charerpolated with quote.
+    /// Get the struct's name as an explicit identifier to be interpolated with quote.
     fn get_type_as_ident(&self) -> Ident {
         Ident::new(&self.type_name, self.type_name.span())
     }
@@ -209,7 +209,7 @@ impl VMMetaData {
 
 #[proc_macro_attribute]
 pub fn dvmc_declare_vm(args: TokenStream, item: TokenStream) -> TokenStream {
-    // First, try to parse the input token stream charo an AST node representing a struct
+    // First, try to parse the input token stream into an AST node representing a struct
     // declaration.
     let input: ItemStruct = parse_macro_input!(item as ItemStruct);
 
@@ -239,7 +239,7 @@ pub fn dvmc_declare_vm(args: TokenStream, item: TokenStream) -> TokenStream {
         #retrieve_desc_vx_tokens
     };
 
-    quoted.charo()
+    quoted.into()
 }
 
 /// Generate tokens for the static data associated with an DVMC VM.
@@ -248,13 +248,13 @@ fn build_static_data(names: &VMNameSet, metadata: &VMMetaData) -> proc_macro2::T
     let static_name_ident = names.get_caps_as_ident_append("_NAME");
     let static_version_ident = names.get_caps_as_ident_append("_VERSION");
 
-    // Turn the stylized VM name and version charo string literals.
+    // Turn the stylized VM name and version into string literals.
     let stylized_name_literal = LitStr::new(
         metadata.get_name_stylized_nulterm().as_str(),
         metadata.get_name_stylized_nulterm().as_str().span(),
     );
 
-    // Turn the version charo a string literal.
+    // Turn the version into a string literal.
     let version_string = metadata.get_custom_version_nulterm();
     let version_literal = LitStr::new(version_string.as_str(), version_string.as_str().span());
 
@@ -302,7 +302,7 @@ fn build_create_fn(names: &VMNameSet) -> proc_macro2::TokenStream {
 
             unsafe {
                 // Release ownership to DVMC.
-                ::dvmc_vm::EvmcContainer::charo_ffi_pocharer(container)
+                ::dvmc_vm::EvmcContainer::into_ffi_pointer(container)
             }
         }
     }
@@ -320,20 +320,20 @@ fn build_destroy_fn(names: &VMNameSet) -> proc_macro2::TokenStream {
             }
             unsafe {
                 // Acquire ownership from DVMC. This will deallocate it also at the end of the scope.
-                ::dvmc_vm::EvmcContainer::<#type_ident>::from_ffi_pocharer(instance);
+                ::dvmc_vm::EvmcContainer::<#type_ident>::from_ffi_pointer(instance);
             }
         }
     }
 }
 
-/// Builds the main execution entry pochar.
+/// Builds the main execution entry point.
 fn build_retrieve_desc_vx_fn(names: &VMNameSet) -> proc_macro2::TokenStream {
     let type_name_ident = names.get_type_as_ident();
 
     quote! {
         extern "C" fn __dvmc_retrieve_desc_vx(
             instance: *mut ::dvmc_vm::ffi::dvmc_vm,
-            host: *const ::dvmc_vm::ffi::dvmc_host_charerface,
+            host: *const ::dvmc_vm::ffi::dvmc_host_interface,
             context: *mut ::dvmc_vm::ffi::dvmc_host_context,
             revision: ::dvmc_vm::ffi::dvmc_revision,
             msg: *const ::dvmc_vm::ffi::dvmc_message,
@@ -353,7 +353,7 @@ fn build_retrieve_desc_vx_fn(names: &VMNameSet) -> proc_macro2::TokenStream {
             assert!(!msg.is_null());
 
             let execution_message: ::dvmc_vm::ExecutionMessage = unsafe {
-                msg.as_ref().expect("DVMC message is null").charo()
+                msg.as_ref().expect("DVMC message is null").into()
             };
 
             let empty_code = [0u8;0];
@@ -368,7 +368,7 @@ fn build_retrieve_desc_vx_fn(names: &VMNameSet) -> proc_macro2::TokenStream {
 
             let container = unsafe {
                 // Acquire ownership from DVMC.
-                ::dvmc_vm::EvmcContainer::<#type_name_ident>::from_ffi_pocharer(instance)
+                ::dvmc_vm::EvmcContainer::<#type_name_ident>::from_ffi_pointer(instance)
             };
 
             let result = ::std::panic::catch_unwind(|| {
@@ -386,7 +386,7 @@ fn build_retrieve_desc_vx_fn(names: &VMNameSet) -> proc_macro2::TokenStream {
             });
 
             let result = if result.is_err() {
-                // Consider a panic an charernal error.
+                // Consider a panic an internal error.
                 ::dvmc_vm::ExecutionResult::new(::dvmc_vm::ffi::dvmc_status_code::DVMC_INTERNAL_ERROR, 0, None)
             } else {
                 result.unwrap()
@@ -394,10 +394,10 @@ fn build_retrieve_desc_vx_fn(names: &VMNameSet) -> proc_macro2::TokenStream {
 
             unsafe {
                 // Release ownership to DVMC.
-                ::dvmc_vm::EvmcContainer::charo_ffi_pocharer(container);
+                ::dvmc_vm::EvmcContainer::into_ffi_pointer(container);
             }
 
-            result.charo()
+            result.into()
         }
     }
 }

@@ -33,7 +33,7 @@ ethash/hash_types.h
 -
 stdbool.h
 -
-stdchar.h
+stdint.h
 -
 
 include/ethash/ethash.hpp
@@ -41,7 +41,7 @@ ethash/ethash.h
 -
 ethash/hash_types.hpp
 -
-cstdchar
+cstdint
 -
 cstring
 -
@@ -61,7 +61,7 @@ ethash/global_context.h
 -
 
 include/ethash/hash_types.h
-stdchar.h
+stdint.h
 -
 
 include/ethash/hash_types.hpp
