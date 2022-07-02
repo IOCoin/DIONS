@@ -8,6 +8,9 @@ I/O Coin (iOC) - DIONS (Decentralized Input Output Name Server) & DVM (Dions Vir
 I/O Coin is a POS CiPher-Based Blockchain
 
 Features:
+* Smart Contract functionality using the D(ions)Virtual Machine (DVM) architecture major upgrade releaase.
+*  running solidity compiled byte code 
+*  (thereby offering also full functional smart contract compatibility with ethereum for example ERC20,NFTs etc)
 * Symbol: IOC
 * 16 Million Coin Fair Launch, POW Mine Period & Switch to POS
 *  4 MB Blocks
