@@ -2987,7 +2987,7 @@ rpcpassword=%s
 The username and password MUST NOT be the same.
 If the file does not exist, create it with owner-readable-only file permissions.
 It is also recommended to set alertnotify so you are notified of problems;
-for example: alertnotify=echo %%s | mail -s &quot;I/OCoin Alert&quot; admin@foo.com
+for example: alertnotify=echo %%s | mail -s &quot;I/OCoin Alert&quot; admin@bar.com
 </source>
         <translation>%s, ha d&apos;establir un rpcpassword al fitxer de configuració:
 %s
@@ -2998,7 +2998,7 @@ rpcpassword=%s
 El nom d&apos;usuari i contrasenya NO HA DE SER el mateix.
 Si no hi ha l&apos;arxiu, s&apos;ha de crear amb els permisos de només lectura per al propietari.
 També es recomana establir alertnotify per a que se li notifiquin els problemes;
-per exemple: alertnotify=echo %%s | mail -s &quot;I/OCoin Alert&quot; admin@foo.com
+per exemple: alertnotify=echo %%s | mail -s &quot;I/OCoin Alert&quot; admin@bar.com
 </translation>
     </message>
     <message>

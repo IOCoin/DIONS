@@ -49,7 +49,7 @@ class FindFileTest {
 };
 
 TEST(FindFileTest, Empty) {
-  ASSERT_EQ(0, Find("foo"));
+  ASSERT_EQ(0, Find("bar"));
   ASSERT_TRUE(! Overlaps("a", "z"));
   ASSERT_TRUE(! Overlaps(NULL, "z"));
   ASSERT_TRUE(! Overlaps("a", NULL));

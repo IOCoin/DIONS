@@ -31,7 +31,7 @@ struct Table::Rep {
   FilterBlockReader* filter;
   const char* filter_data;
 
-  BlockHandle metaindex_handle;  // Handle to metaindex_block: saved from footer
+  BlockHandle metaindex_handle;  // Handle to metaindex_block: saved from barter
   Block* index_block;
 };
 
@@ -44,39 +44,39 @@ Status Table::Open(const Options& options,
     return Status::InvalidArgument("file is too short to be an sstable");
   }
 
-  char footer_space[Footer::kEncodedLength];
-  Slice footer_input;
+  char barter_space[Footer::kEncodedLength];
+  Slice barter_input;
   Status s = file->Read(size - Footer::kEncodedLength, Footer::kEncodedLength,
-                        &footer_input, footer_space);
+                        &barter_input, barter_space);
   if (!s.ok()) return s;
 
-  Footer footer;
-  s = footer.DecodeFrom(&footer_input);
+  Footer barter;
+  s = barter.DecodeFrom(&barter_input);
   if (!s.ok()) return s;
 
   // Read the index block
   BlockContents contents;
   Block* index_block = NULL;
   if (s.ok()) {
-    s = ReadBlock(file, ReadOptions(), footer.index_handle(), &contents);
+    s = ReadBlock(file, ReadOptions(), barter.index_handle(), &contents);
     if (s.ok()) {
       index_block = new Block(contents);
     }
   }
 
   if (s.ok()) {
-    // We've successfully read the footer and the index block: we're
+    // We've successfully read the barter and the index block: we're
     // ready to serve requests.
     Rep* rep = new Table::Rep;
     rep->options = options;
     rep->file = file;
-    rep->metaindex_handle = footer.metaindex_handle();
+    rep->metaindex_handle = barter.metaindex_handle();
     rep->index_block = index_block;
     rep->cache_id = (options.block_cache ? options.block_cache->NewId() : 0);
     rep->filter_data = NULL;
     rep->filter = NULL;
     *table = new Table(rep);
-    (*table)->ReadMeta(footer);
+    (*table)->ReadMeta(barter);
   } else {
     if (index_block) delete index_block;
   }
@@ -84,16 +84,16 @@ Status Table::Open(const Options& options,
   return s;
 }
 
-void Table::ReadMeta(const Footer& footer) {
+void Table::ReadMeta(const Footer& barter) {
   if (rep_->options.filter_policy == NULL) {
     return;  // Do not need any metadata
   }
 
-  // TODO(sanjay): Skip this if footer.metaindex_handle() size indicates
+  // TODO(sanjay): Skip this if barter.metaindex_handle() size indicates
   // it is an empty block.
   ReadOptions opt;
   BlockContents contents;
-  if (!ReadBlock(rep_->file, opt, footer.metaindex_handle(), &contents).ok()) {
+  if (!ReadBlock(rep_->file, opt, barter.metaindex_handle(), &contents).ok()) {
     // Do not propagate errors since meta info is not needed for operation
     return;
   }

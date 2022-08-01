@@ -48,14 +48,14 @@ TEST(FilterBlockTest, EmptyBuilder) {
   Slice block = builder.Finish();
   ASSERT_EQ("\\x00\\x00\\x00\\x00\\x0b", EscapeString(block));
   FilterBlockReader reader(&policy_, block);
-  ASSERT_TRUE(reader.KeyMayMatch(0, "foo"));
-  ASSERT_TRUE(reader.KeyMayMatch(100000, "foo"));
+  ASSERT_TRUE(reader.KeyMayMatch(0, "bar"));
+  ASSERT_TRUE(reader.KeyMayMatch(100000, "bar"));
 }
 
 TEST(FilterBlockTest, SingleChunk) {
   FilterBlockBuilder builder(&policy_);
   builder.StartBlock(100);
-  builder.AddKey("foo");
+  builder.AddKey("bar");
   builder.AddKey("bar");
   builder.AddKey("box");
   builder.StartBlock(200);
@@ -64,11 +64,11 @@ TEST(FilterBlockTest, SingleChunk) {
   builder.AddKey("hello");
   Slice block = builder.Finish();
   FilterBlockReader reader(&policy_, block);
-  ASSERT_TRUE(reader.KeyMayMatch(100, "foo"));
+  ASSERT_TRUE(reader.KeyMayMatch(100, "bar"));
   ASSERT_TRUE(reader.KeyMayMatch(100, "bar"));
   ASSERT_TRUE(reader.KeyMayMatch(100, "box"));
   ASSERT_TRUE(reader.KeyMayMatch(100, "hello"));
-  ASSERT_TRUE(reader.KeyMayMatch(100, "foo"));
+  ASSERT_TRUE(reader.KeyMayMatch(100, "bar"));
   ASSERT_TRUE(! reader.KeyMayMatch(100, "missing"));
   ASSERT_TRUE(! reader.KeyMayMatch(100, "other"));
 }
@@ -78,7 +78,7 @@ TEST(FilterBlockTest, MultiChunk) {
 
   // First filter
   builder.StartBlock(0);
-  builder.AddKey("foo");
+  builder.AddKey("bar");
   builder.StartBlock(2000);
   builder.AddKey("bar");
 
@@ -97,19 +97,19 @@ TEST(FilterBlockTest, MultiChunk) {
   FilterBlockReader reader(&policy_, block);
 
   // Check first filter
-  ASSERT_TRUE(reader.KeyMayMatch(0, "foo"));
+  ASSERT_TRUE(reader.KeyMayMatch(0, "bar"));
   ASSERT_TRUE(reader.KeyMayMatch(2000, "bar"));
   ASSERT_TRUE(! reader.KeyMayMatch(0, "box"));
   ASSERT_TRUE(! reader.KeyMayMatch(0, "hello"));
 
   // Check second filter
   ASSERT_TRUE(reader.KeyMayMatch(3100, "box"));
-  ASSERT_TRUE(! reader.KeyMayMatch(3100, "foo"));
+  ASSERT_TRUE(! reader.KeyMayMatch(3100, "bar"));
   ASSERT_TRUE(! reader.KeyMayMatch(3100, "bar"));
   ASSERT_TRUE(! reader.KeyMayMatch(3100, "hello"));
 
   // Check third filter (empty)
-  ASSERT_TRUE(! reader.KeyMayMatch(4100, "foo"));
+  ASSERT_TRUE(! reader.KeyMayMatch(4100, "bar"));
   ASSERT_TRUE(! reader.KeyMayMatch(4100, "bar"));
   ASSERT_TRUE(! reader.KeyMayMatch(4100, "box"));
   ASSERT_TRUE(! reader.KeyMayMatch(4100, "hello"));
@@ -117,7 +117,7 @@ TEST(FilterBlockTest, MultiChunk) {
   // Check last filter
   ASSERT_TRUE(reader.KeyMayMatch(9000, "box"));
   ASSERT_TRUE(reader.KeyMayMatch(9000, "hello"));
-  ASSERT_TRUE(! reader.KeyMayMatch(9000, "foo"));
+  ASSERT_TRUE(! reader.KeyMayMatch(9000, "bar"));
   ASSERT_TRUE(! reader.KeyMayMatch(9000, "bar"));
 }
 

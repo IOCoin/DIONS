@@ -433,9 +433,9 @@ class Repairer {
 
   void ArchiveFile(const std::string& fname) {
     // Move into another directory.  E.g., for
-    //    dir/foo
+    //    dir/bar
     // rename to
-    //    dir/lost/foo
+    //    dir/lost/bar
     const char* slash = strrchr(fname.c_str(), '/');
     std::string new_dir;
     if (slash != NULL) {

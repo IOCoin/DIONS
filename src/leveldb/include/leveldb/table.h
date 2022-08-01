@@ -72,7 +72,7 @@ class Table {
       void (*handle_result)(void* arg, const Slice& k, const Slice& v));
 
 
-  void ReadMeta(const Footer& footer);
+  void ReadMeta(const Footer& barter);
   void ReadFilter(const Slice& filter_handle_value);
 
   // No copying allowed

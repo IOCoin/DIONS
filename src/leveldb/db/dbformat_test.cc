@@ -64,43 +64,43 @@ TEST(FormatTest, InternalKey_EncodeDecode) {
 
 TEST(FormatTest, InternalKeyShortSeparator) {
   // When user keys are same
-  ASSERT_EQ(IKey("foo", 100, kTypeValue),
-            Shorten(IKey("foo", 100, kTypeValue),
-                    IKey("foo", 99, kTypeValue)));
-  ASSERT_EQ(IKey("foo", 100, kTypeValue),
-            Shorten(IKey("foo", 100, kTypeValue),
-                    IKey("foo", 101, kTypeValue)));
-  ASSERT_EQ(IKey("foo", 100, kTypeValue),
-            Shorten(IKey("foo", 100, kTypeValue),
-                    IKey("foo", 100, kTypeValue)));
-  ASSERT_EQ(IKey("foo", 100, kTypeValue),
-            Shorten(IKey("foo", 100, kTypeValue),
-                    IKey("foo", 100, kTypeDeletion)));
+  ASSERT_EQ(IKey("bar", 100, kTypeValue),
+            Shorten(IKey("bar", 100, kTypeValue),
+                    IKey("bar", 99, kTypeValue)));
+  ASSERT_EQ(IKey("bar", 100, kTypeValue),
+            Shorten(IKey("bar", 100, kTypeValue),
+                    IKey("bar", 101, kTypeValue)));
+  ASSERT_EQ(IKey("bar", 100, kTypeValue),
+            Shorten(IKey("bar", 100, kTypeValue),
+                    IKey("bar", 100, kTypeValue)));
+  ASSERT_EQ(IKey("bar", 100, kTypeValue),
+            Shorten(IKey("bar", 100, kTypeValue),
+                    IKey("bar", 100, kTypeDeletion)));
 
   // When user keys are misordered
-  ASSERT_EQ(IKey("foo", 100, kTypeValue),
-            Shorten(IKey("foo", 100, kTypeValue),
+  ASSERT_EQ(IKey("bar", 100, kTypeValue),
+            Shorten(IKey("bar", 100, kTypeValue),
                     IKey("bar", 99, kTypeValue)));
 
   // When user keys are different, but correctly ordered
   ASSERT_EQ(IKey("g", kMaxSequenceNumber, kValueTypeForSeek),
-            Shorten(IKey("foo", 100, kTypeValue),
+            Shorten(IKey("bar", 100, kTypeValue),
                     IKey("hello", 200, kTypeValue)));
 
   // When start user key is prefix of limit user key
-  ASSERT_EQ(IKey("foo", 100, kTypeValue),
-            Shorten(IKey("foo", 100, kTypeValue),
-                    IKey("foobar", 200, kTypeValue)));
+  ASSERT_EQ(IKey("bar", 100, kTypeValue),
+            Shorten(IKey("bar", 100, kTypeValue),
+                    IKey("barbar", 200, kTypeValue)));
 
   // When limit user key is prefix of start user key
-  ASSERT_EQ(IKey("foobar", 100, kTypeValue),
-            Shorten(IKey("foobar", 100, kTypeValue),
-                    IKey("foo", 200, kTypeValue)));
+  ASSERT_EQ(IKey("barbar", 100, kTypeValue),
+            Shorten(IKey("barbar", 100, kTypeValue),
+                    IKey("bar", 200, kTypeValue)));
 }
 
 TEST(FormatTest, InternalKeyShortestSuccessor) {
   ASSERT_EQ(IKey("g", kMaxSequenceNumber, kValueTypeForSeek),
-            ShortSuccessor(IKey("foo", 100, kTypeValue)));
+            ShortSuccessor(IKey("bar", 100, kTypeValue)));
   ASSERT_EQ(IKey("\xff\xff", 100, kTypeValue),
             ShortSuccessor(IKey("\xff\xff", 100, kTypeValue)));
 }

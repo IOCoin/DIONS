@@ -179,8 +179,6 @@ extern string DESCRIPTOR;
 extern enum Checkpoints::CPMode CheckpointsMode;
 extern void testGen(dvmc::TransitionalNode&,string&);
 extern bool collisionReference(const string& s, uint256& wtxInHash,string&);
-extern bool validate_serial_n(const string&, const string&,__wx__Tx&);
-extern bool read_serial_n(const string&, const string&, __wx__Tx&);
 extern bool getVertex__(const string&, string&);
 
 //////////////////////////////////////////////////////////////////////////////
@@ -848,9 +846,12 @@ bool AcceptToMemoryPool(CTxMemPool& pool, CTransaction &tx,
         {
             return error("AcceptToMemoryPool : ConnectInputs failed %s", hash.ToString().substr(0,10).c_str());
         }
+        if(!AcceptToMemoryPoolPost(tx,mapInputs))
+	{
+            return error("AcceptToMemoryPool : accepttomemorypoolpost dions tx validation failed");
+	}
     }
 
-    AcceptToMemoryPoolPost(tx);
 
     // Store transaction in memory
     {
@@ -1928,7 +1929,7 @@ bool CBlock::ConnectBlock(CTxDB& txdb, CBlockIndex* pindex, bool fJustCheck)
             {
                 return false;
             }
-            bool relay_test=false;
+            bool storage_consistent=false;
             BOOST_FOREACH(CTransaction& tx, vtx)
             {
                 if(tx.nVersion == CTransaction::DION_TX_VERSION)
@@ -2008,7 +2009,8 @@ bool CBlock::ConnectBlock(CTxDB& txdb, CBlockIndex* pindex, bool fJustCheck)
                             const auto input = dvmc::from_hex(contract_input);
                             dvmc_message msg{};
                             msg.recipient = create_address;
-                            msg.track = 10000000;
+                            int64_t nFees = tx.GetValueIn(inputs)-tx.GetValueOut();
+                            msg.track = std::numeric_limits<int64_t>::max();
                             msg.input_data = input.data();
                             msg.input_size = input.size();
                             dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
@@ -2019,8 +2021,8 @@ bool CBlock::ConnectBlock(CTxDB& txdb, CBlockIndex* pindex, bool fJustCheck)
                             boost::archive::text_oarchive oarchive(oss_commit);
                             oarchive << updatedAcc;
                             if(oss_commit.str() != stringFromVch(vvchArgs[1]))
-                                return error("ConnectBlock() OP_RELAY inconsisten with previous");
-                            relay_test=true;
+                                return error("ConnectBlock() computed storage for OP_RELAY inconsisten with previous");
+                            storage_consistent=true;
                             break;
                         }
                         case OP_BASE_VERTEX_SET:
@@ -2045,10 +2047,15 @@ bool CBlock::ConnectBlock(CTxDB& txdb, CBlockIndex* pindex, bool fJustCheck)
                             AddressToHash160(cAddr_.ToString(),h160);
                             memcpy(create_address.bytes,h160.pn,20);
                             create_msg.recipient = create_address;
-                            create_msg.track = 1000000;
+                            create_msg.track = std::numeric_limits<int64_t>::max();
                             dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
                             dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
                             const auto create_result = vm.retrieve_desc_vx(vTrans, rev, create_msg, code.data(), code.size());
+                            if (create_result.status_code != DVMC_SUCCESS)
+                            {
+                                printf("failed: %d\n",create_result.status_code);
+                            }
+
                             auto& created_account = vTrans.accounts[create_address];
                             created_account.code = dvmc::bytes(create_result.output_data, create_result.output_size);
 
@@ -2062,7 +2069,7 @@ bool CBlock::ConnectBlock(CTxDB& txdb, CBlockIndex* pindex, bool fJustCheck)
                             oarchive << acc;
                             if(oss.str() != stringFromVch(vvchArgs[1]))
                                 return error("ConnectBlock op_base_set computed storage does not match supplied storage");
-                            relay_test=true;
+                            storage_consistent=true;
                             break;
                         }
                         default:
@@ -2073,8 +2080,8 @@ bool CBlock::ConnectBlock(CTxDB& txdb, CBlockIndex* pindex, bool fJustCheck)
                 }
             }
 
-            if(!relay_test)
-                return error("incosistent with CYCLE_TX execution");
+            if(!storage_consistent)
+                return error("storage given in block is incosistent with CYCLE_TX execution");
         }
 
         // Do not allow blocks that contain transactions which 'overwrite' older transactions,

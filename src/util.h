@@ -374,7 +374,7 @@ inline bool IsSwitchChar(char c)
 /**
  * Return string argument or default value
  *
- * @param strArg Argument to get (e.g. "-foo")
+ * @param strArg Argument to get (e.g. "-bar")
  * @param default (e.g. "1")
  * @return command-line argument or default value
  */
@@ -383,7 +383,7 @@ std::string GetArg(const std::string& strArg, const std::string& strDefault);
 /**
  * Return integer argument or default value
  *
- * @param strArg Argument to get (e.g. "-foo")
+ * @param strArg Argument to get (e.g. "-bar")
  * @param default (e.g. 1)
  * @return command-line argument (0 if invalid number) or default value
  */
@@ -392,7 +392,7 @@ int64_t GetArg(const std::string& strArg, int64_t nDefault);
 /**
  * Return boolean argument or default value
  *
- * @param strArg Argument to get (e.g. "-foo")
+ * @param strArg Argument to get (e.g. "-bar")
  * @param default (true or false)
  * @return command-line argument or default value
  */
@@ -401,7 +401,7 @@ bool GetBoolArg(const std::string& strArg, bool fDefault=false);
 /**
  * Set an argument if it doesn't already have a value
  *
- * @param strArg Argument to set (e.g. "-foo")
+ * @param strArg Argument to set (e.g. "-bar")
  * @param strValue Value (e.g. "1")
  * @return true if argument gets set, false if it already had a value
  */
@@ -410,7 +410,7 @@ bool SoftSetArg(const std::string& strArg, const std::string& strValue);
 /**
  * Set a boolean argument if it doesn't already have a value
  *
- * @param strArg Argument to set (e.g. "-foo")
+ * @param strArg Argument to set (e.g. "-bar")
  * @param fValue Value (e.g. false)
  * @return true if argument gets set, false if it already had a value
  */

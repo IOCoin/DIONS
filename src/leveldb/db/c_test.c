@@ -126,7 +126,7 @@ static int CmpCompare(void* arg, const char* a, size_t alen,
 }
 
 static const char* CmpName(void* arg) {
-  return "foo";
+  return "bar";
 }
 
 // Custom filter policy
@@ -217,32 +217,32 @@ int main(int argc, char** argv) {
   leveldb_options_set_create_if_missing(options, 1);
   db = leveldb_open(options, dbname, &err);
   CheckNoError(err);
-  CheckGet(db, roptions, "foo", NULL);
+  CheckGet(db, roptions, "bar", NULL);
 
   StartPhase("put");
-  leveldb_put(db, woptions, "foo", 3, "hello", 5, &err);
+  leveldb_put(db, woptions, "bar", 3, "hello", 5, &err);
   CheckNoError(err);
-  CheckGet(db, roptions, "foo", "hello");
+  CheckGet(db, roptions, "bar", "hello");
 
   StartPhase("compactall");
   leveldb_compact_range(db, NULL, 0, NULL, 0);
-  CheckGet(db, roptions, "foo", "hello");
+  CheckGet(db, roptions, "bar", "hello");
 
   StartPhase("compactrange");
   leveldb_compact_range(db, "a", 1, "z", 1);
-  CheckGet(db, roptions, "foo", "hello");
+  CheckGet(db, roptions, "bar", "hello");
 
   StartPhase("writebatch");
   {
     leveldb_writebatch_t* wb = leveldb_writebatch_create();
-    leveldb_writebatch_put(wb, "foo", 3, "a", 1);
+    leveldb_writebatch_put(wb, "bar", 3, "a", 1);
     leveldb_writebatch_clear(wb);
     leveldb_writebatch_put(wb, "bar", 3, "b", 1);
     leveldb_writebatch_put(wb, "box", 3, "c", 1);
     leveldb_writebatch_delete(wb, "bar", 3);
     leveldb_write(db, woptions, wb, &err);
     CheckNoError(err);
-    CheckGet(db, roptions, "foo", "hello");
+    CheckGet(db, roptions, "bar", "hello");
     CheckGet(db, roptions, "bar", NULL);
     CheckGet(db, roptions, "box", "c");
     int pos = 0;
@@ -259,13 +259,13 @@ int main(int argc, char** argv) {
     CheckCondition(leveldb_iter_valid(iter));
     CheckIter(iter, "box", "c");
     leveldb_iter_next(iter);
-    CheckIter(iter, "foo", "hello");
+    CheckIter(iter, "bar", "hello");
     leveldb_iter_prev(iter);
     CheckIter(iter, "box", "c");
     leveldb_iter_prev(iter);
     CheckCondition(!leveldb_iter_valid(iter));
     leveldb_iter_seek_to_last(iter);
-    CheckIter(iter, "foo", "hello");
+    CheckIter(iter, "bar", "hello");
     leveldb_iter_seek(iter, "b", 1);
     CheckIter(iter, "box", "c");
     leveldb_iter_get_error(iter, &err);
@@ -310,12 +310,12 @@ int main(int argc, char** argv) {
   {
     const leveldb_snapshot_t* snap;
     snap = leveldb_create_snapshot(db);
-    leveldb_delete(db, woptions, "foo", 3, &err);
+    leveldb_delete(db, woptions, "bar", 3, &err);
     CheckNoError(err);
     leveldb_readoptions_set_snapshot(roptions, snap);
-    CheckGet(db, roptions, "foo", "hello");
+    CheckGet(db, roptions, "bar", "hello");
     leveldb_readoptions_set_snapshot(roptions, NULL);
-    CheckGet(db, roptions, "foo", NULL);
+    CheckGet(db, roptions, "bar", NULL);
     leveldb_release_snapshot(db, snap);
   }
 
@@ -328,7 +328,7 @@ int main(int argc, char** argv) {
     CheckNoError(err);
     db = leveldb_open(options, dbname, &err);
     CheckNoError(err);
-    CheckGet(db, roptions, "foo", NULL);
+    CheckGet(db, roptions, "bar", NULL);
     CheckGet(db, roptions, "bar", NULL);
     CheckGet(db, roptions, "box", "c");
     leveldb_options_set_create_if_missing(options, 1);
@@ -353,23 +353,23 @@ int main(int argc, char** argv) {
     leveldb_options_set_filter_policy(options, policy);
     db = leveldb_open(options, dbname, &err);
     CheckNoError(err);
-    leveldb_put(db, woptions, "foo", 3, "foovalue", 8, &err);
+    leveldb_put(db, woptions, "bar", 3, "barvalue", 8, &err);
     CheckNoError(err);
     leveldb_put(db, woptions, "bar", 3, "barvalue", 8, &err);
     CheckNoError(err);
     leveldb_compact_range(db, NULL, 0, NULL, 0);
 
     fake_filter_result = 1;
-    CheckGet(db, roptions, "foo", "foovalue");
+    CheckGet(db, roptions, "bar", "barvalue");
     CheckGet(db, roptions, "bar", "barvalue");
     if (phase == 0) {
       // Must not find value when custom filter returns false
       fake_filter_result = 0;
-      CheckGet(db, roptions, "foo", NULL);
+      CheckGet(db, roptions, "bar", NULL);
       CheckGet(db, roptions, "bar", NULL);
       fake_filter_result = 1;
 
-      CheckGet(db, roptions, "foo", "foovalue");
+      CheckGet(db, roptions, "bar", "barvalue");
       CheckGet(db, roptions, "bar", "barvalue");
     }
     leveldb_options_set_filter_policy(options, NULL);

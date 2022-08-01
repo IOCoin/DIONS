@@ -46,8 +46,8 @@ TEST(FileNameTest, Parse) {
   // Errors
   static const char* errors[] = {
     "",
-    "foo",
-    "foo-dx-100.log",
+    "bar",
+    "bar-dx-100.log",
     ".log",
     "",
     "manifest",
@@ -79,20 +79,20 @@ TEST(FileNameTest, Construction) {
   FileType type;
   std::string fname;
 
-  fname = CurrentFileName("foo");
-  ASSERT_EQ("foo/", std::string(fname.data(), 4));
+  fname = CurrentFileName("bar");
+  ASSERT_EQ("bar/", std::string(fname.data(), 4));
   ASSERT_TRUE(ParseFileName(fname.c_str() + 4, &number, &type));
   ASSERT_EQ(0, number);
   ASSERT_EQ(kCurrentFile, type);
 
-  fname = LockFileName("foo");
-  ASSERT_EQ("foo/", std::string(fname.data(), 4));
+  fname = LockFileName("bar");
+  ASSERT_EQ("bar/", std::string(fname.data(), 4));
   ASSERT_TRUE(ParseFileName(fname.c_str() + 4, &number, &type));
   ASSERT_EQ(0, number);
   ASSERT_EQ(kDBLockFile, type);
 
-  fname = LogFileName("foo", 192);
-  ASSERT_EQ("foo/", std::string(fname.data(), 4));
+  fname = LogFileName("bar", 192);
+  ASSERT_EQ("bar/", std::string(fname.data(), 4));
   ASSERT_TRUE(ParseFileName(fname.c_str() + 4, &number, &type));
   ASSERT_EQ(192, number);
   ASSERT_EQ(kLogFile, type);

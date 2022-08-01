@@ -734,7 +734,7 @@ static const sph_u32 IV512[] = {
 #if SPH_JH_64
 
 /*
- * The "small footprint" 64-bit version just uses a partially unrolled
+ * The "small bartprint" 64-bit version just uses a partially unrolled
  * loop.
  */
 
@@ -866,7 +866,7 @@ static const sph_u32 IV512[] = {
 #else
 
 /*
- * We are not aiming at a small footprint, but we are still using a
+ * We are not aiming at a small bartprint, but we are still using a
  * 32-bit implementation. Full loop unrolling would smash the L1
  * cache on some "big" architectures (32 kB L1 cache).
  */

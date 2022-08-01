@@ -631,8 +631,10 @@ void LocatorNodeDB::filter(CBlockIndex* p__)
                             {
                                 vtxPos.push_back(txPos2);
                                 lPut(vvchArgs[0], vtxPos);
-                                if(op == OP_BASE_SET)
+                                if(op == OP_BASE_SET || op == OP_BASE_VERTEX_SET)
                                 {
+				if(op == OP_BASE_VERTEX_SET)
+					std::cout << "db.cpp filter op == OP_BASE_VERTEX_SET 1" << std::endl;
                                     txPos2.vValue = vvchArgs[1];
                                     vtxPos.push_back(txPos2);
                                     lPut(vvchArgs[0], vtxPos);
@@ -650,6 +652,8 @@ void LocatorNodeDB::filter(CBlockIndex* p__)
                                 }
                                 if(op == OP_BASE_SET || op == OP_BASE_VERTEX_SET)
                                 {
+				if(op == OP_BASE_VERTEX_SET)
+					std::cout << "db.cpp filter op == OP_BASE_VERTEX_SET 2" << std::endl;
                                     txPos2.vValue = vvchArgs[1];
                                     vtxPos.push_back(txPos2);
                                     lPut(vvchArgs[0], vtxPos);
@@ -657,6 +661,9 @@ void LocatorNodeDB::filter(CBlockIndex* p__)
                             }
                             else if((op == OP_ALIAS_RELAY || op == OP_BASE_RELAY || op == OP_BASE_VERTEX_RELAY) && lKey(vvchArgs[0]))
                             {
+				    //XXXX
+				if(op == OP_BASE_VERTEX_RELAY)
+					std::cout << "db.cpp filter op == OP_BASE_VERTEX_RELAY" << std::endl;
                                 txPos2.vValue = vvchArgs[1];
                                 vtxPos.push_back(txPos2);
                                 lPut(vvchArgs[0], vtxPos);

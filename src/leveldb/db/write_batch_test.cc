@@ -62,7 +62,7 @@ TEST(WriteBatchTest, Empty) {
 
 TEST(WriteBatchTest, Multiple) {
   WriteBatch batch;
-  batch.Put(Slice("foo"), Slice("bar"));
+  batch.Put(Slice("bar"), Slice("bar"));
   batch.Delete(Slice("box"));
   batch.Put(Slice("baz"), Slice("boo"));
   WriteBatchInternal::SetSequence(&batch, 100);
@@ -70,19 +70,19 @@ TEST(WriteBatchTest, Multiple) {
   ASSERT_EQ(3, WriteBatchInternal::Count(&batch));
   ASSERT_EQ("Put(baz, boo)@102"
             "Delete(box)@101"
-            "Put(foo, bar)@100",
+            "Put(bar, bar)@100",
             PrintContents(&batch));
 }
 
 TEST(WriteBatchTest, Corruption) {
   WriteBatch batch;
-  batch.Put(Slice("foo"), Slice("bar"));
+  batch.Put(Slice("bar"), Slice("bar"));
   batch.Delete(Slice("box"));
   WriteBatchInternal::SetSequence(&batch, 200);
   Slice contents = WriteBatchInternal::Contents(&batch);
   WriteBatchInternal::SetContents(&batch,
                                   Slice(contents.data(),contents.size()-1));
-  ASSERT_EQ("Put(foo, bar)@200"
+  ASSERT_EQ("Put(bar, bar)@200"
             "ParseError()",
             PrintContents(&batch));
 }
@@ -104,12 +104,12 @@ TEST(WriteBatchTest, Append) {
   ASSERT_EQ("Put(a, va)@200"
             "Put(b, vb)@201",
             PrintContents(&b1));
-  b2.Delete("foo");
+  b2.Delete("bar");
   WriteBatchInternal::Append(&b1, &b2);
   ASSERT_EQ("Put(a, va)@200"
             "Put(b, vb)@202"
             "Put(b, vb)@201"
-            "Delete(foo)@203",
+            "Delete(bar)@203",
             PrintContents(&b1));
 }
 

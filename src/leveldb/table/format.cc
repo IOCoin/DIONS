@@ -71,7 +71,7 @@ Status ReadBlock(RandomAccessFile* file,
   result->cachable = false;
   result->heap_allocated = false;
 
-  // Read the block contents as well as the type/crc footer.
+  // Read the block contents as well as the type/crc barter.
   // See table_builder.cc for the code that built this structure.
   size_t n = static_cast<size_t>(handle.size());
   char* buf = new char[n + kBlockTrailerSize];

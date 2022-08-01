@@ -160,15 +160,15 @@ TEST(MemEnvTest, LargeWrite) {
 
   WritableFile* writable_file;
   ASSERT_OK(env_->NewWritableFile("/dir/f", &writable_file));
-  ASSERT_OK(writable_file->Append("foo"));
+  ASSERT_OK(writable_file->Append("bar"));
   ASSERT_OK(writable_file->Append(write_data));
   delete writable_file;
 
   SequentialFile* seq_file;
   Slice result;
   ASSERT_OK(env_->NewSequentialFile("/dir/f", &seq_file));
-  ASSERT_OK(seq_file->Read(3, &result, scratch)); // Read "foo".
-  ASSERT_EQ(0, result.compare("foo"));
+  ASSERT_OK(seq_file->Read(3, &result, scratch)); // Read "bar".
+  ASSERT_EQ(0, result.compare("bar"));
 
   size_t read = 0;
   std::string read_data;
@@ -189,7 +189,7 @@ TEST(MemEnvTest, DBTest) {
   DB* db;
 
   const Slice keys[] = {Slice("aaa"), Slice("bbb"), Slice("ccc")};
-  const Slice vals[] = {Slice("foo"), Slice("bar"), Slice("baz")};
+  const Slice vals[] = {Slice("bar"), Slice("bar"), Slice("baz")};
 
   ASSERT_OK(DB::Open(options, "/dir/db", &db));
   for (size_t i = 0; i < 3; ++i) {

@@ -240,11 +240,11 @@ TEST(LogTest, Empty) {
 }
 
 TEST(LogTest, ReadWrite) {
-  Write("foo");
+  Write("bar");
   Write("bar");
   Write("");
   Write("xxxx");
-  ASSERT_EQ("foo", Read());
+  ASSERT_EQ("bar", Read());
   ASSERT_EQ("bar", Read());
   ASSERT_EQ("", Read());
   ASSERT_EQ("xxxx", Read());
@@ -275,11 +275,11 @@ TEST(LogTest, Fragmentation) {
 TEST(LogTest, MarginalTrailer) {
   // Make a trailer that is exactly the same length as an empty record.
   const int n = kBlockSize - 2*kHeaderSize;
-  Write(BigString("foo", n));
+  Write(BigString("bar", n));
   ASSERT_EQ(kBlockSize - kHeaderSize, WrittenBytes());
   Write("");
   Write("bar");
-  ASSERT_EQ(BigString("foo", n), Read());
+  ASSERT_EQ(BigString("bar", n), Read());
   ASSERT_EQ("", Read());
   ASSERT_EQ("bar", Read());
   ASSERT_EQ("EOF", Read());
@@ -288,10 +288,10 @@ TEST(LogTest, MarginalTrailer) {
 TEST(LogTest, MarginalTrailer2) {
   // Make a trailer that is exactly the same length as an empty record.
   const int n = kBlockSize - 2*kHeaderSize;
-  Write(BigString("foo", n));
+  Write(BigString("bar", n));
   ASSERT_EQ(kBlockSize - kHeaderSize, WrittenBytes());
   Write("bar");
-  ASSERT_EQ(BigString("foo", n), Read());
+  ASSERT_EQ(BigString("bar", n), Read());
   ASSERT_EQ("bar", Read());
   ASSERT_EQ("EOF", Read());
   ASSERT_EQ(0, DroppedBytes());
@@ -300,11 +300,11 @@ TEST(LogTest, MarginalTrailer2) {
 
 TEST(LogTest, ShortTrailer) {
   const int n = kBlockSize - 2*kHeaderSize + 4;
-  Write(BigString("foo", n));
+  Write(BigString("bar", n));
   ASSERT_EQ(kBlockSize - kHeaderSize + 4, WrittenBytes());
   Write("");
   Write("bar");
-  ASSERT_EQ(BigString("foo", n), Read());
+  ASSERT_EQ(BigString("bar", n), Read());
   ASSERT_EQ("", Read());
   ASSERT_EQ("bar", Read());
   ASSERT_EQ("EOF", Read());
@@ -312,9 +312,9 @@ TEST(LogTest, ShortTrailer) {
 
 TEST(LogTest, AlignedEof) {
   const int n = kBlockSize - 2*kHeaderSize + 4;
-  Write(BigString("foo", n));
+  Write(BigString("bar", n));
   ASSERT_EQ(kBlockSize - kHeaderSize + 4, WrittenBytes());
-  ASSERT_EQ(BigString("foo", n), Read());
+  ASSERT_EQ(BigString("bar", n), Read());
   ASSERT_EQ("EOF", Read());
 }
 
@@ -334,7 +334,7 @@ TEST(LogTest, RandomRead) {
 // Tests of all the error paths in log_reader.cc follow:
 
 TEST(LogTest, ReadError) {
-  Write("foo");
+  Write("bar");
   ForceError();
   ASSERT_EQ("EOF", Read());
   ASSERT_EQ(kBlockSize, DroppedBytes());
@@ -342,7 +342,7 @@ TEST(LogTest, ReadError) {
 }
 
 TEST(LogTest, BadRecordType) {
-  Write("foo");
+  Write("bar");
   // Type is stored in header[6]
   IncrementByte(6, 100);
   FixChecksum(0, 3);
@@ -352,7 +352,7 @@ TEST(LogTest, BadRecordType) {
 }
 
 TEST(LogTest, TruncatedTrailingRecordIsIgnored) {
-  Write("foo");
+  Write("bar");
   ShrinkSize(4);   // Drop all payload as well as a header byte
   ASSERT_EQ("EOF", Read());
   // Truncated last record is ignored, not treated as an error.
@@ -363,16 +363,16 @@ TEST(LogTest, TruncatedTrailingRecordIsIgnored) {
 TEST(LogTest, BadLength) {
   const int kPayloadSize = kBlockSize - kHeaderSize;
   Write(BigString("bar", kPayloadSize));
-  Write("foo");
+  Write("bar");
   // Least significant size byte is stored in header[4].
   IncrementByte(4, 1);
-  ASSERT_EQ("foo", Read());
+  ASSERT_EQ("bar", Read());
   ASSERT_EQ(kBlockSize, DroppedBytes());
   ASSERT_EQ("OK", MatchError("bad record length"));
 }
 
 TEST(LogTest, BadLengthAtEndIsIgnored) {
-  Write("foo");
+  Write("bar");
   ShrinkSize(1);
   ASSERT_EQ("EOF", Read());
   ASSERT_EQ(0, DroppedBytes());
@@ -380,7 +380,7 @@ TEST(LogTest, BadLengthAtEndIsIgnored) {
 }
 
 TEST(LogTest, ChecksumMismatch) {
-  Write("foo");
+  Write("bar");
   IncrementByte(0, 10);
   ASSERT_EQ("EOF", Read());
   ASSERT_EQ(10, DroppedBytes());
@@ -388,7 +388,7 @@ TEST(LogTest, ChecksumMismatch) {
 }
 
 TEST(LogTest, UnexpectedMiddleType) {
-  Write("foo");
+  Write("bar");
   SetByte(6, kMiddleType);
   FixChecksum(0, 3);
   ASSERT_EQ("EOF", Read());
@@ -397,7 +397,7 @@ TEST(LogTest, UnexpectedMiddleType) {
 }
 
 TEST(LogTest, UnexpectedLastType) {
-  Write("foo");
+  Write("bar");
   SetByte(6, kLastType);
   FixChecksum(0, 3);
   ASSERT_EQ("EOF", Read());
@@ -406,7 +406,7 @@ TEST(LogTest, UnexpectedLastType) {
 }
 
 TEST(LogTest, UnexpectedFullType) {
-  Write("foo");
+  Write("bar");
   Write("bar");
   SetByte(6, kFirstType);
   FixChecksum(0, 3);
@@ -417,7 +417,7 @@ TEST(LogTest, UnexpectedFullType) {
 }
 
 TEST(LogTest, UnexpectedFirstType) {
-  Write("foo");
+  Write("bar");
   Write(BigString("bar", 100000));
   SetByte(6, kFirstType);
   FixChecksum(0, 3);
@@ -452,7 +452,7 @@ TEST(LogTest, ErrorJoinsRecords) {
   // first(R1),last(R2) to get joined and returned as a valid record.
 
   // Write records that span two blocks
-  Write(BigString("foo", kBlockSize));
+  Write(BigString("bar", kBlockSize));
   Write(BigString("bar", kBlockSize));
   Write("correct");
 

@@ -11,6 +11,7 @@
 #include "json/json_spirit_reader_template.h"
 #include "json/json_spirit_writer_template.h"
 #include "json/json_spirit_utils.h"
+//#include <CLI/CLI.hpp>
 #include <dvmone/dvmone.h>
 #include <dvmc/transitional_node.hpp>
 #include <dvmc/dvmc.h>
@@ -80,7 +81,7 @@ void SHA256Transform(void* pstate, void* pinput, const void* pinit)
 bool getVertex__(const string& target, string& code)
 {
 
-    bool found=false;
+	bool found=false;
     LocatorNodeDB ln1Db("r");
 
     Dbc* cursorp;
@@ -104,17 +105,17 @@ bool getVertex__(const string& target, string& code)
                 vchType k2;
                 ssKey >> k2;
                 string a = stringFromVch(k2);
-                if(a == target)
-                {
-                    vector<PathIndex> vtxPos;
-                    CDataStream ssValue((char*)data.get_data(), (char*)data.get_data() + data.get_size(), SER_DISK, CLIENT_VERSION);
-                    ssValue >> vtxPos;
+		if(a == target)
+		{
+                  vector<PathIndex> vtxPos;
+                  CDataStream ssValue((char*)data.get_data(), (char*)data.get_data() + data.get_size(), SER_DISK, CLIENT_VERSION);
+                  ssValue >> vtxPos;
 
-                    PathIndex i = vtxPos.back();
-                    string i_address = i.vAddress;
-                    code = stringFromVch(i.vValue);
+                  PathIndex i = vtxPos.back();
+                  string i_address = i.vAddress;
+                  code = stringFromVch(i.vValue);
 
-                }
+		}
             }
         }
     }
@@ -141,13 +142,15 @@ void testGen(dvmc::TransitionalNode& acc,string& contractCode)
     dvmc_message create_msg{};
     create_msg.kind = DVMC_CREATE;
 
+    dvmc_address create_address;
+    create_msg.recipient = create_address;
     create_msg.track = 1000000;
     dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
     dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
     const auto create_result = vm.retrieve_desc_vx(vTrans, rev, create_msg, code.data(), code.size());
     if (create_result.status_code != DVMC_SUCCESS)
     {
-        throw error("trace dvm: %d\n",create_result.status_code);
+        cout << "Contract creation failed: " << create_result.status_code << endl;
     }
 
     auto& created_account = vTrans.accounts[create_address];
@@ -285,7 +288,7 @@ CBlock* CreateNewBlock(__wx__* pwallet, bool fProofOfStake, int64_t* pFees)
         vecPriority.reserve(mempool.mapTx.size());
         for (map<uint256, CTransaction>::iterator mi = mempool.mapTx.begin(); mi != mempool.mapTx.end(); ++mi)
         {
-            cba cAddr_;
+		cba cAddr_;
             CTransaction& tx = (*mi).second;
             if(tx.nVersion == CTransaction::CYCLE_TX_VERSION)
             {
@@ -295,28 +298,28 @@ CBlock* CreateNewBlock(__wx__* pwallet, bool fProofOfStake, int64_t* pFees)
                     const CTxOut& out = tx.vout[i];
                     std::vector<vchType> vvchArgs;
 
-                    int prevOp;
+		    int prevOp;
                     if(aliasScript(out.scriptPubKey, prevOp, vvchArgs))
                     {
-                        origin = stringFromVch(vvchArgs[1]);
-                        cAddr_ = out.scriptPubKey.GetBitcoinAddress();
+			origin = stringFromVch(vvchArgs[1]);
+			cAddr_ = out.scriptPubKey.GetBitcoinAddress();
                     }
                 }
-                std::vector<string> contract_execution_data;
-                boost::char_separator<char> tok(":");
-                boost::tokenizer<boost::char_separator<char>> tokens(origin,tok);
-                BOOST_FOREACH(const string& s,tokens)
-                {
-                    contract_execution_data.push_back(s);
-                }
-                string target_contract = contract_execution_data[0];
-                string contract_input  = contract_execution_data[1];
-                string contractCode;
-                bool f = getVertex__(target_contract,contractCode);
-                if(f != true)
-                    continue;
+		std::vector<string> contract_execution_data;
+		boost::char_separator<char> tok(":");
+		boost::tokenizer<boost::char_separator<char>> tokens(origin,tok);
+		BOOST_FOREACH(const string& s,tokens)
+		{
+			contract_execution_data.push_back(s);
+		}
+		string target_contract = contract_execution_data[0];
+		string contract_input  = contract_execution_data[1];
+		string contractCode;
+		bool f = getVertex__(target_contract,contractCode);
+		if(f != true)
+                  continue;
 
-                string code_hex_str = contractCode;
+		string code_hex_str = contractCode;
                 uint256 r;
                 string val;
                 if(!collisionReference(DESCRIPTOR + "_" + target_contract,r,val))
@@ -333,10 +336,10 @@ CBlock* CreateNewBlock(__wx__* pwallet, bool fProofOfStake, int64_t* pFees)
                     dvmc_message create_msg{};
                     create_msg.kind = DVMC_CREATE;
 
-                    dvmc_address create_address;
-                    uint160 h160;
-                    AddressToHash160(cAddr_.ToString(),h160);
-                    memcpy(create_address.bytes,h160.pn,20);
+		    dvmc_address create_address;
+		    uint160 h160;
+		    AddressToHash160(cAddr_.ToString(),h160);
+		    memcpy(create_address.bytes,h160.pn,20);
                     create_msg.recipient = create_address;
                     create_msg.track = 1000000;
                     dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
@@ -344,7 +347,7 @@ CBlock* CreateNewBlock(__wx__* pwallet, bool fProofOfStake, int64_t* pFees)
                     const auto create_result = vm.retrieve_desc_vx(vTrans, rev, create_msg, code.data(), code.size());
                     if (create_result.status_code != DVMC_SUCCESS)
                     {
-                        continue;
+			    continue;
                     }
 
                     auto& created_account = vTrans.accounts[create_address];
@@ -376,10 +379,10 @@ CBlock* CreateNewBlock(__wx__* pwallet, bool fProofOfStake, int64_t* pFees)
                     recon.code = testGen_.code;
                     recon.codehash = testGen_.codehash;
 
-                    dvmc_address create_address;
-                    uint160 h160;
-                    AddressToHash160(cAddr_.ToString(),h160);
-                    memcpy(create_address.bytes,h160.pn,20);
+		    dvmc_address create_address;
+		    uint160 h160;
+		    AddressToHash160(cAddr_.ToString(),h160);
+		    memcpy(create_address.bytes,h160.pn,20);
                     vTrans.accounts[create_address] = recon;
                     const auto input = dvmc::from_hex(contract_input);
                     dvmc_message msg{};

@@ -60,7 +60,7 @@ bool ConnectInputsPost( map<uint256, CTxIndex>& mapTestPool,
                         CDiskTxPos& txPos,
                         bool fBlock,
                         bool fMiner);
-bool AcceptToMemoryPoolPost(const CTransaction& tx);
+bool AcceptToMemoryPoolPost(const CTransaction& tx,MapPrevTx&);
 void RemoveFromMemoryPoolPost(const CTransaction& tx);
 bool IsMinePost(const CTransaction& tx);
 bool IsMinePost(const CTransaction& tx, const CTxOut& txout, bool ignore_registerPath = false);

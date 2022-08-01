@@ -48,7 +48,7 @@ TEST(CRC, StandardResults) {
 }
 
 TEST(CRC, Values) {
-  ASSERT_NE(Value("a", 1), Value("foo", 3));
+  ASSERT_NE(Value("a", 1), Value("bar", 3));
 }
 
 TEST(CRC, Extend) {
@@ -57,7 +57,7 @@ TEST(CRC, Extend) {
 }
 
 TEST(CRC, Mask) {
-  uint32_t crc = Value("foo", 3);
+  uint32_t crc = Value("bar", 3);
   ASSERT_NE(crc, Mask(crc));
   ASSERT_NE(crc, Mask(Mask(crc)));
   ASSERT_EQ(crc, Unmask(Mask(crc)));

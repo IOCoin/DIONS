@@ -41,7 +41,7 @@ where the key is a string >= last key in that data block and before
 the first key in the successive data block.  The value is the
 BlockHandle for the data block.
 
-(6) At the very end of the file is a fixed length footer that contains
+(6) At the very end of the file is a fixed length barter that contains
 the BlockHandle of the metaindex and index blocks as well as a magic number.
        metaindex_handle: char[p];    // Block handle for metaindex
        index_handle:     char[q];    // Block handle for index

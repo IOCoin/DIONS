@@ -172,7 +172,7 @@ TEST(Coding, Varint64Truncation) {
 TEST(Coding, Strings) {
   std::string s;
   PutLengthPrefixedSlice(&s, Slice(""));
-  PutLengthPrefixedSlice(&s, Slice("foo"));
+  PutLengthPrefixedSlice(&s, Slice("bar"));
   PutLengthPrefixedSlice(&s, Slice("bar"));
   PutLengthPrefixedSlice(&s, Slice(std::string(200, 'x')));
 
@@ -181,7 +181,7 @@ TEST(Coding, Strings) {
   ASSERT_TRUE(GetLengthPrefixedSlice(&input, &v));
   ASSERT_EQ("", v.ToString());
   ASSERT_TRUE(GetLengthPrefixedSlice(&input, &v));
-  ASSERT_EQ("foo", v.ToString());
+  ASSERT_EQ("bar", v.ToString());
   ASSERT_TRUE(GetLengthPrefixedSlice(&input, &v));
   ASSERT_EQ("bar", v.ToString());
   ASSERT_TRUE(GetLengthPrefixedSlice(&input, &v));

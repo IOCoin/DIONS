@@ -278,28 +278,28 @@ TEST(CorruptionTest, MissingDescriptor) {
 }
 
 TEST(CorruptionTest, SequenceNumberRecovery) {
-  ASSERT_OK(db_->Put(WriteOptions(), "foo", "v1"));
-  ASSERT_OK(db_->Put(WriteOptions(), "foo", "v2"));
-  ASSERT_OK(db_->Put(WriteOptions(), "foo", "v3"));
-  ASSERT_OK(db_->Put(WriteOptions(), "foo", "v4"));
-  ASSERT_OK(db_->Put(WriteOptions(), "foo", "v5"));
+  ASSERT_OK(db_->Put(WriteOptions(), "bar", "v1"));
+  ASSERT_OK(db_->Put(WriteOptions(), "bar", "v2"));
+  ASSERT_OK(db_->Put(WriteOptions(), "bar", "v3"));
+  ASSERT_OK(db_->Put(WriteOptions(), "bar", "v4"));
+  ASSERT_OK(db_->Put(WriteOptions(), "bar", "v5"));
   RepairDB();
   Reopen();
   std::string v;
-  ASSERT_OK(db_->Get(ReadOptions(), "foo", &v));
+  ASSERT_OK(db_->Get(ReadOptions(), "bar", &v));
   ASSERT_EQ("v5", v);
   // Write something.  If sequence number was not recovered properly,
   // it will be hidden by an earlier write.
-  ASSERT_OK(db_->Put(WriteOptions(), "foo", "v6"));
-  ASSERT_OK(db_->Get(ReadOptions(), "foo", &v));
+  ASSERT_OK(db_->Put(WriteOptions(), "bar", "v6"));
+  ASSERT_OK(db_->Get(ReadOptions(), "bar", &v));
   ASSERT_EQ("v6", v);
   Reopen();
-  ASSERT_OK(db_->Get(ReadOptions(), "foo", &v));
+  ASSERT_OK(db_->Get(ReadOptions(), "bar", &v));
   ASSERT_EQ("v6", v);
 }
 
 TEST(CorruptionTest, CorruptedDescriptor) {
-  ASSERT_OK(db_->Put(WriteOptions(), "foo", "hello"));
+  ASSERT_OK(db_->Put(WriteOptions(), "bar", "hello"));
   DBImpl* dbi = reinterpret_cast<DBImpl*>(db_);
   dbi->TEST_CompactMemTable();
   dbi->TEST_CompactRange(0, NULL, NULL);
@@ -311,7 +311,7 @@ TEST(CorruptionTest, CorruptedDescriptor) {
   RepairDB();
   Reopen();
   std::string v;
-  ASSERT_OK(db_->Get(ReadOptions(), "foo", &v));
+  ASSERT_OK(db_->Get(ReadOptions(), "bar", &v));
   ASSERT_EQ("hello", v);
 }
 

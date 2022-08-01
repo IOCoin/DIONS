@@ -1,6 +1,3 @@
-
-
-
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2012 The Bitcoin developers
 // Distributed under the MIT/X11 software license, see the accompanying
@@ -20,6 +17,18 @@
 
 #include "main.h"
 
+#include <dvmone/dvmone.h>
+#include <dvmc/transitional_node.hpp>
+#include <dvmc/dvmc.h>
+#include <dvmc/dvmc.hpp>
+#include <dvmc/hex.hpp>
+#include <dvmc/loader.h>
+#include <dvmc/tooling.hpp>
+#include <boost/foreach.hpp>
+#include <boost/tokenizer.hpp>
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+using dvmc::operator""_address;
 
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
@@ -30,6 +39,7 @@ using namespace std;
 
 using namespace boost;
 
+extern string DESCRIPTOR;
 static unsigned int GetStakeSplitAge() {
     return IsProtocolV2(nBestHeight) ? (10 * 24 * 60 * 60) : (1 * 24 * 60 * 60);
 }
@@ -39,8 +49,11 @@ static int64_t GetStakeCombineThreshold() {
 
 bool isPathTx(const __wx__Tx* tx);
 extern __wx__* pwalletMain;
+extern void testGen(dvmc::TransitionalNode& acc,string& contractCode);
+extern bool getVertex__(const string& target, string& code);
 extern CScript aliasStrip(const CScript& scriptIn);
 extern bool aliasScript(const CScript& script, int& op, vector<vector<unsigned char> > &vvch);
+extern bool collisionReference(const string& s, uint256& wtxInHash,string&);
 
 extern bool collx(const CTransaction&);
 //////////////////////////////////////////////////////////////////////////////
@@ -134,16 +147,16 @@ bool BackupWallet(const __wx__& wallet, const string& strDest)
                 bitdb.mapFileUseCount.erase(wallet.strWalletFile);
 
                 // Copy wallet.dat
-		boost::filesystem::path pathSrc = GetDataDir() / wallet.strWalletFile;
-		boost::filesystem::path pathDest(strDest);
+                boost::filesystem::path pathSrc = GetDataDir() / wallet.strWalletFile;
+                boost::filesystem::path pathDest(strDest);
                 if(  boost::filesystem::is_directory(pathDest))
                     pathDest /= wallet.strWalletFile;
 
                 try {
 #if BOOST_VERSION >= 104000
-			boost::filesystem::copy_file(pathSrc, pathDest, boost::filesystem::copy_option::overwrite_if_exists);
+                    boost::filesystem::copy_file(pathSrc, pathDest, boost::filesystem::copy_option::overwrite_if_exists);
 #else
-			boost::filesystem::copy_file(pathSrc, pathDest);
+                    boost::filesystem::copy_file(pathSrc, pathDest);
 #endif
                     printf("copied wallet.dat to %s\n", pathDest.string().c_str());
                     return true;
@@ -1714,6 +1727,7 @@ bool __wx__::SelectCoinsForStaking(int64_t nTargetValue, unsigned int nSpendTime
 bool __wx__::CreateTransaction__(const vector<pair<CScript, int64_t> >& vecSend, __wx__Tx& wtxNew, CReserveKey& reservekey, int64_t& nFeeRet, std::string strTxInfo, const CCoinControl* coinControl)
 {
     int64_t nValue = 0;
+    int64_t nTrackFee = 0;
     BOOST_FOREACH (const PAIRTYPE(CScript, int64_t)& s, vecSend)
     {
         if (nValue < 0)
@@ -1738,6 +1752,141 @@ bool __wx__::CreateTransaction__(const vector<pair<CScript, int64_t> >& vecSend,
         // txdb must be opened before the mapWallet lock
         CTxDB txdb("r");
         {
+            for(auto i : vecSend)
+            {
+                CScript s = i.first;
+                vector<vector<unsigned char> > vvch;
+                int op;
+                if(aliasScript(s, op, vvch))
+                {
+                    if(op == OP_BASE_SET && wtxNew.nVersion != CTransaction::CYCLE_TX_VERSION)
+                    {
+                        string contractCodeStr = stringFromVch(vvch[1]);
+                        dvmc::VertexNode vTrans;
+                        const auto code = dvmc::from_hex(contractCodeStr);
+                        dvmc::bytes_view exec_code = code;
+
+                        dvmc_message create_msg{};
+                        create_msg.kind = DVMC_CREATE;
+
+                        dvmc_address create_address;
+                        create_msg.recipient = create_address;
+                        create_msg.track = std::numeric_limits<int64_t>::max();
+                        dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
+                        dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
+                        const auto create_result = vm.retrieve_desc_vx(vTrans, rev, create_msg, code.data(), code.size());
+                        if (create_result.status_code != DVMC_SUCCESS)
+                        {
+                            printf("Contract creation failed: %d\n",create_result.status_code);
+                        }
+                        nTrackFee = create_msg.track - create_result.track_left;
+                        nTrackFee *= CENT;
+                    }
+                    else if(op == OP_BASE_SET && wtxNew.nVersion == CTransaction::CYCLE_TX_VERSION)
+                    {
+                        string origin;
+                        cba cAddr_;
+                                origin = stringFromVch(vvch[1]);
+                                cAddr_ = s.GetBitcoinAddress();
+                        std::vector<string> contract_execution_data;
+                        boost::char_separator<char> tok(":");
+                        boost::tokenizer<boost::char_separator<char>> tokens(origin,tok);
+                        BOOST_FOREACH(const string& s,tokens)
+                        {
+                            contract_execution_data.push_back(s);
+                        }
+                        string target_contract = contract_execution_data[0];
+                        string contract_input  = contract_execution_data[1];
+                        string contractCode;
+                        if(!getVertex__(target_contract,contractCode))
+                        {
+                            printf("CreateTransaction__ : failed to retrieve target contract code for executable tx\n");
+                        }
+                        string code_hex_str = contractCode;
+                        uint256 r;
+                        string val;
+                        if(!collisionReference(DESCRIPTOR + "_" + target_contract,r,val))
+                        {
+                            dvmc::VertexNode vTrans;
+                            dvmc_message msg{};
+                            msg.track = std::numeric_limits<int64_t>::max();
+                            const auto code = dvmc::from_hex(code_hex_str);
+                            dvmc::bytes_view exec_code = code;
+                            const auto input = dvmc::from_hex(contract_input);
+                            msg.input_data = input.data();
+                            msg.input_size = input.size();
+
+                            dvmc_message create_msg{};
+                            create_msg.kind = DVMC_CREATE;
+
+                            dvmc_address create_address;
+                            uint160 h160;
+                            AddressToHash160(cAddr_.ToString(),h160);
+                            memcpy(create_address.bytes,h160.pn,20);
+                            create_msg.recipient = create_address;
+                            create_msg.track = std::numeric_limits<int64_t>::max();
+                            dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
+                            dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
+                            const auto create_result = vm.retrieve_desc_vx(vTrans, rev, create_msg, code.data(), code.size());
+                            if (create_result.status_code != DVMC_SUCCESS)
+                            {
+                                printf("CreateTransaction__ : create - invalid code\n");
+                                return false;
+                            }
+
+                            auto& created_account = vTrans.accounts[create_address];
+                            created_account.code = dvmc::bytes(create_result.output_data, create_result.output_size);
+
+                            msg.recipient = create_address;
+                            exec_code = created_account.code;
+                            const auto result = vm.retrieve_desc_vx(vTrans, rev, msg, exec_code.data(), exec_code.size());
+                            if (result.status_code != DVMC_SUCCESS)
+                            {
+                                printf("CreateTransaction__ : CYCLE transaction - invalid code\n");
+                                return false;
+                            }
+                            nTrackFee = msg.track - result.track_left;
+                            nTrackFee *= CENT;
+                        }
+                        else
+                        {
+                            __wx__Tx serial_n;
+                            dvmc::TransitionalNode testGen_;
+                            testGen(testGen_,code_hex_str);
+                            dvmc::VertexNode vTrans;
+                            dvmc::TransitionalNode recon;
+                            std::stringstream oss_recon;
+                            oss_recon << val;
+                            boost::archive::text_iarchive iarchive(oss_recon);
+                            iarchive >> recon;
+                            recon.code = testGen_.code;
+                            recon.codehash = testGen_.codehash;
+
+                            dvmc_address create_address;
+                            uint160 h160;
+                            AddressToHash160(cAddr_.ToString(),h160);
+                            memcpy(create_address.bytes,h160.pn,20);
+                            vTrans.accounts[create_address] = recon;
+                            const auto input = dvmc::from_hex(contract_input);
+                            dvmc_message msg{};
+                            msg.recipient = create_address;
+                            msg.track = std::numeric_limits<int64_t>::max();
+                            msg.input_data = input.data();
+                            msg.input_size = input.size();
+                            dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
+                            dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
+                            const auto result = vm.retrieve_desc_vx(vTrans, rev, msg, recon.code.data(), recon.code.size());
+                            if (result.status_code != DVMC_SUCCESS)
+                            {
+                                printf("CreateTransaction__ : CYCLE transaction - invalid code\n");
+                                return false;
+                            }
+                            nTrackFee = msg.track - result.track_left;
+                            nTrackFee *= CENT;
+                        }
+                    }
+                }
+            }
             nFeeRet = CENT;
             while (true)
             {
@@ -1827,7 +1976,7 @@ bool __wx__::CreateTransaction__(const vector<pair<CScript, int64_t> >& vecSend,
                 dPriority /= nBytes;
 
                 // Check that enough fee is included
-                int64_t nPayFee = nTransactionFee * (1 + (int64_t)nBytes / 1000);
+                int64_t nPayFee = nTransactionFee * (1 + (int64_t)nBytes / 1000) + nTrackFee;
                 int64_t nMinFee = wtxNew.GetMinFee(1, GMF_SEND, nBytes);
 
                 if (nFeeRet < max(nPayFee, nMinFee))

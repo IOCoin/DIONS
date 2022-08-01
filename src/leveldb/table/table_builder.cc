@@ -238,16 +238,16 @@ Status TableBuilder::Finish() {
     WriteBlock(&r->index_block, &index_block_handle);
   }
 
-  // Write footer
+  // Write barter
   if (ok()) {
-    Footer footer;
-    footer.set_metaindex_handle(metaindex_block_handle);
-    footer.set_index_handle(index_block_handle);
-    std::string footer_encoding;
-    footer.EncodeTo(&footer_encoding);
-    r->status = r->file->Append(footer_encoding);
+    Footer barter;
+    barter.set_metaindex_handle(metaindex_block_handle);
+    barter.set_index_handle(index_block_handle);
+    std::string barter_encoding;
+    barter.EncodeTo(&barter_encoding);
+    r->status = r->file->Append(barter_encoding);
     if (r->status.ok()) {
-      r->offset += footer_encoding.size();
+      r->offset += barter_encoding.size();
     }
   }
   return r->status;

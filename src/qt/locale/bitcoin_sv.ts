@@ -2997,7 +2997,7 @@ rpcpassword=%s
 The username and password MUST NOT be the same.
 If the file does not exist, create it with owner-readable-only file permissions.
 It is also recommended to set alertnotify so you are notified of problems;
-for example: alertnotify=echo %%s | mail -s &quot;I/OCoin Alert&quot; admin@foo.com
+for example: alertnotify=echo %%s | mail -s &quot;I/OCoin Alert&quot; admin@bar.com
 </source>
         <translation>%s, du måste sätta rpcpassword i konfigurationsfilen:
  %s
@@ -3008,7 +3008,7 @@ rpcpassword=%s
 Användarnamnet och lösenordet FÅR INTE vara samma.
 Om filen inte finns, skapa den med endast ägarrättigheter.
 Det är också rekommenderat att sätta alertnotify så du blir notifierad om problem;
-till exempel: alertnotify=echo %%s | mail -s &quot;I/OCoin Varning&quot; admin@foo.com
+till exempel: alertnotify=echo %%s | mail -s &quot;I/OCoin Varning&quot; admin@bar.com
 </translation>
     </message>
     <message>

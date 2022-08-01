@@ -96,7 +96,7 @@ TEST(BloomTest, Small) {
   ASSERT_TRUE(Matches("hello"));
   ASSERT_TRUE(Matches("world"));
   ASSERT_TRUE(! Matches("x"));
-  ASSERT_TRUE(! Matches("foo"));
+  ASSERT_TRUE(! Matches("bar"));
 }
 
 static int NextLength(int length) {

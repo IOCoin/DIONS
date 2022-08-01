@@ -611,7 +611,7 @@ class Harness {
 
   std::string PickRandomKey(Random* rnd, const std::vector<std::string>& keys) {
     if (keys.empty()) {
-      return "foo";
+      return "bar";
     } else {
       const int index = rnd->Uniform(keys.size());
       std::string result = keys[index];
@@ -669,7 +669,7 @@ TEST(Harness, ZeroRestartPointsInBlock) {
   ASSERT_TRUE(!iter->Valid());
   iter->SeekToLast();
   ASSERT_TRUE(!iter->Valid());
-  iter->Seek("foo");
+  iter->Seek("bar");
   ASSERT_TRUE(!iter->Valid());
   delete iter;
 }
