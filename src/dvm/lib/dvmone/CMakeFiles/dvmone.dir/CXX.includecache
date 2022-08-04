@@ -50,55 +50,11 @@ type_traits
 intrin.h
 -
 
-/home/ioc/rem/CC/src/dvm/lib/dvmone/advanced_analysis.cpp
-advanced_analysis.hpp
-/home/ioc/rem/CC/src/dvm/lib/dvmone/advanced_analysis.hpp
-opcodes_helpers.h
-/home/ioc/rem/CC/src/dvm/lib/dvmone/opcodes_helpers.h
-cassert
--
-
-/home/ioc/rem/CC/src/dvm/lib/dvmone/advanced_analysis.hpp
-execution_state.hpp
-/home/ioc/rem/CC/src/dvm/lib/dvmone/execution_state.hpp
-dvmc/dvmc.hpp
--
-dvmc/instructions.h
--
-dvmc/utils.h
--
-intx/intx.hpp
--
-array
--
-cstdint
--
-vector
--
-
-/home/ioc/rem/CC/src/dvm/lib/dvmone/advanced_execution.cpp
-advanced_execution.hpp
-/home/ioc/rem/CC/src/dvm/lib/dvmone/advanced_execution.hpp
-advanced_analysis.hpp
-/home/ioc/rem/CC/src/dvm/lib/dvmone/advanced_analysis.hpp
-eof.hpp
-/home/ioc/rem/CC/src/dvm/lib/dvmone/eof.hpp
-memory
--
-
 /home/ioc/rem/CC/src/dvm/lib/dvmone/advanced_execution.hpp
 dvmc/dvmc.h
 -
 dvmc/utils.h
 -
-
-/home/ioc/rem/CC/src/dvm/lib/dvmone/advanced_instructions.cpp
-advanced_analysis.hpp
-/home/ioc/rem/CC/src/dvm/lib/dvmone/advanced_analysis.hpp
-instructions.hpp
-/home/ioc/rem/CC/src/dvm/lib/dvmone/instructions.hpp
-instructions_traits.hpp
-/home/ioc/rem/CC/src/dvm/lib/dvmone/instructions_traits.hpp
 
 /home/ioc/rem/CC/src/dvm/lib/dvmone/baseline.cpp
 baseline.hpp
@@ -130,28 +86,10 @@ string_view
 vector
 -
 
-/home/ioc/rem/CC/src/dvm/lib/dvmone/baseline_instruction_table.cpp
-baseline_instruction_table.hpp
-/home/ioc/rem/CC/src/dvm/lib/dvmone/baseline_instruction_table.hpp
-instructions_traits.hpp
-/home/ioc/rem/CC/src/dvm/lib/dvmone/instructions_traits.hpp
-
 /home/ioc/rem/CC/src/dvm/lib/dvmone/baseline_instruction_table.hpp
 dvmc/dvmc.h
 -
 array
--
-
-/home/ioc/rem/CC/src/dvm/lib/dvmone/eof.cpp
-eof.hpp
-/home/ioc/rem/CC/src/dvm/lib/dvmone/eof.hpp
-instructions_traits.hpp
-/home/ioc/rem/CC/src/dvm/lib/dvmone/instructions_traits.hpp
-array
--
-cassert
--
-limits
 -
 
 /home/ioc/rem/CC/src/dvm/lib/dvmone/eof.hpp
@@ -188,10 +126,6 @@ instructions_xmacro.hpp
 ethash/keccak.hpp
 -
 
-/home/ioc/rem/CC/src/dvm/lib/dvmone/instructions_calls.cpp
-instructions.hpp
-/home/ioc/rem/CC/src/dvm/lib/dvmone/instructions.hpp
-
 /home/ioc/rem/CC/src/dvm/lib/dvmone/instructions_traits.hpp
 dvmc/instructions.h
 -
@@ -201,20 +135,6 @@ optional
 -
 
 /home/ioc/rem/CC/src/dvm/lib/dvmone/instructions_xmacro.hpp
-
-/home/ioc/rem/CC/src/dvm/lib/dvmone/opcodes_helpers.h
-
-/home/ioc/rem/CC/src/dvm/lib/dvmone/tracing.cpp
-tracing.hpp
-/home/ioc/rem/CC/src/dvm/lib/dvmone/tracing.hpp
-execution_state.hpp
-/home/ioc/rem/CC/src/dvm/lib/dvmone/execution_state.hpp
-instructions_traits.hpp
-/home/ioc/rem/CC/src/dvm/lib/dvmone/instructions_traits.hpp
-dvmc/hex.hpp
--
-stack
--
 
 /home/ioc/rem/CC/src/dvm/lib/dvmone/tracing.hpp
 dvmc/instructions.h
@@ -278,18 +198,6 @@ dvmc/dvmc.h
 stdlib.h
 -
 string.h
--
-
-dvmc/include/dvmc/hex.hpp
-cstdint
--
-iterator
--
-string
--
-string_view
--
-system_error
 -
 
 dvmc/include/dvmc/instructions.h

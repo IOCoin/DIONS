@@ -344,6 +344,16 @@ array
 cstring
 -
 
+/home/ioc/rem/CC/src/dvm/dvmc/tools/vmtester/vmtester.cpp
+vmtester.hpp
+/home/ioc/rem/CC/src/dvm/dvmc/tools/vmtester/vmtester.hpp
+dvmc/dvmc.hpp
+-
+dvmc/loader.h
+-
+iostream
+-
+
 /home/ioc/rem/CC/src/dvm/dvmc/tools/vmtester/vmtester.hpp
 dvmc/dvmc.hpp
 -
@@ -379,6 +389,8 @@ stdlib.h
 -
 string.h
 -
+
+dvmc/include/dvmc/loader.h
 
 dvmc/include/dvmc/transitional_node.hpp
 dvmc/dvmc.hpp

@@ -2031,7 +2031,7 @@ bool CBlock::ConnectBlock(CTxDB& txdb, CBlockIndex* pindex, bool fJustCheck)
                                 return error("ConnectBlock op_base_set with value too long");
                             dvmc::VertexNode vTrans;
                             dvmc_message msg{};
-                            msg.track = 10000000;
+                            msg.track = std::numeric_limits<int64_t>::max();
                             string code_hex_str = contractCode;
                             const auto code = dvmc::from_hex(code_hex_str);
                             dvmc::bytes_view exec_code = code;

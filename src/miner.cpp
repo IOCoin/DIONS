@@ -144,7 +144,7 @@ void testGen(dvmc::TransitionalNode& acc,string& contractCode)
 
     dvmc_address create_address;
     create_msg.recipient = create_address;
-    create_msg.track = 1000000;
+                            create_msg.track = std::numeric_limits<int64_t>::max();
     dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
     dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
     const auto create_result = vm.retrieve_desc_vx(vTrans, rev, create_msg, code.data(), code.size());
@@ -326,7 +326,7 @@ CBlock* CreateNewBlock(__wx__* pwallet, bool fProofOfStake, int64_t* pFees)
                 {
                     dvmc::VertexNode vTrans;
                     dvmc_message msg{};
-                    msg.track = 10000000;
+                            msg.track = std::numeric_limits<int64_t>::max();
                     const auto code = dvmc::from_hex(code_hex_str);
                     dvmc::bytes_view exec_code = code;
                     const auto input = dvmc::from_hex(contract_input);
@@ -341,7 +341,7 @@ CBlock* CreateNewBlock(__wx__* pwallet, bool fProofOfStake, int64_t* pFees)
 		    AddressToHash160(cAddr_.ToString(),h160);
 		    memcpy(create_address.bytes,h160.pn,20);
                     create_msg.recipient = create_address;
-                    create_msg.track = 1000000;
+                            create_msg.track = std::numeric_limits<int64_t>::max();
                     dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
                     dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
                     const auto create_result = vm.retrieve_desc_vx(vTrans, rev, create_msg, code.data(), code.size());
@@ -387,7 +387,7 @@ CBlock* CreateNewBlock(__wx__* pwallet, bool fProofOfStake, int64_t* pFees)
                     const auto input = dvmc::from_hex(contract_input);
                     dvmc_message msg{};
                     msg.recipient = create_address;
-                    msg.track = 10000000;
+                            msg.track = std::numeric_limits<int64_t>::max();
                     msg.input_data = input.data();
                     msg.input_size = input.size();
                     dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
