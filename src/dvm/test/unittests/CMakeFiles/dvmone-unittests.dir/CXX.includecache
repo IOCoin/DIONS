@@ -640,6 +640,14 @@ algorithm
 numeric
 -
 
+/home/ioc/rem/CC/src/dvm/test/unittests/dvmone_test.cpp
+dvmc/dvmc.hpp
+-
+dvmone/dvmone.h
+-
+gtest/gtest.h
+-
+
 /home/ioc/rem/CC/src/dvm/test/unittests/eof_test.cpp
 dvmone/eof.hpp
 -
@@ -658,6 +666,16 @@ gtest/gtest.h
 test/utils/pos_read.hpp
 -
 test/utils/utils.hpp
+-
+
+/home/ioc/rem/CC/src/dvm/test/unittests/execution_state_test.cpp
+dvmone/advanced_analysis.hpp
+-
+dvmone/execution_state.hpp
+-
+gtest/gtest.h
+-
+type_traits
 -
 
 /home/ioc/rem/CC/src/dvm/test/unittests/instructions_test.cpp

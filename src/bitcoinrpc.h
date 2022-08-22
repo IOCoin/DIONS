@@ -286,6 +286,7 @@ extern json_spirit::Value transferEncryptedExtPredicate(const json_spirit::Array
 extern json_spirit::Value lookupStoragePath(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value decryptPath(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value decryptPath_cycle(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value ntxsearch(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value primaryCXValidate(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value updatePath(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value updatePathFile(const json_spirit::Array& params, bool fHelp);

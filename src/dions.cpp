@@ -2277,13 +2277,13 @@ Value getNodeRecord(const Array& params, bool fHelp)
 bool collisionReference(const string& descriptor_alias, uint256& wtxInHash, string& val)
 {
     vchType vchPath = vchFromString(descriptor_alias);
-            LocatorNodeDB ln1Db("r");
+    LocatorNodeDB ln1Db("r");
     vector<PathIndex> vtxPos;
     if(!ln1Db.lGet(vchPath, vtxPos) || vtxPos.empty())
         return false;
 
     PathIndex& txPos = vtxPos.back();
-	val = stringFromVch(txPos.vValue);
+    val = stringFromVch(txPos.vValue);
 
     return true;
 }
@@ -7578,7 +7578,7 @@ AcceptToMemoryPoolPost(const CTransaction& tx, MapPrevTx& mapInputs)
             printf("accepttomempoolpost Contract creation failed: %d\n",create_result.status_code);
         }
         nExpectedTrackFee = create_msg.track - create_result.track_left;
-        nExpectedTrackFee *= CENT;
+        nExpectedTrackFee *= TRACK_SCALE_FACTOR;
     }
     else if(op == OP_BASE_SET && tx.nVersion == CTransaction::CYCLE_TX_VERSION)
     {
@@ -7654,7 +7654,7 @@ AcceptToMemoryPoolPost(const CTransaction& tx, MapPrevTx& mapInputs)
                 return false;
             }
             nExpectedTrackFee = msg.track - result.track_left;
-            nExpectedTrackFee *= CENT;
+            nExpectedTrackFee *= TRACK_SCALE_FACTOR;
         }
         else
         {
@@ -7690,7 +7690,7 @@ AcceptToMemoryPoolPost(const CTransaction& tx, MapPrevTx& mapInputs)
                 return false;
             }
             nExpectedTrackFee = msg.track - result.track_left;
-            nExpectedTrackFee *= CENT;
+            nExpectedTrackFee *= TRACK_SCALE_FACTOR;
         }
     }
 
@@ -9392,6 +9392,128 @@ Value simplexU(const Array& params, bool fHelp) {
     LEAVE_CRITICAL_SECTION(cs_main)
     return wtx.GetHash().GetHex();
 
+}
+Value ntxsearch(const Array& params, bool fHelp)
+{
+    if(fHelp || params.size() != 2)
+        throw runtime_error(
+            "ntxsearch <base> <is>"
+            + HelpRequiringPassphrase());
+
+    string addrStr = params[0].get_str();
+    string contract_input = params[1].get_str();
+    cba cAddr_;
+    if(!cAddr_.IsValid())
+    {
+        vector<PathIndex> vtxPos;
+        vchType vchPath = vchFromString(addrStr);
+        if (ln1Db->lKey (vchPath))
+        {
+            printf("  name exists\n");
+            if (!ln1Db->lGet (vchPath, vtxPos))
+                return error("aliasHeight() : failed to read from name DB");
+            if (vtxPos.empty ())
+                return -1;
+
+            PathIndex& txPos = vtxPos.back ();
+            if(txPos.nHeight + scaleMonitor() <= nBestHeight)
+                throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "extern alias");
+            cAddr_.SetString(txPos.vAddress);
+        }
+        else
+        {
+            throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid I/OCoin address or unknown alias");
+        }
+    }
+
+    string target_path_trigger_node = addrStr;
+    string path_trigger_nodeCode;
+    if(!getVertex__(target_path_trigger_node,path_trigger_nodeCode))
+    {
+        return error("ntxsearch : path_trigger_node\n");
+    }
+
+    string code_hex_str = path_trigger_nodeCode;
+    string target_contract = target_path_trigger_node;
+    uint256 r;
+    string val;
+    Array res_;
+    if(!collisionReference(DESCRIPTOR + "_" + target_contract,r,val))
+    {
+        dvmc::VertexNode vTrans;
+        dvmc_message msg{};
+        msg.track = std::numeric_limits<int64_t>::max();
+        const auto code = dvmc::from_hex(code_hex_str);
+        dvmc::bytes_view exec_code = code;
+        const auto input = dvmc::from_hex(contract_input);
+        msg.input_data = input.data();
+        msg.input_size = input.size();
+
+        dvmc_message create_msg{};
+        create_msg.kind = DVMC_CREATE;
+
+        dvmc_address create_address;
+        uint160 h160;
+        AddressToHash160(cAddr_.ToString(),h160);
+        memcpy(create_address.bytes,h160.pn,20);
+        create_msg.recipient = create_address;
+        create_msg.track = std::numeric_limits<int64_t>::max();
+        dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
+        dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
+        const auto create_result = vm.retrieve_desc_vx(vTrans, rev, create_msg, code.data(), code.size());
+        if (create_result.status_code != DVMC_SUCCESS)
+        {
+            return error("error: create dvm");
+        }
+
+        auto& created_account = vTrans.accounts[create_address];
+        created_account.code = dvmc::bytes(create_result.output_data, create_result.output_size);
+
+        msg.recipient = create_address;
+        exec_code = created_account.code;
+        const auto result = vm.retrieve_desc_vx(vTrans, rev, msg, exec_code.data(), exec_code.size());
+	res_.push_back(dvmc::hex({result.output_data,result.output_size}));
+
+        dvmc::TransitionalNode acc = vTrans.accounts[create_address];
+        std::stringstream oss;
+        boost::archive::text_oarchive oarchive(oss);
+        oarchive << acc;
+    }
+    else
+    {
+        __wx__Tx serial_n;
+        dvmc::TransitionalNode testGen_;
+        testGen(testGen_,code_hex_str);
+        dvmc::VertexNode vTrans;
+        dvmc::TransitionalNode recon;
+        std::stringstream oss_recon;
+        oss_recon << val;
+        boost::archive::text_iarchive iarchive(oss_recon);
+        iarchive >> recon;
+        recon.code = testGen_.code;
+        recon.codehash = testGen_.codehash;
+
+        dvmc_address create_address;
+        uint160 h160;
+        AddressToHash160(cAddr_.ToString(),h160);
+        memcpy(create_address.bytes,h160.pn,20);
+        vTrans.accounts[create_address] = recon;
+        const auto input = dvmc::from_hex(contract_input);
+        dvmc_message msg{};
+        msg.recipient = create_address;
+        msg.track = std::numeric_limits<int64_t>::max();
+        msg.input_data = input.data();
+        msg.input_size = input.size();
+        dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
+        dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
+        const auto result = vm.retrieve_desc_vx(vTrans, rev, msg, recon.code.data(), recon.code.size());
+	res_.push_back(dvmc::hex({result.output_data,result.output_size}));
+        dvmc::TransitionalNode updatedAcc = vTrans.accounts[create_address];
+        std::stringstream oss_commit;
+        boost::archive::text_oarchive oarchive(oss_commit);
+        oarchive << updatedAcc;
+    }
+    return res_;
 }
 Value psimplex(const Array& params, bool fHelp) {
     if(fHelp || params.size() != 2)

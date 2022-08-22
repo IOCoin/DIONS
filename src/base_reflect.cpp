@@ -81,7 +81,7 @@ int aliasHeight(vector<unsigned char> vchPath);
 
 bool vertex_serial_n_cycle(const string& origin, const string& data, __wx__Tx& serial_n)
 {
-    string locatorStr = "vertex_" + origin;
+    string locatorStr = origin;
     string indexStr = data;
 
     if(isOnlyWhiteSpace(locatorStr))

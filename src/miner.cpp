@@ -80,7 +80,6 @@ void SHA256Transform(void* pstate, void* pinput, const void* pinit)
 }
 bool getVertex__(const string& target, string& code)
 {
-
 	bool found=false;
     LocatorNodeDB ln1Db("r");
 
@@ -114,6 +113,7 @@ bool getVertex__(const string& target, string& code)
                   PathIndex i = vtxPos.back();
                   string i_address = i.vAddress;
                   code = stringFromVch(i.vValue);
+		  found=true;
 
 		}
             }
@@ -131,7 +131,7 @@ bool getVertex__(const string& target, string& code)
     if (cursorp != NULL)
         cursorp->close();
 
-    return "";
+    return found;
 }
 void testGen(dvmc::TransitionalNode& acc,string& contractCode)
 {
@@ -150,7 +150,7 @@ void testGen(dvmc::TransitionalNode& acc,string& contractCode)
     const auto create_result = vm.retrieve_desc_vx(vTrans, rev, create_msg, code.data(), code.size());
     if (create_result.status_code != DVMC_SUCCESS)
     {
-        cout << "Contract creation failed: " << create_result.status_code << endl;
+        printf("Contract creation : %d\n",create_result.status_code);
     }
 
     auto& created_account = vTrans.accounts[create_address];
@@ -315,6 +315,7 @@ CBlock* CreateNewBlock(__wx__* pwallet, bool fProofOfStake, int64_t* pFees)
 		string target_contract = contract_execution_data[0];
 		string contract_input  = contract_execution_data[1];
 		string contractCode;
+		
 		bool f = getVertex__(target_contract,contractCode);
 		if(f != true)
                   continue;

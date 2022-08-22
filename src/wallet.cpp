@@ -1780,7 +1780,7 @@ bool __wx__::CreateTransaction__(const vector<pair<CScript, int64_t> >& vecSend,
                             printf("Contract creation failed: %d\n",create_result.status_code);
                         }
                         nTrackFee = create_msg.track - create_result.track_left;
-                        nTrackFee *= CENT;
+                        nTrackFee *= TRACK_SCALE_FACTOR;
                     }
                     else if(op == OP_BASE_SET && wtxNew.nVersion == CTransaction::CYCLE_TX_VERSION)
                     {
@@ -1846,7 +1846,7 @@ bool __wx__::CreateTransaction__(const vector<pair<CScript, int64_t> >& vecSend,
                                 return false;
                             }
                             nTrackFee = msg.track - result.track_left;
-                            nTrackFee *= CENT;
+                            nTrackFee *= TRACK_SCALE_FACTOR;
                         }
                         else
                         {
@@ -1882,7 +1882,7 @@ bool __wx__::CreateTransaction__(const vector<pair<CScript, int64_t> >& vecSend,
                                 return false;
                             }
                             nTrackFee = msg.track - result.track_left;
-                            nTrackFee *= CENT;
+                            nTrackFee *= TRACK_SCALE_FACTOR;
                         }
                     }
                 }
