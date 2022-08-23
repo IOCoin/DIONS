@@ -4,7 +4,7 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/home/ioc/rem/CC/src/dvm/test/utils/utils.cpp" "/home/ioc/rem/CC/src/dvm/test/utils/CMakeFiles/testutils.dir/utils.cpp.o"
+  "/home/ioc/DIONS/src/dvm/test/utils/utils.cpp" "/home/ioc/DIONS/src/dvm/test/utils/CMakeFiles/testutils.dir/utils.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 
@@ -16,8 +16,8 @@ set(CMAKE_CXX_TARGET_INCLUDE_PATH
 
 # Targets to which this target links.
 set(CMAKE_TARGET_LINKED_INFO_FILES
-  "/home/ioc/rem/CC/src/dvm/dvmc/lib/instructions/CMakeFiles/instructions.dir/DependInfo.cmake"
-  "/home/ioc/rem/CC/src/dvm/dvmc/lib/hex/CMakeFiles/hex.dir/DependInfo.cmake"
+  "/home/ioc/DIONS/src/dvm/dvmc/lib/instructions/CMakeFiles/instructions.dir/DependInfo.cmake"
+  "/home/ioc/DIONS/src/dvm/dvmc/lib/hex/CMakeFiles/hex.dir/DependInfo.cmake"
   )
 
 # Fortran module output directory.

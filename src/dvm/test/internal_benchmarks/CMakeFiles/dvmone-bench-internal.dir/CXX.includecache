@@ -40,7 +40,7 @@ utility
 intrin.h
 -
 
-/home/ioc/rem/CC/src/dvm/test/internal_benchmarks/find_jumpdest_bench.cpp
+/home/ioc/DIONS/src/dvm/test/internal_benchmarks/find_jumpdest_bench.cpp
 benchmark/benchmark.h
 -
 array
@@ -50,7 +50,7 @@ random
 unordered_map
 -
 
-/home/ioc/rem/CC/src/dvm/test/internal_benchmarks/memory_allocation.cpp
+/home/ioc/DIONS/src/dvm/test/internal_benchmarks/memory_allocation.cpp
 benchmark/benchmark.h
 -
 cstdlib

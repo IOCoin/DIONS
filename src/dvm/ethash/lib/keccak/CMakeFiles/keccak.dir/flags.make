@@ -6,5 +6,5 @@ C_FLAGS = -O3 -DNDEBUG   -Wpedantic -Werror -Wall -Wextra -Wshadow -Wconversion 
 
 C_DEFINES = 
 
-C_INCLUDES = -I/home/ioc/rem/CC/src/dvm/ethash/include 
+C_INCLUDES = -I/home/ioc/DIONS/src/dvm/ethash/include 
 

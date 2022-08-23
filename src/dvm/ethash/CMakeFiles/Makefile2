@@ -44,10 +44,10 @@ RM = /usr/local/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/ioc/rem/CC/src/dvm/ethash
+CMAKE_SOURCE_DIR = /home/ioc/DIONS/src/dvm/ethash
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/ioc/rem/CC/src/dvm/ethash
+CMAKE_BINARY_DIR = /home/ioc/DIONS/src/dvm/ethash
 
 #=============================================================================
 # Directory level rules for the build root directory
@@ -297,14 +297,14 @@ test/unittests/clean: test/unittests/CMakeFiles/ethash-test.dir/clean
 lib/keccak/CMakeFiles/keccak.dir/all:
 	$(MAKE) -f lib/keccak/CMakeFiles/keccak.dir/build.make lib/keccak/CMakeFiles/keccak.dir/depend
 	$(MAKE) -f lib/keccak/CMakeFiles/keccak.dir/build.make lib/keccak/CMakeFiles/keccak.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ioc/rem/CC/src/dvm/ethash/CMakeFiles --progress-num=24,25 "Built target keccak"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ioc/DIONS/src/dvm/ethash/CMakeFiles --progress-num=24,25 "Built target keccak"
 .PHONY : lib/keccak/CMakeFiles/keccak.dir/all
 
 # Build rule for subdir invocation for target.
 lib/keccak/CMakeFiles/keccak.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/rem/CC/src/dvm/ethash/CMakeFiles 2
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/DIONS/src/dvm/ethash/CMakeFiles 2
 	$(MAKE) -f CMakeFiles/Makefile2 lib/keccak/CMakeFiles/keccak.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/rem/CC/src/dvm/ethash/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/DIONS/src/dvm/ethash/CMakeFiles 0
 .PHONY : lib/keccak/CMakeFiles/keccak.dir/rule
 
 # Convenience name for target.
@@ -324,14 +324,14 @@ lib/keccak/CMakeFiles/keccak.dir/clean:
 lib/ethash/CMakeFiles/ethash.dir/all: lib/keccak/CMakeFiles/keccak.dir/all
 	$(MAKE) -f lib/ethash/CMakeFiles/ethash.dir/build.make lib/ethash/CMakeFiles/ethash.dir/depend
 	$(MAKE) -f lib/ethash/CMakeFiles/ethash.dir/build.make lib/ethash/CMakeFiles/ethash.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ioc/rem/CC/src/dvm/ethash/CMakeFiles --progress-num=1,2,3 "Built target ethash"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ioc/DIONS/src/dvm/ethash/CMakeFiles --progress-num=1,2,3 "Built target ethash"
 .PHONY : lib/ethash/CMakeFiles/ethash.dir/all
 
 # Build rule for subdir invocation for target.
 lib/ethash/CMakeFiles/ethash.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/rem/CC/src/dvm/ethash/CMakeFiles 5
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/DIONS/src/dvm/ethash/CMakeFiles 5
 	$(MAKE) -f CMakeFiles/Makefile2 lib/ethash/CMakeFiles/ethash.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/rem/CC/src/dvm/ethash/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/DIONS/src/dvm/ethash/CMakeFiles 0
 .PHONY : lib/ethash/CMakeFiles/ethash.dir/rule
 
 # Convenience name for target.
@@ -352,14 +352,14 @@ lib/global_context/CMakeFiles/global-context.dir/all: lib/keccak/CMakeFiles/kecc
 lib/global_context/CMakeFiles/global-context.dir/all: lib/ethash/CMakeFiles/ethash.dir/all
 	$(MAKE) -f lib/global_context/CMakeFiles/global-context.dir/build.make lib/global_context/CMakeFiles/global-context.dir/depend
 	$(MAKE) -f lib/global_context/CMakeFiles/global-context.dir/build.make lib/global_context/CMakeFiles/global-context.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ioc/rem/CC/src/dvm/ethash/CMakeFiles --progress-num=22,23 "Built target global-context"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ioc/DIONS/src/dvm/ethash/CMakeFiles --progress-num=22,23 "Built target global-context"
 .PHONY : lib/global_context/CMakeFiles/global-context.dir/all
 
 # Build rule for subdir invocation for target.
 lib/global_context/CMakeFiles/global-context.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/rem/CC/src/dvm/ethash/CMakeFiles 7
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/DIONS/src/dvm/ethash/CMakeFiles 7
 	$(MAKE) -f CMakeFiles/Makefile2 lib/global_context/CMakeFiles/global-context.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/rem/CC/src/dvm/ethash/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/DIONS/src/dvm/ethash/CMakeFiles 0
 .PHONY : lib/global_context/CMakeFiles/global-context.dir/rule
 
 # Convenience name for target.
@@ -381,14 +381,14 @@ test/benchmarks/CMakeFiles/ethash-bench.dir/all: lib/ethash/CMakeFiles/ethash.di
 test/benchmarks/CMakeFiles/ethash-bench.dir/all: lib/global_context/CMakeFiles/global-context.dir/all
 	$(MAKE) -f test/benchmarks/CMakeFiles/ethash-bench.dir/build.make test/benchmarks/CMakeFiles/ethash-bench.dir/depend
 	$(MAKE) -f test/benchmarks/CMakeFiles/ethash-bench.dir/build.make test/benchmarks/CMakeFiles/ethash-bench.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ioc/rem/CC/src/dvm/ethash/CMakeFiles --progress-num=4,5,6,7,8,9,10 "Built target ethash-bench"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ioc/DIONS/src/dvm/ethash/CMakeFiles --progress-num=4,5,6,7,8,9,10 "Built target ethash-bench"
 .PHONY : test/benchmarks/CMakeFiles/ethash-bench.dir/all
 
 # Build rule for subdir invocation for target.
 test/benchmarks/CMakeFiles/ethash-bench.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/rem/CC/src/dvm/ethash/CMakeFiles 14
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/DIONS/src/dvm/ethash/CMakeFiles 14
 	$(MAKE) -f CMakeFiles/Makefile2 test/benchmarks/CMakeFiles/ethash-bench.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/rem/CC/src/dvm/ethash/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/DIONS/src/dvm/ethash/CMakeFiles 0
 .PHONY : test/benchmarks/CMakeFiles/ethash-bench.dir/rule
 
 # Convenience name for target.
@@ -409,14 +409,14 @@ test/experimental/CMakeFiles/experimental.dir/all: lib/keccak/CMakeFiles/keccak.
 test/experimental/CMakeFiles/experimental.dir/all: lib/ethash/CMakeFiles/ethash.dir/all
 	$(MAKE) -f test/experimental/CMakeFiles/experimental.dir/build.make test/experimental/CMakeFiles/experimental.dir/depend
 	$(MAKE) -f test/experimental/CMakeFiles/experimental.dir/build.make test/experimental/CMakeFiles/experimental.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ioc/rem/CC/src/dvm/ethash/CMakeFiles --progress-num=20,21 "Built target experimental"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ioc/DIONS/src/dvm/ethash/CMakeFiles --progress-num=20,21 "Built target experimental"
 .PHONY : test/experimental/CMakeFiles/experimental.dir/all
 
 # Build rule for subdir invocation for target.
 test/experimental/CMakeFiles/experimental.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/rem/CC/src/dvm/ethash/CMakeFiles 7
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/DIONS/src/dvm/ethash/CMakeFiles 7
 	$(MAKE) -f CMakeFiles/Makefile2 test/experimental/CMakeFiles/experimental.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/rem/CC/src/dvm/ethash/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/DIONS/src/dvm/ethash/CMakeFiles 0
 .PHONY : test/experimental/CMakeFiles/experimental.dir/rule
 
 # Convenience name for target.
@@ -438,14 +438,14 @@ test/fakeminer/CMakeFiles/ethash-fakeminer.dir/all: lib/ethash/CMakeFiles/ethash
 test/fakeminer/CMakeFiles/ethash-fakeminer.dir/all: lib/global_context/CMakeFiles/global-context.dir/all
 	$(MAKE) -f test/fakeminer/CMakeFiles/ethash-fakeminer.dir/build.make test/fakeminer/CMakeFiles/ethash-fakeminer.dir/depend
 	$(MAKE) -f test/fakeminer/CMakeFiles/ethash-fakeminer.dir/build.make test/fakeminer/CMakeFiles/ethash-fakeminer.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ioc/rem/CC/src/dvm/ethash/CMakeFiles --progress-num=11,12 "Built target ethash-fakeminer"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ioc/DIONS/src/dvm/ethash/CMakeFiles --progress-num=11,12 "Built target ethash-fakeminer"
 .PHONY : test/fakeminer/CMakeFiles/ethash-fakeminer.dir/all
 
 # Build rule for subdir invocation for target.
 test/fakeminer/CMakeFiles/ethash-fakeminer.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/rem/CC/src/dvm/ethash/CMakeFiles 9
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/DIONS/src/dvm/ethash/CMakeFiles 9
 	$(MAKE) -f CMakeFiles/Makefile2 test/fakeminer/CMakeFiles/ethash-fakeminer.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/rem/CC/src/dvm/ethash/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/DIONS/src/dvm/ethash/CMakeFiles 0
 .PHONY : test/fakeminer/CMakeFiles/ethash-fakeminer.dir/rule
 
 # Convenience name for target.
@@ -466,14 +466,14 @@ test/integration/compilation/CMakeFiles/test-compile-c11.dir/all: lib/keccak/CMa
 test/integration/compilation/CMakeFiles/test-compile-c11.dir/all: lib/ethash/CMakeFiles/ethash.dir/all
 	$(MAKE) -f test/integration/compilation/CMakeFiles/test-compile-c11.dir/build.make test/integration/compilation/CMakeFiles/test-compile-c11.dir/depend
 	$(MAKE) -f test/integration/compilation/CMakeFiles/test-compile-c11.dir/build.make test/integration/compilation/CMakeFiles/test-compile-c11.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ioc/rem/CC/src/dvm/ethash/CMakeFiles --progress-num=29,30,31 "Built target test-compile-c11"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ioc/DIONS/src/dvm/ethash/CMakeFiles --progress-num=29,30,31 "Built target test-compile-c11"
 .PHONY : test/integration/compilation/CMakeFiles/test-compile-c11.dir/all
 
 # Build rule for subdir invocation for target.
 test/integration/compilation/CMakeFiles/test-compile-c11.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/rem/CC/src/dvm/ethash/CMakeFiles 8
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/DIONS/src/dvm/ethash/CMakeFiles 8
 	$(MAKE) -f CMakeFiles/Makefile2 test/integration/compilation/CMakeFiles/test-compile-c11.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/rem/CC/src/dvm/ethash/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/DIONS/src/dvm/ethash/CMakeFiles 0
 .PHONY : test/integration/compilation/CMakeFiles/test-compile-c11.dir/rule
 
 # Convenience name for target.
@@ -494,14 +494,14 @@ test/integration/compilation/CMakeFiles/test-compile-c99.dir/all: lib/keccak/CMa
 test/integration/compilation/CMakeFiles/test-compile-c99.dir/all: lib/ethash/CMakeFiles/ethash.dir/all
 	$(MAKE) -f test/integration/compilation/CMakeFiles/test-compile-c99.dir/build.make test/integration/compilation/CMakeFiles/test-compile-c99.dir/depend
 	$(MAKE) -f test/integration/compilation/CMakeFiles/test-compile-c99.dir/build.make test/integration/compilation/CMakeFiles/test-compile-c99.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ioc/rem/CC/src/dvm/ethash/CMakeFiles --progress-num=32,33,34 "Built target test-compile-c99"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ioc/DIONS/src/dvm/ethash/CMakeFiles --progress-num=32,33,34 "Built target test-compile-c99"
 .PHONY : test/integration/compilation/CMakeFiles/test-compile-c99.dir/all
 
 # Build rule for subdir invocation for target.
 test/integration/compilation/CMakeFiles/test-compile-c99.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/rem/CC/src/dvm/ethash/CMakeFiles 8
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/DIONS/src/dvm/ethash/CMakeFiles 8
 	$(MAKE) -f CMakeFiles/Makefile2 test/integration/compilation/CMakeFiles/test-compile-c99.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/rem/CC/src/dvm/ethash/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/DIONS/src/dvm/ethash/CMakeFiles 0
 .PHONY : test/integration/compilation/CMakeFiles/test-compile-c99.dir/rule
 
 # Convenience name for target.
@@ -522,14 +522,14 @@ test/integration/compilation/CMakeFiles/test-compile-c0.dir/all: lib/keccak/CMak
 test/integration/compilation/CMakeFiles/test-compile-c0.dir/all: lib/ethash/CMakeFiles/ethash.dir/all
 	$(MAKE) -f test/integration/compilation/CMakeFiles/test-compile-c0.dir/build.make test/integration/compilation/CMakeFiles/test-compile-c0.dir/depend
 	$(MAKE) -f test/integration/compilation/CMakeFiles/test-compile-c0.dir/build.make test/integration/compilation/CMakeFiles/test-compile-c0.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ioc/rem/CC/src/dvm/ethash/CMakeFiles --progress-num=26,27,28 "Built target test-compile-c0"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ioc/DIONS/src/dvm/ethash/CMakeFiles --progress-num=26,27,28 "Built target test-compile-c0"
 .PHONY : test/integration/compilation/CMakeFiles/test-compile-c0.dir/all
 
 # Build rule for subdir invocation for target.
 test/integration/compilation/CMakeFiles/test-compile-c0.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/rem/CC/src/dvm/ethash/CMakeFiles 8
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/DIONS/src/dvm/ethash/CMakeFiles 8
 	$(MAKE) -f CMakeFiles/Makefile2 test/integration/compilation/CMakeFiles/test-compile-c0.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/rem/CC/src/dvm/ethash/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/DIONS/src/dvm/ethash/CMakeFiles 0
 .PHONY : test/integration/compilation/CMakeFiles/test-compile-c0.dir/rule
 
 # Convenience name for target.
@@ -552,14 +552,14 @@ test/unittests/CMakeFiles/ethash-test.dir/all: lib/global_context/CMakeFiles/glo
 test/unittests/CMakeFiles/ethash-test.dir/all: test/experimental/CMakeFiles/experimental.dir/all
 	$(MAKE) -f test/unittests/CMakeFiles/ethash-test.dir/build.make test/unittests/CMakeFiles/ethash-test.dir/depend
 	$(MAKE) -f test/unittests/CMakeFiles/ethash-test.dir/build.make test/unittests/CMakeFiles/ethash-test.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ioc/rem/CC/src/dvm/ethash/CMakeFiles --progress-num=13,14,15,16,17,18,19 "Built target ethash-test"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ioc/DIONS/src/dvm/ethash/CMakeFiles --progress-num=13,14,15,16,17,18,19 "Built target ethash-test"
 .PHONY : test/unittests/CMakeFiles/ethash-test.dir/all
 
 # Build rule for subdir invocation for target.
 test/unittests/CMakeFiles/ethash-test.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/rem/CC/src/dvm/ethash/CMakeFiles 16
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/DIONS/src/dvm/ethash/CMakeFiles 16
 	$(MAKE) -f CMakeFiles/Makefile2 test/unittests/CMakeFiles/ethash-test.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/rem/CC/src/dvm/ethash/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/DIONS/src/dvm/ethash/CMakeFiles 0
 .PHONY : test/unittests/CMakeFiles/ethash-test.dir/rule
 
 # Convenience name for target.

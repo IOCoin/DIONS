@@ -7,11 +7,11 @@ C_FLAGS = -O3 -DNDEBUG   -Wpedantic -Werror -Wall -Wextra -Wshadow -Wconversion 
 
 C_DEFINES = 
 
-C_INCLUDES = -I/home/ioc/rem/CC/src/dvm/ethash/include 
+C_INCLUDES = -I/home/ioc/DIONS/src/dvm/ethash/include 
 
 CXX_FLAGS = -O3 -DNDEBUG   -Wpedantic -Werror -Wall -Wextra -Wshadow -Wconversion -Wsign-conversion -Wno-unknown-pragmas -fno-stack-protector -Wimplicit-fallthrough -Wcast-qual -Wmissing-declarations -Wundef -Wunreachable-code -fno-rtti -std=c++14
 
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/home/ioc/rem/CC/src/dvm/ethash/include 
+CXX_INCLUDES = -I/home/ioc/DIONS/src/dvm/ethash/include 
 

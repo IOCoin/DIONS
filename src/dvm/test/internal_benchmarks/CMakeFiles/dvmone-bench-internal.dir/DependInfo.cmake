@@ -4,8 +4,8 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/home/ioc/rem/CC/src/dvm/test/internal_benchmarks/find_jumpdest_bench.cpp" "/home/ioc/rem/CC/src/dvm/test/internal_benchmarks/CMakeFiles/dvmone-bench-internal.dir/find_jumpdest_bench.cpp.o"
-  "/home/ioc/rem/CC/src/dvm/test/internal_benchmarks/memory_allocation.cpp" "/home/ioc/rem/CC/src/dvm/test/internal_benchmarks/CMakeFiles/dvmone-bench-internal.dir/memory_allocation.cpp.o"
+  "/home/ioc/DIONS/src/dvm/test/internal_benchmarks/find_jumpdest_bench.cpp" "/home/ioc/DIONS/src/dvm/test/internal_benchmarks/CMakeFiles/dvmone-bench-internal.dir/find_jumpdest_bench.cpp.o"
+  "/home/ioc/DIONS/src/dvm/test/internal_benchmarks/memory_allocation.cpp" "/home/ioc/DIONS/src/dvm/test/internal_benchmarks/CMakeFiles/dvmone-bench-internal.dir/memory_allocation.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 

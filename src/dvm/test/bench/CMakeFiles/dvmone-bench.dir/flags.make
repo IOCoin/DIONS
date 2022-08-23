@@ -6,5 +6,5 @@ CXX_FLAGS = -O3 -DNDEBUG -fPIE -fvisibility=hidden -fvisibility-inlines-hidden  
 
 CXX_DEFINES = -DHAVE_STD_FILESYSTEM=1
 
-CXX_INCLUDES = -I/home/ioc/rem/CC/src/dvm/lib -I/home/ioc/rem/CC/src/dvm/include -I/home/ioc/rem/CC/src/dvm/dvmc/include -I/home/ioc/rem/CC/src/dvm -isystem /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include 
+CXX_INCLUDES = -I/home/ioc/DIONS/src/dvm/lib -I/home/ioc/DIONS/src/dvm/include -I/home/ioc/DIONS/src/dvm/dvmc/include -I/home/ioc/DIONS/src/dvm -isystem /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/include 
 

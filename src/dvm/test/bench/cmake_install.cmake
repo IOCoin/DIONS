@@ -1,4 +1,4 @@
-# Install script for directory: /home/ioc/rem/CC/src/dvm/test/bench
+# Install script for directory: /home/ioc/DIONS/src/dvm/test/bench
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

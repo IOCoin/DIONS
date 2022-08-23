@@ -43,10 +43,10 @@ RM = /usr/local/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/ioc/rem/CC/src/dvm/ethash
+CMAKE_SOURCE_DIR = /home/ioc/DIONS/src/dvm/ethash
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/ioc/rem/CC/src/dvm/ethash
+CMAKE_BINARY_DIR = /home/ioc/DIONS/src/dvm/ethash
 
 # Include any dependencies generated for this target.
 include test/integration/compilation/CMakeFiles/test-compile-c99.dir/depend.make
@@ -59,29 +59,29 @@ include test/integration/compilation/CMakeFiles/test-compile-c99.dir/flags.make
 
 test/integration/compilation/CMakeFiles/test-compile-c99.dir/ethash_header_test.c.o: test/integration/compilation/CMakeFiles/test-compile-c99.dir/flags.make
 test/integration/compilation/CMakeFiles/test-compile-c99.dir/ethash_header_test.c.o: test/integration/compilation/ethash_header_test.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ioc/rem/CC/src/dvm/ethash/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object test/integration/compilation/CMakeFiles/test-compile-c99.dir/ethash_header_test.c.o"
-	cd /home/ioc/rem/CC/src/dvm/ethash/test/integration/compilation && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/test-compile-c99.dir/ethash_header_test.c.o   -c /home/ioc/rem/CC/src/dvm/ethash/test/integration/compilation/ethash_header_test.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ioc/DIONS/src/dvm/ethash/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building C object test/integration/compilation/CMakeFiles/test-compile-c99.dir/ethash_header_test.c.o"
+	cd /home/ioc/DIONS/src/dvm/ethash/test/integration/compilation && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/test-compile-c99.dir/ethash_header_test.c.o   -c /home/ioc/DIONS/src/dvm/ethash/test/integration/compilation/ethash_header_test.c
 
 test/integration/compilation/CMakeFiles/test-compile-c99.dir/ethash_header_test.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/test-compile-c99.dir/ethash_header_test.c.i"
-	cd /home/ioc/rem/CC/src/dvm/ethash/test/integration/compilation && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/ioc/rem/CC/src/dvm/ethash/test/integration/compilation/ethash_header_test.c > CMakeFiles/test-compile-c99.dir/ethash_header_test.c.i
+	cd /home/ioc/DIONS/src/dvm/ethash/test/integration/compilation && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/ioc/DIONS/src/dvm/ethash/test/integration/compilation/ethash_header_test.c > CMakeFiles/test-compile-c99.dir/ethash_header_test.c.i
 
 test/integration/compilation/CMakeFiles/test-compile-c99.dir/ethash_header_test.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/test-compile-c99.dir/ethash_header_test.c.s"
-	cd /home/ioc/rem/CC/src/dvm/ethash/test/integration/compilation && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/ioc/rem/CC/src/dvm/ethash/test/integration/compilation/ethash_header_test.c -o CMakeFiles/test-compile-c99.dir/ethash_header_test.c.s
+	cd /home/ioc/DIONS/src/dvm/ethash/test/integration/compilation && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/ioc/DIONS/src/dvm/ethash/test/integration/compilation/ethash_header_test.c -o CMakeFiles/test-compile-c99.dir/ethash_header_test.c.s
 
 test/integration/compilation/CMakeFiles/test-compile-c99.dir/__/__/__/lib/ethash/primes.c.o: test/integration/compilation/CMakeFiles/test-compile-c99.dir/flags.make
 test/integration/compilation/CMakeFiles/test-compile-c99.dir/__/__/__/lib/ethash/primes.c.o: lib/ethash/primes.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ioc/rem/CC/src/dvm/ethash/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building C object test/integration/compilation/CMakeFiles/test-compile-c99.dir/__/__/__/lib/ethash/primes.c.o"
-	cd /home/ioc/rem/CC/src/dvm/ethash/test/integration/compilation && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/test-compile-c99.dir/__/__/__/lib/ethash/primes.c.o   -c /home/ioc/rem/CC/src/dvm/ethash/lib/ethash/primes.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ioc/DIONS/src/dvm/ethash/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building C object test/integration/compilation/CMakeFiles/test-compile-c99.dir/__/__/__/lib/ethash/primes.c.o"
+	cd /home/ioc/DIONS/src/dvm/ethash/test/integration/compilation && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/test-compile-c99.dir/__/__/__/lib/ethash/primes.c.o   -c /home/ioc/DIONS/src/dvm/ethash/lib/ethash/primes.c
 
 test/integration/compilation/CMakeFiles/test-compile-c99.dir/__/__/__/lib/ethash/primes.c.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/test-compile-c99.dir/__/__/__/lib/ethash/primes.c.i"
-	cd /home/ioc/rem/CC/src/dvm/ethash/test/integration/compilation && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/ioc/rem/CC/src/dvm/ethash/lib/ethash/primes.c > CMakeFiles/test-compile-c99.dir/__/__/__/lib/ethash/primes.c.i
+	cd /home/ioc/DIONS/src/dvm/ethash/test/integration/compilation && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/ioc/DIONS/src/dvm/ethash/lib/ethash/primes.c > CMakeFiles/test-compile-c99.dir/__/__/__/lib/ethash/primes.c.i
 
 test/integration/compilation/CMakeFiles/test-compile-c99.dir/__/__/__/lib/ethash/primes.c.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/test-compile-c99.dir/__/__/__/lib/ethash/primes.c.s"
-	cd /home/ioc/rem/CC/src/dvm/ethash/test/integration/compilation && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/ioc/rem/CC/src/dvm/ethash/lib/ethash/primes.c -o CMakeFiles/test-compile-c99.dir/__/__/__/lib/ethash/primes.c.s
+	cd /home/ioc/DIONS/src/dvm/ethash/test/integration/compilation && /usr/bin/cc $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/ioc/DIONS/src/dvm/ethash/lib/ethash/primes.c -o CMakeFiles/test-compile-c99.dir/__/__/__/lib/ethash/primes.c.s
 
 # Object files for target test-compile-c99
 test__compile__c99_OBJECTS = \
@@ -95,9 +95,9 @@ test/integration/compilation/libtest-compile-c99.a: test/integration/compilation
 test/integration/compilation/libtest-compile-c99.a: test/integration/compilation/CMakeFiles/test-compile-c99.dir/__/__/__/lib/ethash/primes.c.o
 test/integration/compilation/libtest-compile-c99.a: test/integration/compilation/CMakeFiles/test-compile-c99.dir/build.make
 test/integration/compilation/libtest-compile-c99.a: test/integration/compilation/CMakeFiles/test-compile-c99.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/ioc/rem/CC/src/dvm/ethash/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX static library libtest-compile-c99.a"
-	cd /home/ioc/rem/CC/src/dvm/ethash/test/integration/compilation && $(CMAKE_COMMAND) -P CMakeFiles/test-compile-c99.dir/cmake_clean_target.cmake
-	cd /home/ioc/rem/CC/src/dvm/ethash/test/integration/compilation && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/test-compile-c99.dir/link.txt --verbose=$(VERBOSE)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/ioc/DIONS/src/dvm/ethash/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX static library libtest-compile-c99.a"
+	cd /home/ioc/DIONS/src/dvm/ethash/test/integration/compilation && $(CMAKE_COMMAND) -P CMakeFiles/test-compile-c99.dir/cmake_clean_target.cmake
+	cd /home/ioc/DIONS/src/dvm/ethash/test/integration/compilation && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/test-compile-c99.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
 test/integration/compilation/CMakeFiles/test-compile-c99.dir/build: test/integration/compilation/libtest-compile-c99.a
@@ -105,10 +105,10 @@ test/integration/compilation/CMakeFiles/test-compile-c99.dir/build: test/integra
 .PHONY : test/integration/compilation/CMakeFiles/test-compile-c99.dir/build
 
 test/integration/compilation/CMakeFiles/test-compile-c99.dir/clean:
-	cd /home/ioc/rem/CC/src/dvm/ethash/test/integration/compilation && $(CMAKE_COMMAND) -P CMakeFiles/test-compile-c99.dir/cmake_clean.cmake
+	cd /home/ioc/DIONS/src/dvm/ethash/test/integration/compilation && $(CMAKE_COMMAND) -P CMakeFiles/test-compile-c99.dir/cmake_clean.cmake
 .PHONY : test/integration/compilation/CMakeFiles/test-compile-c99.dir/clean
 
 test/integration/compilation/CMakeFiles/test-compile-c99.dir/depend:
-	cd /home/ioc/rem/CC/src/dvm/ethash && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ioc/rem/CC/src/dvm/ethash /home/ioc/rem/CC/src/dvm/ethash/test/integration/compilation /home/ioc/rem/CC/src/dvm/ethash /home/ioc/rem/CC/src/dvm/ethash/test/integration/compilation /home/ioc/rem/CC/src/dvm/ethash/test/integration/compilation/CMakeFiles/test-compile-c99.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/ioc/DIONS/src/dvm/ethash && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ioc/DIONS/src/dvm/ethash /home/ioc/DIONS/src/dvm/ethash/test/integration/compilation /home/ioc/DIONS/src/dvm/ethash /home/ioc/DIONS/src/dvm/ethash/test/integration/compilation /home/ioc/DIONS/src/dvm/ethash/test/integration/compilation/CMakeFiles/test-compile-c99.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : test/integration/compilation/CMakeFiles/test-compile-c99.dir/depend
 

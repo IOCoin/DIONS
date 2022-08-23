@@ -1,4 +1,4 @@
-# Install script for directory: /home/ioc/rem/CC/src/dvm/dvmc/tools
+# Install script for directory: /home/ioc/DIONS/src/dvm/dvmc/tools
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -39,8 +39,8 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("/home/ioc/rem/CC/src/dvm/dvmc/tools/dvmc/cmake_install.cmake")
-  include("/home/ioc/rem/CC/src/dvm/dvmc/tools/vmtester/cmake_install.cmake")
+  include("/home/ioc/DIONS/src/dvm/dvmc/tools/dvmc/cmake_install.cmake")
+  include("/home/ioc/DIONS/src/dvm/dvmc/tools/vmtester/cmake_install.cmake")
 
 endif()
 

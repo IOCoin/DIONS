@@ -6,5 +6,5 @@ CXX_FLAGS = -O3 -DNDEBUG   -Wpedantic -Werror -Wall -Wextra -Wshadow -Wconversio
 
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/home/ioc/rem/CC/src/dvm/ethash/include 
+CXX_INCLUDES = -I/home/ioc/DIONS/src/dvm/ethash/include 
 

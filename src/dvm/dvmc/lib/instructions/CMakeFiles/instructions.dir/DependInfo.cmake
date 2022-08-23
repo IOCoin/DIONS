@@ -4,8 +4,8 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_C
-  "/home/ioc/rem/CC/src/dvm/dvmc/lib/instructions/instruction_metrics.c" "/home/ioc/rem/CC/src/dvm/dvmc/lib/instructions/CMakeFiles/instructions.dir/instruction_metrics.c.o"
-  "/home/ioc/rem/CC/src/dvm/dvmc/lib/instructions/instruction_names.c" "/home/ioc/rem/CC/src/dvm/dvmc/lib/instructions/CMakeFiles/instructions.dir/instruction_names.c.o"
+  "/home/ioc/DIONS/src/dvm/dvmc/lib/instructions/instruction_metrics.c" "/home/ioc/DIONS/src/dvm/dvmc/lib/instructions/CMakeFiles/instructions.dir/instruction_metrics.c.o"
+  "/home/ioc/DIONS/src/dvm/dvmc/lib/instructions/instruction_names.c" "/home/ioc/DIONS/src/dvm/dvmc/lib/instructions/CMakeFiles/instructions.dir/instruction_names.c.o"
   )
 set(CMAKE_C_COMPILER_ID "GNU")
 

@@ -43,10 +43,10 @@ RM = /usr/local/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/ioc/rem/CC/src/dvm
+CMAKE_SOURCE_DIR = /home/ioc/DIONS/src/dvm
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/ioc/rem/CC/src/dvm
+CMAKE_BINARY_DIR = /home/ioc/DIONS/src/dvm
 
 # Include any dependencies generated for this target.
 include dvmc/tools/vmtester/CMakeFiles/dvmc-vmtester.dir/depend.make
@@ -59,29 +59,29 @@ include dvmc/tools/vmtester/CMakeFiles/dvmc-vmtester.dir/flags.make
 
 dvmc/tools/vmtester/CMakeFiles/dvmc-vmtester.dir/vmtester.cpp.o: dvmc/tools/vmtester/CMakeFiles/dvmc-vmtester.dir/flags.make
 dvmc/tools/vmtester/CMakeFiles/dvmc-vmtester.dir/vmtester.cpp.o: dvmc/tools/vmtester/vmtester.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ioc/rem/CC/src/dvm/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object dvmc/tools/vmtester/CMakeFiles/dvmc-vmtester.dir/vmtester.cpp.o"
-	cd /home/ioc/rem/CC/src/dvm/dvmc/tools/vmtester && /usr/bin/c++  $(CXX_DEFINES) -DPROJECT_VERSION=\"10.0.0-alpha.5\" $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/dvmc-vmtester.dir/vmtester.cpp.o -c /home/ioc/rem/CC/src/dvm/dvmc/tools/vmtester/vmtester.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ioc/DIONS/src/dvm/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object dvmc/tools/vmtester/CMakeFiles/dvmc-vmtester.dir/vmtester.cpp.o"
+	cd /home/ioc/DIONS/src/dvm/dvmc/tools/vmtester && /usr/bin/c++  $(CXX_DEFINES) -DPROJECT_VERSION=\"10.0.0-alpha.5\" $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/dvmc-vmtester.dir/vmtester.cpp.o -c /home/ioc/DIONS/src/dvm/dvmc/tools/vmtester/vmtester.cpp
 
 dvmc/tools/vmtester/CMakeFiles/dvmc-vmtester.dir/vmtester.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/dvmc-vmtester.dir/vmtester.cpp.i"
-	cd /home/ioc/rem/CC/src/dvm/dvmc/tools/vmtester && /usr/bin/c++ $(CXX_DEFINES) -DPROJECT_VERSION=\"10.0.0-alpha.5\" $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ioc/rem/CC/src/dvm/dvmc/tools/vmtester/vmtester.cpp > CMakeFiles/dvmc-vmtester.dir/vmtester.cpp.i
+	cd /home/ioc/DIONS/src/dvm/dvmc/tools/vmtester && /usr/bin/c++ $(CXX_DEFINES) -DPROJECT_VERSION=\"10.0.0-alpha.5\" $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ioc/DIONS/src/dvm/dvmc/tools/vmtester/vmtester.cpp > CMakeFiles/dvmc-vmtester.dir/vmtester.cpp.i
 
 dvmc/tools/vmtester/CMakeFiles/dvmc-vmtester.dir/vmtester.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/dvmc-vmtester.dir/vmtester.cpp.s"
-	cd /home/ioc/rem/CC/src/dvm/dvmc/tools/vmtester && /usr/bin/c++ $(CXX_DEFINES) -DPROJECT_VERSION=\"10.0.0-alpha.5\" $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ioc/rem/CC/src/dvm/dvmc/tools/vmtester/vmtester.cpp -o CMakeFiles/dvmc-vmtester.dir/vmtester.cpp.s
+	cd /home/ioc/DIONS/src/dvm/dvmc/tools/vmtester && /usr/bin/c++ $(CXX_DEFINES) -DPROJECT_VERSION=\"10.0.0-alpha.5\" $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ioc/DIONS/src/dvm/dvmc/tools/vmtester/vmtester.cpp -o CMakeFiles/dvmc-vmtester.dir/vmtester.cpp.s
 
 dvmc/tools/vmtester/CMakeFiles/dvmc-vmtester.dir/tests.cpp.o: dvmc/tools/vmtester/CMakeFiles/dvmc-vmtester.dir/flags.make
 dvmc/tools/vmtester/CMakeFiles/dvmc-vmtester.dir/tests.cpp.o: dvmc/tools/vmtester/tests.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ioc/rem/CC/src/dvm/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object dvmc/tools/vmtester/CMakeFiles/dvmc-vmtester.dir/tests.cpp.o"
-	cd /home/ioc/rem/CC/src/dvm/dvmc/tools/vmtester && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/dvmc-vmtester.dir/tests.cpp.o -c /home/ioc/rem/CC/src/dvm/dvmc/tools/vmtester/tests.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ioc/DIONS/src/dvm/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object dvmc/tools/vmtester/CMakeFiles/dvmc-vmtester.dir/tests.cpp.o"
+	cd /home/ioc/DIONS/src/dvm/dvmc/tools/vmtester && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/dvmc-vmtester.dir/tests.cpp.o -c /home/ioc/DIONS/src/dvm/dvmc/tools/vmtester/tests.cpp
 
 dvmc/tools/vmtester/CMakeFiles/dvmc-vmtester.dir/tests.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/dvmc-vmtester.dir/tests.cpp.i"
-	cd /home/ioc/rem/CC/src/dvm/dvmc/tools/vmtester && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ioc/rem/CC/src/dvm/dvmc/tools/vmtester/tests.cpp > CMakeFiles/dvmc-vmtester.dir/tests.cpp.i
+	cd /home/ioc/DIONS/src/dvm/dvmc/tools/vmtester && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ioc/DIONS/src/dvm/dvmc/tools/vmtester/tests.cpp > CMakeFiles/dvmc-vmtester.dir/tests.cpp.i
 
 dvmc/tools/vmtester/CMakeFiles/dvmc-vmtester.dir/tests.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/dvmc-vmtester.dir/tests.cpp.s"
-	cd /home/ioc/rem/CC/src/dvm/dvmc/tools/vmtester && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ioc/rem/CC/src/dvm/dvmc/tools/vmtester/tests.cpp -o CMakeFiles/dvmc-vmtester.dir/tests.cpp.s
+	cd /home/ioc/DIONS/src/dvm/dvmc/tools/vmtester && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ioc/DIONS/src/dvm/dvmc/tools/vmtester/tests.cpp -o CMakeFiles/dvmc-vmtester.dir/tests.cpp.s
 
 # Object files for target dvmc-vmtester
 dvmc__vmtester_OBJECTS = \
@@ -97,8 +97,8 @@ bin/dvmc-vmtester: dvmc/tools/vmtester/CMakeFiles/dvmc-vmtester.dir/build.make
 bin/dvmc-vmtester: dvmc/lib/loader/libdvmc-loader.a
 bin/dvmc-vmtester: /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/lib/libgtest.a
 bin/dvmc-vmtester: dvmc/tools/vmtester/CMakeFiles/dvmc-vmtester.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/ioc/rem/CC/src/dvm/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX executable ../../../bin/dvmc-vmtester"
-	cd /home/ioc/rem/CC/src/dvm/dvmc/tools/vmtester && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/dvmc-vmtester.dir/link.txt --verbose=$(VERBOSE)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/ioc/DIONS/src/dvm/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX executable ../../../bin/dvmc-vmtester"
+	cd /home/ioc/DIONS/src/dvm/dvmc/tools/vmtester && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/dvmc-vmtester.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
 dvmc/tools/vmtester/CMakeFiles/dvmc-vmtester.dir/build: bin/dvmc-vmtester
@@ -106,10 +106,10 @@ dvmc/tools/vmtester/CMakeFiles/dvmc-vmtester.dir/build: bin/dvmc-vmtester
 .PHONY : dvmc/tools/vmtester/CMakeFiles/dvmc-vmtester.dir/build
 
 dvmc/tools/vmtester/CMakeFiles/dvmc-vmtester.dir/clean:
-	cd /home/ioc/rem/CC/src/dvm/dvmc/tools/vmtester && $(CMAKE_COMMAND) -P CMakeFiles/dvmc-vmtester.dir/cmake_clean.cmake
+	cd /home/ioc/DIONS/src/dvm/dvmc/tools/vmtester && $(CMAKE_COMMAND) -P CMakeFiles/dvmc-vmtester.dir/cmake_clean.cmake
 .PHONY : dvmc/tools/vmtester/CMakeFiles/dvmc-vmtester.dir/clean
 
 dvmc/tools/vmtester/CMakeFiles/dvmc-vmtester.dir/depend:
-	cd /home/ioc/rem/CC/src/dvm && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ioc/rem/CC/src/dvm /home/ioc/rem/CC/src/dvm/dvmc/tools/vmtester /home/ioc/rem/CC/src/dvm /home/ioc/rem/CC/src/dvm/dvmc/tools/vmtester /home/ioc/rem/CC/src/dvm/dvmc/tools/vmtester/CMakeFiles/dvmc-vmtester.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/ioc/DIONS/src/dvm && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ioc/DIONS/src/dvm /home/ioc/DIONS/src/dvm/dvmc/tools/vmtester /home/ioc/DIONS/src/dvm /home/ioc/DIONS/src/dvm/dvmc/tools/vmtester /home/ioc/DIONS/src/dvm/dvmc/tools/vmtester/CMakeFiles/dvmc-vmtester.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : dvmc/tools/vmtester/CMakeFiles/dvmc-vmtester.dir/depend
 

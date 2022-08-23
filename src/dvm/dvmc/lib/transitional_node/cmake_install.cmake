@@ -1,4 +1,4 @@
-# Install script for directory: /home/ioc/rem/CC/src/dvm/dvmc/lib/transitional_node
+# Install script for directory: /home/ioc/DIONS/src/dvm/dvmc/lib/transitional_node
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

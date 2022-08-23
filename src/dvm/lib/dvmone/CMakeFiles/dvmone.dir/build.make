@@ -43,10 +43,10 @@ RM = /usr/local/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/ioc/rem/CC/src/dvm
+CMAKE_SOURCE_DIR = /home/ioc/DIONS/src/dvm
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/ioc/rem/CC/src/dvm
+CMAKE_BINARY_DIR = /home/ioc/DIONS/src/dvm
 
 # Include any dependencies generated for this target.
 include lib/dvmone/CMakeFiles/dvmone.dir/depend.make
@@ -59,120 +59,120 @@ include lib/dvmone/CMakeFiles/dvmone.dir/flags.make
 
 lib/dvmone/CMakeFiles/dvmone.dir/advanced_analysis.cpp.o: lib/dvmone/CMakeFiles/dvmone.dir/flags.make
 lib/dvmone/CMakeFiles/dvmone.dir/advanced_analysis.cpp.o: lib/dvmone/advanced_analysis.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ioc/rem/CC/src/dvm/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object lib/dvmone/CMakeFiles/dvmone.dir/advanced_analysis.cpp.o"
-	cd /home/ioc/rem/CC/src/dvm/lib/dvmone && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/dvmone.dir/advanced_analysis.cpp.o -c /home/ioc/rem/CC/src/dvm/lib/dvmone/advanced_analysis.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ioc/DIONS/src/dvm/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object lib/dvmone/CMakeFiles/dvmone.dir/advanced_analysis.cpp.o"
+	cd /home/ioc/DIONS/src/dvm/lib/dvmone && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/dvmone.dir/advanced_analysis.cpp.o -c /home/ioc/DIONS/src/dvm/lib/dvmone/advanced_analysis.cpp
 
 lib/dvmone/CMakeFiles/dvmone.dir/advanced_analysis.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/dvmone.dir/advanced_analysis.cpp.i"
-	cd /home/ioc/rem/CC/src/dvm/lib/dvmone && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ioc/rem/CC/src/dvm/lib/dvmone/advanced_analysis.cpp > CMakeFiles/dvmone.dir/advanced_analysis.cpp.i
+	cd /home/ioc/DIONS/src/dvm/lib/dvmone && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ioc/DIONS/src/dvm/lib/dvmone/advanced_analysis.cpp > CMakeFiles/dvmone.dir/advanced_analysis.cpp.i
 
 lib/dvmone/CMakeFiles/dvmone.dir/advanced_analysis.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/dvmone.dir/advanced_analysis.cpp.s"
-	cd /home/ioc/rem/CC/src/dvm/lib/dvmone && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ioc/rem/CC/src/dvm/lib/dvmone/advanced_analysis.cpp -o CMakeFiles/dvmone.dir/advanced_analysis.cpp.s
+	cd /home/ioc/DIONS/src/dvm/lib/dvmone && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ioc/DIONS/src/dvm/lib/dvmone/advanced_analysis.cpp -o CMakeFiles/dvmone.dir/advanced_analysis.cpp.s
 
 lib/dvmone/CMakeFiles/dvmone.dir/advanced_execution.cpp.o: lib/dvmone/CMakeFiles/dvmone.dir/flags.make
 lib/dvmone/CMakeFiles/dvmone.dir/advanced_execution.cpp.o: lib/dvmone/advanced_execution.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ioc/rem/CC/src/dvm/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object lib/dvmone/CMakeFiles/dvmone.dir/advanced_execution.cpp.o"
-	cd /home/ioc/rem/CC/src/dvm/lib/dvmone && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/dvmone.dir/advanced_execution.cpp.o -c /home/ioc/rem/CC/src/dvm/lib/dvmone/advanced_execution.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ioc/DIONS/src/dvm/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object lib/dvmone/CMakeFiles/dvmone.dir/advanced_execution.cpp.o"
+	cd /home/ioc/DIONS/src/dvm/lib/dvmone && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/dvmone.dir/advanced_execution.cpp.o -c /home/ioc/DIONS/src/dvm/lib/dvmone/advanced_execution.cpp
 
 lib/dvmone/CMakeFiles/dvmone.dir/advanced_execution.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/dvmone.dir/advanced_execution.cpp.i"
-	cd /home/ioc/rem/CC/src/dvm/lib/dvmone && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ioc/rem/CC/src/dvm/lib/dvmone/advanced_execution.cpp > CMakeFiles/dvmone.dir/advanced_execution.cpp.i
+	cd /home/ioc/DIONS/src/dvm/lib/dvmone && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ioc/DIONS/src/dvm/lib/dvmone/advanced_execution.cpp > CMakeFiles/dvmone.dir/advanced_execution.cpp.i
 
 lib/dvmone/CMakeFiles/dvmone.dir/advanced_execution.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/dvmone.dir/advanced_execution.cpp.s"
-	cd /home/ioc/rem/CC/src/dvm/lib/dvmone && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ioc/rem/CC/src/dvm/lib/dvmone/advanced_execution.cpp -o CMakeFiles/dvmone.dir/advanced_execution.cpp.s
+	cd /home/ioc/DIONS/src/dvm/lib/dvmone && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ioc/DIONS/src/dvm/lib/dvmone/advanced_execution.cpp -o CMakeFiles/dvmone.dir/advanced_execution.cpp.s
 
 lib/dvmone/CMakeFiles/dvmone.dir/advanced_instructions.cpp.o: lib/dvmone/CMakeFiles/dvmone.dir/flags.make
 lib/dvmone/CMakeFiles/dvmone.dir/advanced_instructions.cpp.o: lib/dvmone/advanced_instructions.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ioc/rem/CC/src/dvm/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object lib/dvmone/CMakeFiles/dvmone.dir/advanced_instructions.cpp.o"
-	cd /home/ioc/rem/CC/src/dvm/lib/dvmone && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/dvmone.dir/advanced_instructions.cpp.o -c /home/ioc/rem/CC/src/dvm/lib/dvmone/advanced_instructions.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ioc/DIONS/src/dvm/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object lib/dvmone/CMakeFiles/dvmone.dir/advanced_instructions.cpp.o"
+	cd /home/ioc/DIONS/src/dvm/lib/dvmone && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/dvmone.dir/advanced_instructions.cpp.o -c /home/ioc/DIONS/src/dvm/lib/dvmone/advanced_instructions.cpp
 
 lib/dvmone/CMakeFiles/dvmone.dir/advanced_instructions.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/dvmone.dir/advanced_instructions.cpp.i"
-	cd /home/ioc/rem/CC/src/dvm/lib/dvmone && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ioc/rem/CC/src/dvm/lib/dvmone/advanced_instructions.cpp > CMakeFiles/dvmone.dir/advanced_instructions.cpp.i
+	cd /home/ioc/DIONS/src/dvm/lib/dvmone && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ioc/DIONS/src/dvm/lib/dvmone/advanced_instructions.cpp > CMakeFiles/dvmone.dir/advanced_instructions.cpp.i
 
 lib/dvmone/CMakeFiles/dvmone.dir/advanced_instructions.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/dvmone.dir/advanced_instructions.cpp.s"
-	cd /home/ioc/rem/CC/src/dvm/lib/dvmone && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ioc/rem/CC/src/dvm/lib/dvmone/advanced_instructions.cpp -o CMakeFiles/dvmone.dir/advanced_instructions.cpp.s
+	cd /home/ioc/DIONS/src/dvm/lib/dvmone && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ioc/DIONS/src/dvm/lib/dvmone/advanced_instructions.cpp -o CMakeFiles/dvmone.dir/advanced_instructions.cpp.s
 
 lib/dvmone/CMakeFiles/dvmone.dir/baseline.cpp.o: lib/dvmone/CMakeFiles/dvmone.dir/flags.make
 lib/dvmone/CMakeFiles/dvmone.dir/baseline.cpp.o: lib/dvmone/baseline.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ioc/rem/CC/src/dvm/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object lib/dvmone/CMakeFiles/dvmone.dir/baseline.cpp.o"
-	cd /home/ioc/rem/CC/src/dvm/lib/dvmone && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/dvmone.dir/baseline.cpp.o -c /home/ioc/rem/CC/src/dvm/lib/dvmone/baseline.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ioc/DIONS/src/dvm/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object lib/dvmone/CMakeFiles/dvmone.dir/baseline.cpp.o"
+	cd /home/ioc/DIONS/src/dvm/lib/dvmone && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/dvmone.dir/baseline.cpp.o -c /home/ioc/DIONS/src/dvm/lib/dvmone/baseline.cpp
 
 lib/dvmone/CMakeFiles/dvmone.dir/baseline.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/dvmone.dir/baseline.cpp.i"
-	cd /home/ioc/rem/CC/src/dvm/lib/dvmone && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ioc/rem/CC/src/dvm/lib/dvmone/baseline.cpp > CMakeFiles/dvmone.dir/baseline.cpp.i
+	cd /home/ioc/DIONS/src/dvm/lib/dvmone && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ioc/DIONS/src/dvm/lib/dvmone/baseline.cpp > CMakeFiles/dvmone.dir/baseline.cpp.i
 
 lib/dvmone/CMakeFiles/dvmone.dir/baseline.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/dvmone.dir/baseline.cpp.s"
-	cd /home/ioc/rem/CC/src/dvm/lib/dvmone && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ioc/rem/CC/src/dvm/lib/dvmone/baseline.cpp -o CMakeFiles/dvmone.dir/baseline.cpp.s
+	cd /home/ioc/DIONS/src/dvm/lib/dvmone && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ioc/DIONS/src/dvm/lib/dvmone/baseline.cpp -o CMakeFiles/dvmone.dir/baseline.cpp.s
 
 lib/dvmone/CMakeFiles/dvmone.dir/baseline_instruction_table.cpp.o: lib/dvmone/CMakeFiles/dvmone.dir/flags.make
 lib/dvmone/CMakeFiles/dvmone.dir/baseline_instruction_table.cpp.o: lib/dvmone/baseline_instruction_table.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ioc/rem/CC/src/dvm/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object lib/dvmone/CMakeFiles/dvmone.dir/baseline_instruction_table.cpp.o"
-	cd /home/ioc/rem/CC/src/dvm/lib/dvmone && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/dvmone.dir/baseline_instruction_table.cpp.o -c /home/ioc/rem/CC/src/dvm/lib/dvmone/baseline_instruction_table.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ioc/DIONS/src/dvm/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object lib/dvmone/CMakeFiles/dvmone.dir/baseline_instruction_table.cpp.o"
+	cd /home/ioc/DIONS/src/dvm/lib/dvmone && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/dvmone.dir/baseline_instruction_table.cpp.o -c /home/ioc/DIONS/src/dvm/lib/dvmone/baseline_instruction_table.cpp
 
 lib/dvmone/CMakeFiles/dvmone.dir/baseline_instruction_table.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/dvmone.dir/baseline_instruction_table.cpp.i"
-	cd /home/ioc/rem/CC/src/dvm/lib/dvmone && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ioc/rem/CC/src/dvm/lib/dvmone/baseline_instruction_table.cpp > CMakeFiles/dvmone.dir/baseline_instruction_table.cpp.i
+	cd /home/ioc/DIONS/src/dvm/lib/dvmone && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ioc/DIONS/src/dvm/lib/dvmone/baseline_instruction_table.cpp > CMakeFiles/dvmone.dir/baseline_instruction_table.cpp.i
 
 lib/dvmone/CMakeFiles/dvmone.dir/baseline_instruction_table.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/dvmone.dir/baseline_instruction_table.cpp.s"
-	cd /home/ioc/rem/CC/src/dvm/lib/dvmone && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ioc/rem/CC/src/dvm/lib/dvmone/baseline_instruction_table.cpp -o CMakeFiles/dvmone.dir/baseline_instruction_table.cpp.s
+	cd /home/ioc/DIONS/src/dvm/lib/dvmone && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ioc/DIONS/src/dvm/lib/dvmone/baseline_instruction_table.cpp -o CMakeFiles/dvmone.dir/baseline_instruction_table.cpp.s
 
 lib/dvmone/CMakeFiles/dvmone.dir/eof.cpp.o: lib/dvmone/CMakeFiles/dvmone.dir/flags.make
 lib/dvmone/CMakeFiles/dvmone.dir/eof.cpp.o: lib/dvmone/eof.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ioc/rem/CC/src/dvm/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object lib/dvmone/CMakeFiles/dvmone.dir/eof.cpp.o"
-	cd /home/ioc/rem/CC/src/dvm/lib/dvmone && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/dvmone.dir/eof.cpp.o -c /home/ioc/rem/CC/src/dvm/lib/dvmone/eof.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ioc/DIONS/src/dvm/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object lib/dvmone/CMakeFiles/dvmone.dir/eof.cpp.o"
+	cd /home/ioc/DIONS/src/dvm/lib/dvmone && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/dvmone.dir/eof.cpp.o -c /home/ioc/DIONS/src/dvm/lib/dvmone/eof.cpp
 
 lib/dvmone/CMakeFiles/dvmone.dir/eof.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/dvmone.dir/eof.cpp.i"
-	cd /home/ioc/rem/CC/src/dvm/lib/dvmone && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ioc/rem/CC/src/dvm/lib/dvmone/eof.cpp > CMakeFiles/dvmone.dir/eof.cpp.i
+	cd /home/ioc/DIONS/src/dvm/lib/dvmone && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ioc/DIONS/src/dvm/lib/dvmone/eof.cpp > CMakeFiles/dvmone.dir/eof.cpp.i
 
 lib/dvmone/CMakeFiles/dvmone.dir/eof.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/dvmone.dir/eof.cpp.s"
-	cd /home/ioc/rem/CC/src/dvm/lib/dvmone && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ioc/rem/CC/src/dvm/lib/dvmone/eof.cpp -o CMakeFiles/dvmone.dir/eof.cpp.s
+	cd /home/ioc/DIONS/src/dvm/lib/dvmone && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ioc/DIONS/src/dvm/lib/dvmone/eof.cpp -o CMakeFiles/dvmone.dir/eof.cpp.s
 
 lib/dvmone/CMakeFiles/dvmone.dir/instructions_calls.cpp.o: lib/dvmone/CMakeFiles/dvmone.dir/flags.make
 lib/dvmone/CMakeFiles/dvmone.dir/instructions_calls.cpp.o: lib/dvmone/instructions_calls.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ioc/rem/CC/src/dvm/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object lib/dvmone/CMakeFiles/dvmone.dir/instructions_calls.cpp.o"
-	cd /home/ioc/rem/CC/src/dvm/lib/dvmone && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/dvmone.dir/instructions_calls.cpp.o -c /home/ioc/rem/CC/src/dvm/lib/dvmone/instructions_calls.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ioc/DIONS/src/dvm/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object lib/dvmone/CMakeFiles/dvmone.dir/instructions_calls.cpp.o"
+	cd /home/ioc/DIONS/src/dvm/lib/dvmone && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/dvmone.dir/instructions_calls.cpp.o -c /home/ioc/DIONS/src/dvm/lib/dvmone/instructions_calls.cpp
 
 lib/dvmone/CMakeFiles/dvmone.dir/instructions_calls.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/dvmone.dir/instructions_calls.cpp.i"
-	cd /home/ioc/rem/CC/src/dvm/lib/dvmone && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ioc/rem/CC/src/dvm/lib/dvmone/instructions_calls.cpp > CMakeFiles/dvmone.dir/instructions_calls.cpp.i
+	cd /home/ioc/DIONS/src/dvm/lib/dvmone && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ioc/DIONS/src/dvm/lib/dvmone/instructions_calls.cpp > CMakeFiles/dvmone.dir/instructions_calls.cpp.i
 
 lib/dvmone/CMakeFiles/dvmone.dir/instructions_calls.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/dvmone.dir/instructions_calls.cpp.s"
-	cd /home/ioc/rem/CC/src/dvm/lib/dvmone && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ioc/rem/CC/src/dvm/lib/dvmone/instructions_calls.cpp -o CMakeFiles/dvmone.dir/instructions_calls.cpp.s
+	cd /home/ioc/DIONS/src/dvm/lib/dvmone && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ioc/DIONS/src/dvm/lib/dvmone/instructions_calls.cpp -o CMakeFiles/dvmone.dir/instructions_calls.cpp.s
 
 lib/dvmone/CMakeFiles/dvmone.dir/tracing.cpp.o: lib/dvmone/CMakeFiles/dvmone.dir/flags.make
 lib/dvmone/CMakeFiles/dvmone.dir/tracing.cpp.o: lib/dvmone/tracing.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ioc/rem/CC/src/dvm/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object lib/dvmone/CMakeFiles/dvmone.dir/tracing.cpp.o"
-	cd /home/ioc/rem/CC/src/dvm/lib/dvmone && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/dvmone.dir/tracing.cpp.o -c /home/ioc/rem/CC/src/dvm/lib/dvmone/tracing.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ioc/DIONS/src/dvm/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object lib/dvmone/CMakeFiles/dvmone.dir/tracing.cpp.o"
+	cd /home/ioc/DIONS/src/dvm/lib/dvmone && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/dvmone.dir/tracing.cpp.o -c /home/ioc/DIONS/src/dvm/lib/dvmone/tracing.cpp
 
 lib/dvmone/CMakeFiles/dvmone.dir/tracing.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/dvmone.dir/tracing.cpp.i"
-	cd /home/ioc/rem/CC/src/dvm/lib/dvmone && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ioc/rem/CC/src/dvm/lib/dvmone/tracing.cpp > CMakeFiles/dvmone.dir/tracing.cpp.i
+	cd /home/ioc/DIONS/src/dvm/lib/dvmone && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ioc/DIONS/src/dvm/lib/dvmone/tracing.cpp > CMakeFiles/dvmone.dir/tracing.cpp.i
 
 lib/dvmone/CMakeFiles/dvmone.dir/tracing.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/dvmone.dir/tracing.cpp.s"
-	cd /home/ioc/rem/CC/src/dvm/lib/dvmone && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ioc/rem/CC/src/dvm/lib/dvmone/tracing.cpp -o CMakeFiles/dvmone.dir/tracing.cpp.s
+	cd /home/ioc/DIONS/src/dvm/lib/dvmone && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ioc/DIONS/src/dvm/lib/dvmone/tracing.cpp -o CMakeFiles/dvmone.dir/tracing.cpp.s
 
 lib/dvmone/CMakeFiles/dvmone.dir/vm.cpp.o: lib/dvmone/CMakeFiles/dvmone.dir/flags.make
 lib/dvmone/CMakeFiles/dvmone.dir/vm.cpp.o: lib/dvmone/vm.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ioc/rem/CC/src/dvm/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object lib/dvmone/CMakeFiles/dvmone.dir/vm.cpp.o"
-	cd /home/ioc/rem/CC/src/dvm/lib/dvmone && /usr/bin/c++  $(CXX_DEFINES) -DPROJECT_VERSION=\"0.9.0-dev\" $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/dvmone.dir/vm.cpp.o -c /home/ioc/rem/CC/src/dvm/lib/dvmone/vm.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ioc/DIONS/src/dvm/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object lib/dvmone/CMakeFiles/dvmone.dir/vm.cpp.o"
+	cd /home/ioc/DIONS/src/dvm/lib/dvmone && /usr/bin/c++  $(CXX_DEFINES) -DPROJECT_VERSION=\"0.9.0-dev\" $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/dvmone.dir/vm.cpp.o -c /home/ioc/DIONS/src/dvm/lib/dvmone/vm.cpp
 
 lib/dvmone/CMakeFiles/dvmone.dir/vm.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/dvmone.dir/vm.cpp.i"
-	cd /home/ioc/rem/CC/src/dvm/lib/dvmone && /usr/bin/c++ $(CXX_DEFINES) -DPROJECT_VERSION=\"0.9.0-dev\" $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ioc/rem/CC/src/dvm/lib/dvmone/vm.cpp > CMakeFiles/dvmone.dir/vm.cpp.i
+	cd /home/ioc/DIONS/src/dvm/lib/dvmone && /usr/bin/c++ $(CXX_DEFINES) -DPROJECT_VERSION=\"0.9.0-dev\" $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ioc/DIONS/src/dvm/lib/dvmone/vm.cpp > CMakeFiles/dvmone.dir/vm.cpp.i
 
 lib/dvmone/CMakeFiles/dvmone.dir/vm.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/dvmone.dir/vm.cpp.s"
-	cd /home/ioc/rem/CC/src/dvm/lib/dvmone && /usr/bin/c++ $(CXX_DEFINES) -DPROJECT_VERSION=\"0.9.0-dev\" $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ioc/rem/CC/src/dvm/lib/dvmone/vm.cpp -o CMakeFiles/dvmone.dir/vm.cpp.s
+	cd /home/ioc/DIONS/src/dvm/lib/dvmone && /usr/bin/c++ $(CXX_DEFINES) -DPROJECT_VERSION=\"0.9.0-dev\" $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ioc/DIONS/src/dvm/lib/dvmone/vm.cpp -o CMakeFiles/dvmone.dir/vm.cpp.s
 
 # Object files for target dvmone
 dvmone_OBJECTS = \
@@ -200,9 +200,9 @@ lib/libdvmone.a: lib/dvmone/CMakeFiles/dvmone.dir/tracing.cpp.o
 lib/libdvmone.a: lib/dvmone/CMakeFiles/dvmone.dir/vm.cpp.o
 lib/libdvmone.a: lib/dvmone/CMakeFiles/dvmone.dir/build.make
 lib/libdvmone.a: lib/dvmone/CMakeFiles/dvmone.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/ioc/rem/CC/src/dvm/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Linking CXX static library ../libdvmone.a"
-	cd /home/ioc/rem/CC/src/dvm/lib/dvmone && $(CMAKE_COMMAND) -P CMakeFiles/dvmone.dir/cmake_clean_target.cmake
-	cd /home/ioc/rem/CC/src/dvm/lib/dvmone && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/dvmone.dir/link.txt --verbose=$(VERBOSE)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/ioc/DIONS/src/dvm/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Linking CXX static library ../libdvmone.a"
+	cd /home/ioc/DIONS/src/dvm/lib/dvmone && $(CMAKE_COMMAND) -P CMakeFiles/dvmone.dir/cmake_clean_target.cmake
+	cd /home/ioc/DIONS/src/dvm/lib/dvmone && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/dvmone.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
 lib/dvmone/CMakeFiles/dvmone.dir/build: lib/libdvmone.a
@@ -210,10 +210,10 @@ lib/dvmone/CMakeFiles/dvmone.dir/build: lib/libdvmone.a
 .PHONY : lib/dvmone/CMakeFiles/dvmone.dir/build
 
 lib/dvmone/CMakeFiles/dvmone.dir/clean:
-	cd /home/ioc/rem/CC/src/dvm/lib/dvmone && $(CMAKE_COMMAND) -P CMakeFiles/dvmone.dir/cmake_clean.cmake
+	cd /home/ioc/DIONS/src/dvm/lib/dvmone && $(CMAKE_COMMAND) -P CMakeFiles/dvmone.dir/cmake_clean.cmake
 .PHONY : lib/dvmone/CMakeFiles/dvmone.dir/clean
 
 lib/dvmone/CMakeFiles/dvmone.dir/depend:
-	cd /home/ioc/rem/CC/src/dvm && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ioc/rem/CC/src/dvm /home/ioc/rem/CC/src/dvm/lib/dvmone /home/ioc/rem/CC/src/dvm /home/ioc/rem/CC/src/dvm/lib/dvmone /home/ioc/rem/CC/src/dvm/lib/dvmone/CMakeFiles/dvmone.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/ioc/DIONS/src/dvm && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ioc/DIONS/src/dvm /home/ioc/DIONS/src/dvm/lib/dvmone /home/ioc/DIONS/src/dvm /home/ioc/DIONS/src/dvm/lib/dvmone /home/ioc/DIONS/src/dvm/lib/dvmone/CMakeFiles/dvmone.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : lib/dvmone/CMakeFiles/dvmone.dir/depend
 

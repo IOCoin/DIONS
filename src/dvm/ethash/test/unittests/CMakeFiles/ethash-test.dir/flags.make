@@ -6,7 +6,7 @@ CXX_FLAGS = -O3 -DNDEBUG   -Wpedantic -Werror -Wall -Wextra -Wshadow -Wconversio
 
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/home/ioc/rem/CC/src/dvm/ethash/lib -I/home/ioc/rem/CC/src/dvm/ethash/include -isystem /home/ioc/.hunter/_Base/a3d7f43/97671df/104ac99/Install/include 
+CXX_INCLUDES = -I/home/ioc/DIONS/src/dvm/ethash/lib -I/home/ioc/DIONS/src/dvm/ethash/include -isystem /home/ioc/.hunter/_Base/a3d7f43/97671df/104ac99/Install/include 
 
 # Custom defines: test/unittests/CMakeFiles/ethash-test.dir/test_version.cpp.o_DEFINES = TEST_PROJECT_VERSION="1.0.0-alpha.0"
 

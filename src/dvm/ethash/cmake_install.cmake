@@ -1,4 +1,4 @@
-# Install script for directory: /home/ioc/rem/CC/src/dvm/ethash
+# Install script for directory: /home/ioc/DIONS/src/dvm/ethash
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -39,23 +39,23 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/ioc/rem/CC/src/dvm/ethash/lib/cmake_install.cmake")
+  include("/home/ioc/DIONS/src/dvm/ethash/lib/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/ioc/rem/CC/src/dvm/ethash/test/cmake_install.cmake")
+  include("/home/ioc/DIONS/src/dvm/ethash/test/cmake_install.cmake")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/include" TYPE DIRECTORY FILES "/home/ioc/rem/CC/src/dvm/ethash/include/")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/include" TYPE DIRECTORY FILES "/home/ioc/DIONS/src/dvm/ethash/include/")
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
   if(EXISTS "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/cmake/ethash/ethashTargets.cmake")
     file(DIFFERENT EXPORT_FILE_CHANGED FILES
          "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/cmake/ethash/ethashTargets.cmake"
-         "/home/ioc/rem/CC/src/dvm/ethash/CMakeFiles/Export/lib/cmake/ethash/ethashTargets.cmake")
+         "/home/ioc/DIONS/src/dvm/ethash/CMakeFiles/Export/lib/cmake/ethash/ethashTargets.cmake")
     if(EXPORT_FILE_CHANGED)
       file(GLOB OLD_CONFIG_FILES "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/cmake/ethash/ethashTargets-*.cmake")
       if(OLD_CONFIG_FILES)
@@ -64,16 +64,16 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
       endif()
     endif()
   endif()
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/cmake/ethash" TYPE FILE FILES "/home/ioc/rem/CC/src/dvm/ethash/CMakeFiles/Export/lib/cmake/ethash/ethashTargets.cmake")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/cmake/ethash" TYPE FILE FILES "/home/ioc/DIONS/src/dvm/ethash/CMakeFiles/Export/lib/cmake/ethash/ethashTargets.cmake")
   if("${CMAKE_INSTALL_CONFIG_NAME}" MATCHES "^([Rr][Ee][Ll][Ee][Aa][Ss][Ee])$")
-    file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/cmake/ethash" TYPE FILE FILES "/home/ioc/rem/CC/src/dvm/ethash/CMakeFiles/Export/lib/cmake/ethash/ethashTargets-release.cmake")
+    file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/cmake/ethash" TYPE FILE FILES "/home/ioc/DIONS/src/dvm/ethash/CMakeFiles/Export/lib/cmake/ethash/ethashTargets-release.cmake")
   endif()
 endif()
 
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
   file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/cmake/ethash" TYPE FILE FILES
-    "/home/ioc/rem/CC/src/dvm/ethash/ethashConfig.cmake"
-    "/home/ioc/rem/CC/src/dvm/ethash/ethashConfigVersion.cmake"
+    "/home/ioc/DIONS/src/dvm/ethash/ethashConfig.cmake"
+    "/home/ioc/DIONS/src/dvm/ethash/ethashConfigVersion.cmake"
     )
 endif()
 
@@ -85,5 +85,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/ioc/rem/CC/src/dvm/ethash/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/ioc/DIONS/src/dvm/ethash/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

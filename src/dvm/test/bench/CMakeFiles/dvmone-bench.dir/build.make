@@ -43,10 +43,10 @@ RM = /usr/local/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/ioc/rem/CC/src/dvm
+CMAKE_SOURCE_DIR = /home/ioc/DIONS/src/dvm
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/ioc/rem/CC/src/dvm
+CMAKE_BINARY_DIR = /home/ioc/DIONS/src/dvm
 
 # Include any dependencies generated for this target.
 include test/bench/CMakeFiles/dvmone-bench.dir/depend.make
@@ -59,29 +59,29 @@ include test/bench/CMakeFiles/dvmone-bench.dir/flags.make
 
 test/bench/CMakeFiles/dvmone-bench.dir/bench.cpp.o: test/bench/CMakeFiles/dvmone-bench.dir/flags.make
 test/bench/CMakeFiles/dvmone-bench.dir/bench.cpp.o: test/bench/bench.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ioc/rem/CC/src/dvm/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object test/bench/CMakeFiles/dvmone-bench.dir/bench.cpp.o"
-	cd /home/ioc/rem/CC/src/dvm/test/bench && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/dvmone-bench.dir/bench.cpp.o -c /home/ioc/rem/CC/src/dvm/test/bench/bench.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ioc/DIONS/src/dvm/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object test/bench/CMakeFiles/dvmone-bench.dir/bench.cpp.o"
+	cd /home/ioc/DIONS/src/dvm/test/bench && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/dvmone-bench.dir/bench.cpp.o -c /home/ioc/DIONS/src/dvm/test/bench/bench.cpp
 
 test/bench/CMakeFiles/dvmone-bench.dir/bench.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/dvmone-bench.dir/bench.cpp.i"
-	cd /home/ioc/rem/CC/src/dvm/test/bench && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ioc/rem/CC/src/dvm/test/bench/bench.cpp > CMakeFiles/dvmone-bench.dir/bench.cpp.i
+	cd /home/ioc/DIONS/src/dvm/test/bench && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ioc/DIONS/src/dvm/test/bench/bench.cpp > CMakeFiles/dvmone-bench.dir/bench.cpp.i
 
 test/bench/CMakeFiles/dvmone-bench.dir/bench.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/dvmone-bench.dir/bench.cpp.s"
-	cd /home/ioc/rem/CC/src/dvm/test/bench && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ioc/rem/CC/src/dvm/test/bench/bench.cpp -o CMakeFiles/dvmone-bench.dir/bench.cpp.s
+	cd /home/ioc/DIONS/src/dvm/test/bench && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ioc/DIONS/src/dvm/test/bench/bench.cpp -o CMakeFiles/dvmone-bench.dir/bench.cpp.s
 
 test/bench/CMakeFiles/dvmone-bench.dir/synthetic_benchmarks.cpp.o: test/bench/CMakeFiles/dvmone-bench.dir/flags.make
 test/bench/CMakeFiles/dvmone-bench.dir/synthetic_benchmarks.cpp.o: test/bench/synthetic_benchmarks.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ioc/rem/CC/src/dvm/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object test/bench/CMakeFiles/dvmone-bench.dir/synthetic_benchmarks.cpp.o"
-	cd /home/ioc/rem/CC/src/dvm/test/bench && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/dvmone-bench.dir/synthetic_benchmarks.cpp.o -c /home/ioc/rem/CC/src/dvm/test/bench/synthetic_benchmarks.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/ioc/DIONS/src/dvm/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object test/bench/CMakeFiles/dvmone-bench.dir/synthetic_benchmarks.cpp.o"
+	cd /home/ioc/DIONS/src/dvm/test/bench && /usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/dvmone-bench.dir/synthetic_benchmarks.cpp.o -c /home/ioc/DIONS/src/dvm/test/bench/synthetic_benchmarks.cpp
 
 test/bench/CMakeFiles/dvmone-bench.dir/synthetic_benchmarks.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/dvmone-bench.dir/synthetic_benchmarks.cpp.i"
-	cd /home/ioc/rem/CC/src/dvm/test/bench && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ioc/rem/CC/src/dvm/test/bench/synthetic_benchmarks.cpp > CMakeFiles/dvmone-bench.dir/synthetic_benchmarks.cpp.i
+	cd /home/ioc/DIONS/src/dvm/test/bench && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/ioc/DIONS/src/dvm/test/bench/synthetic_benchmarks.cpp > CMakeFiles/dvmone-bench.dir/synthetic_benchmarks.cpp.i
 
 test/bench/CMakeFiles/dvmone-bench.dir/synthetic_benchmarks.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/dvmone-bench.dir/synthetic_benchmarks.cpp.s"
-	cd /home/ioc/rem/CC/src/dvm/test/bench && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ioc/rem/CC/src/dvm/test/bench/synthetic_benchmarks.cpp -o CMakeFiles/dvmone-bench.dir/synthetic_benchmarks.cpp.s
+	cd /home/ioc/DIONS/src/dvm/test/bench && /usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/ioc/DIONS/src/dvm/test/bench/synthetic_benchmarks.cpp -o CMakeFiles/dvmone-bench.dir/synthetic_benchmarks.cpp.s
 
 # Object files for target dvmone-bench
 dvmone__bench_OBJECTS = \
@@ -102,8 +102,8 @@ bin/dvmone-bench: /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/lib/li
 bin/dvmone-bench: dvmc/lib/instructions/libdvmc-instructions.a
 bin/dvmone-bench: dvmc/lib/hex/libhex.a
 bin/dvmone-bench: test/bench/CMakeFiles/dvmone-bench.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/ioc/rem/CC/src/dvm/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX executable ../../bin/dvmone-bench"
-	cd /home/ioc/rem/CC/src/dvm/test/bench && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/dvmone-bench.dir/link.txt --verbose=$(VERBOSE)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/ioc/DIONS/src/dvm/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Linking CXX executable ../../bin/dvmone-bench"
+	cd /home/ioc/DIONS/src/dvm/test/bench && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/dvmone-bench.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
 test/bench/CMakeFiles/dvmone-bench.dir/build: bin/dvmone-bench
@@ -111,10 +111,10 @@ test/bench/CMakeFiles/dvmone-bench.dir/build: bin/dvmone-bench
 .PHONY : test/bench/CMakeFiles/dvmone-bench.dir/build
 
 test/bench/CMakeFiles/dvmone-bench.dir/clean:
-	cd /home/ioc/rem/CC/src/dvm/test/bench && $(CMAKE_COMMAND) -P CMakeFiles/dvmone-bench.dir/cmake_clean.cmake
+	cd /home/ioc/DIONS/src/dvm/test/bench && $(CMAKE_COMMAND) -P CMakeFiles/dvmone-bench.dir/cmake_clean.cmake
 .PHONY : test/bench/CMakeFiles/dvmone-bench.dir/clean
 
 test/bench/CMakeFiles/dvmone-bench.dir/depend:
-	cd /home/ioc/rem/CC/src/dvm && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ioc/rem/CC/src/dvm /home/ioc/rem/CC/src/dvm/test/bench /home/ioc/rem/CC/src/dvm /home/ioc/rem/CC/src/dvm/test/bench /home/ioc/rem/CC/src/dvm/test/bench/CMakeFiles/dvmone-bench.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/ioc/DIONS/src/dvm && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/ioc/DIONS/src/dvm /home/ioc/DIONS/src/dvm/test/bench /home/ioc/DIONS/src/dvm /home/ioc/DIONS/src/dvm/test/bench /home/ioc/DIONS/src/dvm/test/bench/CMakeFiles/dvmone-bench.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : test/bench/CMakeFiles/dvmone-bench.dir/depend
 

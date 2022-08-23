@@ -16,7 +16,7 @@ set(CMAKE_MAKEFILE_DEPENDS
   "CMakeFiles/3.16.2/CMakeCCompiler.cmake"
   "CMakeFiles/3.16.2/CMakeCXXCompiler.cmake"
   "CMakeFiles/3.16.2/CMakeSystem.cmake"
-  "/home/ioc/rem/CC/src/dvm/ethash/cmake/cable/toolchains/cxx14.cmake"
+  "/home/ioc/DIONS/src/dvm/ethash/cmake/cable/toolchains/cxx14.cmake"
   "/usr/local/share/cmake-3.16/Modules/CMakeCCompiler.cmake.in"
   "/usr/local/share/cmake-3.16/Modules/CMakeCCompilerABI.c"
   "/usr/local/share/cmake-3.16/Modules/CMakeCInformation.cmake"

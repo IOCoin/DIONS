@@ -1,4 +1,4 @@
-# Install script for directory: /home/ioc/rem/CC/src/dvm/ethash/lib
+# Install script for directory: /home/ioc/DIONS/src/dvm/ethash/lib
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -39,16 +39,16 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/ioc/rem/CC/src/dvm/ethash/lib/keccak/cmake_install.cmake")
+  include("/home/ioc/DIONS/src/dvm/ethash/lib/keccak/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/ioc/rem/CC/src/dvm/ethash/lib/ethash/cmake_install.cmake")
+  include("/home/ioc/DIONS/src/dvm/ethash/lib/ethash/cmake_install.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for the subdirectory.
-  include("/home/ioc/rem/CC/src/dvm/ethash/lib/global_context/cmake_install.cmake")
+  include("/home/ioc/DIONS/src/dvm/ethash/lib/global_context/cmake_install.cmake")
 endif()
 

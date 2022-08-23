@@ -44,10 +44,10 @@ RM = /usr/local/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/ioc/rem/CC/src/dvm
+CMAKE_SOURCE_DIR = /home/ioc/DIONS/src/dvm
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/ioc/rem/CC/src/dvm
+CMAKE_BINARY_DIR = /home/ioc/DIONS/src/dvm
 
 #=============================================================================
 # Directory level rules for the build root directory
@@ -438,14 +438,14 @@ test/utils/clean: test/utils/CMakeFiles/testutils.dir/clean
 dvmc/lib/hex/CMakeFiles/hex.dir/all:
 	$(MAKE) -f dvmc/lib/hex/CMakeFiles/hex.dir/build.make dvmc/lib/hex/CMakeFiles/hex.dir/depend
 	$(MAKE) -f dvmc/lib/hex/CMakeFiles/hex.dir/build.make dvmc/lib/hex/CMakeFiles/hex.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ioc/rem/CC/src/dvm/CMakeFiles --progress-num=44,45 "Built target hex"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ioc/DIONS/src/dvm/CMakeFiles --progress-num=44,45 "Built target hex"
 .PHONY : dvmc/lib/hex/CMakeFiles/hex.dir/all
 
 # Build rule for subdir invocation for target.
 dvmc/lib/hex/CMakeFiles/hex.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/rem/CC/src/dvm/CMakeFiles 2
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/DIONS/src/dvm/CMakeFiles 2
 	$(MAKE) -f CMakeFiles/Makefile2 dvmc/lib/hex/CMakeFiles/hex.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/rem/CC/src/dvm/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/DIONS/src/dvm/CMakeFiles 0
 .PHONY : dvmc/lib/hex/CMakeFiles/hex.dir/rule
 
 # Convenience name for target.
@@ -465,14 +465,14 @@ dvmc/lib/hex/CMakeFiles/hex.dir/clean:
 dvmc/lib/instructions/CMakeFiles/instructions.dir/all:
 	$(MAKE) -f dvmc/lib/instructions/CMakeFiles/instructions.dir/build.make dvmc/lib/instructions/CMakeFiles/instructions.dir/depend
 	$(MAKE) -f dvmc/lib/instructions/CMakeFiles/instructions.dir/build.make dvmc/lib/instructions/CMakeFiles/instructions.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ioc/rem/CC/src/dvm/CMakeFiles --progress-num=46,47,48 "Built target instructions"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ioc/DIONS/src/dvm/CMakeFiles --progress-num=46,47,48 "Built target instructions"
 .PHONY : dvmc/lib/instructions/CMakeFiles/instructions.dir/all
 
 # Build rule for subdir invocation for target.
 dvmc/lib/instructions/CMakeFiles/instructions.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/rem/CC/src/dvm/CMakeFiles 3
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/DIONS/src/dvm/CMakeFiles 3
 	$(MAKE) -f CMakeFiles/Makefile2 dvmc/lib/instructions/CMakeFiles/instructions.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/rem/CC/src/dvm/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/DIONS/src/dvm/CMakeFiles 0
 .PHONY : dvmc/lib/instructions/CMakeFiles/instructions.dir/rule
 
 # Convenience name for target.
@@ -492,14 +492,14 @@ dvmc/lib/instructions/CMakeFiles/instructions.dir/clean:
 dvmc/lib/loader/CMakeFiles/loader.dir/all:
 	$(MAKE) -f dvmc/lib/loader/CMakeFiles/loader.dir/build.make dvmc/lib/loader/CMakeFiles/loader.dir/depend
 	$(MAKE) -f dvmc/lib/loader/CMakeFiles/loader.dir/build.make dvmc/lib/loader/CMakeFiles/loader.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ioc/rem/CC/src/dvm/CMakeFiles --progress-num=49,50 "Built target loader"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ioc/DIONS/src/dvm/CMakeFiles --progress-num=49,50 "Built target loader"
 .PHONY : dvmc/lib/loader/CMakeFiles/loader.dir/all
 
 # Build rule for subdir invocation for target.
 dvmc/lib/loader/CMakeFiles/loader.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/rem/CC/src/dvm/CMakeFiles 2
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/DIONS/src/dvm/CMakeFiles 2
 	$(MAKE) -f CMakeFiles/Makefile2 dvmc/lib/loader/CMakeFiles/loader.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/rem/CC/src/dvm/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/DIONS/src/dvm/CMakeFiles 0
 .PHONY : dvmc/lib/loader/CMakeFiles/loader.dir/rule
 
 # Convenience name for target.
@@ -519,14 +519,14 @@ dvmc/lib/loader/CMakeFiles/loader.dir/clean:
 dvmc/lib/tooling/CMakeFiles/tooling.dir/all: dvmc/lib/hex/CMakeFiles/hex.dir/all
 	$(MAKE) -f dvmc/lib/tooling/CMakeFiles/tooling.dir/build.make dvmc/lib/tooling/CMakeFiles/tooling.dir/depend
 	$(MAKE) -f dvmc/lib/tooling/CMakeFiles/tooling.dir/build.make dvmc/lib/tooling/CMakeFiles/tooling.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ioc/rem/CC/src/dvm/CMakeFiles --progress-num=55,56 "Built target tooling"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ioc/DIONS/src/dvm/CMakeFiles --progress-num=55,56 "Built target tooling"
 .PHONY : dvmc/lib/tooling/CMakeFiles/tooling.dir/all
 
 # Build rule for subdir invocation for target.
 dvmc/lib/tooling/CMakeFiles/tooling.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/rem/CC/src/dvm/CMakeFiles 4
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/DIONS/src/dvm/CMakeFiles 4
 	$(MAKE) -f CMakeFiles/Makefile2 dvmc/lib/tooling/CMakeFiles/tooling.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/rem/CC/src/dvm/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/DIONS/src/dvm/CMakeFiles 0
 .PHONY : dvmc/lib/tooling/CMakeFiles/tooling.dir/rule
 
 # Convenience name for target.
@@ -548,14 +548,14 @@ dvmc/tools/dvmc/CMakeFiles/dvmc-tool.dir/all: dvmc/lib/loader/CMakeFiles/loader.
 dvmc/tools/dvmc/CMakeFiles/dvmc-tool.dir/all: dvmc/lib/tooling/CMakeFiles/tooling.dir/all
 	$(MAKE) -f dvmc/tools/dvmc/CMakeFiles/dvmc-tool.dir/build.make dvmc/tools/dvmc/CMakeFiles/dvmc-tool.dir/depend
 	$(MAKE) -f dvmc/tools/dvmc/CMakeFiles/dvmc-tool.dir/build.make dvmc/tools/dvmc/CMakeFiles/dvmc-tool.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ioc/rem/CC/src/dvm/CMakeFiles --progress-num=1,2 "Built target dvmc-tool"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ioc/DIONS/src/dvm/CMakeFiles --progress-num=1,2 "Built target dvmc-tool"
 .PHONY : dvmc/tools/dvmc/CMakeFiles/dvmc-tool.dir/all
 
 # Build rule for subdir invocation for target.
 dvmc/tools/dvmc/CMakeFiles/dvmc-tool.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/rem/CC/src/dvm/CMakeFiles 8
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/DIONS/src/dvm/CMakeFiles 8
 	$(MAKE) -f CMakeFiles/Makefile2 dvmc/tools/dvmc/CMakeFiles/dvmc-tool.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/rem/CC/src/dvm/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/DIONS/src/dvm/CMakeFiles 0
 .PHONY : dvmc/tools/dvmc/CMakeFiles/dvmc-tool.dir/rule
 
 # Convenience name for target.
@@ -575,14 +575,14 @@ dvmc/tools/dvmc/CMakeFiles/dvmc-tool.dir/clean:
 dvmc/tools/vmtester/CMakeFiles/dvmc-vmtester.dir/all: dvmc/lib/loader/CMakeFiles/loader.dir/all
 	$(MAKE) -f dvmc/tools/vmtester/CMakeFiles/dvmc-vmtester.dir/build.make dvmc/tools/vmtester/CMakeFiles/dvmc-vmtester.dir/depend
 	$(MAKE) -f dvmc/tools/vmtester/CMakeFiles/dvmc-vmtester.dir/build.make dvmc/tools/vmtester/CMakeFiles/dvmc-vmtester.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ioc/rem/CC/src/dvm/CMakeFiles --progress-num=3,4,5 "Built target dvmc-vmtester"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ioc/DIONS/src/dvm/CMakeFiles --progress-num=3,4,5 "Built target dvmc-vmtester"
 .PHONY : dvmc/tools/vmtester/CMakeFiles/dvmc-vmtester.dir/all
 
 # Build rule for subdir invocation for target.
 dvmc/tools/vmtester/CMakeFiles/dvmc-vmtester.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/rem/CC/src/dvm/CMakeFiles 5
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/DIONS/src/dvm/CMakeFiles 5
 	$(MAKE) -f CMakeFiles/Makefile2 dvmc/tools/vmtester/CMakeFiles/dvmc-vmtester.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/rem/CC/src/dvm/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/DIONS/src/dvm/CMakeFiles 0
 .PHONY : dvmc/tools/vmtester/CMakeFiles/dvmc-vmtester.dir/rule
 
 # Convenience name for target.
@@ -602,14 +602,14 @@ dvmc/tools/vmtester/CMakeFiles/dvmc-vmtester.dir/clean:
 lib/dvmone/CMakeFiles/dvmone-standalone.dir/all: lib/dvmone/CMakeFiles/dvmone.dir/all
 	$(MAKE) -f lib/dvmone/CMakeFiles/dvmone-standalone.dir/build.make lib/dvmone/CMakeFiles/dvmone-standalone.dir/depend
 	$(MAKE) -f lib/dvmone/CMakeFiles/dvmone-standalone.dir/build.make lib/dvmone/CMakeFiles/dvmone-standalone.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ioc/rem/CC/src/dvm/CMakeFiles --progress-num=22 "Built target dvmone-standalone"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ioc/DIONS/src/dvm/CMakeFiles --progress-num=22 "Built target dvmone-standalone"
 .PHONY : lib/dvmone/CMakeFiles/dvmone-standalone.dir/all
 
 # Build rule for subdir invocation for target.
 lib/dvmone/CMakeFiles/dvmone-standalone.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/rem/CC/src/dvm/CMakeFiles 16
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/DIONS/src/dvm/CMakeFiles 16
 	$(MAKE) -f CMakeFiles/Makefile2 lib/dvmone/CMakeFiles/dvmone-standalone.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/rem/CC/src/dvm/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/DIONS/src/dvm/CMakeFiles 0
 .PHONY : lib/dvmone/CMakeFiles/dvmone-standalone.dir/rule
 
 # Convenience name for target.
@@ -630,14 +630,14 @@ lib/dvmone/CMakeFiles/dvmone.dir/all: dvmc/lib/hex/CMakeFiles/hex.dir/all
 lib/dvmone/CMakeFiles/dvmone.dir/all: dvmc/lib/instructions/CMakeFiles/instructions.dir/all
 	$(MAKE) -f lib/dvmone/CMakeFiles/dvmone.dir/build.make lib/dvmone/CMakeFiles/dvmone.dir/depend
 	$(MAKE) -f lib/dvmone/CMakeFiles/dvmone.dir/build.make lib/dvmone/CMakeFiles/dvmone.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ioc/rem/CC/src/dvm/CMakeFiles --progress-num=6,7,8,9,10,11,12,13,14,15 "Built target dvmone"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ioc/DIONS/src/dvm/CMakeFiles --progress-num=6,7,8,9,10,11,12,13,14,15 "Built target dvmone"
 .PHONY : lib/dvmone/CMakeFiles/dvmone.dir/all
 
 # Build rule for subdir invocation for target.
 lib/dvmone/CMakeFiles/dvmone.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/rem/CC/src/dvm/CMakeFiles 15
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/DIONS/src/dvm/CMakeFiles 15
 	$(MAKE) -f CMakeFiles/Makefile2 lib/dvmone/CMakeFiles/dvmone.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/rem/CC/src/dvm/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/DIONS/src/dvm/CMakeFiles 0
 .PHONY : lib/dvmone/CMakeFiles/dvmone.dir/rule
 
 # Convenience name for target.
@@ -660,14 +660,14 @@ test/utils/CMakeFiles/testutils-dump.dir/all: lib/dvmone/CMakeFiles/dvmone.dir/a
 test/utils/CMakeFiles/testutils-dump.dir/all: test/utils/CMakeFiles/testutils.dir/all
 	$(MAKE) -f test/utils/CMakeFiles/testutils-dump.dir/build.make test/utils/CMakeFiles/testutils-dump.dir/depend
 	$(MAKE) -f test/utils/CMakeFiles/testutils-dump.dir/build.make test/utils/CMakeFiles/testutils-dump.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ioc/rem/CC/src/dvm/CMakeFiles --progress-num=53,54 "Built target testutils-dump"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ioc/DIONS/src/dvm/CMakeFiles --progress-num=53,54 "Built target testutils-dump"
 .PHONY : test/utils/CMakeFiles/testutils-dump.dir/all
 
 # Build rule for subdir invocation for target.
 test/utils/CMakeFiles/testutils-dump.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/rem/CC/src/dvm/CMakeFiles 19
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/DIONS/src/dvm/CMakeFiles 19
 	$(MAKE) -f CMakeFiles/Makefile2 test/utils/CMakeFiles/testutils-dump.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/rem/CC/src/dvm/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/DIONS/src/dvm/CMakeFiles 0
 .PHONY : test/utils/CMakeFiles/testutils-dump.dir/rule
 
 # Convenience name for target.
@@ -688,14 +688,14 @@ test/utils/CMakeFiles/testutils.dir/all: dvmc/lib/hex/CMakeFiles/hex.dir/all
 test/utils/CMakeFiles/testutils.dir/all: dvmc/lib/instructions/CMakeFiles/instructions.dir/all
 	$(MAKE) -f test/utils/CMakeFiles/testutils.dir/build.make test/utils/CMakeFiles/testutils.dir/depend
 	$(MAKE) -f test/utils/CMakeFiles/testutils.dir/build.make test/utils/CMakeFiles/testutils.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ioc/rem/CC/src/dvm/CMakeFiles --progress-num=51,52 "Built target testutils"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ioc/DIONS/src/dvm/CMakeFiles --progress-num=51,52 "Built target testutils"
 .PHONY : test/utils/CMakeFiles/testutils.dir/all
 
 # Build rule for subdir invocation for target.
 test/utils/CMakeFiles/testutils.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/rem/CC/src/dvm/CMakeFiles 7
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/DIONS/src/dvm/CMakeFiles 7
 	$(MAKE) -f CMakeFiles/Makefile2 test/utils/CMakeFiles/testutils.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/rem/CC/src/dvm/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/DIONS/src/dvm/CMakeFiles 0
 .PHONY : test/utils/CMakeFiles/testutils.dir/rule
 
 # Convenience name for target.
@@ -719,14 +719,14 @@ test/bench/CMakeFiles/dvmone-bench.dir/all: lib/dvmone/CMakeFiles/dvmone.dir/all
 test/bench/CMakeFiles/dvmone-bench.dir/all: test/utils/CMakeFiles/testutils.dir/all
 	$(MAKE) -f test/bench/CMakeFiles/dvmone-bench.dir/build.make test/bench/CMakeFiles/dvmone-bench.dir/depend
 	$(MAKE) -f test/bench/CMakeFiles/dvmone-bench.dir/build.make test/bench/CMakeFiles/dvmone-bench.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ioc/rem/CC/src/dvm/CMakeFiles --progress-num=16,17,18 "Built target dvmone-bench"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ioc/DIONS/src/dvm/CMakeFiles --progress-num=16,17,18 "Built target dvmone-bench"
 .PHONY : test/bench/CMakeFiles/dvmone-bench.dir/all
 
 # Build rule for subdir invocation for target.
 test/bench/CMakeFiles/dvmone-bench.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/rem/CC/src/dvm/CMakeFiles 22
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/DIONS/src/dvm/CMakeFiles 22
 	$(MAKE) -f CMakeFiles/Makefile2 test/bench/CMakeFiles/dvmone-bench.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/rem/CC/src/dvm/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/DIONS/src/dvm/CMakeFiles 0
 .PHONY : test/bench/CMakeFiles/dvmone-bench.dir/rule
 
 # Convenience name for target.
@@ -746,14 +746,14 @@ test/bench/CMakeFiles/dvmone-bench.dir/clean:
 test/internal_benchmarks/CMakeFiles/dvmone-bench-internal.dir/all:
 	$(MAKE) -f test/internal_benchmarks/CMakeFiles/dvmone-bench-internal.dir/build.make test/internal_benchmarks/CMakeFiles/dvmone-bench-internal.dir/depend
 	$(MAKE) -f test/internal_benchmarks/CMakeFiles/dvmone-bench-internal.dir/build.make test/internal_benchmarks/CMakeFiles/dvmone-bench-internal.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ioc/rem/CC/src/dvm/CMakeFiles --progress-num=19,20,21 "Built target dvmone-bench-internal"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ioc/DIONS/src/dvm/CMakeFiles --progress-num=19,20,21 "Built target dvmone-bench-internal"
 .PHONY : test/internal_benchmarks/CMakeFiles/dvmone-bench-internal.dir/all
 
 # Build rule for subdir invocation for target.
 test/internal_benchmarks/CMakeFiles/dvmone-bench-internal.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/rem/CC/src/dvm/CMakeFiles 3
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/DIONS/src/dvm/CMakeFiles 3
 	$(MAKE) -f CMakeFiles/Makefile2 test/internal_benchmarks/CMakeFiles/dvmone-bench-internal.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/rem/CC/src/dvm/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/DIONS/src/dvm/CMakeFiles 0
 .PHONY : test/internal_benchmarks/CMakeFiles/dvmone-bench-internal.dir/rule
 
 # Convenience name for target.
@@ -776,14 +776,14 @@ test/unittests/CMakeFiles/dvmone-unittests.dir/all: lib/dvmone/CMakeFiles/dvmone
 test/unittests/CMakeFiles/dvmone-unittests.dir/all: test/utils/CMakeFiles/testutils.dir/all
 	$(MAKE) -f test/unittests/CMakeFiles/dvmone-unittests.dir/build.make test/unittests/CMakeFiles/dvmone-unittests.dir/depend
 	$(MAKE) -f test/unittests/CMakeFiles/dvmone-unittests.dir/build.make test/unittests/CMakeFiles/dvmone-unittests.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ioc/rem/CC/src/dvm/CMakeFiles --progress-num=23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43 "Built target dvmone-unittests"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/ioc/DIONS/src/dvm/CMakeFiles --progress-num=23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43 "Built target dvmone-unittests"
 .PHONY : test/unittests/CMakeFiles/dvmone-unittests.dir/all
 
 # Build rule for subdir invocation for target.
 test/unittests/CMakeFiles/dvmone-unittests.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/rem/CC/src/dvm/CMakeFiles 38
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/DIONS/src/dvm/CMakeFiles 38
 	$(MAKE) -f CMakeFiles/Makefile2 test/unittests/CMakeFiles/dvmone-unittests.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/rem/CC/src/dvm/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/ioc/DIONS/src/dvm/CMakeFiles 0
 .PHONY : test/unittests/CMakeFiles/dvmone-unittests.dir/rule
 
 # Convenience name for target.

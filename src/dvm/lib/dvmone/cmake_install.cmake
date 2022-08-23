@@ -1,4 +1,4 @@
-# Install script for directory: /home/ioc/rem/CC/src/dvm/lib/dvmone
+# Install script for directory: /home/ioc/DIONS/src/dvm/lib/dvmone
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

@@ -6,13 +6,13 @@
 
 #IncludeRegexTransform: 
 
-/home/ioc/rem/CC/src/dvm/test/utils/utils.cpp
+/home/ioc/DIONS/src/dvm/test/utils/utils.cpp
 utils.hpp
-/home/ioc/rem/CC/src/dvm/test/utils/utils.hpp
+/home/ioc/DIONS/src/dvm/test/utils/utils.hpp
 regex
 -
 
-/home/ioc/rem/CC/src/dvm/test/utils/utils.hpp
+/home/ioc/DIONS/src/dvm/test/utils/utils.hpp
 dvmc/hex.hpp
 -
 

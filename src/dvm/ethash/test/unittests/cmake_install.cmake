@@ -1,4 +1,4 @@
-# Install script for directory: /home/ioc/rem/CC/src/dvm/ethash/test/unittests
+# Install script for directory: /home/ioc/DIONS/src/dvm/ethash/test/unittests
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

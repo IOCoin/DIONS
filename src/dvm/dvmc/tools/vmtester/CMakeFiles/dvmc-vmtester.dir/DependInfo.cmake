@@ -4,8 +4,8 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/home/ioc/rem/CC/src/dvm/dvmc/tools/vmtester/tests.cpp" "/home/ioc/rem/CC/src/dvm/dvmc/tools/vmtester/CMakeFiles/dvmc-vmtester.dir/tests.cpp.o"
-  "/home/ioc/rem/CC/src/dvm/dvmc/tools/vmtester/vmtester.cpp" "/home/ioc/rem/CC/src/dvm/dvmc/tools/vmtester/CMakeFiles/dvmc-vmtester.dir/vmtester.cpp.o"
+  "/home/ioc/DIONS/src/dvm/dvmc/tools/vmtester/tests.cpp" "/home/ioc/DIONS/src/dvm/dvmc/tools/vmtester/CMakeFiles/dvmc-vmtester.dir/tests.cpp.o"
+  "/home/ioc/DIONS/src/dvm/dvmc/tools/vmtester/vmtester.cpp" "/home/ioc/DIONS/src/dvm/dvmc/tools/vmtester/CMakeFiles/dvmc-vmtester.dir/vmtester.cpp.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 
@@ -22,7 +22,7 @@ set(CMAKE_CXX_TARGET_INCLUDE_PATH
 
 # Targets to which this target links.
 set(CMAKE_TARGET_LINKED_INFO_FILES
-  "/home/ioc/rem/CC/src/dvm/dvmc/lib/loader/CMakeFiles/loader.dir/DependInfo.cmake"
+  "/home/ioc/DIONS/src/dvm/dvmc/lib/loader/CMakeFiles/loader.dir/DependInfo.cmake"
   )
 
 # Fortran module output directory.

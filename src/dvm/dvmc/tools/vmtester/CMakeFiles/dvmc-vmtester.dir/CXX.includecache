@@ -332,9 +332,9 @@ cxxabi.h
 acxx_demangle.h
 -
 
-/home/ioc/rem/CC/src/dvm/dvmc/tools/vmtester/tests.cpp
+/home/ioc/DIONS/src/dvm/dvmc/tools/vmtester/tests.cpp
 vmtester.hpp
-/home/ioc/rem/CC/src/dvm/dvmc/tools/vmtester/vmtester.hpp
+/home/ioc/DIONS/src/dvm/dvmc/tools/vmtester/vmtester.hpp
 dvmc/dvmc.hpp
 -
 dvmc/transitional_node.hpp
@@ -344,9 +344,9 @@ array
 cstring
 -
 
-/home/ioc/rem/CC/src/dvm/dvmc/tools/vmtester/vmtester.cpp
+/home/ioc/DIONS/src/dvm/dvmc/tools/vmtester/vmtester.cpp
 vmtester.hpp
-/home/ioc/rem/CC/src/dvm/dvmc/tools/vmtester/vmtester.hpp
+/home/ioc/DIONS/src/dvm/dvmc/tools/vmtester/vmtester.hpp
 dvmc/dvmc.hpp
 -
 dvmc/loader.h
@@ -354,7 +354,7 @@ dvmc/loader.h
 iostream
 -
 
-/home/ioc/rem/CC/src/dvm/dvmc/tools/vmtester/vmtester.hpp
+/home/ioc/DIONS/src/dvm/dvmc/tools/vmtester/vmtester.hpp
 dvmc/dvmc.hpp
 -
 gtest/gtest.h

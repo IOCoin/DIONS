@@ -6,5 +6,5 @@ CXX_FLAGS = -O3 -DNDEBUG -fPIC -fvisibility=hidden -fvisibility-inlines-hidden  
 
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/home/ioc/rem/CC/src/dvm -I/home/ioc/rem/CC/src/dvm/dvmc/include 
+CXX_INCLUDES = -I/home/ioc/DIONS/src/dvm -I/home/ioc/DIONS/src/dvm/dvmc/include 
 

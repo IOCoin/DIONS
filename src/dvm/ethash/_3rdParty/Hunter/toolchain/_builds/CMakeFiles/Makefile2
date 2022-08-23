@@ -44,10 +44,10 @@ RM = /usr/local/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/ioc/rem/CC/src/dvm/ethash/_3rdParty/Hunter/toolchain
+CMAKE_SOURCE_DIR = /home/ioc/DIONS/src/dvm/ethash/_3rdParty/Hunter/toolchain
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/ioc/rem/CC/src/dvm/ethash/_3rdParty/Hunter/toolchain/_builds
+CMAKE_BINARY_DIR = /home/ioc/DIONS/src/dvm/ethash/_3rdParty/Hunter/toolchain/_builds
 
 #=============================================================================
 # Directory level rules for the build root directory

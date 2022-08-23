@@ -6,25 +6,25 @@
 
 #IncludeRegexTransform: 
 
-/home/ioc/rem/CC/src/dvm/ethash/lib/ethash/endianness.hpp
+/home/ioc/DIONS/src/dvm/ethash/lib/ethash/endianness.hpp
 ../support/attributes.h
-/home/ioc/rem/CC/src/dvm/ethash/lib/support/attributes.h
+/home/ioc/DIONS/src/dvm/ethash/lib/support/attributes.h
 ethash/ethash.hpp
 -
 stdlib.h
 -
 
-/home/ioc/rem/CC/src/dvm/ethash/lib/support/attributes.h
+/home/ioc/DIONS/src/dvm/ethash/lib/support/attributes.h
 
-/home/ioc/rem/CC/src/dvm/ethash/test/experimental/difficulty.cpp
+/home/ioc/DIONS/src/dvm/ethash/test/experimental/difficulty.cpp
 difficulty.h
-/home/ioc/rem/CC/src/dvm/ethash/test/experimental/difficulty.h
+/home/ioc/DIONS/src/dvm/ethash/test/experimental/difficulty.h
 ../../lib/ethash/endianness.hpp
-/home/ioc/rem/CC/src/dvm/ethash/lib/ethash/endianness.hpp
+/home/ioc/DIONS/src/dvm/ethash/lib/ethash/endianness.hpp
 intrin.h
 -
 
-/home/ioc/rem/CC/src/dvm/ethash/test/experimental/difficulty.h
+/home/ioc/DIONS/src/dvm/ethash/test/experimental/difficulty.h
 ethash/hash_types.h
 -
 

@@ -1,4 +1,4 @@
-# Install script for directory: /home/ioc/rem/CC/src/dvm/test
+# Install script for directory: /home/ioc/DIONS/src/dvm/test
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -39,11 +39,11 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("/home/ioc/rem/CC/src/dvm/test/utils/cmake_install.cmake")
-  include("/home/ioc/rem/CC/src/dvm/test/bench/cmake_install.cmake")
-  include("/home/ioc/rem/CC/src/dvm/test/integration/cmake_install.cmake")
-  include("/home/ioc/rem/CC/src/dvm/test/internal_benchmarks/cmake_install.cmake")
-  include("/home/ioc/rem/CC/src/dvm/test/unittests/cmake_install.cmake")
+  include("/home/ioc/DIONS/src/dvm/test/utils/cmake_install.cmake")
+  include("/home/ioc/DIONS/src/dvm/test/bench/cmake_install.cmake")
+  include("/home/ioc/DIONS/src/dvm/test/integration/cmake_install.cmake")
+  include("/home/ioc/DIONS/src/dvm/test/internal_benchmarks/cmake_install.cmake")
+  include("/home/ioc/DIONS/src/dvm/test/unittests/cmake_install.cmake")
 
 endif()
 

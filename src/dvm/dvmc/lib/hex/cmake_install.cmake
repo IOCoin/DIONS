@@ -1,4 +1,4 @@
-# Install script for directory: /home/ioc/rem/CC/src/dvm/dvmc/lib/hex
+# Install script for directory: /home/ioc/DIONS/src/dvm/dvmc/lib/hex
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

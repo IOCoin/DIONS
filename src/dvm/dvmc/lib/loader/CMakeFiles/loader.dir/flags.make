@@ -6,5 +6,5 @@ C_FLAGS = -O3 -DNDEBUG -fPIC
 
 C_DEFINES = 
 
-C_INCLUDES = -I/home/ioc/rem/CC/src/dvm/dvmc/include 
+C_INCLUDES = -I/home/ioc/DIONS/src/dvm/dvmc/include 
 
