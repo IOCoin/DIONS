@@ -12,6 +12,8 @@ Features:
 *   candidate v1 - batch integration test 
 *   TODO -> main branch add release notes - blastdoor7 
 *        -> (deprecated) pre dvm-SM network version frozen under branch main-legacy
+*  Decentralized named abstract accounts
+*  TODO : configure options for randomize and preferential address
 *  running solidity compiled byte code 
 *  (thereby offering also full functional smart contract compatibility with ethereum for example ERC20,NFTs etc)
 * Symbol: IOC
