@@ -13,8 +13,18 @@
 #include "net.h"
 #include "script.h"
 #include "hashblock.h"
+#include <dvmc/dvmc.h>
+#include <dvmc/dvmc.hpp>
+#include <dvmc/hex.hpp>
+#include "ptrie/TrieDB.h"
+#include "ptrie/StateCacheDB.h"
+#include "ptrie/OverlayDB.h"
+#include "ptrie/Address.h"
+#include "ptrie/Account.h"
+#include "ptrie/DBFactory.h"
 
 #include <list>
+
 
 
 class __wx__;
@@ -72,10 +82,14 @@ static const unsigned int MAX_TX_INFO_LEN = 140; // Like Twitter
 static const int64_t MIN_COIN_YEAR_REWARD = 1 * CENT; // 1% per year
 static const int64_t MAX_COIN_YEAR_REWARD = 3 * CENT; // 3% per year
 
-
+//blastdoor7 note : TODO abstract to polymorphic and sub class
 static const uint256 hashGenesisBlock("0x00000afad2d5833b50b59a9784fdc59869b688680e1670a52c52e3c2c04c1fe8");
-static const uint256 hashGenesisBlockTestNet("5f97300cd3dc3d2215dd38ce6d99bf7d5984bb62b2777060d3b5564298bd5484");
 static const uint256 hashGenesisMerkleRoot("0xcd5029ac01fb6cd7da8ff00ff1e82f3aca6bf3ecce5fb60623ee807fa83d1795");
+static const dev::h256 hashGenesisStateRoot("d7f8974fb5ac78d9ac099b9ad5018bedc2ce0a72dad1827a1709da30580f0544");
+
+//Test net
+static const uint256 hashGenesisBlockTestNet("5f97300cd3dc3d2215dd38ce6d99bf7d5984bb62b2777060d3b5564298bd5484");
+static const dev::h256 hashGenesisStateRootTestNet("56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421");
 
 const int SHADE_FEATURE_UPDATE = 75 * 500 + 1860837;
 const int BASELINE_LOCK = 0x00ff0;
@@ -954,6 +968,7 @@ public:
     unsigned int nTime;
     unsigned int nBits;
     unsigned int nNonce;
+    dev::h256 hashStateRoot;
 
     // network and disk
     std::vector<CTransaction> vtx;
@@ -1723,3 +1738,5 @@ public:
 extern CTxMemPool mempool;
 
 #endif
+
+
