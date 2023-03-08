@@ -1,6 +1,4 @@
 
-
-
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2012 The Bitcoin developers
 // Distributed under the MIT/X11 software license, see the accompanying
@@ -19,6 +17,8 @@
 #include <boost/interprocess/sync/file_lock.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <openssl/crypto.h>
+#include "ptrie/DBFactory.h"
+#include "ptrie/OverlayDB.h"
 
 #include "main.h"
 
@@ -42,6 +42,7 @@ string strDNSSeedNode;
 bool fUseFastIndex;
 enum Checkpoints::CPMode CheckpointsMode;
 LocatorNodeDB* ln1Db = NULL;
+dev::OverlayDB* overlayDB_ = NULL;
 //////////////////////////////////////////////////////////////////////////////
 //
 // Shutdown
@@ -711,6 +712,47 @@ bool AppInit2()
     BOOST_FOREACH(string strDest, mapMultiArgs["-seednode"])
     AddOneShot(strDest);
 
+    try
+    {
+        fprintf(stdout, "Opening state database\n");
+        std::unique_ptr<dev::db::DatabaseFace> db = dev::db::DBFactory::create(GetDataDir() / "state");
+        overlayDB_ = new dev::OverlayDB(std::move(db));
+    }
+    catch (boost::exception const& ex)
+    {
+        if (dev::db::isDiskDatabase())
+        {
+            fprintf(stdout, "Error opening state database\n");
+            dev::db::DatabaseStatus const dbStatus =
+                *boost::get_error_info<dev::db::errinfo_dbStatusCode>(ex);
+            if (boost::filesystem::space(GetDataDir() / "state").available < 1024)
+            {
+                return InitError("Insufficient disk space : "
+                                 "Not enough available space on hard drive."
+                                 "Please back up disk first - free up some space and then re run. Exiting.");
+            }
+            else if (dbStatus == dev::db::DatabaseStatus::Corruption)
+            {
+                fprintf(stdout, "Database corruption detected. Please see the exception for corruption "
+                        "details. Exception: %s\n", boost::diagnostic_information(ex));
+                throw runtime_error("Database corruption");
+                string msg = strprintf(_(
+                                           " Database corruption detected. Details : Exception %s\n"
+                                       ), boost::diagnostic_information(ex));
+                return InitError(msg);
+            }
+            else if (dbStatus == dev::db::DatabaseStatus::IOError)
+            {
+                return InitError("Database already open. You appear to have "
+                                 "another instance running on the same data path.");
+            }
+        }
+        string msg = strprintf(_(
+                                   "statedb: Unknown error encountered when opening state database. Details : Exception %s\n"
+                               ), boost::diagnostic_information(ex));
+        return InitError(msg);
+    }
+
     // ********************************************************* Step 7: load blockchain
 
     if (!bitdb.Open(GetDataDir()))
@@ -865,11 +907,11 @@ bool AppInit2()
 
     if(GetBoolArg("-xscan"))
     {
-	    boost::filesystem::path dc = GetDataDir() / "aliascache.dat";
+        boost::filesystem::path dc = GetDataDir() / "aliascache.dat";
         FILE *file = fopen(dc.string().c_str(), "rb");
         if (file)
         {
-		boost::filesystem::path dc__ = GetDataDir() / "aliascache.dat.old";
+            boost::filesystem::path dc__ = GetDataDir() / "aliascache.dat.old";
             RenameOver(dc, dc__);
         }
     }
@@ -925,7 +967,7 @@ bool AppInit2()
 
         FILE *file = fopen(pathBootstrap.string().c_str(), "rb");
         if (file) {
-		boost::filesystem::path pathBootstrapOld = GetDataDir() / "bootstrap.dat.old";
+            boost::filesystem::path pathBootstrapOld = GetDataDir() / "bootstrap.dat.old";
             LoadExternalBlockFile(file);
             RenameOver(pathBootstrap, pathBootstrapOld);
         }
