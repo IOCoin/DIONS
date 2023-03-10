@@ -714,7 +714,7 @@ bool AppInit2()
 
     try
     {
-        fprintf(stdout, "Opening state database\n");
+        printf("Opening state database...\n");
         std::unique_ptr<dev::db::DatabaseFace> db = dev::db::DBFactory::create(GetDataDir() / "state");
         overlayDB_ = new dev::OverlayDB(std::move(db));
     }
@@ -722,7 +722,7 @@ bool AppInit2()
     {
         if (dev::db::isDiskDatabase())
         {
-            fprintf(stdout, "Error opening state database\n");
+            printf("Error opening state database\n");
             dev::db::DatabaseStatus const dbStatus =
                 *boost::get_error_info<dev::db::errinfo_dbStatusCode>(ex);
             if (boost::filesystem::space(GetDataDir() / "state").available < 1024)
@@ -733,7 +733,7 @@ bool AppInit2()
             }
             else if (dbStatus == dev::db::DatabaseStatus::Corruption)
             {
-                fprintf(stdout, "Database corruption detected. Please see the exception for corruption "
+                printf("Database corruption detected. Please see the exception for corruption "
                         "details. Exception: %s\n", boost::diagnostic_information(ex));
                 throw runtime_error("Database corruption");
                 string msg = strprintf(_(
