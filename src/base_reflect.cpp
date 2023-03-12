@@ -851,7 +851,9 @@ Value integratedTest3(const Array& params, bool fHelp)
      {
         if (dev::h256 root = retrievedAcc.baseRoot())
         {
+		//trans set  - test case - cast
 		dev::SecureTrieDB<dev::h256, dev::OverlayDB> memdb(const_cast<dev::OverlayDB*>(overlayDB_), root);
+
 
             for (auto it = memdb.hashedBegin(); it != memdb.hashedEnd(); ++it)
             {
