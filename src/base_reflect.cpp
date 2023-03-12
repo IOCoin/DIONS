@@ -855,6 +855,7 @@ Value integratedTest3(const Array& params, bool fHelp)
 		dev::SecureTrieDB<dev::h256, dev::OverlayDB> memdb(const_cast<dev::OverlayDB*>(overlayDB_), root);
 
 
+		//trans set  - test case - recon 
             for (auto it = memdb.hashedBegin(); it != memdb.hashedEnd(); ++it)
             {
 		    dev::h256 const hashedKey((*it).first);
