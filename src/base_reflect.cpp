@@ -67,6 +67,7 @@ extern string txRelay(const CScript& scriptPubKey, int64_t nValue, const __wx__T
 extern bool aliasAddress(const CTransaction& tx, std::string& strAddress);
 extern Object JSONRPCError(int code, const string& message);
 extern Value xtu_url__(const string& url);
+dev::OverlayDB* overlayDB_;
 template<typename T> void ConvertTo(Value& value, bool fAllowNull=false);
 
 std::map<vchType, uint256> mapMyMessages_cycle;
@@ -473,8 +474,7 @@ Value integratedTest1(const Array& params, bool fHelp)
     }
 
     std::unique_ptr<dev::db::DatabaseFace> db = dev::db::DBFactory::create("/home/argon/data1/testnet/state");
-    auto overlay_db = dev::OverlayDB(std::move(db));
-    dev::SecureTrieDB<dev::Address, dev::OverlayDB> state(&overlay_db);
+    dev::SecureTrieDB<dev::Address, dev::OverlayDB> state(overlayDB_);
     state.init();
     dev::Address tmpAddr("9999999999999996789012345678901234567890");
     dev::eth::Account tmpAcc(0,0);
@@ -521,7 +521,7 @@ Value integratedTest1(const Array& params, bool fHelp)
 
     s << tmpAcc.codeHash();
     state.insert(tmpAddr, &s.out());
-    overlay_db.commit();
+    overlayDB_.commit();
   }
      auto created_acc = host.accounts[create_address];
      dvmc::TransitionalNode account_recon;
@@ -577,7 +577,7 @@ Value integratedTest1(const Array& params, bool fHelp)
 
      {
         {
-		dev::SecureTrieDB<dev::h256, dev::OverlayDB> memdb(const_cast<dev::OverlayDB*>(&overlay_db), tmpAccstorageRoot);
+		dev::SecureTrieDB<dev::h256, dev::OverlayDB> memdb(const_cast<dev::OverlayDB*>(overlayDB_), tmpAccstorageRoot);
 
             for (auto it = memdb.hashedBegin(); it != memdb.hashedEnd(); ++it)
             {
@@ -725,8 +725,6 @@ Value integratedTest2(const Array& params, bool fHelp)
         fs::create_directories("/home/argon/data1/testnet/state");
         fs::permissions("/home/argon/data1/testnet/state", fs::owner_all);
     std::unique_ptr<dev::db::DatabaseFace> db = dev::db::DBFactory::create("/home/argon/data1/testnet/state");
-    auto overlay_db = dev::OverlayDB(std::move(db));
-    dev::SecureTrieDB<dev::Address, dev::OverlayDB> state(&overlay_db);
     std::unordered_map<dev::Address, dev::eth::Account> m_cache;
 
     state.init();
@@ -794,7 +792,7 @@ Value integratedTest2(const Array& params, bool fHelp)
     auto const codeHash_ = rlp_state_[3].toHash<dev::h256>();
             }
 
-	    overlay_db.commit();
+	    overlayDB_.commit();
     string account_str = state.at(tmpAddr);
     dev::h256 storageRoot__("650276fe18bc32afd3f79fc876c678269635c037e52f178402cfaf1a0c6ea911");
 
@@ -828,8 +826,7 @@ Value integratedTest3(const Array& params, bool fHelp)
  dev::h256 root("ac7ed96f9c8ced36cb005661a0083cd2284e1487c578e4ffbfa4f2550fcfd947");
 
 
-    auto overlay_db = dev::OverlayDB(std::move(db));
-    dev::SecureTrieDB<dev::Address, dev::OverlayDB> state(&overlay_db);
+    dev::SecureTrieDB<dev::Address, dev::OverlayDB> state(overlayDB_);
 
     state.setRoot(root);
     std::cout << "integratedTest3 state root after db open " << state.root() << std::endl;
@@ -854,7 +851,7 @@ Value integratedTest3(const Array& params, bool fHelp)
      {
         if (dev::h256 root = retrievedAcc.baseRoot())
         {
-		dev::SecureTrieDB<dev::h256, dev::OverlayDB> memdb(const_cast<dev::OverlayDB*>(&overlay_db), root);
+		dev::SecureTrieDB<dev::h256, dev::OverlayDB> memdb(const_cast<dev::OverlayDB*>(overlayDB_), root);
 
             for (auto it = memdb.hashedBegin(); it != memdb.hashedEnd(); ++it)
             {
