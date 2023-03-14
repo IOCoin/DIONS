@@ -41,6 +41,7 @@ extern bool collisionReference(const string& s, uint256& wtxInHash,string&);
 extern bool validate_serial_trc_n(const string&, const string&,__wx__Tx&);
 extern bool read_serial_trc_n(const string&, const string&, __wx__Tx&);
 extern __wx__Tx generateUpdate(const string& origin);
+extern dev::OverlayDB* overlayDB_;
 string ADDRESS    = "value";
 string DESCRIPTOR = "descriptor";
 int static FormatHashBlocks(void* pbuffer, unsigned int len)
@@ -320,7 +321,15 @@ CBlock* CreateNewBlock(__wx__* pwallet, bool fProofOfStake, int64_t* pFees)
 		if(f != true)
                   continue;
 
+		CKeyID keyID;
+                cAddr_.GetKeyID(keyID); 
+                dev::Address acc_target(keyID.GetHex().c_str());
+
+                dev::SecureTrieDB<dev::Address, dev::OverlayDB> state(overlayDB_);
+                string acc = state.at(acc_target);
+                dev::RLP rlp_state(acc,0);
 		string code_hex_str = contractCode;
+                auto const storageRoot = rlp_state[2].toHash<dev::h256>();
                 uint256 r;
                 string val;
                 if(!collisionReference(DESCRIPTOR + "_" + target_contract,r,val))
