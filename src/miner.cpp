@@ -332,6 +332,66 @@ CBlock* CreateNewBlock(__wx__* pwallet, bool fProofOfStake, int64_t* pFees)
                 auto const storageRoot = rlp_state[2].toHash<dev::h256>();
                 uint256 r;
                 string val;
+
+		//Construct target acc
+                dev::SecureTrieDB<dev::Address, dev::OverlayDB> state(overlayDB_);
+                string acc_ser = state.at(acc_target);
+                dev::RLP rlp_state(acc_ser,0);
+                auto const relay = rlp_state[0].toInt<dev::u256>();
+                auto const cache_b1 = rlp_state[1].toInt<dev::u256>();
+                auto const cache_b2 = rlp_state[3].toHash<dev::h256>();
+                uint256 r;
+                string val;
+                dvmc::TransitionalNode recon;
+                {
+                    map<dev::h256, pair<dev::bytes, dev::bytes>> ret_;
+                    ret_.clear();
+                    {
+                        {
+                            dev::SecureTrieDB<dev::h256, dev::OverlayDB> memdb(const_cast<dev::OverlayDB*>(overlayDB_), tmpAccstorageRoot);
+
+                            for (auto it = memdb.hashedBegin(); it != memdb.hashedEnd(); ++it)
+                            {
+                                dev::h256 const hashedKey((*it).first);
+                                auto const key = it.key();
+                                dev::bytes const value = dev::RLP((*it).second).toBytes();
+                                ret_[hashedKey] = make_pair(key, value);
+                            }
+                        }
+                    }
+                    std::unordered_map<dvmc::bytes32, dvmc::storage_value>& storage_recon = recon.storage;
+                    for(auto i_ : ret_)
+                    {
+                        dvmc::bytes32 reconKey;
+                        dev::bytes key = i_.second.first;
+                        for(int idx=0; idx<32; idx++)
+                            reconKey.bytes[idx] = key[idx];
+                        dvmc::storage_value sv;
+                        for(int idx=0; idx<32; idx++)
+                            sv.value.bytes[idx] = i_.second.second[idx];
+
+                        storage_recon[reconKey] = sv;
+                    }
+                }
+                {
+                    testGen(recon,code_hex_str);
+                    dvmc::VertexNode vTrans;
+                    dvmc_address init_addr;
+                    uint160 h160;
+                    AddressToHash160(cAddr_.ToString(),h160);
+                    memcpy(create_address.bytes,h160.pn,20);
+                    vTrans.accounts[init_addr] = recon;
+                    const auto input = dvmc::from_hex(contract_input);
+                    dvmc_message msg{};
+                    msg.recipient = init_addr;
+                    msg.track = std::numeric_limits<int64_t>::max();
+                    msg.input_data = input.data();
+                    msg.input_size = input.size();
+                    dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
+                    dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
+                    const auto result = vm.retrieve_desc_vx(vTrans, rev, msg, recon.code.data(), recon.code.size());
+                    dvmc::TransitionalNode vecAcc = vTrans.accounts[init_addr];
+                }
                 if(!collisionReference(DESCRIPTOR + "_" + target_contract,r,val))
                 {
                     dvmc::VertexNode vTrans;
