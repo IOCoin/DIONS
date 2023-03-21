@@ -391,7 +391,35 @@ CBlock* CreateNewBlock(__wx__* pwallet, bool fProofOfStake, int64_t* pFees)
                     dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
                     const auto result = vm.retrieve_desc_vx(vTrans, rev, msg, recon.code.data(), recon.code.size());
                     dvmc::TransitionalNode vecAcc = vTrans.accounts[init_addr];
+                    dev::SecureTrieDB<dev::Address, dev::OverlayDB> state(overlayDB_);
+                    {
+                        dev::RLPStream s(4);
+                        {
+                            dev::SecureTrieDB<dev::h256, dev::StateCacheDB> storageDB(state.db(), retrievedAcc.baseRoot());
+                            for(auto pair : vecAcc.storage)
+                            {
+                                auto storage_key = pair.first.bytes;
+                                dev::bytes key;
+                                for(int i=0; i<32; i++)
+                                    key.push_back(storage_key[i]);
+
+                                dev::h256 key256(key);
+
+                                auto storage_bytes = pair.second.value;
+                                dev::bytes val;
+                                for(int i=0; i<32; i++)
+                                    val.push_back(storage_bytes.bytes[i]);
+                                storageDB.insert(key256, dev::rlp(val));
+                            }
+                            s << storageDB.root();
+                        }
+
+                        s << retrievedAcc.codeHash();
+                        state.insert(acc_target, &s.out());
+                        overlayDB_->commit();
+                    }
                 }
+		//Post correlate cycle tx data and link
                 if(!collisionReference(DESCRIPTOR + "_" + target_contract,r,val))
                 {
                     dvmc::VertexNode vTrans;
