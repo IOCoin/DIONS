@@ -186,6 +186,62 @@ bool vertex_serial_n_cycle(const string& origin, const string& data, __wx__Tx& s
     return true;
 }
 
+bool sectionVertex(const string& path, string& reference)
+{
+    bool found=false;
+    LocatorNodeDB ln1Db("r");
+
+    Dbc* cursorp;
+    try
+    {
+        cursorp = ln1Db.GetCursor();
+
+        Dbt key, data;
+        int ret;
+
+        while ((ret = cursorp->get(&key, &data, DB_NEXT)) == 0)
+        {
+            CDataStream ssKey(SER_DISK, CLIENT_VERSION);
+            ssKey.write((char*)key.get_data(), key.get_size());
+
+            string k1;
+            ssKey >> k1;
+            if(k1 == "alias_")
+            {
+                Object o;
+                vchType k2;
+                ssKey >> k2;
+                string a = stringFromVch(k2);
+                if(a == path)
+                {
+                    vector<PathIndex> vtxPos;
+                    CDataStream ssValue((char*)data.get_data(), (char*)data.get_data() + data.get_size(), SER_DISK, CLIENT_VERSION);
+                    ssValue >> vtxPos;
+
+                    PathIndex i = vtxPos.back();
+                    string i_address = i.vAddress;
+                    reference = stringFromVch(i.vValue);
+                    found=true;
+
+                }
+            }
+        }
+    }
+    catch(DbException &e)
+    {
+        //ln1Db.err(e.get_errno(), "Error!");
+    }
+    catch(std::exception &e)
+    {
+        //ln1Db.errx("Error! %s", e.what());
+    }
+
+    if (cursorp != NULL)
+        cursorp->close();
+
+    return found;
+}
+
 Value decryptPath_cycle(const Array& params, bool fHelp)
 {
     if(fHelp || params.size() != 3)
