@@ -1621,6 +1621,16 @@ Value integratedTest5(const Array& params, bool fHelp)
         LocatorNodeDB transSetup__("r+");
         transSetup__.lPut(vchFromString(ctrN), vtxPos);
     }
+    {
+        std::string refStr = ctrN + ":" + "0x18160ddd";
+        std::string executableTxName = "executable_test_0x18160ddd";
+        __wx__Tx vertex;
+        vertex_serial_aux_cycle(executableTxName, refStr, vertex);
+
+        testTxVector.push_back(vertex);
+    }
+
+	    sectionTest(testTxVector);
 
     vector<Value> res;
     return res;
