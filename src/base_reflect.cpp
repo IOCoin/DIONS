@@ -374,23 +374,8 @@ bool section_vertex_serial_n(const string& origin, const string& data, __wx__Tx&
     scriptPubKey << OP_BASE_SET << vchPath << vchValue << OP_2DROP << OP_DROP;
     scriptPubKey += scriptPubKeyOrig;
 
-    //ENTER_CRITICAL_SECTION(cs_main)
-    //{
-    //    EnsureWalletIsUnlocked();
-
-    //    string strError = pwalletMain->SendMoney__(scriptPubKey, CTRL__, serial_n, false);
     vector< pair<CScript, int64_t> > vecSend;
     vecSend.push_back(make_pair(scriptPubKey, CTRL__));
-
-
-    //    if(strError != "")
-    //    {
-    //        LEAVE_CRITICAL_SECTION(cs_main)
-    //        throw JSONRPCError(RPC_WALLET_ERROR, strError);
-    //    }
-    //    mapLocator[vchPath] = serial_n.GetHash();
-    //}
-    //LEAVE_CRITICAL_SECTION(cs_main)
 
     return true;
 }
@@ -686,10 +671,9 @@ Value integratedTest1(const Array& params, bool fHelp)
         msg.recipient = create_address;
         exec_code = created_account.code;
     }
-    //totalSupply
     {
         std::cout << "\n";
-        const auto input = dvmc::from_hex("0x18160ddd"); //totalSupply
+        const auto input = dvmc::from_hex("0x18160ddd"); 
         msg.input_data = input.data();
         msg.input_size = input.size();
 
@@ -703,10 +687,9 @@ Value integratedTest1(const Array& params, bool fHelp)
         if (result.status_code == DVMC_SUCCESS || result.status_code == DVMC_REVERT)
             std::cout << "Output:   " << dvmc::hex({result.output_data, result.output_size}) << "\n";
     }
-    //burn
     {
         std::cout << "\n";
-        const auto input = dvmc::from_hex("0x42966c68000000000000000000000000000000000000000000000000000000000000029a"); //burn
+        const auto input = dvmc::from_hex("0x42966c68000000000000000000000000000000000000000000000000000000000000029a");
         msg.input_data = input.data();
         msg.input_size = input.size();
 
@@ -720,10 +703,9 @@ Value integratedTest1(const Array& params, bool fHelp)
         if (result.status_code == DVMC_SUCCESS || result.status_code == DVMC_REVERT)
             std::cout << "Output:   " << dvmc::hex({result.output_data, result.output_size}) << "\n";
     }
-    //totalSupply
     {
         std::cout << "\n";
-        const auto input = dvmc::from_hex("0x18160ddd"); //totalSupply
+        const auto input = dvmc::from_hex("0x18160ddd"); 
         msg.input_data = input.data();
         msg.input_size = input.size();
 
@@ -737,10 +719,8 @@ Value integratedTest1(const Array& params, bool fHelp)
         if (result.status_code == DVMC_SUCCESS || result.status_code == DVMC_REVERT)
             std::cout << "integratedTest1 : Output:   " << dvmc::hex({result.output_data, result.output_size}) << "\n";
     }
-    //approve
     {
-        //std::cout << "\n";
-        const auto input = dvmc::from_hex("0x095ea7b30000000000000000000000005b38da6a701c568545dcfcb03fcb875f56beddc40000000000000000000000000000000000000000000000000000000000000050"); //approve spender,amount
+        const auto input = dvmc::from_hex("0x095ea7b30000000000000000000000005b38da6a701c568545dcfcb03fcb875f56beddc40000000000000000000000000000000000000000000000000000000000000050");
         msg.sender = test_sender_address;
         msg.input_data = input.data();
         msg.input_size = input.size();
@@ -753,10 +733,9 @@ Value integratedTest1(const Array& params, bool fHelp)
         std::cout << "integratedTest1 : Result:   " << result.status_code << "\nGas used: " << track_used << "\n";
 
     }
-    //print allowance
     {
         std::cout << "\n";
-        const auto input = dvmc::from_hex("0xdd62ed3e0000000000000000000000005b38da6a701c568545dcfcb03fcb875f56beddc40000000000000000000000005b38da6a701c568545dcfcb03fcb875f56beddc4"); //approve spender,amount
+        const auto input = dvmc::from_hex("0xdd62ed3e0000000000000000000000005b38da6a701c568545dcfcb03fcb875f56beddc40000000000000000000000005b38da6a701c568545dcfcb03fcb875f56beddc4");
         msg.input_data = input.data();
         msg.input_size = input.size();
 
@@ -768,10 +747,9 @@ Value integratedTest1(const Array& params, bool fHelp)
         std::cout << "integratedTest1 : Result:   " << result.status_code << "\nGas used: " << track_used << "\n";
 
     }
-    //transfer_from
     {
         std::cout << "\n";
-        const auto input = dvmc::from_hex("0x23b872dd0000000000000000000000005b38da6a701c568545dcfcb03fcb875f56beddc40000000000000000000000005b38da6a701c568545dcfcb03fcb875f56beddc40000000000000000000000000000000000000000000000000000000000000037"); //transfer_from
+        const auto input = dvmc::from_hex("0x23b872dd0000000000000000000000005b38da6a701c568545dcfcb03fcb875f56beddc40000000000000000000000005b38da6a701c568545dcfcb03fcb875f56beddc40000000000000000000000000000000000000000000000000000000000000037");
 
 
         msg.track = std::numeric_limits<int64_t>::max();
@@ -785,10 +763,9 @@ Value integratedTest1(const Array& params, bool fHelp)
         const auto track_used = msg.track - result.track_left;
         std::cout << "integratedTest1 : Result: transfer_from  " << result.status_code << "\nGas used: " << track_used << "\n";
     }
-    //print allowance
     {
         std::cout << "\n";
-        const auto input = dvmc::from_hex("0xdd62ed3e0000000000000000000000005b38da6a701c568545dcfcb03fcb875f56beddc40000000000000000000000005b38da6a701c568545dcfcb03fcb875f56beddc4"); //approve spender,amount
+        const auto input = dvmc::from_hex("0xdd62ed3e0000000000000000000000005b38da6a701c568545dcfcb03fcb875f56beddc40000000000000000000000005b38da6a701c568545dcfcb03fcb875f56beddc4"); 
         msg.input_data = input.data();
         msg.input_size = input.size();
 
@@ -802,10 +779,9 @@ Value integratedTest1(const Array& params, bool fHelp)
         if (result.status_code == DVMC_SUCCESS || result.status_code == DVMC_REVERT)
             std::cout << "integratedTest1 : Output: allowance  " << dvmc::hex({result.output_data, result.output_size}) << "\n";
     }
-    //withdraw 4 eth
     {
         std::cout << "\n";
-        const auto input =   dvmc::from_hex("0x486556ce0000000000000000000000000000000000000000000000000000000000031415"); //approve spender,amount
+        const auto input =   dvmc::from_hex("0x486556ce0000000000000000000000000000000000000000000000000000000000031415"); 
         msg.sender = test_sender_address;
         msg.recipient = create_address;
         msg.input_data = input.data();
@@ -831,10 +807,6 @@ Value integratedTest1(const Array& params, bool fHelp)
         uint256 msg_test_bytes;
         for(int i=0; i<8; i++)
         {
-            //28     24    20   16   12    8     4     0
-            //-28   -20   -12   -4   +4   +12   +20  +28
-            //unsigned int b1 = test_bytes[i*4 - 28 + 8*(7-i)];
-
             unsigned int b1 = test_bytes[i*4];
             b1<<=24;
             unsigned int b2 = test_bytes[i*4+1];
@@ -915,7 +887,7 @@ Value integratedTest1(const Array& params, bool fHelp)
     {
         std::cout << "RECON QUERY ALLOWANCE" << std::endl;
         std::cout << "\n";
-        const auto input = dvmc::from_hex("0xdd62ed3e0000000000000000000000005b38da6a701c568545dcfcb03fcb875f56beddc40000000000000000000000005b38da6a701c568545dcfcb03fcb875f56beddc4"); //approve spender,amount
+        const auto input = dvmc::from_hex("0xdd62ed3e0000000000000000000000005b38da6a701c568545dcfcb03fcb875f56beddc40000000000000000000000005b38da6a701c568545dcfcb03fcb875f56beddc4"); 
         msg.input_data = input.data();
         msg.input_size = input.size();
 
@@ -929,12 +901,7 @@ Value integratedTest1(const Array& params, bool fHelp)
             std::cout << "integratedTest1 : Output: after recon allowance  " << dvmc::hex({result.output_data, result.output_size}) << "\n";
     }
     std::cout << "========================================================================" << std::endl;
-    //integratedTest1 Pull the storage data from db and re construct the transitional_host
     {
-        //transitional_node
-        /// The account storage map.
-        //std::unordered_map<bytes32, storage_value> storage;
-        //struct storage_value -> bytes32 value
         string account_str = state.at(tmpAddr);
         dev::RLP rlp_state(account_str,0);
         auto const nonce = rlp_state[0].toInt<dev::u256>();
@@ -949,7 +916,6 @@ Value integratedTest1(const Array& params, bool fHelp)
         dev::eth::Account retrievedAcc(nonce,balance,tmpAccstorageRoot,codeHash,0,dev::eth::Account::Unchanged);
         {
             map<dev::h256, pair<dev::u256, dev::u256>> ret;
-            //map<dev::h256, pair<dev::bytes, dev::vector_ref<const unsigned char>>> ret_;
             map<dev::h256, pair<dev::bytes, dev::bytes>> ret_;
             ret_.clear();
             std::cout << "created ret_.size " << ret_.size() << std::endl;
@@ -957,19 +923,13 @@ Value integratedTest1(const Array& params, bool fHelp)
                 std::cout << "after creation ret_ entry" << std::endl;
 
             {
-                // Pull out all values from trie storage.
-                //if (dev::h256 root = retrievedAcc.baseRoot())
                 {
-                    dev::SecureTrieDB<dev::h256, dev::OverlayDB> memdb(const_cast<dev::OverlayDB*>(overlayDB_), tmpAccstorageRoot);       // promise we won't alter the overlay! :)
+                    dev::SecureTrieDB<dev::h256, dev::OverlayDB> memdb(const_cast<dev::OverlayDB*>(overlayDB_), tmpAccstorageRoot);
 
                     for (auto it = memdb.hashedBegin(); it != memdb.hashedEnd(); ++it)
                     {
                         dev::h256 const hashedKey((*it).first);
-                        //dev::u256 const key = dev::h256(it.key());
                         auto const key = it.key();
-                        //std::cout << "integratedTest 1 set value u256 0" << std::endl;
-                        //dev::u256 const value = dev::RLP((*it).second).toInt<dev::u256>();
-                        //auto const value = (*it).second;
                         dev::bytes const value = dev::RLP((*it).second).toBytes();
                         std::cout << "integratedTest 1 set ret_ hash map key value" << std::endl;
                         ret_[hashedKey] = make_pair(key, value);
@@ -979,7 +939,6 @@ Value integratedTest1(const Array& params, bool fHelp)
                 std::cout << "after first setting entries ret_.size " << ret_.size() << std::endl;
                 for(auto p : ret_)
                     std::cout << "after setting ret_ entry" << std::endl;
-                //Check ret_ values match original storage values
                 auto created_account__ = host.accounts[create_address];
                 std::cout << "created_account__.storage.size " << created_account__.storage.size() << std::endl;
                 for(auto pair : created_account__.storage)
@@ -1010,11 +969,9 @@ Value integratedTest1(const Array& params, bool fHelp)
                 std::cout << "prior to val scan created_account__.storage.size " << created_account__.storage.size() << std::endl;
                 for(auto pair : created_account__.storage)
                 {
-                    //std::cout << "scan hash map" << std::endl;
                     auto storage_value = pair.second.value;
                     for(auto i_ret_ : ret_)
                     {
-                        //dev::vector_ref<const unsigned char> val = i_ret_.second.second;
                         dev::bytes val = i_ret_.second.second;
                         bool match = true;
                         for(int index=0; index<32; index++)
@@ -1030,23 +987,7 @@ Value integratedTest1(const Array& params, bool fHelp)
                     }
                 }
                 std::cout << "================== scan values end ================== " << std::endl;
-
-                // Then merge cached storage over the top.
-                //for (auto const& i : retrievedAcc.storageOverlay())
-                //{
-                //	dev::h256 const key = i.first;
-                //	dev::h256 const hashedKey = sha3(key);
-                //   if (i.second)
-                //      ret[hashedKey] = i;
-                // else
-                //    ret.erase(hashedKey);
-                //}
             }
-            //std::cout << "integratedTest 1 pull from trie storage 2" << std::endl;
-
-            //struct storage_value:: bytes32 value
-
-            //std::cout << "ret.size() " << ret.size() << std::endl;
             dvmc::TransitionalNode account_recon;
             std::unordered_map<dvmc::bytes32, dvmc::storage_value>& storage_recon = account_recon.storage;
             for(auto i_ : ret_)
@@ -1064,7 +1005,6 @@ Value integratedTest1(const Array& params, bool fHelp)
 
             auto& created_account___ = host.accounts[create_address];
             {
-                //Compare recon keys with orig
                 for(auto pair : created_account___.storage)
                 {
                     for(auto pair_r : account_recon.storage)
@@ -1249,71 +1189,9 @@ Value integratedTest2(const Array& params, bool fHelp)
 
 
 
-    //dev::h256 tmp;
-    //while(iter != state.end())
-    //{
-    //}
     vector<Value> res;
     return res;
 }
-/*
-template <class DB>
-AddressHash dev::eth::commit(AccountMap const& _cache, SecureTrieDB<Address, DB>& _state)
-{
-    AddressHash ret;
-    for (auto const& i: _cache)
-        if (i.second.isDirty())
-        {
-            if (!i.second.isAlive())
-                _state.remove(i.first);
-            else
-            {
-                auto const version = i.second.version();
-
-                // version = 0: [nonce, balance, storageRoot, codeHash]
-                // version > 0: [nonce, balance, storageRoot, codeHash, version]
-                RLPStream s(version != 0 ? 5 : 4);
-                s << i.second.nonce() << i.second.balance();
-
-                if (i.second.storageOverlay().empty())
-                {
-                    assert(i.second.baseRoot());
-                    s.append(i.second.baseRoot());
-                }
-                else
-                {
-                    SecureTrieDB<h256, DB> storageDB(_state.db(), i.second.baseRoot());
-                    for (auto const& j: i.second.storageOverlay())
-                        if (j.second)
-                            storageDB.insert(j.first, rlp(j.second));
-                        else
-                            storageDB.remove(j.first);
-                    assert(storageDB.root());
-                    s.append(storageDB.root());
-                }
-
-                if (i.second.hasNewCode())
-                {
-                    h256 ch = i.second.codeHash();
-                    // Store the size of the code
-                    CodeSizeCache::instance().store(ch, i.second.code().size());
-                    _state.db()->insert(ch, &i.second.code());
-                    s << ch;
-                }
-                else
-                    s << i.second.codeHash();
-
-                if (version != 0)
-                    s << i.second.version();
-
-                _state.insert(i.first, &s.out());
-            }
-            ret.insert(i.first);
-        }
-    return ret;
-}
-*/
-
 Value integratedTest3(const Array& params, bool fHelp)
 {
     if(fHelp || params.size() > 0)
@@ -1329,7 +1207,6 @@ Value integratedTest3(const Array& params, bool fHelp)
     dev::SecureTrieDB<dev::Address, dev::OverlayDB> state(&overlay_db);
 
     state.setRoot(root);
-    //state root needs initializing
     std::cout << "integratedTest3 state root after db open " << state.root() << std::endl;
     std::unordered_map<dev::Address, dev::eth::Account> m_cache;
     std::ostringstream os;
@@ -1350,15 +1227,13 @@ Value integratedTest3(const Array& params, bool fHelp)
     std::cout << "extracted codeHash " << codeHash << std::endl;
 
     dev::eth::Account retrievedAcc(nonce,balance,storageRoot,codeHash,0,dev::eth::Account::Unchanged);
-//map<h256, pair<u256, u256>> State::storage(Address const& _id) const
     {
         map<dev::h256, pair<dev::u256, dev::u256>> ret;
 
         {
-            // Pull out all values from trie storage.
             if (dev::h256 root = retrievedAcc.baseRoot())
             {
-                dev::SecureTrieDB<dev::h256, dev::OverlayDB> memdb(const_cast<dev::OverlayDB*>(&overlay_db), root);       // promise we won't alter the overlay! :)
+                dev::SecureTrieDB<dev::h256, dev::OverlayDB> memdb(const_cast<dev::OverlayDB*>(&overlay_db), root);
 
                 for (auto it = memdb.hashedBegin(); it != memdb.hashedEnd(); ++it)
                 {
@@ -1369,7 +1244,6 @@ Value integratedTest3(const Array& params, bool fHelp)
                 }
             }
 
-            // Then merge cached storage over the top.
             for (auto const& i : retrievedAcc.storageOverlay())
             {
                 dev::h256 const key = i.first;
@@ -1390,18 +1264,6 @@ Value integratedTest3(const Array& params, bool fHelp)
             std::cout << "map val.second " << val.second << std::endl;
         }
     }
-    /*
-        dev::h256 tmp;
-        dev::SpecificTrieDB<dev::FatGenericTrieDB<dev::OverlayDB>, dev::FixedHash<20> >::iterator iter = state.begin();
-        while(iter != state.end())
-        {
-          std::cout << "--- " << (*iter).first.hex() << std::endl;
-          std::cout << "--- " << (*iter).second << std::endl;
-          //dev::SecureTrieDB<dev::h256, dev::OverlayDB> const memdb(const_cast<dev::OverlayDB*>(&overlay_db), (*iter).second);
-          ++iter;
-        }
-        std::cout << "state root after test insert " << state.root() << std::endl;
-        */
     vector<Value> res;
     return res;
 }
@@ -1414,7 +1276,6 @@ Value integratedTest4(const Array& params, bool fHelp)
             "integratedTest4 no args"
             + HelpRequiringPassphrase());
 
-    // Generate a new key that is added to wallet
     CPubKey newKey_contract_address;
     if(!pwalletMain->GetKeyFromPool(newKey_contract_address, false))
         throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
@@ -1464,10 +1325,9 @@ Value integratedTest4(const Array& params, bool fHelp)
         msg.recipient = create_address;
         exec_code = created_account.code;
     }
-    //totalSupply
     {
         std::cout << "\n";
-        const auto input = dvmc::from_hex("0x18160ddd"); //totalSupply
+        const auto input = dvmc::from_hex("0x18160ddd");
         msg.input_data = input.data();
         msg.input_size = input.size();
 
@@ -1478,10 +1338,9 @@ Value integratedTest4(const Array& params, bool fHelp)
         const auto track_used = msg.track - result.track_left;
         std::cout << "integratedTest14: Result: totalSupply  " << result.status_code << "\nGas used: " << track_used << "\n";
     }
-    //burn
     {
         std::cout << "\n";
-        const auto input = dvmc::from_hex("0x42966c68000000000000000000000000000000000000000000000000000000000000029a"); //burn
+        const auto input = dvmc::from_hex("0x42966c68000000000000000000000000000000000000000000000000000000000000029a");
         msg.input_data = input.data();
         msg.input_size = input.size();
 
@@ -1491,10 +1350,9 @@ Value integratedTest4(const Array& params, bool fHelp)
         const auto track_used = msg.track - result.track_left;
         std::cout << "integratedTest1 : Result: Burn  " << result.status_code << "\nGas used: " << track_used << "\n";
     }
-    //totalSupply
     {
         std::cout << "\n";
-        const auto input = dvmc::from_hex("0x18160ddd"); //totalSupply
+        const auto input = dvmc::from_hex("0x18160ddd");
         msg.input_data = input.data();
         msg.input_size = input.size();
 
@@ -1507,12 +1365,11 @@ Value integratedTest4(const Array& params, bool fHelp)
         if (result.status_code == DVMC_SUCCESS || result.status_code == DVMC_REVERT)
             std::cout << "integratedTest1 : Output:   " << dvmc::hex({result.output_data, result.output_size}) << "\n";
     }
-    //approve
     {
         std::string s = dvmc::hex(test_sender_address.bytes);
         const std::string code_str = "0x095ea7b3000000000000000000000000" + s +  "0000000000000000000000000000000000000000000000000000000000000050";
         std::cout << "approve op input code " << code_str << std::endl;
-        const auto input = dvmc::from_hex(code_str); //approve spender,amount
+        const auto input = dvmc::from_hex(code_str);
         msg.sender = test_sender_address;
         msg.input_data = input.data();
         msg.input_size = input.size();
@@ -1523,15 +1380,12 @@ Value integratedTest4(const Array& params, bool fHelp)
         const auto track_used = msg.track - result.track_left;
         std::cout << "integratedTest4 : Result:   " << result.status_code << "\nGas used: " << track_used << "\n";
     }
-    //print allowance
     {
         std::cout << "\n";
         std::string s = dvmc::hex(test_sender_address.bytes);
-        //auto input = dvmc::from_hex("0xdd62ed3e0000000000000000000000005b38da6a701c568545dcfcb03fcb875f56beddc40000000000000000000000005b38da6a701c568545dcfcb03fcb875f56beddc4"); //approve spender,amount
-        std::string code_str = "0xdd62ed3e000000000000000000000000" + s + "000000000000000000000000" + s; //approve spender,amount
-        //const std::string code_str = "0xdd62ed3e0000000000000000000000005b38da6a701c568545dcfcb03fcb875f56beddc40000000000000000000000005b38da6a701c568545dcfcb03fcb875f56beddc4"; //approve spender,amount
+        std::string code_str = "0xdd62ed3e000000000000000000000000" + s + "000000000000000000000000" + s;
         std::cout << "print allowance op input code " << code_str << std::endl;
-        const auto input = dvmc::from_hex(code_str); //approve spender,amount
+        const auto input = dvmc::from_hex(code_str);
         msg.input_data = input.data();
         msg.input_size = input.size();
 
@@ -1543,13 +1397,12 @@ Value integratedTest4(const Array& params, bool fHelp)
         if (result.status_code == DVMC_SUCCESS || result.status_code == DVMC_REVERT)
             std::cout << "integratedTest4 : Output:   " << dvmc::hex({result.output_data, result.output_size}) << "\n";
     }
-    //transfer_from
     {
         std::cout << "\n";
         std::string s = dvmc::hex(test_sender_address.bytes);
-        std::string code_str = "0x23b872dd000000000000000000000000" + s + "000000000000000000000000" + s + "0000000000000000000000000000000000000000000000000000000000000037"; //transfer_from
+        std::string code_str = "0x23b872dd000000000000000000000000" + s + "000000000000000000000000" + s + "0000000000000000000000000000000000000000000000000000000000000037";
         std::cout << "transfer_from op input code " << code_str << std::endl;
-        const auto input = dvmc::from_hex(code_str); //transfer_from
+        const auto input = dvmc::from_hex(code_str);
 
         msg.track = std::numeric_limits<int64_t>::max();
         msg.input_data = input.data();
@@ -1565,13 +1418,12 @@ Value integratedTest4(const Array& params, bool fHelp)
             std::cout << "integratedTest4 : Output:   " << dvmc::hex({result.output_data, result.output_size}) << "\n";
 
     }
-    //print allowance
     {
         std::cout << "\n";
         std::string s = dvmc::hex(test_sender_address.bytes);
-        std::string code_str = "0xdd62ed3e000000000000000000000000" + s + "000000000000000000000000" + s; //approve spender,amount
+        std::string code_str = "0xdd62ed3e000000000000000000000000" + s + "000000000000000000000000" + s; 
         std::cout << "print allowance op input code " << code_str << std::endl;
-        const auto input = dvmc::from_hex(code_str); //approve spender,amount
+        const auto input = dvmc::from_hex(code_str); 
         msg.input_data = input.data();
         msg.input_size = input.size();
 
@@ -1597,32 +1449,120 @@ Value integratedTest5(const Array& params, bool fHelp)
             + HelpRequiringPassphrase());
 
     std::vector<CTransaction> testTxVector;
+	    dev::h256 ROOT("50f104f3eab3bd446bf82207b181bc95ff35b9aa57322d2f9e573861cdb38f48");
+            dev::SecureTrieDB<dev::Address, dev::OverlayDB> state(overlayDB_,ROOT);
+    CPubKey newKey_contract_address;
+    {
+        if(!pwalletMain->GetKeyFromPool(newKey_contract_address, false))
+            throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
+        CKeyID keyID_contract_address = newKey_contract_address.GetID();
+        dvmc::address create_address = dvmc::literals::internal::from_hex<dvmc::address>(keyID_contract_address.GetHex().c_str());
+        dev::Address target_addr(keyID_contract_address.GetHex().c_str());
 
+        CPubKey newKey_test_sender_address;
+        if(!pwalletMain->GetKeyFromPool(newKey_test_sender_address, false))
+            throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
+        CKeyID keyID_test_sender_address = newKey_test_sender_address.GetID();
+        dvmc::address test_sender_address = dvmc::literals::internal::from_hex<dvmc::address>(keyID_test_sender_address.GetHex().c_str());
+
+        dvmc::address test_recipient_address = test_sender_address;
+
+        std::cout << "integratedTest5 : initialised create address " << dvmc::hex(create_address.bytes) << "\n";
+        std::cout << "integratedTest5 : initialised from address " << dvmc::hex(test_sender_address.bytes) << "\n";
+        std::cout << "integratedTest5 : initialised to address " << dvmc::hex(test_recipient_address.bytes) << "\n";
+        const auto code = dvmc::from_hex(erc20_22112022_withdraw_with_parameter_subtract_15);
+
+        dvmc::VertexNode host;
+        dvmc::TransitionalNode created_account;
+        dvmc::TransitionalNode sender_account;
+        sender_account.set_balance(3141);
+        dvmc_message msg{};
+        msg.track = std::numeric_limits<int64_t>::max();
+
+        dvmc::bytes_view exec_code = code;
+        {
+            dvmc_message create_msg{};
+            create_msg.kind = DVMC_CREATE;
+            create_msg.recipient = create_address;
+            create_msg.track = std::numeric_limits<int64_t>::max();
+
+            dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
+            dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
+            const auto create_result = vm.retrieve_desc_vx(host, rev, create_msg, code.data(), code.size());
+            if (create_result.status_code != DVMC_SUCCESS)
+            {
+                std::cout << "integratedTest5 : Contract creation failed: " << create_result.status_code << "\n";
+                return create_result.status_code;
+            }
+
+            auto& created_account = host.accounts[create_address];
+            created_account.set_balance(100000000000000);
+            created_account.code = dvmc::bytes(create_result.output_data, create_result.output_size);
+
+            msg.recipient = create_address;
+            exec_code = created_account.code;
+            std::cout << "CREATE SUCCESS - STORE STATE IN PTRIE ..." << std::endl;
+            dev::eth::Account tmpAcc(0,0);
+            {
+                dev::u256 nonce = 12345678;
+                dev::u256 balance = 1010101010101;
+                dev::RLPStream s(4);
+                s << nonce << balance;
+
+                {
+                    dev::SecureTrieDB<dev::h256, dev::StateCacheDB> storageDB(state.db(), tmpAcc.baseRoot());
+                    for(auto pair : created_account.storage)
+                    {
+                        std::cout << "integratedTest5 : store key value" << std::endl;
+                        auto storage_key = pair.first.bytes;
+                        dev::bytes key;
+                        for(int i=0; i<32; i++)
+                            key.push_back(storage_key[i]);
+
+                        dev::h256 key256(key);
+
+                        auto storage_bytes = pair.second.value;
+                        dev::bytes val;
+                        for(int i=0; i<32; i++)
+                            val.push_back(storage_bytes.bytes[i]);
+                        storageDB.insert(key256, dev::rlp(val));
+                    }
+                    s << storageDB.root();
+                }
+
+                s << tmpAcc.codeHash();
+		std::cout << "integratedTest5 BEFORE contract state insert : state root " << state.root() << std::endl;
+                state.insert(target_addr, &s.out());
+                overlayDB_->commit();
+			    std::ostringstream os;
+			    state.debugStructure(os);
+			    std::cout << "global state traversal " << os.str() << std::endl;
+
+		std::cout << "integratedTest5 AFTER contract state insert : state root " << state.root() << std::endl;
+            }
+        }
+    }
+
+    cba keyAddress(newKey_contract_address.GetID());
+
+    std::string contractName    = "contract_1";
     {
         std::string contractCodeStr = erc20_22112022_withdraw_with_parameter_subtract_15;
-        std::string ctrN    = "vertex_trigger";
 
         vector<PathIndex> vtxPos;
         PathIndex txPos2;
+
         txPos2.vValue = vchFromString(contractCodeStr);
 
-        CPubKey vchPubKey;
-        CReserveKey reservekey(pwalletMain);
-        if(!reservekey.GetReservedKey(vchPubKey))
-        {
-            return false;
-        }
-
-        reservekey.KeepKey();
-
-        cba keyAddress(vchPubKey.GetID());
         txPos2.vAddress = keyAddress.ToString();
         vtxPos.push_back(txPos2);
         LocatorNodeDB transSetup__("r+");
-        transSetup__.lPut(vchFromString(ctrN), vtxPos);
+        transSetup__.lPut(vchFromString(contractName), vtxPos);
     }
+
+
     {
-        std::string refStr = ctrN + ":" + "0x18160ddd";
+        std::string refStr = contractName + ":" + "0x18160ddd";
         std::string executableTxName = "executable_test_0x18160ddd";
         __wx__Tx vertex;
         vertex_serial_aux_cycle(executableTxName, refStr, vertex);
@@ -1630,7 +1570,9 @@ Value integratedTest5(const Array& params, bool fHelp)
         testTxVector.push_back(vertex);
     }
 
-	    sectionTest(testTxVector);
+    {
+        sectionTest(testTxVector,state);
+    }
 
     vector<Value> res;
     return res;
