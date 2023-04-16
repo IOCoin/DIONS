@@ -363,6 +363,40 @@ public:
     )
 };
 
+class VertexNodeDB : public CDB
+{
+public:
+    VertexNodeDB(const char* pszMode="cr+") : CDB("vertexcache.dat", pszMode)
+    {
+    }
+
+    bool lPut(const vchType& alias, const std::vector<PathIndex>& vtxPos)
+    {
+        return Write(make_pair(std::string("vertex_"), alias), vtxPos, true);
+    }
+
+    bool lGet(const vchType& alias, std::vector<PathIndex>& vtxPos)
+    {
+        return Read(make_pair(std::string("vertex_"), alias), vtxPos);
+    }
+
+    bool lKey(const vchType& alias)
+    {
+        return Exists(make_pair(std::string("vertex_"), alias));
+    }
+
+    bool EraseName(const vchType& alias)
+    {
+        return Erase(make_pair(std::string("vertex_"), alias));
+    }
+
+    bool test();
+    void filter(CBlockIndex*);
+    void filter() {
+        return;
+    };
+};
+
 class LocatorNodeDB : public CDB
 {
 public:
