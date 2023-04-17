@@ -370,24 +370,24 @@ public:
     {
     }
 
-    bool lPut(const vchType& alias, const std::vector<PathIndex>& vtxPos)
+    bool lPut(const vchType& vertex, const vchType& ref)
     {
-        return Write(make_pair(std::string("vertex_"), alias), vtxPos, true);
+        return Write(make_pair(std::string("vertex_"), vertex), ref, true);
     }
 
-    bool lGet(const vchType& alias, std::vector<PathIndex>& vtxPos)
+    bool lGet(const vchType& vertex, vchType& ref)
     {
-        return Read(make_pair(std::string("vertex_"), alias), vtxPos);
+        return Read(make_pair(std::string("vertex_"), vertex), ref);
     }
 
-    bool lKey(const vchType& alias)
+    bool lKey(const vchType& vertex)
     {
-        return Exists(make_pair(std::string("vertex_"), alias));
+        return Exists(make_pair(std::string("vertex_"), vertex));
     }
 
-    bool EraseName(const vchType& alias)
+    bool EraseName(const vchType& vertex)
     {
-        return Erase(make_pair(std::string("vertex_"), alias));
+        return Erase(make_pair(std::string("vertex_"), vertex));
     }
 
     bool test();
