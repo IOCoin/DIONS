@@ -41,7 +41,8 @@ unsigned int nMinerSleep;
 string strDNSSeedNode;
 bool fUseFastIndex;
 enum Checkpoints::CPMode CheckpointsMode;
-LocatorNodeDB* ln1Db = NULL;
+LocatorNodeDB*       ln1Db = NULL;
+VertexNodeDB*   vertexDB__ = NULL;
 dev::OverlayDB* overlayDB_ = NULL;
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -917,6 +918,8 @@ bool AppInit2()
     }
 
     ln1Db = new LocatorNodeDB("cr+");
+    vertexDB__ = new VertexNodeDB("cr+");
+
     CBlockIndex *pindexRescan = pindexBest;
     if(GetBoolArg("-rescan") || GetBoolArg("-xscan") || GetBoolArg("-upgradewallet"))
     {
