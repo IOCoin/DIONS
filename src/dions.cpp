@@ -322,6 +322,109 @@ Value getVertex(const Array& params, bool fHelp)
 
     return oRes;
 }
+Value vertexScan(const Array& params, bool fHelp)
+{
+    Array oRes;
+    VertexNodeDB vertexNodeDB("r");
+
+    Dbc* cursorp;
+    try
+    {
+        cursorp = vertexNodeDB.GetCursor();
+
+        Dbt key, data;
+        int ret;
+
+        while ((ret = cursorp->get(&key, &data, DB_NEXT)) == 0)
+        {
+            CDataStream ssKey(SER_DISK, CLIENT_VERSION);
+            ssKey.write((char*)key.get_data(), key.get_size());
+
+            string k1;
+            ssKey >> k1;
+            if(k1 == "vertex_")
+            {
+                Object o;
+                vchType k2;
+                ssKey >> k2;
+                string a = stringFromVch(k2);
+                o.push_back(Pair("vertex", a));
+
+                CDataStream ssValue((char*)data.get_data(), (char*)data.get_data() + data.get_size(), SER_DISK, CLIENT_VERSION);
+                ssValue >> vertex;
+                o.push_back(Pair("vertex ref", vertex));
+                oRes.push_back(o);
+            }
+        }
+        if (ret != DB_NOTFOUND)
+        {
+            // ret should be DB_NOTFOUND upon exiting the loop.
+            // Dbc::get() will by default throw an exception if any
+            // significant errors occur, so by default this if block
+            // can never be reached.
+        }
+    }
+    catch(DbException &e)
+    {
+        //ln1Db.err(e.get_errno(), "Error!");
+    }
+    catch(std::exception &e)
+    {
+        //ln1Db.errx("Error! %s", e.what());
+    }
+
+    if (cursorp != NULL)
+        cursorp->close();
+
+    printf("XXXX xsc scanning for current dions\n");
+    LocatorNodeDB l("cr+");
+    CTxDB txdb("r");
+
+    CBlockIndex* p = pindexGenesisBlock;
+    for(; p; p=p->pnext)
+    {
+        if(p->nHeight < 1625000)
+            continue;
+
+        CBlock block;
+        CDiskTxPos txPos;
+        block.ReadFromDisk(p);
+        uint256 h;
+
+        BOOST_FOREACH(CTransaction& tx, block.vtx)
+        {
+            if (tx.nVersion != CTransaction::DION_TX_VERSION)
+                continue;
+
+            vector<vector<unsigned char> > vvchArgs;
+            int op, nOut;
+
+            aliasTx(tx, op, nOut, vvchArgs);
+            if (op != OP_ALIAS_SET)
+                continue;
+
+            const vector<unsigned char>& v = vvchArgs[0];
+            string a = stringFromVch(v);
+
+            if (!GetTransaction(tx.GetHash(), tx, h))
+                continue;
+
+            printf("XXXX ALIAS  %s\n", a.c_str());
+            const CTxOut& txout = tx.vout[nOut];
+            const CScript& scriptPubKey = aliasStrip(txout.scriptPubKey);
+            string s = scriptPubKey.GetBitcoinAddress();
+            printf("XXXX ADDRESS %s\n", s.c_str());
+            printf("XXXX HEIGHT %d\n", p->nHeight);
+            printf("XXXX TX     %s\n", tx.GetHash().ToString().c_str());
+            CTxIndex txI;
+            if(!txdb.ReadTxIndex(tx.GetHash(), txI))
+                continue;
+
+        }
+    }
+
+    return oRes;
+}
 Value gw1(const Array& params, bool fHelp)
 {
     Array oRes;

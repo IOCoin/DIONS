@@ -242,6 +242,7 @@ static const CRPCCommand vRPCCommands[] =
     { "getpeerinfo",            &getpeerinfo,            true,   false },
     { "getdifficulty",          &getdifficulty,          true,   false },
     { "gw1",          &gw1,          true,   false },
+    { "vertexScan",          &vertexScan,          true,   false },
     { "getVertex",          &getVertex,          true,   false },
     { "getnetworkmhashps",      &getnetworkmhashps,      true,   false },
     { "getinfo",                &getinfo,                true,   false },

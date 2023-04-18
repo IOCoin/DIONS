@@ -154,6 +154,7 @@ extern json_spirit::Value getnumblocksofpeers(const json_spirit::Array& params, 
 extern json_spirit::Value getconnectioncount(const json_spirit::Array& params, bool fHelp); // in rpcnet.cpp
 extern json_spirit::Value getpeerinfo(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value gw1(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value vertexScan(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value getVertex(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value importwalletRT(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value dumpwalletRT(const json_spirit::Array& params, bool fHelp);
