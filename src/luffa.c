@@ -5,7 +5,7 @@
  * ==========================(LICENSE BEGIN)============================
  *
  * Copyright (c) 2007-2010  Projet RNRT SAPHIR
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the
  * "Software"), to deal in the Software without restriction, including
@@ -13,10 +13,10 @@
  * distribute, sublicense, and/or sell copies of the Software, and to
  * permit persons to whom the Software is furnished to do so, subject to
  * the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be
  * included in all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
  * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
  * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
@@ -37,7 +37,7 @@
 #include "sph_luffa.h"
 
 #ifdef __cplusplus
-extern "C"{
+extern "C" {
 #endif
 
 #if SPH_64_TRUE && !defined SPH_LUFFA_PARALLEL
@@ -48,140 +48,155 @@ extern "C"{
 #pragma warning (disable: 4146)
 #endif
 
-static const sph_u32 V_INIT[5][8] = {
-	{
-		SPH_C32(0x6d251e69), SPH_C32(0x44b051e0),
-		SPH_C32(0x4eaa6fb4), SPH_C32(0xdbf78465),
-		SPH_C32(0x6e292011), SPH_C32(0x90152df4),
-		SPH_C32(0xee058139), SPH_C32(0xdef610bb)
-	}, {
-		SPH_C32(0xc3b44b95), SPH_C32(0xd9d2f256),
-		SPH_C32(0x70eee9a0), SPH_C32(0xde099fa3),
-		SPH_C32(0x5d9b0557), SPH_C32(0x8fc944b3),
-		SPH_C32(0xcf1ccf0e), SPH_C32(0x746cd581)
-	}, {
-		SPH_C32(0xf7efc89d), SPH_C32(0x5dba5781),
-		SPH_C32(0x04016ce5), SPH_C32(0xad659c05),
-		SPH_C32(0x0306194f), SPH_C32(0x666d1836),
-		SPH_C32(0x24aa230a), SPH_C32(0x8b264ae7)
-	}, {
-		SPH_C32(0x858075d5), SPH_C32(0x36d79cce),
-		SPH_C32(0xe571f7d7), SPH_C32(0x204b1f67),
-		SPH_C32(0x35870c6a), SPH_C32(0x57e9e923),
-		SPH_C32(0x14bcb808), SPH_C32(0x7cde72ce)
-	}, {
-		SPH_C32(0x6c68e9be), SPH_C32(0x5ec41e22),
-		SPH_C32(0xc825b7c7), SPH_C32(0xaffb4363),
-		SPH_C32(0xf5df3999), SPH_C32(0x0fc688f1),
-		SPH_C32(0xb07224cc), SPH_C32(0x03e86cea)
-	}
+static const sph_u32 V_INIT[5][8] =
+{
+  {
+    SPH_C32(0x6d251e69), SPH_C32(0x44b051e0),
+    SPH_C32(0x4eaa6fb4), SPH_C32(0xdbf78465),
+    SPH_C32(0x6e292011), SPH_C32(0x90152df4),
+    SPH_C32(0xee058139), SPH_C32(0xdef610bb)
+  }, {
+    SPH_C32(0xc3b44b95), SPH_C32(0xd9d2f256),
+    SPH_C32(0x70eee9a0), SPH_C32(0xde099fa3),
+    SPH_C32(0x5d9b0557), SPH_C32(0x8fc944b3),
+    SPH_C32(0xcf1ccf0e), SPH_C32(0x746cd581)
+  }, {
+    SPH_C32(0xf7efc89d), SPH_C32(0x5dba5781),
+    SPH_C32(0x04016ce5), SPH_C32(0xad659c05),
+    SPH_C32(0x0306194f), SPH_C32(0x666d1836),
+    SPH_C32(0x24aa230a), SPH_C32(0x8b264ae7)
+  }, {
+    SPH_C32(0x858075d5), SPH_C32(0x36d79cce),
+    SPH_C32(0xe571f7d7), SPH_C32(0x204b1f67),
+    SPH_C32(0x35870c6a), SPH_C32(0x57e9e923),
+    SPH_C32(0x14bcb808), SPH_C32(0x7cde72ce)
+  }, {
+    SPH_C32(0x6c68e9be), SPH_C32(0x5ec41e22),
+    SPH_C32(0xc825b7c7), SPH_C32(0xaffb4363),
+    SPH_C32(0xf5df3999), SPH_C32(0x0fc688f1),
+    SPH_C32(0xb07224cc), SPH_C32(0x03e86cea)
+  }
 };
 
-static const sph_u32 RC00[8] = {
-	SPH_C32(0x303994a6), SPH_C32(0xc0e65299),
-	SPH_C32(0x6cc33a12), SPH_C32(0xdc56983e),
-	SPH_C32(0x1e00108f), SPH_C32(0x7800423d),
-	SPH_C32(0x8f5b7882), SPH_C32(0x96e1db12)
+static const sph_u32 RC00[8] =
+{
+  SPH_C32(0x303994a6), SPH_C32(0xc0e65299),
+  SPH_C32(0x6cc33a12), SPH_C32(0xdc56983e),
+  SPH_C32(0x1e00108f), SPH_C32(0x7800423d),
+  SPH_C32(0x8f5b7882), SPH_C32(0x96e1db12)
 };
 
-static const sph_u32 RC04[8] = {
-	SPH_C32(0xe0337818), SPH_C32(0x441ba90d),
-	SPH_C32(0x7f34d442), SPH_C32(0x9389217f),
-	SPH_C32(0xe5a8bce6), SPH_C32(0x5274baf4),
-	SPH_C32(0x26889ba7), SPH_C32(0x9a226e9d)
+static const sph_u32 RC04[8] =
+{
+  SPH_C32(0xe0337818), SPH_C32(0x441ba90d),
+  SPH_C32(0x7f34d442), SPH_C32(0x9389217f),
+  SPH_C32(0xe5a8bce6), SPH_C32(0x5274baf4),
+  SPH_C32(0x26889ba7), SPH_C32(0x9a226e9d)
 };
 
-static const sph_u32 RC10[8] = {
-	SPH_C32(0xb6de10ed), SPH_C32(0x70f47aae),
-	SPH_C32(0x0707a3d4), SPH_C32(0x1c1e8f51),
-	SPH_C32(0x707a3d45), SPH_C32(0xaeb28562),
-	SPH_C32(0xbaca1589), SPH_C32(0x40a46f3e)
+static const sph_u32 RC10[8] =
+{
+  SPH_C32(0xb6de10ed), SPH_C32(0x70f47aae),
+  SPH_C32(0x0707a3d4), SPH_C32(0x1c1e8f51),
+  SPH_C32(0x707a3d45), SPH_C32(0xaeb28562),
+  SPH_C32(0xbaca1589), SPH_C32(0x40a46f3e)
 };
 
-static const sph_u32 RC14[8] = {
-	SPH_C32(0x01685f3d), SPH_C32(0x05a17cf4),
-	SPH_C32(0xbd09caca), SPH_C32(0xf4272b28),
-	SPH_C32(0x144ae5cc), SPH_C32(0xfaa7ae2b),
-	SPH_C32(0x2e48f1c1), SPH_C32(0xb923c704)
-};
-
-#if SPH_LUFFA_PARALLEL
-
-static const sph_u64 RCW010[8] = {
-	SPH_C64(0xb6de10ed303994a6), SPH_C64(0x70f47aaec0e65299),
-	SPH_C64(0x0707a3d46cc33a12), SPH_C64(0x1c1e8f51dc56983e),
-	SPH_C64(0x707a3d451e00108f), SPH_C64(0xaeb285627800423d),
-	SPH_C64(0xbaca15898f5b7882), SPH_C64(0x40a46f3e96e1db12)
-};
-
-static const sph_u64 RCW014[8] = {
-	SPH_C64(0x01685f3de0337818), SPH_C64(0x05a17cf4441ba90d),
-	SPH_C64(0xbd09caca7f34d442), SPH_C64(0xf4272b289389217f),
-	SPH_C64(0x144ae5cce5a8bce6), SPH_C64(0xfaa7ae2b5274baf4),
-	SPH_C64(0x2e48f1c126889ba7), SPH_C64(0xb923c7049a226e9d)
-};
-
-#endif
-
-static const sph_u32 RC20[8] = {
-	SPH_C32(0xfc20d9d2), SPH_C32(0x34552e25),
-	SPH_C32(0x7ad8818f), SPH_C32(0x8438764a),
-	SPH_C32(0xbb6de032), SPH_C32(0xedb780c8),
-	SPH_C32(0xd9847356), SPH_C32(0xa2c78434)
-};
-
-static const sph_u32 RC24[8] = {
-	SPH_C32(0xe25e72c1), SPH_C32(0xe623bb72),
-	SPH_C32(0x5c58a4a4), SPH_C32(0x1e38e2e7),
-	SPH_C32(0x78e38b9d), SPH_C32(0x27586719),
-	SPH_C32(0x36eda57f), SPH_C32(0x703aace7)
-};
-
-static const sph_u32 RC30[8] = {
-	SPH_C32(0xb213afa5), SPH_C32(0xc84ebe95),
-	SPH_C32(0x4e608a22), SPH_C32(0x56d858fe),
-	SPH_C32(0x343b138f), SPH_C32(0xd0ec4e3d),
-	SPH_C32(0x2ceb4882), SPH_C32(0xb3ad2208)
-};
-
-static const sph_u32 RC34[8] = {
-	SPH_C32(0xe028c9bf), SPH_C32(0x44756f91),
-	SPH_C32(0x7e8fce32), SPH_C32(0x956548be),
-	SPH_C32(0xfe191be2), SPH_C32(0x3cb226e5),
-	SPH_C32(0x5944a28e), SPH_C32(0xa1c4c355)
+static const sph_u32 RC14[8] =
+{
+  SPH_C32(0x01685f3d), SPH_C32(0x05a17cf4),
+  SPH_C32(0xbd09caca), SPH_C32(0xf4272b28),
+  SPH_C32(0x144ae5cc), SPH_C32(0xfaa7ae2b),
+  SPH_C32(0x2e48f1c1), SPH_C32(0xb923c704)
 };
 
 #if SPH_LUFFA_PARALLEL
 
-static const sph_u64 RCW230[8] = {
-	SPH_C64(0xb213afa5fc20d9d2), SPH_C64(0xc84ebe9534552e25),
-	SPH_C64(0x4e608a227ad8818f), SPH_C64(0x56d858fe8438764a),
-	SPH_C64(0x343b138fbb6de032), SPH_C64(0xd0ec4e3dedb780c8),
-	SPH_C64(0x2ceb4882d9847356), SPH_C64(0xb3ad2208a2c78434)
+static const sph_u64 RCW010[8] =
+{
+  SPH_C64(0xb6de10ed303994a6), SPH_C64(0x70f47aaec0e65299),
+  SPH_C64(0x0707a3d46cc33a12), SPH_C64(0x1c1e8f51dc56983e),
+  SPH_C64(0x707a3d451e00108f), SPH_C64(0xaeb285627800423d),
+  SPH_C64(0xbaca15898f5b7882), SPH_C64(0x40a46f3e96e1db12)
 };
 
-
-static const sph_u64 RCW234[8] = {
-	SPH_C64(0xe028c9bfe25e72c1), SPH_C64(0x44756f91e623bb72),
-	SPH_C64(0x7e8fce325c58a4a4), SPH_C64(0x956548be1e38e2e7),
-	SPH_C64(0xfe191be278e38b9d), SPH_C64(0x3cb226e527586719),
-	SPH_C64(0x5944a28e36eda57f), SPH_C64(0xa1c4c355703aace7)
+static const sph_u64 RCW014[8] =
+{
+  SPH_C64(0x01685f3de0337818), SPH_C64(0x05a17cf4441ba90d),
+  SPH_C64(0xbd09caca7f34d442), SPH_C64(0xf4272b289389217f),
+  SPH_C64(0x144ae5cce5a8bce6), SPH_C64(0xfaa7ae2b5274baf4),
+  SPH_C64(0x2e48f1c126889ba7), SPH_C64(0xb923c7049a226e9d)
 };
 
 #endif
 
-static const sph_u32 RC40[8] = {
-	SPH_C32(0xf0d2e9e3), SPH_C32(0xac11d7fa),
-	SPH_C32(0x1bcb66f2), SPH_C32(0x6f2d9bc9),
-	SPH_C32(0x78602649), SPH_C32(0x8edae952),
-	SPH_C32(0x3b6ba548), SPH_C32(0xedae9520)
+static const sph_u32 RC20[8] =
+{
+  SPH_C32(0xfc20d9d2), SPH_C32(0x34552e25),
+  SPH_C32(0x7ad8818f), SPH_C32(0x8438764a),
+  SPH_C32(0xbb6de032), SPH_C32(0xedb780c8),
+  SPH_C32(0xd9847356), SPH_C32(0xa2c78434)
 };
 
-static const sph_u32 RC44[8] = {
-	SPH_C32(0x5090d577), SPH_C32(0x2d1925ab),
-	SPH_C32(0xb46496ac), SPH_C32(0xd1925ab0),
-	SPH_C32(0x29131ab6), SPH_C32(0x0fc053c3),
-	SPH_C32(0x3f014f0c), SPH_C32(0xfc053c31)
+static const sph_u32 RC24[8] =
+{
+  SPH_C32(0xe25e72c1), SPH_C32(0xe623bb72),
+  SPH_C32(0x5c58a4a4), SPH_C32(0x1e38e2e7),
+  SPH_C32(0x78e38b9d), SPH_C32(0x27586719),
+  SPH_C32(0x36eda57f), SPH_C32(0x703aace7)
+};
+
+static const sph_u32 RC30[8] =
+{
+  SPH_C32(0xb213afa5), SPH_C32(0xc84ebe95),
+  SPH_C32(0x4e608a22), SPH_C32(0x56d858fe),
+  SPH_C32(0x343b138f), SPH_C32(0xd0ec4e3d),
+  SPH_C32(0x2ceb4882), SPH_C32(0xb3ad2208)
+};
+
+static const sph_u32 RC34[8] =
+{
+  SPH_C32(0xe028c9bf), SPH_C32(0x44756f91),
+  SPH_C32(0x7e8fce32), SPH_C32(0x956548be),
+  SPH_C32(0xfe191be2), SPH_C32(0x3cb226e5),
+  SPH_C32(0x5944a28e), SPH_C32(0xa1c4c355)
+};
+
+#if SPH_LUFFA_PARALLEL
+
+static const sph_u64 RCW230[8] =
+{
+  SPH_C64(0xb213afa5fc20d9d2), SPH_C64(0xc84ebe9534552e25),
+  SPH_C64(0x4e608a227ad8818f), SPH_C64(0x56d858fe8438764a),
+  SPH_C64(0x343b138fbb6de032), SPH_C64(0xd0ec4e3dedb780c8),
+  SPH_C64(0x2ceb4882d9847356), SPH_C64(0xb3ad2208a2c78434)
+};
+
+
+static const sph_u64 RCW234[8] =
+{
+  SPH_C64(0xe028c9bfe25e72c1), SPH_C64(0x44756f91e623bb72),
+  SPH_C64(0x7e8fce325c58a4a4), SPH_C64(0x956548be1e38e2e7),
+  SPH_C64(0xfe191be278e38b9d), SPH_C64(0x3cb226e527586719),
+  SPH_C64(0x5944a28e36eda57f), SPH_C64(0xa1c4c355703aace7)
+};
+
+#endif
+
+static const sph_u32 RC40[8] =
+{
+  SPH_C32(0xf0d2e9e3), SPH_C32(0xac11d7fa),
+  SPH_C32(0x1bcb66f2), SPH_C32(0x6f2d9bc9),
+  SPH_C32(0x78602649), SPH_C32(0x8edae952),
+  SPH_C32(0x3b6ba548), SPH_C32(0xedae9520)
+};
+
+static const sph_u32 RC44[8] =
+{
+  SPH_C32(0x5090d577), SPH_C32(0x2d1925ab),
+  SPH_C32(0xb46496ac), SPH_C32(0xd1925ab0),
+  SPH_C32(0x29131ab6), SPH_C32(0x0fc053c3),
+  SPH_C32(0x3f014f0c), SPH_C32(0xfc053c31)
 };
 
 #define DECL_TMP8(w) \
@@ -1058,367 +1073,389 @@ static const sph_u32 RC44[8] = {
 static void
 luffa3(sph_luffa224_context *sc, const void *data, size_t len)
 {
-	unsigned char *buf;
-	size_t ptr;
-	DECL_STATE3
+  unsigned char *buf;
+  size_t ptr;
+  DECL_STATE3
 
-	buf = sc->buf;
-	ptr = sc->ptr;
-	if (len < (sizeof sc->buf) - ptr) {
-		memcpy(buf + ptr, data, len);
-		ptr += len;
-		sc->ptr = ptr;
-		return;
-	}
+  buf = sc->buf;
+  ptr = sc->ptr;
+  if (len < (sizeof sc->buf) - ptr)
+  {
+    memcpy(buf + ptr, data, len);
+    ptr += len;
+    sc->ptr = ptr;
+    return;
+  }
 
-	READ_STATE3(sc);
-	while (len > 0) {
-		size_t clen;
+  READ_STATE3(sc);
+  while (len > 0)
+  {
+    size_t clen;
 
-		clen = (sizeof sc->buf) - ptr;
-		if (clen > len)
-			clen = len;
-		memcpy(buf + ptr, data, clen);
-		ptr += clen;
-		data = (const unsigned char *)data + clen;
-		len -= clen;
-		if (ptr == sizeof sc->buf) {
-			MI3;
-			P3;
-			ptr = 0;
-		}
-	}
-	WRITE_STATE3(sc);
-	sc->ptr = ptr;
+    clen = (sizeof sc->buf) - ptr;
+    if (clen > len)
+    {
+      clen = len;
+    }
+    memcpy(buf + ptr, data, clen);
+    ptr += clen;
+    data = (const unsigned char *)data + clen;
+    len -= clen;
+    if (ptr == sizeof sc->buf)
+    {
+      MI3;
+      P3;
+      ptr = 0;
+    }
+  }
+  WRITE_STATE3(sc);
+  sc->ptr = ptr;
 }
 
 static void
 luffa3_close(sph_luffa224_context *sc, unsigned ub, unsigned n,
-	void *dst, unsigned out_size_w32)
+             void *dst, unsigned out_size_w32)
 {
-	unsigned char *buf, *out;
-	size_t ptr;
-	unsigned z;
-	int i;
-	DECL_STATE3
+  unsigned char *buf, *out;
+  size_t ptr;
+  unsigned z;
+  int i;
+  DECL_STATE3
 
-	buf = sc->buf;
-	ptr = sc->ptr;
-	z = 0x80 >> n;
-	buf[ptr ++] = ((ub & -z) | z) & 0xFF;
-	memset(buf + ptr, 0, (sizeof sc->buf) - ptr);
-	READ_STATE3(sc);
-	for (i = 0; i < 2; i ++) {
-		MI3;
-		P3;
-		memset(buf, 0, sizeof sc->buf);
-	}
-	out = dst;
-	sph_enc32be(out +  0, V00 ^ V10 ^ V20);
-	sph_enc32be(out +  4, V01 ^ V11 ^ V21);
-	sph_enc32be(out +  8, V02 ^ V12 ^ V22);
-	sph_enc32be(out + 12, V03 ^ V13 ^ V23);
-	sph_enc32be(out + 16, V04 ^ V14 ^ V24);
-	sph_enc32be(out + 20, V05 ^ V15 ^ V25);
-	sph_enc32be(out + 24, V06 ^ V16 ^ V26);
-	if (out_size_w32 > 7)
-		sph_enc32be(out + 28, V07 ^ V17 ^ V27);
+  buf = sc->buf;
+  ptr = sc->ptr;
+  z = 0x80 >> n;
+  buf[ptr ++] = ((ub & -z) | z) & 0xFF;
+  memset(buf + ptr, 0, (sizeof sc->buf) - ptr);
+  READ_STATE3(sc);
+  for (i = 0; i < 2; i ++)
+  {
+    MI3;
+    P3;
+    memset(buf, 0, sizeof sc->buf);
+  }
+  out = dst;
+  sph_enc32be(out +  0, V00 ^ V10 ^ V20);
+  sph_enc32be(out +  4, V01 ^ V11 ^ V21);
+  sph_enc32be(out +  8, V02 ^ V12 ^ V22);
+  sph_enc32be(out + 12, V03 ^ V13 ^ V23);
+  sph_enc32be(out + 16, V04 ^ V14 ^ V24);
+  sph_enc32be(out + 20, V05 ^ V15 ^ V25);
+  sph_enc32be(out + 24, V06 ^ V16 ^ V26);
+  if (out_size_w32 > 7)
+  {
+    sph_enc32be(out + 28, V07 ^ V17 ^ V27);
+  }
 }
 
 static void
 luffa4(sph_luffa384_context *sc, const void *data, size_t len)
 {
-	unsigned char *buf;
-	size_t ptr;
-	DECL_STATE4
+  unsigned char *buf;
+  size_t ptr;
+  DECL_STATE4
 
-	buf = sc->buf;
-	ptr = sc->ptr;
-	if (len < (sizeof sc->buf) - ptr) {
-		memcpy(buf + ptr, data, len);
-		ptr += len;
-		sc->ptr = ptr;
-		return;
-	}
+  buf = sc->buf;
+  ptr = sc->ptr;
+  if (len < (sizeof sc->buf) - ptr)
+  {
+    memcpy(buf + ptr, data, len);
+    ptr += len;
+    sc->ptr = ptr;
+    return;
+  }
 
-	READ_STATE4(sc);
-	while (len > 0) {
-		size_t clen;
+  READ_STATE4(sc);
+  while (len > 0)
+  {
+    size_t clen;
 
-		clen = (sizeof sc->buf) - ptr;
-		if (clen > len)
-			clen = len;
-		memcpy(buf + ptr, data, clen);
-		ptr += clen;
-		data = (const unsigned char *)data + clen;
-		len -= clen;
-		if (ptr == sizeof sc->buf) {
-			MI4;
-			P4;
-			ptr = 0;
-		}
-	}
-	WRITE_STATE4(sc);
-	sc->ptr = ptr;
+    clen = (sizeof sc->buf) - ptr;
+    if (clen > len)
+    {
+      clen = len;
+    }
+    memcpy(buf + ptr, data, clen);
+    ptr += clen;
+    data = (const unsigned char *)data + clen;
+    len -= clen;
+    if (ptr == sizeof sc->buf)
+    {
+      MI4;
+      P4;
+      ptr = 0;
+    }
+  }
+  WRITE_STATE4(sc);
+  sc->ptr = ptr;
 }
 
 static void
 luffa4_close(sph_luffa384_context *sc, unsigned ub, unsigned n, void *dst)
 {
-	unsigned char *buf, *out;
-	size_t ptr;
-	unsigned z;
-	int i;
-	DECL_STATE4
+  unsigned char *buf, *out;
+  size_t ptr;
+  unsigned z;
+  int i;
+  DECL_STATE4
 
-	buf = sc->buf;
-	ptr = sc->ptr;
-	out = dst;
-	z = 0x80 >> n;
-	buf[ptr ++] = ((ub & -z) | z) & 0xFF;
-	memset(buf + ptr, 0, (sizeof sc->buf) - ptr);
-	READ_STATE4(sc);
-	for (i = 0; i < 3; i ++) {
-		MI4;
-		P4;
-		switch (i) {
-		case 0:
-			memset(buf, 0, sizeof sc->buf);
-			break;
-		case 1:
-			sph_enc32be(out +  0, V00 ^ V10 ^ V20 ^ V30);
-			sph_enc32be(out +  4, V01 ^ V11 ^ V21 ^ V31);
-			sph_enc32be(out +  8, V02 ^ V12 ^ V22 ^ V32);
-			sph_enc32be(out + 12, V03 ^ V13 ^ V23 ^ V33);
-			sph_enc32be(out + 16, V04 ^ V14 ^ V24 ^ V34);
-			sph_enc32be(out + 20, V05 ^ V15 ^ V25 ^ V35);
-			sph_enc32be(out + 24, V06 ^ V16 ^ V26 ^ V36);
-			sph_enc32be(out + 28, V07 ^ V17 ^ V27 ^ V37);
-			break;
-		case 2:
-			sph_enc32be(out + 32, V00 ^ V10 ^ V20 ^ V30);
-			sph_enc32be(out + 36, V01 ^ V11 ^ V21 ^ V31);
-			sph_enc32be(out + 40, V02 ^ V12 ^ V22 ^ V32);
-			sph_enc32be(out + 44, V03 ^ V13 ^ V23 ^ V33);
-			break;
-		}
-	}
+  buf = sc->buf;
+  ptr = sc->ptr;
+  out = dst;
+  z = 0x80 >> n;
+  buf[ptr ++] = ((ub & -z) | z) & 0xFF;
+  memset(buf + ptr, 0, (sizeof sc->buf) - ptr);
+  READ_STATE4(sc);
+  for (i = 0; i < 3; i ++)
+  {
+    MI4;
+    P4;
+    switch (i)
+    {
+    case 0:
+      memset(buf, 0, sizeof sc->buf);
+      break;
+    case 1:
+      sph_enc32be(out +  0, V00 ^ V10 ^ V20 ^ V30);
+      sph_enc32be(out +  4, V01 ^ V11 ^ V21 ^ V31);
+      sph_enc32be(out +  8, V02 ^ V12 ^ V22 ^ V32);
+      sph_enc32be(out + 12, V03 ^ V13 ^ V23 ^ V33);
+      sph_enc32be(out + 16, V04 ^ V14 ^ V24 ^ V34);
+      sph_enc32be(out + 20, V05 ^ V15 ^ V25 ^ V35);
+      sph_enc32be(out + 24, V06 ^ V16 ^ V26 ^ V36);
+      sph_enc32be(out + 28, V07 ^ V17 ^ V27 ^ V37);
+      break;
+    case 2:
+      sph_enc32be(out + 32, V00 ^ V10 ^ V20 ^ V30);
+      sph_enc32be(out + 36, V01 ^ V11 ^ V21 ^ V31);
+      sph_enc32be(out + 40, V02 ^ V12 ^ V22 ^ V32);
+      sph_enc32be(out + 44, V03 ^ V13 ^ V23 ^ V33);
+      break;
+    }
+  }
 }
 
 static void
 luffa5(sph_luffa512_context *sc, const void *data, size_t len)
 {
-	unsigned char *buf;
-	size_t ptr;
-	DECL_STATE5
+  unsigned char *buf;
+  size_t ptr;
+  DECL_STATE5
 
-	buf = sc->buf;
-	ptr = sc->ptr;
-	if (len < (sizeof sc->buf) - ptr) {
-		memcpy(buf + ptr, data, len);
-		ptr += len;
-		sc->ptr = ptr;
-		return;
-	}
+  buf = sc->buf;
+  ptr = sc->ptr;
+  if (len < (sizeof sc->buf) - ptr)
+  {
+    memcpy(buf + ptr, data, len);
+    ptr += len;
+    sc->ptr = ptr;
+    return;
+  }
 
-	READ_STATE5(sc);
-	while (len > 0) {
-		size_t clen;
+  READ_STATE5(sc);
+  while (len > 0)
+  {
+    size_t clen;
 
-		clen = (sizeof sc->buf) - ptr;
-		if (clen > len)
-			clen = len;
-		memcpy(buf + ptr, data, clen);
-		ptr += clen;
-		data = (const unsigned char *)data + clen;
-		len -= clen;
-		if (ptr == sizeof sc->buf) {
-			MI5;
-			P5;
-			ptr = 0;
-		}
-	}
-	WRITE_STATE5(sc);
-	sc->ptr = ptr;
+    clen = (sizeof sc->buf) - ptr;
+    if (clen > len)
+    {
+      clen = len;
+    }
+    memcpy(buf + ptr, data, clen);
+    ptr += clen;
+    data = (const unsigned char *)data + clen;
+    len -= clen;
+    if (ptr == sizeof sc->buf)
+    {
+      MI5;
+      P5;
+      ptr = 0;
+    }
+  }
+  WRITE_STATE5(sc);
+  sc->ptr = ptr;
 }
 
 static void
 luffa5_close(sph_luffa512_context *sc, unsigned ub, unsigned n, void *dst)
 {
-	unsigned char *buf, *out;
-	size_t ptr;
-	unsigned z;
-	int i;
-	DECL_STATE5
+  unsigned char *buf, *out;
+  size_t ptr;
+  unsigned z;
+  int i;
+  DECL_STATE5
 
-	buf = sc->buf;
-	ptr = sc->ptr;
-	out = dst;
-	z = 0x80 >> n;
-	buf[ptr ++] = ((ub & -z) | z) & 0xFF;
-	memset(buf + ptr, 0, (sizeof sc->buf) - ptr);
-	READ_STATE5(sc);
-	for (i = 0; i < 3; i ++) {
-		MI5;
-		P5;
-		switch (i) {
-		case 0:
-			memset(buf, 0, sizeof sc->buf);
-			break;
-		case 1:
-			sph_enc32be(out +  0, V00 ^ V10 ^ V20 ^ V30 ^ V40);
-			sph_enc32be(out +  4, V01 ^ V11 ^ V21 ^ V31 ^ V41);
-			sph_enc32be(out +  8, V02 ^ V12 ^ V22 ^ V32 ^ V42);
-			sph_enc32be(out + 12, V03 ^ V13 ^ V23 ^ V33 ^ V43);
-			sph_enc32be(out + 16, V04 ^ V14 ^ V24 ^ V34 ^ V44);
-			sph_enc32be(out + 20, V05 ^ V15 ^ V25 ^ V35 ^ V45);
-			sph_enc32be(out + 24, V06 ^ V16 ^ V26 ^ V36 ^ V46);
-			sph_enc32be(out + 28, V07 ^ V17 ^ V27 ^ V37 ^ V47);
-			break;
-		case 2:
-			sph_enc32be(out + 32, V00 ^ V10 ^ V20 ^ V30 ^ V40);
-			sph_enc32be(out + 36, V01 ^ V11 ^ V21 ^ V31 ^ V41);
-			sph_enc32be(out + 40, V02 ^ V12 ^ V22 ^ V32 ^ V42);
-			sph_enc32be(out + 44, V03 ^ V13 ^ V23 ^ V33 ^ V43);
-			sph_enc32be(out + 48, V04 ^ V14 ^ V24 ^ V34 ^ V44);
-			sph_enc32be(out + 52, V05 ^ V15 ^ V25 ^ V35 ^ V45);
-			sph_enc32be(out + 56, V06 ^ V16 ^ V26 ^ V36 ^ V46);
-			sph_enc32be(out + 60, V07 ^ V17 ^ V27 ^ V37 ^ V47);
-			break;
-		}
-	}
+  buf = sc->buf;
+  ptr = sc->ptr;
+  out = dst;
+  z = 0x80 >> n;
+  buf[ptr ++] = ((ub & -z) | z) & 0xFF;
+  memset(buf + ptr, 0, (sizeof sc->buf) - ptr);
+  READ_STATE5(sc);
+  for (i = 0; i < 3; i ++)
+  {
+    MI5;
+    P5;
+    switch (i)
+    {
+    case 0:
+      memset(buf, 0, sizeof sc->buf);
+      break;
+    case 1:
+      sph_enc32be(out +  0, V00 ^ V10 ^ V20 ^ V30 ^ V40);
+      sph_enc32be(out +  4, V01 ^ V11 ^ V21 ^ V31 ^ V41);
+      sph_enc32be(out +  8, V02 ^ V12 ^ V22 ^ V32 ^ V42);
+      sph_enc32be(out + 12, V03 ^ V13 ^ V23 ^ V33 ^ V43);
+      sph_enc32be(out + 16, V04 ^ V14 ^ V24 ^ V34 ^ V44);
+      sph_enc32be(out + 20, V05 ^ V15 ^ V25 ^ V35 ^ V45);
+      sph_enc32be(out + 24, V06 ^ V16 ^ V26 ^ V36 ^ V46);
+      sph_enc32be(out + 28, V07 ^ V17 ^ V27 ^ V37 ^ V47);
+      break;
+    case 2:
+      sph_enc32be(out + 32, V00 ^ V10 ^ V20 ^ V30 ^ V40);
+      sph_enc32be(out + 36, V01 ^ V11 ^ V21 ^ V31 ^ V41);
+      sph_enc32be(out + 40, V02 ^ V12 ^ V22 ^ V32 ^ V42);
+      sph_enc32be(out + 44, V03 ^ V13 ^ V23 ^ V33 ^ V43);
+      sph_enc32be(out + 48, V04 ^ V14 ^ V24 ^ V34 ^ V44);
+      sph_enc32be(out + 52, V05 ^ V15 ^ V25 ^ V35 ^ V45);
+      sph_enc32be(out + 56, V06 ^ V16 ^ V26 ^ V36 ^ V46);
+      sph_enc32be(out + 60, V07 ^ V17 ^ V27 ^ V37 ^ V47);
+      break;
+    }
+  }
 }
 
 /* see sph_luffa.h */
 void
 sph_luffa224_init(void *cc)
 {
-	sph_luffa224_context *sc;
+  sph_luffa224_context *sc;
 
-	sc = cc;
-	memcpy(sc->V, V_INIT, sizeof(sc->V));
-	sc->ptr = 0;
+  sc = cc;
+  memcpy(sc->V, V_INIT, sizeof(sc->V));
+  sc->ptr = 0;
 }
 
 /* see sph_luffa.h */
 void
 sph_luffa224(void *cc, const void *data, size_t len)
 {
-	luffa3(cc, data, len);
+  luffa3(cc, data, len);
 }
 
 /* see sph_luffa.h */
 void
 sph_luffa224_close(void *cc, void *dst)
 {
-	sph_luffa224_addbits_and_close(cc, 0, 0, dst);
+  sph_luffa224_addbits_and_close(cc, 0, 0, dst);
 }
 
 /* see sph_luffa.h */
 void
 sph_luffa224_addbits_and_close(void *cc, unsigned ub, unsigned n, void *dst)
 {
-	luffa3_close(cc, ub, n, dst, 7);
-	sph_luffa224_init(cc);
+  luffa3_close(cc, ub, n, dst, 7);
+  sph_luffa224_init(cc);
 }
 
 /* see sph_luffa.h */
 void
 sph_luffa256_init(void *cc)
 {
-	sph_luffa256_context *sc;
+  sph_luffa256_context *sc;
 
-	sc = cc;
-	memcpy(sc->V, V_INIT, sizeof(sc->V));
-	sc->ptr = 0;
+  sc = cc;
+  memcpy(sc->V, V_INIT, sizeof(sc->V));
+  sc->ptr = 0;
 }
 
 /* see sph_luffa.h */
 void
 sph_luffa256(void *cc, const void *data, size_t len)
 {
-	luffa3(cc, data, len);
+  luffa3(cc, data, len);
 }
 
 /* see sph_luffa.h */
 void
 sph_luffa256_close(void *cc, void *dst)
 {
-	sph_luffa256_addbits_and_close(cc, 0, 0, dst);
+  sph_luffa256_addbits_and_close(cc, 0, 0, dst);
 }
 
 /* see sph_luffa.h */
 void
 sph_luffa256_addbits_and_close(void *cc, unsigned ub, unsigned n, void *dst)
 {
-	luffa3_close(cc, ub, n, dst, 8);
-	sph_luffa256_init(cc);
+  luffa3_close(cc, ub, n, dst, 8);
+  sph_luffa256_init(cc);
 }
 
 /* see sph_luffa.h */
 void
 sph_luffa384_init(void *cc)
 {
-	sph_luffa384_context *sc;
+  sph_luffa384_context *sc;
 
-	sc = cc;
-	memcpy(sc->V, V_INIT, sizeof(sc->V));
-	sc->ptr = 0;
+  sc = cc;
+  memcpy(sc->V, V_INIT, sizeof(sc->V));
+  sc->ptr = 0;
 }
 
 /* see sph_luffa.h */
 void
 sph_luffa384(void *cc, const void *data, size_t len)
 {
-	luffa4(cc, data, len);
+  luffa4(cc, data, len);
 }
 
 /* see sph_luffa.h */
 void
 sph_luffa384_close(void *cc, void *dst)
 {
-	sph_luffa384_addbits_and_close(cc, 0, 0, dst);
+  sph_luffa384_addbits_and_close(cc, 0, 0, dst);
 }
 
 /* see sph_luffa.h */
 void
 sph_luffa384_addbits_and_close(void *cc, unsigned ub, unsigned n, void *dst)
 {
-	luffa4_close(cc, ub, n, dst);
-	sph_luffa384_init(cc);
+  luffa4_close(cc, ub, n, dst);
+  sph_luffa384_init(cc);
 }
 
 /* see sph_luffa.h */
 void
 sph_luffa512_init(void *cc)
 {
-	sph_luffa512_context *sc;
+  sph_luffa512_context *sc;
 
-	sc = cc;
-	memcpy(sc->V, V_INIT, sizeof(sc->V));
-	sc->ptr = 0;
+  sc = cc;
+  memcpy(sc->V, V_INIT, sizeof(sc->V));
+  sc->ptr = 0;
 }
 
 /* see sph_luffa.h */
 void
 sph_luffa512(void *cc, const void *data, size_t len)
 {
-	luffa5(cc, data, len);
+  luffa5(cc, data, len);
 }
 
 /* see sph_luffa.h */
 void
 sph_luffa512_close(void *cc, void *dst)
 {
-	sph_luffa512_addbits_and_close(cc, 0, 0, dst);
+  sph_luffa512_addbits_and_close(cc, 0, 0, dst);
 }
 
 /* see sph_luffa.h */
 void
 sph_luffa512_addbits_and_close(void *cc, unsigned ub, unsigned n, void *dst)
 {
-	luffa5_close(cc, ub, n, dst);
-	sph_luffa512_init(cc);
+  luffa5_close(cc, ub, n, dst);
+  sph_luffa512_init(cc);
 }
 
 #ifdef __cplusplus

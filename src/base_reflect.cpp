@@ -93,8 +93,8 @@ extern std::map<uint160, vchType> mapLocatorHashes;
 //Ext frame
 typedef struct vx_bytes32
 {
-    //The 32 bytes.
-    uint8_t bytes[32];
+  //The 32 bytes.
+  uint8_t bytes[32];
 } vx_bytes32;
 
 // * The alias for evmc_bytes32 to represent a big-endian 256-bit integer.
@@ -114,487 +114,505 @@ int aliasHeight(vector<unsigned char> vchPath);
 
 bool vertex_serial_n_cycle(const string& origin, const string& data, __wx__Tx& serial_n)
 {
-    string locatorStr = origin;
-    string indexStr = data;
+  string locatorStr = origin;
+  string indexStr = data;
 
-    if(isOnlyWhiteSpace(locatorStr))
+  if(isOnlyWhiteSpace(locatorStr))
+  {
+    string err = "Attempt to register alias consisting only of white space";
+
+    throw JSONRPCError(RPC_WALLET_ERROR, err);
+  }
+  else if(locatorStr.size() > 255)
+  {
+    string err = "Attempt to register alias more than 255 chars";
+
+    throw JSONRPCError(RPC_WALLET_ERROR, err);
+  }
+
+  uint256 wtxInHash__;
+
+  vector<Value> res;
+  LocatorNodeDB aliasCacheDB("r");
+  CTransaction tx;
+  if(aliasTx(aliasCacheDB, vchFromString(locatorStr), tx))
+  {
+    string err = "Attempt to register alias : " + locatorStr + ", this alias is already active with tx " + tx.GetHash().GetHex();
+
+    throw JSONRPCError(RPC_WALLET_ERROR, err);
+  }
+
+  CPubKey vchPubKey;
+  CReserveKey reservekey(pwalletMain);
+  if(!reservekey.GetReservedKey(vchPubKey))
+  {
+    return false;
+  }
+
+  reservekey.KeepKey();
+
+  cba keyAddress(vchPubKey.GetID());
+  CKeyID keyID;
+  keyAddress.GetKeyID(keyID);
+  pwalletMain->SetAddressBookName(keyID, "");
+
+  __wx__DB walletdb(pwalletMain->strWalletFile, "r+");
+
+  CKey key;
+  if(!pwalletMain->GetKey(keyID, key))
+  {
+    throw JSONRPCError(RPC_WALLET_ERROR, "Private key not available");
+  }
+
+  serial_n.nVersion = CTransaction::CYCLE_TX_VERSION;
+
+  CScript scriptPubKeyOrig;
+  scriptPubKeyOrig.SetBitcoinAddress(vchPubKey.Raw());
+  CScript scriptPubKey;
+  vchType vchPath = vchFromString(locatorStr);
+  vchType vchValue = vchFromString(indexStr);
+
+  scriptPubKey << OP_BASE_SET << vchPath << vchValue << OP_2DROP << OP_DROP;
+  scriptPubKey += scriptPubKeyOrig;
+
+  ENTER_CRITICAL_SECTION(cs_main)
+  {
+    EnsureWalletIsUnlocked();
+
+    string strError = pwalletMain->SendMoney__(scriptPubKey, CTRL__, serial_n, false);
+
+    if(strError != "")
     {
-        string err = "Attempt to register alias consisting only of white space";
-
-        throw JSONRPCError(RPC_WALLET_ERROR, err);
+      LEAVE_CRITICAL_SECTION(cs_main)
+      throw JSONRPCError(RPC_WALLET_ERROR, strError);
     }
-    else if(locatorStr.size() > 255)
-    {
-        string err = "Attempt to register alias more than 255 chars";
+    mapLocator[vchPath] = serial_n.GetHash();
+  }
+  LEAVE_CRITICAL_SECTION(cs_main)
 
-        throw JSONRPCError(RPC_WALLET_ERROR, err);
-    }
-
-    uint256 wtxInHash__;
-
-    vector<Value> res;
-    LocatorNodeDB aliasCacheDB("r");
-    CTransaction tx;
-    if(aliasTx(aliasCacheDB, vchFromString(locatorStr), tx))
-    {
-        string err = "Attempt to register alias : " + locatorStr + ", this alias is already active with tx " + tx.GetHash().GetHex();
-
-        throw JSONRPCError(RPC_WALLET_ERROR, err);
-    }
-
-    CPubKey vchPubKey;
-    CReserveKey reservekey(pwalletMain);
-    if(!reservekey.GetReservedKey(vchPubKey))
-    {
-        return false;
-    }
-
-    reservekey.KeepKey();
-
-    cba keyAddress(vchPubKey.GetID());
-    CKeyID keyID;
-    keyAddress.GetKeyID(keyID);
-    pwalletMain->SetAddressBookName(keyID, "");
-
-    __wx__DB walletdb(pwalletMain->strWalletFile, "r+");
-
-    CKey key;
-    if(!pwalletMain->GetKey(keyID, key))
-        throw JSONRPCError(RPC_WALLET_ERROR, "Private key not available");
-
-    serial_n.nVersion = CTransaction::CYCLE_TX_VERSION;
-
-    CScript scriptPubKeyOrig;
-    scriptPubKeyOrig.SetBitcoinAddress(vchPubKey.Raw());
-    CScript scriptPubKey;
-    vchType vchPath = vchFromString(locatorStr);
-    vchType vchValue = vchFromString(indexStr);
-
-    scriptPubKey << OP_BASE_SET << vchPath << vchValue << OP_2DROP << OP_DROP;
-    scriptPubKey += scriptPubKeyOrig;
-
-    ENTER_CRITICAL_SECTION(cs_main)
-    {
-        EnsureWalletIsUnlocked();
-
-        string strError = pwalletMain->SendMoney__(scriptPubKey, CTRL__, serial_n, false);
-
-        if(strError != "")
-        {
-            LEAVE_CRITICAL_SECTION(cs_main)
-            throw JSONRPCError(RPC_WALLET_ERROR, strError);
-        }
-        mapLocator[vchPath] = serial_n.GetHash();
-    }
-    LEAVE_CRITICAL_SECTION(cs_main)
-
-    return true;
+  return true;
 }
 
 bool vertex_serial_aux_cycle(const string& origin, const string& data, __wx__Tx& serial_n)
 {
-    string locatorStr = origin;
-    string indexStr = data;
+  string locatorStr = origin;
+  string indexStr = data;
 
-    if(isOnlyWhiteSpace(locatorStr))
+  if(isOnlyWhiteSpace(locatorStr))
+  {
+    string err = "Attempt to register alias consisting only of white space";
+
+    throw JSONRPCError(RPC_WALLET_ERROR, err);
+  }
+  else if(locatorStr.size() > 255)
+  {
+    string err = "Attempt to register alias more than 255 chars";
+
+    throw JSONRPCError(RPC_WALLET_ERROR, err);
+  }
+
+  uint256 wtxInHash__;
+
+  vector<Value> res;
+  LocatorNodeDB aliasCacheDB("r");
+  CTransaction tx;
+  if(aliasTx(aliasCacheDB, vchFromString(locatorStr), tx))
+  {
+    string err = "Attempt to register alias : " + locatorStr + ", this alias is already active with tx " + tx.GetHash().GetHex();
+
+    throw JSONRPCError(RPC_WALLET_ERROR, err);
+  }
+
+  CPubKey vchPubKey;
+  CReserveKey reservekey(pwalletMain);
+  if(!reservekey.GetReservedKey(vchPubKey))
+  {
+    return false;
+  }
+
+  reservekey.KeepKey();
+
+  cba keyAddress(vchPubKey.GetID());
+  CKeyID keyID;
+  keyAddress.GetKeyID(keyID);
+  pwalletMain->SetAddressBookName(keyID, "");
+
+  __wx__DB walletdb(pwalletMain->strWalletFile, "r+");
+
+  CKey key;
+  if(!pwalletMain->GetKey(keyID, key))
+  {
+    throw JSONRPCError(RPC_WALLET_ERROR, "Private key not available");
+  }
+
+  serial_n.nVersion = CTransaction::CYCLE_TX_VERSION;
+
+  CScript scriptPubKeyOrig;
+  scriptPubKeyOrig.SetBitcoinAddress(vchPubKey.Raw());
+  CScript scriptPubKey;
+  vchType vchPath = vchFromString(locatorStr);
+  vchType vchValue = vchFromString(indexStr);
+
+  scriptPubKey << OP_BASE_SET << vchPath << vchValue << OP_2DROP << OP_DROP;
+  scriptPubKey += scriptPubKeyOrig;
+
+  ENTER_CRITICAL_SECTION(cs_main)
+  {
+    EnsureWalletIsUnlocked();
+
+    string strError = pwalletMain->transientRelay(scriptPubKey, CTRL__, serial_n, false);
+
+    if(strError != "")
     {
-        string err = "Attempt to register alias consisting only of white space";
-
-        throw JSONRPCError(RPC_WALLET_ERROR, err);
+      LEAVE_CRITICAL_SECTION(cs_main)
+      throw JSONRPCError(RPC_WALLET_ERROR, strError);
     }
-    else if(locatorStr.size() > 255)
-    {
-        string err = "Attempt to register alias more than 255 chars";
+    mapLocator[vchPath] = serial_n.GetHash();
+  }
+  LEAVE_CRITICAL_SECTION(cs_main)
 
-        throw JSONRPCError(RPC_WALLET_ERROR, err);
-    }
-
-    uint256 wtxInHash__;
-
-    vector<Value> res;
-    LocatorNodeDB aliasCacheDB("r");
-    CTransaction tx;
-    if(aliasTx(aliasCacheDB, vchFromString(locatorStr), tx))
-    {
-        string err = "Attempt to register alias : " + locatorStr + ", this alias is already active with tx " + tx.GetHash().GetHex();
-
-        throw JSONRPCError(RPC_WALLET_ERROR, err);
-    }
-
-    CPubKey vchPubKey;
-    CReserveKey reservekey(pwalletMain);
-    if(!reservekey.GetReservedKey(vchPubKey))
-    {
-        return false;
-    }
-
-    reservekey.KeepKey();
-
-    cba keyAddress(vchPubKey.GetID());
-    CKeyID keyID;
-    keyAddress.GetKeyID(keyID);
-    pwalletMain->SetAddressBookName(keyID, "");
-
-    __wx__DB walletdb(pwalletMain->strWalletFile, "r+");
-
-    CKey key;
-    if(!pwalletMain->GetKey(keyID, key))
-        throw JSONRPCError(RPC_WALLET_ERROR, "Private key not available");
-
-    serial_n.nVersion = CTransaction::CYCLE_TX_VERSION;
-
-    CScript scriptPubKeyOrig;
-    scriptPubKeyOrig.SetBitcoinAddress(vchPubKey.Raw());
-    CScript scriptPubKey;
-    vchType vchPath = vchFromString(locatorStr);
-    vchType vchValue = vchFromString(indexStr);
-
-    scriptPubKey << OP_BASE_SET << vchPath << vchValue << OP_2DROP << OP_DROP;
-    scriptPubKey += scriptPubKeyOrig;
-
-    ENTER_CRITICAL_SECTION(cs_main)
-    {
-        EnsureWalletIsUnlocked();
-
-        string strError = pwalletMain->transientRelay(scriptPubKey, CTRL__, serial_n, false);
-
-        if(strError != "")
-        {
-            LEAVE_CRITICAL_SECTION(cs_main)
-            throw JSONRPCError(RPC_WALLET_ERROR, strError);
-        }
-        mapLocator[vchPath] = serial_n.GetHash();
-    }
-    LEAVE_CRITICAL_SECTION(cs_main)
-
-    return true;
+  return true;
 }
 
 __wx__Tx aux_cycle(string& locatorStr, const string& tStr, const string& iStr)
 {
-    locatorStr = stripSpacesAndQuotes(locatorStr);
+  locatorStr = stripSpacesAndQuotes(locatorStr);
 
-    if(isOnlyWhiteSpace(locatorStr))
-    {
-        string err = "Attempt to register alias consisting only of white space";
+  if(isOnlyWhiteSpace(locatorStr))
+  {
+    string err = "Attempt to register alias consisting only of white space";
 
-        throw JSONRPCError(RPC_WALLET_ERROR, err);
-    }
-    else if(locatorStr.size() > 255)
-    {
-        string err = "Attempt to register alias more than 255 chars";
+    throw JSONRPCError(RPC_WALLET_ERROR, err);
+  }
+  else if(locatorStr.size() > 255)
+  {
+    string err = "Attempt to register alias more than 255 chars";
 
-        throw JSONRPCError(RPC_WALLET_ERROR, err);
-    }
-    __wx__Tx vertex;
-    vertex_serial_n_cycle(locatorStr, tStr + ":" + iStr, vertex);
-    return vertex;
+    throw JSONRPCError(RPC_WALLET_ERROR, err);
+  }
+  __wx__Tx vertex;
+  vertex_serial_n_cycle(locatorStr, tStr + ":" + iStr, vertex);
+  return vertex;
 }
 
 Value decryptPath_cycle(const Array& params, bool fHelp)
 {
-    if(fHelp || params.size() != 3)
-        throw runtime_error(
-            "registerPathGenerate <alias> <t> <i>"
-            + HelpRequiringPassphrase());
+  if(fHelp || params.size() != 3)
+    throw runtime_error(
+      "registerPathGenerate <alias> <t> <i>"
+      + HelpRequiringPassphrase());
 
-    string locatorStr = params[0].get_str();
-    string tStr = params[1].get_str();
-    string iStr = params[2].get_str();
+  string locatorStr = params[0].get_str();
+  string tStr = params[1].get_str();
+  string iStr = params[2].get_str();
 
-    locatorStr = stripSpacesAndQuotes(locatorStr);
+  locatorStr = stripSpacesAndQuotes(locatorStr);
 
-    if(isOnlyWhiteSpace(locatorStr))
-    {
-        string err = "Attempt to register alias consisting only of white space";
+  if(isOnlyWhiteSpace(locatorStr))
+  {
+    string err = "Attempt to register alias consisting only of white space";
 
-        throw JSONRPCError(RPC_WALLET_ERROR, err);
-    }
-    else if(locatorStr.size() > 255)
-    {
-        string err = "Attempt to register alias more than 255 chars";
+    throw JSONRPCError(RPC_WALLET_ERROR, err);
+  }
+  else if(locatorStr.size() > 255)
+  {
+    string err = "Attempt to register alias more than 255 chars";
 
-        throw JSONRPCError(RPC_WALLET_ERROR, err);
-    }
-    __wx__Tx vertex;
-    vertex_serial_n_cycle(locatorStr, tStr + ":" + iStr, vertex);
-    vector<Value> res;
-    res.push_back(vertex.GetHash().GetHex());
-    return res;
+    throw JSONRPCError(RPC_WALLET_ERROR, err);
+  }
+  __wx__Tx vertex;
+  vertex_serial_n_cycle(locatorStr, tStr + ":" + iStr, vertex);
+  vector<Value> res;
+  res.push_back(vertex.GetHash().GetHex());
+  return res;
 }
 
 bool section_vertex_serial_n(const string& origin, const string& data, __wx__Tx& serial_n)
 {
-    string locatorStr = "vertex_" + origin;
-    string indexStr = data;
+  string locatorStr = "vertex_" + origin;
+  string indexStr = data;
 
-    if(isOnlyWhiteSpace(locatorStr))
-    {
-        string err = "Attempt to register alias consisting only of white space";
+  if(isOnlyWhiteSpace(locatorStr))
+  {
+    string err = "Attempt to register alias consisting only of white space";
 
-        throw JSONRPCError(RPC_WALLET_ERROR, err);
-    }
-    else if(locatorStr.size() > 255)
-    {
-        string err = "Attempt to register alias more than 255 chars";
+    throw JSONRPCError(RPC_WALLET_ERROR, err);
+  }
+  else if(locatorStr.size() > 255)
+  {
+    string err = "Attempt to register alias more than 255 chars";
 
-        throw JSONRPCError(RPC_WALLET_ERROR, err);
-    }
+    throw JSONRPCError(RPC_WALLET_ERROR, err);
+  }
 
-    uint256 wtxInHash__;
+  uint256 wtxInHash__;
 
-    CPubKey vchPubKey;
-    CReserveKey reservekey(pwalletMain);
-    if(!reservekey.GetReservedKey(vchPubKey))
-    {
-        return false;
-    }
+  CPubKey vchPubKey;
+  CReserveKey reservekey(pwalletMain);
+  if(!reservekey.GetReservedKey(vchPubKey))
+  {
+    return false;
+  }
 
-    reservekey.KeepKey();
+  reservekey.KeepKey();
 
-    cba keyAddress(vchPubKey.GetID());
-    CKeyID keyID;
-    keyAddress.GetKeyID(keyID);
-    pwalletMain->SetAddressBookName(keyID, "");
+  cba keyAddress(vchPubKey.GetID());
+  CKeyID keyID;
+  keyAddress.GetKeyID(keyID);
+  pwalletMain->SetAddressBookName(keyID, "");
 
-    __wx__DB walletdb(pwalletMain->strWalletFile, "r+");
+  __wx__DB walletdb(pwalletMain->strWalletFile, "r+");
 
-    CKey key;
-    if(!pwalletMain->GetKey(keyID, key))
-        throw JSONRPCError(RPC_WALLET_ERROR, "Private key not available");
+  CKey key;
+  if(!pwalletMain->GetKey(keyID, key))
+  {
+    throw JSONRPCError(RPC_WALLET_ERROR, "Private key not available");
+  }
 
-    serial_n.nVersion = CTransaction::DION_TX_VERSION;
+  serial_n.nVersion = CTransaction::DION_TX_VERSION;
 
-    CScript scriptPubKeyOrig;
-    scriptPubKeyOrig.SetBitcoinAddress(vchPubKey.Raw());
-    CScript scriptPubKey;
-    vchType vchPath = vchFromString(locatorStr);
-    vchType vchValue = vchFromString(indexStr);
+  CScript scriptPubKeyOrig;
+  scriptPubKeyOrig.SetBitcoinAddress(vchPubKey.Raw());
+  CScript scriptPubKey;
+  vchType vchPath = vchFromString(locatorStr);
+  vchType vchValue = vchFromString(indexStr);
 
-    scriptPubKey << OP_BASE_SET << vchPath << vchValue << OP_2DROP << OP_DROP;
-    scriptPubKey += scriptPubKeyOrig;
+  scriptPubKey << OP_BASE_SET << vchPath << vchValue << OP_2DROP << OP_DROP;
+  scriptPubKey += scriptPubKeyOrig;
 
-    vector< pair<CScript, int64_t> > vecSend;
-    vecSend.push_back(make_pair(scriptPubKey, CTRL__));
+  vector< pair<CScript, int64_t> > vecSend;
+  vecSend.push_back(make_pair(scriptPubKey, CTRL__));
 
-    return true;
+  return true;
 }
 bool sectionVertex(const string& target, string& code)
 {
-    bool found=false;
-    LocatorNodeDB ln1Db("r");
+  bool found=false;
+  LocatorNodeDB ln1Db("r");
 
-    Dbc* cursorp;
-    try
+  Dbc* cursorp;
+  try
+  {
+    cursorp = ln1Db.GetCursor();
+
+    Dbt key, data;
+    int ret;
+
+    while ((ret = cursorp->get(&key, &data, DB_NEXT)) == 0)
     {
-        cursorp = ln1Db.GetCursor();
+      CDataStream ssKey(SER_DISK, CLIENT_VERSION);
+      ssKey.write((char*)key.get_data(), key.get_size());
 
-        Dbt key, data;
-        int ret;
-
-        while ((ret = cursorp->get(&key, &data, DB_NEXT)) == 0)
+      string k1;
+      ssKey >> k1;
+      if(k1 == "alias_")
+      {
+        Object o;
+        vchType k2;
+        ssKey >> k2;
+        string a = stringFromVch(k2);
+        if(a == target)
         {
-            CDataStream ssKey(SER_DISK, CLIENT_VERSION);
-            ssKey.write((char*)key.get_data(), key.get_size());
+          vector<PathIndex> vtxPos;
+          CDataStream ssValue((char*)data.get_data(), (char*)data.get_data() + data.get_size(), SER_DISK, CLIENT_VERSION);
+          ssValue >> vtxPos;
 
-            string k1;
-            ssKey >> k1;
-            if(k1 == "alias_")
-            {
-                Object o;
-                vchType k2;
-                ssKey >> k2;
-                string a = stringFromVch(k2);
-                if(a == target)
-                {
-                    vector<PathIndex> vtxPos;
-                    CDataStream ssValue((char*)data.get_data(), (char*)data.get_data() + data.get_size(), SER_DISK, CLIENT_VERSION);
-                    ssValue >> vtxPos;
+          PathIndex i = vtxPos.back();
+          string i_address = i.vAddress;
+          code = stringFromVch(i.vValue);
+          found=true;
 
-                    PathIndex i = vtxPos.back();
-                    string i_address = i.vAddress;
-                    code = stringFromVch(i.vValue);
-                    found=true;
-
-                }
-            }
         }
+      }
     }
-    catch(DbException &e)
-    {
-        //ln1Db.err(e.get_errno(), "Error!");
-    }
-    catch(std::exception &e)
-    {
-        //ln1Db.errx("Error! %s", e.what());
-    }
+  }
+  catch(DbException &e)
+  {
+    //ln1Db.err(e.get_errno(), "Error!");
+  }
+  catch(std::exception &e)
+  {
+    //ln1Db.errx("Error! %s", e.what());
+  }
 
-    if (cursorp != NULL)
-        cursorp->close();
+  if (cursorp != NULL)
+  {
+    cursorp->close();
+  }
 
-    return found;
+  return found;
 }
 void sectionTest(std::vector<CTransaction>& testTxVector)
 {
-    for(int index=0; index<testTxVector.size(); index++)
+  for(int index=0; index<testTxVector.size(); index++)
+  {
+    cba cAddr_;
+    CTransaction& tx = testTxVector[index];
+    if(tx.nVersion == CTransaction::CYCLE_TX_VERSION)
     {
-        cba cAddr_;
-        CTransaction& tx = testTxVector[index];
-        if(tx.nVersion == CTransaction::CYCLE_TX_VERSION)
+      string origin;
+      for(int i = 0; i < tx.vout.size(); i++)
+      {
+        const CTxOut& out = tx.vout[i];
+        std::vector<vchType> vvchArgs;
+
+        int prevOp;
+        if(aliasScript(out.scriptPubKey, prevOp, vvchArgs))
         {
-            string origin;
-            for(int i = 0; i < tx.vout.size(); i++)
-            {
-                const CTxOut& out = tx.vout[i];
-                std::vector<vchType> vvchArgs;
-
-                int prevOp;
-                if(aliasScript(out.scriptPubKey, prevOp, vvchArgs))
-                {
-                    origin = stringFromVch(vvchArgs[1]);
-                }
-            }
-            std::vector<string> contract_execution_data;
-            boost::char_separator<char> tok(":");
-            boost::tokenizer<boost::char_separator<char>> tokens(origin,tok);
-            BOOST_FOREACH(const string& s,tokens)
-            {
-                contract_execution_data.push_back(s);
-            }
-            string target_contract = contract_execution_data[0];
-            {
-                vector<PathIndex> vtxPos;
-                vchType vchPath = vchFromString(target_contract);
-                if (ln1Db->lKey (vchPath))
-                {
-                    printf("  name exists\n");
-                    if (!ln1Db->lGet (vchPath, vtxPos))
-		    {
-			    std::cout << "error read : name db" << std::endl;
-		    }
-                    if (vtxPos.empty ())
-		    {
-			    std::cout << "error vec : empty" << std::endl;
-	            }
-
-                    PathIndex& txPos = vtxPos.back ();
-                    cAddr_.SetString(txPos.vAddress);
-                }
-                else
-                {
-                    throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid I/OCoin address or unknown alias");
-                }
-            }
-
-            string contract_input  = contract_execution_data[1];
-            string contractCode;
-
-            bool f = sectionVertex(target_contract,contractCode);
-            if(f != true)
-                continue;
-
-            CKeyID keyID;
-            cAddr_.GetKeyID(keyID);
-            dev::Address target_addr(keyID.GetHex().c_str());
-
-            dev::SecureTrieDB<dev::Address, dev::OverlayDB> state(overlayDB_);
-            state.init();
-            string account_str = state.at(target_addr);
-            dev::RLP rlp_state(account_str,0);
-            auto const targetAccStorageRoot = rlp_state[2].toHash<dev::h256>();
-            auto const nonce = rlp_state[0].toInt<dev::u256>();
-            auto const balance = rlp_state[1].toInt<dev::u256>();
-            auto const codeHash = rlp_state[3].toHash<dev::h256>();
-            dev::eth::Account retrievedAcc(nonce,balance,targetAccStorageRoot,codeHash,0,dev::eth::Account::Unchanged);
-            string code_hex_str = contractCode;
-            uint256 r;
-            string val;
-            dvmc::TransitionalNode account_recon;
-            {
-                map<dev::h256, pair<dev::bytes, dev::bytes>> ret_;
-                ret_.clear();
-                {
-                    {
-                        dev::SecureTrieDB<dev::h256, dev::OverlayDB> memdb(const_cast<dev::OverlayDB*>(overlayDB_), targetAccStorageRoot);
-
-                        for (auto it = memdb.hashedBegin(); it != memdb.hashedEnd(); ++it)
-                        {
-                            dev::h256 const hashedKey((*it).first);
-                            auto const key = it.key();
-                            dev::bytes const value = dev::RLP((*it).second).toBytes();
-                            ret_[hashedKey] = make_pair(key, value);
-                        }
-                    }
-                }
-                std::unordered_map<dvmc::bytes32, dvmc::storage_value>& storage_recon = account_recon.storage;
-                for(auto i_ : ret_)
-                {
-                    dvmc::bytes32 reconKey;
-                    dev::bytes key = i_.second.first;
-                    for(int idx=0; idx<32; idx++)
-                        reconKey.bytes[idx] = key[idx];
-                    dvmc::storage_value sv;
-                    for(int idx=0; idx<32; idx++)
-                        sv.value.bytes[idx] = i_.second.second[idx];
-
-                    storage_recon[reconKey] = sv;
-                }
-            }
-            {
-                testGen(account_recon,code_hex_str);
-
-                dvmc::VertexNode vTrans;
-                dvmc_address create_address;
-                uint160 h160;
-                AddressToHash160(cAddr_.ToString(),h160);
-                memcpy(create_address.bytes,h160.pn,20);
-                vTrans.accounts[create_address] = account_recon;
-                const auto input = dvmc::from_hex(contract_input);
-                dvmc_message msg{};
-                msg.recipient = create_address;
-                msg.track = std::numeric_limits<int64_t>::max();
-                msg.input_data = input.data();
-                msg.input_size = input.size();
-                dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
-                dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
-                const auto result = vm.retrieve_desc_vx(vTrans, rev, msg, account_recon.code.data(), account_recon.code.size());
-                dvmc::TransitionalNode updatedAcc = vTrans.accounts[create_address];
-
-                dev::SecureTrieDB<dev::Address, dev::OverlayDB> state(overlayDB_);
-                state.init();
-                {
-                    dev::u256 nonce = 12345678;
-                    dev::u256 balance = 1010101010101;
-                    dev::RLPStream s(4);
-                    s << nonce << balance;
-
-                    {
-                        dev::SecureTrieDB<dev::h256, dev::StateCacheDB> storageDB(state.db(), retrievedAcc.baseRoot());
-                        for(auto pair : updatedAcc.storage)
-                        {
-                            auto storage_key = pair.first.bytes;
-                            dev::bytes key;
-                            for(int i=0; i<32; i++)
-                                key.push_back(storage_key[i]);
-
-                            dev::h256 key256(key);
-
-                            auto storage_bytes = pair.second.value;
-                            dev::bytes val;
-                            for(int i=0; i<32; i++)
-                                val.push_back(storage_bytes.bytes[i]);
-                            storageDB.insert(key256, dev::rlp(val));
-                        }
-                        s << storageDB.root();
-                    }
-
-                    s << retrievedAcc.codeHash();
-                    state.insert(target_addr, &s.out());
-                    overlayDB_->commit();
-                }
-            }
+          origin = stringFromVch(vvchArgs[1]);
         }
+      }
+      std::vector<string> contract_execution_data;
+      boost::char_separator<char> tok(":");
+      boost::tokenizer<boost::char_separator<char>> tokens(origin,tok);
+      BOOST_FOREACH(const string& s,tokens)
+      {
+        contract_execution_data.push_back(s);
+      }
+      string target_contract = contract_execution_data[0];
+      {
+        vector<PathIndex> vtxPos;
+        vchType vchPath = vchFromString(target_contract);
+        if (ln1Db->lKey (vchPath))
+        {
+          printf("  name exists\n");
+          if (!ln1Db->lGet (vchPath, vtxPos))
+          {
+            std::cout << "error read : name db" << std::endl;
+          }
+          if (vtxPos.empty ())
+          {
+            std::cout << "error vec : empty" << std::endl;
+          }
+
+          PathIndex& txPos = vtxPos.back ();
+          cAddr_.SetString(txPos.vAddress);
+        }
+        else
+        {
+          throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid I/OCoin address or unknown alias");
+        }
+      }
+
+      string contract_input  = contract_execution_data[1];
+      string contractCode;
+
+      bool f = sectionVertex(target_contract,contractCode);
+      if(f != true)
+      {
+        continue;
+      }
+
+      CKeyID keyID;
+      cAddr_.GetKeyID(keyID);
+      dev::Address target_addr(keyID.GetHex().c_str());
+
+      dev::SecureTrieDB<dev::Address, dev::OverlayDB> state(overlayDB_);
+      state.init();
+      string account_str = state.at(target_addr);
+      dev::RLP rlp_state(account_str,0);
+      auto const targetAccStorageRoot = rlp_state[2].toHash<dev::h256>();
+      auto const nonce = rlp_state[0].toInt<dev::u256>();
+      auto const balance = rlp_state[1].toInt<dev::u256>();
+      auto const codeHash = rlp_state[3].toHash<dev::h256>();
+      dev::eth::Account retrievedAcc(nonce,balance,targetAccStorageRoot,codeHash,0,dev::eth::Account::Unchanged);
+      string code_hex_str = contractCode;
+      uint256 r;
+      string val;
+      dvmc::TransitionalNode account_recon;
+      {
+        map<dev::h256, pair<dev::bytes, dev::bytes>> ret_;
+        ret_.clear();
+        {
+          {
+            dev::SecureTrieDB<dev::h256, dev::OverlayDB> memdb(const_cast<dev::OverlayDB*>(overlayDB_), targetAccStorageRoot);
+
+            for (auto it = memdb.hashedBegin(); it != memdb.hashedEnd(); ++it)
+            {
+              dev::h256 const hashedKey((*it).first);
+              auto const key = it.key();
+              dev::bytes const value = dev::RLP((*it).second).toBytes();
+              ret_[hashedKey] = make_pair(key, value);
+            }
+          }
+        }
+        std::unordered_map<dvmc::bytes32, dvmc::storage_value>& storage_recon = account_recon.storage;
+        for(auto i_ : ret_)
+        {
+          dvmc::bytes32 reconKey;
+          dev::bytes key = i_.second.first;
+          for(int idx=0; idx<32; idx++)
+          {
+            reconKey.bytes[idx] = key[idx];
+          }
+          dvmc::storage_value sv;
+          for(int idx=0; idx<32; idx++)
+          {
+            sv.value.bytes[idx] = i_.second.second[idx];
+          }
+
+          storage_recon[reconKey] = sv;
+        }
+      }
+      {
+        testGen(account_recon,code_hex_str);
+
+        dvmc::VertexNode vTrans;
+        dvmc_address create_address;
+        uint160 h160;
+        AddressToHash160(cAddr_.ToString(),h160);
+        memcpy(create_address.bytes,h160.pn,20);
+        vTrans.accounts[create_address] = account_recon;
+        const auto input = dvmc::from_hex(contract_input);
+        dvmc_message msg{};
+        msg.recipient = create_address;
+        msg.track = std::numeric_limits<int64_t>::max();
+        msg.input_data = input.data();
+        msg.input_size = input.size();
+        dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
+        dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
+        const auto result = vm.retrieve_desc_vx(vTrans, rev, msg, account_recon.code.data(), account_recon.code.size());
+        dvmc::TransitionalNode updatedAcc = vTrans.accounts[create_address];
+
+        dev::SecureTrieDB<dev::Address, dev::OverlayDB> state(overlayDB_);
+        state.init();
+        {
+          dev::u256 nonce = 12345678;
+          dev::u256 balance = 1010101010101;
+          dev::RLPStream s(4);
+          s << nonce << balance;
+
+          {
+            dev::SecureTrieDB<dev::h256, dev::StateCacheDB> storageDB(state.db(), retrievedAcc.baseRoot());
+            for(auto pair : updatedAcc.storage)
+            {
+              auto storage_key = pair.first.bytes;
+              dev::bytes key;
+              for(int i=0; i<32; i++)
+              {
+                key.push_back(storage_key[i]);
+              }
+
+              dev::h256 key256(key);
+
+              auto storage_bytes = pair.second.value;
+              dev::bytes val;
+              for(int i=0; i<32; i++)
+              {
+                val.push_back(storage_bytes.bytes[i]);
+              }
+              storageDB.insert(key256, dev::rlp(val));
+            }
+            s << storageDB.root();
+          }
+
+          s << retrievedAcc.codeHash();
+          state.insert(target_addr, &s.out());
+          overlayDB_->commit();
+        }
+      }
     }
+  }
 
 }
 
@@ -626,114 +644,445 @@ string erc20_22112022_withdraw_with_parameter_subtract_15 = "0x60806040526012600
 
 Value integratedTest1(const Array& params, bool fHelp)
 {
-    if(fHelp || params.size() > 0)
-        throw runtime_error(
-            "integratedTest1 no args"
-            + HelpRequiringPassphrase());
+  if(fHelp || params.size() > 0)
+    throw runtime_error(
+      "integratedTest1 no args"
+      + HelpRequiringPassphrase());
 
-    vector<Value> res;
-    constexpr auto create_address         = 0xc9ea7ed000000000000000000000000000000001_address;
-    constexpr auto test_sender_address    = 0x5b38da6a701c568545dcfcb03fcb875f56beddc4_address;
-    constexpr auto test_recipient_address = 0x5b38da6a701c568545dcfcb03fcb875f56beddc4_address;
-    std::cout << "integratedTest1 : initialised create address " << dvmc::hex(create_address.bytes) << "\n";
-    std::cout << "integratedTest1 : initialised from address " << dvmc::hex(test_sender_address.bytes) << "\n";
-    std::cout << "integratedTest1 : initialised to address " << dvmc::hex(test_recipient_address.bytes) << "\n";
-    const auto code = dvmc::from_hex(erc20_22112022_withdraw_with_parameter_subtract_15);
+  vector<Value> res;
+  constexpr auto create_address         = 0xc9ea7ed000000000000000000000000000000001_address;
+  constexpr auto test_sender_address    = 0x5b38da6a701c568545dcfcb03fcb875f56beddc4_address;
+  constexpr auto test_recipient_address = 0x5b38da6a701c568545dcfcb03fcb875f56beddc4_address;
+  std::cout << "integratedTest1 : initialised create address " << dvmc::hex(create_address.bytes) << "\n";
+  std::cout << "integratedTest1 : initialised from address " << dvmc::hex(test_sender_address.bytes) << "\n";
+  std::cout << "integratedTest1 : initialised to address " << dvmc::hex(test_recipient_address.bytes) << "\n";
+  const auto code = dvmc::from_hex(erc20_22112022_withdraw_with_parameter_subtract_15);
 
-    dvmc::VertexNode host;
-    dvmc::TransitionalNode created_account;
-    dvmc::TransitionalNode sender_account;
-    sender_account.set_balance(3141);
-    dvmc_message msg{};
-    msg.track = std::numeric_limits<int64_t>::max();
+  dvmc::VertexNode host;
+  dvmc::TransitionalNode created_account;
+  dvmc::TransitionalNode sender_account;
+  sender_account.set_balance(3141);
+  dvmc_message msg{};
+  msg.track = std::numeric_limits<int64_t>::max();
 
-    dvmc::bytes_view exec_code = code;
+  dvmc::bytes_view exec_code = code;
+  {
+    dvmc_message create_msg{};
+    create_msg.kind = DVMC_CREATE;
+    create_msg.recipient = create_address;
+    create_msg.track = std::numeric_limits<int64_t>::max();
+
+    dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
+    dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
+    const auto create_result = vm.retrieve_desc_vx(host, rev, create_msg, code.data(), code.size());
+    if (create_result.status_code != DVMC_SUCCESS)
     {
-        dvmc_message create_msg{};
-        create_msg.kind = DVMC_CREATE;
-        create_msg.recipient = create_address;
-        create_msg.track = std::numeric_limits<int64_t>::max();
+      std::cout << "integratedTest1 : Contract creation failed: " << create_result.status_code << "\n";
+      return create_result.status_code;
+    }
 
-        dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
-        dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
-        const auto create_result = vm.retrieve_desc_vx(host, rev, create_msg, code.data(), code.size());
-        if (create_result.status_code != DVMC_SUCCESS)
+    auto& created_account = host.accounts[create_address];
+    created_account.set_balance(100000000000000);
+
+    created_account.code = dvmc::bytes(create_result.output_data, create_result.output_size);
+
+    msg.recipient = create_address;
+    exec_code = created_account.code;
+  }
+  {
+    std::cout << "\n";
+    const auto input = dvmc::from_hex("0x18160ddd");
+    msg.input_data = input.data();
+    msg.input_size = input.size();
+
+    dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
+    dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
+    const auto result = vm.retrieve_desc_vx(host, rev, msg, exec_code.data(), exec_code.size());
+
+    const auto track_used = msg.track - result.track_left;
+    std::cout << "integratedTest1 : Result: totalSupply  " << result.status_code << "\nGas used: " << track_used << "\n";
+
+    if (result.status_code == DVMC_SUCCESS || result.status_code == DVMC_REVERT)
+      std::cout << "Output:   " << dvmc::hex({result.output_data, result.output_size}) << "\n";
+  }
+  {
+    std::cout << "\n";
+    const auto input = dvmc::from_hex("0x42966c68000000000000000000000000000000000000000000000000000000000000029a");
+    msg.input_data = input.data();
+    msg.input_size = input.size();
+
+    dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
+    dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
+    const auto result = vm.retrieve_desc_vx(host, rev, msg, exec_code.data(), exec_code.size());
+
+    const auto track_used = msg.track - result.track_left;
+    std::cout << "integratedTest1 : Result: Burn  " << result.status_code << "\nGas used: " << track_used << "\n";
+
+    if (result.status_code == DVMC_SUCCESS || result.status_code == DVMC_REVERT)
+      std::cout << "Output:   " << dvmc::hex({result.output_data, result.output_size}) << "\n";
+  }
+  {
+    std::cout << "\n";
+    const auto input = dvmc::from_hex("0x18160ddd");
+    msg.input_data = input.data();
+    msg.input_size = input.size();
+
+    dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
+    dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
+    const auto result = vm.retrieve_desc_vx(host, rev, msg, exec_code.data(), exec_code.size());
+
+    const auto track_used = msg.track - result.track_left;
+    std::cout << "integratedTest1 : Result: totalSupply  " << result.status_code << "\nGas used: " << track_used << "\n";
+
+    if (result.status_code == DVMC_SUCCESS || result.status_code == DVMC_REVERT)
+      std::cout << "integratedTest1 : Output:   " << dvmc::hex({result.output_data, result.output_size}) << "\n";
+  }
+  {
+    const auto input = dvmc::from_hex("0x095ea7b30000000000000000000000005b38da6a701c568545dcfcb03fcb875f56beddc40000000000000000000000000000000000000000000000000000000000000050");
+    msg.sender = test_sender_address;
+    msg.input_data = input.data();
+    msg.input_size = input.size();
+
+    dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
+    dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
+    const auto result = vm.retrieve_desc_vx(host, rev, msg, exec_code.data(), exec_code.size());
+
+    const auto track_used = msg.track - result.track_left;
+    std::cout << "integratedTest1 : Result:   " << result.status_code << "\nGas used: " << track_used << "\n";
+
+  }
+  {
+    std::cout << "\n";
+    const auto input = dvmc::from_hex("0xdd62ed3e0000000000000000000000005b38da6a701c568545dcfcb03fcb875f56beddc40000000000000000000000005b38da6a701c568545dcfcb03fcb875f56beddc4");
+    msg.input_data = input.data();
+    msg.input_size = input.size();
+
+    dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
+    dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
+    const auto result = vm.retrieve_desc_vx(host, rev, msg, exec_code.data(), exec_code.size());
+
+    const auto track_used = msg.track - result.track_left;
+    std::cout << "integratedTest1 : Result:   " << result.status_code << "\nGas used: " << track_used << "\n";
+
+  }
+  {
+    std::cout << "\n";
+    const auto input = dvmc::from_hex("0x23b872dd0000000000000000000000005b38da6a701c568545dcfcb03fcb875f56beddc40000000000000000000000005b38da6a701c568545dcfcb03fcb875f56beddc40000000000000000000000000000000000000000000000000000000000000037");
+
+
+    msg.track = std::numeric_limits<int64_t>::max();
+    msg.input_data = input.data();
+    msg.input_size = input.size();
+
+    dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
+    dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
+    const auto result = vm.retrieve_desc_vx(host, rev, msg, exec_code.data(), exec_code.size());
+
+    const auto track_used = msg.track - result.track_left;
+    std::cout << "integratedTest1 : Result: transfer_from  " << result.status_code << "\nGas used: " << track_used << "\n";
+  }
+  {
+    std::cout << "\n";
+    const auto input = dvmc::from_hex("0xdd62ed3e0000000000000000000000005b38da6a701c568545dcfcb03fcb875f56beddc40000000000000000000000005b38da6a701c568545dcfcb03fcb875f56beddc4");
+    msg.input_data = input.data();
+    msg.input_size = input.size();
+
+    dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
+    dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
+    const auto result = vm.retrieve_desc_vx(host, rev, msg, exec_code.data(), exec_code.size());
+
+    const auto track_used = msg.track - result.track_left;
+    std::cout << "integratedTest1 : Result:   " << result.status_code << "\nGas used: " << track_used << "\n";
+
+    if (result.status_code == DVMC_SUCCESS || result.status_code == DVMC_REVERT)
+      std::cout << "integratedTest1 : Output: allowance  " << dvmc::hex({result.output_data, result.output_size}) << "\n";
+  }
+  {
+    std::cout << "\n";
+    const auto input =   dvmc::from_hex("0x486556ce0000000000000000000000000000000000000000000000000000000000031415");
+    msg.sender = test_sender_address;
+    msg.recipient = create_address;
+    msg.input_data = input.data();
+    msg.input_size = input.size();
+    dvmc::bytes32 bytes__sender_before = host.get_balance(test_sender_address);
+    dvmc::bytes32 bytes__ = host.get_balance(create_address);
+
+    dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
+    dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
+    const auto result = vm.retrieve_desc_vx(host, rev, msg, exec_code.data(), exec_code.size());
+
+    dvmc::bytes32 bytes__sender_after = host.get_balance(test_sender_address);
+    dvmc::bytes32 bytes__contract_after = host.get_balance(create_address);
+    unsigned char test_bytes[] =
+    {
+      0,0,0,0,0,0,0,0,
+      0,0,0,0,0,0,0,0,
+      0,0,0,0,0,0,0,0,
+      0,0,0,0,0,0x03,0x14,0x06
+    };
+    uint256 test = test_bytes[0];
+    unsigned int test2;
+
+    uint256 msg_test_bytes;
+    for(int i=0; i<8; i++)
+    {
+      unsigned int b1 = test_bytes[i*4];
+      b1<<=24;
+      unsigned int b2 = test_bytes[i*4+1];
+      b2<<=16;
+      unsigned int b3 = test_bytes[i*4+2];
+      b3<<=8;
+      unsigned int b4 = test_bytes[i*4+3];
+      b4<<=0;
+      unsigned int p_i = b1 + b2 + b3 + b4;
+      msg_test_bytes.pn[7 - i] = p_i;
+    }
+    msg_test_bytes +=1;
+
+    uint64_t msg_test_bytes64 = msg_test_bytes.pn[0];
+    msg_test_bytes64 += (0x00000000fffffffff&msg_test_bytes.pn[1])<<32;
+
+    const auto track_used = msg.track - result.track_left;
+  }
+
+  dev::SecureTrieDB<dev::Address, dev::OverlayDB> state(overlayDB_);
+  state.init();
+  dev::Address tmpAddr("9999999999999996789012345678901234567890");
+  dev::eth::Account tmpAcc(0,0);
+  {
+    dev::u256 nonce = 12345678;
+    dev::u256 balance = 1010101010101;
+    dev::RLPStream s(4);
+    s << nonce << balance;
+
+    {
+      dev::SecureTrieDB<dev::h256, dev::StateCacheDB> storageDB(state.db(), tmpAcc.baseRoot());
+      auto& created_account__ = host.accounts[create_address];
+      for(auto pair : created_account__.storage)
+      {
+        auto storage_key = pair.first.bytes;
+        dev::bytes key;
+        for(int i=0; i<32; i++)
         {
-            std::cout << "integratedTest1 : Contract creation failed: " << create_result.status_code << "\n";
-            return create_result.status_code;
+          key.push_back(storage_key[i]);
         }
 
-        auto& created_account = host.accounts[create_address];
-        created_account.set_balance(100000000000000);
+        dev::h256 key256(key);
 
-        created_account.code = dvmc::bytes(create_result.output_data, create_result.output_size);
-
-        msg.recipient = create_address;
-        exec_code = created_account.code;
+        auto storage_bytes = pair.second.value;
+        dev::bytes val;
+        std::cout << "preparing insert dev::bytes val in trie, val.size " << val.size() << std::endl;
+        for(int i=0; i<32; i++)
+        {
+          val.push_back(storage_bytes.bytes[i]);
+        }
+        std::cout << "insert " << storageDB.root() << std::endl;
+        std::cout << "preparing insert convert val toString" << std::endl;
+        std::cout << "preparing insert compare toString with orig" << std::endl;
+        std::cout << "preparing insert prior to insert val.size " << val.size() << std::endl;
+        bool match=true;
+        for(int i=0; i<32; i++)
+        {
+          if(val[i] != storage_bytes.bytes[i])
+          {
+            match=false;
+            break;
+          }
+        }
+        std::cout << "preparing insert compare val with orig " << match << std::endl;
+        storageDB.insert(key256, dev::rlp(val));
+      }
+      s << storageDB.root();
     }
+
+    s << tmpAcc.codeHash();
+    state.insert(tmpAddr, &s.out());
+    overlayDB_->commit();
+  }
+  auto created_acc = host.accounts[create_address];
+  dvmc::TransitionalNode account_recon;
+  auto& node_map = host.accounts;
+  account_recon.storage = created_acc.storage;
+  account_recon.code = created_acc.code;
+  account_recon.balance = created_acc.balance;
+  node_map[create_address] = account_recon;
+  std::cout << "direct copy storage plus code plus balance to recon" << std::endl;
+  {
+    std::cout << "RECON QUERY ALLOWANCE" << std::endl;
+    std::cout << "\n";
+    const auto input = dvmc::from_hex("0xdd62ed3e0000000000000000000000005b38da6a701c568545dcfcb03fcb875f56beddc40000000000000000000000005b38da6a701c568545dcfcb03fcb875f56beddc4");
+    msg.input_data = input.data();
+    msg.input_size = input.size();
+
+    dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
+    dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
+    const auto result = vm.retrieve_desc_vx(host, rev, msg, exec_code.data(), exec_code.size());
+    const auto track_used = msg.track - result.track_left;
+    std::cout << "integratedTest1 : after recon Result:   " << result.status_code << "\nGas used: " << track_used << "\n";
+
+    if (result.status_code == DVMC_SUCCESS || result.status_code == DVMC_REVERT)
+      std::cout << "integratedTest1 : Output: after recon allowance  " << dvmc::hex({result.output_data, result.output_size}) << "\n";
+  }
+  std::cout << "========================================================================" << std::endl;
+  {
+    string account_str = state.at(tmpAddr);
+    dev::RLP rlp_state(account_str,0);
+    auto const nonce = rlp_state[0].toInt<dev::u256>();
+    std::cout << "extracted nonce " << nonce << std::endl;
+    auto const balance = rlp_state[1].toInt<dev::u256>();
+    std::cout << "extracted balance " << balance << std::endl;
+    auto const tmpAccstorageRoot = rlp_state[2].toHash<dev::h256>();
+    std::cout << "extracted storageRoot " << tmpAccstorageRoot << std::endl;
+    auto const codeHash = rlp_state[3].toHash<dev::h256>();
+    std::cout << "integratedTest 1 extracted codeHash " << codeHash << std::endl;
+
+    dev::eth::Account retrievedAcc(nonce,balance,tmpAccstorageRoot,codeHash,0,dev::eth::Account::Unchanged);
     {
-        std::cout << "\n";
-        const auto input = dvmc::from_hex("0x18160ddd"); 
-        msg.input_data = input.data();
-        msg.input_size = input.size();
+      map<dev::h256, pair<dev::u256, dev::u256>> ret;
+      map<dev::h256, pair<dev::bytes, dev::bytes>> ret_;
+      ret_.clear();
+      std::cout << "created ret_.size " << ret_.size() << std::endl;
+      for(auto p : ret_)
+      {
+        std::cout << "after creation ret_ entry" << std::endl;
+      }
 
-        dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
-        dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
-        const auto result = vm.retrieve_desc_vx(host, rev, msg, exec_code.data(), exec_code.size());
+      {
+        {
+          dev::SecureTrieDB<dev::h256, dev::OverlayDB> memdb(const_cast<dev::OverlayDB*>(overlayDB_), tmpAccstorageRoot);
 
-        const auto track_used = msg.track - result.track_left;
-        std::cout << "integratedTest1 : Result: totalSupply  " << result.status_code << "\nGas used: " << track_used << "\n";
+          for (auto it = memdb.hashedBegin(); it != memdb.hashedEnd(); ++it)
+          {
+            dev::h256 const hashedKey((*it).first);
+            auto const key = it.key();
+            dev::bytes const value = dev::RLP((*it).second).toBytes();
+            std::cout << "integratedTest 1 set ret_ hash map key value" << std::endl;
+            ret_[hashedKey] = make_pair(key, value);
+          }
+        }
+        std::cout << "integratedTest 1 map ret_.size() " << ret_.size() << std::endl;
+        std::cout << "after first setting entries ret_.size " << ret_.size() << std::endl;
+        for(auto p : ret_)
+        {
+          std::cout << "after setting ret_ entry" << std::endl;
+        }
+        auto created_account__ = host.accounts[create_address];
+        std::cout << "created_account__.storage.size " << created_account__.storage.size() << std::endl;
+        for(auto pair : created_account__.storage)
+        {
+          auto storage_key = pair.first.bytes;
+          for(auto i_ret_ : ret_)
+          {
+            dev::bytes key = i_ret_.second.first;
+            bool match = true;
+            for(int index=0; index<32; index++)
+            {
+              if(storage_key[index] != key[index])
+              {
+                match=false;
+                break;
+              }
+            }
+            if(match == true)
+            {
+              std::cout << "found matching key bytes" << std::endl;
+            }
+          }
+        }
+        std::cout << "integratedTest 1 map ret_.size() " << ret_.size() << std::endl;
+        std::cout << "prior to val scan entries ret_.size " << ret_.size() << std::endl;
+        for(auto p : ret_)
+        {
+          std::cout << "prior to val scan ret_ entry" << std::endl;
+        }
+        std::cout << "================== scan values ================== " << std::endl;
+        std::cout << "ret_.size " << ret_.size() << std::endl;
+        std::cout << "prior to val scan created_account__.storage.size " << created_account__.storage.size() << std::endl;
+        for(auto pair : created_account__.storage)
+        {
+          auto storage_value = pair.second.value;
+          for(auto i_ret_ : ret_)
+          {
+            dev::bytes val = i_ret_.second.second;
+            bool match = true;
+            for(int index=0; index<32; index++)
+            {
+              if(storage_value.bytes[index] != val[index])
+              {
+                match=false;
+                break;
+              }
+            }
+            if(match == true)
+            {
+              std::cout << "found matching value bytes" << std::endl;
+            }
+          }
+        }
+        std::cout << "================== scan values end ================== " << std::endl;
+      }
+      dvmc::TransitionalNode account_recon;
+      std::unordered_map<dvmc::bytes32, dvmc::storage_value>& storage_recon = account_recon.storage;
+      for(auto i_ : ret_)
+      {
+        dvmc::bytes32 reconKey;
+        dev::bytes key = i_.second.first;
+        for(int idx=0; idx<32; idx++)
+        {
+          reconKey.bytes[idx] = key[idx];
+        }
+        dvmc::storage_value sv;
+        for(int idx=0; idx<32; idx++)
+        {
+          sv.value.bytes[idx] = i_.second.second[idx];
+        }
 
-        if (result.status_code == DVMC_SUCCESS || result.status_code == DVMC_REVERT)
-            std::cout << "Output:   " << dvmc::hex({result.output_data, result.output_size}) << "\n";
-    }
-    {
-        std::cout << "\n";
-        const auto input = dvmc::from_hex("0x42966c68000000000000000000000000000000000000000000000000000000000000029a");
-        msg.input_data = input.data();
-        msg.input_size = input.size();
+        storage_recon[reconKey] = sv;
+      }
 
-        dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
-        dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
-        const auto result = vm.retrieve_desc_vx(host, rev, msg, exec_code.data(), exec_code.size());
+      auto& created_account___ = host.accounts[create_address];
+      {
+        for(auto pair : created_account___.storage)
+        {
+          for(auto pair_r : account_recon.storage)
+          {
+            bool match=true;
+            for(int idx=0; idx<32; idx++)
+            {
+              if(pair_r.first.bytes[idx] != pair.first.bytes[idx])
+              {
+                match=false;
+                break;
+              }
+            }
+            if(match)
+            {
+              std::cout << "key match" << std::endl;
+            }
+          }
+        }
+      }
+      {
+        for(auto pair : created_account___.storage)
+        {
+          dvmc::storage_value sv = account_recon.storage[pair.first];
+          if(sv.value == pair.second.value)
+          {
+            std::cout << "payload match" << std::endl;
+          }
+          else
+          {
+            std::cout << "payload does not match" << std::endl;
+          }
 
-        const auto track_used = msg.track - result.track_left;
-        std::cout << "integratedTest1 : Result: Burn  " << result.status_code << "\nGas used: " << track_used << "\n";
-
-        if (result.status_code == DVMC_SUCCESS || result.status_code == DVMC_REVERT)
-            std::cout << "Output:   " << dvmc::hex({result.output_data, result.output_size}) << "\n";
-    }
-    {
-        std::cout << "\n";
-        const auto input = dvmc::from_hex("0x18160ddd"); 
-        msg.input_data = input.data();
-        msg.input_size = input.size();
-
-        dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
-        dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
-        const auto result = vm.retrieve_desc_vx(host, rev, msg, exec_code.data(), exec_code.size());
-
-        const auto track_used = msg.track - result.track_left;
-        std::cout << "integratedTest1 : Result: totalSupply  " << result.status_code << "\nGas used: " << track_used << "\n";
-
-        if (result.status_code == DVMC_SUCCESS || result.status_code == DVMC_REVERT)
-            std::cout << "integratedTest1 : Output:   " << dvmc::hex({result.output_data, result.output_size}) << "\n";
-    }
-    {
-        const auto input = dvmc::from_hex("0x095ea7b30000000000000000000000005b38da6a701c568545dcfcb03fcb875f56beddc40000000000000000000000000000000000000000000000000000000000000050");
-        msg.sender = test_sender_address;
-        msg.input_data = input.data();
-        msg.input_size = input.size();
-
-        dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
-        dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
-        const auto result = vm.retrieve_desc_vx(host, rev, msg, exec_code.data(), exec_code.size());
-
-        const auto track_used = msg.track - result.track_left;
-        std::cout << "integratedTest1 : Result:   " << result.status_code << "\nGas used: " << track_used << "\n";
-
-    }
-    {
+        }
+      }
+      account_recon.nonce = created_account___.nonce;
+      account_recon.balance = created_account___.balance;
+      account_recon.code = created_account___.code;
+      created_account___ = account_recon;
+      {
+        std::cout << "RECON TEST" << std::endl;
         std::cout << "\n";
         const auto input = dvmc::from_hex("0xdd62ed3e0000000000000000000000005b38da6a701c568545dcfcb03fcb875f56beddc40000000000000000000000005b38da6a701c568545dcfcb03fcb875f56beddc4");
         msg.input_data = input.data();
@@ -744,555 +1093,454 @@ Value integratedTest1(const Array& params, bool fHelp)
         const auto result = vm.retrieve_desc_vx(host, rev, msg, exec_code.data(), exec_code.size());
 
         const auto track_used = msg.track - result.track_left;
-        std::cout << "integratedTest1 : Result:   " << result.status_code << "\nGas used: " << track_used << "\n";
-
-    }
-    {
-        std::cout << "\n";
-        const auto input = dvmc::from_hex("0x23b872dd0000000000000000000000005b38da6a701c568545dcfcb03fcb875f56beddc40000000000000000000000005b38da6a701c568545dcfcb03fcb875f56beddc40000000000000000000000000000000000000000000000000000000000000037");
-
-
-        msg.track = std::numeric_limits<int64_t>::max();
-        msg.input_data = input.data();
-        msg.input_size = input.size();
-
-        dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
-        dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
-        const auto result = vm.retrieve_desc_vx(host, rev, msg, exec_code.data(), exec_code.size());
-
-        const auto track_used = msg.track - result.track_left;
-        std::cout << "integratedTest1 : Result: transfer_from  " << result.status_code << "\nGas used: " << track_used << "\n";
-    }
-    {
-        std::cout << "\n";
-        const auto input = dvmc::from_hex("0xdd62ed3e0000000000000000000000005b38da6a701c568545dcfcb03fcb875f56beddc40000000000000000000000005b38da6a701c568545dcfcb03fcb875f56beddc4"); 
-        msg.input_data = input.data();
-        msg.input_size = input.size();
-
-        dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
-        dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
-        const auto result = vm.retrieve_desc_vx(host, rev, msg, exec_code.data(), exec_code.size());
-
-        const auto track_used = msg.track - result.track_left;
-        std::cout << "integratedTest1 : Result:   " << result.status_code << "\nGas used: " << track_used << "\n";
-
-        if (result.status_code == DVMC_SUCCESS || result.status_code == DVMC_REVERT)
-            std::cout << "integratedTest1 : Output: allowance  " << dvmc::hex({result.output_data, result.output_size}) << "\n";
-    }
-    {
-        std::cout << "\n";
-        const auto input =   dvmc::from_hex("0x486556ce0000000000000000000000000000000000000000000000000000000000031415"); 
-        msg.sender = test_sender_address;
-        msg.recipient = create_address;
-        msg.input_data = input.data();
-        msg.input_size = input.size();
-        dvmc::bytes32 bytes__sender_before = host.get_balance(test_sender_address);
-        dvmc::bytes32 bytes__ = host.get_balance(create_address);
-
-        dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
-        dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
-        const auto result = vm.retrieve_desc_vx(host, rev, msg, exec_code.data(), exec_code.size());
-
-        dvmc::bytes32 bytes__sender_after = host.get_balance(test_sender_address);
-        dvmc::bytes32 bytes__contract_after = host.get_balance(create_address);
-        unsigned char test_bytes[] = {
-            0,0,0,0,0,0,0,0,
-            0,0,0,0,0,0,0,0,
-            0,0,0,0,0,0,0,0,
-            0,0,0,0,0,0x03,0x14,0x06
-        };
-        uint256 test = test_bytes[0];
-        unsigned int test2;
-
-        uint256 msg_test_bytes;
-        for(int i=0; i<8; i++)
-        {
-            unsigned int b1 = test_bytes[i*4];
-            b1<<=24;
-            unsigned int b2 = test_bytes[i*4+1];
-            b2<<=16;
-            unsigned int b3 = test_bytes[i*4+2];
-            b3<<=8;
-            unsigned int b4 = test_bytes[i*4+3];
-            b4<<=0;
-            unsigned int p_i = b1 + b2 + b3 + b4;
-            msg_test_bytes.pn[7 - i] = p_i;
-        }
-        msg_test_bytes +=1;
-
-        uint64_t msg_test_bytes64 = msg_test_bytes.pn[0];
-        msg_test_bytes64 += (0x00000000fffffffff&msg_test_bytes.pn[1])<<32;
-
-        const auto track_used = msg.track - result.track_left;
-    }
-
-    dev::SecureTrieDB<dev::Address, dev::OverlayDB> state(overlayDB_);
-    state.init();
-    dev::Address tmpAddr("9999999999999996789012345678901234567890");
-    dev::eth::Account tmpAcc(0,0);
-    {
-        dev::u256 nonce = 12345678;
-        dev::u256 balance = 1010101010101;
-        dev::RLPStream s(4);
-        s << nonce << balance;
-
-        {
-            dev::SecureTrieDB<dev::h256, dev::StateCacheDB> storageDB(state.db(), tmpAcc.baseRoot());
-            auto& created_account__ = host.accounts[create_address];
-            for(auto pair : created_account__.storage)
-            {
-                auto storage_key = pair.first.bytes;
-                dev::bytes key;
-                for(int i=0; i<32; i++)
-                    key.push_back(storage_key[i]);
-
-                dev::h256 key256(key);
-
-                auto storage_bytes = pair.second.value;
-                dev::bytes val;
-                std::cout << "preparing insert dev::bytes val in trie, val.size " << val.size() << std::endl;
-                for(int i=0; i<32; i++)
-                    val.push_back(storage_bytes.bytes[i]);
-                std::cout << "insert " << storageDB.root() << std::endl;
-                std::cout << "preparing insert convert val toString" << std::endl;
-                std::cout << "preparing insert compare toString with orig" << std::endl;
-                std::cout << "preparing insert prior to insert val.size " << val.size() << std::endl;
-                bool match=true;
-                for(int i=0; i<32; i++)
-                {
-                    if(val[i] != storage_bytes.bytes[i])
-                    {
-                        match=false;
-                        break;
-                    }
-                }
-                std::cout << "preparing insert compare val with orig " << match << std::endl;
-                storageDB.insert(key256, dev::rlp(val));
-            }
-            s << storageDB.root();
-        }
-
-        s << tmpAcc.codeHash();
-        state.insert(tmpAddr, &s.out());
-        overlayDB_->commit();
-    }
-    auto created_acc = host.accounts[create_address];
-    dvmc::TransitionalNode account_recon;
-    auto& node_map = host.accounts;
-    account_recon.storage = created_acc.storage;
-    account_recon.code = created_acc.code;
-    account_recon.balance = created_acc.balance;
-    node_map[create_address] = account_recon;
-    std::cout << "direct copy storage plus code plus balance to recon" << std::endl;
-    {
-        std::cout << "RECON QUERY ALLOWANCE" << std::endl;
-        std::cout << "\n";
-        const auto input = dvmc::from_hex("0xdd62ed3e0000000000000000000000005b38da6a701c568545dcfcb03fcb875f56beddc40000000000000000000000005b38da6a701c568545dcfcb03fcb875f56beddc4"); 
-        msg.input_data = input.data();
-        msg.input_size = input.size();
-
-        dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
-        dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
-        const auto result = vm.retrieve_desc_vx(host, rev, msg, exec_code.data(), exec_code.size());
-        const auto track_used = msg.track - result.track_left;
         std::cout << "integratedTest1 : after recon Result:   " << result.status_code << "\nGas used: " << track_used << "\n";
 
         if (result.status_code == DVMC_SUCCESS || result.status_code == DVMC_REVERT)
-            std::cout << "integratedTest1 : Output: after recon allowance  " << dvmc::hex({result.output_data, result.output_size}) << "\n";
+          std::cout << "integratedTest1 : Output: after recon allowance  " << dvmc::hex({result.output_data, result.output_size}) << "\n";
+      }
     }
-    std::cout << "========================================================================" << std::endl;
-    {
-        string account_str = state.at(tmpAddr);
-        dev::RLP rlp_state(account_str,0);
-        auto const nonce = rlp_state[0].toInt<dev::u256>();
-        std::cout << "extracted nonce " << nonce << std::endl;
-        auto const balance = rlp_state[1].toInt<dev::u256>();
-        std::cout << "extracted balance " << balance << std::endl;
-        auto const tmpAccstorageRoot = rlp_state[2].toHash<dev::h256>();
-        std::cout << "extracted storageRoot " << tmpAccstorageRoot << std::endl;
-        auto const codeHash = rlp_state[3].toHash<dev::h256>();
-        std::cout << "integratedTest 1 extracted codeHash " << codeHash << std::endl;
-
-        dev::eth::Account retrievedAcc(nonce,balance,tmpAccstorageRoot,codeHash,0,dev::eth::Account::Unchanged);
-        {
-            map<dev::h256, pair<dev::u256, dev::u256>> ret;
-            map<dev::h256, pair<dev::bytes, dev::bytes>> ret_;
-            ret_.clear();
-            std::cout << "created ret_.size " << ret_.size() << std::endl;
-            for(auto p : ret_)
-                std::cout << "after creation ret_ entry" << std::endl;
-
-            {
-                {
-                    dev::SecureTrieDB<dev::h256, dev::OverlayDB> memdb(const_cast<dev::OverlayDB*>(overlayDB_), tmpAccstorageRoot);
-
-                    for (auto it = memdb.hashedBegin(); it != memdb.hashedEnd(); ++it)
-                    {
-                        dev::h256 const hashedKey((*it).first);
-                        auto const key = it.key();
-                        dev::bytes const value = dev::RLP((*it).second).toBytes();
-                        std::cout << "integratedTest 1 set ret_ hash map key value" << std::endl;
-                        ret_[hashedKey] = make_pair(key, value);
-                    }
-                }
-                std::cout << "integratedTest 1 map ret_.size() " << ret_.size() << std::endl;
-                std::cout << "after first setting entries ret_.size " << ret_.size() << std::endl;
-                for(auto p : ret_)
-                    std::cout << "after setting ret_ entry" << std::endl;
-                auto created_account__ = host.accounts[create_address];
-                std::cout << "created_account__.storage.size " << created_account__.storage.size() << std::endl;
-                for(auto pair : created_account__.storage)
-                {
-                    auto storage_key = pair.first.bytes;
-                    for(auto i_ret_ : ret_)
-                    {
-                        dev::bytes key = i_ret_.second.first;
-                        bool match = true;
-                        for(int index=0; index<32; index++)
-                        {
-                            if(storage_key[index] != key[index])
-                            {
-                                match=false;
-                                break;
-                            }
-                        }
-                        if(match == true)
-                            std::cout << "found matching key bytes" << std::endl;
-                    }
-                }
-                std::cout << "integratedTest 1 map ret_.size() " << ret_.size() << std::endl;
-                std::cout << "prior to val scan entries ret_.size " << ret_.size() << std::endl;
-                for(auto p : ret_)
-                    std::cout << "prior to val scan ret_ entry" << std::endl;
-                std::cout << "================== scan values ================== " << std::endl;
-                std::cout << "ret_.size " << ret_.size() << std::endl;
-                std::cout << "prior to val scan created_account__.storage.size " << created_account__.storage.size() << std::endl;
-                for(auto pair : created_account__.storage)
-                {
-                    auto storage_value = pair.second.value;
-                    for(auto i_ret_ : ret_)
-                    {
-                        dev::bytes val = i_ret_.second.second;
-                        bool match = true;
-                        for(int index=0; index<32; index++)
-                        {
-                            if(storage_value.bytes[index] != val[index])
-                            {
-                                match=false;
-                                break;
-                            }
-                        }
-                        if(match == true)
-                            std::cout << "found matching value bytes" << std::endl;
-                    }
-                }
-                std::cout << "================== scan values end ================== " << std::endl;
-            }
-            dvmc::TransitionalNode account_recon;
-            std::unordered_map<dvmc::bytes32, dvmc::storage_value>& storage_recon = account_recon.storage;
-            for(auto i_ : ret_)
-            {
-                dvmc::bytes32 reconKey;
-                dev::bytes key = i_.second.first;
-                for(int idx=0; idx<32; idx++)
-                    reconKey.bytes[idx] = key[idx];
-                dvmc::storage_value sv;
-                for(int idx=0; idx<32; idx++)
-                    sv.value.bytes[idx] = i_.second.second[idx];
-
-                storage_recon[reconKey] = sv;
-            }
-
-            auto& created_account___ = host.accounts[create_address];
-            {
-                for(auto pair : created_account___.storage)
-                {
-                    for(auto pair_r : account_recon.storage)
-                    {
-                        bool match=true;
-                        for(int idx=0; idx<32; idx++)
-                        {
-                            if(pair_r.first.bytes[idx] != pair.first.bytes[idx])
-                            {
-                                match=false;
-                                break;
-                            }
-                        }
-                        if(match) std::cout << "key match" << std::endl;
-                    }
-                }
-            }
-            {
-                for(auto pair : created_account___.storage)
-                {
-                    dvmc::storage_value sv = account_recon.storage[pair.first];
-                    if(sv.value == pair.second.value)
-                        std::cout << "payload match" << std::endl;
-                    else
-                        std::cout << "payload does not match" << std::endl;
-
-                }
-            }
-            account_recon.nonce = created_account___.nonce;
-            account_recon.balance = created_account___.balance;
-            account_recon.code = created_account___.code;
-            created_account___ = account_recon;
-            {
-                std::cout << "RECON TEST" << std::endl;
-                std::cout << "\n";
-                const auto input = dvmc::from_hex("0xdd62ed3e0000000000000000000000005b38da6a701c568545dcfcb03fcb875f56beddc40000000000000000000000005b38da6a701c568545dcfcb03fcb875f56beddc4");
-                msg.input_data = input.data();
-                msg.input_size = input.size();
-
-                dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
-                dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
-                const auto result = vm.retrieve_desc_vx(host, rev, msg, exec_code.data(), exec_code.size());
-
-                const auto track_used = msg.track - result.track_left;
-                std::cout << "integratedTest1 : after recon Result:   " << result.status_code << "\nGas used: " << track_used << "\n";
-
-                if (result.status_code == DVMC_SUCCESS || result.status_code == DVMC_REVERT)
-                    std::cout << "integratedTest1 : Output: after recon allowance  " << dvmc::hex({result.output_data, result.output_size}) << "\n";
-            }
-        }
-    }
+  }
 
 
-    return res;
+  return res;
 }
 
 Value integratedTest2(const Array& params, bool fHelp)
 {
-    if(fHelp || params.size() > 0)
-        throw runtime_error(
-            "integratedTest2 no args"
-            + HelpRequiringPassphrase());
+  if(fHelp || params.size() > 0)
+    throw runtime_error(
+      "integratedTest2 no args"
+      + HelpRequiringPassphrase());
 
-    fs::create_directories("/home/argon/data1/testnet/state");
-    fs::permissions("/home/argon/data1/testnet/state", fs::owner_all);
-    std::unique_ptr<dev::db::DatabaseFace> db = dev::db::DBFactory::create("/home/argon/data1/testnet/state");
-    auto overlay_db = dev::OverlayDB(std::move(db));
-    dev::SecureTrieDB<dev::Address, dev::OverlayDB> state(&overlay_db);
-    std::unordered_map<dev::Address, dev::eth::Account> m_cache;
+  fs::create_directories("/home/argon/data1/testnet/state");
+  fs::permissions("/home/argon/data1/testnet/state", fs::owner_all);
+  std::unique_ptr<dev::db::DatabaseFace> db = dev::db::DBFactory::create("/home/argon/data1/testnet/state");
+  auto overlay_db = dev::OverlayDB(std::move(db));
+  dev::SecureTrieDB<dev::Address, dev::OverlayDB> state(&overlay_db);
+  std::unordered_map<dev::Address, dev::eth::Account> m_cache;
 
-    state.init();
-    std::cout << "state root before test insert " << state.root() << std::endl;
-    dev::Address tmpAddr("1234567890123456789012345678901234567890");
-    dev::eth::Account tmpAcc(0,0);
-    std::cout << "tmpAcc created storageRoot " << tmpAcc.baseRoot() << std::endl;
-    namespace po = boost::program_options;
-    po::options_description desc("Allowed options");
-    desc.add_options()
-    ("key1", po::value<dev::u256>()->value_name("<v1>"), "hljhkljh")
-    ("val1", po::value<dev::u256>()->value_name("<v2>"), "hljhkljh");
-    po::variables_map m;
-    int arg_count = 3;
-    char* args[] = {
-        "program",
-        "--key1=123",
-        "--val1=456"
-    };
+  state.init();
+  std::cout << "state root before test insert " << state.root() << std::endl;
+  dev::Address tmpAddr("1234567890123456789012345678901234567890");
+  dev::eth::Account tmpAcc(0,0);
+  std::cout << "tmpAcc created storageRoot " << tmpAcc.baseRoot() << std::endl;
+  namespace po = boost::program_options;
+  po::options_description desc("Allowed options");
+  desc.add_options()
+  ("key1", po::value<dev::u256>()->value_name("<v1>"), "hljhkljh")
+  ("val1", po::value<dev::u256>()->value_name("<v2>"), "hljhkljh");
+  po::variables_map m;
+  int arg_count = 3;
+  char* args[] =
+  {
+    "program",
+    "--key1=123",
+    "--val1=456"
+  };
 
-    po::parsed_options parsed = po::parse_command_line(arg_count, args, desc);
-    po::store(parsed, m);
-    po::notify(m);
+  po::parsed_options parsed = po::parse_command_line(arg_count, args, desc);
+  po::store(parsed, m);
+  po::notify(m);
 
-    if(m.count("key1")) std::cout << "key1" << std::endl;
-    if(m.count("key2")) std::cout << "key2" << std::endl;
+  if(m.count("key1"))
+  {
+    std::cout << "key1" << std::endl;
+  }
+  if(m.count("key2"))
+  {
+    std::cout << "key2" << std::endl;
+  }
 
-    dev::u256 key1 =
-        m["key1"].as<dev::u256>();
-    dev::u256 val1 =
-        m["val1"].as<dev::u256>();
-    dev::RLPStream s(4);
-    tmpAcc.setStorage(key1, val1);
-    std::cout << "tmpAcc storage set - storageRoot " << tmpAcc.baseRoot() << std::endl;
-    dev::SpecificTrieDB<dev::FatGenericTrieDB<dev::OverlayDB>, dev::FixedHash<20> >::iterator iter = state.begin();
+  dev::u256 key1 =
+    m["key1"].as<dev::u256>();
+  dev::u256 val1 =
+    m["val1"].as<dev::u256>();
+  dev::RLPStream s(4);
+  tmpAcc.setStorage(key1, val1);
+  std::cout << "tmpAcc storage set - storageRoot " << tmpAcc.baseRoot() << std::endl;
+  dev::SpecificTrieDB<dev::FatGenericTrieDB<dev::OverlayDB>, dev::FixedHash<20> >::iterator iter = state.begin();
+  {
+    dev::u256 nonce = 12345678;
+    dev::u256 balance = 1010101010101;
+    s << nonce << balance;
+
+    std::cout << nonce << std::endl;
     {
-        dev::u256 nonce = 12345678;
-        dev::u256 balance = 1010101010101;
-        s << nonce << balance;
-
-        std::cout << nonce << std::endl;
-        {
-            dev::SecureTrieDB<dev::h256, dev::StateCacheDB> storageDB(state.db(), tmpAcc.baseRoot());
-            for(auto i : tmpAcc.storageOverlay())
-            {
-                std::cout << "test 2 insert" << std::endl;
-                storageDB.insert(i.first, dev::rlp(i.second));
-            }
-            s << storageDB.root();
-            std::cout << "generated storage root " << storageDB.root() << std::endl;
-        }
-
-        std::cout << "insert tmpAddr into state" << std::endl;
-        s << tmpAcc.codeHash();
-        std::cout << "appended codehash " << tmpAcc.codeHash() << std::endl;
-        std::cout << "s.out vector unsigned char " << s.out().size() << std::endl;
-
-
-        state.insert(tmpAddr, &s.out());
-        dev::RLP rlp_state_(s.out(),0);
-        auto const nonce_ = rlp_state_[0].toInt<dev::u256>();
-
-        auto const balance_ = rlp_state_[1].toInt<dev::u256>();
-        auto const storageRoot_ = rlp_state_[2].toHash<dev::h256>();
-        auto const codeHash_ = rlp_state_[3].toHash<dev::h256>();
+      dev::SecureTrieDB<dev::h256, dev::StateCacheDB> storageDB(state.db(), tmpAcc.baseRoot());
+      for(auto i : tmpAcc.storageOverlay())
+      {
+        std::cout << "test 2 insert" << std::endl;
+        storageDB.insert(i.first, dev::rlp(i.second));
+      }
+      s << storageDB.root();
+      std::cout << "generated storage root " << storageDB.root() << std::endl;
     }
 
-    std::cout << "commit 0" << std::endl;
-    overlay_db.commit();
-    std::cout << "commit 1" << std::endl;
-    std::cout << "state root after test insert " << state.root() << std::endl;
-    std::cout << "tmpAcc inserted - storageRoot " << tmpAcc.baseRoot() << std::endl;
-    string account_str = state.at(tmpAddr);
-    if(account_str.empty())
-        std::cout << "account str empty" << std::endl;
-    else
-        std::cout << "account str not empty" << std::endl;
-    dev::h256 storageRoot__("650276fe18bc32afd3f79fc876c678269635c037e52f178402cfaf1a0c6ea911");
-
-    dev::Address tmpAddr2("9299567890123456789012345678901234567890");
-    string account_str2 = state.at(tmpAddr2);
-    if(account_str2.empty())
-        std::cout << "account str2 empty" << std::endl;
-    else
-        std::cout << "account str2 not empty" << std::endl;
-    std::cout << "read back account string from trie " << account_str << std::endl;
-    dev::RLP rlp_state(s.out(),0);
-    std::cout << "constructed rlp" << std::endl;
-    auto const nonce = rlp_state[0].toInt<dev::u256>();
-    std::cout << "extracted nonce " << nonce << std::endl;
-    auto const balance = rlp_state[1].toInt<dev::u256>();
-    std::cout << "extracted balance " << balance << std::endl;
-    auto const storageRoot = rlp_state[2].toHash<dev::h256>();
-    std::cout << "extracted storageRoot " << storageRoot << std::endl;
-    auto const codeHash = rlp_state[3].toHash<dev::h256>();
-    std::cout << "extracted codeHash " << codeHash << std::endl;
-    fs::path configFile = "/home/argon/rem/CC/testdata/rlp/transaction.rlp";
-
-    dev::u256 t1 = 123456;
-    dev::RLPStream rlpStream(25);
-    rlpStream << t1;
-    rlpStream << t1;
-    rlpStream << t1;
-    rlpStream << t1;
-    rlpStream << t1;
-    rlpStream << t1;
-    rlpStream << t1;
-    std::cout << "test rlp 1" << std::endl;
-    dev::RLP config(rlpStream.out());
-    std::cout << "test rlp 6" << std::endl;
-    std::ostringstream os_;
-    os_ << config;
-    std::cout << "test rlp " << os_.str() << std::endl;
+    std::cout << "insert tmpAddr into state" << std::endl;
+    s << tmpAcc.codeHash();
+    std::cout << "appended codehash " << tmpAcc.codeHash() << std::endl;
+    std::cout << "s.out vector unsigned char " << s.out().size() << std::endl;
 
 
+    state.insert(tmpAddr, &s.out());
+    dev::RLP rlp_state_(s.out(),0);
+    auto const nonce_ = rlp_state_[0].toInt<dev::u256>();
 
-    vector<Value> res;
-    return res;
+    auto const balance_ = rlp_state_[1].toInt<dev::u256>();
+    auto const storageRoot_ = rlp_state_[2].toHash<dev::h256>();
+    auto const codeHash_ = rlp_state_[3].toHash<dev::h256>();
+  }
+
+  std::cout << "commit 0" << std::endl;
+  overlay_db.commit();
+  std::cout << "commit 1" << std::endl;
+  std::cout << "state root after test insert " << state.root() << std::endl;
+  std::cout << "tmpAcc inserted - storageRoot " << tmpAcc.baseRoot() << std::endl;
+  string account_str = state.at(tmpAddr);
+  if(account_str.empty())
+  {
+    std::cout << "account str empty" << std::endl;
+  }
+  else
+  {
+    std::cout << "account str not empty" << std::endl;
+  }
+  dev::h256 storageRoot__("650276fe18bc32afd3f79fc876c678269635c037e52f178402cfaf1a0c6ea911");
+
+  dev::Address tmpAddr2("9299567890123456789012345678901234567890");
+  string account_str2 = state.at(tmpAddr2);
+  if(account_str2.empty())
+  {
+    std::cout << "account str2 empty" << std::endl;
+  }
+  else
+  {
+    std::cout << "account str2 not empty" << std::endl;
+  }
+  std::cout << "read back account string from trie " << account_str << std::endl;
+  dev::RLP rlp_state(s.out(),0);
+  std::cout << "constructed rlp" << std::endl;
+  auto const nonce = rlp_state[0].toInt<dev::u256>();
+  std::cout << "extracted nonce " << nonce << std::endl;
+  auto const balance = rlp_state[1].toInt<dev::u256>();
+  std::cout << "extracted balance " << balance << std::endl;
+  auto const storageRoot = rlp_state[2].toHash<dev::h256>();
+  std::cout << "extracted storageRoot " << storageRoot << std::endl;
+  auto const codeHash = rlp_state[3].toHash<dev::h256>();
+  std::cout << "extracted codeHash " << codeHash << std::endl;
+  fs::path configFile = "/home/argon/rem/CC/testdata/rlp/transaction.rlp";
+
+  dev::u256 t1 = 123456;
+  dev::RLPStream rlpStream(25);
+  rlpStream << t1;
+  rlpStream << t1;
+  rlpStream << t1;
+  rlpStream << t1;
+  rlpStream << t1;
+  rlpStream << t1;
+  rlpStream << t1;
+  std::cout << "test rlp 1" << std::endl;
+  dev::RLP config(rlpStream.out());
+  std::cout << "test rlp 6" << std::endl;
+  std::ostringstream os_;
+  os_ << config;
+  std::cout << "test rlp " << os_.str() << std::endl;
+
+
+
+  vector<Value> res;
+  return res;
 }
 Value integratedTest3(const Array& params, bool fHelp)
 {
-    if(fHelp || params.size() > 0)
-        throw runtime_error(
-            "integratedTest3 no args"
-            + HelpRequiringPassphrase());
+  if(fHelp || params.size() > 0)
+    throw runtime_error(
+      "integratedTest3 no args"
+      + HelpRequiringPassphrase());
 
-    std::unique_ptr<dev::db::DatabaseFace> db = dev::db::DBFactory::create("/home/argon/data1/testnet/state");
-    dev::h256 root("ac7ed96f9c8ced36cb005661a0083cd2284e1487c578e4ffbfa4f2550fcfd947");
+  std::unique_ptr<dev::db::DatabaseFace> db = dev::db::DBFactory::create("/home/argon/data1/testnet/state");
+  dev::h256 root("ac7ed96f9c8ced36cb005661a0083cd2284e1487c578e4ffbfa4f2550fcfd947");
 
 
-    auto overlay_db = dev::OverlayDB(std::move(db));
-    dev::SecureTrieDB<dev::Address, dev::OverlayDB> state(&overlay_db);
+  auto overlay_db = dev::OverlayDB(std::move(db));
+  dev::SecureTrieDB<dev::Address, dev::OverlayDB> state(&overlay_db);
 
-    state.setRoot(root);
-    std::cout << "integratedTest3 state root after db open " << state.root() << std::endl;
-    std::unordered_map<dev::Address, dev::eth::Account> m_cache;
-    std::ostringstream os;
-    state.debugStructure(os);
-    std::cout << "trie op << " << os.str() << std::endl;
+  state.setRoot(root);
+  std::cout << "integratedTest3 state root after db open " << state.root() << std::endl;
+  std::unordered_map<dev::Address, dev::eth::Account> m_cache;
+  std::ostringstream os;
+  state.debugStructure(os);
+  std::cout << "trie op << " << os.str() << std::endl;
 
-    std::cout << "state root after retrieving from db " << state.root() << std::endl;
-    dev::Address tmpAddr("1234567890123456789012345678901234567890");
-    string account_str = state.at(tmpAddr);
-    dev::RLP rlp_state(account_str,0);
-    auto const nonce = rlp_state[0].toInt<dev::u256>();
-    std::cout << "extracted nonce " << nonce << std::endl;
-    auto const balance = rlp_state[1].toInt<dev::u256>();
-    std::cout << "extracted balance " << balance << std::endl;
-    auto const storageRoot = rlp_state[2].toHash<dev::h256>();
-    std::cout << "extracted storageRoot " << storageRoot << std::endl;
-    auto const codeHash = rlp_state[3].toHash<dev::h256>();
-    std::cout << "extracted codeHash " << codeHash << std::endl;
+  std::cout << "state root after retrieving from db " << state.root() << std::endl;
+  dev::Address tmpAddr("1234567890123456789012345678901234567890");
+  string account_str = state.at(tmpAddr);
+  dev::RLP rlp_state(account_str,0);
+  auto const nonce = rlp_state[0].toInt<dev::u256>();
+  std::cout << "extracted nonce " << nonce << std::endl;
+  auto const balance = rlp_state[1].toInt<dev::u256>();
+  std::cout << "extracted balance " << balance << std::endl;
+  auto const storageRoot = rlp_state[2].toHash<dev::h256>();
+  std::cout << "extracted storageRoot " << storageRoot << std::endl;
+  auto const codeHash = rlp_state[3].toHash<dev::h256>();
+  std::cout << "extracted codeHash " << codeHash << std::endl;
 
-    dev::eth::Account retrievedAcc(nonce,balance,storageRoot,codeHash,0,dev::eth::Account::Unchanged);
+  dev::eth::Account retrievedAcc(nonce,balance,storageRoot,codeHash,0,dev::eth::Account::Unchanged);
+  {
+    map<dev::h256, pair<dev::u256, dev::u256>> ret;
+
     {
-        map<dev::h256, pair<dev::u256, dev::u256>> ret;
+      if (dev::h256 root = retrievedAcc.baseRoot())
+      {
+        dev::SecureTrieDB<dev::h256, dev::OverlayDB> memdb(const_cast<dev::OverlayDB*>(&overlay_db), root);
 
+        for (auto it = memdb.hashedBegin(); it != memdb.hashedEnd(); ++it)
         {
-            if (dev::h256 root = retrievedAcc.baseRoot())
-            {
-                dev::SecureTrieDB<dev::h256, dev::OverlayDB> memdb(const_cast<dev::OverlayDB*>(&overlay_db), root);
-
-                for (auto it = memdb.hashedBegin(); it != memdb.hashedEnd(); ++it)
-                {
-                    dev::h256 const hashedKey((*it).first);
-                    dev::u256 const key = dev::h256(it.key());
-                    dev::u256 const value = dev::RLP((*it).second).toInt<dev::u256>();
-                    ret[hashedKey] = make_pair(key, value);
-                }
-            }
-
-            for (auto const& i : retrievedAcc.storageOverlay())
-            {
-                dev::h256 const key = i.first;
-                dev::h256 const hashedKey = sha3(key);
-                if (i.second)
-                    ret[hashedKey] = i;
-                else
-                    ret.erase(hashedKey);
-            }
+          dev::h256 const hashedKey((*it).first);
+          dev::u256 const key = dev::h256(it.key());
+          dev::u256 const value = dev::RLP((*it).second).toInt<dev::u256>();
+          ret[hashedKey] = make_pair(key, value);
         }
+      }
 
-        std::cout << "ret.size() " << ret.size() << std::endl;
-        for(auto i : ret)
+      for (auto const& i : retrievedAcc.storageOverlay())
+      {
+        dev::h256 const key = i.first;
+        dev::h256 const hashedKey = sha3(key);
+        if (i.second)
         {
-            std::cout << "map key " << i.first << std::endl;
-            pair<dev::u256,dev::u256> val = i.second;
-            std::cout << "map val.first " << val.first << std::endl;
-            std::cout << "map val.second " << val.second << std::endl;
+          ret[hashedKey] = i;
         }
+        else
+        {
+          ret.erase(hashedKey);
+        }
+      }
     }
-    vector<Value> res;
-    return res;
+
+    std::cout << "ret.size() " << ret.size() << std::endl;
+    for(auto i : ret)
+    {
+      std::cout << "map key " << i.first << std::endl;
+      pair<dev::u256,dev::u256> val = i.second;
+      std::cout << "map val.first " << val.first << std::endl;
+      std::cout << "map val.second " << val.second << std::endl;
+    }
+  }
+  vector<Value> res;
+  return res;
 }
 
 
 Value integratedTest4(const Array& params, bool fHelp)
 {
-    if(fHelp || params.size() > 0)
-        throw runtime_error(
-            "integratedTest4 no args"
-            + HelpRequiringPassphrase());
+  if(fHelp || params.size() > 0)
+    throw runtime_error(
+      "integratedTest4 no args"
+      + HelpRequiringPassphrase());
 
-    CPubKey newKey_contract_address;
+  CPubKey newKey_contract_address;
+  if(!pwalletMain->GetKeyFromPool(newKey_contract_address, false))
+  {
+    throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
+  }
+  CKeyID keyID_contract_address = newKey_contract_address.GetID();
+  dvmc::address create_address = dvmc::literals::internal::from_hex<dvmc::address>(keyID_contract_address.GetHex().c_str());
+
+  CPubKey newKey_test_sender_address;
+  if(!pwalletMain->GetKeyFromPool(newKey_test_sender_address, false))
+  {
+    throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
+  }
+  CKeyID keyID_test_sender_address = newKey_test_sender_address.GetID();
+  dvmc::address test_sender_address = dvmc::literals::internal::from_hex<dvmc::address>(keyID_test_sender_address.GetHex().c_str());
+
+  dvmc::address test_recipient_address = test_sender_address;
+
+  std::cout << "integratedTest4 : initialised create address " << dvmc::hex(create_address.bytes) << "\n";
+  std::cout << "integratedTest4 : initialised from address " << dvmc::hex(test_sender_address.bytes) << "\n";
+  std::cout << "integratedTest4 : initialised to address " << dvmc::hex(test_recipient_address.bytes) << "\n";
+  const auto code = dvmc::from_hex(erc20_22112022_withdraw_with_parameter_subtract_15);
+
+  dvmc::VertexNode host;
+  dvmc::TransitionalNode created_account;
+  dvmc::TransitionalNode sender_account;
+  sender_account.set_balance(3141);
+  dvmc_message msg{};
+  msg.track = std::numeric_limits<int64_t>::max();
+
+  dvmc::bytes_view exec_code = code;
+  {
+    dvmc_message create_msg{};
+    create_msg.kind = DVMC_CREATE;
+    create_msg.recipient = create_address;
+    create_msg.track = std::numeric_limits<int64_t>::max();
+
+    dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
+    dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
+    const auto create_result = vm.retrieve_desc_vx(host, rev, create_msg, code.data(), code.size());
+    if (create_result.status_code != DVMC_SUCCESS)
+    {
+      std::cout << "integratedTest4 : Contract creation failed: " << create_result.status_code << "\n";
+      return create_result.status_code;
+    }
+
+    auto& created_account = host.accounts[create_address];
+    created_account.set_balance(100000000000000);
+    created_account.code = dvmc::bytes(create_result.output_data, create_result.output_size);
+
+    msg.recipient = create_address;
+    exec_code = created_account.code;
+  }
+  {
+    std::cout << "\n";
+    const auto input = dvmc::from_hex("0x18160ddd");
+    msg.input_data = input.data();
+    msg.input_size = input.size();
+
+    dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
+    dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
+    const auto result = vm.retrieve_desc_vx(host, rev, msg, exec_code.data(), exec_code.size());
+
+    const auto track_used = msg.track - result.track_left;
+    std::cout << "integratedTest14: Result: totalSupply  " << result.status_code << "\nGas used: " << track_used << "\n";
+  }
+  {
+    std::cout << "\n";
+    const auto input = dvmc::from_hex("0x42966c68000000000000000000000000000000000000000000000000000000000000029a");
+    msg.input_data = input.data();
+    msg.input_size = input.size();
+
+    dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
+    dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
+    const auto result = vm.retrieve_desc_vx(host, rev, msg, exec_code.data(), exec_code.size());
+    const auto track_used = msg.track - result.track_left;
+    std::cout << "integratedTest1 : Result: Burn  " << result.status_code << "\nGas used: " << track_used << "\n";
+  }
+  {
+    std::cout << "\n";
+    const auto input = dvmc::from_hex("0x18160ddd");
+    msg.input_data = input.data();
+    msg.input_size = input.size();
+
+    dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
+    dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
+    const auto result = vm.retrieve_desc_vx(host, rev, msg, exec_code.data(), exec_code.size());
+    const auto track_used = msg.track - result.track_left;
+    std::cout << "integratedTest1 : Result: totalSupply  " << result.status_code << "\nGas used: " << track_used << "\n";
+
+    if (result.status_code == DVMC_SUCCESS || result.status_code == DVMC_REVERT)
+      std::cout << "integratedTest1 : Output:   " << dvmc::hex({result.output_data, result.output_size}) << "\n";
+  }
+  {
+    std::string s = dvmc::hex(test_sender_address.bytes);
+    const std::string code_str = "0x095ea7b3000000000000000000000000" + s +  "0000000000000000000000000000000000000000000000000000000000000050";
+    std::cout << "approve op input code " << code_str << std::endl;
+    const auto input = dvmc::from_hex(code_str);
+    msg.sender = test_sender_address;
+    msg.input_data = input.data();
+    msg.input_size = input.size();
+
+    dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
+    dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
+    const auto result = vm.retrieve_desc_vx(host, rev, msg, exec_code.data(), exec_code.size());
+    const auto track_used = msg.track - result.track_left;
+    std::cout << "integratedTest4 : Result:   " << result.status_code << "\nGas used: " << track_used << "\n";
+  }
+  {
+    std::cout << "\n";
+    std::string s = dvmc::hex(test_sender_address.bytes);
+    std::string code_str = "0xdd62ed3e000000000000000000000000" + s + "000000000000000000000000" + s;
+    std::cout << "print allowance op input code " << code_str << std::endl;
+    const auto input = dvmc::from_hex(code_str);
+    msg.input_data = input.data();
+    msg.input_size = input.size();
+
+    dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
+    dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
+    const auto result = vm.retrieve_desc_vx(host, rev, msg, exec_code.data(), exec_code.size());
+    const auto track_used = msg.track - result.track_left;
+    std::cout << "integratedTest4 : Result:   " << result.status_code << "\nGas used: " << track_used << "\n";
+    if (result.status_code == DVMC_SUCCESS || result.status_code == DVMC_REVERT)
+      std::cout << "integratedTest4 : Output:   " << dvmc::hex({result.output_data, result.output_size}) << "\n";
+  }
+  {
+    std::cout << "\n";
+    std::string s = dvmc::hex(test_sender_address.bytes);
+    std::string code_str = "0x23b872dd000000000000000000000000" + s + "000000000000000000000000" + s + "0000000000000000000000000000000000000000000000000000000000000037";
+    std::cout << "transfer_from op input code " << code_str << std::endl;
+    const auto input = dvmc::from_hex(code_str);
+
+    msg.track = std::numeric_limits<int64_t>::max();
+    msg.input_data = input.data();
+    msg.input_size = input.size();
+
+    dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
+    dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
+    const auto result = vm.retrieve_desc_vx(host, rev, msg, exec_code.data(), exec_code.size());
+
+    const auto track_used = msg.track - result.track_left;
+    std::cout << "integratedTest1 : Result: transfer_from  " << result.status_code << "\nGas used: " << track_used << "\n";
+    if (result.status_code == DVMC_SUCCESS || result.status_code == DVMC_REVERT)
+      std::cout << "integratedTest4 : Output:   " << dvmc::hex({result.output_data, result.output_size}) << "\n";
+
+  }
+  {
+    std::cout << "\n";
+    std::string s = dvmc::hex(test_sender_address.bytes);
+    std::string code_str = "0xdd62ed3e000000000000000000000000" + s + "000000000000000000000000" + s;
+    std::cout << "print allowance op input code " << code_str << std::endl;
+    const auto input = dvmc::from_hex(code_str);
+    msg.input_data = input.data();
+    msg.input_size = input.size();
+
+    dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
+    dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
+    const auto result = vm.retrieve_desc_vx(host, rev, msg, exec_code.data(), exec_code.size());
+    const auto track_used = msg.track - result.track_left;
+    std::cout << "integratedTest1 : Result:   " << result.status_code << "\nGas used: " << track_used << "\n";
+    if (result.status_code == DVMC_SUCCESS || result.status_code == DVMC_REVERT)
+      std::cout << "integratedTest1 : Output: allowance  " << dvmc::hex({result.output_data, result.output_size}) << "\n";
+  }
+
+
+  vector<Value> res;
+  return res;
+}
+
+Value integratedTest5(const Array& params, bool fHelp)
+{
+  if(fHelp || params.size() > 0)
+    throw runtime_error(
+      "integratedTest5 no args"
+      + HelpRequiringPassphrase());
+
+  std::vector<CTransaction> testTxVector;
+  dev::h256 ROOT("50f104f3eab3bd446bf82207b181bc95ff35b9aa57322d2f9e573861cdb38f48");
+  dev::SecureTrieDB<dev::Address, dev::OverlayDB> state(overlayDB_,ROOT);
+  CPubKey newKey_contract_address;
+  {
     if(!pwalletMain->GetKeyFromPool(newKey_contract_address, false))
-        throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
+    {
+      throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
+    }
     CKeyID keyID_contract_address = newKey_contract_address.GetID();
     dvmc::address create_address = dvmc::literals::internal::from_hex<dvmc::address>(keyID_contract_address.GetHex().c_str());
+    dev::Address target_addr(keyID_contract_address.GetHex().c_str());
 
     CPubKey newKey_test_sender_address;
     if(!pwalletMain->GetKeyFromPool(newKey_test_sender_address, false))
-        throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
+    {
+      throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
+    }
     CKeyID keyID_test_sender_address = newKey_test_sender_address.GetID();
     dvmc::address test_sender_address = dvmc::literals::internal::from_hex<dvmc::address>(keyID_test_sender_address.GetHex().c_str());
 
     dvmc::address test_recipient_address = test_sender_address;
 
-    std::cout << "integratedTest4 : initialised create address " << dvmc::hex(create_address.bytes) << "\n";
-    std::cout << "integratedTest4 : initialised from address " << dvmc::hex(test_sender_address.bytes) << "\n";
-    std::cout << "integratedTest4 : initialised to address " << dvmc::hex(test_recipient_address.bytes) << "\n";
+    std::cout << "integratedTest5 : initialised create address " << dvmc::hex(create_address.bytes) << "\n";
+    std::cout << "integratedTest5 : initialised from address " << dvmc::hex(test_sender_address.bytes) << "\n";
+    std::cout << "integratedTest5 : initialised to address " << dvmc::hex(test_recipient_address.bytes) << "\n";
     const auto code = dvmc::from_hex(erc20_22112022_withdraw_with_parameter_subtract_15);
 
     dvmc::VertexNode host;
@@ -1304,276 +1552,103 @@ Value integratedTest4(const Array& params, bool fHelp)
 
     dvmc::bytes_view exec_code = code;
     {
-        dvmc_message create_msg{};
-        create_msg.kind = DVMC_CREATE;
-        create_msg.recipient = create_address;
-        create_msg.track = std::numeric_limits<int64_t>::max();
+      dvmc_message create_msg{};
+      create_msg.kind = DVMC_CREATE;
+      create_msg.recipient = create_address;
+      create_msg.track = std::numeric_limits<int64_t>::max();
 
-        dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
-        dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
-        const auto create_result = vm.retrieve_desc_vx(host, rev, create_msg, code.data(), code.size());
-        if (create_result.status_code != DVMC_SUCCESS)
+      dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
+      dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
+      const auto create_result = vm.retrieve_desc_vx(host, rev, create_msg, code.data(), code.size());
+      if (create_result.status_code != DVMC_SUCCESS)
+      {
+        std::cout << "integratedTest5 : Contract creation failed: " << create_result.status_code << "\n";
+        return create_result.status_code;
+      }
+
+      auto& created_account = host.accounts[create_address];
+      created_account.set_balance(100000000000000);
+      created_account.code = dvmc::bytes(create_result.output_data, create_result.output_size);
+
+      msg.recipient = create_address;
+      exec_code = created_account.code;
+      std::cout << "CREATE SUCCESS - STORE STATE IN PTRIE ..." << std::endl;
+      dev::eth::Account tmpAcc(0,0);
+      {
+        dev::u256 nonce = 12345678;
+        dev::u256 balance = 1010101010101;
+        dev::RLPStream s(4);
+        s << nonce << balance;
+
         {
-            std::cout << "integratedTest4 : Contract creation failed: " << create_result.status_code << "\n";
-            return create_result.status_code;
-        }
-
-        auto& created_account = host.accounts[create_address];
-        created_account.set_balance(100000000000000);
-        created_account.code = dvmc::bytes(create_result.output_data, create_result.output_size);
-
-        msg.recipient = create_address;
-        exec_code = created_account.code;
-    }
-    {
-        std::cout << "\n";
-        const auto input = dvmc::from_hex("0x18160ddd");
-        msg.input_data = input.data();
-        msg.input_size = input.size();
-
-        dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
-        dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
-        const auto result = vm.retrieve_desc_vx(host, rev, msg, exec_code.data(), exec_code.size());
-
-        const auto track_used = msg.track - result.track_left;
-        std::cout << "integratedTest14: Result: totalSupply  " << result.status_code << "\nGas used: " << track_used << "\n";
-    }
-    {
-        std::cout << "\n";
-        const auto input = dvmc::from_hex("0x42966c68000000000000000000000000000000000000000000000000000000000000029a");
-        msg.input_data = input.data();
-        msg.input_size = input.size();
-
-        dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
-        dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
-        const auto result = vm.retrieve_desc_vx(host, rev, msg, exec_code.data(), exec_code.size());
-        const auto track_used = msg.track - result.track_left;
-        std::cout << "integratedTest1 : Result: Burn  " << result.status_code << "\nGas used: " << track_used << "\n";
-    }
-    {
-        std::cout << "\n";
-        const auto input = dvmc::from_hex("0x18160ddd");
-        msg.input_data = input.data();
-        msg.input_size = input.size();
-
-        dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
-        dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
-        const auto result = vm.retrieve_desc_vx(host, rev, msg, exec_code.data(), exec_code.size());
-        const auto track_used = msg.track - result.track_left;
-        std::cout << "integratedTest1 : Result: totalSupply  " << result.status_code << "\nGas used: " << track_used << "\n";
-
-        if (result.status_code == DVMC_SUCCESS || result.status_code == DVMC_REVERT)
-            std::cout << "integratedTest1 : Output:   " << dvmc::hex({result.output_data, result.output_size}) << "\n";
-    }
-    {
-        std::string s = dvmc::hex(test_sender_address.bytes);
-        const std::string code_str = "0x095ea7b3000000000000000000000000" + s +  "0000000000000000000000000000000000000000000000000000000000000050";
-        std::cout << "approve op input code " << code_str << std::endl;
-        const auto input = dvmc::from_hex(code_str);
-        msg.sender = test_sender_address;
-        msg.input_data = input.data();
-        msg.input_size = input.size();
-
-        dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
-        dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
-        const auto result = vm.retrieve_desc_vx(host, rev, msg, exec_code.data(), exec_code.size());
-        const auto track_used = msg.track - result.track_left;
-        std::cout << "integratedTest4 : Result:   " << result.status_code << "\nGas used: " << track_used << "\n";
-    }
-    {
-        std::cout << "\n";
-        std::string s = dvmc::hex(test_sender_address.bytes);
-        std::string code_str = "0xdd62ed3e000000000000000000000000" + s + "000000000000000000000000" + s;
-        std::cout << "print allowance op input code " << code_str << std::endl;
-        const auto input = dvmc::from_hex(code_str);
-        msg.input_data = input.data();
-        msg.input_size = input.size();
-
-        dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
-        dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
-        const auto result = vm.retrieve_desc_vx(host, rev, msg, exec_code.data(), exec_code.size());
-        const auto track_used = msg.track - result.track_left;
-        std::cout << "integratedTest4 : Result:   " << result.status_code << "\nGas used: " << track_used << "\n";
-        if (result.status_code == DVMC_SUCCESS || result.status_code == DVMC_REVERT)
-            std::cout << "integratedTest4 : Output:   " << dvmc::hex({result.output_data, result.output_size}) << "\n";
-    }
-    {
-        std::cout << "\n";
-        std::string s = dvmc::hex(test_sender_address.bytes);
-        std::string code_str = "0x23b872dd000000000000000000000000" + s + "000000000000000000000000" + s + "0000000000000000000000000000000000000000000000000000000000000037";
-        std::cout << "transfer_from op input code " << code_str << std::endl;
-        const auto input = dvmc::from_hex(code_str);
-
-        msg.track = std::numeric_limits<int64_t>::max();
-        msg.input_data = input.data();
-        msg.input_size = input.size();
-
-        dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
-        dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
-        const auto result = vm.retrieve_desc_vx(host, rev, msg, exec_code.data(), exec_code.size());
-
-        const auto track_used = msg.track - result.track_left;
-        std::cout << "integratedTest1 : Result: transfer_from  " << result.status_code << "\nGas used: " << track_used << "\n";
-        if (result.status_code == DVMC_SUCCESS || result.status_code == DVMC_REVERT)
-            std::cout << "integratedTest4 : Output:   " << dvmc::hex({result.output_data, result.output_size}) << "\n";
-
-    }
-    {
-        std::cout << "\n";
-        std::string s = dvmc::hex(test_sender_address.bytes);
-        std::string code_str = "0xdd62ed3e000000000000000000000000" + s + "000000000000000000000000" + s; 
-        std::cout << "print allowance op input code " << code_str << std::endl;
-        const auto input = dvmc::from_hex(code_str); 
-        msg.input_data = input.data();
-        msg.input_size = input.size();
-
-        dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
-        dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
-        const auto result = vm.retrieve_desc_vx(host, rev, msg, exec_code.data(), exec_code.size());
-        const auto track_used = msg.track - result.track_left;
-        std::cout << "integratedTest1 : Result:   " << result.status_code << "\nGas used: " << track_used << "\n";
-        if (result.status_code == DVMC_SUCCESS || result.status_code == DVMC_REVERT)
-            std::cout << "integratedTest1 : Output: allowance  " << dvmc::hex({result.output_data, result.output_size}) << "\n";
-    }
-
-
-    vector<Value> res;
-    return res;
-}
-
-Value integratedTest5(const Array& params, bool fHelp)
-{
-    if(fHelp || params.size() > 0)
-        throw runtime_error(
-            "integratedTest5 no args"
-            + HelpRequiringPassphrase());
-
-    std::vector<CTransaction> testTxVector;
-	    dev::h256 ROOT("50f104f3eab3bd446bf82207b181bc95ff35b9aa57322d2f9e573861cdb38f48");
-            dev::SecureTrieDB<dev::Address, dev::OverlayDB> state(overlayDB_,ROOT);
-    CPubKey newKey_contract_address;
-    {
-        if(!pwalletMain->GetKeyFromPool(newKey_contract_address, false))
-            throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
-        CKeyID keyID_contract_address = newKey_contract_address.GetID();
-        dvmc::address create_address = dvmc::literals::internal::from_hex<dvmc::address>(keyID_contract_address.GetHex().c_str());
-        dev::Address target_addr(keyID_contract_address.GetHex().c_str());
-
-        CPubKey newKey_test_sender_address;
-        if(!pwalletMain->GetKeyFromPool(newKey_test_sender_address, false))
-            throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
-        CKeyID keyID_test_sender_address = newKey_test_sender_address.GetID();
-        dvmc::address test_sender_address = dvmc::literals::internal::from_hex<dvmc::address>(keyID_test_sender_address.GetHex().c_str());
-
-        dvmc::address test_recipient_address = test_sender_address;
-
-        std::cout << "integratedTest5 : initialised create address " << dvmc::hex(create_address.bytes) << "\n";
-        std::cout << "integratedTest5 : initialised from address " << dvmc::hex(test_sender_address.bytes) << "\n";
-        std::cout << "integratedTest5 : initialised to address " << dvmc::hex(test_recipient_address.bytes) << "\n";
-        const auto code = dvmc::from_hex(erc20_22112022_withdraw_with_parameter_subtract_15);
-
-        dvmc::VertexNode host;
-        dvmc::TransitionalNode created_account;
-        dvmc::TransitionalNode sender_account;
-        sender_account.set_balance(3141);
-        dvmc_message msg{};
-        msg.track = std::numeric_limits<int64_t>::max();
-
-        dvmc::bytes_view exec_code = code;
-        {
-            dvmc_message create_msg{};
-            create_msg.kind = DVMC_CREATE;
-            create_msg.recipient = create_address;
-            create_msg.track = std::numeric_limits<int64_t>::max();
-
-            dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
-            dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
-            const auto create_result = vm.retrieve_desc_vx(host, rev, create_msg, code.data(), code.size());
-            if (create_result.status_code != DVMC_SUCCESS)
+          dev::SecureTrieDB<dev::h256, dev::StateCacheDB> storageDB(state.db(), tmpAcc.baseRoot());
+          for(auto pair : created_account.storage)
+          {
+            std::cout << "integratedTest5 : store key value" << std::endl;
+            auto storage_key = pair.first.bytes;
+            dev::bytes key;
+            for(int i=0; i<32; i++)
             {
-                std::cout << "integratedTest5 : Contract creation failed: " << create_result.status_code << "\n";
-                return create_result.status_code;
+              key.push_back(storage_key[i]);
             }
 
-            auto& created_account = host.accounts[create_address];
-            created_account.set_balance(100000000000000);
-            created_account.code = dvmc::bytes(create_result.output_data, create_result.output_size);
+            dev::h256 key256(key);
 
-            msg.recipient = create_address;
-            exec_code = created_account.code;
-            std::cout << "CREATE SUCCESS - STORE STATE IN PTRIE ..." << std::endl;
-            dev::eth::Account tmpAcc(0,0);
+            auto storage_bytes = pair.second.value;
+            dev::bytes val;
+            for(int i=0; i<32; i++)
             {
-                dev::u256 nonce = 12345678;
-                dev::u256 balance = 1010101010101;
-                dev::RLPStream s(4);
-                s << nonce << balance;
-
-                {
-                    dev::SecureTrieDB<dev::h256, dev::StateCacheDB> storageDB(state.db(), tmpAcc.baseRoot());
-                    for(auto pair : created_account.storage)
-                    {
-                        std::cout << "integratedTest5 : store key value" << std::endl;
-                        auto storage_key = pair.first.bytes;
-                        dev::bytes key;
-                        for(int i=0; i<32; i++)
-                            key.push_back(storage_key[i]);
-
-                        dev::h256 key256(key);
-
-                        auto storage_bytes = pair.second.value;
-                        dev::bytes val;
-                        for(int i=0; i<32; i++)
-                            val.push_back(storage_bytes.bytes[i]);
-                        storageDB.insert(key256, dev::rlp(val));
-                    }
-                    s << storageDB.root();
-                }
-
-                s << tmpAcc.codeHash();
-		std::cout << "integratedTest5 BEFORE contract state insert : state root " << state.root() << std::endl;
-                state.insert(target_addr, &s.out());
-                overlayDB_->commit();
-			    std::ostringstream os;
-			    state.debugStructure(os);
-			    std::cout << "global state traversal " << os.str() << std::endl;
-
-		std::cout << "integratedTest5 AFTER contract state insert : state root " << state.root() << std::endl;
+              val.push_back(storage_bytes.bytes[i]);
             }
+            storageDB.insert(key256, dev::rlp(val));
+          }
+          s << storageDB.root();
         }
+
+        s << tmpAcc.codeHash();
+        std::cout << "integratedTest5 BEFORE contract state insert : state root " << state.root() << std::endl;
+        state.insert(target_addr, &s.out());
+        overlayDB_->commit();
+        std::ostringstream os;
+        state.debugStructure(os);
+        std::cout << "global state traversal " << os.str() << std::endl;
+
+        std::cout << "integratedTest5 AFTER contract state insert : state root " << state.root() << std::endl;
+      }
     }
+  }
 
-    cba keyAddress(newKey_contract_address.GetID());
+  cba keyAddress(newKey_contract_address.GetID());
 
-    std::string contractName    = "contract_1";
-    {
-        std::string contractCodeStr = erc20_22112022_withdraw_with_parameter_subtract_15;
+  std::string contractName    = "contract_1";
+  {
+    std::string contractCodeStr = erc20_22112022_withdraw_with_parameter_subtract_15;
 
-        vector<PathIndex> vtxPos;
-        PathIndex txPos2;
+    vector<PathIndex> vtxPos;
+    PathIndex txPos2;
 
-        txPos2.vValue = vchFromString(contractCodeStr);
+    txPos2.vValue = vchFromString(contractCodeStr);
 
-        txPos2.vAddress = keyAddress.ToString();
-        vtxPos.push_back(txPos2);
-        LocatorNodeDB transSetup__("r+");
-        transSetup__.lPut(vchFromString(contractName), vtxPos);
-    }
+    txPos2.vAddress = keyAddress.ToString();
+    vtxPos.push_back(txPos2);
+    LocatorNodeDB transSetup__("r+");
+    transSetup__.lPut(vchFromString(contractName), vtxPos);
+  }
 
 
-    {
-        std::string refStr = contractName + ":" + "0x18160ddd";
-        std::string executableTxName = "executable_test_0x18160ddd";
-        __wx__Tx vertex;
-        vertex_serial_aux_cycle(executableTxName, refStr, vertex);
+  {
+    std::string refStr = contractName + ":" + "0x18160ddd";
+    std::string executableTxName = "executable_test_0x18160ddd";
+    __wx__Tx vertex;
+    vertex_serial_aux_cycle(executableTxName, refStr, vertex);
 
-        testTxVector.push_back(vertex);
-    }
+    testTxVector.push_back(vertex);
+  }
 
-    {
-        sectionTest(testTxVector,state);
-    }
+  {
+    sectionTest(testTxVector,state);
+  }
 
-    vector<Value> res;
-    return res;
+  vector<Value> res;
+  return res;
 }

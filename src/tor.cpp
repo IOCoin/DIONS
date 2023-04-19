@@ -6,5 +6,5 @@
 //typedef struct FI12__ fi12;
 void Toroid::translate(int r, int t, int p)
 {
-    fi2 ser_fi2;
+  fi2 ser_fi2;
 }
