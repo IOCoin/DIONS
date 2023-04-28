@@ -1,0 +1,160 @@
+#include <thread>
+#include <ptrie/db.h>
+#include <ptrie/Common.h>
+#include "ptrie/SHA3.h"
+#include "ptrie/OverlayDB.h"
+#include "ptrie/TrieDB.h"
+
+namespace dev
+{
+namespace
+{
+inline db::Slice toSlice(h256 const& _h)
+{
+  return db::Slice(reinterpret_cast<char const*>(_h.data()), _h.size);
+}
+
+inline db::Slice toSlice(std::string const& _str)
+{
+  return db::Slice(_str.data(), _str.size());
+}
+
+inline db::Slice toSlice(bytes const& _b)
+{
+  return db::Slice(reinterpret_cast<char const*>(&_b[0]), _b.size());
+}
+
+}
+
+OverlayDB::~OverlayDB() = default;
+
+void OverlayDB::commit()
+{
+  if (m_db)
+  {
+    auto writeBatch = m_db->createWriteBatch();
+
+#if DEV_GUARDED_DB
+    DEV_READ_GUARDED(x_this)
+#endif
+    {
+      for (auto const& i: m_main)
+      {
+        if (i.second.second)
+        {
+          writeBatch->insert(toSlice(i.first), toSlice(i.second.first));
+        }
+
+      }
+      for (auto const& i: m_aux)
+        if (i.second.second)
+        {
+          bytes b = i.first.asBytes();
+          b.push_back(255);
+          writeBatch->insert(toSlice(b), toSlice(i.second.first));
+        }
+    }
+
+    for (unsigned i = 0; i < 10; ++i)
+    {
+      try
+      {
+        m_db->commit(std::move(writeBatch));
+        break;
+      }
+      catch (boost::exception const& ex)
+      {
+        if (i == 9)
+        {
+
+          std::cout << "Fail writing to state database. Bombing out.";
+          exit(-1);
+        }
+
+
+        std::cout << "Error writing to state database: " << boost::diagnostic_information(ex);
+        std::cout << "Sleeping for" << (i + 1) << "seconds, then retrying.";
+        std::this_thread::sleep_for(std::chrono::seconds(i + 1));
+      }
+    }
+#if DEV_GUARDED_DB
+    DEV_WRITE_GUARDED(x_this)
+#endif
+    {
+      m_aux.clear();
+      m_main.clear();
+    }
+  }
+}
+
+bytes OverlayDB::lookupAux(h256 const& _h) const
+{
+  std::cout << "OverlayDB::lookupAux" << std::endl;
+  bytes ret = StateCacheDB::lookupAux(_h);
+  if (!ret.empty() || !m_db)
+  {
+    return ret;
+  }
+
+  bytes b = _h.asBytes();
+  b.push_back(255);
+  std::string const v = m_db->lookup(toSlice(b));
+  if (v.empty())
+
+  {
+    std::cout << "Aux not found: " << _h;
+  }
+
+  return asBytes(v);
+}
+
+void OverlayDB::rollback()
+{
+#if DEV_GUARDED_DB
+  WriteGuard l(x_this);
+#endif
+  m_main.clear();
+}
+
+std::string OverlayDB::lookup(h256 const& _h) const
+{
+  std::string ret = StateCacheDB::lookup(_h);
+  if (!ret.empty() || !m_db)
+  {
+    return ret;
+  }
+
+  return m_db->lookup(toSlice(_h));
+}
+
+bool OverlayDB::exists(h256 const& _h) const
+{
+  if (StateCacheDB::exists(_h))
+  {
+    return true;
+  }
+  return m_db && m_db->exists(toSlice(_h));
+}
+
+void OverlayDB::kill(h256 const& _h)
+{
+  if (!StateCacheDB::kill(_h))
+  {
+    if (m_db)
+    {
+      if (!m_db->exists(toSlice(_h)))
+      {
+
+
+        if (_h != EmptyTrie)
+
+          std::cout << "Decreasing DB node ref count below zero with no DB node. Probably "
+                    "have a corrupt Trie."
+                    << _h;
+
+      }
+    }
+  }
+}
+
+}
