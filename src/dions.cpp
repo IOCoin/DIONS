@@ -21,17 +21,6 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
-#include <ctime>
-
-#include <dvmone/dvmone.h>
-#include <dvmc/transitional_node.hpp>
-#include <dvmc/dvmc.h>
-#include <dvmc/dvmc.hpp>
-#include <dvmc/hex.hpp>
-#include <dvmc/loader.h>
-#include <dvmc/tooling.hpp>
-using dvmc::operator""_address;
-
 #include <boost/iostreams/filtering_streambuf.hpp>
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/iostreams/copy.hpp>
@@ -40,22 +29,15 @@ using dvmc::operator""_address;
 #include <boost/iostreams/stream.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
 #include <boost/iostreams/device/file_descriptor.hpp>
-#include <boost/foreach.hpp>
-#include <boost/tokenizer.hpp>
-#include <boost/archive/text_iarchive.hpp>
-#include <boost/archive/text_oarchive.hpp>
 using namespace std;
 using namespace json_spirit;
 using namespace boost::iostreams;
 
 namespace fs = boost::filesystem;
 
-extern string DESCRIPTOR;
 extern LocatorNodeDB* ln1Db;
 extern Object JSONRPCError(int code, const string& message);
 extern Value xtu_url__(const string& url);
-extern void testGen(dvmc::TransitionalNode& acc,string& path_trigger_nodeCode);
-extern bool getVertex__(const string& target, string& code);
 template<typename T> void ConvertTo(Value& value, bool fAllowNull=false);
 
 std::map<vchType, uint256> mapMyMessages;
@@ -138,8 +120,7 @@ Value downloadDecryptEPID(const Array& params, bool fHelp);
 
 extern unsigned int LR_SHIFT__[LR_R];
 
-bool collisionReference(string& s, uint256& wtxInHash,string&);
-bool searchPathEncrypted2(string l, uint256& wtxInHash);
+bool searchAliasEncrypted2(string l, uint256& wtxInHash);
 bool getImportedPubKey(string senderAddress, string recipientAddress, vchType& recipientPubKeyVch, vchType& aesKeyBase64EncryptedVch, bool& thresholdCount);
 bool getImportedPubKey(string senderAddress, string recipientAddress, vchType& recipientPubKeyVch, vchType& aesKeyBase64EncryptedVch);
 bool getImportedPubKey(string recipientAddress, vchType& recipientPubKeyVch);
@@ -222,142 +203,22 @@ bool channelPredicate(string ext, string& tor)
 
   return true;
 }
-Value getVertex(const Array& params, bool fHelp)
-{
-  Array oRes;
-  LocatorNodeDB ln1Db("r");
-
-  Dbc* cursorp;
-  try
-  {
-    cursorp = ln1Db.GetCursor();
-
-    Dbt key, data;
-    int ret;
-
-    while ((ret = cursorp->get(&key, &data, DB_NEXT)) == 0)
-    {
-      CDataStream ssKey(SER_DISK, CLIENT_VERSION);
-      ssKey.write((char*)key.get_data(), key.get_size());
-
-      string k1;
-      ssKey >> k1;
-      if(k1 == "alias_")
-      {
-        Object o;
-        vchType k2;
-        ssKey >> k2;
-        string a = stringFromVch(k2);
-        o.push_back(Pair("alias", a));
-
-        vector<PathIndex> vtxPos;
-        CDataStream ssValue((char*)data.get_data(), (char*)data.get_data() + data.get_size(), SER_DISK, CLIENT_VERSION);
-        ssValue >> vtxPos;
-
-        PathIndex i = vtxPos.back();
-        string i_address = i.vAddress;
-        o.push_back(Pair("address", i_address));
-        string val = stringFromVch(i.vValue);
-        o.push_back(Pair("data", val));
-        o.push_back(Pair("h", (int)i.nHeight));
-        oRes.push_back(o);
-      }
-    }
-    if (ret != DB_NOTFOUND)
-    {
-      // ret should be DB_NOTFOUND upon exiting the loop.
-      // Dbc::get() will by default throw an exception if any
-      // significant errors occur, so by default this if block
-      // can never be reached.
-    }
-  }
-  catch(DbException &e)
-  {
-    //ln1Db.err(e.get_errno(), "Error!");
-  }
-  catch(std::exception &e)
-  {
-    //ln1Db.errx("Error! %s", e.what());
-  }
-
-  if (cursorp != NULL)
-  {
-    cursorp->close();
-  }
-
-  printf("XXXX xsc scanning for current dions\n");
-  LocatorNodeDB l("cr+");
-  CTxDB txdb("r");
-
-  CBlockIndex* p = pindexGenesisBlock;
-  for(; p; p=p->pnext)
-  {
-    if(p->nHeight < 1625000)
-    {
-      continue;
-    }
-
-    CBlock block;
-    CDiskTxPos txPos;
-    block.ReadFromDisk(p);
-    uint256 h;
-
-    BOOST_FOREACH(CTransaction& tx, block.vtx)
-    {
-      if (tx.nVersion != CTransaction::DION_TX_VERSION)
-      {
-        continue;
-      }
-
-      vector<vector<unsigned char> > vvchArgs;
-      int op, nOut;
-
-      aliasTx(tx, op, nOut, vvchArgs);
-      if (op != OP_ALIAS_SET)
-      {
-        continue;
-      }
-
-      const vector<unsigned char>& v = vvchArgs[0];
-      string a = stringFromVch(v);
-
-      if (!GetTransaction(tx.GetHash(), tx, h))
-      {
-        continue;
-      }
-
-      printf("XXXX ALIAS  %s\n", a.c_str());
-      const CTxOut& txout = tx.vout[nOut];
-      const CScript& scriptPubKey = aliasStrip(txout.scriptPubKey);
-      string s = scriptPubKey.GetBitcoinAddress();
-      printf("XXXX ADDRESS %s\n", s.c_str());
-      printf("XXXX HEIGHT %d\n", p->nHeight);
-      printf("XXXX TX     %s\n", tx.GetHash().ToString().c_str());
-      CTxIndex txI;
-      if(!txdb.ReadTxIndex(tx.GetHash(), txI))
-      {
-        continue;
-      }
-    }
-  }
-
-  return oRes;
-}
 Value vertexScan(const Array& params, bool fHelp)
 {
   Array oRes;
-  VertexNodeDB vertexNodeDB("r");
+  VertexNodeDB vertexDB("r");
 
   Dbc* cursorp;
   try
   {
-    cursorp = vertexNodeDB.GetCursor();
+    cursorp = vertexDB.GetCursor();
 
     Dbt key, data;
     int ret;
 
     while ((ret = cursorp->get(&key, &data, DB_NEXT)) == 0)
     {
+      printf("  key \n");
       CDataStream ssKey(SER_DISK, CLIENT_VERSION);
       ssKey.write((char*)key.get_data(), key.get_size());
 
@@ -366,14 +227,18 @@ Value vertexScan(const Array& params, bool fHelp)
       if(k1 == "vertex_")
       {
         Object o;
+        printf("  k1 %s\n", k1.c_str());
         vchType k2;
         ssKey >> k2;
         string a = stringFromVch(k2);
+        printf("  k2 %s\n", a.c_str());
         o.push_back(Pair("vertex", a));
 
         CDataStream ssValue((char*)data.get_data(), (char*)data.get_data() + data.get_size(), SER_DISK, CLIENT_VERSION);
-        ssValue >> vertex;
-        o.push_back(Pair("vertex ref", vertex));
+        vchType val;
+        ssValue >> val;
+
+        o.push_back(Pair("vertex ref", stringFromVch(val)));
         oRes.push_back(o);
       }
     }
@@ -452,7 +317,6 @@ Value vertexScan(const Array& params, bool fHelp)
       {
         continue;
       }
-
     }
   }
 
@@ -473,6 +337,7 @@ Value gw1(const Array& params, bool fHelp)
 
     while ((ret = cursorp->get(&key, &data, DB_NEXT)) == 0)
     {
+      printf("  key \n");
       CDataStream ssKey(SER_DISK, CLIENT_VERSION);
       ssKey.write((char*)key.get_data(), key.get_size());
 
@@ -481,16 +346,18 @@ Value gw1(const Array& params, bool fHelp)
       if(k1 == "alias_")
       {
         Object o;
+        printf("  k1 %s\n", k1.c_str());
         vchType k2;
         ssKey >> k2;
         string a = stringFromVch(k2);
+        printf("  k2 %s\n", a.c_str());
         o.push_back(Pair("alias", a));
 
-        vector<PathIndex> vtxPos;
+        vector<AliasIndex> vtxPos;
         CDataStream ssValue((char*)data.get_data(), (char*)data.get_data() + data.get_size(), SER_DISK, CLIENT_VERSION);
         ssValue >> vtxPos;
 
-        PathIndex i = vtxPos.back();
+        AliasIndex i = vtxPos.back();
         string i_address = i.vAddress;
         o.push_back(Pair("address", i_address));
         o.push_back(Pair("h", (int)i.nHeight));
@@ -572,7 +439,6 @@ Value gw1(const Array& params, bool fHelp)
       {
         continue;
       }
-
     }
   }
 
@@ -610,9 +476,9 @@ unsigned int scaleMonitor()
     return 210000;
   }
 
-  return 210000;
+  return 200;
 }
-int GetTxPosHeight(PathIndex& txPos)
+int GetTxPosHeight(AliasIndex& txPos)
 {
   return txPos.nHeight;
 }
@@ -636,13 +502,13 @@ int GetTxPosHeight(CDiskTxPos& txPos)
   return pindex->nHeight;
 }
 int
-aliasHeight(vector<unsigned char> vchPath)
+aliasHeight(vector<unsigned char> vchAlias)
 {
-  vector<PathIndex> vtxPos;
+  vector<AliasIndex> vtxPos;
   LocatorNodeDB ln1Db("r");
-  if(ln1Db.lKey(vchPath))
+  if(ln1Db.lKey(vchAlias))
   {
-    if(!ln1Db.lGet(vchPath, vtxPos))
+    if(!ln1Db.lGet(vchAlias, vtxPos))
     {
       return error("aliasHeight() : failed to read from alias DB");
     }
@@ -651,7 +517,7 @@ aliasHeight(vector<unsigned char> vchPath)
       return -1;
     }
 
-    PathIndex& txPos = vtxPos.back();
+    AliasIndex& txPos = vtxPos.back();
     return GetTxPosHeight(txPos);
   }
 
@@ -678,130 +544,6 @@ bool IsLocator(const CTransaction& tx, const CTxOut& txout)
   {
     return false;
   }
-  return true;
-}
-bool txPost_dvm(const vector<pair<CScript, int64_t> >& vecSend, const __wx__Tx& wtxIn, int nTxOut, __wx__Tx& wtxNew, CReserveKey& reservekey, int64_t& nFeeRet)
-{
-  int64_t nValue = 0;
-  BOOST_FOREACH(const PAIRTYPE(CScript, int64_t)& s, vecSend)
-  {
-    if(nValue < 0)
-    {
-      return false;
-    }
-    nValue += s.second;
-  }
-  if(vecSend.empty() || nValue < 0)
-  {
-    return false;
-  }
-
-  wtxNew.pwallet = pwalletMain;
-
-  ENTER_CRITICAL_SECTION(cs_main)
-  {
-    CTxDB txdb("r");
-    ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
-    {
-      nFeeRet = CENT;
-      for(;;)
-      {
-        wtxNew.vin.clear();
-        wtxNew.vout.clear();
-        wtxNew.fFromMe = true;
-
-        int64_t nTotalValue = nValue + nFeeRet;
-        BOOST_FOREACH(const PAIRTYPE(CScript, int64_t)& s, vecSend)
-        wtxNew.vout.push_back(CTxOut(s.second, s.first));
-
-        int64_t nWtxinCredit = 0;
-
-        set<pair<const __wx__Tx*, unsigned int> > setCoins;
-        int64_t nValueIn = 0;
-        if(nTotalValue - nWtxinCredit > 0)
-        {
-          if(!pwalletMain->SelectCoins(nTotalValue - nWtxinCredit, wtxNew.nTime, setCoins, nValueIn))
-          {
-            LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
-            LEAVE_CRITICAL_SECTION(cs_main)
-            return false;
-          }
-        }
-
-
-        vector<pair<const __wx__Tx*, unsigned int> >
-        vecCoins(setCoins.begin(), setCoins.end());
-
-        vecCoins.insert(vecCoins.begin(), make_pair(&wtxIn, nTxOut));
-
-        nValueIn += nWtxinCredit;
-
-        int64_t nChange = nValueIn - nTotalValue;
-        if(nChange >= CENT)
-        {
-          CPubKey pubkey;
-          if(!reservekey.GetReservedKey(pubkey))
-          {
-            LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
-            LEAVE_CRITICAL_SECTION(cs_main)
-            return false;
-          }
-
-          CScript scriptChange;
-          scriptChange.SetDestination(pubkey.GetID());
-
-          vector<CTxOut>::iterator position = wtxNew.vout.begin()+GetRandInt(wtxNew.vout.size());
-          wtxNew.vout.insert(position, CTxOut(nChange, scriptChange));
-        }
-        else
-        {
-          reservekey.ReturnKey();
-        }
-
-        BOOST_FOREACH(PAIRTYPE(const __wx__Tx*, unsigned int)& coin, vecCoins)
-        {
-          wtxNew.vin.push_back(CTxIn(coin.first->GetHash(), coin.second));
-        }
-
-        int nIn = 0;
-        BOOST_FOREACH(PAIRTYPE(const __wx__Tx*, unsigned int)& coin, vecCoins)
-        {
-          if(!SignSignature(*pwalletMain, *coin.first, wtxNew, nIn++))
-          {
-            LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
-            LEAVE_CRITICAL_SECTION(cs_main)
-            return false;
-          }
-        }
-
-        unsigned int nBytes = ::GetSerializeSize(*(CTransaction*)&wtxNew, SER_NETWORK);
-
-        if(nBytes >= MAX_BLOCK_SIZE)
-        {
-          LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
-          LEAVE_CRITICAL_SECTION(cs_main)
-          return false;
-        }
-
-        int64_t nPayFee = CENT * (1 +(int64_t)nBytes / 1024);
-        int64_t nMinFee = CENT;
-
-        if(nFeeRet < max(nPayFee, nMinFee))
-        {
-          nFeeRet = max(nPayFee, nMinFee);
-          continue;
-        }
-
-        wtxNew.AddSupportingTransactions(txdb);
-        wtxNew.fTimeReceivedIsTxTime = true;
-        break;
-      }
-    }
-    LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
-  }
-  LEAVE_CRITICAL_SECTION(cs_main)
-
-
   return true;
 }
 bool txPost(const vector<pair<CScript, int64_t> >& vecSend, const __wx__Tx& wtxIn, int nTxOut, __wx__Tx& wtxNew, CReserveKey& reservekey, int64_t& nFeeRet)
@@ -936,11 +678,11 @@ int atod(const std::string& addr, std::string& d)
     return -2;
   }
 
-  vector<PathIndex> vtxPos_;
+  vector<AliasIndex> vtxPos_;
   string a("a");
   if (ln1Db->lGet(vchFromString(a), vtxPos_))
   {
-    PathIndex i = vtxPos_.back();
+    AliasIndex i = vtxPos_.back();
   }
 
   Dbc* cursorp;
@@ -964,11 +706,11 @@ int atod(const std::string& addr, std::string& d)
         ssKey >> k2;
         string a = stringFromVch(k2);
 
-        vector<PathIndex> vtxPos;
+        vector<AliasIndex> vtxPos;
         CDataStream ssValue((char*)data.get_data(), (char*)data.get_data() + data.get_size(), SER_DISK, CLIENT_VERSION);
         ssValue >> vtxPos;
 
-        BOOST_FOREACH(PathIndex& i, vtxPos)
+        BOOST_FOREACH(AliasIndex& i, vtxPos)
         {
           int k = i.nHeight + scaleMonitor() - pindexBest->nHeight;
           if(k<=0)
@@ -1031,34 +773,6 @@ bool txRelayPre__(const CScript& scriptPubKey, const __wx__Tx& wtxIn, __wx__Tx& 
 
   return true;
 }
-string txRelay_no_commit(const CScript& scriptPubKey, int64_t nValue, const __wx__Tx& wtxIn, __wx__Tx& wtxNew, bool fAskFee)
-{
-  int nTxOut = aliasOutIndex(wtxIn);
-  if(nTxOut == -1)
-  {
-    return "error out index";
-  }
-  CReserveKey reservekey(pwalletMain);
-  int64_t nFeeRequired;
-  vector< pair<CScript, int64_t> > vecSend;
-  vecSend.push_back(make_pair(scriptPubKey, nValue));
-
-  if(!txPost(vecSend, wtxIn, nTxOut, wtxNew, reservekey, nFeeRequired))
-  {
-    string strError;
-    if(nValue + nFeeRequired > pwalletMain->GetBalance())
-    {
-      strError = strprintf(_("Error: This transaction requires a transaction fee of at least %s because of its amount, complexity, or use of recently received funds "), FormatMoney(nFeeRequired).c_str());
-    }
-    else
-    {
-      strError = _("Error: Transaction creation failed  ");
-    }
-    return strError;
-  }
-
-  return "";
-}
 string txRelay(const CScript& scriptPubKey, int64_t nValue, const __wx__Tx& wtxIn, __wx__Tx& wtxNew, bool fAskFee)
 {
   int nTxOut = aliasOutIndex(wtxIn);
@@ -1092,7 +806,7 @@ string txRelay(const CScript& scriptPubKey, int64_t nValue, const __wx__Tx& wtxI
 
   return "";
 }
-bool txTrace(PathIndex& txPos, vector<unsigned char>& vchValue, uint256& hash, int& nHeight)
+bool txTrace(AliasIndex& txPos, vector<unsigned char>& vchValue, uint256& hash, int& nHeight)
 {
   nHeight = GetTxPosHeight(txPos);
   vchValue = txPos.vValue;
@@ -1119,21 +833,21 @@ bool txTrace(CDiskTxPos& txPos, vector<unsigned char>& vchValue, uint256& hash, 
   hash = tx.GetHash();
   return true;
 }
-bool aliasTx(LocatorNodeDB& aliasCacheDB, const vector<unsigned char> &vchPath, CTransaction& tx)
+bool aliasTx(LocatorNodeDB& aliasCacheDB, const vector<unsigned char> &vchAlias, CTransaction& tx)
 {
 
-  vector<PathIndex> vtxPos;
-  if(!aliasCacheDB.lGet(vchPath, vtxPos) || vtxPos.empty())
+  vector<AliasIndex> vtxPos;
+  if(!aliasCacheDB.lGet(vchAlias, vtxPos) || vtxPos.empty())
   {
     return false;
   }
 
-  PathIndex& txPos = vtxPos.back();
+  AliasIndex& txPos = vtxPos.back();
 
   unsigned int nHeight = txPos.nHeight;
   if(nHeight + scaleMonitor() <= pindexBest->nHeight)
   {
-    string alias = stringFromVch(vchPath);
+    string alias = stringFromVch(vchAlias);
     return false;
   }
 
@@ -1291,7 +1005,7 @@ Value publicKeyExports(const Array& params, bool fHelp)
     vchNodeLocator = vchFromValue(params[0]);
   }
 
-  std::map<vchType, int> mapPathVchInt;
+  std::map<vchType, int> mapAliasVchInt;
   std::map<vchType, Object> aliasMapVchObj;
 
   Array oRes;
@@ -1357,7 +1071,7 @@ Value publicKeys(const Array& params, bool fHelp)
     vchNodeLocator = vchFromValue(params[0]);
   }
 
-  std::map<vchType, int> mapPathVchInt;
+  std::map<vchType, int> mapAliasVchInt;
   std::map<vchType, Object> aliasMapVchObj;
 
   Array oRes;
@@ -1493,7 +1207,7 @@ Value decryptedMessageList(const Array& params, bool fHelp)
     vchNodeLocator = vchFromValue(params[0]);
   }
 
-  std::map<vchType, int> mapPathVchInt;
+  std::map<vchType, int> mapAliasVchInt;
   std::map<vchType, Object> aliasMapVchObj;
 
   Array oRes;
@@ -1603,7 +1317,7 @@ Value decryptedMessageList(const Array& params, bool fHelp)
 
         oRes.push_back(aliasObj);
 
-        mapPathVchInt[vchSender] = nHeight;
+        mapAliasVchInt[vchSender] = nHeight;
         aliasMapVchObj[vchSender] = aliasObj;
       }
     }
@@ -1627,7 +1341,7 @@ Value plainTextMessageList(const Array& params, bool fHelp)
     vchNodeLocator = vchFromValue(params[0]);
   }
 
-  std::map<vchType, int> mapPathVchInt;
+  std::map<vchType, int> mapAliasVchInt;
   std::map<vchType, Object> aliasMapVchObj;
 
   Array oRes;
@@ -1676,6 +1390,7 @@ Value externFrame__(const Array& params, bool fHelp)
   string k1;
   vchType vchNodeLocator;
   k1=(params[0]).get_str();
+  std::transform(k1.begin(), k1.end(), k1.begin(), ::tolower);
   vchNodeLocator = vchFromString(k1);
 
   __wx__Tx wtx;
@@ -1707,7 +1422,7 @@ Value externFrame__(const Array& params, bool fHelp)
       {
         LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
         LEAVE_CRITICAL_SECTION(cs_main)
-        throw runtime_error("could not find a coin with this alias 2");
+        throw runtime_error("could not find a coin with this alias");
       }
 
       uint256 wtxInHash = tx.GetHash();
@@ -1771,6 +1486,7 @@ Value internFrame__(const Array& params, bool fHelp)
   vchType vchNodeLocator;
   k1=(params[0]).get_str();
 
+  std::transform(k1.begin(), k1.end(), k1.begin(), ::tolower);
   vchNodeLocator = vchFromString(k1);
 
   __wx__Tx wtx;
@@ -1780,7 +1496,7 @@ Value internFrame__(const Array& params, bool fHelp)
   {
     if(mapState.count(vchNodeLocator) && mapState[vchNodeLocator].size())
     {
-      error("updateEncryptedPath() : %lu pending operations %s",
+      error("updateEncryptedAlias() : %lu pending operations %s",
             mapState[vchNodeLocator].size(),
             mapState[vchNodeLocator].begin()->GetHex().c_str());
       LEAVE_CRITICAL_SECTION(cs_main)
@@ -1806,7 +1522,7 @@ Value internFrame__(const Array& params, bool fHelp)
     EnsureWalletIsUnlocked();
 
     uint256 wtxInHash;
-    if(!searchPathEncrypted2(stringFromVch(vchNodeLocator), wtxInHash))
+    if(!searchAliasEncrypted2(stringFromVch(vchNodeLocator), wtxInHash))
     {
       LEAVE_CRITICAL_SECTION(cs_main)
       throw runtime_error("not found");
@@ -2028,7 +1744,7 @@ Value aliasOut(const Array& params, bool fHelp)
     throw runtime_error("Invalid out put path");
   }
 
-  std::map<vchType, int> mapPathVchInt;
+  std::map<vchType, int> mapAliasVchInt;
   std::map<vchType, Object> aliasMapVchObj;
 
   string value;
@@ -2042,10 +1758,10 @@ Value aliasOut(const Array& params, bool fHelp)
       {
         const __wx__Tx& tx = item.second;
 
-        vchType vchPath, vchValue;
+        vchType vchAlias, vchValue;
         int nOut;
         int op__=-1;
-        if(!tx.aliasSet(op__, nOut, vchPath, vchValue))
+        if(!tx.aliasSet(op__, nOut, vchAlias, vchValue))
         {
           continue;
         }
@@ -2087,13 +1803,13 @@ Value aliasOut(const Array& params, bool fHelp)
           {
             continue;
           }
-          if(mapPathVchInt.find(vchFromString(decrypted)) != mapPathVchInt.end() && mapPathVchInt[vchFromString(decrypted)] > nHeight)
+          if(mapAliasVchInt.find(vchFromString(decrypted)) != mapAliasVchInt.end() && mapAliasVchInt[vchFromString(decrypted)] > nHeight)
           {
             continue;
           }
-          mapPathVchInt[vchFromString(decrypted)] = nHeight;
+          mapAliasVchInt[vchFromString(decrypted)] = nHeight;
 
-          DecryptMessage(rsaPrivKey, stringFromVch(vchPath), decrypted);
+          DecryptMessage(rsaPrivKey, stringFromVch(vchAlias), decrypted);
           if(k1 != decrypted)
           {
             continue;
@@ -2106,13 +1822,13 @@ Value aliasOut(const Array& params, bool fHelp)
         }
         else
         {
-          if(mapPathVchInt.find(vchPath) != mapPathVchInt.end() && mapPathVchInt[vchPath] > nHeight)
+          if(mapAliasVchInt.find(vchAlias) != mapAliasVchInt.end() && mapAliasVchInt[vchAlias] > nHeight)
           {
             continue;
           }
-          mapPathVchInt[vchPath] = nHeight;
+          mapAliasVchInt[vchAlias] = nHeight;
 
-          if(k1 != stringFromVch(vchPath))
+          if(k1 != stringFromVch(vchAlias))
           {
             continue;
           }
@@ -2167,10 +1883,10 @@ Value nodeValidate(const Array& params, bool fHelp)
       {
         const __wx__Tx& tx = item.second;
 
-        vchType vchPath, vchValue;
+        vchType vchAlias, vchValue;
         int nOut;
         int op__=-1;
-        if(!tx.aliasSet(op__, nOut, vchPath, vchValue))
+        if(!tx.aliasSet(op__, nOut, vchAlias, vchValue))
         {
           continue;
         }
@@ -2208,7 +1924,7 @@ Value nodeValidate(const Array& params, bool fHelp)
           CKey key;
           if(!pwalletMain->GetKey(keyID, key))
           {
-            aliasObj.push_back(Pair("alias", stringFromVch(vchPath)));
+            aliasObj.push_back(Pair("alias", stringFromVch(vchAlias)));
           }
           else
           {
@@ -2218,7 +1934,7 @@ Value nodeValidate(const Array& params, bool fHelp)
               continue;
             }
 
-            DecryptMessage(rsaPrivKey, stringFromVch(vchPath), decrypted);
+            DecryptMessage(rsaPrivKey, stringFromVch(vchAlias), decrypted);
 
             aliasObj.push_back(Pair("alias", decrypted));
           }
@@ -2227,12 +1943,12 @@ Value nodeValidate(const Array& params, bool fHelp)
         }
         else
         {
-          if(k1 != stringFromVch(vchPath))
+          if(k1 != stringFromVch(vchAlias))
           {
             continue;
           }
 
-          aliasObj.push_back(Pair("alias", stringFromVch(vchPath)));
+          aliasObj.push_back(Pair("alias", stringFromVch(vchAlias)));
           aliasObj.push_back(Pair("encrypted", "false"));
         }
 
@@ -2254,6 +1970,7 @@ Value nodeValidate(const Array& params, bool fHelp)
         vchType vchRand;
 
         const int ex = nHeight + scaleMonitor() - pindexBest->nHeight;
+        aliasObj.push_back(Pair("expires_in", ex));
         if(ex <= 0)
         {
           aliasObj.push_back(Pair("expired", 1));
@@ -2264,7 +1981,7 @@ Value nodeValidate(const Array& params, bool fHelp)
           aliasObj.push_back(Pair("tunnel_switch", ex));
         }
 
-        if(mapState.count(vchPath) && mapState[vchPath].size())
+        if(mapState.count(vchAlias) && mapState[vchAlias].size())
         {
           aliasObj.push_back(Pair("status", "pending_update"));
         }
@@ -2350,10 +2067,10 @@ Value nodeRetrieve(const Array& params, bool fHelp)
       {
         const __wx__Tx& tx = item.second;
 
-        vchType vchPath, vchValue;
+        vchType vchAlias, vchValue;
         int nOut;
         int op__=-1;
-        if(!tx.aliasSet(op__, nOut, vchPath, vchValue))
+        if(!tx.aliasSet(op__, nOut, vchAlias, vchValue))
         {
           continue;
         }
@@ -2400,7 +2117,7 @@ Value nodeRetrieve(const Array& params, bool fHelp)
             continue;
           }
 
-          DecryptMessage(rsaPrivKey, stringFromVch(vchPath), decrypted);
+          DecryptMessage(rsaPrivKey, stringFromVch(vchAlias), decrypted);
           if(k1 != decrypted)
           {
             continue;
@@ -2412,12 +2129,12 @@ Value nodeRetrieve(const Array& params, bool fHelp)
         }
         else
         {
-          if(k1 != stringFromVch(vchPath))
+          if(k1 != stringFromVch(vchAlias))
           {
             continue;
           }
 
-          aliasObj.push_back(Pair("alias", stringFromVch(vchPath)));
+          aliasObj.push_back(Pair("alias", stringFromVch(vchAlias)));
           aliasObj.push_back(Pair("encrypted", "false"));
         }
 
@@ -2439,12 +2156,13 @@ Value nodeRetrieve(const Array& params, bool fHelp)
         vchType vchRand;
 
         const int expiresIn = nHeight + scaleMonitor() - pindexBest->nHeight;
+        aliasObj.push_back(Pair("expires_in", expiresIn));
         if(expiresIn <= 0)
         {
           aliasObj.push_back(Pair("expired", 1));
         }
 
-        if(mapState.count(vchPath) && mapState[vchPath].size())
+        if(mapState.count(vchAlias) && mapState[vchAlias].size())
         {
           aliasObj.push_back(Pair("status", "pending_update"));
         }
@@ -2465,6 +2183,11 @@ Value nodeRetrieve(const Array& params, bool fHelp)
   }
   LEAVE_CRITICAL_SECTION(cs_main)
 
+
+  //Array oRes;
+  //BOOST_FOREACH(const PAIRTYPE(vector<unsigned char>, Object)& item, aliasMapVchObj)
+  //    oRes.push_back(item.second);
+
   return oRes;
 }
 
@@ -2484,7 +2207,7 @@ Value getNodeRecord(const Array& params, bool fHelp)
   }
 
 
-  std::map<vchType, int> mapPathVchInt;
+  std::map<vchType, int> mapAliasVchInt;
   std::map<vchType, Object> aliasMapVchObj;
 
   ENTER_CRITICAL_SECTION(cs_main)
@@ -2496,10 +2219,10 @@ Value getNodeRecord(const Array& params, bool fHelp)
       {
         const __wx__Tx& tx = item.second;
 
-        vchType vchPath, vchValue;
+        vchType vchAlias, vchValue;
         int nOut;
         int op__=-1;
-        if(!tx.aliasSet(op__, nOut, vchPath, vchValue))
+        if(!tx.aliasSet(op__, nOut, vchAlias, vchValue))
         {
           continue;
         }
@@ -2546,36 +2269,36 @@ Value getNodeRecord(const Array& params, bool fHelp)
             continue;
           }
 
-          DecryptMessage(rsaPrivKey, stringFromVch(vchPath), decrypted);
+          DecryptMessage(rsaPrivKey, stringFromVch(vchAlias), decrypted);
           if(k1 != decrypted)
           {
             continue;
           }
 
-          if(mapPathVchInt.find(vchFromString(decrypted)) != mapPathVchInt.end() && mapPathVchInt[vchFromString(decrypted)] > nHeight)
+          if(mapAliasVchInt.find(vchFromString(decrypted)) != mapAliasVchInt.end() && mapAliasVchInt[vchFromString(decrypted)] > nHeight)
           {
             continue;
           }
           aliasObj.push_back(Pair("alias", decrypted));
 
           aliasObj.push_back(Pair("encrypted", "true"));
-          mapPathVchInt[vchFromString(decrypted)] = nHeight;
+          mapAliasVchInt[vchFromString(decrypted)] = nHeight;
         }
         else
         {
-          if(mapPathVchInt.find(vchPath) != mapPathVchInt.end() && mapPathVchInt[vchPath] > nHeight)
+          if(mapAliasVchInt.find(vchAlias) != mapAliasVchInt.end() && mapAliasVchInt[vchAlias] > nHeight)
           {
             continue;
           }
 
-          if(k1 != stringFromVch(vchPath))
+          if(k1 != stringFromVch(vchAlias))
           {
             continue;
           }
 
-          aliasObj.push_back(Pair("alias", stringFromVch(vchPath)));
+          aliasObj.push_back(Pair("alias", stringFromVch(vchAlias)));
           aliasObj.push_back(Pair("encrypted", "false"));
-          mapPathVchInt[vchPath] = nHeight;
+          mapAliasVchInt[vchAlias] = nHeight;
         }
 
         aliasObj.push_back(Pair("value", value));
@@ -2596,12 +2319,13 @@ Value getNodeRecord(const Array& params, bool fHelp)
         vchType vchRand;
 
         const int expiresIn = nHeight + scaleMonitor() - pindexBest->nHeight;
+        aliasObj.push_back(Pair("expires_in", expiresIn));
         if(expiresIn <= 0)
         {
           aliasObj.push_back(Pair("expired", 1));
         }
 
-        if(mapState.count(vchPath) && mapState[vchPath].size())
+        if(mapState.count(vchAlias) && mapState[vchAlias].size())
         {
           aliasObj.push_back(Pair("status", "pending_update"));
         }
@@ -2619,7 +2343,7 @@ Value getNodeRecord(const Array& params, bool fHelp)
 
         if(op__ != OP_ALIAS_ENCRYPTED)
         {
-          aliasMapVchObj[vchPath] = aliasObj;
+          aliasMapVchObj[vchAlias] = aliasObj;
         }
         else
         {
@@ -2639,24 +2363,10 @@ Value getNodeRecord(const Array& params, bool fHelp)
 
   return oRes;
 }
-bool collisionReference(const string& descriptor_alias, uint256& wtxInHash, string& val)
+
+bool searchAliasEncrypted2(string alias, uint256& wtxInHash)
 {
-  vchType vchPath = vchFromString(descriptor_alias);
-  LocatorNodeDB ln1Db("r");
-  vector<PathIndex> vtxPos;
-  if(!ln1Db.lGet(vchPath, vtxPos) || vtxPos.empty())
-  {
-    return false;
-  }
-
-  PathIndex& txPos = vtxPos.back();
-  val = stringFromVch(txPos.vValue);
-
-  return true;
-}
-
-bool collisionReference__(const string& descriptor_alias, uint256& wtxInHash, string& val)
-{
+  std::transform(alias.begin(), alias.end(), alias.begin(), ::tolower);
   bool found=false;
   ENTER_CRITICAL_SECTION(cs_main)
   {
@@ -2667,71 +2377,10 @@ bool collisionReference__(const string& descriptor_alias, uint256& wtxInHash, st
       {
         const __wx__Tx& tx = item.second;
 
-        vchType vchPath, vchValue;
+        vchType vchAlias, vchValue;
         int nOut;
         int op__=-1;
-        if(!tx.aliasSet(op__, nOut, vchPath, vchValue))
-        {
-          continue;
-        }
-
-        if(tx.IsSpent(nOut))
-        {
-          continue;
-        }
-
-        const int nHeight = tx.GetHeightInMainChain();
-
-        if(nHeight == -1)
-        {
-          continue;
-        }
-
-        assert(nHeight >= 0);
-
-        const int ex = nHeight + scaleMonitor() - pindexBest->nHeight;
-        if(ex <= 0)
-        {
-          continue;
-        }
-
-        string strAddress = "";
-        aliasAddress(tx, strAddress);
-        string alias = stringFromVch(vchPath);
-
-        int pos=0;
-        if(alias == descriptor_alias)
-        {
-          found = true;
-          val = stringFromVch(vchValue);
-          wtxInHash=tx.GetHash();
-          break;
-        }
-      }
-    }
-    LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
-  }
-  LEAVE_CRITICAL_SECTION(cs_main)
-
-  return found;
-}
-
-bool searchPathEncrypted2(string alias, uint256& wtxInHash)
-{
-  bool found=false;
-  ENTER_CRITICAL_SECTION(cs_main)
-  {
-    ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
-    {
-      BOOST_FOREACH(PAIRTYPE(const uint256, __wx__Tx)& item,
-                    pwalletMain->mapWallet)
-      {
-        const __wx__Tx& tx = item.second;
-
-        vchType vchPath, vchValue;
-        int nOut;
-        int op__=-1;
-        if(!tx.aliasSet(op__, nOut, vchPath, vchValue))
+        if(!tx.aliasSet(op__, nOut, vchAlias, vchValue))
         {
           continue;
         }
@@ -2786,7 +2435,8 @@ bool searchPathEncrypted2(string alias, uint256& wtxInHash)
             continue;
           }
 
-          DecryptMessage(rsaPrivKey, stringFromVch(vchPath), decrypted);
+          DecryptMessage(rsaPrivKey, stringFromVch(vchAlias), decrypted);
+          std::transform(decrypted.begin(), decrypted.end(), decrypted.begin(), ::tolower);
           if(decrypted == alias)
           {
             found=true;
@@ -2803,7 +2453,7 @@ bool searchPathEncrypted2(string alias, uint256& wtxInHash)
   return found;
 }
 
-bool searchPathEncrypted(string alias, uint256& wtxInHash)
+bool searchAliasEncrypted(string alias, uint256& wtxInHash)
 {
   bool found=false;
   ENTER_CRITICAL_SECTION(cs_main)
@@ -2815,10 +2465,10 @@ bool searchPathEncrypted(string alias, uint256& wtxInHash)
       {
         const __wx__Tx& tx = item.second;
 
-        vchType vchPath, vchValue;
+        vchType vchAlias, vchValue;
         int nOut;
         int op__=-1;
-        if(!tx.aliasSet(op__, nOut, vchPath, vchValue))
+        if(!tx.aliasSet(op__, nOut, vchAlias, vchValue))
         {
           continue;
         }
@@ -2865,7 +2515,7 @@ bool searchPathEncrypted(string alias, uint256& wtxInHash)
             throw JSONRPCError(RPC_WALLET_ERROR, "error p0");
           }
 
-          DecryptMessage(rsaPrivKey, stringFromVch(vchPath), decrypted);
+          DecryptMessage(rsaPrivKey, stringFromVch(vchAlias), decrypted);
           if(decrypted == alias)
           {
             found=true;
@@ -2895,7 +2545,7 @@ Value aliasList__(const Array& params, bool fHelp)
     vchNodeLocator = vchFromValue(params[0]);
   }
 
-  std::map<vchType, int> mapPathVchInt;
+  std::map<vchType, int> mapAliasVchInt;
   std::map<vchType, Object> aliasMapVchObj;
 
   Array oRes;
@@ -2914,10 +2564,10 @@ Value aliasList__(const Array& params, bool fHelp)
       {
         const __wx__Tx& tx = item.second;
 
-        vchType vchPath, vchValue;
+        vchType vchAlias, vchValue;
         int nOut;
         int op__=-1;
-        if(!tx.aliasSet(op__, nOut, vchPath, vchValue))
+        if(!tx.aliasSet(op__, nOut, vchAlias, vchValue))
         {
           continue;
         }
@@ -2925,7 +2575,7 @@ Value aliasList__(const Array& params, bool fHelp)
         Object aliasObj;
 
 
-        if(!vchNodeLocator.empty() && vchNodeLocator != vchPath)
+        if(!vchNodeLocator.empty() && vchNodeLocator != vchAlias)
         {
           continue;
         }
@@ -2962,7 +2612,7 @@ Value aliasList__(const Array& params, bool fHelp)
             CPubKey pubKey = key.GetPubKey();
             if(pwalletMain->envCP0(pubKey, rsaPrivKey) == true)
             {
-              DecryptMessage(rsaPrivKey, stringFromVch(vchPath), decrypted);
+              DecryptMessage(rsaPrivKey, stringFromVch(vchAlias), decrypted);
               aliasObj.push_back(Pair("alias", decrypted));
             }
           }
@@ -3010,26 +2660,26 @@ Value aliasList__(const Array& params, bool fHelp)
             }
           }
 
-          if(mapPathVchInt.find(vchFromString(decrypted)) != mapPathVchInt.end() && mapPathVchInt[vchFromString(decrypted)] > nHeight)
+          if(mapAliasVchInt.find(vchFromString(decrypted)) != mapAliasVchInt.end() && mapAliasVchInt[vchFromString(decrypted)] > nHeight)
           {
             continue;
           }
 
           aliasObj.push_back(Pair("encrypted", "true"));
-          mapPathVchInt[vchFromString(decrypted)] = nHeight;
+          mapAliasVchInt[vchFromString(decrypted)] = nHeight;
         }
         else
         {
-          if(mapPathVchInt.find(vchPath) != mapPathVchInt.end() && mapPathVchInt[vchPath] > nHeight)
+          if(mapAliasVchInt.find(vchAlias) != mapAliasVchInt.end() && mapAliasVchInt[vchAlias] > nHeight)
           {
             continue;
           }
-          string s = stringFromVch(vchPath);
+          string s = stringFromVch(vchAlias);
           aliasObj.push_back(Pair("alias", s));
           aliasObj.push_back(Pair("encrypted", "false"));
           Value v = xtu_url__(s);
           aliasObj.push_back(Pair("xtu", v.get_real()));
-          mapPathVchInt[vchPath] = nHeight;
+          mapAliasVchInt[vchAlias] = nHeight;
           if(xs(s))
           {
             aliasObj.push_back(Pair("xstat", "true"));
@@ -3051,6 +2701,7 @@ Value aliasList__(const Array& params, bool fHelp)
         vchType vchRand;
 
         const int ex = nHeight + scaleMonitor() - pindexBest->nHeight;
+        aliasObj.push_back(Pair("expires_in", ex));
         if(ex <= 0)
         {
           aliasObj.push_back(Pair("expired", 1));
@@ -3060,7 +2711,7 @@ Value aliasList__(const Array& params, bool fHelp)
           aliasObj.push_back(Pair("tunnel_switch", ex));
         }
 
-        if(mapState.count(vchPath) && mapState[vchPath].size())
+        if(mapState.count(vchAlias) && mapState[vchAlias].size())
         {
           aliasObj.push_back(Pair("status", "pending_update"));
         }
@@ -3083,7 +2734,7 @@ Value aliasList__(const Array& params, bool fHelp)
 
         if(op__ != OP_ALIAS_ENCRYPTED)
         {
-          aliasMapVchObj[vchPath] = aliasObj;
+          aliasMapVchObj[vchAlias] = aliasObj;
         }
         else
         {
@@ -3102,22 +2753,6 @@ Value aliasList__(const Array& params, bool fHelp)
 
   return oRes;
 }
-Value lookupStoragePath(const Array& params, bool fHelp)
-{
-  if(fHelp || params.size() > 1)
-    throw runtime_error(
-      "aliasList [<alias>]\n"
-    );
-
-  uint256 wtx__;
-  const string storagePath = "NOT FOUND";
-  string val;
-  collisionReference(storagePath, wtx__,val);
-
-  Array oRes;
-  oRes.push_back(storagePath);
-  return oRes;
-}
 
 Value aliasList(const Array& params, bool fHelp)
 {
@@ -3132,7 +2767,7 @@ Value aliasList(const Array& params, bool fHelp)
     vchNodeLocator = vchFromValue(params[0]);
   }
 
-  std::map<vchType, int> mapPathVchInt;
+  std::map<vchType, int> mapAliasVchInt;
   std::map<vchType, Object> aliasMapVchObj;
 
   ENTER_CRITICAL_SECTION(cs_main)
@@ -3144,17 +2779,17 @@ Value aliasList(const Array& params, bool fHelp)
       {
         __wx__Tx& tx = item.second;
 
-        vchType vchPath, vchValue;
+        vchType vchAlias, vchValue;
         int nOut;
         int op__=-1;
-        if(!tx.aliasSet(op__, nOut, vchPath, vchValue))
+        if(!tx.aliasSet(op__, nOut, vchAlias, vchValue))
         {
           continue;
         }
 
         Object aliasObj;
 
-        if(!vchNodeLocator.empty() && vchNodeLocator != vchPath)
+        if(!vchNodeLocator.empty() && vchNodeLocator != vchAlias)
         {
           continue;
         }
@@ -3192,7 +2827,7 @@ Value aliasList(const Array& params, bool fHelp)
             CPubKey pubKey = key.GetPubKey();
             if(pwalletMain->envCP0(pubKey, rsaPrivKey) == true)
             {
-              DecryptMessage(rsaPrivKey, stringFromVch(vchPath), decrypted);
+              DecryptMessage(rsaPrivKey, stringFromVch(vchAlias), decrypted);
               aliasObj.push_back(Pair("alias", decrypted));
             }
           }
@@ -3240,29 +2875,29 @@ Value aliasList(const Array& params, bool fHelp)
             }
           }
 
-          if(mapPathVchInt.find(vchFromString(decrypted)) != mapPathVchInt.end() && mapPathVchInt[vchFromString(decrypted)] > nHeight)
+          if(mapAliasVchInt.find(vchFromString(decrypted)) != mapAliasVchInt.end() && mapAliasVchInt[vchFromString(decrypted)] > nHeight)
           {
             continue;
           }
 
           aliasObj.push_back(Pair("encrypted", "true"));
-          mapPathVchInt[vchFromString(decrypted)] = nHeight;
+          mapAliasVchInt[vchFromString(decrypted)] = nHeight;
         }
         else
         {
-          if(mapPathVchInt.find(vchPath) != mapPathVchInt.end() && mapPathVchInt[vchPath] > nHeight)
+          if(mapAliasVchInt.find(vchAlias) != mapAliasVchInt.end() && mapAliasVchInt[vchAlias] > nHeight)
           {
             continue;
           }
-          aliasObj.push_back(Pair("alias", stringFromVch(vchPath)));
+          aliasObj.push_back(Pair("alias", stringFromVch(vchAlias)));
           aliasObj.push_back(Pair("encrypted", "false"));
-          string s = stringFromVch(vchPath);
+          string s = stringFromVch(vchAlias);
           if(xs(s))
           {
             aliasObj.push_back(Pair("xstat", "true"));
           }
 
-          mapPathVchInt[vchPath] = nHeight;
+          mapAliasVchInt[vchAlias] = nHeight;
         }
 
 
@@ -3284,6 +2919,7 @@ Value aliasList(const Array& params, bool fHelp)
         vchType vchRand;
 
         const int ex = nHeight + scaleMonitor() - pindexBest->nHeight;
+        aliasObj.push_back(Pair("expires_in", ex));
         if(ex <= 0)
         {
           aliasObj.push_back(Pair("expired", 1));
@@ -3293,7 +2929,7 @@ Value aliasList(const Array& params, bool fHelp)
           aliasObj.push_back(Pair("tunnel_switch", ex));
         }
 
-        if(mapState.count(vchPath) && mapState[vchPath].size())
+        if(mapState.count(vchAlias) && mapState[vchAlias].size())
         {
           aliasObj.push_back(Pair("status", "pending_update"));
         }
@@ -3311,7 +2947,7 @@ Value aliasList(const Array& params, bool fHelp)
 
         if(op__ != OP_ALIAS_ENCRYPTED)
         {
-          aliasMapVchObj[vchPath] = aliasObj;
+          aliasMapVchObj[vchAlias] = aliasObj;
         }
         else
         {
@@ -3368,19 +3004,19 @@ Value nodeDebug1(const Array& params, bool fHelp)
       "nodeDebug1 <alias>\n"
       "Dump alias blocks number and transactions id in the debug file.\n");
 
-  vector<unsigned char> vchPath = vchFromValue(params[0]);
+  vector<unsigned char> vchAlias = vchFromValue(params[0]);
   ENTER_CRITICAL_SECTION(cs_main)
   {
 
-    vector<PathIndex> vtxPos;
+    vector<AliasIndex> vtxPos;
     LocatorNodeDB aliasCacheDB("r");
-    if(!aliasCacheDB.lGet(vchPath, vtxPos))
+    if(!aliasCacheDB.lGet(vchAlias, vtxPos))
     {
       error("failed to read from alias DB");
       return false;
     }
 
-    PathIndex txPos;
+    AliasIndex txPos;
     BOOST_FOREACH(txPos, vtxPos)
     {
       CTransaction tx;
@@ -3403,7 +3039,8 @@ Value transform(const Array& params, bool fHelp)
     );
   string locatorStr = params[0].get_str();
 
-  const vchType vchPath = vchFromValue(locatorStr);
+  std::transform(locatorStr.begin(), locatorStr.end(), locatorStr.begin(), ::tolower);
+  const vchType vchAlias = vchFromValue(locatorStr);
   const char* locatorFile = (params[1].get_str()).c_str();
 
   fs::path p = locatorFile;
@@ -3459,6 +3096,7 @@ Value primaryCXValidate(const Array& params, bool fHelp)
       + HelpRequiringPassphrase());
 
   string locatorStr = params[0].get_str();
+  std::transform(locatorStr.begin(), locatorStr.end(), locatorStr.begin(), ::tolower);
   vchType vchLocator = vchFromString(locatorStr);
 
   cba predicate((params[1]).get_str());
@@ -3485,7 +3123,7 @@ Value primaryCXValidate(const Array& params, bool fHelp)
   cba externPredicate(extPredicate);
   if(!externPredicate.IsValid())
   {
-    vector<PathIndex> vtxPos;
+    vector<AliasIndex> vtxPos;
     LocatorNodeDB ln1Db("r");
     vchType vchPredicate = vchFromString(extPredicate);
     if (ln1Db.lKey (vchPredicate))
@@ -3499,7 +3137,7 @@ Value primaryCXValidate(const Array& params, bool fHelp)
         return -1;
       }
 
-      PathIndex& txPos = vtxPos.back ();
+      AliasIndex& txPos = vtxPos.back ();
       externPredicate.SetString(txPos.vAddress);
     }
     else
@@ -3607,7 +3245,7 @@ Value primaryCXValidate(const Array& params, bool fHelp)
   ENTER_CRITICAL_SECTION(cs_main)
   {
     uint256 wtxInHash;
-    if(!searchPathEncrypted2(stringFromVch(vchLocator), wtxInHash))
+    if(!searchAliasEncrypted2(stringFromVch(vchLocator), wtxInHash))
     {
       LEAVE_CRITICAL_SECTION(cs_main)
       throw runtime_error("could not find this alias");
@@ -3641,8 +3279,8 @@ Value primaryCXValidate(const Array& params, bool fHelp)
       string randBase64 = EncodeBase64(&vchRand[0], vchRand.size());
       EncryptMessage(stringFromVch(extVch), randBase64, encryptedRandForRecipient);
       EncryptMessage(stringFromVch(extVch), randBase64, encryptedRandForRecipient);
-      string encryptedPathForRecipient;
-      EncryptMessage(stringFromVch(extVch), locatorStr, encryptedPathForRecipient);
+      string encryptedAliasForRecipient;
+      EncryptMessage(stringFromVch(extVch), locatorStr, encryptedAliasForRecipient);
 
       const __wx__Tx& wtxIn = pwalletMain->mapWallet[wtxInHash];
       bool found = false;
@@ -3714,7 +3352,7 @@ Value primaryCXValidate(const Array& params, bool fHelp)
           uint160 hash = uint160(vvch[3]);
 
           CDataStream ss(SER_GETHASH, 0);
-          ss << encryptedPathForRecipient;
+          ss << encryptedAliasForRecipient;
           ss << hash.ToString();
 
           vchType q1;
@@ -3762,7 +3400,7 @@ Value primaryCXValidate(const Array& params, bool fHelp)
           }
 
           string sigBase64 = EncodeBase64(&vchSig[0], vchSig.size());
-          scriptPubKey << OP_ALIAS_ENCRYPTED << vchFromString(encryptedPathForRecipient) << vchFromString(sigBase64) << rVch << vvch[3] << q1 << vchFromString(encryptedRandForRecipient) << vchFromString(iv128) << fs << OP_2DROP << OP_2DROP << OP_2DROP << OP_2DROP << OP_DROP;
+          scriptPubKey << OP_ALIAS_ENCRYPTED << vchFromString(encryptedAliasForRecipient) << vchFromString(sigBase64) << rVch << vvch[3] << q1 << vchFromString(encryptedRandForRecipient) << vchFromString(iv128) << fs << OP_2DROP << OP_2DROP << OP_2DROP << OP_2DROP << OP_DROP;
 
           scriptPubKey += scriptPubKeyOrig;
           found = true;
@@ -3799,6 +3437,107 @@ Value primaryCXValidate(const Array& params, bool fHelp)
   LEAVE_CRITICAL_SECTION(cs_main)
   return ret;
 }
+Value vextract(const Array& params, bool fHelp)
+{
+  if(fHelp || params.size() != 3)
+    throw runtime_error(
+      "vextract <epid> <pos> <op>\n"
+    );
+
+  string ep =(params[0]).get_str();
+  string pos =(params[1]).get_str();
+  int pos_ = stoi(pos);
+
+  const char* out__ = (params[2].get_str()).c_str();
+  cerr << out__ << endl;
+  fs::path op = out__;
+  boost::filesystem::path ve = op.parent_path();
+  if(!fs::exists(ve))
+  {
+    throw runtime_error("Invalid out put path");
+  }
+
+  //vex
+  Array oRes;
+  LocatorNodeDB ln1Db("r");
+
+  bool loc=false;
+  vchType intern;
+  Dbc* cursorp;
+  try
+  {
+    cursorp = ln1Db.GetCursor();
+
+    Dbt key, data;
+    int ret;
+
+    while ((ret = cursorp->get(&key, &data, DB_NEXT)) == 0)
+    {
+      CDataStream ssKey(SER_DISK, CLIENT_VERSION);
+      ssKey.write((char*)key.get_data(), key.get_size());
+
+      string k1;
+      ssKey >> k1;
+      if(k1 == "alias_")
+      {
+        Object o;
+        vchType k2;
+        ssKey >> k2;
+        string a = stringFromVch(k2);
+
+        vector<AliasIndex> vtxPos;
+        CDataStream ssValue((char*)data.get_data(), (char*)data.get_data() + data.get_size(), SER_DISK, CLIENT_VERSION);
+        ssValue >> vtxPos;
+
+        AliasIndex i = vtxPos.back();
+        if(ep == i.vAddress && pos_ == (int)i.nHeight)
+        {
+          cout << "FOUND" << endl;
+          loc=true;
+          intern = i.vValue;
+          break;
+        }
+      }
+    }
+    if (ret != DB_NOTFOUND)
+    {
+    }
+  }
+  catch(DbException &e)
+  {
+    //ln1Db.err(e.get_errno(), "Error!");
+  }
+  catch(std::exception &e)
+  {
+    //ln1Db.errx("Error! %s", e.what());
+  }
+
+  if (cursorp != NULL)
+  {
+    cursorp->close();
+  }
+  string val = stringFromVch(intern);
+
+  bool fInvalid = false;
+  vector<unsigned char> asK = DecodeBase64(val.c_str(), &fInvalid);
+
+  string v = stringFromVch(asK);
+  try
+  {
+    stringstream is(v, ios_base::in | ios_base::binary);
+    filtering_streambuf<input> in__;
+    in__.push(gzip_decompressor());
+    in__.push(is);
+    ofstream file__(out__, ios_base::binary);
+    boost::iostreams::copy(in__, file__);
+  }
+  catch(std::exception& e)
+  {
+    std::cerr << e.what() << std::endl;
+  }
+
+  return true;
+}
 Value vEPID(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() != 2)
@@ -3806,6 +3545,8 @@ Value vEPID(const Array& params, bool fHelp)
       "vEPID [<node opt>]\n"
     );
 
+
+  //VX series
   vchType vchNodeLocator;
   string k =(params[0]).get_str();
   cba k1(k);
@@ -3822,7 +3563,7 @@ Value vEPID(const Array& params, bool fHelp)
     throw runtime_error("Invalid out put path");
   }
 
-  std::map<vchType, int> mapPathVchInt;
+  std::map<vchType, int> mapAliasVchInt;
   std::map<vchType, Object> aliasMapVchObj;
 
   vector< vector<unsigned char> > vvch;
@@ -3886,11 +3627,11 @@ Value vEPID(const Array& params, bool fHelp)
           {
             continue;
           }
-          if(mapPathVchInt.find(vchFromString(decrypted)) != mapPathVchInt.end() && mapPathVchInt[vchFromString(decrypted)] > nHeight)
+          if(mapAliasVchInt.find(vchFromString(decrypted)) != mapAliasVchInt.end() && mapAliasVchInt[vchFromString(decrypted)] > nHeight)
           {
             continue;
           }
-          mapPathVchInt[vchFromString(decrypted)] = nHeight;
+          mapAliasVchInt[vchFromString(decrypted)] = nHeight;
 
           DecryptMessage(rsaPrivKey, stringFromVch(vv[0]), decrypted);
           if(k1.ToString() != r.ToString())
@@ -3986,7 +3727,7 @@ Value vEPID(const Array& params, bool fHelp)
       }
       else
       {
-        throw JSONRPCError(RPC_TYPE_ERROR, "key not barund");
+        throw JSONRPCError(RPC_TYPE_ERROR, "key not foound");
       }
     }
 
@@ -4029,7 +3770,7 @@ Value validate(const Array& params, bool fHelp)
     throw runtime_error("Invalid out put path");
   }
 
-  std::map<vchType, int> mapPathVchInt;
+  std::map<vchType, int> mapAliasVchInt;
   std::map<vchType, Object> aliasMapVchObj;
 
   vector< vector<unsigned char> > vvch;
@@ -4093,11 +3834,11 @@ Value validate(const Array& params, bool fHelp)
           {
             continue;
           }
-          if(mapPathVchInt.find(vchFromString(decrypted)) != mapPathVchInt.end() && mapPathVchInt[vchFromString(decrypted)] > nHeight)
+          if(mapAliasVchInt.find(vchFromString(decrypted)) != mapAliasVchInt.end() && mapAliasVchInt[vchFromString(decrypted)] > nHeight)
           {
             continue;
           }
-          mapPathVchInt[vchFromString(decrypted)] = nHeight;
+          mapAliasVchInt[vchFromString(decrypted)] = nHeight;
 
           DecryptMessage(rsaPrivKey, stringFromVch(vv[0]), decrypted);
           if(k1 != decrypted)
@@ -4191,7 +3932,7 @@ Value validate(const Array& params, bool fHelp)
       }
       else
       {
-        throw JSONRPCError(RPC_TYPE_ERROR, "key not barund");
+        throw JSONRPCError(RPC_TYPE_ERROR, "key not foound");
       }
     }
 
@@ -4223,7 +3964,8 @@ Value transientStatus__C(const Array& params, bool fHelp)
 
   string locatorStr = params[0].get_str();
 
-  const vchType vchPath = vchFromString(locatorStr);
+  std::transform(locatorStr.begin(), locatorStr.end(), locatorStr.begin(), ::tolower);
+  const vchType vchAlias = vchFromString(locatorStr);
 
   Object ret;
   const char* locatorFile = (params[1].get_str()).c_str();
@@ -4259,7 +4001,7 @@ Value transientStatus__C(const Array& params, bool fHelp)
 
   ENTER_CRITICAL_SECTION(cs_main)
   {
-    if(mapState.count(vchPath) && mapState[vchPath].size())
+    if(mapState.count(vchAlias) && mapState[vchAlias].size())
     {
       LEAVE_CRITICAL_SECTION(cs_main)
       ret.push_back(Pair("status", "error"));
@@ -4273,7 +4015,7 @@ Value transientStatus__C(const Array& params, bool fHelp)
   {
     LocatorNodeDB aliasCacheDB("r");
     CTransaction tx;
-    if(aliasTx(aliasCacheDB, vchPath, tx))
+    if(aliasTx(aliasCacheDB, vchAlias, tx))
     {
       ret.push_back(Pair("status", "error"));
       ret.push_back(Pair("message", "alias is active"));
@@ -4286,7 +4028,7 @@ Value transientStatus__C(const Array& params, bool fHelp)
     EnsureWalletIsUnlocked();
 
     uint256 wtxInHash;
-    if(!searchPathEncrypted2(stringFromVch(vchPath), wtxInHash))
+    if(!searchAliasEncrypted2(stringFromVch(vchAlias), wtxInHash))
     {
       LEAVE_CRITICAL_SECTION(cs_main)
       ret.push_back(Pair("status", "error"));
@@ -4400,16 +4142,17 @@ Value transientStatus__C(const Array& params, bool fHelp)
   return ret;
 }
 
-Value updateEncryptedPathFile(const Array& params, bool fHelp)
+Value updateEncryptedAliasFile(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() != 2)
     throw runtime_error(
-      "updateEncryptedPath <locator> <file>"
+      "updateEncryptedAlias <locator> <file>"
       + HelpRequiringPassphrase());
 
   string locatorStr = params[0].get_str();
 
-  const vchType vchPath = vchFromString(locatorStr);
+  std::transform(locatorStr.begin(), locatorStr.end(), locatorStr.begin(), ::tolower);
+  const vchType vchAlias = vchFromString(locatorStr);
 
   const char* locatorFile = (params[1].get_str()).c_str();
   fs::path p = locatorFile;
@@ -4441,11 +4184,11 @@ Value updateEncryptedPathFile(const Array& params, bool fHelp)
 
   ENTER_CRITICAL_SECTION(cs_main)
   {
-    if(mapState.count(vchPath) && mapState[vchPath].size())
+    if(mapState.count(vchAlias) && mapState[vchAlias].size())
     {
-      error("updateEncryptedPath() : there are %lu pending operations on that alias, including %s",
-            mapState[vchPath].size(),
-            mapState[vchPath].begin()->GetHex().c_str());
+      error("updateEncryptedAlias() : there are %lu pending operations on that alias, including %s",
+            mapState[vchAlias].size(),
+            mapState[vchAlias].begin()->GetHex().c_str());
       LEAVE_CRITICAL_SECTION(cs_main)
       throw runtime_error("there are pending operations on that alias");
     }
@@ -4456,9 +4199,9 @@ Value updateEncryptedPathFile(const Array& params, bool fHelp)
   {
     LocatorNodeDB aliasCacheDB("r");
     CTransaction tx;
-    if(aliasTx(aliasCacheDB, vchPath, tx))
+    if(aliasTx(aliasCacheDB, vchAlias, tx))
     {
-      error("updateEncryptedPath() : this alias is already active with tx %s",
+      error("updateEncryptedAlias() : this alias is already active with tx %s",
             tx.GetHash().GetHex().c_str());
       throw runtime_error("this alias is already active");
     }
@@ -4469,10 +4212,10 @@ Value updateEncryptedPathFile(const Array& params, bool fHelp)
     EnsureWalletIsUnlocked();
 
     uint256 wtxInHash;
-    if(!searchPathEncrypted2(stringFromVch(vchPath), wtxInHash))
+    if(!searchAliasEncrypted2(stringFromVch(vchAlias), wtxInHash))
     {
       LEAVE_CRITICAL_SECTION(cs_main)
-      throw runtime_error("could not find a coin with this alias, try specifying the registerPath transaction id");
+      throw runtime_error("could not find a coin with this alias, try specifying the registerAlias transaction id");
     }
 
 
@@ -4566,14 +4309,14 @@ Value updateEncryptedPathFile(const Array& params, bool fHelp)
 
   return wtx.GetHash().GetHex();
 }
-Value updateEncryptedPath(const Array& params, bool fHelp)
+Value updateEncryptedAlias(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() != 3)
     throw runtime_error(
-      "updateEncryptedPath <alias> <value> <address>"
+      "updateEncryptedAlias <alias> <value> <address>"
       + HelpRequiringPassphrase());
 
-  const vchType vchPath = vchFromString(params[0].get_str());
+  const vchType vchAlias = vchFromString(params[0].get_str());
   vchType vchValue = vchFromString(params[1].get_str());
 
   __wx__Tx wtx;
@@ -4581,11 +4324,11 @@ Value updateEncryptedPath(const Array& params, bool fHelp)
 
   ENTER_CRITICAL_SECTION(cs_main)
   {
-    if(mapState.count(vchPath) && mapState[vchPath].size())
+    if(mapState.count(vchAlias) && mapState[vchAlias].size())
     {
-      error("updateEncryptedPath() : there are %lu pending operations on that alias, including %s",
-            mapState[vchPath].size(),
-            mapState[vchPath].begin()->GetHex().c_str());
+      error("updateEncryptedAlias() : there are %lu pending operations on that alias, including %s",
+            mapState[vchAlias].size(),
+            mapState[vchAlias].begin()->GetHex().c_str());
       LEAVE_CRITICAL_SECTION(cs_main)
       throw runtime_error("there are pending operations on that alias");
     }
@@ -4596,9 +4339,9 @@ Value updateEncryptedPath(const Array& params, bool fHelp)
   {
     LocatorNodeDB aliasCacheDB("r");
     CTransaction tx;
-    if(aliasTx(aliasCacheDB, vchPath, tx))
+    if(aliasTx(aliasCacheDB, vchAlias, tx))
     {
-      error("updateEncryptedPath() : this alias is already active with tx %s",
+      error("updateEncryptedAlias() : this alias is already active with tx %s",
             tx.GetHash().GetHex().c_str());
       throw runtime_error("this alias is already active");
     }
@@ -4609,10 +4352,10 @@ Value updateEncryptedPath(const Array& params, bool fHelp)
     EnsureWalletIsUnlocked();
 
     uint256 wtxInHash;
-    if(!searchPathEncrypted(stringFromVch(vchPath), wtxInHash))
+    if(!searchAliasEncrypted(stringFromVch(vchAlias), wtxInHash))
     {
       LEAVE_CRITICAL_SECTION(cs_main)
-      throw runtime_error("could not find a coin with this alias, try specifying the registerPath transaction id");
+      throw runtime_error("could not find a coin with this alias, try specifying the registerAlias transaction id");
     }
 
 
@@ -4706,142 +4449,17 @@ Value updateEncryptedPath(const Array& params, bool fHelp)
 
   return wtx.GetHash().GetHex();
 }
-bool decrypt_ra(const string& alias, const string& address, __wx__Tx& ra_tx, __wx__Tx& decrypt_ra_tx)
-{
-  string locatorStr = alias;
-  const vchType vchPath = vchFromValue(locatorStr);
-  const std::string addressOfOwner = address;
 
-  cba ownerAddr(addressOfOwner);
-  if(!ownerAddr.IsValid())
-  {
-    throw JSONRPCError(RPC_TYPE_ERROR, "Invalid owner address");
-  }
-
-  CKeyID keyID;
-  if(!ownerAddr.GetKeyID(keyID))
-  {
-    throw JSONRPCError(RPC_TYPE_ERROR, "ownerAddr does not refer to key");
-  }
-
-  CKey key;
-  if(!pwalletMain->GetKey(keyID, key))
-  {
-    throw JSONRPCError(RPC_WALLET_ERROR, "1 Private key not available");
-  }
-
-  CPubKey vchPubKey;
-  pwalletMain->GetPubKey(keyID, vchPubKey);
-
-  string rsaPubKeyStr = "";
-  if(!pwalletMain->envCP1(key.GetPubKey(), rsaPubKeyStr))
-  {
-    throw JSONRPCError(RPC_WALLET_ERROR, "no rsa key available for address");
-  }
-
-  vchType vchRand;
-  string r_;
-  if(!pwalletMain->GetRandomKeyMetadata(key.GetPubKey(), vchRand, r_))
-  {
-    throw JSONRPCError(RPC_WALLET_ERROR, "no random key available for address");
-  }
-
-
-  decrypt_ra_tx.nVersion = CTransaction::DION_TX_VERSION;
-
-  {
-    LocatorNodeDB aliasCacheDB("r");
-    CTransaction tx;
-    if(aliasTx(aliasCacheDB, vchPath, tx))
-    {
-      error("decryptPath() : this alias is already active with tx %s",
-            tx.GetHash().GetHex().c_str());
-      throw runtime_error("this alias is already active");
-    }
-  }
-
-
-  ENTER_CRITICAL_SECTION(cs_main)
-  {
-    EnsureWalletIsUnlocked();
-    CScript scriptPubKeyOrig;
-    scriptPubKeyOrig.SetBitcoinAddress(addressOfOwner);
-    CScript scriptPubKey;
-    vector<unsigned char> vchPrevSig;
-    bool found = false;
-    BOOST_FOREACH(CTxOut& out, ra_tx.vout)
-    {
-      vector<vector<unsigned char> > vvch;
-      int op;
-      if(aliasScript(out.scriptPubKey, op, vvch))
-      {
-        if(op != OP_ALIAS_ENCRYPTED)
-        {
-          throw runtime_error("previous transaction wasn't a registerPath");
-        }
-        CDataStream ss(SER_GETHASH, 0);
-        ss << locatorStr;
-        CScript script;
-        script.SetBitcoinAddress(stringFromVch(vvch[2]));
-
-        cba ownerAddr = script.GetBitcoinAddress();
-        if(!ownerAddr.IsValid())
-        {
-          throw JSONRPCError(RPC_TYPE_ERROR, "Invalid owner address");
-        }
-
-        CKeyID keyID;
-        if(!ownerAddr.GetKeyID(keyID))
-        {
-          throw JSONRPCError(RPC_TYPE_ERROR, "ownerAddr does not refer to key");
-        }
-
-
-        CKey key;
-        if(!pwalletMain->GetKey(keyID, key))
-        {
-          throw JSONRPCError(RPC_WALLET_ERROR, "2 Private key not available");
-        }
-
-        CPubKey vchPubKey;
-        pwalletMain->GetPubKey(keyID, vchPubKey);
-
-        vector<unsigned char> vchSig;
-        if(!key.SignCompact(Hash(ss.begin(), ss.end()), vchSig))
-        {
-          throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Sign failed");
-        }
-
-        string sigBase64 = EncodeBase64(&vchSig[0], vchSig.size());
-
-
-        scriptPubKey << OP_ALIAS_SET << vchPath << vchFromString(sigBase64) << vchFromString(addressOfOwner) << vchRand << vvch[4] << OP_2DROP << OP_2DROP << OP_2DROP;
-        scriptPubKey += scriptPubKeyOrig;
-
-      }
-    }
-
-    string strError = txRelay_no_commit(scriptPubKey, CTRL__, ra_tx, decrypt_ra_tx, false);
-    if(strError != "")
-    {
-      LEAVE_CRITICAL_SECTION(cs_main)
-      throw JSONRPCError(RPC_WALLET_ERROR, strError);
-    }
-  }
-  LEAVE_CRITICAL_SECTION(cs_main)
-
-  return true;
-}
-
-Value decryptPath(const Array& params, bool fHelp)
+Value decryptAlias(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() != 2 )
     throw runtime_error(
-      "decryptPath <alias> <address specified by owner>\n"
+      "decryptAlias <alias> <address specified by owner>\n"
       + HelpRequiringPassphrase());
 
   string locatorStr = params[0].get_str();
-  const vchType vchPath = vchFromValue(locatorStr);
+  std::transform(locatorStr.begin(), locatorStr.end(), locatorStr.begin(), ::tolower);
+  const vchType vchAlias = vchFromValue(locatorStr);
   const std::string addressOfOwner = params[1].get_str();
 
   cba ownerAddr(addressOfOwner);
@@ -4884,11 +4502,11 @@ Value decryptPath(const Array& params, bool fHelp)
 
   ENTER_CRITICAL_SECTION(cs_main)
   {
-    if(mapState.count(vchPath) && mapState[vchPath].size())
+    if(mapState.count(vchAlias) && mapState[vchAlias].size())
     {
-      error("decryptPath() : there are %lu pending operations on that alias, including %s",
-            mapState[vchPath].size(),
-            mapState[vchPath].begin()->GetHex().c_str());
+      error("decryptAlias() : there are %lu pending operations on that alias, including %s",
+            mapState[vchAlias].size(),
+            mapState[vchAlias].begin()->GetHex().c_str());
       LEAVE_CRITICAL_SECTION(cs_main)
       throw runtime_error("there are pending operations on that alias");
     }
@@ -4898,9 +4516,9 @@ Value decryptPath(const Array& params, bool fHelp)
   {
     LocatorNodeDB aliasCacheDB("r");
     CTransaction tx;
-    if(aliasTx(aliasCacheDB, vchPath, tx))
+    if(aliasTx(aliasCacheDB, vchAlias, tx))
     {
-      error("decryptPath() : this alias is already active with tx %s",
+      error("decryptAlias() : this alias is already active with tx %s",
             tx.GetHash().GetHex().c_str());
       throw runtime_error("this alias is already active");
     }
@@ -4912,10 +4530,10 @@ Value decryptPath(const Array& params, bool fHelp)
     EnsureWalletIsUnlocked();
 
     uint256 wtxInHash;
-    if(!searchPathEncrypted2(stringFromVch(vchPath), wtxInHash))
+    if(!searchAliasEncrypted2(stringFromVch(vchAlias), wtxInHash))
     {
       LEAVE_CRITICAL_SECTION(cs_main)
-      throw runtime_error("could not find a coin with this alias, try specifying the registerPath transaction id");
+      throw runtime_error("could not find a coin with this alias, try specifying the registerAlias transaction id");
     }
 
 
@@ -4950,7 +4568,7 @@ Value decryptPath(const Array& params, bool fHelp)
       {
         if(op != OP_ALIAS_ENCRYPTED)
         {
-          throw runtime_error("previous transaction wasn't a registerPath");
+          throw runtime_error("previous transaction wasn't a registerAlias");
         }
         CDataStream ss(SER_GETHASH, 0);
         ss << locatorStr;
@@ -4988,7 +4606,7 @@ Value decryptPath(const Array& params, bool fHelp)
         string sigBase64 = EncodeBase64(&vchSig[0], vchSig.size());
 
 
-        scriptPubKey << OP_ALIAS_SET << vchPath << vchFromString(sigBase64) << vchFromString(addressOfOwner) << vchRand << vvch[4] << OP_2DROP << OP_2DROP << OP_2DROP;
+        scriptPubKey << OP_ALIAS_SET << vchAlias << vchFromString(sigBase64) << vchFromString(addressOfOwner) << vchRand << vvch[4] << OP_2DROP << OP_2DROP << OP_2DROP;
         scriptPubKey += scriptPubKeyOrig;
 
         found = true;
@@ -5020,6 +4638,7 @@ Value transferEncryptedExtPredicate(const Array& params, bool fHelp)
       + HelpRequiringPassphrase());
 
   string locatorStr = params[0].get_str();
+  std::transform(locatorStr.begin(), locatorStr.end(), locatorStr.begin(), ::tolower);
   vchType vchLocator = vchFromString(locatorStr);
 
   cba predicate((params[1]).get_str());
@@ -5145,7 +4764,7 @@ Value transferEncryptedExtPredicate(const Array& params, bool fHelp)
   ENTER_CRITICAL_SECTION(cs_main)
   {
     uint256 wtxInHash;
-    if(!searchPathEncrypted(stringFromVch(vchLocator), wtxInHash))
+    if(!searchAliasEncrypted(stringFromVch(vchLocator), wtxInHash))
     {
       LEAVE_CRITICAL_SECTION(cs_main)
       throw runtime_error("could not find this alias");
@@ -5179,8 +4798,8 @@ Value transferEncryptedExtPredicate(const Array& params, bool fHelp)
       string randBase64 = EncodeBase64(&vchRand[0], vchRand.size());
       EncryptMessage(stringFromVch(extVch), randBase64, encryptedRandForRecipient);
       EncryptMessage(stringFromVch(extVch), randBase64, encryptedRandForRecipient);
-      string encryptedPathForRecipient;
-      EncryptMessage(stringFromVch(extVch), locatorStr, encryptedPathForRecipient);
+      string encryptedAliasForRecipient;
+      EncryptMessage(stringFromVch(extVch), locatorStr, encryptedAliasForRecipient);
 
       const __wx__Tx& wtxIn = pwalletMain->mapWallet[wtxInHash];
       bool found = false;
@@ -5252,7 +4871,7 @@ Value transferEncryptedExtPredicate(const Array& params, bool fHelp)
           uint160 hash = uint160(vvch[3]);
 
           CDataStream ss(SER_GETHASH, 0);
-          ss << encryptedPathForRecipient;
+          ss << encryptedAliasForRecipient;
           ss << hash.ToString();
 
           vchType q1;
@@ -5300,7 +4919,7 @@ Value transferEncryptedExtPredicate(const Array& params, bool fHelp)
           }
 
           string sigBase64 = EncodeBase64(&vchSig[0], vchSig.size());
-          scriptPubKey << OP_ALIAS_ENCRYPTED << vchFromString(encryptedPathForRecipient) << vchFromString(sigBase64) << rVch << vvch[3] << q1 << vchFromString(encryptedRandForRecipient) << vchFromString(iv128) << fs << OP_2DROP << OP_2DROP << OP_2DROP << OP_2DROP << OP_DROP;
+          scriptPubKey << OP_ALIAS_ENCRYPTED << vchFromString(encryptedAliasForRecipient) << vchFromString(sigBase64) << rVch << vvch[3] << q1 << vchFromString(encryptedRandForRecipient) << vchFromString(iv128) << fs << OP_2DROP << OP_2DROP << OP_2DROP << OP_2DROP << OP_DROP;
 
           scriptPubKey += scriptPubKeyOrig;
           found = true;
@@ -5327,14 +4946,15 @@ Value transferEncryptedExtPredicate(const Array& params, bool fHelp)
   LEAVE_CRITICAL_SECTION(cs_main)
   return wtx.GetHash().GetHex();
 }
-Value transferEncryptedPath(const Array& params, bool fHelp)
+Value transferEncryptedAlias(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() != 3)
     throw runtime_error(
-      "transferEncryptedPath <alias> <predicate> <l1_internal>"
+      "transferEncryptedAlias <alias> <predicate> <l1_internal>"
       + HelpRequiringPassphrase());
 
   string locatorStr = params[0].get_str();
+  std::transform(locatorStr.begin(), locatorStr.end(), locatorStr.begin(), ::tolower);
   vchType vchLocator = vchFromString(locatorStr);
 
   cba predicate((params[1]).get_str());
@@ -5361,7 +4981,7 @@ Value transferEncryptedPath(const Array& params, bool fHelp)
   cba externPredicate(extPredicate);
   if(!externPredicate.IsValid())
   {
-    vector<PathIndex> vtxPos;
+    vector<AliasIndex> vtxPos;
     LocatorNodeDB ln1Db("r");
     vchType vchPredicate = vchFromString(extPredicate);
     if (ln1Db.lKey (vchPredicate))
@@ -5375,7 +4995,7 @@ Value transferEncryptedPath(const Array& params, bool fHelp)
         return -1;
       }
 
-      PathIndex& txPos = vtxPos.back ();
+      AliasIndex& txPos = vtxPos.back ();
       externPredicate.SetString(txPos.vAddress);
     }
     else
@@ -5482,7 +5102,7 @@ Value transferEncryptedPath(const Array& params, bool fHelp)
   ENTER_CRITICAL_SECTION(cs_main)
   {
     uint256 wtxInHash;
-    if(!searchPathEncrypted2(stringFromVch(vchLocator), wtxInHash))
+    if(!searchAliasEncrypted2(stringFromVch(vchLocator), wtxInHash))
     {
       LEAVE_CRITICAL_SECTION(cs_main)
       throw runtime_error("could not find this alias");
@@ -5516,8 +5136,8 @@ Value transferEncryptedPath(const Array& params, bool fHelp)
       string randBase64 = EncodeBase64(&vchRand[0], vchRand.size());
       EncryptMessage(stringFromVch(extVch), randBase64, encryptedRandForRecipient);
       EncryptMessage(stringFromVch(extVch), randBase64, encryptedRandForRecipient);
-      string encryptedPathForRecipient;
-      EncryptMessage(stringFromVch(extVch), locatorStr, encryptedPathForRecipient);
+      string encryptedAliasForRecipient;
+      EncryptMessage(stringFromVch(extVch), locatorStr, encryptedAliasForRecipient);
 
       const __wx__Tx& wtxIn = pwalletMain->mapWallet[wtxInHash];
       bool found = false;
@@ -5589,7 +5209,7 @@ Value transferEncryptedPath(const Array& params, bool fHelp)
           uint160 hash = uint160(vvch[3]);
 
           CDataStream ss(SER_GETHASH, 0);
-          ss << encryptedPathForRecipient;
+          ss << encryptedAliasForRecipient;
           ss << hash.ToString();
 
           vchType q1;
@@ -5637,7 +5257,7 @@ Value transferEncryptedPath(const Array& params, bool fHelp)
           }
 
           string sigBase64 = EncodeBase64(&vchSig[0], vchSig.size());
-          scriptPubKey << OP_ALIAS_ENCRYPTED << vchFromString(encryptedPathForRecipient) << vchFromString(sigBase64) << rVch << vvch[3] << q1 << vchFromString(encryptedRandForRecipient) << vchFromString(iv128) << fs << OP_2DROP << OP_2DROP << OP_2DROP << OP_2DROP << OP_DROP;
+          scriptPubKey << OP_ALIAS_ENCRYPTED << vchFromString(encryptedAliasForRecipient) << vchFromString(sigBase64) << rVch << vvch[3] << q1 << vchFromString(encryptedRandForRecipient) << vchFromString(iv128) << fs << OP_2DROP << OP_2DROP << OP_2DROP << OP_2DROP << OP_DROP;
 
           scriptPubKey += scriptPubKeyOrig;
           found = true;
@@ -5664,17 +5284,17 @@ Value transferEncryptedPath(const Array& params, bool fHelp)
   LEAVE_CRITICAL_SECTION(cs_main)
   return wtx.GetHash().GetHex();
 }
-Value transferPath(const Array& params, bool fHelp)
+Value transferAlias(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() != 2)
     throw runtime_error(
-      "transferPath <alias> <toaddress>"
+      "transferAlias <alias> <toaddress>"
       + HelpRequiringPassphrase());
 
-  vchType vchPath = vchFromValue(params[0]);
+  vchType vchAlias = vchFromValue(params[0]);
   const vchType vchAddress = vchFromValue(params[1]);
 
-  string locatorStr = stringFromVch(vchPath);
+  string locatorStr = stringFromVch(vchAlias);
   string addressStr = stringFromVch(vchAddress);
 
 
@@ -5686,12 +5306,12 @@ Value transferPath(const Array& params, bool fHelp)
   cba address(strAddress);
   if(!address.IsValid())
   {
-    vector<PathIndex> vtxPos;
+    vector<AliasIndex> vtxPos;
     LocatorNodeDB ln1Db("r");
-    vchType vchPath = vchFromString(strAddress);
-    if (ln1Db.lKey (vchPath))
+    vchType vchAlias = vchFromString(strAddress);
+    if (ln1Db.lKey (vchAlias))
     {
-      if (!ln1Db.lGet (vchPath, vtxPos))
+      if (!ln1Db.lGet (vchAlias, vtxPos))
       {
         return error("aliasHeight() : failed to read from name DB");
       }
@@ -5700,12 +5320,12 @@ Value transferPath(const Array& params, bool fHelp)
         return -1;
       }
 
-      PathIndex& txPos = vtxPos.back ();
+      AliasIndex& txPos = vtxPos.back ();
       address.SetString(txPos.vAddress);
     }
     else
     {
-      throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid I/OCoin address or unknown alias 1");
+      throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid I/OCoin address or unknown alias");
     }
   }
 
@@ -5714,17 +5334,17 @@ Value transferPath(const Array& params, bool fHelp)
 
   CScript scriptPubKey;
 
-  scriptPubKey << OP_ALIAS_RELAY << vchPath ;
+  scriptPubKey << OP_ALIAS_RELAY << vchAlias ;
 
   ENTER_CRITICAL_SECTION(cs_main)
   {
     ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
     {
-      if(mapState.count(vchPath) && mapState[vchPath].size())
+      if(mapState.count(vchAlias) && mapState[vchAlias].size())
       {
-        error("updateEncryptedPath() : there are %lu pending operations on that alias, including %s",
-              mapState[vchPath].size(),
-              mapState[vchPath].begin()->GetHex().c_str());
+        error("updateEncryptedAlias() : there are %lu pending operations on that alias, including %s",
+              mapState[vchAlias].size(),
+              mapState[vchAlias].begin()->GetHex().c_str());
         LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
         LEAVE_CRITICAL_SECTION(cs_main)
         throw runtime_error("there are pending operations on that alias");
@@ -5734,18 +5354,18 @@ Value transferPath(const Array& params, bool fHelp)
 
       LocatorNodeDB aliasCacheDB("r");
       CTransaction tx;
-      if(!aliasTx(aliasCacheDB, vchPath, tx))
+      if(!aliasTx(aliasCacheDB, vchAlias, tx))
       {
         LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
         LEAVE_CRITICAL_SECTION(cs_main)
-        throw runtime_error("could not find a coin with this alias 5");
+        throw runtime_error("could not find a coin with this alias");
       }
 
       uint256 wtxInHash = tx.GetHash();
 
       if(!pwalletMain->mapWallet.count(wtxInHash))
       {
-        error("updateEncryptedPath() : this coin is not in your wallet %s",
+        error("updateEncryptedAlias() : this coin is not in your wallet %s",
               wtxInHash.GetHex().c_str());
         LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
         LEAVE_CRITICAL_SECTION(cs_main)
@@ -5756,13 +5376,13 @@ Value transferPath(const Array& params, bool fHelp)
       int op__;
       int nOut;
       vchType vchValue;
-      wtxIn.aliasSet(op__, nOut, vchPath, vchValue);
+      wtxIn.aliasSet(op__, nOut, vchAlias, vchValue);
 
       scriptPubKey << vchValue << OP_2DROP << OP_DROP;
       scriptPubKey += scriptPubKeyOrig;
 
-      string locatorStr = stringFromVch(vchPath);
-      string indexStr = stringFromVch(vchValue);
+      string locatorStr = stringFromVch(vchAlias);
+      string dataStr = stringFromVch(vchValue);
       string strError = txRelay(scriptPubKey, CTRL__, wtxIn, wtx, false);
       if(strError != "")
       {
@@ -5784,7 +5404,8 @@ Value uC(const Array& params, bool fHelp)
       + HelpRequiringPassphrase());
   string locatorStr = params[0].get_str();
 
-  const vchType vchPath = vchFromValue(locatorStr);
+  std::transform(locatorStr.begin(), locatorStr.end(), locatorStr.begin(), ::tolower);
+  const vchType vchAlias = vchFromValue(locatorStr);
   const char* locatorFile = (params[1].get_str()).c_str();
 
   fs::path p = locatorFile;
@@ -5812,7 +5433,7 @@ Value uC(const Array& params, bool fHelp)
 
     __wx__DB walletdb(pwalletMain->strWalletFile, "r+");
 
-    pwalletMain->LoadRelay(vchPath, r);
+    pwalletMain->LoadRelay(vchAlias, r);
     if(!walletdb.UpdateKey(l, pwalletMain->lCache[l]))
     {
       throw JSONRPCError(RPC_TYPE_ERROR, "Failed to write data for key");
@@ -5847,11 +5468,11 @@ Value uC(const Array& params, bool fHelp)
   wtx.nVersion = CTransaction::DION_TX_VERSION;
   ENTER_CRITICAL_SECTION(cs_main)
   {
-    if(mapState.count(vchPath) && mapState[vchPath].size())
+    if(mapState.count(vchAlias) && mapState[vchAlias].size())
     {
-      error("updateEncryptedPath() : there are %lu pending operations on that alias, including %s",
-            mapState[vchPath].size(),
-            mapState[vchPath].begin()->GetHex().c_str());
+      error("updateEncryptedAlias() : there are %lu pending operations on that alias, including %s",
+            mapState[vchAlias].size(),
+            mapState[vchAlias].begin()->GetHex().c_str());
       LEAVE_CRITICAL_SECTION(cs_main)
       throw runtime_error("there are pending operations on that alias");
     }
@@ -5862,9 +5483,9 @@ Value uC(const Array& params, bool fHelp)
   {
     LocatorNodeDB aliasCacheDB("r");
     CTransaction tx;
-    if(aliasTx(aliasCacheDB, vchPath, tx))
+    if(aliasTx(aliasCacheDB, vchAlias, tx))
     {
-      error("updateEncryptedPath() : this alias is already active with tx %s",
+      error("updateEncryptedAlias() : this alias is already active with tx %s",
             tx.GetHash().GetHex().c_str());
       throw runtime_error("this alias is already active");
     }
@@ -5875,10 +5496,10 @@ Value uC(const Array& params, bool fHelp)
     EnsureWalletIsUnlocked();
 
     uint256 wtxInHash;
-    if(!searchPathEncrypted2(stringFromVch(vchPath), wtxInHash))
+    if(!searchAliasEncrypted2(stringFromVch(vchAlias), wtxInHash))
     {
       LEAVE_CRITICAL_SECTION(cs_main)
-      throw runtime_error("could not find a coin with this alias, try specifying the registerPath transaction id");
+      throw runtime_error("could not find a coin with this alias, try specifying the registerAlias transaction id");
     }
 
 
@@ -5980,7 +5601,8 @@ Value transientStatus__(const Array& params, bool fHelp)
   Object ret;
   string locatorStr = params[0].get_str();
 
-  const vchType vchPath = vchFromValue(locatorStr);
+  std::transform(locatorStr.begin(), locatorStr.end(), locatorStr.begin(), ::tolower);
+  const vchType vchAlias = vchFromValue(locatorStr);
   const char* locatorFile = (params[1].get_str()).c_str();
   fs::path p = locatorFile;
   if(!fs::exists(p))
@@ -6014,13 +5636,13 @@ Value transientStatus__(const Array& params, bool fHelp)
   CScript scriptPubKeyOrig;
 
   CScript scriptPubKey;
-  scriptPubKey << OP_ALIAS_RELAY << vchPath << vchValue << OP_2DROP << OP_DROP;
+  scriptPubKey << OP_ALIAS_RELAY << vchAlias << vchValue << OP_2DROP << OP_DROP;
 
   ENTER_CRITICAL_SECTION(cs_main)
   {
     ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
     {
-      if(mapState.count(vchPath) && mapState[vchPath].size())
+      if(mapState.count(vchAlias) && mapState[vchAlias].size())
       {
         LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
         LEAVE_CRITICAL_SECTION(cs_main)
@@ -6033,7 +5655,7 @@ Value transientStatus__(const Array& params, bool fHelp)
 
       LocatorNodeDB aliasCacheDB("r");
       CTransaction tx;
-      if(!aliasTx(aliasCacheDB, vchPath, tx))
+      if(!aliasTx(aliasCacheDB, vchAlias, tx))
       {
         LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
         LEAVE_CRITICAL_SECTION(cs_main)
@@ -6096,15 +5718,16 @@ Value transientStatus__(const Array& params, bool fHelp)
 
   return ret;
 }
-Value updatePathFile(const Array& params, bool fHelp)
+Value updateAliasFile(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() < 2 || params.size() > 3)
     throw runtime_error(
-      "updatePath <alias> <value> [<toaddress>] update or transfer"
+      "updateAlias <alias> <value> [<toaddress>] update or transfer"
       + HelpRequiringPassphrase());
   string locatorStr = params[0].get_str();
 
-  const vchType vchPath = vchFromValue(locatorStr);
+  std::transform(locatorStr.begin(), locatorStr.end(), locatorStr.begin(), ::tolower);
+  const vchType vchAlias = vchFromValue(locatorStr);
   const char* locatorFile = (params[1].get_str()).c_str();
   fs::path p = locatorFile;
   if(!fs::exists(p))
@@ -6146,17 +5769,17 @@ Value updatePathFile(const Array& params, bool fHelp)
   }
 
   CScript scriptPubKey;
-  scriptPubKey << OP_ALIAS_RELAY << vchPath << vchValue << OP_2DROP << OP_DROP;
+  scriptPubKey << OP_ALIAS_RELAY << vchAlias << vchValue << OP_2DROP << OP_DROP;
 
   ENTER_CRITICAL_SECTION(cs_main)
   {
     ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
     {
-      if(mapState.count(vchPath) && mapState[vchPath].size())
+      if(mapState.count(vchAlias) && mapState[vchAlias].size())
       {
-        error("updatePath() : there are %lu pending operations on that alias, including %s",
-              mapState[vchPath].size(),
-              mapState[vchPath].begin()->GetHex().c_str());
+        error("updateAlias() : there are %lu pending operations on that alias, including %s",
+              mapState[vchAlias].size(),
+              mapState[vchAlias].begin()->GetHex().c_str());
         LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
         LEAVE_CRITICAL_SECTION(cs_main)
         throw runtime_error("there are pending operations on that alias");
@@ -6166,11 +5789,11 @@ Value updatePathFile(const Array& params, bool fHelp)
 
       LocatorNodeDB aliasCacheDB("r");
       CTransaction tx;
-      if(!aliasTx(aliasCacheDB, vchPath, tx))
+      if(!aliasTx(aliasCacheDB, vchAlias, tx))
       {
         LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
         LEAVE_CRITICAL_SECTION(cs_main)
-        throw runtime_error("could not find a coin with this alias 4");
+        throw runtime_error("could not find a coin with this alias");
       }
 
       if(params.size() == 2)
@@ -6195,7 +5818,7 @@ Value updatePathFile(const Array& params, bool fHelp)
 
       if(!pwalletMain->mapWallet.count(wtxInHash))
       {
-        error("updatePath() : this coin is not in your wallet %s",
+        error("updateAlias() : this coin is not in your wallet %s",
               wtxInHash.GetHex().c_str());
         LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
         LEAVE_CRITICAL_SECTION(cs_main)
@@ -6218,655 +5841,150 @@ Value updatePathFile(const Array& params, bool fHelp)
   return wtx.GetHash().GetHex();
 }
 
-__wx__Tx createRelayDescriptor(const string& origin)
-{
-  uint256 wtx__;
-  string locatorStr = "descriptor_";
-  locatorStr += origin;
-  const vchType vchPath = vchFromValue(locatorStr);
-
-  std::time_t t = std::time(NULL);
-  ostringstream oss;
-  oss << t;
-  const vchType vchValue = vchFromValue(oss.str());
-
-  __wx__Tx wtx;
-  wtx.nVersion = CTransaction::DION_TX_VERSION;
-  CScript scriptPubKeyOrig;
-
-  CScript scriptPubKey;
-  scriptPubKey << OP_ALIAS_RELAY << vchPath << vchValue << OP_2DROP << OP_DROP;
-
-  ENTER_CRITICAL_SECTION(cs_main)
-  {
-    ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
-    {
-      if(mapState.count(vchPath) && mapState[vchPath].size())
-      {
-        error("updatePath() : there are %lu pending operations on that alias, including %s",
-              mapState[vchPath].size(),
-              mapState[vchPath].begin()->GetHex().c_str());
-        LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
-        LEAVE_CRITICAL_SECTION(cs_main)
-        throw runtime_error("there are pending operations on that alias");
-      }
-
-      EnsureWalletIsUnlocked();
-
-      LocatorNodeDB aliasCacheDB("r");
-      CTransaction tx;
-      if(!aliasTx(aliasCacheDB, vchPath, tx))
-      {
-        LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
-        LEAVE_CRITICAL_SECTION(cs_main)
-        throw runtime_error("could not find a coin with this alias 5 " + stringFromVch(vchPath));
-      }
-
-      uint256 wtxInHash = tx.GetHash();
-
-      if(!pwalletMain->mapWallet.count(wtxInHash))
-      {
-        error("updatePath() : this coin is not in your wallet %s",
-              wtxInHash.GetHex().c_str());
-        LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
-        LEAVE_CRITICAL_SECTION(cs_main)
-        throw runtime_error("this coin is not in your wallet");
-      }
-
-      {
-        string strAddress = "";
-        aliasAddress(tx, strAddress);
-        if(strAddress == "")
-        {
-          throw runtime_error("alias has no associated address");
-        }
-
-        uint160 hash160;
-        bool isValid = AddressToHash160(strAddress, hash160);
-        if(!isValid)
-        {
-          throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid dions address");
-        }
-        scriptPubKeyOrig.SetBitcoinAddress(strAddress);
-      }
-
-      __wx__Tx& wtxIn = pwalletMain->mapWallet[wtxInHash];
-      scriptPubKey += scriptPubKeyOrig;
-      string strError = txRelay_no_commit(scriptPubKey, CTRL__, wtxIn, wtx, false);
-      if(strError != "")
-      {
-        LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
-        LEAVE_CRITICAL_SECTION(cs_main)
-        throw JSONRPCError(RPC_WALLET_ERROR, strError);
-      }
-    }
-    LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
-  }
-  LEAVE_CRITICAL_SECTION(cs_main)
-  return wtx;
-}
-bool vertex_serial_n(const string& origin, const string& data, __wx__Tx& serial_n)
-{
-  string locatorStr = "vertex_" + origin;
-  string indexStr = data;
-
-  if(isOnlyWhiteSpace(locatorStr))
-  {
-    string err = "Attempt to register alias consisting only of white space";
-
-    throw JSONRPCError(RPC_WALLET_ERROR, err);
-  }
-  else if(locatorStr.size() > 255)
-  {
-    string err = "Attempt to register alias more than 255 chars";
-
-    throw JSONRPCError(RPC_WALLET_ERROR, err);
-  }
-
-  uint256 wtxInHash__;
-
-  vector<Value> res;
-  LocatorNodeDB aliasCacheDB("r");
-  CTransaction tx;
-  if(aliasTx(aliasCacheDB, vchFromString(locatorStr), tx))
-  {
-    string err = "Attempt to register alias : " + locatorStr + ", this alias is already active with tx " + tx.GetHash().GetHex();
-
-    throw JSONRPCError(RPC_WALLET_ERROR, err);
-  }
-
-  CPubKey vchPubKey;
-  CReserveKey reservekey(pwalletMain);
-  if(!reservekey.GetReservedKey(vchPubKey))
-  {
-    return false;
-  }
-
-  reservekey.KeepKey();
-
-  cba keyAddress(vchPubKey.GetID());
-  CKeyID keyID;
-  keyAddress.GetKeyID(keyID);
-  pwalletMain->SetAddressBookName(keyID, "");
-
-  __wx__DB walletdb(pwalletMain->strWalletFile, "r+");
-
-  CKey key;
-  if(!pwalletMain->GetKey(keyID, key))
-  {
-    throw JSONRPCError(RPC_WALLET_ERROR, "Private key not available");
-  }
-
-  serial_n.nVersion = CTransaction::DION_TX_VERSION;
-
-  CScript scriptPubKeyOrig;
-  scriptPubKeyOrig.SetBitcoinAddress(vchPubKey.Raw());
-  CScript scriptPubKey;
-  vchType vchPath = vchFromString(locatorStr);
-  vchType vchValue = vchFromString(indexStr);
-
-  scriptPubKey << OP_BASE_SET << vchPath << vchValue << OP_2DROP << OP_DROP;
-  scriptPubKey += scriptPubKeyOrig;
-
-  ENTER_CRITICAL_SECTION(cs_main)
-  {
-    EnsureWalletIsUnlocked();
-
-    string strError = pwalletMain->SendMoney__(scriptPubKey, CTRL__, serial_n, false);
-
-    if(strError != "")
-    {
-      LEAVE_CRITICAL_SECTION(cs_main)
-      throw JSONRPCError(RPC_WALLET_ERROR, strError);
-    }
-    mapLocator[vchPath] = serial_n.GetHash();
-  }
-  LEAVE_CRITICAL_SECTION(cs_main)
-
-  return true;
-}
-Value registerVertex(const Array& params, bool fHelp)
-{
-  if(fHelp || params.size() != 2)
-    throw runtime_error(
-      "registerPathGenerate <alias> <ref>"
-      + HelpRequiringPassphrase());
-
-  string locatorStr = params[0].get_str();
-  string refStr = params[1].get_str();
-
-  locatorStr = stripSpacesAndQuotes(locatorStr);
-
-  if(isOnlyWhiteSpace(locatorStr))
-  {
-    string err = "Attempt to register alias consisting only of white space";
-
-    throw JSONRPCError(RPC_WALLET_ERROR, err);
-  }
-  else if(locatorStr.size() > 255)
-  {
-    string err = "Attempt to register alias more than 255 chars";
-
-    throw JSONRPCError(RPC_WALLET_ERROR, err);
-  }
-  __wx__Tx vertex;
-  vertex_serial_n(locatorStr, refStr, vertex);
-  vector<Value> res;
-  res.push_back(vertex.GetHash().GetHex());
-  return res;
-}
-bool validate_serial_trc_n(const string& origin, const string& data, __wx__Tx& serial_n)
-{
-  string locatorStr = "descriptor_" + origin;
-  string indexStr = data;
-
-  if(isOnlyWhiteSpace(locatorStr))
-  {
-    string err = "Attempt to register alias consisting only of white space";
-
-    throw JSONRPCError(RPC_WALLET_ERROR, err);
-  }
-  else if(locatorStr.size() > 255)
-  {
-    string err = "Attempt to register alias more than 255 chars";
-
-    throw JSONRPCError(RPC_WALLET_ERROR, err);
-  }
-
-  uint256 wtxInHash__;
-
-  vector<Value> res;
-  LocatorNodeDB aliasCacheDB("r");
-  CTransaction tx;
-  if(aliasTx(aliasCacheDB, vchFromString(locatorStr), tx))
-  {
-    string err = "Attempt to register alias : " + locatorStr + ", this alias is already active with tx " + tx.GetHash().GetHex();
-
-    throw JSONRPCError(RPC_WALLET_ERROR, err);
-  }
-
-  CPubKey vchPubKey;
-  CReserveKey reservekey(pwalletMain);
-  if(!reservekey.GetReservedKey(vchPubKey))
-  {
-    return false;
-  }
-
-  reservekey.KeepKey();
-
-  cba keyAddress(vchPubKey.GetID());
-  CKeyID keyID;
-  keyAddress.GetKeyID(keyID);
-  pwalletMain->SetAddressBookName(keyID, "");
-
-  __wx__DB walletdb(pwalletMain->strWalletFile, "r+");
-
-  CKey key;
-  if(!pwalletMain->GetKey(keyID, key))
-  {
-    throw JSONRPCError(RPC_WALLET_ERROR, "Private key not available");
-  }
-
-  serial_n.nVersion = CTransaction::DION_TX_VERSION;
-
-  CScript scriptPubKeyOrig;
-  scriptPubKeyOrig.SetBitcoinAddress(vchPubKey.Raw());
-  CScript scriptPubKey;
-  vchType vchPath = vchFromString(locatorStr);
-  vchType vchValue = vchFromString(indexStr);
-
-  scriptPubKey << OP_BASE_VERTEX_SET << vchPath << vchValue << OP_2DROP << OP_DROP;
-  scriptPubKey += scriptPubKeyOrig;
-
-  ENTER_CRITICAL_SECTION(cs_main)
-  {
-    EnsureWalletIsUnlocked();
-
-    string strError = pwalletMain->generateSM__(scriptPubKey, CTRL__, serial_n, false);
-
-    if(strError != "")
-    {
-      LEAVE_CRITICAL_SECTION(cs_main)
-      throw JSONRPCError(RPC_WALLET_ERROR, strError);
-    }
-    mapLocator[vchPath] = serial_n.GetHash();
-  }
-  LEAVE_CRITICAL_SECTION(cs_main)
-
-  return true;
-}
-
-
-bool generate_ra_plain(const string& origin, __wx__Tx& ra)
-{
-  string locatorStr = "descriptor_" + origin;
-
-  uint256 wtxInHash__;
-
-  vector<Value> res;
-  LocatorNodeDB aliasCacheDB("r");
-  CTransaction tx;
-  if(aliasTx(aliasCacheDB, vchFromString(locatorStr), tx))
-  {
-    if(IsMinePost(tx))
-    {
-      string err = "Attempt to register alias : " + locatorStr + ", this alias is already active with tx " + tx.GetHash().GetHex();
-
-      throw JSONRPCError(RPC_WALLET_ERROR, err);
-    }
-    else
-    {
-      res.push_back("commit");
-    }
-  }
-
-  const uint64_t rand = GetRand((uint64_t)-1);
-  const vchType vchRand = CBigNum(rand).getvch();
-  vchType vchToHash(vchRand);
-
-  const vchType vchPath = vchFromValue(locatorStr);
-  vchToHash.insert(vchToHash.end(), vchPath.begin(), vchPath.end());
-  const uint160 hash = Hash160(vchToHash);
-
-  CPubKey vchPubKey;
-  CReserveKey reservekey(pwalletMain);
-  if(!reservekey.GetReservedKey(vchPubKey))
-  {
-    return false;
-  }
-
-  reservekey.KeepKey();
-
-  cba keyAddress(vchPubKey.GetID());
-  CKeyID keyID;
-  keyAddress.GetKeyID(keyID);
-  pwalletMain->SetAddressBookName(keyID, "");
-
-  __wx__DB walletdb(pwalletMain->strWalletFile, "r+");
-  if(!pwalletMain->SetRSAMetadata(vchPubKey))
-  {
-    throw JSONRPCError(RPC_TYPE_ERROR, "Failed to load meta data for key");
-  }
-
-  if(!walletdb.UpdateKey(vchPubKey, pwalletMain->kd[vchPubKey.GetID()]))
-  {
-    throw JSONRPCError(RPC_TYPE_ERROR, "Failed to write meta data for key");
-  }
-
-  string pKey;
-  if(!pwalletMain->envCP0(vchPubKey, pKey))
-  {
-    throw JSONRPCError(RPC_TYPE_ERROR, "Failed to load alpha");
-  }
-
-  string pub_k;
-  if(!pwalletMain->envCP1(vchPubKey, pub_k))
-  {
-    throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "address has no associated RSA keys");
-  }
-
-  if(!pwalletMain->SetRandomKeyMetadata(vchPubKey, vchRand))
-  {
-    throw JSONRPCError(RPC_WALLET_ERROR, "Failed to set meta data for key");
-  }
-
-  if(!walletdb.UpdateKey(vchPubKey, pwalletMain->kd[vchPubKey.GetID()]))
-  {
-    throw JSONRPCError(RPC_TYPE_ERROR, "Failed to write meta data for key");
-  }
-
-  CKey key;
-  if(!pwalletMain->GetKey(keyID, key))
-  {
-    throw JSONRPCError(RPC_WALLET_ERROR, "Private key not available");
-  }
-
-  string encrypted;
-  EncryptMessage(pub_k, locatorStr, encrypted);
-
-  ra.nVersion = CTransaction::DION_TX_VERSION;
-
-  CScript scriptPubKeyOrig;
-  scriptPubKeyOrig.SetBitcoinAddress(vchPubKey.Raw());
-  CScript scriptPubKey;
-  vchType vchEncryptedPath = vchFromString(encrypted);
-  string tmp = stringFromVch(vchEncryptedPath);
-  vchType vchValue = vchFromString("");
-
-  CDataStream ss(SER_GETHASH, 0);
-  ss << encrypted;
-  ss << hash.ToString();
-  ss << stringFromVch(vchValue);
-  ss << string("0");
-
-  vector<unsigned char> vchSig;
-  if(!key.SignCompact(Hash(ss.begin(), ss.end()), vchSig))
-  {
-    throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Sign failed");
-  }
-
-  string sigBase64 = EncodeBase64(&vchSig[0], vchSig.size());
-
-  scriptPubKey << OP_ALIAS_ENCRYPTED << vchEncryptedPath << vchFromString(sigBase64) << vchFromString(keyAddress.ToString()) << hash << vchValue << vchFromString("0") << vchFromString("_") << vchFromString(State::GROUND) << OP_2DROP << OP_2DROP << OP_2DROP << OP_2DROP << OP_DROP;
-  scriptPubKey += scriptPubKeyOrig;
-
-  ENTER_CRITICAL_SECTION(cs_main)
-  {
-    EnsureWalletIsUnlocked();
-
-    string strError = pwalletMain->generateSM__(scriptPubKey, CTRL__, ra, false);
-
-    if(strError != "")
-    {
-      LEAVE_CRITICAL_SECTION(cs_main)
-      throw JSONRPCError(RPC_WALLET_ERROR, strError);
-    }
-    mapLocator[vchPath] = ra.GetHash();
-  }
-  LEAVE_CRITICAL_SECTION(cs_main)
-
-  return true;
-}
-
-bool generate_ra_tested_encrypted(const string& origin, __wx__Tx& ra)
-{
-  string locatorStr = "descriptor_" + origin;
-
-  uint256 wtxInHash__;
-  if(searchPathEncrypted2(locatorStr, wtxInHash__) == true)
-  {
-    __wx__Tx& wtxIn = pwalletMain->mapWallet[wtxInHash__];
-    const int nHeight = wtxIn.GetHeightInMainChain();
-    const int ex = nHeight + scaleMonitor() - pindexBest->nHeight;
-    if(ex > 0)
-    {
-      string err = "Attempt to register alias : " + locatorStr + ", this alias is already registered as encrypted with tx " + wtxInHash__.GetHex();
-
-      throw JSONRPCError(RPC_WALLET_ERROR, err);
-    }
-  }
-
-  vector<Value> res;
-  LocatorNodeDB aliasCacheDB("r");
-  CTransaction tx;
-  if(aliasTx(aliasCacheDB, vchFromString(locatorStr), tx))
-  {
-    if(IsMinePost(tx))
-    {
-      string err = "Attempt to register alias : " + locatorStr + ", this alias is already active with tx " + tx.GetHash().GetHex();
-
-      throw JSONRPCError(RPC_WALLET_ERROR, err);
-    }
-    else
-    {
-      res.push_back("commit");
-    }
-  }
-
-  const uint64_t rand = GetRand((uint64_t)-1);
-  const vchType vchRand = CBigNum(rand).getvch();
-  vchType vchToHash(vchRand);
-
-  const vchType vchPath = vchFromValue(locatorStr);
-  vchToHash.insert(vchToHash.end(), vchPath.begin(), vchPath.end());
-  const uint160 hash = Hash160(vchToHash);
-
-  CPubKey vchPubKey;
-  CReserveKey reservekey(pwalletMain);
-  if(!reservekey.GetReservedKey(vchPubKey))
-  {
-    return false;
-  }
-
-  reservekey.KeepKey();
-
-  cba keyAddress(vchPubKey.GetID());
-  CKeyID keyID;
-  keyAddress.GetKeyID(keyID);
-  pwalletMain->SetAddressBookName(keyID, "");
-
-  __wx__DB walletdb(pwalletMain->strWalletFile, "r+");
-  if(!pwalletMain->SetRSAMetadata(vchPubKey))
-  {
-    throw JSONRPCError(RPC_TYPE_ERROR, "Failed to load meta data for key");
-  }
-
-  if(!walletdb.UpdateKey(vchPubKey, pwalletMain->kd[vchPubKey.GetID()]))
-  {
-    throw JSONRPCError(RPC_TYPE_ERROR, "Failed to write meta data for key");
-  }
-
-  string pKey;
-  if(!pwalletMain->envCP0(vchPubKey, pKey))
-  {
-    throw JSONRPCError(RPC_TYPE_ERROR, "Failed to load alpha");
-  }
-
-  string pub_k;
-  if(!pwalletMain->envCP1(vchPubKey, pub_k))
-  {
-    throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "address has no associated RSA keys");
-  }
-
-  if(!pwalletMain->SetRandomKeyMetadata(vchPubKey, vchRand))
-  {
-    throw JSONRPCError(RPC_WALLET_ERROR, "Failed to set meta data for key");
-  }
-
-  if(!walletdb.UpdateKey(vchPubKey, pwalletMain->kd[vchPubKey.GetID()]))
-  {
-    throw JSONRPCError(RPC_TYPE_ERROR, "Failed to write meta data for key");
-  }
-
-  CKey key;
-  if(!pwalletMain->GetKey(keyID, key))
-  {
-    throw JSONRPCError(RPC_WALLET_ERROR, "Private key not available");
-  }
-
-  string encrypted;
-  EncryptMessage(pub_k, locatorStr, encrypted);
-
-  ra.nVersion = CTransaction::DION_TX_VERSION;
-
-  CScript scriptPubKeyOrig;
-  scriptPubKeyOrig.SetBitcoinAddress(vchPubKey.Raw());
-  CScript scriptPubKey;
-  vchType vchEncryptedPath = vchFromString(encrypted);
-  string tmp = stringFromVch(vchEncryptedPath);
-  vchType vchValue = vchFromString("");
-
-  CDataStream ss(SER_GETHASH, 0);
-  ss << encrypted;
-  ss << hash.ToString();
-  ss << stringFromVch(vchValue);
-  ss << string("0");
-
-  vector<unsigned char> vchSig;
-  if(!key.SignCompact(Hash(ss.begin(), ss.end()), vchSig))
-  {
-    throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Sign failed");
-  }
-
-  string sigBase64 = EncodeBase64(&vchSig[0], vchSig.size());
-
-  scriptPubKey << OP_ALIAS_ENCRYPTED << vchEncryptedPath << vchFromString(sigBase64) << vchFromString(keyAddress.ToString()) << hash << vchValue << vchFromString("0") << vchFromString("_") << vchFromString(State::GROUND) << OP_2DROP << OP_2DROP << OP_2DROP << OP_2DROP << OP_DROP;
-  scriptPubKey += scriptPubKeyOrig;
-
-  ENTER_CRITICAL_SECTION(cs_main)
-  {
-    EnsureWalletIsUnlocked();
-
-    string strError = pwalletMain->generateSM__(scriptPubKey, CTRL__, ra, false);
-
-    if(strError != "")
-    {
-      LEAVE_CRITICAL_SECTION(cs_main)
-      throw JSONRPCError(RPC_WALLET_ERROR, strError);
-    }
-    mapLocator[vchPath] = ra.GetHash();
-  }
-  LEAVE_CRITICAL_SECTION(cs_main)
-
-  return true;
-}
-
-__wx__Tx generateUpdate(const string& origin)
-{
-  uint256 wtx__;
-  string locatorStr = "descriptor_";
-  locatorStr += origin;
-  const vchType vchPath = vchFromValue(locatorStr);
-
-  std::time_t t = std::time(NULL);
-  ostringstream oss;
-  oss << t;
-  const vchType vchValue = vchFromValue(oss.str());
-
-  __wx__Tx wtx;
-  wtx.nVersion = CTransaction::DION_TX_VERSION;
-  CScript scriptPubKeyOrig;
-
-  CScript scriptPubKey;
-  scriptPubKey << OP_ALIAS_RELAY << vchPath << vchValue << OP_2DROP << OP_DROP;
-
-  ENTER_CRITICAL_SECTION(cs_main)
-  {
-    ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
-    {
-      if(mapState.count(vchPath) && mapState[vchPath].size())
-      {
-        error("updatePath() : there are %lu pending operations on that alias, including %s",
-              mapState[vchPath].size(),
-              mapState[vchPath].begin()->GetHex().c_str());
-        LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
-        LEAVE_CRITICAL_SECTION(cs_main)
-        throw runtime_error("there are pending operations on that alias");
-      }
-
-      EnsureWalletIsUnlocked();
-
-      LocatorNodeDB aliasCacheDB("r");
-      CTransaction tx;
-      if(!aliasTx(aliasCacheDB, vchPath, tx))
-      {
-        LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
-        LEAVE_CRITICAL_SECTION(cs_main)
-        throw runtime_error("could not find a coin with this alias 5 " + stringFromVch(vchPath));
-      }
-
-      uint256 wtxInHash = tx.GetHash();
-
-      if(!pwalletMain->mapWallet.count(wtxInHash))
-      {
-        error("updatePath() : this coin is not in your wallet %s",
-              wtxInHash.GetHex().c_str());
-        LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
-        LEAVE_CRITICAL_SECTION(cs_main)
-        throw runtime_error("this coin is not in your wallet");
-      }
-
-      {
-        string strAddress = "";
-        aliasAddress(tx, strAddress);
-        if(strAddress == "")
-        {
-          throw runtime_error("alias has no associated address");
-        }
-
-        uint160 hash160;
-        bool isValid = AddressToHash160(strAddress, hash160);
-        if(!isValid)
-        {
-          throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid dions address");
-        }
-        scriptPubKeyOrig.SetBitcoinAddress(strAddress);
-      }
-
-      __wx__Tx& wtxIn = pwalletMain->mapWallet[wtxInHash];
-      scriptPubKey += scriptPubKeyOrig;
-      string strError = txRelay_no_commit(scriptPubKey, CTRL__, wtxIn, wtx, false);
-      if(strError != "")
-      {
-        LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
-        LEAVE_CRITICAL_SECTION(cs_main)
-        throw JSONRPCError(RPC_WALLET_ERROR, strError);
-      }
-    }
-    LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
-  }
-  LEAVE_CRITICAL_SECTION(cs_main)
-  return wtx;
-}
-
-Value updatePath(const Array& params, bool fHelp)
+Value projectCache(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() < 2 || params.size() > 3)
     throw runtime_error(
-      "updatePath <alias> <value> [<toaddress>]\nUpdate and possibly transfer a alias"
+      "projectCache <alias> <value> [<toaddress>]\nUpdate and possibly transfer a alias"
+      + HelpRequiringPassphrase());
+
+  string locatorStr = params[0].get_str();
+  std::transform(locatorStr.begin(), locatorStr.end(), locatorStr.begin(), ::tolower);
+  const vchType vchAlias = vchFromValue(locatorStr);      
+  string cacheAliasStr = params[1].get_str(); 
+  vchType inputDataVch = vchFromValue(params[2].get_str());
+  cba address(targetContractAliasStr);
+  if(!address.IsValid())
+  {
+    vector<AliasIndex> vtxPos;
+    vchType vchAlias = vchFromString(cacheAliasStr);
+    if (ln1Db->lKey (vchAlias))
+    {
+      printf("  name exists\n");
+      if (!ln1Db->lGet (vchAlias, vtxPos))
+      {
+        return error("aliasHeight() : failed to read from name DB");
+      }
+      if (vtxPos.empty ())
+      {
+        return -1;
+      }
+
+      AliasIndex& txPos = vtxPos.back ();
+      if(txPos.nHeight + scaleMonitor() <= nBestHeight)
+      {
+        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "extern alias");
+      }
+      address.SetString(txPos.vAddress);
+    }
+    else
+    {
+      throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid I/OCoin address or unknown alias");
+    }
+  }
+
+  uint160 hash160;
+  bool isValid = AddressToHash160(address.ToString(), hash160);
+
+  __wx__Tx wtx;
+  wtx.nVersion = CTransaction::DION_TX_VERSION;
+  CScript scriptPubKeyOrig;
+
+  if(params.size() == 3)
+  {
+    string strAddress = params[2].get_str();
+    uint160 hash160;
+    bool isValid = AddressToHash160(strAddress, hash160);
+    if(!isValid)
+    {
+      throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid dions address");
+    }
+    scriptPubKeyOrig.SetBitcoinAddress(strAddress);
+  }
+
+  vchType vchValue;
+  CScript scriptPubKey;
+  scriptPubKey << OP_ALIAS_RELAY << vchAlias << vchValue << OP_2DROP << OP_DROP;
+
+  ENTER_CRITICAL_SECTION(cs_main)
+  {
+    ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    {
+      if(mapState.count(vchAlias) && mapState[vchAlias].size())
+      {
+        error("updateAlias() : there are %lu pending operations on that alias, including %s",
+              mapState[vchAlias].size(),
+              mapState[vchAlias].begin()->GetHex().c_str());
+        LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+        LEAVE_CRITICAL_SECTION(cs_main)
+        throw runtime_error("there are pending operations on that alias");
+      }
+
+      EnsureWalletIsUnlocked();
+
+      LocatorNodeDB aliasCacheDB("r");
+      CTransaction tx;
+      if(!aliasTx(aliasCacheDB, vchAlias, tx))
+      {
+        LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+        LEAVE_CRITICAL_SECTION(cs_main)
+        throw runtime_error("could not find a coin with this alias");
+      }
+
+      uint256 wtxInHash = tx.GetHash();
+
+      if(!pwalletMain->mapWallet.count(wtxInHash))
+      {
+        error("updateAlias() : this coin is not in your wallet %s",
+              wtxInHash.GetHex().c_str());
+        LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+        LEAVE_CRITICAL_SECTION(cs_main)
+        throw runtime_error("this coin is not in your wallet");
+      }
+
+      if(params.size() == 2)
+      {
+        string strAddress = "";
+        aliasAddress(tx, strAddress);
+        if(strAddress == "")
+        {
+          throw runtime_error("alias has no associated address");
+        }
+
+        uint160 hash160;
+        bool isValid = AddressToHash160(strAddress, hash160);
+        if(!isValid)
+        {
+          throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid dions address");
+        }
+        scriptPubKeyOrig.SetBitcoinAddress(strAddress);
+      }
+
+      __wx__Tx& wtxIn = pwalletMain->mapWallet[wtxInHash];
+      scriptPubKey += scriptPubKeyOrig;
+      string strError = txRelay(scriptPubKey, CTRL__, wtxIn, wtx, false);
+      if(strError != "")
+      {
+        LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+        LEAVE_CRITICAL_SECTION(cs_main)
+        throw JSONRPCError(RPC_WALLET_ERROR, strError);
+      }
+    }
+    LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+  }
+  LEAVE_CRITICAL_SECTION(cs_main)
+  return wtx.GetHash().GetHex();
+}
+
+Value updateAlias(const Array& params, bool fHelp)
+{
+  if(fHelp || params.size() < 2 || params.size() > 3)
+    throw runtime_error(
+      "updateAlias <alias> <value> [<toaddress>]\nUpdate and possibly transfer a alias"
       + HelpRequiringPassphrase());
   string locatorStr = params[0].get_str();
-  const vchType vchPath = vchFromValue(locatorStr);
+  std::transform(locatorStr.begin(), locatorStr.end(), locatorStr.begin(), ::tolower);
+  const vchType vchAlias = vchFromValue(locatorStr);
   const vchType vchValue = vchFromValue(params[1]);
 
   __wx__Tx wtx;
@@ -6886,17 +6004,17 @@ Value updatePath(const Array& params, bool fHelp)
   }
 
   CScript scriptPubKey;
-  scriptPubKey << OP_ALIAS_RELAY << vchPath << vchValue << OP_2DROP << OP_DROP;
+  scriptPubKey << OP_ALIAS_RELAY << vchAlias << vchValue << OP_2DROP << OP_DROP;
 
   ENTER_CRITICAL_SECTION(cs_main)
   {
     ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
     {
-      if(mapState.count(vchPath) && mapState[vchPath].size())
+      if(mapState.count(vchAlias) && mapState[vchAlias].size())
       {
-        error("updatePath() : there are %lu pending operations on that alias, including %s",
-              mapState[vchPath].size(),
-              mapState[vchPath].begin()->GetHex().c_str());
+        error("updateAlias() : there are %lu pending operations on that alias, including %s",
+              mapState[vchAlias].size(),
+              mapState[vchAlias].begin()->GetHex().c_str());
         LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
         LEAVE_CRITICAL_SECTION(cs_main)
         throw runtime_error("there are pending operations on that alias");
@@ -6906,18 +6024,18 @@ Value updatePath(const Array& params, bool fHelp)
 
       LocatorNodeDB aliasCacheDB("r");
       CTransaction tx;
-      if(!aliasTx(aliasCacheDB, vchPath, tx))
+      if(!aliasTx(aliasCacheDB, vchAlias, tx))
       {
         LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
         LEAVE_CRITICAL_SECTION(cs_main)
-        throw runtime_error("could not find a coin with this alias 6");
+        throw runtime_error("could not find a coin with this alias");
       }
 
       uint256 wtxInHash = tx.GetHash();
 
       if(!pwalletMain->mapWallet.count(wtxInHash))
       {
-        error("updatePath() : this coin is not in your wallet %s",
+        error("updateAlias() : this coin is not in your wallet %s",
               wtxInHash.GetHex().c_str());
         LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
         LEAVE_CRITICAL_SECTION(cs_main)
@@ -7284,12 +6402,13 @@ int checkAddress(string addr, cba& a)
   cba address(addr);
   if(!address.IsValid())
   {
-    vector<PathIndex> vtxPos;
+    vector<AliasIndex> vtxPos;
     LocatorNodeDB ln1Db("r");
-    vchType vchPath = vchFromString(addr);
-    if(ln1Db.lKey(vchPath))
+    std::transform(addr.begin(), addr.end(), addr.begin(), ::tolower);
+    vchType vchAlias = vchFromString(addr);
+    if(ln1Db.lKey(vchAlias))
     {
-      if(!ln1Db.lGet(vchPath, vtxPos))
+      if(!ln1Db.lGet(vchAlias, vtxPos))
       {
         return -2;
       }
@@ -7298,7 +6417,7 @@ int checkAddress(string addr, cba& a)
         return -3;
       }
 
-      PathIndex& txPos = vtxPos.back();
+      AliasIndex& txPos = vtxPos.back();
       address.SetString(txPos.vAddress);
       if(!address.IsValid())
       {
@@ -7752,94 +6871,11 @@ bool sign_verifymessage(string address)
 
   return(key__.GetPubKey().GetID() == keyID__);
 }
-bool read_serial_trc_n(const string& origin, const string& data, __wx__Tx& serial_n)
-{
-  uint256 wtx__;
-  string locatorStr = "descriptor_";
-  locatorStr += origin;
-  const vchType vchPath = vchFromValue(locatorStr);
-
-  const vchType vchValue = vchFromValue(data);
-
-  serial_n.nVersion = CTransaction::DION_TX_VERSION;
-  CScript scriptPubKeyOrig;
-
-  CScript scriptPubKey;
-  scriptPubKey << OP_BASE_VERTEX_RELAY << vchPath << vchValue << OP_2DROP << OP_DROP;
-
-  ENTER_CRITICAL_SECTION(cs_main)
-  {
-    ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
-    {
-      if(mapState.count(vchPath) && mapState[vchPath].size())
-      {
-        error("updatePath() : there are %lu pending operations on that alias, including %s",
-              mapState[vchPath].size(),
-              mapState[vchPath].begin()->GetHex().c_str());
-        LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
-        LEAVE_CRITICAL_SECTION(cs_main)
-        throw runtime_error("there are pending operations on that alias");
-      }
-
-      EnsureWalletIsUnlocked();
-
-      LocatorNodeDB aliasCacheDB("r");
-      CTransaction tx;
-      if(!aliasTx(aliasCacheDB, vchPath, tx))
-      {
-        LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
-        LEAVE_CRITICAL_SECTION(cs_main)
-        throw runtime_error("could not find a coin with this alias 5 " + stringFromVch(vchPath));
-      }
-
-      uint256 wtxInHash = tx.GetHash();
-
-      if(!pwalletMain->mapWallet.count(wtxInHash))
-      {
-        error("updatePath() : this coin is not in your wallet %s",
-              wtxInHash.GetHex().c_str());
-        LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
-        LEAVE_CRITICAL_SECTION(cs_main)
-        throw runtime_error("this coin is not in your wallet");
-      }
-
-      {
-        string strAddress = "";
-        aliasAddress(tx, strAddress);
-        if(strAddress == "")
-        {
-          throw runtime_error("alias has no associated address");
-        }
-
-        uint160 hash160;
-        bool isValid = AddressToHash160(strAddress, hash160);
-        if(!isValid)
-        {
-          throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid dions address");
-        }
-        scriptPubKeyOrig.SetBitcoinAddress(strAddress);
-      }
-
-      __wx__Tx& wtxIn = pwalletMain->mapWallet[wtxInHash];
-      scriptPubKey += scriptPubKeyOrig;
-      string strError = txRelay_no_commit(scriptPubKey, CTRL__, wtxIn, serial_n, false);
-      if(strError != "")
-      {
-        LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
-        LEAVE_CRITICAL_SECTION(cs_main)
-        throw JSONRPCError(RPC_WALLET_ERROR, strError);
-      }
-    }
-    LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
-  }
-  LEAVE_CRITICAL_SECTION(cs_main)
-  return true;
-}
-Value registerPathGenerate(const Array& params, bool fHelp)
+Value registerAliasGenerate(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() != 1)
     throw runtime_error(
-      "registerPathGenerate <alias>"
+      "registerAliasGenerate <alias>"
       + HelpRequiringPassphrase());
 
   string locatorStr = params[0].get_str();
@@ -7859,8 +6895,9 @@ Value registerPathGenerate(const Array& params, bool fHelp)
     throw JSONRPCError(RPC_WALLET_ERROR, err);
   }
 
+  std::transform(locatorStr.begin(), locatorStr.end(), locatorStr.begin(), ::tolower);
   uint256 wtxInHash__;
-  if(searchPathEncrypted2(locatorStr, wtxInHash__) == true)
+  if(searchAliasEncrypted2(locatorStr, wtxInHash__) == true)
   {
     __wx__Tx& wtxIn = pwalletMain->mapWallet[wtxInHash__];
     const int nHeight = wtxIn.GetHeightInMainChain();
@@ -7894,8 +6931,8 @@ Value registerPathGenerate(const Array& params, bool fHelp)
   const vchType vchRand = CBigNum(rand).getvch();
   vchType vchToHash(vchRand);
 
-  const vchType vchPath = vchFromValue(locatorStr);
-  vchToHash.insert(vchToHash.end(), vchPath.begin(), vchPath.end());
+  const vchType vchAlias = vchFromValue(locatorStr);
+  vchToHash.insert(vchToHash.end(), vchAlias.begin(), vchAlias.end());
   const uint160 hash = Hash160(vchToHash);
 
   CPubKey vchPubKey;
@@ -7960,8 +6997,8 @@ Value registerPathGenerate(const Array& params, bool fHelp)
   CScript scriptPubKeyOrig;
   scriptPubKeyOrig.SetBitcoinAddress(vchPubKey.Raw());
   CScript scriptPubKey;
-  vchType vchEncryptedPath = vchFromString(encrypted);
-  string tmp = stringFromVch(vchEncryptedPath);
+  vchType vchEncryptedAlias = vchFromString(encrypted);
+  string tmp = stringFromVch(vchEncryptedAlias);
   vchType vchValue = vchFromString("");
 
   CDataStream ss(SER_GETHASH, 0);
@@ -7978,7 +7015,7 @@ Value registerPathGenerate(const Array& params, bool fHelp)
 
   string sigBase64 = EncodeBase64(&vchSig[0], vchSig.size());
 
-  scriptPubKey << OP_ALIAS_ENCRYPTED << vchEncryptedPath << vchFromString(sigBase64) << vchFromString(keyAddress.ToString()) << hash << vchValue << vchFromString("0") << vchFromString("_") << vchFromString(State::GROUND) << OP_2DROP << OP_2DROP << OP_2DROP << OP_2DROP << OP_DROP;
+  scriptPubKey << OP_ALIAS_ENCRYPTED << vchEncryptedAlias << vchFromString(sigBase64) << vchFromString(keyAddress.ToString()) << hash << vchValue << vchFromString("0") << vchFromString("_") << vchFromString(State::GROUND) << OP_2DROP << OP_2DROP << OP_2DROP << OP_2DROP << OP_DROP;
   scriptPubKey += scriptPubKeyOrig;
 
   ENTER_CRITICAL_SECTION(cs_main)
@@ -7992,18 +7029,18 @@ Value registerPathGenerate(const Array& params, bool fHelp)
       LEAVE_CRITICAL_SECTION(cs_main)
       throw JSONRPCError(RPC_WALLET_ERROR, strError);
     }
-    mapLocator[vchPath] = wtx.GetHash();
+    mapLocator[vchAlias] = wtx.GetHash();
   }
   LEAVE_CRITICAL_SECTION(cs_main)
 
   res.push_back(wtx.GetHash().GetHex());
   return res;
 }
-Value registerPath(const Array& params, bool fHelp)
+Value registerAlias(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() != 2)
     throw runtime_error(
-      "registerPath <alias> <address>"
+      "registerAlias <alias> <address>"
       + HelpRequiringPassphrase());
 
   string locatorStr = params[0].get_str();
@@ -8023,8 +7060,9 @@ Value registerPath(const Array& params, bool fHelp)
   }
 
 
+  std::transform(locatorStr.begin(), locatorStr.end(), locatorStr.begin(), ::tolower);
   uint256 wtxInHash__;
-  if(searchPathEncrypted2(locatorStr, wtxInHash__) == true)
+  if(searchAliasEncrypted2(locatorStr, wtxInHash__) == true)
   {
     string err = "Attempt to register alias : " + locatorStr + ", this alias is already registered as encrypted with tx " + wtxInHash__.GetHex();
 
@@ -8046,8 +7084,8 @@ Value registerPath(const Array& params, bool fHelp)
   const vchType vchRand = CBigNum(rand).getvch();
   vchType vchToHash(vchRand);
 
-  const vchType vchPath = vchFromValue(locatorStr);
-  vchToHash.insert(vchToHash.end(), vchPath.begin(), vchPath.end());
+  const vchType vchAlias = vchFromValue(locatorStr);
+  vchToHash.insert(vchToHash.end(), vchAlias.begin(), vchAlias.end());
   const uint160 hash = Hash160(vchToHash);
 
   uint160 hash160;
@@ -8109,8 +7147,8 @@ Value registerPath(const Array& params, bool fHelp)
   CScript scriptPubKeyOrig;
   scriptPubKeyOrig.SetBitcoinAddress(vchPubKey.Raw());
   CScript scriptPubKey;
-  vchType vchEncryptedPath = vchFromString(encrypted);
-  string tmp = stringFromVch(vchEncryptedPath);
+  vchType vchEncryptedAlias = vchFromString(encrypted);
+  string tmp = stringFromVch(vchEncryptedAlias);
 
   vchType vchValue = vchFromString("");
 
@@ -8127,7 +7165,7 @@ Value registerPath(const Array& params, bool fHelp)
   }
 
   string sigBase64 = EncodeBase64(&vchSig[0], vchSig.size());
-  scriptPubKey << OP_ALIAS_ENCRYPTED << vchEncryptedPath << vchFromString(sigBase64) << vchFromString(strAddress) << hash << vchValue << vchFromString("0") << vchFromString("_") << vchFromString(State::GROUND) << OP_2DROP << OP_2DROP << OP_2DROP << OP_2DROP << OP_DROP;
+  scriptPubKey << OP_ALIAS_ENCRYPTED << vchEncryptedAlias << vchFromString(sigBase64) << vchFromString(strAddress) << hash << vchValue << vchFromString("0") << vchFromString("_") << vchFromString(State::GROUND) << OP_2DROP << OP_2DROP << OP_2DROP << OP_2DROP << OP_DROP;
   scriptPubKey += scriptPubKeyOrig;
 
   ENTER_CRITICAL_SECTION(cs_main)
@@ -8141,7 +7179,7 @@ Value registerPath(const Array& params, bool fHelp)
       LEAVE_CRITICAL_SECTION(cs_main)
       throw JSONRPCError(RPC_WALLET_ERROR, strError);
     }
-    mapLocator[vchPath] = wtx.GetHash();
+    mapLocator[vchAlias] = wtx.GetHash();
   }
   LEAVE_CRITICAL_SECTION(cs_main)
 
@@ -8150,7 +7188,7 @@ Value registerPath(const Array& params, bool fHelp)
   res.push_back(wtx.GetHash().GetHex());
   return res;
 }
-bool aliasTxPos(const vector<PathIndex> &vtxPos, const CDiskTxPos& txPos)
+bool aliasTxPos(const vector<AliasIndex> &vtxPos, const CDiskTxPos& txPos)
 {
   if(vtxPos.empty())
   {
@@ -8166,6 +7204,7 @@ bool aliasScript(const CScript& script, int& op, vector<vector<unsigned char> > 
 }
 bool aliasScript(const CScript& script, int& op, vector<vector<unsigned char> > &vvch, CScript::const_iterator& pc)
 {
+
   opcodetype opcode;
   if(!script.GetOp(pc, opcode))
   {
@@ -8209,10 +7248,6 @@ bool aliasScript(const CScript& script, int& op, vector<vector<unsigned char> > 
   if((op == OP_ALIAS_ENCRYPTED && vvch.size() == 8) ||
       (op == OP_ALIAS_SET && vvch.size() == 5) ||
       (op == OP_MESSAGE) ||
-      (op == OP_BASE_SET) ||
-      (op == OP_BASE_VERTEX_SET) ||
-      (op == OP_BASE_RELAY) ||
-      (op == OP_BASE_VERTEX_RELAY) ||
       (op == OP_ENCRYPTED_MESSAGE) ||
       (op == OP_MAP_PROJECT) ||
       (op == OP_PUBLIC_KEY) ||
@@ -8303,18 +7338,6 @@ bool aliasTxValue(const CTransaction& tx, vector<unsigned char>& value)
     value = vvch[2];
     return true;
   case OP_ALIAS_RELAY:
-    value = vvch[1];
-    return true;
-  case OP_BASE_SET:
-    value = vvch[1];
-    return true;
-  case OP_BASE_RELAY:
-    value = vvch[1];
-    return true;
-  case OP_BASE_VERTEX_SET:
-    value = vvch[1];
-    return true;
-  case OP_BASE_VERTEX_RELAY:
     value = vvch[1];
     return true;
   default:
@@ -8429,7 +7452,7 @@ bool verifymessage(const string& strAddress, const string& strSig, const string&
 
   return(key.GetPubKey().GetID() == keyID);
 }
-bool IsMinePost(const CTransaction& tx, const CTxOut& txout, bool ignore_registerPath )
+bool IsMinePost(const CTransaction& tx, const CTxOut& txout, bool ignore_registerAlias )
 {
   if(tx.nVersion != CTransaction::DION_TX_VERSION)
   {
@@ -8445,7 +7468,7 @@ bool IsMinePost(const CTransaction& tx, const CTxOut& txout, bool ignore_registe
     return false;
   }
 
-  if(ignore_registerPath && op == OP_ALIAS_ENCRYPTED)
+  if(ignore_registerAlias && op == OP_ALIAS_ENCRYPTED)
   {
     return false;
   }
@@ -8458,13 +7481,12 @@ bool IsMinePost(const CTransaction& tx, const CTxOut& txout, bool ignore_registe
 }
 
 bool
-AcceptToMemoryPoolPost(const CTransaction& tx, MapPrevTx& mapInputs)
+AcceptToMemoryPoolPost(const CTransaction& tx)
 {
-  if(!(tx.nVersion == CTransaction::DION_TX_VERSION || tx.nVersion == CTransaction::CYCLE_TX_VERSION))
+  if(tx.nVersion != CTransaction::DION_TX_VERSION)
   {
     return true;
   }
-
 
   if(tx.vout.size() < 1)
     return error("AcceptToMemoryPoolPost: no output in alias tx %s\n",
@@ -8479,8 +7501,6 @@ AcceptToMemoryPoolPost(const CTransaction& tx, MapPrevTx& mapInputs)
     return error("AcceptToMemoryPoolPost: no output out script in alias tx %s",
                  tx.GetHash().ToString().c_str());
 
-  int64_t nExpectedFee = 0;
-  int64_t nExpectedTrackFee = 0;
   if(op == OP_ALIAS_SET)
   {
     if(vvch[0].size() > MAX_LOCATOR_LENGTH)
@@ -8495,154 +7515,6 @@ AcceptToMemoryPoolPost(const CTransaction& tx, MapPrevTx& mapInputs)
     }
   }
 
-  if(op == OP_BASE_SET && tx.nVersion == CTransaction::DION_TX_VERSION)
-  {
-    if(vvch[0].size() > MAX_LOCATOR_LENGTH)
-    {
-      return error("locator too long");
-    }
-
-    int nPrevHeight = aliasHeight(vvch[0]);
-    if(nPrevHeight >= 0 && nBestHeight - nPrevHeight < scaleMonitor())
-    {
-      return false;
-    }
-
-    string path_trigger_nodeStr = stringFromVch(vvch[1]);
-    dvmc::VertexNode vTrans;
-    const auto code = dvmc::from_hex(path_trigger_nodeStr);
-    dvmc::bytes_view exec_code = code;
-
-    dvmc_message create_msg{};
-    create_msg.kind = DVMC_CREATE;
-
-    dvmc_address create_address;
-    create_msg.recipient = create_address;
-    create_msg.track = std::numeric_limits<int64_t>::max();
-    dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
-    dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
-    const auto create_result = vm.retrieve_desc_vx(vTrans, rev, create_msg, code.data(), code.size());
-    if (create_result.status_code != DVMC_SUCCESS)
-    {
-      printf("accepttomempoolpost Contract creation failed: %d\n",create_result.status_code);
-    }
-    nExpectedTrackFee = create_msg.track - create_result.track_left;
-    nExpectedTrackFee *= TRACK_SCALE_FACTOR;
-  }
-  else if(op == OP_BASE_SET && tx.nVersion == CTransaction::CYCLE_TX_VERSION)
-  {
-    string origin;
-    cba cAddr_;
-    for(int i = 0; i < tx.vout.size(); i++)
-    {
-      const CTxOut& out = tx.vout[i];
-      std::vector<vchType> vvchArgs;
-
-      int prevOp;
-      if(aliasScript(out.scriptPubKey, prevOp, vvchArgs))
-      {
-        origin = stringFromVch(vvchArgs[1]);
-        cAddr_ = out.scriptPubKey.GetBitcoinAddress();
-      }
-    }
-    std::vector<string> path_coord_set;
-    boost::char_separator<char> tok(":");
-    boost::tokenizer<boost::char_separator<char>> tokens(origin,tok);
-    BOOST_FOREACH(const string& s,tokens)
-    {
-      path_coord_set.push_back(s);
-    }
-    string target_path_trigger_node = path_coord_set[0];
-    string path_coord  = path_coord_set[1];
-    string path_trigger_nodeCode;
-    if(!getVertex__(target_path_trigger_node,path_trigger_nodeCode))
-    {
-      printf("mempoolpost : failed to retrieve target path_trigger_node code for executable tx\n");
-    }
-    string code_hex_str = path_trigger_nodeCode;
-    uint256 r;
-    string val;
-    if(!collisionReference(DESCRIPTOR + "_" + target_path_trigger_node,r,val))
-    {
-      dvmc::VertexNode vTrans;
-      dvmc_message msg{};
-      msg.track = std::numeric_limits<int64_t>::max();
-      const auto code = dvmc::from_hex(code_hex_str);
-      dvmc::bytes_view exec_code = code;
-      const auto input = dvmc::from_hex(path_coord);
-      msg.input_data = input.data();
-      msg.input_size = input.size();
-
-      dvmc_message create_msg{};
-      create_msg.kind = DVMC_CREATE;
-
-      dvmc_address create_address;
-      uint160 h160;
-      AddressToHash160(cAddr_.ToString(),h160);
-      memcpy(create_address.bytes,h160.pn,20);
-      create_msg.recipient = create_address;
-      create_msg.track = std::numeric_limits<int64_t>::max();
-      dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
-      dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
-      const auto create_result = vm.retrieve_desc_vx(vTrans, rev, create_msg, code.data(), code.size());
-      if (create_result.status_code != DVMC_SUCCESS)
-      {
-        printf("mempoolpost : create - invalid code\n");
-        return false;
-      }
-
-      auto& ledger_instance = vTrans.accounts[create_address];
-      ledger_instance.code = dvmc::bytes(create_result.output_data, create_result.output_size);
-
-      msg.recipient = create_address;
-      exec_code = ledger_instance.code;
-      const auto result = vm.retrieve_desc_vx(vTrans, rev, msg, exec_code.data(), exec_code.size());
-      if (result.status_code != DVMC_SUCCESS)
-      {
-        printf("mempoolpost : CYCLE transaction - invalid code\n");
-        return false;
-      }
-      nExpectedTrackFee = msg.track - result.track_left;
-      nExpectedTrackFee *= TRACK_SCALE_FACTOR;
-    }
-    else
-    {
-      __wx__Tx serial_n;
-      dvmc::TransitionalNode testGen_;
-      testGen(testGen_,code_hex_str);
-      dvmc::VertexNode vTrans;
-      dvmc::TransitionalNode recon;
-      std::stringstream oss_recon;
-      oss_recon << val;
-      boost::archive::text_iarchive iarchive(oss_recon);
-      iarchive >> recon;
-      recon.code = testGen_.code;
-      recon.codehash = testGen_.codehash;
-
-      dvmc_address create_address;
-      uint160 h160;
-      AddressToHash160(cAddr_.ToString(),h160);
-      memcpy(create_address.bytes,h160.pn,20);
-      vTrans.accounts[create_address] = recon;
-      const auto input = dvmc::from_hex(path_coord);
-      dvmc_message msg{};
-      msg.recipient = create_address;
-      msg.track = std::numeric_limits<int64_t>::max();
-      msg.input_data = input.data();
-      msg.input_size = input.size();
-      dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
-      dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
-      const auto result = vm.retrieve_desc_vx(vTrans, rev, msg, recon.code.data(), recon.code.size());
-      if (result.status_code != DVMC_SUCCESS)
-      {
-        printf("mempoolpost : CYCLE transaction - invalid code\n");
-        return false;
-      }
-      nExpectedTrackFee = msg.track - result.track_left;
-      nExpectedTrackFee *= TRACK_SCALE_FACTOR;
-    }
-  }
-
   if(op != OP_ALIAS_ENCRYPTED)
   {
     ENTER_CRITICAL_SECTION(cs_main)
@@ -8650,24 +7522,6 @@ AcceptToMemoryPoolPost(const CTransaction& tx, MapPrevTx& mapInputs)
       mapState[vvch[0]].insert(tx.GetHash());
     }
     LEAVE_CRITICAL_SECTION(cs_main)
-  }
-
-  unsigned int nBytes = ::GetSerializeSize(*(CTransaction*)&tx, SER_NETWORK, PROTOCOL_VERSION);
-  if (nBytes >= MAX_STANDARD_TX_SIZE)
-  {
-    return false;
-  }
-
-  int64_t nExpectedPayFee = nTransactionFee * (1 + (int64_t)nBytes / 1000);
-  int64_t nExpectedMinFee = tx.GetMinFee(1, GMF_SEND, nBytes);
-  nExpectedFee    = max(nExpectedPayFee, nExpectedMinFee);
-
-  int64_t nEnclosedFees = tx.GetValueIn(mapInputs)-tx.GetValueOut();
-
-  if(nEnclosedFees < nExpectedFee + nExpectedTrackFee)
-  {
-    printf("AcceptToMemoryPoolPost: insufficient fees for tx\n");
-    return false;
   }
 
   return true;
@@ -8742,7 +7596,7 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
                   CBlockIndex* pindexBlock, CDiskTxPos& txPos,
                   bool fBlock, bool fMiner)
 {
-  if(!(tx.nVersion == CTransaction::DION_TX_VERSION || tx.nVersion == CTransaction::CYCLE_TX_VERSION))
+  if(tx.nVersion != CTransaction::DION_TX_VERSION)
   {
     bool found= false;
     for(unsigned int i = 0; i < tx.vout.size(); i++)
@@ -8771,6 +7625,8 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
 
   int prevOp;
   std::vector<vchType> vvchPrevArgs;
+  printf("CIP tx %s\n",
+         tx.GetHash().GetHex().c_str());
 
   for(int i = 0; i < tx.vin.size(); i++)
   {
@@ -8964,7 +7820,7 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
   {
     if(vvchArgs[3].size() != 20)
     {
-      return error("registerPath tx with incorrect hash length");
+      return error("registerAlias tx with incorrect hash length");
     }
     CScript script;
     if(vvchPrevArgs.size() != 0)
@@ -8982,7 +7838,7 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
     string r = stringFromVch(vvchArgs[5]);
     if(!verifymessage(script.GetBitcoinAddress(), stringFromVch(vvchArgs[1]), encrypted, hash.ToString(), value, r))
     {
-      return error("Dions::ConnectInputsPost: failed to verify signature for registerPath tx %s",
+      return error("Dions::ConnectInputsPost: failed to verify signature for registerAlias tx %s",
                    tx.GetHash().ToString().c_str());
     }
 
@@ -9053,7 +7909,7 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
   {
     if(!found || prevOp != OP_ALIAS_ENCRYPTED)
     {
-      return error("ConnectInputsPost() : decryptPath tx without previous registerPath tx");
+      return error("ConnectInputsPost() : decryptAlias tx without previous registerAlias tx");
     }
 
     CScript script;
@@ -9067,7 +7923,7 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
     }
 
     if(!verifymessage(script.GetBitcoinAddress(), stringFromVch(vvchArgs[1]), stringFromVch(vvchArgs[0])))
-      return error("Dions::ConnectInputsPost: failed to verify signature for decryptPath tx %s",
+      return error("Dions::ConnectInputsPost: failed to verify signature for decryptAlias tx %s",
                    tx.GetHash().ToString().c_str());
 
 
@@ -9089,10 +7945,10 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
 
     {
       const vchType& vchHash = vvchPrevArgs[3];
-      const vchType& vchPath = vvchArgs[0];
+      const vchType& vchAlias = vvchArgs[0];
       const vchType& vchRand = vvchArgs[3];
       vchType vchToHash(vchRand);
-      vchToHash.insert(vchToHash.end(), vchPath.begin(), vchPath.end());
+      vchToHash.insert(vchToHash.end(), vchAlias.begin(), vchAlias.end());
       uint160 hash = Hash160(vchToHash);
       if(uint160(vchHash) != hash)
       {
@@ -9129,12 +7985,12 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
   case OP_ALIAS_RELAY:
     if(!found ||(prevOp != OP_ALIAS_SET && prevOp != OP_ALIAS_RELAY))
     {
-      return error("updatePath tx without previous update tx");
+      return error("updateAlias tx without previous update tx");
     }
 
     if(vvchArgs[1].size() > MAX_XUNIT_LENGTH)
     {
-      return error("updatePath tx with value too long");
+      return error("updateAlias tx with value too long");
     }
 
     if(vvchPrevArgs[0] != vvchArgs[0])
@@ -9147,77 +8003,14 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
     {
       return error("expired alias, or there is a pending transaction on the alias");
     }
-    break;
-  case OP_BASE_RELAY:
-    if(!found || !(prevOp == OP_BASE_SET || prevOp == OP_BASE_RELAY))
-    {
-      return error("updatePath tx without previous update tx");
-    }
 
-    if(vvchArgs[1].size() > MAX_XUNIT_LENGTH)
-    {
-      return error("updatePath tx with value too long");
-    }
-
-    if(vvchPrevArgs[0] != vvchArgs[0])
-    {
-      return error("alias mismatch");
-    }
-
-    nDepth = CheckTransactionAtRelativeDepth(pindexBlock, vTxindex[nInput], scaleMonitor());
-    if((fBlock || fMiner) && nDepth < 0)
-    {
-      return error("expired alias, or there is a pending transaction on the alias");
-    }
-    break;
-  case OP_BASE_SET:
-    if(vvchArgs[1].size() > MAX_XUNIT_LENGTH)
-    {
-      return error("createDataNode tx with value too long");
-    }
-    break;
-  case OP_BASE_VERTEX_RELAY:
-    if(!fBlock)
-    {
-      return tx.DoS(100, error("ConnectInputsPost() : op vertex inconsistent"));
-    }
-    if(!found || !(prevOp == OP_BASE_VERTEX_SET || prevOp == OP_BASE_VERTEX_RELAY))
-    {
-      return error("updatePath tx without previous update tx");
-    }
-
-    if(vvchArgs[1].size() > MAX_XUNIT_LENGTH)
-    {
-      return error("updatePath tx with value too long");
-    }
-
-    if(vvchPrevArgs[0] != vvchArgs[0])
-    {
-      return error("alias mismatch");
-    }
-
-    nDepth = CheckTransactionAtRelativeDepth(pindexBlock, vTxindex[nInput], scaleMonitor());
-    if((fBlock || fMiner) && nDepth < 0)
-    {
-      return error("expired alias, or there is a pending transaction on the alias");
-    }
-    break;
-  case OP_BASE_VERTEX_SET:
-    if(!fBlock)
-    {
-      return tx.DoS(100, error("ConnectInputsPost() : op vertex inconsistent"));
-    }
-    if(vvchArgs[1].size() > MAX_XUNIT_LENGTH)
-    {
-      return error("createDataNode tx with value too long");
-    }
     break;
   default:
     return error("alias transaction has unknown op");
   }
-  if(!fBlock && (op == OP_ALIAS_RELAY || op == OP_BASE_RELAY))
+  if(!fBlock && op == OP_ALIAS_RELAY)
   {
-    vector<PathIndex> vtxPos;
+    vector<AliasIndex> vtxPos;
     if(ln1Db.lKey(vvchArgs[0])
         && !ln1Db.lGet(vvchArgs[0], vtxPos))
     {
@@ -9230,12 +8023,13 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
   }
   if(fBlock)
   {
-    if(op == OP_ALIAS_SET || op == OP_ALIAS_RELAY || op == OP_BASE_SET || op == OP_BASE_RELAY || op == OP_BASE_VERTEX_SET || op == OP_BASE_VERTEX_RELAY)
+    if(op == OP_ALIAS_SET || op == OP_ALIAS_RELAY)
     {
 
       string locatorStr = stringFromVch(vvchArgs[0]);
+      std::transform(locatorStr.begin(), locatorStr.end(), locatorStr.begin(), ::tolower);
 
-      if(op == OP_ALIAS_SET || OP_BASE_SET || OP_BASE_VERTEX_SET)
+      if(op == OP_ALIAS_SET)
       {
         CTransaction tx;
         if(aliasTx(ln1Db, vchFromString(locatorStr), tx))
@@ -9287,7 +8081,7 @@ unsigned char GetAddressVersion()
 
 Value alias(const Array& params, bool fHelp)
 {
-  return registerPathGenerate(params, fHelp);
+  return registerAliasGenerate(params, fHelp);
 }
 Value statusList(const Array& params, bool fHelp)
 {
@@ -9315,6 +8109,10 @@ bool relaySigFrame(int i, vchType& s)
 {
   return LR_SHIFT__[i] == s[0];
 }
+Value extract(const Array& params, bool fHelp)
+{
+  return vextract(params, fHelp);
+}
 bool frlRelay(int& i)
 {
   return true;
@@ -9332,12 +8130,12 @@ Value vtx(const Array& params, bool fHelp)
   cba keyAddress(l);
   if(!keyAddress.IsValid())
   {
-    vector<PathIndex> vtxPos;
+    vector<AliasIndex> vtxPos;
     LocatorNodeDB ln1Db("r");
-    vchType vchPath = vchFromString(l);
-    if (ln1Db.lKey(vchPath))
+    vchType vchAlias = vchFromString(l);
+    if (ln1Db.lKey(vchAlias))
     {
-      if (!ln1Db.lGet(vchPath, vtxPos))
+      if (!ln1Db.lGet(vchAlias, vtxPos))
       {
         return error("aliasHeight() : failed to read from name DB");
       }
@@ -9346,7 +8144,7 @@ Value vtx(const Array& params, bool fHelp)
         return -1;
       }
 
-      PathIndex& txPos = vtxPos.back ();
+      AliasIndex& txPos = vtxPos.back ();
       keyAddress.SetString(txPos.vAddress);
     }
     else
@@ -9388,12 +8186,12 @@ Value mapVertex(const Array& params, bool fHelp)
   cba addr(params[0].get_str());
   if(!addr.IsValid())
   {
-    vector<PathIndex> vtxPos;
+    vector<AliasIndex> vtxPos;
     LocatorNodeDB ln1Db("r");
-    vchType vchPath = vchFromString(params[0].get_str());
-    if (ln1Db.lKey(vchPath))
+    vchType vchAlias = vchFromString(params[0].get_str());
+    if (ln1Db.lKey(vchAlias))
     {
-      if (!ln1Db.lGet(vchPath, vtxPos))
+      if (!ln1Db.lGet(vchAlias, vtxPos))
       {
         return error("aliasHeight() : failed to read from name DB");
       }
@@ -9402,7 +8200,7 @@ Value mapVertex(const Array& params, bool fHelp)
         return -1;
       }
 
-      PathIndex& txPos = vtxPos.back ();
+      AliasIndex& txPos = vtxPos.back ();
       addr.SetString(txPos.vAddress);
     }
     else
@@ -9415,12 +8213,12 @@ Value mapVertex(const Array& params, bool fHelp)
 
   if(!aRecipient.IsValid())
   {
-    vector<PathIndex> vtxPos;
+    vector<AliasIndex> vtxPos;
     LocatorNodeDB ln1Db("r");
-    vchType vchPath = vchFromString(params[1].get_str());
-    if (ln1Db.lKey(vchPath))
+    vchType vchAlias = vchFromString(params[1].get_str());
+    if (ln1Db.lKey(vchAlias))
     {
-      if (!ln1Db.lGet(vchPath, vtxPos))
+      if (!ln1Db.lGet(vchAlias, vtxPos))
       {
         return error("aliasHeight() : failed to read from name DB");
       }
@@ -9429,7 +8227,7 @@ Value mapVertex(const Array& params, bool fHelp)
         return -1;
       }
 
-      PathIndex& txPos = vtxPos.back ();
+      AliasIndex& txPos = vtxPos.back ();
       aRecipient.SetString(txPos.vAddress);
     }
     else
@@ -9593,7 +8391,7 @@ Value vtxtrace(const Array& params, bool fHelp)
     vchNodeLocator = vchFromValue(params[0]);
   }
 
-  std::map<vchType, int> mapPathVchInt;
+  std::map<vchType, int> mapAliasVchInt;
   std::map<vchType, Object> aliasMapVchObj;
 
   Array oRes;
@@ -9710,12 +8508,12 @@ Value mapProject(const Array& params, bool fHelp)
   cba prj(params[2].get_str());
   if(!prj.IsValid())
   {
-    vector<PathIndex> vtxPos;
+    vector<AliasIndex> vtxPos;
     LocatorNodeDB ln1Db("r");
-    vchType vchPath = vchFromString(params[2].get_str());
-    if (ln1Db.lKey(vchPath))
+    vchType vchAlias = vchFromString(params[2].get_str());
+    if (ln1Db.lKey(vchAlias))
     {
-      if (!ln1Db.lGet(vchPath, vtxPos))
+      if (!ln1Db.lGet(vchAlias, vtxPos))
       {
         return error("aliasHeight() : failed to read from name DB");
       }
@@ -9724,7 +8522,7 @@ Value mapProject(const Array& params, bool fHelp)
         return -1;
       }
 
-      PathIndex& txPos = vtxPos.back ();
+      AliasIndex& txPos = vtxPos.back ();
       prj.SetString(txPos.vAddress);
     }
     else
@@ -9747,12 +8545,12 @@ Value mapProject(const Array& params, bool fHelp)
   cba node(params[0].get_str());
   if(!node.IsValid())
   {
-    vector<PathIndex> vtxPos;
+    vector<AliasIndex> vtxPos;
     LocatorNodeDB ln1Db("r");
-    vchType vchPath = vchFromString(params[0].get_str());
-    if (ln1Db.lKey(vchPath))
+    vchType vchAlias = vchFromString(params[0].get_str());
+    if (ln1Db.lKey(vchAlias))
     {
-      if (!ln1Db.lGet(vchPath, vtxPos))
+      if (!ln1Db.lGet(vchAlias, vtxPos))
       {
         return error("aliasHeight() : failed to read from name DB");
       }
@@ -9761,7 +8559,7 @@ Value mapProject(const Array& params, bool fHelp)
         return -1;
       }
 
-      PathIndex& txPos = vtxPos.back ();
+      AliasIndex& txPos = vtxPos.back ();
       node.SetString(txPos.vAddress);
     }
     else
@@ -9887,12 +8685,12 @@ Value projection(const Array& params, bool fHelp)
   cba alpha(ref);
   if(!alpha.IsValid())
   {
-    vector<PathIndex> vtxPos;
+    vector<AliasIndex> vtxPos;
     LocatorNodeDB ln1Db("r");
-    vchType vchPath = vchFromString(ref);
-    if (ln1Db.lKey(vchPath))
+    vchType vchAlias = vchFromString(ref);
+    if (ln1Db.lKey(vchAlias))
     {
-      if (!ln1Db.lGet(vchPath, vtxPos))
+      if (!ln1Db.lGet(vchAlias, vtxPos))
       {
         return error("aliasHeight() : failed to read from name DB");
       }
@@ -9901,7 +8699,7 @@ Value projection(const Array& params, bool fHelp)
         return -1;
       }
 
-      PathIndex& txPos = vtxPos.back ();
+      AliasIndex& txPos = vtxPos.back ();
       alpha.SetString(txPos.vAddress);
     }
     else
@@ -9910,7 +8708,7 @@ Value projection(const Array& params, bool fHelp)
     }
   }
 
-  std::map<vchType, int> mapPathVchInt;
+  std::map<vchType, int> mapAliasVchInt;
   std::map<vchType, Object> aliasMapVchObj;
 
   Array oRes;
@@ -10057,7 +8855,7 @@ Value projection(const Array& params, bool fHelp)
         }
         oRes.push_back(aliasObj);
 
-        mapPathVchInt[vchV0] = nHeight;
+        mapAliasVchInt[vchV0] = nHeight;
         aliasMapVchObj[vchV0] = aliasObj;
       }
     }
@@ -10108,7 +8906,7 @@ bool collx(const CTransaction& t)
 
 bool vclose(string& v, string& w)
 {
-  std::map<vchType, int> mapPathVchInt;
+  std::map<vchType, int> mapAliasVchInt;
   std::map<vchType, Object> aliasMapVchObj;
 
   Array oRes;
@@ -10229,11 +9027,11 @@ Value xstat(const Array& params, bool fHelp)
   cba keyAddress(l);
   if(!keyAddress.IsValid())
   {
-    vector<PathIndex> vtxPos;
-    vchType vchPath = vchFromString(l);
-    if (ln1Db->lKey(vchPath))
+    vector<AliasIndex> vtxPos;
+    vchType vchAlias = vchFromString(l);
+    if (ln1Db->lKey(vchAlias))
     {
-      if (!ln1Db->lGet(vchPath, vtxPos))
+      if (!ln1Db->lGet(vchAlias, vtxPos))
       {
         return error("aliasHeight() : failed to read from name DB");
       }
@@ -10242,7 +9040,7 @@ Value xstat(const Array& params, bool fHelp)
         return -1;
       }
 
-      PathIndex& txPos = vtxPos.back ();
+      AliasIndex& txPos = vtxPos.back ();
       if(txPos.nHeight + scaleMonitor() <= nBestHeight)
       {
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "extern alias");
@@ -10251,7 +9049,7 @@ Value xstat(const Array& params, bool fHelp)
     }
     else
     {
-      throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid I/OCoin address or unknown alias 2");
+      throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid I/OCoin address or unknown alias");
     }
   }
 
@@ -10286,11 +9084,11 @@ static bool xs(string& s)
   cba keyAddress(s);
   if(!keyAddress.IsValid())
   {
-    vector<PathIndex> vtxPos;
-    vchType vchPath = vchFromString(s);
-    if (ln1Db->lKey(vchPath))
+    vector<AliasIndex> vtxPos;
+    vchType vchAlias = vchFromString(s);
+    if (ln1Db->lKey(vchAlias))
     {
-      if (!ln1Db->lGet(vchPath, vtxPos))
+      if (!ln1Db->lGet(vchAlias, vtxPos))
       {
         return error("aliasHeight() : failed to read from name DB");
       }
@@ -10299,12 +9097,12 @@ static bool xs(string& s)
         return -1;
       }
 
-      PathIndex& txPos = vtxPos.back ();
+      AliasIndex& txPos = vtxPos.back ();
       keyAddress.SetString(txPos.vAddress);
     }
     else
     {
-      throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid I/OCoin address or unknown alias 3");
+      throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid I/OCoin address or unknown alias");
     }
   }
 
@@ -10337,11 +9135,11 @@ Value svtx(const Array& params, bool fHelp)
   cba k(ref);
   if(!k.IsValid())
   {
-    vector<PathIndex> vtxPos;
-    vchType vchPath = vchFromString(ref);
-    if (ln1Db->lKey(vchPath))
+    vector<AliasIndex> vtxPos;
+    vchType vchAlias = vchFromString(ref);
+    if (ln1Db->lKey(vchAlias))
     {
-      if (!ln1Db->lGet(vchPath, vtxPos))
+      if (!ln1Db->lGet(vchAlias, vtxPos))
       {
         return error("aliasHeight() : failed to read from name DB");
       }
@@ -10350,7 +9148,7 @@ Value svtx(const Array& params, bool fHelp)
         return -1;
       }
 
-      PathIndex& txPos = vtxPos.back ();
+      AliasIndex& txPos = vtxPos.back ();
       if(txPos.nHeight + scaleMonitor() <= nBestHeight)
       {
         throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "extern alias");
@@ -10359,7 +9157,7 @@ Value svtx(const Array& params, bool fHelp)
     }
     else
     {
-      throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid I/OCoin address or unknown alias 4");
+      throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid I/OCoin address or unknown alias");
     }
   }
   CKeyID keyID;
@@ -10374,7 +9172,7 @@ Value svtx(const Array& params, bool fHelp)
     throw JSONRPCError(RPC_TYPE_ERROR, "external");
   }
 
-  std::map<vchType, int> mapPathVchInt;
+  std::map<vchType, int> mapAliasVchInt;
   std::map<vchType, Object> aliasMapVchObj;
 
   ENTER_CRITICAL_SECTION(cs_main)
@@ -10491,7 +9289,8 @@ Value simplexU(const Array& params, bool fHelp)
       + HelpRequiringPassphrase());
   string locatorStr = params[0].get_str();
 
-  const vchType vchPath = vchFromValue(locatorStr);
+  std::transform(locatorStr.begin(), locatorStr.end(), locatorStr.begin(), ::tolower);
+  const vchType vchAlias = vchFromValue(locatorStr);
   const char* locatorFile = (params[1].get_str()).c_str();
 
   fs::path p = locatorFile;
@@ -10534,17 +9333,17 @@ Value simplexU(const Array& params, bool fHelp)
   }
 
   CScript scriptPubKey;
-  scriptPubKey << OP_ALIAS_RELAY << vchPath << vchFromString(r) << OP_2DROP << OP_DROP;
+  scriptPubKey << OP_ALIAS_RELAY << vchAlias << vchFromString(r) << OP_2DROP << OP_DROP;
 
   ENTER_CRITICAL_SECTION(cs_main)
   {
     ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
     {
-      if(mapState.count(vchPath) && mapState[vchPath].size())
+      if(mapState.count(vchAlias) && mapState[vchAlias].size())
       {
-        error("updatePath() : there are %lu pending operations on that alias, including %s",
-              mapState[vchPath].size(),
-              mapState[vchPath].begin()->GetHex().c_str());
+        error("updateAlias() : there are %lu pending operations on that alias, including %s",
+              mapState[vchAlias].size(),
+              mapState[vchAlias].begin()->GetHex().c_str());
         LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
         LEAVE_CRITICAL_SECTION(cs_main)
         throw runtime_error("there are pending operations on that alias");
@@ -10554,11 +9353,11 @@ Value simplexU(const Array& params, bool fHelp)
 
       LocatorNodeDB aliasCacheDB("r");
       CTransaction tx;
-      if(!aliasTx(aliasCacheDB, vchPath, tx))
+      if(!aliasTx(aliasCacheDB, vchAlias, tx))
       {
         LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
         LEAVE_CRITICAL_SECTION(cs_main)
-        throw runtime_error("could not find a coin with this alias 1");
+        throw runtime_error("could not find a coin with this alias");
       }
 
       if(params.size() == 2)
@@ -10583,7 +9382,7 @@ Value simplexU(const Array& params, bool fHelp)
 
       if(!pwalletMain->mapWallet.count(wtxInHash))
       {
-        error("updatePath() : this coin is not in your wallet %s",
+        error("updateAlias() : this coin is not in your wallet %s",
               wtxInHash.GetHex().c_str());
         LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
         LEAVE_CRITICAL_SECTION(cs_main)
@@ -10606,136 +9405,9 @@ Value simplexU(const Array& params, bool fHelp)
   return wtx.GetHash().GetHex();
 
 }
-Value ntxsearch(const Array& params, bool fHelp)
-{
-  if(fHelp || params.size() != 2)
-    throw runtime_error(
-      "ntxsearch <base> <is>"
-      + HelpRequiringPassphrase());
-
-  string addrStr = params[0].get_str();
-  string contract_input = params[1].get_str();
-  cba cAddr_;
-  if(!cAddr_.IsValid())
-  {
-    vector<PathIndex> vtxPos;
-    vchType vchPath = vchFromString(addrStr);
-    if (ln1Db->lKey (vchPath))
-    {
-      printf("  name exists\n");
-      if (!ln1Db->lGet (vchPath, vtxPos))
-      {
-        return error("aliasHeight() : failed to read from name DB");
-      }
-      if (vtxPos.empty ())
-      {
-        return -1;
-      }
-
-      PathIndex& txPos = vtxPos.back ();
-      if(txPos.nHeight + scaleMonitor() <= nBestHeight)
-      {
-        throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "extern alias");
-      }
-      cAddr_.SetString(txPos.vAddress);
-    }
-    else
-    {
-      throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid I/OCoin address or unknown alias");
-    }
-  }
-
-  string target_path_trigger_node = addrStr;
-  string path_trigger_nodeCode;
-  if(!getVertex__(target_path_trigger_node,path_trigger_nodeCode))
-  {
-    return error("ntxsearch : path_trigger_node\n");
-  }
-
-  string code_hex_str = path_trigger_nodeCode;
-  string target_contract = target_path_trigger_node;
-  uint256 r;
-  string val;
-  Array res_;
-  if(!collisionReference(DESCRIPTOR + "_" + target_contract,r,val))
-  {
-    dvmc::VertexNode vTrans;
-    dvmc_message msg{};
-    msg.track = std::numeric_limits<int64_t>::max();
-    const auto code = dvmc::from_hex(code_hex_str);
-    dvmc::bytes_view exec_code = code;
-    const auto input = dvmc::from_hex(contract_input);
-    msg.input_data = input.data();
-    msg.input_size = input.size();
-
-    dvmc_message create_msg{};
-    create_msg.kind = DVMC_CREATE;
-
-    dvmc_address create_address;
-    uint160 h160;
-    AddressToHash160(cAddr_.ToString(),h160);
-    memcpy(create_address.bytes,h160.pn,20);
-    create_msg.recipient = create_address;
-    create_msg.track = std::numeric_limits<int64_t>::max();
-    dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
-    dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
-    const auto create_result = vm.retrieve_desc_vx(vTrans, rev, create_msg, code.data(), code.size());
-    if (create_result.status_code != DVMC_SUCCESS)
-    {
-      return error("error: create dvm");
-    }
-
-    auto& created_account = vTrans.accounts[create_address];
-    created_account.code = dvmc::bytes(create_result.output_data, create_result.output_size);
-
-    msg.recipient = create_address;
-    exec_code = created_account.code;
-    const auto result = vm.retrieve_desc_vx(vTrans, rev, msg, exec_code.data(), exec_code.size());
-    res_.push_back(dvmc::hex({result.output_data,result.output_size}));
-
-    dvmc::TransitionalNode acc = vTrans.accounts[create_address];
-    std::stringstream oss;
-    boost::archive::text_oarchive oarchive(oss);
-    oarchive << acc;
-  }
-  else
-  {
-    __wx__Tx serial_n;
-    dvmc::TransitionalNode testGen_;
-    testGen(testGen_,code_hex_str);
-    dvmc::VertexNode vTrans;
-    dvmc::TransitionalNode recon;
-    std::stringstream oss_recon;
-    oss_recon << val;
-    boost::archive::text_iarchive iarchive(oss_recon);
-    iarchive >> recon;
-    recon.code = testGen_.code;
-    recon.codehash = testGen_.codehash;
-
-    dvmc_address create_address;
-    uint160 h160;
-    AddressToHash160(cAddr_.ToString(),h160);
-    memcpy(create_address.bytes,h160.pn,20);
-    vTrans.accounts[create_address] = recon;
-    const auto input = dvmc::from_hex(contract_input);
-    dvmc_message msg{};
-    msg.recipient = create_address;
-    msg.track = std::numeric_limits<int64_t>::max();
-    msg.input_data = input.data();
-    msg.input_size = input.size();
-    dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
-    dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
-    const auto result = vm.retrieve_desc_vx(vTrans, rev, msg, recon.code.data(), recon.code.size());
-    res_.push_back(dvmc::hex({result.output_data,result.output_size}));
-    dvmc::TransitionalNode updatedAcc = vTrans.accounts[create_address];
-    std::stringstream oss_commit;
-    boost::archive::text_oarchive oarchive(oss_commit);
-    oarchive << updatedAcc;
-  }
-  return res_;
-}
 Value psimplex(const Array& params, bool fHelp)
 {
+
   if(fHelp || params.size() != 2)
     throw runtime_error(
       "psimplex <base> <is>"
@@ -10756,14 +9428,15 @@ Value psimplex(const Array& params, bool fHelp)
 
   ln1Db->filter();
   string alias = params[0].get_str();
+  std::transform(alias.begin(), alias.end(), alias.begin(), ::tolower);
   string address = "address not found";
   vchType value;
 
-  vector<PathIndex> vtxPos;
-  vchType vchPath = vchFromString(alias);
-  if(ln1Db->lKey(vchPath))
+  vector<AliasIndex> vtxPos;
+  vchType vchAlias = vchFromString(alias);
+  if(ln1Db->lKey(vchAlias))
   {
-    if(!ln1Db->lGet(vchPath, vtxPos))
+    if(!ln1Db->lGet(vchAlias, vtxPos))
     {
       return error("aliasHeight() : failed to read from name DB");
     }
@@ -10772,7 +9445,7 @@ Value psimplex(const Array& params, bool fHelp)
       return -1;
     }
 
-    PathIndex& txPos = vtxPos.back();
+    AliasIndex& txPos = vtxPos.back();
     address = txPos.vAddress;
     value = txPos.vValue;
   }

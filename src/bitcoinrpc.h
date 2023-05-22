@@ -1,6 +1,3 @@
-
-
-
 // Copyright (c) 2010 Satoshi Nakamoto
 // Copyright (c) 2009-2012 The Bitcoin developers
 // Distributed under the MIT/X11 software license, see the accompanying
@@ -25,48 +22,48 @@ class CBlockIndex;
 // HTTP status codes
 enum HTTPStatusCode
 {
-    HTTP_OK                    = 200,
-    HTTP_BAD_REQUEST           = 400,
-    HTTP_UNAUTHORIZED          = 401,
-    HTTP_FORBIDDEN             = 403,
-    HTTP_NOT_FOUND             = 404,
-    HTTP_INTERNAL_SERVER_ERROR = 500,
+  HTTP_OK                    = 200,
+  HTTP_BAD_REQUEST           = 400,
+  HTTP_UNAUTHORIZED          = 401,
+  HTTP_FORBIDDEN             = 403,
+  HTTP_NOT_FOUND             = 404,
+  HTTP_INTERNAL_SERVER_ERROR = 500,
 };
 
 // Bitcoin RPC error codes
 enum RPCErrorCode
 {
-    // Standard JSON-RPC 2.0 errors
-    RPC_INVALID_REQUEST  = -32600,
-    RPC_METHOD_NOT_FOUND = -32601,
-    RPC_INVALID_PARAMS   = -32602,
-    RPC_INTERNAL_ERROR   = -32603,
-    RPC_PARSE_ERROR      = -32700,
+  // Standard JSON-RPC 2.0 errors
+  RPC_INVALID_REQUEST  = -32600,
+  RPC_METHOD_NOT_FOUND = -32601,
+  RPC_INVALID_PARAMS   = -32602,
+  RPC_INTERNAL_ERROR   = -32603,
+  RPC_PARSE_ERROR      = -32700,
 
-    // General application defined errors
-    RPC_MISC_ERROR                  = -1,  // std::exception thrown in command handling
-    RPC_FORBIDDEN_BY_SAFE_MODE      = -2,  // Server is in safe mode, and command is not allowed in safe mode
-    RPC_TYPE_ERROR                  = -3,  // Unexpected type was passed as parameter
-    RPC_INVALID_ADDRESS_OR_KEY      = -5,  // Invalid address or key
-    RPC_OUT_OF_MEMORY               = -7,  // Ran out of memory during operation
-    RPC_INVALID_PARAMETER           = -8,  // Invalid, missing or duplicate parameter
-    RPC_DATABASE_ERROR              = -20, // Database error
-    RPC_DESERIALIZATION_ERROR       = -22, // Error parsing or validating structure in raw format
+  // General application defined errors
+  RPC_MISC_ERROR                  = -1,  // std::exception thrown in command handling
+  RPC_FORBIDDEN_BY_SAFE_MODE      = -2,  // Server is in safe mode, and command is not allowed in safe mode
+  RPC_TYPE_ERROR                  = -3,  // Unexpected type was passed as parameter
+  RPC_INVALID_ADDRESS_OR_KEY      = -5,  // Invalid address or key
+  RPC_OUT_OF_MEMORY               = -7,  // Ran out of memory during operation
+  RPC_INVALID_PARAMETER           = -8,  // Invalid, missing or duplicate parameter
+  RPC_DATABASE_ERROR              = -20, // Database error
+  RPC_DESERIALIZATION_ERROR       = -22, // Error parsing or validating structure in raw format
 
-    // P2P client errors
-    RPC_CLIENT_NOT_CONNECTED        = -9,  // Bitcoin is not connected
-    RPC_CLIENT_IN_INITIAL_DOWNLOAD  = -10, // Still downloading initial blocks
+  // P2P client errors
+  RPC_CLIENT_NOT_CONNECTED        = -9,  // Bitcoin is not connected
+  RPC_CLIENT_IN_INITIAL_DOWNLOAD  = -10, // Still downloading initial blocks
 
-    // Wallet errors
-    RPC_WALLET_ERROR                = -4,  // Unspecified problem with wallet (key not found etc.)
-    RPC_WALLET_INSUFFICIENT_FUNDS   = -6,  // Not enough funds in wallet or account
-    RPC_WALLET_INVALID_ACCOUNT_NAME = -11, // Invalid account name
-    RPC_WALLET_KEYPOOL_RAN_OUT      = -12, // Keypool ran out, call keypoolrefill first
-    RPC_WALLET_UNLOCK_NEEDED        = -13, // Enter the wallet passphrase with walletpassphrase first
-    RPC_WALLET_PASSPHRASE_INCORRECT = -14, // The wallet passphrase entered was incorrect
-    RPC_WALLET_WRONG_ENC_STATE      = -15, // Command given in wrong wallet encryption state (encrypting an encrypted wallet etc.)
-    RPC_WALLET_ENCRYPTION_FAILED    = -16, // Failed to encrypt the wallet
-    RPC_WALLET_ALREADY_UNLOCKED     = -17, // Wallet is already unlocked
+  // Wallet errors
+  RPC_WALLET_ERROR                = -4,  // Unspecified problem with wallet (key not found etc.)
+  RPC_WALLET_INSUFFICIENT_FUNDS   = -6,  // Not enough funds in wallet or account
+  RPC_WALLET_INVALID_ACCOUNT_NAME = -11, // Invalid account name
+  RPC_WALLET_KEYPOOL_RAN_OUT      = -12, // Keypool ran out, call keypoolrefill first
+  RPC_WALLET_UNLOCK_NEEDED        = -13, // Enter the wallet passphrase with walletpassphrase first
+  RPC_WALLET_PASSPHRASE_INCORRECT = -14, // The wallet passphrase entered was incorrect
+  RPC_WALLET_WRONG_ENC_STATE      = -15, // Command given in wrong wallet encryption state (encrypting an encrypted wallet etc.)
+  RPC_WALLET_ENCRYPTION_FAILED    = -16, // Failed to encrypt the wallet
+  RPC_WALLET_ALREADY_UNLOCKED     = -17, // Wallet is already unlocked
 };
 
 json_spirit::Object JSONRPCError(int code, const std::string& message);
@@ -96,10 +93,10 @@ typedef json_spirit::Value(*rpcfn_type)(const json_spirit::Array& params, bool f
 class CRPCCommand
 {
 public:
-    std::string name;
-    rpcfn_type actor;
-    bool okSafeMode;
-    bool unlocked;
+  std::string name;
+  rpcfn_type actor;
+  bool okSafeMode;
+  bool unlocked;
 };
 
 const unsigned long X_REG_TABLE__[] = { 0xb3e454ac, 0x3a326a21 };
@@ -110,22 +107,22 @@ const unsigned long X_REG_TABLE__[] = { 0xb3e454ac, 0x3a326a21 };
 class CRPCTable
 {
 public:
-    CRPCTable();
-    const CRPCCommand* operator[](std::string name) const;
-    std::string help(std::string name) const;
+  CRPCTable();
+  const CRPCCommand* operator[](std::string name) const;
+  std::string help(std::string name) const;
 
-    const json_spirit::Value operator()() const;
+  const json_spirit::Value operator()() const;
 
-    /**
-     * Execute a method.
-     * @param method   Method to execute
-     * @param params   Array of arguments (JSON objects)
-     * @returns Result of the call.
-     * @throws an exception (json_spirit::Value) when an error happens.
-     */
-    json_spirit::Value execute(const std::string &method, const json_spirit::Array &params) const;
+  /**
+   * Execute a method.
+   * @param method   Method to execute
+   * @param params   Array of arguments (JSON objects)
+   * @returns Result of the call.
+   * @throws an exception (json_spirit::Value) when an error happens.
+   */
+  json_spirit::Value execute(const std::string &method, const json_spirit::Array &params) const;
 private:
-    std::map<std::string, const CRPCCommand*> mapCommands;
+  std::map<std::string, const CRPCCommand*> mapCommands;
 };
 
 extern const CRPCTable tableRPC;
@@ -155,7 +152,12 @@ extern json_spirit::Value getconnectioncount(const json_spirit::Array& params, b
 extern json_spirit::Value getpeerinfo(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value gw1(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value vertexScan(const json_spirit::Array& params, bool fHelp);
-extern json_spirit::Value getVertex(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value integratedTest1(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value integratedTest2(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value integratedTest3(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value integratedTest4(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value integratedTest5(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value integratedTest6(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value importwalletRT(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value dumpwalletRT(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value importwallet(const json_spirit::Array& params, bool fHelp);
@@ -268,40 +270,34 @@ extern json_spirit::Value mapVertex(const json_spirit::Array& params, bool fHelp
 extern json_spirit::Value vtxtrace(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value svtx(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value sendMessage(const json_spirit::Array& params, bool fHelp);
-extern json_spirit::Value registerPath(const json_spirit::Array& params, bool fHelp);
-extern json_spirit::Value registerVertex(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value registerAlias(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value uC(const json_spirit::Array& params, bool fHelp);
-extern json_spirit::Value registerPathGenerate(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value registerAliasGenerate(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value mapProject(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value alias(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value statusList(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value downloadDecrypt(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value simplexU(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value downloadDecryptEPID(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value extract(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value updateEncrypt(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value ioget(const json_spirit::Array& params, bool fHelp);
-extern json_spirit::Value transferPath(const json_spirit::Array& params, bool fHelp);
-extern json_spirit::Value transferEncryptedPath(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value transferAlias(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value transferEncryptedAlias(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value psimplex(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value transferEncryptedExtPredicate(const json_spirit::Array& params, bool fHelp);
-extern json_spirit::Value lookupStoragePath(const json_spirit::Array& params, bool fHelp);
-extern json_spirit::Value decryptPath(const json_spirit::Array& params, bool fHelp);
-extern json_spirit::Value decryptPath_cycle(const json_spirit::Array& params, bool fHelp);
-extern json_spirit::Value integratedTest1(const json_spirit::Array& params, bool fHelp);
-extern json_spirit::Value integratedTest2(const json_spirit::Array& params, bool fHelp);
-extern json_spirit::Value integratedTest3(const json_spirit::Array& params, bool fHelp);
-extern json_spirit::Value integratedTest4(const json_spirit::Array& params, bool fHelp);
-extern json_spirit::Value ntxsearch(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value decryptAlias(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value primaryCXValidate(const json_spirit::Array& params, bool fHelp);
-extern json_spirit::Value updatePath(const json_spirit::Array& params, bool fHelp);
-extern json_spirit::Value updatePathFile(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value updateAlias(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value projectCache(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value updateAliasFile(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value transientStatus__(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value transientStatus__C(const json_spirit::Array& params, bool fHelp);
-extern json_spirit::Value updateEncryptedPath(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value updateEncryptedAlias(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value validate(const json_spirit::Array& params, bool fHelp);
-extern json_spirit::Value updateEncryptedPathFile(const json_spirit::Array& params, bool fHelp);
-extern json_spirit::Value transferPath(const json_spirit::Array& params, bool fHelp);
-extern json_spirit::Value transferEncryptedPath(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value updateEncryptedAliasFile(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value transferAlias(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value transferEncryptedAlias(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value aliasOut(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value externFrame__(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value internFrame__(const json_spirit::Array& params, bool fHelp);
