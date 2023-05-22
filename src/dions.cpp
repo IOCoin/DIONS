@@ -5885,6 +5885,14 @@ Value projectCache(const Array& params, bool fHelp)
 
   uint160 hash160;
   bool isValid = AddressToHash160(address.ToString(), hash160);
+  std::vector<unsigned char> payload(hash160.begin(), hash160.end());
+  vchType cacheData = vchFromString(params[2].get_str());
+  payload.insert(payload.end(), cacheData.begin(), cacheData.end());
+
+  uint256 hash256 = Hash(payload.begin(), payload.end());
+
+  std::vector<unsigned char> transmission_cache(hash256.begin(),hash256.end());
+  transmission_cache.insert(transmission_cache.end(), payload.begin(), payload.end());
 
   __wx__Tx wtx;
   wtx.nVersion = CTransaction::DION_TX_VERSION;
