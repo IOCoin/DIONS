@@ -1,6 +1,6 @@
 ## I/O Coin Application Based Blockchain Platform 
 
-MAIN-LEGACY 
+The MAIN-LEGACY branch of our I/O Coin Application Based Blockchain Platform is the definitive, production-ready version of our codebase. It is currently operational on the mainnet and contains all finalized and thoroughly tested features and enhancements. Exchanges and other partners should pull from this branch for integration purposes, as it represents the most stable and up-to-date version of our platform.
 
 For: Data, Communications, Privacy and Payments
   
