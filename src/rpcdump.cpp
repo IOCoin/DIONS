@@ -1,14 +1,7 @@
-
-
-
-// Copyright (c) 2009-2012 Bitcoin Developers
-// Distributed under the MIT/X11 software license, see the accompanying
-// file COPYING or http://www.opensource.org/licenses/mit-license.php.
-
 #include <iostream>
 #include <fstream>
 
-#include "init.h" // for pwalletMain
+#include "init.h"
 #include "bitcoinrpc.h"
 #include "ui_interface.h"
 #include "base58.h"
@@ -32,8 +25,8 @@ void EnsureWalletIsUnlocked();
 namespace bt = boost::posix_time;
 
 extern int checkAddress(string addr, cba& a);
-// Extended DecodeDumpTime implementation, see this page for details:
-// http://stackoverflow.com/questions/3786201/parsing-of-date-time-from-string-boost
+
+
 const std::locale formats[] =
 {
   std::locale(std::locale::classic(),new bt::time_input_facet("%Y-%m-%dT%H:%M:%SZ")),
@@ -163,7 +156,7 @@ Value importprivkey(const Array& params, bool fHelp)
     pwalletMain->MarkDirty();
     pwalletMain->SetAddressBookName(vchAddress, strLabel);
 
-    // Don't throw error in case a key is already there
+
     if (pwalletMain->HaveKey(vchAddress))
     {
       return Value::null;
@@ -176,8 +169,8 @@ Value importprivkey(const Array& params, bool fHelp)
       throw JSONRPCError(RPC_WALLET_ERROR, "Error adding key to wallet");
     }
 
-    // whenever a key is imported, we need to scan the whole chain
-    pwalletMain->nTimeFirstKey = 1; // 0 would be considered 'no value'
+
+    pwalletMain->nTimeFirstKey = 1;
 
     pwalletMain->ScanForWalletTransactions(pindexGenesisBlock, true);
     pwalletMain->ReacceptWalletTransactions();
@@ -364,7 +357,7 @@ Value dumpwalletRT(const Array& params, bool fHelp)
 
   pwalletMain->GetAllReserveKeys(setKeyPool);
 
-  // sort time/key pairs
+
   std::vector<std::pair<int64_t, CKeyID> > vKeyBirth;
   for (std::map<CKeyID, int64_t>::const_iterator it = mapKeyBirth.begin(); it != mapKeyBirth.end(); it++)
   {
@@ -373,7 +366,7 @@ Value dumpwalletRT(const Array& params, bool fHelp)
   mapKeyBirth.clear();
   std::sort(vKeyBirth.begin(), vKeyBirth.end());
 
-  // produce output
+
   file << strprintf("# Wallet dump created by I/OCoin %s (%s)\n", CLIENT_BUILD.c_str(), CLIENT_DATE.c_str());
   file << strprintf("# * Created on %s\n", EncodeDumpTime(GetTime()).c_str());
   file << strprintf("# * Best block at time of backup was %i (%s),\n", nBestHeight, hashBestChain.ToString().c_str());
@@ -485,7 +478,7 @@ Value ydwiWhldw_base_diff(const Array& params, bool fHelp)
       pwalletMain->TopUpKeyPool();
     }
 
-    // Generate a new key that is added to wallet
+
     CPubKey newKey;
     if(!pwalletMain->GetKeyFromPool(newKey, false))
     {
@@ -539,7 +532,7 @@ Value importwallet(const Array& params, bool fHelp)
 
   bool fGood = true;
 
-  //ydwi base
+
   while (file.good())
   {
     std::string line;
@@ -726,7 +719,7 @@ Value dumpwallet(const Array& params, bool fHelp)
 
   pwalletMain->GetAllReserveKeys(setKeyPool);
 
-  // sort time/key pairs
+
   std::vector<std::pair<int64_t, CKeyID> > vKeyBirth;
   for (std::map<CKeyID, int64_t>::const_iterator it = mapKeyBirth.begin(); it != mapKeyBirth.end(); it++)
   {
@@ -735,7 +728,7 @@ Value dumpwallet(const Array& params, bool fHelp)
   mapKeyBirth.clear();
   std::sort(vKeyBirth.begin(), vKeyBirth.end());
 
-  // produce output
+
   file << strprintf("# Wallet dump created by I/OCoin %s (%s)\n", CLIENT_BUILD.c_str(), CLIENT_DATE.c_str());
   file << strprintf("# * Created on %s\n", EncodeDumpTime(GetTime()).c_str());
   file << strprintf("# * Best block at time of backup was %i (%s),\n", nBestHeight, hashBestChain.ToString().c_str());
@@ -820,7 +813,7 @@ Value trc(const Array& params, bool fHelp)
     );
 
   EnsureWalletIsUnlocked();
-  //init track
+
   ifstream file;
   file.open(params[0].get_str().c_str());
   if (!file.is_open())

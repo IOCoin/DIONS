@@ -1,35 +1,3 @@
-
-
-
-/*-
- * Copyright 2009 Colin Percival, 2011 ArtForz, 2011 pooler, 2013 Balthazar
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
- * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
- *
- * This file was originally written by Colin Percival as part of the Tarsnap
- * online backup system.
- */
-
 #include <stdlib.h>
 #include <stdint.h>
 
@@ -44,7 +12,7 @@
 #if defined (OPTIMIZED_SALSA) && ( defined (__x86_64__) || defined (__i386__) || defined(__arm__) )
 extern "C" void scrypt_core(unsigned int *X, unsigned int *V);
 #else
-// Generic scrypt_core implementation
+
 
 static inline void xor_salsa8(unsigned int B[16], const unsigned int Bx[16])
 {
@@ -69,8 +37,8 @@ static inline void xor_salsa8(unsigned int B[16], const unsigned int Bx[16])
   x15 = (B[15] ^= Bx[15]);
   for (i = 0; i < 8; i += 2)
   {
-#define R(a, b) (((a) << (b)) | ((a) >> (32 - (b))))
-    /* Operate on columns. */
+#define R(a,b) (((a) << (b)) | ((a) >> (32 - (b))))
+
     x04 ^= R(x00+x12, 7);
     x09 ^= R(x05+x01, 7);
     x14 ^= R(x10+x06, 7);
@@ -91,7 +59,7 @@ static inline void xor_salsa8(unsigned int B[16], const unsigned int Bx[16])
     x10 ^= R(x06+x02,18);
     x15 ^= R(x11+x07,18);
 
-    /* Operate on rows. */
+
     x01 ^= R(x00+x03, 7);
     x06 ^= R(x05+x04, 7);
     x11 ^= R(x10+x09, 7);
@@ -155,10 +123,10 @@ static inline void scrypt_core(unsigned int *X, unsigned int *V)
 
 #endif
 
-/* cpu and memory intensive function to transform a 80 byte buffer into a 32 byte output
-   scratchpad size needs to be at least 63 + (128 * r * p) + (256 * r + 64) + (128 * r * N) bytes
-   r = 1, p = 1, N = 1024
- */
+
+
+
+
 
 uint256 scrypt_nosalt(const void* input, size_t inputlen, void *scratchpad)
 {
@@ -219,4 +187,3 @@ uint256 scrypt_blockhash(const void* input)
   unsigned char scratchpad[SCRYPT_BUFFER_SIZE];
   return scrypt_nosalt(input, 80, scratchpad);
 }
-

@@ -1,10 +1,3 @@
-
-
-
-//
-// Alert system
-//
-
 #include <algorithm>
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/replace.hpp>
@@ -24,7 +17,7 @@ CCriticalSection cs_mapAlerts;
 
 static const char* pszMainKey = "04d2045ae17f45675e7c0eaa19d47fca3462defec5a713a7eda2bd04b86fafc8a2eece56562025fc131cf03bd96f3501dfb0ac0f2faa5557d69f7a7778711994f1";
 
-// TestNet alerts pubKey
+
 static const char* pszTestKey = "0434fba4959f7c6980f91a0ce0ed0dce5d78634da9590abe7182425538986462b7a64b503b48673b828ab6979081da78c7de0a52f565cc296de67a7d02b6e4085b";
 
 void CUnsignedAlert::SetNull()
@@ -113,14 +106,14 @@ bool CAlert::Cancels(const CAlert& alert) const
 {
   if (!IsInEffect())
   {
-    return false;  // this was a no-op before 31403
+    return false;
   }
   return (alert.nID <= nCancel || setCancel.count(alert.nID));
 }
 
 bool CAlert::AppliesTo(int nVersion, std::string strSubVerIn) const
 {
-  // TODO: rework for client-version-embedded-in-strSubVer ?
+
   return (IsInEffect() &&
           nMinVer <= nVersion && nVersion <= nMaxVer &&
           (setSubVer.empty() || setSubVer.count(strSubVerIn)));
@@ -137,7 +130,7 @@ bool CAlert::RelayTo(CNode* pnode) const
   {
     return false;
   }
-  // returns true if wasn't already contained in the set
+
   if (pnode->setKnown.insert(GetHash()).second)
   {
     if (AppliesTo(pnode->nVersion, pnode->strSubVer) ||
@@ -163,7 +156,7 @@ bool CAlert::CheckSignature() const
     return error("CAlert::CheckSignature() : verify signature failed");
   }
 
-  // Now unserialize the data
+
   CDataStream sMsg(vchMsg, SER_NETWORK, PROTOCOL_VERSION);
   sMsg >> *(CUnsignedAlert*)this;
   return true;
@@ -193,14 +186,7 @@ bool CAlert::ProcessAlert(bool fThread)
   {
     return false;
   }
-
-  // alert.nID=max is reserved for if the alert key is
-  // compromised. It must have a pre-defined message,
-  // must never expire, must apply to all versions,
-  // and must cancel all previous
-  // alerts or it will be ignored (so an attacker can't
-  // send an "everything is OK, don't panic" version that
-  // cannot be overridden):
+# 201 "alert.cpp"
   int maxInt = std::numeric_limits<int>::max();
   if (nID == maxInt)
   {
@@ -220,7 +206,7 @@ bool CAlert::ProcessAlert(bool fThread)
 
   {
     LOCK(cs_mapAlerts);
-    // Cancel previous alerts
+
     for (map<uint256, CAlert>::iterator mi = mapAlerts.begin(); mi != mapAlerts.end();)
     {
       const CAlert& alert = (*mi).second;
@@ -242,7 +228,7 @@ bool CAlert::ProcessAlert(bool fThread)
       }
     }
 
-    // Check if this alert has been cancelled
+
     BOOST_FOREACH(PAIRTYPE(const uint256, CAlert)& item, mapAlerts)
     {
       const CAlert& alert = item.second;
@@ -253,21 +239,21 @@ bool CAlert::ProcessAlert(bool fThread)
       }
     }
 
-    // Add to mapAlerts
+
     mapAlerts.insert(make_pair(GetHash(), *this));
-    // Notify UI and -alertnotify if it applies to me
+
     if(AppliesToMe())
     {
       uiInterface.NotifyAlertChanged(GetHash(), CT_NEW);
       std::string strCmd = GetArg("-alertnotify", "");
       if (!strCmd.empty())
       {
-        // Alert text should be plain ascii coming from a trusted source, but to
-        // be safe we first strip anything not in safeChars, then add single quotes around
-        // the whole string before passing it to the shell:
+
+
+
         std::string singleQuote("'");
-        // safeChars chosen to allow simple messages/URLs/email addresses, but avoid anything
-        // even possibly remotely dangerous like & or >
+
+
         std::string safeChars("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890 .,;_/:?@");
         std::string safeStatus;
         for (std::string::size_type i = 0; i < strStatusBar.size(); i++)
@@ -282,7 +268,7 @@ bool CAlert::ProcessAlert(bool fThread)
 
         if (fThread)
         {
-          boost::thread t(runCommand, strCmd);  // thread runs free
+          boost::thread t(runCommand, strCmd);
         }
         else
         {

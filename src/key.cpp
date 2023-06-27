@@ -1,10 +1,3 @@
-
-
-
-// Copyright (c) 2009-2012 The Bitcoin developers
-// Distributed under the MIT/X11 software license, see the accompanying
-// file COPYING or http://www.opensource.org/licenses/mit-license.php.
-
 #include <map>
 
 #include <openssl/ecdsa.h>
@@ -95,7 +88,7 @@ void __conv_intern__x__(__conv__intern__* c)
   BN_free(c->s7);
 }
 
-// Generate a private key from just the secret parameter
+
 int EC_KEY_regenerate_key(EC_KEY *eckey, BIGNUM *priv_key)
 {
   int ok = 0;
@@ -145,9 +138,9 @@ err:
   return(ok);
 }
 
-// Perform ECDSA key recovery (see SEC1 4.1.6) for curves over (mod p)-fields
-// recid selects which key is recovered
-// if check is non-zero, additional checks are performed
+
+
+
 int ECDSA_SIG_recover_key_GFp(EC_KEY *eckey, ECDSA_SIG *ecsig, const unsigned char *msg, int msglen, int recid, int check)
 {
   if (!eckey)
@@ -422,7 +415,7 @@ int CompareBigEndian(const unsigned char *c1, size_t c1len, const unsigned char 
   return 0;
 }
 
-// Order of secp256k1's generator minus 1.
+
 const unsigned char vchMaxModOrder[32] =
 {
   0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
@@ -431,7 +424,7 @@ const unsigned char vchMaxModOrder[32] =
   0xBF,0xD2,0x5E,0x8C,0xD0,0x36,0x41,0x40
 };
 
-// Half of the order of secp256k1's generator minus 1.
+
 const unsigned char vchMaxModHalfOrder[32] =
 {
   0x7F,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
@@ -466,19 +459,19 @@ bool CKey::SetPrivKey(const CPrivKey& vchPrivKey)
   const unsigned char* pbegin = &vchPrivKey[0];
   if (d2i_ECPrivateKey(&pkey, &pbegin, vchPrivKey.size()))
   {
-    // In testing, d2i_ECPrivateKey can return true
-    // but fill in pkey with a key that fails
-    // EC_KEY_check_key, so:
+
+
+
     if (EC_KEY_check_key(pkey))
     {
       fSet = true;
       return true;
     }
   }
-  // If vchPrivKey data is bad d2i_ECPrivateKey() can
-  // leave pkey in a state where calling EC_KEY_free()
-  // crashes. To avoid that, set pkey to NULL and
-  // leak the memory (a leak is better than a crash)
+
+
+
+
   pkey = NULL;
   Reset();
   return false;
@@ -604,9 +597,9 @@ bool CKey::Sign(uint256 hash, std::vector<unsigned char>& vchSig)
   ECDSA_SIG_get0(sig, &pr, &ps);
   if (BN_cmp(ps, halforder) > 0)
   {
-    // enforce low S values, by negating the value (modulo the order) if above order/2.
+
     BIGNUM* r=0;
-    r  = BN_dup(pr);
+    r = BN_dup(pr);
     BIGNUM* s=0;
     s = BN_new();
     BN_sub(s, order, ps);
@@ -615,19 +608,19 @@ bool CKey::Sign(uint256 hash, std::vector<unsigned char>& vchSig)
   BN_CTX_end(ctx);
   BN_CTX_free(ctx);
   unsigned int nSize = ECDSA_size(pkey);
-  vchSig.resize(nSize); // Make sure it is big enough
+  vchSig.resize(nSize);
   unsigned char *pos = &vchSig[0];
   nSize = i2d_ECDSA_SIG(sig, &pos);
   ECDSA_SIG_free(sig);
-  vchSig.resize(nSize); // Shrink to fit actual size
+  vchSig.resize(nSize);
 
   return true;
 }
 
-// create a compact signature (65 bytes), which allows reconstructing the used public key
-// The format is one header byte, followed by two times 32 bytes for the serialized r and s values.
-// The header byte: 0x1B = first key with even y, 0x1C = first key with odd y,
-//                  0x1D = second key with even y, 0x1E = second key with odd y
+
+
+
+
 bool CKey::SignCompact(uint256 hash, std::vector<unsigned char>& vchSig)
 {
   bool fOk = false;
@@ -677,10 +670,10 @@ bool CKey::SignCompact(uint256 hash, std::vector<unsigned char>& vchSig)
   return fOk;
 }
 
-// reconstruct public key from a compact signature
-// This is only slightly more CPU intensive than just verifying it.
-// If this function succeeds, the recovered public key is guaranteed to be valid
-// (the signature is a valid signature of the given data for that key)
+
+
+
+
 bool CKey::SetCompactSignature(uint256 hash, const std::vector<unsigned char>& vchSig)
 {
   if (vchSig.size() != 65)
@@ -720,7 +713,7 @@ bool CKey::SetCompactSignature(uint256 hash, const std::vector<unsigned char>& v
 
 bool CKey::Verify(uint256 hash, const std::vector<unsigned char>& vchSig)
 {
-  // -1 = error, 0 = bad sig, 1 = good
+
   if (ECDSA_verify(0, (unsigned char*)&hash, sizeof(hash), &vchSig[0], vchSig.size(), pkey) != 1)
   {
     return false;
@@ -1226,4 +1219,3 @@ int __synth_piv__conv71__outer(__im__& t, __im__& i,
 
   return 0;
 }
-

@@ -1,11 +1,3 @@
-
-
-
-// Copyright (c) 2010 Satoshi Nakamoto
-// Copyright (c) 2009-2012 The Bitcoin developers
-// Distributed under the MIT/X11 software license, see the accompanying
-// file COPYING or http://www.opensource.org/licenses/mit-license.php.
-
 #include "main.h"
 #include "bitcoinrpc.h"
 #include "kernel.h"
@@ -21,8 +13,8 @@ extern enum Checkpoints::CPMode CheckpointsMode;
 
 double GetDifficulty(const CBlockIndex* blockindex)
 {
-  // Floating point number that is a multiple of the minimum difficulty,
-  // minimum difficulty = 1.0.
+
+
   if (blockindex == NULL)
   {
     if (pindexBest == NULL)
@@ -239,7 +231,7 @@ Value getpowblocksleft(const Array& params, bool fHelp)
          0 : LAST_POW_BLOCK - powHeight;
 }
 
-// TODO: Move somewhere more accessible
+
 double GetBlocktime(CBlockIndex * block, int blocks,
                     bool proofOfWork, bool proofOfStake)
 {
@@ -319,9 +311,9 @@ Value getdifficulty(const Array& params, bool fHelp)
       "Returns the difficulty as a multiple of the minimum difficulty.");
 
   Object obj;
-  obj.push_back(Pair("proof-of-work",        GetDifficulty()));
-  obj.push_back(Pair("proof-of-stake",       GetDifficulty(GetLastBlockIndex(pindexBest, true))));
-  obj.push_back(Pair("search-interval",      (int)nLastCoinStakeSearchInterval));
+  obj.push_back(Pair("proof-of-work", GetDifficulty()));
+  obj.push_back(Pair("proof-of-stake", GetDifficulty(GetLastBlockIndex(pindexBest, true))));
+  obj.push_back(Pair("search-interval", (int)nLastCoinStakeSearchInterval));
   return obj;
 }
 
@@ -334,7 +326,7 @@ Value settxfee(const Array& params, bool fHelp)
       "<amount> is a real and is rounded to the nearest 0.01");
 
   nTransactionFee = AmountFromValue(params[0]);
-  nTransactionFee = (nTransactionFee / CENT) * CENT;  // round to cent
+  nTransactionFee = (nTransactionFee / CENT) * CENT;
 
   return true;
 }
@@ -425,7 +417,7 @@ Value getblockbynumber(const Array& params, bool fHelp)
   return blockToJSON(block, pblockindex, params.size() > 1 ? params[1].get_bool() : false);
 }
 
-// ppcoin: get information of sync-checkpoint
+
 Value getcheckpoint(const Array& params, bool fHelp)
 {
   if (fHelp || params.size() != 0)
@@ -441,7 +433,7 @@ Value getcheckpoint(const Array& params, bool fHelp)
   result.push_back(Pair("height", pindexCheckpoint->nHeight));
   result.push_back(Pair("timestamp", DateTimeStrFormat(pindexCheckpoint->GetBlockTime()).c_str()));
 
-  // Check that the block satisfies synchronized checkpoint
+
   if (CheckpointsMode == Checkpoints::STRICT)
   {
     result.push_back(Pair("policy", "strict"));

@@ -1,8 +1,3 @@
-
-// Copyright (c) 2009-2010 Satoshi Nakamoto
-// Copyright (c) 2009-2012 The Bitcoin developers
-// Distributed under the MIT/X11 software license, see the accompanying
-// file COPYING or http://www.opensource.org/licenses/mit-license.php.
 #include "txdb.h"
 #include "walletdb.h"
 #include "bitcoinrpc.h"
@@ -17,8 +12,11 @@
 #include <boost/interprocess/sync/file_lock.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <openssl/crypto.h>
+
 #include "ptrie/DBFactory.h"
 #include "ptrie/OverlayDB.h"
+#include "ptrie/TrieDB.h"
+#include "ptrie/Address.h"
 
 #include "main.h"
 
@@ -41,13 +39,13 @@ unsigned int nMinerSleep;
 string strDNSSeedNode;
 bool fUseFastIndex;
 enum Checkpoints::CPMode CheckpointsMode;
-LocatorNodeDB*       ln1Db = NULL;
-VertexNodeDB*   vertexDB__ = NULL;
-dev::OverlayDB* overlayDB_ = NULL;
-//////////////////////////////////////////////////////////////////////////////
-//
-// Shutdown
-//
+LocatorNodeDB* ln1Db = NULL;
+VertexNodeDB* vertexDB__ = NULL;
+dev::OverlayDB* overlayDB__ = NULL;
+
+
+
+
 
 void ExitTimeout(void* parg)
 {
@@ -60,10 +58,10 @@ void ExitTimeout(void* parg)
 void StartShutdown()
 {
 #ifdef QT_GUI
-  // ensure we leave the Qt main loop for a clean GUI exit (Shutdown() is called in bitcoin.cpp afterwards)
+
   uiInterface.QueueShutdown();
 #else
-  // Without UI, Shutdown() can simply be started in a new thread
+
   NewThread(Shutdown, NULL);
 #endif
 }
@@ -73,7 +71,7 @@ void Shutdown(void* parg)
   static CCriticalSection cs_Shutdown;
   static bool fTaken;
 
-  // Make this thread recognisable as the shutdown thread
+
   RenameThread("iocoin-shutoff");
 
   bool fFirstThread = false;
@@ -97,12 +95,13 @@ void Shutdown(void* parg)
     UnregisterWallet(pwalletMain);
     delete pwalletMain;
     delete ln1Db;
+    delete overlayDB__;
     NewThread(ExitTimeout, NULL);
     MilliSleep(50);
     printf("I/OCoin exited\n\n");
     fExit = true;
 #ifndef QT_GUI
-    // ensure non-UI client gets exited here, but let Bitcoin-Qt reach 'return 0;' in bitcoin.cpp
+
     exit(0);
 #endif
   }
@@ -126,25 +125,17 @@ void HandleSIGHUP(int)
 {
   fReopenDebugLog = true;
 }
-
-
-
-
-
-//////////////////////////////////////////////////////////////////////////////
-//
-// Start
-//
+# 141 "init.cpp"
 #if !defined(QT_GUI)
 bool AppInit(int argc, char* argv[])
 {
   bool fRet = false;
   try
   {
-    //
-    // Parameters
-    //
-    // If Qt is used, parameters/bitcoin.conf are parsed in qt/bitcoin.cpp's main()
+
+
+
+
     ParseParameters(argc, argv);
     if (!boost::filesystem::is_directory(GetDataDir(false)))
     {
@@ -155,7 +146,7 @@ bool AppInit(int argc, char* argv[])
 
     if (mapArgs.count("-?") || mapArgs.count("--help"))
     {
-      // First part of help message is specific to bitcoind / RPC client
+
       std::string strUsage = _("I/OCoin version") + " " + FormatFullVersion() + "\n\n" +
                              _("Usage:") + "\n" +
                              "  iocoind [options]                     " + "\n" +
@@ -169,7 +160,7 @@ bool AppInit(int argc, char* argv[])
       return false;
     }
 
-    // Command-line RPC
+
     for (int i = 1; i < argc; i++)
       if (!IsSwitchChar(argv[i][0]) && !boost::algorithm::istarts_with(argv[i], "iocoin:"))
       {
@@ -204,7 +195,7 @@ int main(int argc, char* argv[])
 {
   bool fRet = false;
 
-  // Connect bitcoind signal handlers
+
   noui_connect();
 
   fRet = AppInit(argc, argv);
@@ -249,7 +240,7 @@ bool static Bind(const CService &addr, bool fError = true)
   return true;
 }
 
-// Core-specific options shared between UI and daemon
+
 std::string HelpMessage()
 {
   string strUsage = _("Options:") + "\n" +
@@ -265,7 +256,7 @@ std::string HelpMessage()
                     "  -socks=<n>             " + _("Select the version of socks proxy to use (4-5, default: 5)") + "\n" +
                     "  -tor=<ip:port>         " + _("Use proxy to reach tor hidden services (default: same as -proxy)") + "\n"
                     "  -dns                   " + _("Allow DNS lookups for -addnode, -seednode and -connect") + "\n" +
-                    "  -port=<port>           " + _("Listen for connections on <port> (default: 33764 or testnet: 43764)") + "\n" +
+                    "  -port=<port>           " + _("Listen for connections on <port> (default: 33764 or testnet: 1901)") + "\n" +
                     "  -maxconnections=<n>    " + _("Maintain at most <n> connections to peers (default: 125)") + "\n" +
                     "  -addnode=<ip>          " + _("Add a node to connect to and attempt to keep the connection open") + "\n" +
                     "  -connect=<ip>          " + _("Connect only to the specified node(s)") + "\n" +
@@ -308,7 +299,7 @@ std::string HelpMessage()
                     "  -rpcconnect=<ip>       " + _("Send commands to node running on <ip> (default: 127.0.0.1)") + "\n" +
                     "  -blocknotify=<cmd>     " + _("Execute command when the best block changes (%s in cmd is replaced by block hash)") + "\n" +
                     "  -walletnotify=<cmd>    " + _("Execute command when a wallet transaction changes (%s in cmd is replaced by TxID)") + "\n" +
-                    "  -zapwallettxes=<mode>" +  _("Delete all wallet transactions and only recover those parts of the blockchain through -rescan on startup") +
+                    "  -zapwallettxes=<mode>" + _("Delete all wallet transactions and only recover those parts of the blockchain through -rescan on startup") +
                     "  -confchange            " + _("Require a confirmations for change (default: 0)") + "\n" +
                     "  -enforcecanonical      " + _("Enforce transaction scripts to use canonical PUSH operators (default: 1)") + "\n" +
                     "  -alertnotify=<cmd>     " + _("Execute command when a relevant alert is received (%s in cmd is replaced by message)") + "\n" +
@@ -322,9 +313,9 @@ std::string HelpMessage()
                     "  -loadblock=<file>      " + _("Imports blocks from external blk000?.dat file") + "\n" +
 
                     "\n" + _("Block creation options:") + "\n" +
-                    "  -blockminsize=<n>      "   + _("Set minimum block size in bytes (default: 0)") + "\n" +
-                    "  -blockmaxsize=<n>      "   + _("Set maximum block size in bytes (default: 250000)") + "\n" +
-                    "  -blockprioritysize=<n> "   + _("Set maximum size of high-priority/low-fee transactions in bytes (default: 27000)") + "\n" +
+                    "  -blockminsize=<n>      " + _("Set minimum block size in bytes (default: 0)") + "\n" +
+                    "  -blockmaxsize=<n>      " + _("Set maximum block size in bytes (default: 250000)") + "\n" +
+                    "  -blockprioritysize=<n> " + _("Set maximum size of high-priority/low-fee transactions in bytes (default: 27000)") + "\n" +
 
                     "\n" + _("SSL options: (see the Bitcoin Wiki for SSL setup instructions)") + "\n" +
                     "  -rpcssl                                  " + _("Use OpenSSL (https) for JSON-RPC connections") + "\n" +
@@ -335,10 +326,10 @@ std::string HelpMessage()
   return strUsage;
 }
 
-/** Sanity checks
- *  Ensure that Bitcoin is running in a usable environment with all
- *  necessary library support.
- */
+
+
+
+
 bool InitSanityCheck(void)
 {
   if(!ECC_InitSanityCheck())
@@ -348,33 +339,33 @@ bool InitSanityCheck(void)
     return false;
   }
 
-  // TODO: remaining sanity checks, see #4081
+
 
   return true;
 }
 
-/** Initialize bitcoin.
- *  @pre Parameters should be parsed and config file should be read.
- */
+
+
+
 bool AppInit2()
 {
-  // ********************************************************* Step 1: setup
+
 #ifdef _MSC_VER
-  // Turn off Microsoft heap dump noise
+
   _CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_FILE);
   _CrtSetReportFile(_CRT_WARN, CreateFileA("NUL", GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, 0));
 #endif
 #if _MSC_VER >= 1400
-  // Disable confusing "helpful" text message on abort, Ctrl-C
+
   _set_abort_behavior(0, _WRITE_ABORT_MSG | _CALL_REPORTFAULT);
 #endif
 #ifdef WIN32
-  // Enable Data Execution Prevention (DEP)
-  // Minimum supported OS versions: WinXP SP3, WinVista >= SP1, Win Server 2008
-  // A failure is non-critical and needs no further attention!
+
+
+
 #ifndef PROCESS_DEP_ENABLE
-// We define this here, because GCCs winbase.h limits this to _WIN32_WINNT >= 0x0601 (Windows 7),
-// which is not correct. Can be removed, when GCCs winbase.h is fixed!
+
+
 #define PROCESS_DEP_ENABLE 0x00000001
 #endif
   typedef BOOL (WINAPI *PSETPROCDEPPOL)(DWORD);
@@ -387,7 +378,7 @@ bool AppInit2()
 #ifndef WIN32
   umask(077);
 
-  // Clean shutdown on SIGTERM
+
   struct sigaction sa;
   sa.sa_handler = HandleSIGTERM;
   sigemptyset(&sa.sa_mask);
@@ -395,7 +386,7 @@ bool AppInit2()
   sigaction(SIGTERM, &sa, NULL);
   sigaction(SIGINT, &sa, NULL);
 
-  // Reopen debug.log on SIGHUP
+
   struct sigaction sa_hup;
   sa_hup.sa_handler = HandleSIGHUP;
   sigemptyset(&sa_hup.sa_mask);
@@ -403,7 +394,7 @@ bool AppInit2()
   sigaction(SIGHUP, &sa_hup, NULL);
 #endif
 
-  // ********************************************************* Step 2: parameter interactions
+
 
   nNodeLifespan = GetArg("-addrlifespan", 7);
   fUseFastIndex = GetBoolArg("-fastindex", true);
@@ -456,43 +447,43 @@ bool AppInit2()
 
   if (mapArgs.count("-bind"))
   {
-    // when specifying an explicit binding address, you want to listen on it
-    // even when -connect or -proxy is specified
+
+
     SoftSetBoolArg("-listen", true);
   }
 
   if (mapArgs.count("-connect") && mapMultiArgs["-connect"].size() > 0)
   {
-    // when only connecting to trusted nodes, do not seed via DNS, or listen by default
+
     SoftSetBoolArg("-dnsseed", false);
     SoftSetBoolArg("-listen", false);
   }
 
   if (mapArgs.count("-proxy"))
   {
-    // to protect privacy, do not listen by default if a proxy server is specified
+
     SoftSetBoolArg("-listen", false);
   }
 
   if (!GetBoolArg("-listen", true))
   {
-    // do not map ports or try to retrieve public IP when not listening (pointless)
+
     SoftSetBoolArg("-discover", false);
   }
 
   if (mapArgs.count("-externalip"))
   {
-    // if an explicit public IP is specified, do not try to find others
+
     SoftSetBoolArg("-discover", false);
   }
 
   if (GetBoolArg("-salvagewallet"))
   {
-    // Rewrite just private keys: rescan to find transactions
+
     SoftSetBoolArg("-rescan", true);
   }
 
-  // -zapwallettx implies a rescan
+
   if (GetBoolArg("-zapwallettxes", false))
   {
     if (SoftSetBoolArg("-rescan", true))
@@ -501,11 +492,11 @@ bool AppInit2()
     }
   }
 
-  // ********************************************************* Step 3: parameter-to-internal-flags
+
 
   fDebug = GetBoolArg("-debug");
 
-  // -debug implies fDebug*
+
   if (fDebug)
   {
     fDebugNet = true;
@@ -530,7 +521,7 @@ bool AppInit2()
     fServer = GetBoolArg("-server");
   }
 
-  /* force fServer when running without GUI */
+
 #if !defined(QT_GUI)
   fServer = true;
 #endif
@@ -570,8 +561,8 @@ bool AppInit2()
     }
   }
 
-  // ********************************************************* Step 4: application initialization: dir lock, daemonize, pidfile, debug log
-  // Sanity check
+
+
   if (!InitSanityCheck())
   {
     return InitError(_("Initialization sanity check failed. I/OCoin is shutting down."));
@@ -580,15 +571,15 @@ bool AppInit2()
   std::string strDataDir = GetDataDir().string();
   std::string strWalletFileName = GetArg("-wallet", "wallet.dat");
 
-  // strWalletFileName must be a plain filename without a directory
+
   if (strWalletFileName != boost::filesystem::basename(strWalletFileName) + boost::filesystem::extension(strWalletFileName))
   {
     return InitError(strprintf(_("Wallet %s resides outside data directory %s."), strWalletFileName.c_str(), strDataDir.c_str()));
   }
 
-  // Make sure only a single Bitcoin process is using the data directory.
+
   boost::filesystem::path pathLockFile = GetDataDir() / ".lock";
-  FILE* file = fopen(pathLockFile.string().c_str(), "a"); // empty lock file; created if it doesn't exist.
+  FILE* file = fopen(pathLockFile.string().c_str(), "a");
   if (file)
   {
     fclose(file);
@@ -602,7 +593,7 @@ bool AppInit2()
 #if !defined(WIN32) && !defined(QT_GUI)
   if (fDaemon)
   {
-    // Daemonize
+
     pid_t pid = fork();
     if (pid < 0)
     {
@@ -645,7 +636,7 @@ bool AppInit2()
 
   int64_t nStart;
 
-  // ********************************************************* Step 5: verify database integrity
+
 
   uiInterface.InitMessage(_("Verifying database integrity..."));
 
@@ -659,7 +650,7 @@ bool AppInit2()
 
   if (GetBoolArg("-salvagewallet"))
   {
-    // Recover readable keypairs:
+
     if (!__wx__DB::Recover(bitdb, strWalletFileName, true))
     {
       return false;
@@ -683,7 +674,7 @@ bool AppInit2()
     }
   }
 
-  // ********************************************************* Step 6: network initialization
+
 
   int nSocksVersion = GetArg("-socks", 5);
 
@@ -739,7 +730,7 @@ bool AppInit2()
     fProxy = true;
   }
 
-  // -tor can override normal proxy, -notor disables tor entirely
+
   if (!(mapArgs.count("-tor") && mapArgs["-tor"] == "0") && (fProxy || mapArgs.count("-tor")))
   {
     CService addrOnion;
@@ -759,7 +750,7 @@ bool AppInit2()
     SetReachable(NET_TOR);
   }
 
-  // see Step 2: parameter interactions for more information about these
+
   fNoListen = !GetBoolArg("-listen", true);
   fDiscover = GetBoolArg("-discover", true);
   fNameLookup = GetBoolArg("-dns", true);
@@ -812,7 +803,7 @@ bool AppInit2()
     }
   }
 
-  if (mapArgs.count("-reservebalance")) // ppcoin: reserve balance amount
+  if (mapArgs.count("-reservebalance"))
   {
     if (!ParseMoney(mapArgs["-reservebalance"], nReserveBalance))
     {
@@ -821,7 +812,7 @@ bool AppInit2()
     }
   }
 
-  if (mapArgs.count("-checkpointkey")) // ppcoin: checkpoint master priv key
+  if (mapArgs.count("-checkpointkey"))
   {
     if (!Checkpoints::SetCheckpointPrivKey(GetArg("-checkpointkey", "")))
     {
@@ -832,48 +823,50 @@ bool AppInit2()
   BOOST_FOREACH(string strDest, mapMultiArgs["-seednode"])
   AddOneShot(strDest);
 
-  try
-  {
-    printf("Opening state database...\n");
-    std::unique_ptr<dev::db::DatabaseFace> db = dev::db::DBFactory::create(GetDataDir() / "state");
-    overlayDB_ = new dev::OverlayDB(std::move(db));
-  }
-  catch (boost::exception const& ex)
-  {
-    if (dev::db::isDiskDatabase())
+    try
     {
-      printf("Error opening state database\n");
-      dev::db::DatabaseStatus const dbStatus =
-        *boost::get_error_info<dev::db::errinfo_dbStatusCode>(ex);
-      if (boost::filesystem::space(GetDataDir() / "state").available < 1024)
-      {
-        return InitError("Insufficient disk space : "
-                         "Not enough available space on hard drive."
-                         "Please back up disk first - free up some space and then re run. Exiting.");
-      }
-      else if (dbStatus == dev::db::DatabaseStatus::Corruption)
-      {
-        printf("Database corruption detected. Please see the exception for corruption "
-               "details. Exception: %s\n", boost::diagnostic_information(ex));
-        throw runtime_error("Database corruption");
+        printf("Opening state database...\n");
+                  std::cout << "INIT OPEN STATE DB" << std::endl;
+        std::unique_ptr<dev::db::DatabaseFace> db = dev::db::DBFactory::create(GetDataDir() / "state");
+        overlayDB__ = new dev::OverlayDB(std::move(db));
+# 865 "init.cpp"
+    }
+    catch (boost::exception const& ex)
+    {
+        if (dev::db::isDiskDatabase())
+        {
+            printf("Error opening state database\n");
+            dev::db::DatabaseStatus const dbStatus =
+                *boost::get_error_info<dev::db::errinfo_dbStatusCode>(ex);
+            if (boost::filesystem::space(GetDataDir() / "state").available < 1024)
+            {
+                return InitError("Insufficient disk space : "
+                                 "Not enough available space on hard drive."
+                                 "Please back up disk first - free up some space and then re run. Exiting.");
+            }
+            else if (dbStatus == dev::db::DatabaseStatus::Corruption)
+            {
+                printf("Database corruption detected. Please see the exception for corruption "
+                        "details. Exception: %s\n", boost::diagnostic_information(ex));
+                throw runtime_error("Database corruption");
+                string msg = strprintf(_(
+                                           " Database corruption detected. Details : Exception %s\n"
+                                       ), boost::diagnostic_information(ex));
+                return InitError(msg);
+            }
+            else if (dbStatus == dev::db::DatabaseStatus::IOError)
+            {
+                return InitError("Database already open. You appear to have "
+                                 "another instance running on the same data path.");
+            }
+        }
         string msg = strprintf(_(
-                                 " Database corruption detected. Details : Exception %s\n"
+                                   "statedb: Unknown error encountered when opening state database. Details : Exception %s\n"
                                ), boost::diagnostic_information(ex));
         return InitError(msg);
-      }
-      else if (dbStatus == dev::db::DatabaseStatus::IOError)
-      {
-        return InitError("Database already open. You appear to have "
-                         "another instance running on the same data path.");
-      }
     }
-    string msg = strprintf(_(
-                             "statedb: Unknown error encountered when opening state database. Details : Exception %s\n"
-                           ), boost::diagnostic_information(ex));
-    return InitError(msg);
-  }
 
-  // ********************************************************* Step 7: load blockchain
+
 
   if (!bitdb.Open(GetDataDir()))
   {
@@ -900,9 +893,9 @@ bool AppInit2()
   }
 
 
-  // as LoadBlockIndex can take several minutes, it's possible the user
-  // requested to kill bitcoin-qt during the last operation. If so, exit.
-  // As the program has not fully started yet, Shutdown() is possibly overkill.
+
+
+
   if (fRequestShutdown)
   {
     printf("Shutdown requested. Exiting.\n");
@@ -941,7 +934,7 @@ bool AppInit2()
     return false;
   }
 
-  // ********************************************************* Step 8: load wallet
+
 
   if (GetBoolArg("-zapwallettxes", false))
   {
@@ -996,11 +989,11 @@ bool AppInit2()
   if (GetBoolArg("-upgradewallet", fFirstRun))
   {
     int nMaxVersion = GetArg("-upgradewallet", 0);
-    if (nMaxVersion == 0) // the -upgradewallet without argument case
+    if (nMaxVersion == 0)
     {
       printf("Performing wallet upgrade to %i\n", FEATURE_LATEST);
       nMaxVersion = CLIENT_VERSION;
-      pwalletMain->SetMinVersion(FEATURE_LATEST); // permanently upgrade the wallet immediately
+      pwalletMain->SetMinVersion(FEATURE_LATEST);
       std::map<CKeyID, int64_t> mk;
       pwalletMain->kt(mk);
 
@@ -1023,7 +1016,7 @@ bool AppInit2()
 
   if (fFirstRun && !fViewWallet)
   {
-    // Create new keyUser and set as default key
+
     RandAddSeedPerfmon();
 
     CPubKey newDefaultKey;
@@ -1087,7 +1080,7 @@ bool AppInit2()
     }
   }
 
-  // ********************************************************* Step 9: import blocks
+
 
   if (mapArgs.count("-loadblock"))
   {
@@ -1118,7 +1111,7 @@ bool AppInit2()
     }
   }
 
-  // ********************************************************* Step 10: load peers
+
 
   uiInterface.InitMessage(_("Loading addresses..."));
   printf("Loading addresses...\n");
@@ -1144,12 +1137,12 @@ bool AppInit2()
 
   RandAddSeedPerfmon();
 
-  //// debug print
-  printf("mapBlockIndex.size() = %" PRIszu "\n",   mapBlockIndex.size());
-  printf("nBestHeight = %d\n",            nBestHeight);
-  printf("setKeyPool.size() = %" PRIszu "\n",      pwalletMain->setKeyPool.size());
-  printf("mapWallet.size() = %" PRIszu "\n",       pwalletMain->mapWallet.size());
-  printf("mapAddressBook.size() = %" PRIszu "\n",  pwalletMain->mapAddressBook.size());
+
+  printf("mapBlockIndex.size() = %" PRIszu "\n", mapBlockIndex.size());
+  printf("nBestHeight = %d\n", nBestHeight);
+  printf("setKeyPool.size() = %" PRIszu "\n", pwalletMain->setKeyPool.size());
+  printf("mapWallet.size() = %" PRIszu "\n", pwalletMain->mapWallet.size());
+  printf("mapAddressBook.size() = %" PRIszu "\n", pwalletMain->mapAddressBook.size());
 
   if (!NewThread(StartNode, NULL))
   {
@@ -1161,7 +1154,7 @@ bool AppInit2()
     NewThread(ThreadRPCServer, NULL);
   }
 
-  // ********************************************************* Step 12: finished
+
 
   uiInterface.InitMessage(_("Done loading"));
   printf("Done loading\n");
@@ -1171,12 +1164,12 @@ bool AppInit2()
     return InitError(strErrors.str());
   }
 
-  // Add wallet transactions that aren't already in a block to mapTransactions
+
   pwalletMain->ReacceptWalletTransactions();
 
 #if !defined(QT_GUI)
-  // Loop until process is exit()ed from shutdown() function,
-  // called from ThreadRPCServer thread when a "stop" command is received.
+
+
   while (1)
   {
     MilliSleep(5000);

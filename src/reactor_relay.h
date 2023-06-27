@@ -1,8 +1,5 @@
-
-
-
 #ifndef REACTOR_RELAY
-#define REACTOR_RELAY
+#define REACTOR_RELAY 
 
 #include "bbuffer.h"
 
@@ -13,39 +10,41 @@
 class Encode__N
 {
 public:
-    Encode__N() : BASE__(-1) { }
-    int status__point(int n)
+  Encode__N() : BASE__(-1) { }
+  int status__point(int n)
+  {
+    int r, i;
+    if ((n % 2) == 0)
     {
-        int r, i;
-        if ((n % 2) == 0)
-            return 0;
-
-        r = (double) (sqrt((double)n));
-        for (i = 3; i <= r; i += 2)
-            if ((n % i) == 0)
-            {
-                return 0;
-            }
-        return 1;
+      return 0;
     }
 
-    int seek__node(int n)
-    {
-        do
-        {
-            n++;
-        }
-        while (!status__point(n));
-        return n;
-    }
+    r = (double) (sqrt((double)n));
+    for (i = 3; i <= r; i += 2)
+      if ((n % i) == 0)
+      {
+        return 0;
+      }
+    return 1;
+  }
 
-    bool conformal(int n)
+  int seek__node(int n)
+  {
+    do
     {
-        return this->BASE__ == n;
+      n++;
     }
+    while (!status__point(n));
+    return n;
+  }
+
+  bool conformal(int n)
+  {
+    return this->BASE__ == n;
+  }
 
 private:
-    long BASE__;
+  long BASE__;
 };
 
 class RLWE__CTRL__
@@ -54,15 +53,15 @@ class RLWE__CTRL__
 
 class Acceptor
 {
-    virtual void rwle__base() = 0;
-    virtual void rwle__trans__() = 0;
-    virtual void* operator()() = 0;
+  virtual void rwle__base() = 0;
+  virtual void rwle__trans__() = 0;
+  virtual void* operator()() = 0;
 };
 
 class ReactorRelay
 {
-    virtual void burstBufferCRC() = 0;
-    virtual void acceptor() = 0;
+  virtual void burstBufferCRC() = 0;
+  virtual void acceptor() = 0;
 };
 
 #endif

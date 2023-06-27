@@ -1,11 +1,3 @@
-
-
-
-// Copyright (c) 2009-2010 Satoshi Nakamoto
-// Copyright (c) 2009-2012 The Bitcoin developers
-// Distributed under the MIT/X11 software license, see the accompanying
-// file COPYING or http://www.opensource.org/licenses/mit-license.php.
-
 #include "db.h"
 #include "net.h"
 #include "util.h"
@@ -27,9 +19,9 @@ unsigned int nWalletDBUpdated;
 
 extern unsigned int scaleMonitor();
 
-//
-// CDB
-//
+
+
+
 
 CDBEnv bitdb;
 
@@ -48,7 +40,7 @@ void CDBEnv::EnvShutdown()
   }
   if (!fMockDb)
   {
-    DbEnv(0).remove(strPath.c_str(), 0);
+    DbEnv((u_int32_t)0).remove(strPath.c_str(), 0);
   }
 }
 
@@ -100,25 +92,25 @@ bool CDBEnv::Open(boost::filesystem::path pathEnv_)
   dbenv.set_lg_bsize(1048576);
   dbenv.set_lg_max(10485760);
 
-  // Bugfix: Bump lk_max_locks default to 537000, to safely handle reorgs with up to 5 blocks reversed
-  // dbenv.set_lk_max_locks(10000);
+
+
   dbenv.set_lk_max_locks(537000);
 
   dbenv.set_lk_max_objects(10000);
-  dbenv.set_errfile(fopen(pathErrorFile.string().c_str(), "a")); /// debug
+  dbenv.set_errfile(fopen(pathErrorFile.string().c_str(), "a"));
   dbenv.set_flags(DB_AUTO_COMMIT, 1);
   dbenv.set_flags(DB_TXN_WRITE_NOSYNC, 1);
 #ifdef DB_LOG_AUTO_REMOVE
   dbenv.log_set_config(DB_LOG_AUTO_REMOVE, 1);
 #endif
   int ret = dbenv.open(strPath.c_str(),
-                       DB_CREATE     |
-                       DB_INIT_LOCK  |
-                       DB_INIT_LOG   |
+                       DB_CREATE |
+                       DB_INIT_LOCK |
+                       DB_INIT_LOG |
                        DB_INIT_MPOOL |
-                       DB_INIT_TXN   |
-                       DB_THREAD     |
-                       DB_RECOVER    |
+                       DB_INIT_TXN |
+                       DB_THREAD |
+                       DB_RECOVER |
                        nEnvFlags,
                        S_IRUSR | S_IWUSR);
   if (ret != 0)
@@ -156,12 +148,12 @@ void CDBEnv::MakeMock()
   dbenv.log_set_config(DB_LOG_IN_MEMORY, 1);
 #endif
   int ret = dbenv.open(NULL,
-                       DB_CREATE     |
-                       DB_INIT_LOCK  |
-                       DB_INIT_LOG   |
+                       DB_CREATE |
+                       DB_INIT_LOCK |
+                       DB_INIT_LOG |
                        DB_INIT_MPOOL |
-                       DB_INIT_TXN   |
-                       DB_THREAD     |
+                       DB_INIT_TXN |
+                       DB_THREAD |
                        DB_PRIVATE,
                        S_IRUSR | S_IWUSR);
   if (ret > 0)
@@ -189,7 +181,7 @@ CDBEnv::VerifyResult CDBEnv::Verify(std::string strFile, bool (*recoverFunc)(CDB
     return RECOVER_FAIL;
   }
 
-  // Try to recover:
+
   bool fRecovered = (*recoverFunc)(*this, strFile);
   return (fRecovered ? RECOVER_OK : RECOVER_FAIL);
 }
@@ -224,19 +216,11 @@ bool CDBEnv::Salvage(std::string strFile, bool fAggressive,
     printf("ERROR: db salvage failed: %d\n",result);
     return false;
   }
-
-  // Format of bdb dump is ascii lines:
-  // header lines...
-  // HEADER=END
-  // hexadecimal key
-  // hexadecimal value
-  // ... repeated
-  // DATA=END
-
+# 233 "db.cpp"
   string strLine;
   while (!strDump.eof() && strLine != "HEADER=END")
   {
-    getline(strDump, strLine);  // Skip past header
+    getline(strDump, strLine);
   }
 
   std::string keyHex, valueHex;
@@ -307,11 +291,11 @@ CDB::CDB(const char *pszFile, const char* pszMode) :
         }
       }
 
-      ret = pdb->open(NULL,      // Txn pointer
-                      fMockDb ? NULL : pszFile,   // Filename
-                      "main",    // Logical db name
-                      DB_BTREE,  // Database type
-                      nFlags,    // Flags
+      ret = pdb->open(NULL,
+                      fMockDb ? NULL : pszFile,
+                      "main",
+                      DB_BTREE,
+                      nFlags,
                       0);
 
       if (ret != 0)
@@ -349,7 +333,7 @@ void CDB::Close()
   activeTxn = NULL;
   pdb = NULL;
 
-  // Flush database activity from memory pool to disk log
+
   unsigned int nMinutes = 0;
   if (fReadOnly)
   {
@@ -370,7 +354,7 @@ void CDBEnv::CloseDb(const string& strFile)
     LOCK(cs_db);
     if (mapDb[strFile] != NULL)
     {
-      // Close the database handle
+
       Db* pdb = mapDb[strFile];
       pdb->close(0);
       delete pdb;
@@ -396,7 +380,7 @@ bool CDB::Rewrite(const string& strFile, const char* pszSkip)
       LOCK(bitdb.cs_db);
       if (!bitdb.mapFileUseCount.count(strFile) || bitdb.mapFileUseCount[strFile] == 0)
       {
-        // Flush log data to the dat file
+
         bitdb.CloseDb(strFile);
         bitdb.CheckpointLSN(strFile);
         bitdb.mapFileUseCount.erase(strFile);
@@ -405,15 +389,15 @@ bool CDB::Rewrite(const string& strFile, const char* pszSkip)
         printf("Rewriting %s...\n", strFile.c_str());
         string strFileRes = strFile + ".rewrite";
         {
-          // surround usage of db with extra {}
+
           CDB db(strFile.c_str(), "r");
           Db* pdbCopy = new Db(&bitdb.dbenv, 0);
 
-          int ret = pdbCopy->open(NULL,                 // Txn pointer
-                                  strFileRes.c_str(),   // Filename
-                                  "main",    // Logical db name
-                                  DB_BTREE,  // Database type
-                                  DB_CREATE,    // Flags
+          int ret = pdbCopy->open(NULL,
+                                  strFileRes.c_str(),
+                                  "main",
+                                  DB_BTREE,
+                                  DB_CREATE,
                                   0);
           if (ret > 0)
           {
@@ -446,7 +430,7 @@ bool CDB::Rewrite(const string& strFile, const char* pszSkip)
               }
               if (strncmp(&ssKey[0], "\x07version", 8) == 0)
               {
-                // Update version:
+
                 ssValue.clear();
                 ssValue << CLIENT_VERSION;
               }
@@ -498,8 +482,8 @@ bool CDB::Rewrite(const string& strFile, const char* pszSkip)
 void CDBEnv::Flush(bool fShutdown)
 {
   int64_t nStart = GetTimeMillis();
-  // Flush log data to the actual data file
-  //  on all files that are not in use
+
+
   printf("Flush(%s)%s\n", fShutdown ? "true" : "false", fDbEnvInit ? "" : " db not started");
   if (!fDbEnvInit)
   {
@@ -515,7 +499,7 @@ void CDBEnv::Flush(bool fShutdown)
       printf("%s refcount=%d\n", strFile.c_str(), nRefCount);
       if (nRefCount == 0)
       {
-        // Move log data to the dat file
+
         CloseDb(strFile);
         printf("%s checkpoint\n", strFile.c_str());
         dbenv.txn_checkpoint(0, 0, 0);
@@ -546,9 +530,9 @@ void CDBEnv::Flush(bool fShutdown)
 }
 
 
-//
-// CAddrDB
-//
+
+
+
 
 
 CAddrDB::CAddrDB()
@@ -558,19 +542,19 @@ CAddrDB::CAddrDB()
 
 bool CAddrDB::Write(const CAddrMan& addr)
 {
-  // Generate random temporary filename
+
   unsigned short randv = 0;
   RAND_bytes((unsigned char *)&randv, sizeof(randv));
   std::string tmpfn = strprintf("peers.dat.%04x", randv);
 
-  // serialize addresses, checksum data up to that point, then append csum
+
   CDataStream ssPeers(SER_DISK, CLIENT_VERSION);
   ssPeers << FLATDATA(pchMessageStart);
   ssPeers << addr;
   uint256 hash = Hash(ssPeers.begin(), ssPeers.end());
   ssPeers << hash;
 
-  // open temp output file, and associate with CAutoFile
+
   boost::filesystem::path pathTmp = GetDataDir() / tmpfn;
   FILE *file = fopen(pathTmp.string().c_str(), "wb");
   CAutoFile fileout = CAutoFile(file, SER_DISK, CLIENT_VERSION);
@@ -579,7 +563,7 @@ bool CAddrDB::Write(const CAddrMan& addr)
     return error("CAddrman::Write() : open failed");
   }
 
-  // Write and commit header, data
+
   try
   {
     fileout << ssPeers;
@@ -591,7 +575,7 @@ bool CAddrDB::Write(const CAddrMan& addr)
   FileCommit(fileout);
   fileout.fclose();
 
-  // replace existing peers.dat, if any, with new peers.dat.XXXX
+
   if (!RenameOver(pathTmp, pathAddr))
   {
     return error("CAddrman::Write() : Rename-into-place failed");
@@ -602,7 +586,7 @@ bool CAddrDB::Write(const CAddrMan& addr)
 
 bool CAddrDB::Read(CAddrMan& addr)
 {
-  // open input file, and associate with CAutoFile
+
   FILE *file = fopen(pathAddr.string().c_str(), "rb");
   CAutoFile filein = CAutoFile(file, SER_DISK, CLIENT_VERSION);
   if (!filein)
@@ -610,10 +594,10 @@ bool CAddrDB::Read(CAddrMan& addr)
     return error("CAddrman::Read() : open failed");
   }
 
-  // use file size to size memory buffer
+
   int fileSize = boost::filesystem::file_size(pathAddr);
   int dataSize = fileSize - sizeof(uint256);
-  // Don't try to resize to a negative number if file is small
+
   if ( dataSize < 0 )
   {
     dataSize = 0;
@@ -622,7 +606,7 @@ bool CAddrDB::Read(CAddrMan& addr)
   vchData.resize(dataSize);
   uint256 hashIn;
 
-  // read data and checksum from file
+
   try
   {
     filein.read((char *)&vchData[0], dataSize);
@@ -636,7 +620,7 @@ bool CAddrDB::Read(CAddrMan& addr)
 
   CDataStream ssPeers(vchData, SER_DISK, CLIENT_VERSION);
 
-  // verify stored checksum matches input data
+
   uint256 hashTmp = Hash(ssPeers.begin(), ssPeers.end());
   if (hashIn != hashTmp)
   {
@@ -646,16 +630,16 @@ bool CAddrDB::Read(CAddrMan& addr)
   unsigned char pchMsgTmp[4];
   try
   {
-    // de-serialize file header (pchMessageStart magic number) and
+
     ssPeers >> FLATDATA(pchMsgTmp);
 
-    // verify the network matches ours
+
     if (memcmp(pchMsgTmp, pchMessageStart, sizeof(pchMsgTmp)))
     {
       return error("CAddrman::Read() : invalid network magic number");
     }
 
-    // de-serialize address data into one CAddrMan object
+
     ssPeers >> addr;
   }
   catch (std::exception &e)
@@ -680,13 +664,13 @@ void LocatorNodeDB::filter(CBlockIndex* p__)
     unsigned int nTxPos = p__->nBlockPos + ::GetSerializeSize(CBlock(), SER_DISK, CLIENT_VERSION) - (2 * GetSizeOfCompactSize(0)) + GetSizeOfCompactSize(block.vtx.size());
     BOOST_FOREACH(CTransaction& tx, block.vtx)
     {
-      if(tx.nVersion == CTransaction::DION_TX_VERSION || tx.nVersion == CTransaction::CYCLE_TX_VERSION)
+      if(tx.nVersion == CTransaction::DION_TX_VERSION)
       {
         vector<vector<unsigned char> > vvchArgs;
         int op, nOut;
 
         aliasTx(tx, op, nOut, vvchArgs);
-        if((op == OP_ALIAS_SET || op == OP_ALIAS_RELAY || op == OP_BASE_SET || OP_BASE_RELAY || op == OP_BASE_VERTEX_SET || OP_BASE_VERTEX_RELAY))
+        if((op == OP_ALIAS_SET || op == OP_ALIAS_RELAY))
         {
           const vector<unsigned char>& v = vvchArgs[0];
           string a = stringFromVch(v);
@@ -701,44 +685,32 @@ void LocatorNodeDB::filter(CBlockIndex* p__)
             if(txdb.ReadTxIndex(tx.GetHash(), txI))
             {
               vector<unsigned char> vchValue;
-              vector<PathIndex> vtxPos;
+              vector<AliasIndex> vtxPos;
               uint256 hash;
-              PathIndex txPos2;
+              AliasIndex txPos2;
               CDiskTxPos txPos(p__->nFile, p__->nBlockPos, nTxPos);
 
               txPos2.nHeight = p__->nHeight;
               txPos2.vValue = vchValue;
               txPos2.vAddress = s;
               txPos2.txPos = txPos;
-              if((op == OP_ALIAS_SET || op == OP_BASE_SET || op == OP_BASE_VERTEX_SET) && !lKey(vvchArgs[0]))
+              if(op == OP_ALIAS_SET && !lKey(vvchArgs[0]))
               {
                 vtxPos.push_back(txPos2);
                 lPut(vvchArgs[0], vtxPos);
-                if(op == OP_BASE_SET || op == OP_BASE_VERTEX_SET)
-                {
-                  txPos2.vValue = vvchArgs[1];
-                  vtxPos.push_back(txPos2);
-                  lPut(vvchArgs[0], vtxPos);
-                }
               }
-              else if((op == OP_ALIAS_SET || op == OP_BASE_SET || op == OP_BASE_VERTEX_SET) && lKey(vvchArgs[0]))
+              else if(op == OP_ALIAS_SET && lKey(vvchArgs[0]))
               {
-                vector<PathIndex> v;
+                vector<AliasIndex> v;
                 lGet(vvchArgs[0], v);
-                PathIndex t = v.back();
+                AliasIndex t = v.back();
                 if(p__->nHeight - t.nHeight >= scaleMonitor())
                 {
                   vtxPos.push_back(txPos2);
                   lPut(vvchArgs[0], vtxPos);
                 }
-                if(op == OP_BASE_SET || op == OP_BASE_VERTEX_SET)
-                {
-                  txPos2.vValue = vvchArgs[1];
-                  vtxPos.push_back(txPos2);
-                  lPut(vvchArgs[0], vtxPos);
-                }
               }
-              else if((op == OP_ALIAS_RELAY || op == OP_BASE_RELAY || op == OP_BASE_VERTEX_RELAY) && lKey(vvchArgs[0]))
+              else if(op == OP_ALIAS_RELAY && lKey(vvchArgs[0]))
               {
                 txPos2.vValue = vvchArgs[1];
                 vtxPos.push_back(txPos2);
@@ -748,6 +720,7 @@ void LocatorNodeDB::filter(CBlockIndex* p__)
               {
                 vtxPos.push_back(txPos2);
               }
+
             }
           }
         }

@@ -1,6 +1,3 @@
-
-
-
 #include "util.h"
 #include "sync.h"
 #include "strlcpy.h"
@@ -62,7 +59,7 @@ std::string to_internal(const std::string&);
 #define _WIN32_IE 0x0501
 #define WIN32_LEAN_AND_MEAN 1
 #ifndef NOMINMAX
-#define NOMINMAX
+#define NOMINMAX 
 #endif
 #include <io.h>
 #include "shlobj.h"
@@ -384,7 +381,7 @@ void GenerateRSAKey(CoordinateVector& p)
 
 
   fflush(stdout);
-  //RSA *keypair = RSA_generate_key(KEY_LENGTH, PUB_EXP, NULL, NULL);
+
   RSA* keypair = RSA_new();
   ostringstream os;
   os << PUB_EXP;

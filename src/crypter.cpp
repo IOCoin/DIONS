@@ -1,10 +1,3 @@
-
-
-
-// Copyright (c) 2009-2012 The Bitcoin Developers
-// Distributed under the MIT/X11 software license, see the accompanying
-// file COPYING or http://www.opensource.org/licenses/mit-license.php.
-
 #include <openssl/aes.h>
 #include <openssl/evp.h>
 #include <vector>
@@ -58,8 +51,8 @@ bool CCrypter::Encrypt(const CKeyingMaterial& vchPlaintext, std::vector<unsigned
     return false;
   }
 
-  // max ciphertext len for a n bytes of plaintext is
-  // n + AES_BLOCK_SIZE - 1 bytes
+
+
   int nLen = vchPlaintext.size();
   int nCLen = nLen + AES_BLOCK_SIZE, nFLen = 0;
   vchCiphertext = std::vector<unsigned char> (nCLen);
@@ -68,7 +61,8 @@ bool CCrypter::Encrypt(const CKeyingMaterial& vchPlaintext, std::vector<unsigned
 
   bool fOk = true;
 
-  EVP_CIPHER_CTX_init(ctx);
+
+  ctx = EVP_CIPHER_CTX_new();
   if (fOk)
   {
     fOk = EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, chKey, chIV);
@@ -81,7 +75,7 @@ bool CCrypter::Encrypt(const CKeyingMaterial& vchPlaintext, std::vector<unsigned
   {
     fOk = EVP_EncryptFinal_ex(ctx, (&vchCiphertext[0])+nCLen, &nFLen);
   }
-  EVP_CIPHER_CTX_cleanup(ctx);
+  EVP_CIPHER_CTX_free(ctx);
 
   if (!fOk)
   {
@@ -99,7 +93,7 @@ bool CCrypter::Decrypt(const std::vector<unsigned char>& vchCiphertext, CKeyingM
     return false;
   }
 
-  // plaintext will always be equal to or lesser than length of ciphertext
+
   int nLen = vchCiphertext.size();
   int nPLen = nLen, nFLen = 0;
 
@@ -109,7 +103,7 @@ bool CCrypter::Decrypt(const std::vector<unsigned char>& vchCiphertext, CKeyingM
 
   bool fOk = true;
 
-  EVP_CIPHER_CTX_init(ctx);
+  ctx = EVP_CIPHER_CTX_new();
   if (fOk)
   {
     fOk = EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, chKey, chIV);
@@ -122,7 +116,7 @@ bool CCrypter::Decrypt(const std::vector<unsigned char>& vchCiphertext, CKeyingM
   {
     fOk = EVP_DecryptFinal_ex(ctx, (&vchPlaintext[0])+nPLen, &nFLen);
   }
-  EVP_CIPHER_CTX_cleanup(ctx);
+  EVP_CIPHER_CTX_free(ctx);
 
   if (!fOk)
   {

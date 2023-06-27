@@ -1,8 +1,3 @@
-// Copyright (c) 2009-2010 Satoshi Nakamoto
-// Copyright (c) 2009-2012 The Bitcoin developers
-// Distributed under the MIT/X11 software license, see the accompanying
-// file COPYING or http://www.opensource.org/licenses/mit-license.php.
-
 #include "txdb.h"
 #include "wallet.h"
 #include "walletdb.h"
@@ -17,18 +12,6 @@
 
 #include "main.h"
 
-#include <dvmone/dvmone.h>
-#include <dvmc/transitional_node.hpp>
-#include <dvmc/dvmc.h>
-#include <dvmc/dvmc.hpp>
-#include <dvmc/hex.hpp>
-#include <dvmc/loader.h>
-#include <dvmc/tooling.hpp>
-#include <boost/foreach.hpp>
-#include <boost/tokenizer.hpp>
-#include <boost/archive/text_iarchive.hpp>
-#include <boost/archive/text_oarchive.hpp>
-using dvmc::operator""_address;
 
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
@@ -39,7 +22,6 @@ using namespace std;
 
 using namespace boost;
 
-extern string DESCRIPTOR;
 static unsigned int GetStakeSplitAge()
 {
   return IsProtocolV2(nBestHeight) ? (10 * 24 * 60 * 60) : (1 * 24 * 60 * 60);
@@ -49,19 +31,16 @@ static int64_t GetStakeCombineThreshold()
   return IsProtocolV2(nBestHeight) ? (50 * COIN) : (1000 * COIN);
 }
 
-bool isPathTx(const __wx__Tx* tx);
+bool isAliasTx(const __wx__Tx* tx);
 extern __wx__* pwalletMain;
-extern void testGen(dvmc::TransitionalNode& acc,string& contractCode);
-extern bool getVertex__(const string& target, string& code);
 extern CScript aliasStrip(const CScript& scriptIn);
 extern bool aliasScript(const CScript& script, int& op, vector<vector<unsigned char> > &vvch);
-extern bool collisionReference(const string& s, uint256& wtxInHash,string&);
 
 extern bool collx(const CTransaction&);
-//////////////////////////////////////////////////////////////////////////////
-//
-// mapWallet
-//
+
+
+
+
 
 struct CompareValueOnly
 {
@@ -73,7 +52,7 @@ struct CompareValueOnly
 };
 void ThreadFlushWalletDB(void* parg)
 {
-  // Make this thread recognisable as the wallet flushing thread
+
   RenameThread("iocoin-wallet");
 
   const string& strFile = ((const string*)parg)[0];
@@ -106,7 +85,7 @@ void ThreadFlushWalletDB(void* parg)
       TRY_LOCK(bitdb.cs_db,lockDb);
       if (lockDb)
       {
-        // Don't do this if any databases are in use
+
         int nRefCount = 0;
         map<string, int>::iterator mi = bitdb.mapFileUseCount.begin();
         while (mi != bitdb.mapFileUseCount.end())
@@ -124,7 +103,7 @@ void ThreadFlushWalletDB(void* parg)
             nLastFlushed = nWalletDBUpdated;
             int64_t nStart = GetTimeMillis();
 
-            // Flush wallet.dat so it's self contained
+
             bitdb.CloseDb(strFile);
             bitdb.CheckpointLSN(strFile);
 
@@ -149,15 +128,15 @@ bool BackupWallet(const __wx__& wallet, const string& strDest)
       LOCK(bitdb.cs_db);
       if (!bitdb.mapFileUseCount.count(wallet.strWalletFile) || bitdb.mapFileUseCount[wallet.strWalletFile] == 0)
       {
-        // Flush log data to the dat file
+
         bitdb.CloseDb(wallet.strWalletFile);
         bitdb.CheckpointLSN(wallet.strWalletFile);
         bitdb.mapFileUseCount.erase(wallet.strWalletFile);
 
-        // Copy wallet.dat
+
         boost::filesystem::path pathSrc = GetDataDir() / wallet.strWalletFile;
         boost::filesystem::path pathDest(strDest);
-        if(  boost::filesystem::is_directory(pathDest))
+        if( boost::filesystem::is_directory(pathDest))
         {
           pathDest /= wallet.strWalletFile;
         }
@@ -186,14 +165,14 @@ bool BackupWallet(const __wx__& wallet, const string& strDest)
 
 CPubKey __wx__::GenerateNewKey()
 {
-  AssertLockHeld(cs_wallet); // kd
-  bool fCompressed = CanSupportFeature(FEATURE_COMPRPUBKEY); // default to compressed public keys if we want 0.6.0 wallets
+  AssertLockHeld(cs_wallet);
+  bool fCompressed = CanSupportFeature(FEATURE_COMPRPUBKEY);
 
   RandAddSeedPerfmon();
   CKey key;
   key.MakeNewKey(fCompressed);
 
-  // Compressed public keys were introduced in version 0.6.0
+
   if (fCompressed)
   {
     SetMinVersion(FEATURE_COMPRPUBKEY);
@@ -201,7 +180,7 @@ CPubKey __wx__::GenerateNewKey()
 
   CPubKey pubkey = key.GetPubKey();
 
-  // Create new metadata
+
   int64_t nCreationTime = GetTime();
   kd[pubkey.GetID()] = CKeyMetadata(nCreationTime);
   if (!nTimeFirstKey || nCreationTime < nTimeFirstKey)
@@ -219,7 +198,7 @@ CPubKey __wx__::GenerateNewKey()
 
 bool __wx__::ak(const CKey& key)
 {
-  AssertLockHeld(cs_wallet); // kd
+  AssertLockHeld(cs_wallet);
 
   CPubKey pubkey = key.GetPubKey();
 
@@ -264,7 +243,7 @@ bool __wx__::sync(const CPubKey &vchPubKey, const vector<unsigned char> &vchCryp
 
 bool __wx__::LoadKeyMetadata(const CPubKey &pubkey, const CKeyMetadata &meta)
 {
-  AssertLockHeld(cs_wallet); // kd
+  AssertLockHeld(cs_wallet);
   if (meta.nCreateTime && (!nTimeFirstKey || meta.nCreateTime < nTimeFirstKey))
   {
     nTimeFirstKey = meta.nCreateTime;
@@ -276,14 +255,14 @@ bool __wx__::LoadKeyMetadata(const CPubKey &pubkey, const CKeyMetadata &meta)
 
 bool __wx__::LoadRelay(const vchType& k, const Relay& r)
 {
-  AssertLockHeld(cs_wallet); // kd
+  AssertLockHeld(cs_wallet);
   lCache[k] = r;
   return true;
 }
 
 bool __wx__::envCP0(const CPubKey &pubkey, string& rsaPrivKey)
 {
-  AssertLockHeld(cs_wallet); // kd
+  AssertLockHeld(cs_wallet);
   if(kd.count(pubkey.GetID()))
   {
     if(! (kd[pubkey.GetID()].patch.scale_() || kd[pubkey.GetID()].patch.scale()))
@@ -297,7 +276,7 @@ bool __wx__::envCP0(const CPubKey &pubkey, string& rsaPrivKey)
 
 bool __wx__::envCP1(const CPubKey &pubkey, string& rsaPubKey)
 {
-  AssertLockHeld(cs_wallet); // kd
+  AssertLockHeld(cs_wallet);
   if(kd.count(pubkey.GetID()))
   {
     if(!(kd[pubkey.GetID()].patch.scale_() || kd[pubkey.GetID()].patch.scale()))
@@ -312,7 +291,7 @@ bool __wx__::envCP1(const CPubKey &pubkey, string& rsaPubKey)
 
 bool __wx__::GetRandomKeyMetadata(const CPubKey& pubkey, vchType &r, string& r_)
 {
-  AssertLockHeld(cs_wallet); // kd
+  AssertLockHeld(cs_wallet);
 
   r = kd[pubkey.GetID()].random;
   r_ = kd[pubkey.GetID()].r;
@@ -322,7 +301,7 @@ bool __wx__::GetRandomKeyMetadata(const CPubKey& pubkey, vchType &r, string& r_)
 
 bool __wx__::SetRandomKeyMetadata(const CPubKey& pubkey, const vchType &r)
 {
-  AssertLockHeld(cs_wallet); // kd
+  AssertLockHeld(cs_wallet);
 
   kd[pubkey.GetID()].random = r;
   kd[pubkey.GetID()].r = stringFromVch(r);
@@ -332,7 +311,7 @@ bool __wx__::SetRandomKeyMetadata(const CPubKey& pubkey, const vchType &r)
 
 bool __wx__::aes_(const CPubKey& pubkey, string& f, string& aesPlainBase64)
 {
-  AssertLockHeld(cs_wallet); // kd
+  AssertLockHeld(cs_wallet);
 
   aesPlainBase64 = kd[pubkey.GetID()].m[f];
 
@@ -346,7 +325,7 @@ bool __wx__::aes_(const CPubKey& pubkey, string& f, string& aesPlainBase64)
 
 bool __wx__::aes(const CPubKey &pubkey, string& f, string& aes256KeyBase64)
 {
-  AssertLockHeld(cs_wallet); // kd
+  AssertLockHeld(cs_wallet);
 
   kd[pubkey.GetID()].m[f] = aes256KeyBase64;
 
@@ -355,7 +334,7 @@ bool __wx__::aes(const CPubKey &pubkey, string& f, string& aes256KeyBase64)
 
 bool __wx__::vtx_(const CPubKey& pubkey, string& a)
 {
-  AssertLockHeld(cs_wallet); // kd
+  AssertLockHeld(cs_wallet);
 
   if(kd[pubkey.GetID()].q.size() > 0)
   {
@@ -376,7 +355,7 @@ bool __wx__::vtx_(const CPubKey& pubkey, string& a)
 
 bool __wx__::vtx(const CPubKey &pubkey, string& a)
 {
-  AssertLockHeld(cs_wallet); // kd
+  AssertLockHeld(cs_wallet);
 
   kd[pubkey.GetID()].q.push_back(a);
 
@@ -385,7 +364,7 @@ bool __wx__::vtx(const CPubKey &pubkey, string& a)
 
 bool __wx__::SetRSAMetadata(const CPubKey &pubkey)
 {
-  AssertLockHeld(cs_wallet); // kd
+  AssertLockHeld(cs_wallet);
 
   if(kd[pubkey.GetID()].patch.scale_() && kd[pubkey.GetID()].patch.scale())
   {
@@ -415,16 +394,16 @@ bool __wx__::AddCScript(const CScript& redeemScript)
   return __wx__DB(strWalletFile).WriteCScript(Hash160(redeemScript), redeemScript);
 }
 
-// optional setting to unlock wallet for staking only
-// serves to disable the trivial sendmoney when OS account compromised
-// provides no real security
+
+
+
 bool fWalletUnlockStakingOnly = false;
 
 bool __wx__::LoadCScript(const CScript& redeemScript)
 {
-  /* A sanity check was added in pull #3843 to avoid adding redeemScripts
-   * that never can be redeemed. However, old wallets may still contain
-   * these. Do not add them to the wallet and warn. */
+
+
+
   if (redeemScript.size() > MAX_SCRIPT_ELEMENT_SIZE)
   {
     std::string strAddr = cba(redeemScript.GetID()).ToString();
@@ -560,13 +539,13 @@ void __wx__::SetBestChain(const CBlockLocator& loc)
 
 bool __wx__::SetMinVersion(enum WalletFeature nVersion, __wx__DB* pwalletdbIn, bool fExplicit)
 {
-  LOCK(cs_wallet); // nWalletVersion
+  LOCK(cs_wallet);
   if (nWalletVersion >= nVersion)
   {
     return true;
   }
 
-  // when doing an explicit upgrade, if we pass the max version permitted, upgrade all the way
+
   if (fExplicit && nVersion > nWalletMaxVersion)
   {
     nVersion = FEATURE_LATEST;
@@ -597,8 +576,8 @@ bool __wx__::SetMinVersion(enum WalletFeature nVersion, __wx__DB* pwalletdbIn, b
 
 bool __wx__::SetMaxVersion(int nVersion)
 {
-  LOCK(cs_wallet); // nWalletVersion, nWalletMaxVersion
-  // cannot downgrade below current version
+  LOCK(cs_wallet);
+
   if (nWalletVersion > nVersion)
   {
     return false;
@@ -653,6 +632,7 @@ bool __wx__::EncryptWallet(const SecureString& strWalletPassphrase)
     return false;
   }
 
+
   {
     LOCK(cs_wallet);
     mapMasterKeys[++nMasterKeyMaxID] = kMasterKey;
@@ -672,17 +652,17 @@ bool __wx__::EncryptWallet(const SecureString& strWalletPassphrase)
       {
         pwalletdbEncryption->TxnAbort();
       }
-      exit(1); //We now probably have half of our keys encrypted in memory, and half not...die and let the user reload their unencrypted wallet.
+      exit(1);
     }
 
-    // Encryption was introduced in version 0.4.0
+
     SetMinVersion(FEATURE_WALLETCRYPT, pwalletdbEncryption, true);
 
     if (fFileBacked)
     {
       if (!pwalletdbEncryption->TxnCommit())
       {
-        exit(1);  //We now have keys encrypted in memory, but no on disk...die to avoid confusion and let the user reload their unencrypted wallet.
+        exit(1);
       }
 
       delete pwalletdbEncryption;
@@ -694,8 +674,8 @@ bool __wx__::EncryptWallet(const SecureString& strWalletPassphrase)
     NewKeyPool();
     Lock();
 
-    // Need to completely rewrite the wallet file; if we don't, bdb might keep
-    // bits of the unencrypted private key in slack space in the database file.
+
+
     CDB::Rewrite(strWalletFile);
 
   }
@@ -706,7 +686,7 @@ bool __wx__::EncryptWallet(const SecureString& strWalletPassphrase)
 
 int64_t __wx__::IncOrderPosNext(__wx__DB *pwalletdb)
 {
-  AssertLockHeld(cs_wallet); // nOrderPosNext
+  AssertLockHeld(cs_wallet);
   int64_t nRet = nOrderPosNext++;
   if (pwalletdb)
   {
@@ -721,14 +701,14 @@ int64_t __wx__::IncOrderPosNext(__wx__DB *pwalletdb)
 
 __wx__::TxItems __wx__::OrderedTxItems(std::list<CAccountingEntry>& acentries, std::string strAccount)
 {
-  AssertLockHeld(cs_wallet); // mapWallet
+  AssertLockHeld(cs_wallet);
   __wx__DB walletdb(strWalletFile);
 
-  // First: get all __wx__Tx and CAccountingEntry into a sorted-by-order multimap.
+
   TxItems txOrdered;
 
-  // Note: maintaining indices in the database of (account,time) --> txid and (account, time) --> acentry
-  // would make this much faster for applications that do this a lot.
+
+
   for (map<uint256, __wx__Tx>::iterator it = mapWallet.begin(); it != mapWallet.end(); ++it)
   {
     __wx__Tx* wtx = &((*it).second);
@@ -746,9 +726,9 @@ __wx__::TxItems __wx__::OrderedTxItems(std::list<CAccountingEntry>& acentries, s
 
 void __wx__::WalletUpdateSpent(const CTransaction &tx, bool fBlock)
 {
-  // Anytime a signature is successfully verified, it's proof the outpoint is spent.
-  // Update the wallet spent flag if it doesn't know due to wallet.dat being
-  // restored from backup or the user making copies of wallet.dat.
+
+
+
   {
     LOCK(cs_wallet);
     BOOST_FOREACH(const CTxIn& txin, tx.vin)
@@ -805,7 +785,7 @@ bool __wx__::AddToWallet(const __wx__Tx& wtxIn)
   uint256 hash = wtxIn.GetHash();
   {
     LOCK(cs_wallet);
-    // Inserts only if not already there, returns tx inserted or tx found
+
     pair<map<uint256, __wx__Tx>::iterator, bool> ret = mapWallet.insert(make_pair(hash, wtxIn));
     __wx__Tx& wtx = (*ret.first).second;
     wtx.BindWallet(this);
@@ -823,7 +803,7 @@ bool __wx__::AddToWallet(const __wx__Tx& wtxIn)
           unsigned int latestNow = wtx.nTimeReceived;
           unsigned int latestEntry = 0;
           {
-            // Tolerate times up to the last timestamp in the wallet not more than 5 minutes into the future
+
             int64_t latestTolerated = latestNow + 300;
             std::list<CAccountingEntry> acentries;
             TxItems txOrdered = OrderedTxItems(acentries);
@@ -873,7 +853,7 @@ bool __wx__::AddToWallet(const __wx__Tx& wtxIn)
     bool fUpdated = false;
     if (!fInsertedNew)
     {
-      // Merge
+
       if (wtxIn.hashBlock != 0 && wtxIn.hashBlock != wtx.hashBlock)
       {
         wtx.hashBlock = wtxIn.hashBlock;
@@ -893,17 +873,17 @@ bool __wx__::AddToWallet(const __wx__Tx& wtxIn)
       fUpdated |= wtx.UpdateSpent(wtxIn.vfSpent);
     }
 
-    //// debug print
+
     printf("AddToWallet %s  %s%s\n", wtxIn.GetHash().ToString().substr(0,10).c_str(), (fInsertedNew ? "new" : ""), (fUpdated ? "update" : ""));
 
-    // Write to disk
+
     if (fInsertedNew || fUpdated)
       if (!wtx.WriteToDisk())
       {
         return false;
       }
 #ifndef QT_GUI
-    // If default receiving address gets used, replace it with a new one
+
     if (vchDefaultKey.IsValid())
     {
       CScript scriptDefaultKey;
@@ -922,28 +902,28 @@ bool __wx__::AddToWallet(const __wx__Tx& wtxIn)
       }
     }
 #endif
-    // since AddToWallet is called directly for self-originating transactions, check for consumption of own coins
+
     WalletUpdateSpent(wtx, (wtxIn.hashBlock != 0));
 
-    // Notify UI of new or updated transaction
+
     NotifyTransactionChanged(this, hash, fInsertedNew ? CT_NEW : CT_UPDATED);
 
-    // notify an external script when a wallet transaction comes in or is updated
+
     std::string strCmd = GetArg("-walletnotify", "");
 
     if ( !strCmd.empty())
     {
       boost::replace_all(strCmd, "%s", wtxIn.GetHash().GetHex());
-      boost::thread t(runCommand, strCmd); // thread runs free
+      boost::thread t(runCommand, strCmd);
     }
 
   }
   return true;
 }
 
-// Add a transaction to the wallet, or update it.
-// pblock is optional, but should be provided if the transaction is known to be in a block.
-// If fUpdate is true, existing transactions will be updated.
+
+
+
 bool __wx__::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlock* pblock, bool fUpdate, bool fFindBlock)
 {
   uint256 hash = tx.GetHash();
@@ -957,7 +937,7 @@ bool __wx__::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlock* pblo
     if (fExisted || IsMine(tx) || IsFromMe(tx) || collx(tx))
     {
       __wx__Tx wtx(this,tx);
-      // Get merkle branch if transaction was found in a block
+
       if (pblock)
       {
         wtx.SetMerkleBranch(pblock);
@@ -1028,14 +1008,7 @@ int64_t __wx__::GetDebit(const CTxIn &txin) const
 bool __wx__::IsChange(const CTxOut& txout) const
 {
   CTxDestination address;
-
-  // TODO: fix handling of 'change' outputs. The assumption is that any
-  // payment to a TX_PUBKEYHASH that is mine but isn't in the address book
-  // is change. That assumption is likely to break when we implement multisignature
-  // wallets that return change back into a multi-signature-protected address;
-  // a better way of identifying which outputs are 'the send' and which are
-  // 'the change' will need to be implemented (maybe extend __wx__Tx to remember
-  // which output, if any, was change).
+# 1024 "wallet.cpp"
   if (ExtractDestination(txout.scriptPubKey, address) && ::IsMine(*this, address))
   {
     LOCK(cs_wallet);
@@ -1055,13 +1028,13 @@ int64_t __wx__Tx::GetTxTime() const
 
 int __wx__Tx::GetRequestCount() const
 {
-  // Returns -1 if it wasn't being tracked
+
   int nRequests = -1;
   {
     LOCK(pwallet->cs_wallet);
     if (IsCoinBase() || IsCoinStake())
     {
-      // Generated block
+
       if (hashBlock != 0)
       {
         map<uint256, int>::const_iterator mi = pwallet->mapRequestCount.find(hashBlock);
@@ -1073,13 +1046,13 @@ int __wx__Tx::GetRequestCount() const
     }
     else
     {
-      // Did anyone request this transaction?
+
       map<uint256, int>::const_iterator mi = pwallet->mapRequestCount.find(GetHash());
       if (mi != pwallet->mapRequestCount.end())
       {
         nRequests = (*mi).second;
 
-        // How about the block it's in?
+
         if (nRequests == 0 && hashBlock != 0)
         {
           map<uint256, int>::const_iterator mi = pwallet->mapRequestCount.find(hashBlock);
@@ -1089,7 +1062,7 @@ int __wx__Tx::GetRequestCount() const
           }
           else
           {
-            nRequests = 1;  // If it's in someone else's block it must have got out
+            nRequests = 1;
           }
         }
       }
@@ -1105,18 +1078,18 @@ void __wx__Tx::GetAmounts(list<pair<CTxDestination, int64_t> >& listReceived,
   listSent.clear();
   strSentAccount = strFromAccount;
 
-  // Compute fee:
+
   int64_t nDebit = GetDebit();
-  if (nDebit > 0) // debit>0 means we signed/sent this transaction
+  if (nDebit > 0)
   {
     int64_t nValueOut = GetValueOut();
     nFee = nDebit - nValueOut;
   }
 
-  // Sent/received.
+
   BOOST_FOREACH(const CTxOut& txout, vout)
   {
-    // Skip special stake out
+
     if (txout.scriptPubKey.empty())
     {
       continue;
@@ -1133,12 +1106,12 @@ void __wx__Tx::GetAmounts(list<pair<CTxDestination, int64_t> >& listReceived,
     }
 
     bool fIsMine;
-    // Only need to handle txouts if AT LEAST one of these is true:
-    //   1) they debit from us (sent)
-    //   2) the output is to us (received)
+
+
+
     if (nDebit > 0)
     {
-      // Don't report 'change' txouts
+
       if (pwallet->IsChange(txout))
       {
         continue;
@@ -1150,7 +1123,7 @@ void __wx__Tx::GetAmounts(list<pair<CTxDestination, int64_t> >& listReceived,
       continue;
     }
 
-    // In either case, we need to get the destination address
+
     CTxDestination address;
 
     std::vector<vchType> vvchPrevArgsRead;
@@ -1172,13 +1145,13 @@ void __wx__Tx::GetAmounts(list<pair<CTxDestination, int64_t> >& listReceived,
       address = CNoDestination();
     }
 
-    // If we are debited by the transaction, add the output as a "sent" entry
+
     if (nDebit > 0)
     {
       listSent.push_back(make_pair(address, txout.nValue));
     }
 
-    // If we are receiving the output, add it as a "received" entry
+
     if(fIsMine)
     {
       listReceived.push_back(make_pair(address, txout.nValue));
@@ -1235,7 +1208,7 @@ void __wx__Tx::AddSupportingTransactions(CTxDB& txdb)
     BOOST_FOREACH(const CTxIn& txin, vin)
     vWorkQueue.push_back(txin.prevout.hash);
 
-    // This critsect is OK because txdb is already open
+
     {
       LOCK(pwallet->cs_wallet);
       map<uint256, const CMerkleTx*> mapWalletPrev;
@@ -1291,9 +1264,9 @@ bool __wx__Tx::WriteToDisk()
   return __wx__DB(pwallet->strWalletFile).WriteTx(GetHash(), *this);
 }
 
-// Scan the block chain (starting in pindexStart) for transactions
-// from or to us. If fUpdate is true, found transactions that already
-// exist in the wallet will be updated.
+
+
+
 int __wx__::ScanForWalletTransactions(CBlockIndex* pindexStart, bool fUpdate)
 {
   int ret = 0;
@@ -1303,8 +1276,8 @@ int __wx__::ScanForWalletTransactions(CBlockIndex* pindexStart, bool fUpdate)
     LOCK2(cs_main, cs_wallet);
     while (pindex)
     {
-      // no need to read and scan block, if block was created before
-      // our wallet birthday (as adjusted for block time variability)
+
+
       if (nTimeFirstKey && (pindex->nTime < (nTimeFirstKey - 7200)))
       {
         pindex = pindex->pnext;
@@ -1347,7 +1320,7 @@ void __wx__::ReacceptWalletTransactions()
       bool fUpdated = false;
       if (txdb.ReadTxIndex(wtx.GetHash(), txindex))
       {
-        // Update fSpent if a tx got spent somewhere else by a copy of wallet.dat
+
         if (txindex.vSpent.size() != wtx.vout.size())
         {
           printf("ERROR: ReacceptWalletTransactions() : txindex.vSpent.size() %" PRIszu " != wtx.vout.size() %" PRIszu "\n", txindex.vSpent.size(), wtx.vout.size());
@@ -1375,7 +1348,7 @@ void __wx__::ReacceptWalletTransactions()
       }
       else
       {
-        // Re-accept any txes of ours that aren't already in a block
+
         if (!(wtx.IsCoinBase() || wtx.IsCoinStake()))
         {
           wtx.AcceptWalletTransaction(txdb);
@@ -1384,10 +1357,10 @@ void __wx__::ReacceptWalletTransactions()
     }
     if (!vMissingTx.empty())
     {
-      // TODO: optimize this to scan just part of the block chain?
+
       if (ScanForWalletTransactions(pindexGenesisBlock))
       {
-        fRepeat = true;  // Found missing transactions: re-do re-accept.
+        fRepeat = true;
       }
     }
   }
@@ -1427,8 +1400,8 @@ void __wx__::ResendWalletTransactions(bool fForce)
 {
   if (!fForce)
   {
-    // Do this infrequently and randomly to avoid giving away
-    // that these are our transactions.
+
+
     static int64_t nNextTime;
     if (GetTime() < nNextTime)
     {
@@ -1441,7 +1414,7 @@ void __wx__::ResendWalletTransactions(bool fForce)
       return;
     }
 
-    // Only do it if there's been a new block since last time
+
     static int64_t nLastTime;
     if (nTimeBestReceived < nLastTime)
     {
@@ -1450,18 +1423,18 @@ void __wx__::ResendWalletTransactions(bool fForce)
     nLastTime = GetTime();
   }
 
-  // Rebroadcast any of our txes that aren't in a block yet
+
   printf("ResendWalletTransactions()\n");
   CTxDB txdb("r");
   {
     LOCK(cs_wallet);
-    // Sort them in chronological order
+
     multimap<unsigned int, __wx__Tx*> mapSorted;
     BOOST_FOREACH(PAIRTYPE(const uint256, __wx__Tx)& item, mapWallet)
     {
       __wx__Tx& wtx = item.second;
-      // Don't rebroadcast until it's had plenty of time that
-      // it should have gotten in already by now.
+
+
       if (fForce || nTimeBestReceived - (int64_t)wtx.nTimeReceived > 5 * 60)
       {
         mapSorted.insert(make_pair(wtx.nTimeReceived, &wtx));
@@ -1481,18 +1454,7 @@ void __wx__::ResendWalletTransactions(bool fForce)
     }
   }
 }
-
-
-
-
-
-
-//////////////////////////////////////////////////////////////////////////////
-//
-// Actions
-//
-
-
+# 1481 "wallet.cpp"
 int64_t __wx__::GetBalance() const
 {
   int64_t nTotal = 0;
@@ -1545,7 +1507,7 @@ int64_t __wx__::GetImmatureBalance() const
   return nTotal;
 }
 
-bool isPathTx(const __wx__Tx* tx)
+bool isAliasTx(const __wx__Tx* tx)
 {
   std::vector<vchType> vvch;
   int n;
@@ -1554,10 +1516,6 @@ bool isPathTx(const __wx__Tx* tx)
   {
     switch (op)
     {
-    case OP_BASE_SET:
-    case OP_BASE_RELAY:
-    case OP_BASE_VERTEX_SET:
-    case OP_BASE_VERTEX_RELAY:
     case OP_ALIAS_SET:
     case OP_ALIAS_RELAY:
     case OP_ALIAS_ENCRYPTED:
@@ -1569,7 +1527,7 @@ bool isPathTx(const __wx__Tx* tx)
 
 }
 
-// populate vCoins with vector of spendable COutputs
+
 void __wx__::AvailableCoins(vector<COutput>& vCoins, bool fOnlyConfirmed, const CCoinControl *coinControl) const
 {
   vCoins.clear();
@@ -1678,12 +1636,12 @@ static void ApproximateBestSubset(vector<pair<int64_t, pair<const __wx__Tx*,unsi
     {
       for (unsigned int i = 0; i < vValue.size(); i++)
       {
-        //The solver here uses a randomized algorithm,
-        //the randomness serves no real security purpose but is just
-        //needed to prevent degenerate behavior and it is important
-        //that the rng fast. We do not use a constant random sequence,
-        //because there may be some privacy improvement by making
-        //the selection random.
+
+
+
+
+
+
         if (nPass == 0 ? insecure_rand()&1 : !vfIncluded[i])
         {
           nTotal += vValue[i].first;
@@ -1705,7 +1663,7 @@ static void ApproximateBestSubset(vector<pair<int64_t, pair<const __wx__Tx*,unsi
   }
 }
 
-// ppcoin: total coins staked (non-spendable until maturity)
+
 int64_t __wx__::GetStake() const
 {
   int64_t nTotal = 0;
@@ -1743,7 +1701,7 @@ bool __wx__::SelectCoinsMinConf(int64_t nTargetValue, unsigned int nSpendTime, i
 
   printf("SelectCoins vCoins.size %lu\n", vCoins.size());
 
-  // List of values less than target
+
   pair<int64_t, pair<const __wx__Tx*,unsigned int> > coinLowestLarger;
   coinLowestLarger.first = std::numeric_limits<int64_t>::max();
   coinLowestLarger.second.first = NULL;
@@ -1812,7 +1770,7 @@ bool __wx__::SelectCoinsMinConf(int64_t nTargetValue, unsigned int nSpendTime, i
     return true;
   }
 
-  // Solve subset sum by stochastic approximation
+
   sort(vValue.rbegin(), vValue.rend(), CompareValueOnly());
   vector<char> vfBest;
   int64_t nBest;
@@ -1823,8 +1781,8 @@ bool __wx__::SelectCoinsMinConf(int64_t nTargetValue, unsigned int nSpendTime, i
     ApproximateBestSubset(vValue, nTotalLower, nTargetValue + CENT, vfBest, nBest, 1000);
   }
 
-  // If we have a bigger coin and (either the stochastic approximation didn't find a good solution,
-  //                                   or the next bigger coin is closer), return the bigger coin
+
+
   if (coinLowestLarger.second.first &&
       ((nBest != nTargetValue && nBest < nTargetValue + CENT) || coinLowestLarger.first <= nBest))
   {
@@ -1842,7 +1800,7 @@ bool __wx__::SelectCoinsMinConf(int64_t nTargetValue, unsigned int nSpendTime, i
 
     if (fDebug && GetBoolArg("-printpriority"))
     {
-      //// debug print
+
       printf("SelectCoins() best subset: ");
       for (unsigned int i = 0; i < vValue.size(); i++)
         if (vfBest[i])
@@ -1861,7 +1819,7 @@ bool __wx__::SelectCoins(int64_t nTargetValue, unsigned int nSpendTime, set<pair
   vector<COutput> vCoins;
   AvailableCoins(vCoins, true, coinControl);
 
-  // coin control -> return all selected outputs (we want all selected to go into the transaction for sure)
+
   if (coinControl && coinControl->HasSelected())
   {
     printf("SelectCoins coinControl\n");
@@ -1878,7 +1836,7 @@ bool __wx__::SelectCoins(int64_t nTargetValue, unsigned int nSpendTime, set<pair
           SelectCoinsMinConf(nTargetValue, nSpendTime, 0, 1, vCoins, setCoinsRet, nValueRet));
 }
 
-// Select some coins without random shuffle or best subset approximation
+
 bool __wx__::SelectCoinsForStaking(int64_t nTargetValue, unsigned int nSpendTime, set<pair<const __wx__Tx*,unsigned int> >& setCoinsRet, int64_t& nValueRet) const
 {
   vector<COutput> vCoins;
@@ -1894,7 +1852,7 @@ bool __wx__::SelectCoinsForStaking(int64_t nTargetValue, unsigned int nSpendTime
     const __wx__Tx *pcoin = output.tx;
     int i = output.i;
 
-    // Stop if we've chosen enough inputs
+
     if (nValueRet >= nTargetValue)
     {
       break;
@@ -1906,8 +1864,8 @@ bool __wx__::SelectCoinsForStaking(int64_t nTargetValue, unsigned int nSpendTime
 
     if (n >= nTargetValue)
     {
-      // If input value is greater or equal to target then simply insert
-      //    it into the current subset and exit
+
+
       setCoinsRet.insert(coin.second);
       nValueRet += coin.first;
       break;
@@ -1925,7 +1883,6 @@ bool __wx__::SelectCoinsForStaking(int64_t nTargetValue, unsigned int nSpendTime
 bool __wx__::CreateTransaction__(const vector<pair<CScript, int64_t> >& vecSend, __wx__Tx& wtxNew, CReserveKey& reservekey, int64_t& nFeeRet, std::string strTxInfo, const CCoinControl* coinControl)
 {
   int64_t nValue = 0;
-  int64_t nTrackFee = 0;
   BOOST_FOREACH (const PAIRTYPE(CScript, int64_t)& s, vecSend)
   {
     if (nValue < 0)
@@ -1951,144 +1908,9 @@ bool __wx__::CreateTransaction__(const vector<pair<CScript, int64_t> >& vecSend,
   }
   {
     LOCK2(cs_main, cs_wallet);
-    // txdb must be opened before the mapWallet lock
+
     CTxDB txdb("r");
     {
-      for(auto i : vecSend)
-      {
-        CScript s = i.first;
-        vector<vector<unsigned char> > vvch;
-        int op;
-        if(aliasScript(s, op, vvch))
-        {
-          if(op == OP_BASE_SET && wtxNew.nVersion != CTransaction::CYCLE_TX_VERSION)
-          {
-            string contractCodeStr = stringFromVch(vvch[1]);
-            dvmc::VertexNode vTrans;
-            const auto code = dvmc::from_hex(contractCodeStr);
-            dvmc::bytes_view exec_code = code;
-
-            dvmc_message create_msg{};
-            create_msg.kind = DVMC_CREATE;
-
-            dvmc_address create_address;
-            create_msg.recipient = create_address;
-            create_msg.track = std::numeric_limits<int64_t>::max();
-            dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
-            dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
-            const auto create_result = vm.retrieve_desc_vx(vTrans, rev, create_msg, code.data(), code.size());
-            if (create_result.status_code != DVMC_SUCCESS)
-            {
-              printf("Contract creation failed: %d\n",create_result.status_code);
-            }
-            nTrackFee = create_msg.track - create_result.track_left;
-            nTrackFee *= TRACK_SCALE_FACTOR;
-          }
-          else if(op == OP_BASE_SET && wtxNew.nVersion == CTransaction::CYCLE_TX_VERSION)
-          {
-            string origin;
-            cba cAddr_;
-            origin = stringFromVch(vvch[1]);
-            cAddr_ = s.GetBitcoinAddress();
-            std::vector<string> contract_execution_data;
-            boost::char_separator<char> tok(":");
-            boost::tokenizer<boost::char_separator<char>> tokens(origin,tok);
-            BOOST_FOREACH(const string& s,tokens)
-            {
-              contract_execution_data.push_back(s);
-            }
-            string target_contract = contract_execution_data[0];
-            string contract_input  = contract_execution_data[1];
-            string contractCode;
-            if(!getVertex__(target_contract,contractCode))
-            {
-              printf("CreateTransaction__ : failed to retrieve target contract code for executable tx\n");
-            }
-            string code_hex_str = contractCode;
-            uint256 r;
-            string val;
-            if(!collisionReference(DESCRIPTOR + "_" + target_contract,r,val))
-            {
-              dvmc::VertexNode vTrans;
-              dvmc_message msg{};
-              msg.track = std::numeric_limits<int64_t>::max();
-              const auto code = dvmc::from_hex(code_hex_str);
-              dvmc::bytes_view exec_code = code;
-              const auto input = dvmc::from_hex(contract_input);
-              msg.input_data = input.data();
-              msg.input_size = input.size();
-
-              dvmc_message create_msg{};
-              create_msg.kind = DVMC_CREATE;
-
-              dvmc_address create_address;
-              uint160 h160;
-              AddressToHash160(cAddr_.ToString(),h160);
-              memcpy(create_address.bytes,h160.pn,20);
-              create_msg.recipient = create_address;
-              create_msg.track = std::numeric_limits<int64_t>::max();
-              dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
-              dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
-              const auto create_result = vm.retrieve_desc_vx(vTrans, rev, create_msg, code.data(), code.size());
-              if (create_result.status_code != DVMC_SUCCESS)
-              {
-                printf("CreateTransaction__ : create - invalid code\n");
-                return false;
-              }
-
-              auto& created_account = vTrans.accounts[create_address];
-              created_account.code = dvmc::bytes(create_result.output_data, create_result.output_size);
-
-              msg.recipient = create_address;
-              exec_code = created_account.code;
-              const auto result = vm.retrieve_desc_vx(vTrans, rev, msg, exec_code.data(), exec_code.size());
-              if (result.status_code != DVMC_SUCCESS)
-              {
-                printf("CreateTransaction__ : CYCLE transaction - invalid code\n");
-                return false;
-              }
-              nTrackFee = msg.track - result.track_left;
-              nTrackFee *= TRACK_SCALE_FACTOR;
-            }
-            else
-            {
-              __wx__Tx serial_n;
-              dvmc::TransitionalNode testGen_;
-              testGen(testGen_,code_hex_str);
-              dvmc::VertexNode vTrans;
-              dvmc::TransitionalNode recon;
-              std::stringstream oss_recon;
-              oss_recon << val;
-              boost::archive::text_iarchive iarchive(oss_recon);
-              iarchive >> recon;
-              recon.code = testGen_.code;
-              recon.codehash = testGen_.codehash;
-
-              dvmc_address create_address;
-              uint160 h160;
-              AddressToHash160(cAddr_.ToString(),h160);
-              memcpy(create_address.bytes,h160.pn,20);
-              vTrans.accounts[create_address] = recon;
-              const auto input = dvmc::from_hex(contract_input);
-              dvmc_message msg{};
-              msg.recipient = create_address;
-              msg.track = std::numeric_limits<int64_t>::max();
-              msg.input_data = input.data();
-              msg.input_size = input.size();
-              dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
-              dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
-              const auto result = vm.retrieve_desc_vx(vTrans, rev, msg, recon.code.data(), recon.code.size());
-              if (result.status_code != DVMC_SUCCESS)
-              {
-                printf("CreateTransaction__ : CYCLE transaction - invalid code\n");
-                return false;
-              }
-              nTrackFee = msg.track - result.track_left;
-              nTrackFee *= TRACK_SCALE_FACTOR;
-            }
-          }
-        }
-      }
       nFeeRet = CENT;
       while (true)
       {
@@ -2098,11 +1920,11 @@ bool __wx__::CreateTransaction__(const vector<pair<CScript, int64_t> >& vecSend,
 
         int64_t nTotalValue = nValue + nFeeRet;
         double dPriority = 0;
-        // vouts to the payees
+
         BOOST_FOREACH (const PAIRTYPE(CScript, int64_t)& s, vecSend)
         wtxNew.vout.push_back(CTxOut(s.second, s.first));
 
-        // Choose coins to use
+
         set<pair<const __wx__Tx*,unsigned int> > setCoins;
         int64_t nValueIn = 0;
         if (!SelectCoins(nTotalValue, wtxNew.nTime, setCoins, nValueIn, coinControl))
@@ -2116,9 +1938,9 @@ bool __wx__::CreateTransaction__(const vector<pair<CScript, int64_t> >& vecSend,
         }
 
         int64_t nChange = nValueIn - nValue - nFeeRet;
-        // if sub-cent change is required, the fee must be raised to at least MIN_TX_FEE
-        // or until nChange becomes zero
-        // NOTE: this depends on the exact behaviour of GetMinFee
+
+
+
         if (nFeeRet < MIN_TX_FEE && nChange > 0 && nChange < CENT)
         {
           int64_t nMoveToFee = min(nChange, MIN_TX_FEE - nFeeRet);
@@ -2128,35 +1950,28 @@ bool __wx__::CreateTransaction__(const vector<pair<CScript, int64_t> >& vecSend,
 
         if (nChange > 0)
         {
-          // Fill a vout to ourself
-          // TODO: pass in scriptChange instead of reservekey so
-          // change transaction isn't always pay-to-bitcoin-address
+
+
+
           CScript scriptChange;
 
-          // coin control: send change to custom address
+
           if (coinControl && !boost::get<CNoDestination>(&coinControl->destChange))
           {
             scriptChange.SetDestination(coinControl->destChange);
           }
 
-          // no coin control: send change to newly generated address
+
           else
           {
-            // Note: We use a new key here to keep it from being obvious which side is the change.
-            //  The drawback is that by not reusing a previous key, the change may be lost if a
-            //  backup is restored, if the backup doesn't have the new private key for the change.
-            //  If we reused the old key, it would be possible to add code to look for and
-            //  rediscover unknown transactions that were written with keys of ours to recover
-            //  post-backup change.
-
-            // Reserve a new key pair from key pool
+# 1998 "wallet.cpp"
             CPubKey vchPubKey;
-            assert(reservekey.GetReservedKey(vchPubKey)); // should never fail, as we just unlocked
+            assert(reservekey.GetReservedKey(vchPubKey));
 
             scriptChange.SetDestination(vchPubKey.GetID());
           }
 
-          // Insert change txn at random position:
+
           vector<CTxOut>::iterator position = wtxNew.vout.begin()+GetRandInt(wtxNew.vout.size());
           wtxNew.vout.insert(position, CTxOut(nChange, scriptChange));
         }
@@ -2165,11 +1980,11 @@ bool __wx__::CreateTransaction__(const vector<pair<CScript, int64_t> >& vecSend,
           reservekey.ReturnKey();
         }
 
-        // Fill vin
+
         BOOST_FOREACH(const PAIRTYPE(const __wx__Tx*,unsigned int)& coin, setCoins)
         wtxNew.vin.push_back(CTxIn(coin.first->GetHash(),coin.second));
 
-        // Sign
+
         int nIn = 0;
         BOOST_FOREACH(const PAIRTYPE(const __wx__Tx*,unsigned int)& coin, setCoins)
         if (!SignSignature(*this, *coin.first, wtxNew, nIn++))
@@ -2177,7 +1992,7 @@ bool __wx__::CreateTransaction__(const vector<pair<CScript, int64_t> >& vecSend,
           return false;
         }
 
-        // Limit size
+
         unsigned int nBytes = ::GetSerializeSize(*(CTransaction*)&wtxNew, SER_NETWORK, PROTOCOL_VERSION);
         if (nBytes >= MAX_STANDARD_TX_SIZE)
         {
@@ -2185,8 +2000,8 @@ bool __wx__::CreateTransaction__(const vector<pair<CScript, int64_t> >& vecSend,
         }
         dPriority /= nBytes;
 
-        // Check that enough fee is included
-        int64_t nPayFee = nTransactionFee * (1 + (int64_t)nBytes / 1000) + nTrackFee;
+
+        int64_t nPayFee = nTransactionFee * (1 + (int64_t)nBytes / 1000);
         int64_t nMinFee = wtxNew.GetMinFee(1, GMF_SEND, nBytes);
 
         if (nFeeRet < max(nPayFee, nMinFee))
@@ -2195,7 +2010,7 @@ bool __wx__::CreateTransaction__(const vector<pair<CScript, int64_t> >& vecSend,
           continue;
         }
 
-        // Fill vtxPrev by copying from previous transactions vtxPrev
+
         wtxNew.AddSupportingTransactions(txdb);
         wtxNew.fTimeReceivedIsTxTime = true;
 
@@ -2234,7 +2049,7 @@ bool __wx__::CreateTransaction(const vector<pair<CScript, int64_t> >& vecSend, _
   }
   {
     LOCK2(cs_main, cs_wallet);
-    // txdb must be opened before the mapWallet lock
+
     CTxDB txdb("r");
     {
       nFeeRet = S_MIN_TX_FEE;
@@ -2246,11 +2061,11 @@ bool __wx__::CreateTransaction(const vector<pair<CScript, int64_t> >& vecSend, _
 
         int64_t nTotalValue = nValue + nFeeRet;
         double dPriority = 0;
-        // vouts to the payees
+
         BOOST_FOREACH (const PAIRTYPE(CScript, int64_t)& s, vecSend)
         wtxNew.vout.push_back(CTxOut(s.second, s.first));
 
-        // Choose coins to use
+
         set<pair<const __wx__Tx*,unsigned int> > setCoins;
         int64_t nValueIn = 0;
         if (!SelectCoins(nTotalValue, wtxNew.nTime, setCoins, nValueIn, coinControl))
@@ -2264,9 +2079,9 @@ bool __wx__::CreateTransaction(const vector<pair<CScript, int64_t> >& vecSend, _
         }
 
         int64_t nChange = nValueIn - nValue - nFeeRet;
-        // if sub-cent change is required, the fee must be raised to at least MIN_TX_FEE
-        // or until nChange becomes zero
-        // NOTE: this depends on the exact behaviour of GetMinFee
+
+
+
         if (nFeeRet < MIN_TX_FEE && nChange > 0 && nChange < CENT)
         {
           int64_t nMoveToFee = min(nChange, MIN_TX_FEE - nFeeRet);
@@ -2276,35 +2091,28 @@ bool __wx__::CreateTransaction(const vector<pair<CScript, int64_t> >& vecSend, _
 
         if (nChange > 0)
         {
-          // Fill a vout to ourself
-          // TODO: pass in scriptChange instead of reservekey so
-          // change transaction isn't always pay-to-bitcoin-address
+
+
+
           CScript scriptChange;
 
-          // coin control: send change to custom address
+
           if (coinControl && !boost::get<CNoDestination>(&coinControl->destChange))
           {
             scriptChange.SetDestination(coinControl->destChange);
           }
 
-          // no coin control: send change to newly generated address
+
           else
           {
-            // Note: We use a new key here to keep it from being obvious which side is the change.
-            //  The drawback is that by not reusing a previous key, the change may be lost if a
-            //  backup is restored, if the backup doesn't have the new private key for the change.
-            //  If we reused the old key, it would be possible to add code to look for and
-            //  rediscover unknown transactions that were written with keys of ours to recover
-            //  post-backup change.
-
-            // Reserve a new key pair from key pool
+# 2146 "wallet.cpp"
             CPubKey vchPubKey;
-            assert(reservekey.GetReservedKey(vchPubKey)); // should never fail, as we just unlocked
+            assert(reservekey.GetReservedKey(vchPubKey));
 
             scriptChange.SetDestination(vchPubKey.GetID());
           }
 
-          // Insert change txn at random position:
+
           vector<CTxOut>::iterator position = wtxNew.vout.begin()+GetRandInt(wtxNew.vout.size());
           wtxNew.vout.insert(position, CTxOut(nChange, scriptChange));
         }
@@ -2313,11 +2121,11 @@ bool __wx__::CreateTransaction(const vector<pair<CScript, int64_t> >& vecSend, _
           reservekey.ReturnKey();
         }
 
-        // Fill vin
+
         BOOST_FOREACH(const PAIRTYPE(const __wx__Tx*,unsigned int)& coin, setCoins)
         wtxNew.vin.push_back(CTxIn(coin.first->GetHash(),coin.second));
 
-        // Sign
+
         int nIn = 0;
         BOOST_FOREACH(const PAIRTYPE(const __wx__Tx*,unsigned int)& coin, setCoins)
         {
@@ -2327,7 +2135,7 @@ bool __wx__::CreateTransaction(const vector<pair<CScript, int64_t> >& vecSend, _
           }
         }
 
-        // Limit size
+
         unsigned int nBytes = ::GetSerializeSize(*(CTransaction*)&wtxNew, SER_NETWORK, PROTOCOL_VERSION);
         if (nBytes >= MAX_STANDARD_TX_SIZE)
         {
@@ -2335,7 +2143,7 @@ bool __wx__::CreateTransaction(const vector<pair<CScript, int64_t> >& vecSend, _
         }
         dPriority /= nBytes;
 
-        // Check that enough fee is included
+
         int64_t nPayFee = nTransactionFee * (1 + (int64_t)nBytes / 1000);
         int64_t nMinFee = wtxNew.GetMinFee(1, GMF_SEND, nBytes);
 
@@ -2345,7 +2153,7 @@ bool __wx__::CreateTransaction(const vector<pair<CScript, int64_t> >& vecSend, _
           continue;
         }
 
-        // Fill vtxPrev by copying from previous transactions vtxPrev
+
         wtxNew.AddSupportingTransactions(txdb);
         wtxNew.fTimeReceivedIsTxTime = true;
 
@@ -2372,7 +2180,7 @@ bool __wx__::CreateTransaction(CScript scriptPubKey, int64_t nValue, __wx__Tx& w
 
 bool __wx__::GetStakeWeight(uint64_t& nWeight)
 {
-  // Choose coins to use
+
   int64_t nBalance = GetBalance();
 
   if (nBalance <= nReserveBalance)
@@ -2426,12 +2234,12 @@ bool __wx__::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int6
   txNew.vin.clear();
   txNew.vout.clear();
 
-  // Mark coin stake transaction
+
   CScript scriptEmpty;
   scriptEmpty.clear();
   txNew.vout.push_back(CTxOut(0, scriptEmpty));
 
-  // Choose coins to use
+
   int64_t nBalance = GetBalance();
 
   if (nBalance <= nReserveBalance)
@@ -2444,7 +2252,7 @@ bool __wx__::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int6
   set<pair<const __wx__Tx*,unsigned int> > setCoins;
   int64_t nValueIn = 0;
 
-  // Select coins with suitable depth
+
   if (!SelectCoinsForStaking(nBalance - nReserveBalance, txNew.nTime, setCoins, nValueIn))
   {
     return false;
@@ -2469,7 +2277,7 @@ bool __wx__::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int6
       }
     }
 
-    // Read block header
+
     CBlock block;
     {
       LOCK2(cs_main, cs_wallet);
@@ -2483,13 +2291,13 @@ bool __wx__::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int6
     bool fKernelFound = false;
     for (unsigned int n=0; n<min(nSearchInterval,(int64_t)nMaxStakeSearchInterval) && !fKernelFound && !fShutdown && pindexPrev == pindexBest; n++)
     {
-      // Search backward in time from the given txNew timestamp
-      // Search nSearchInterval seconds back up to nMaxStakeSearchInterval
+
+
       COutPoint prevoutStake = COutPoint(pcoin.first->GetHash(), pcoin.second);
       int64_t nBlockTime;
-      if(CheckKernel(pindexPrev,  nBits, txNew.nTime -n, prevoutStake, &nBlockTime))
+      if(CheckKernel(pindexPrev, nBits, txNew.nTime -n, prevoutStake, &nBlockTime))
       {
-        // Found a kernel
+
         if (fDebug && GetBoolArg("-printcoinstake"))
         {
           printf("CreateCoinStake : kernel found\n");
@@ -2516,18 +2324,18 @@ bool __wx__::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int6
           {
             printf("CreateCoinStake : no support for kernel type=%d\n", whichType);
           }
-          break;  // only support pay to public key and pay to address
+          break;
         }
-        if (whichType == TX_PUBKEYHASH) // pay to address type
+        if (whichType == TX_PUBKEYHASH)
         {
-          // convert to pay to public key type
+
           if (!keystore.GetKey(uint160(vSolutions[0]), key))
           {
             if (fDebug && GetBoolArg("-printcoinstake"))
             {
               printf("CreateCoinStake : failed to get key for kernel type=%d\n", whichType);
             }
-            break;  // unable to find corresponding public key
+            break;
           }
           scriptPubKeyOut << key.GetPubKey() << OP_CHECKSIG;
         }
@@ -2540,7 +2348,7 @@ bool __wx__::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int6
             {
               printf("CreateCoinStake : failed to get key for kernel type=%d\n", whichType);
             }
-            break;  // unable to find corresponding public key
+            break;
           }
 
           if (key.GetPubKey() != vchPubKey)
@@ -2549,7 +2357,7 @@ bool __wx__::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int6
             {
               printf("CreateCoinStake : invalid key for kernel type=%d\n", whichType);
             }
-            break; // keys mismatch
+            break;
           }
 
           scriptPubKeyOut = scriptPubKeyKernel;
@@ -2563,7 +2371,7 @@ bool __wx__::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int6
 
         if (GetWeight(block.GetBlockTime(), (int64_t)txNew.nTime) < GetStakeSplitAge())
         {
-          txNew.vout.push_back(CTxOut(0, scriptPubKeyOut));  //split stake
+          txNew.vout.push_back(CTxOut(0, scriptPubKeyOut));
         }
         if (fDebug && GetBoolArg("-printcoinstake"))
         {
@@ -2576,7 +2384,7 @@ bool __wx__::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int6
 
     if (fKernelFound || fShutdown)
     {
-      break;  // if kernel is found stop searching
+      break;
     }
   }
 
@@ -2587,34 +2395,34 @@ bool __wx__::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int6
 
   BOOST_FOREACH(PAIRTYPE(const __wx__Tx*, unsigned int) pcoin, setCoins)
   {
-    // Attempt to add more inputs
-    // Only add coins of the same key/address as kernel
+
+
     if (txNew.vout.size() == 2 && ((pcoin.first->vout[pcoin.second].scriptPubKey == scriptPubKeyKernel || pcoin.first->vout[pcoin.second].scriptPubKey == txNew.vout[1].scriptPubKey))
         && pcoin.first->GetHash() != txNew.vin[0].prevout.hash)
     {
       int64_t nTimeWeight = GetWeight((int64_t)pcoin.first->nTime, (int64_t)txNew.nTime);
 
-      // Stop adding more inputs if already too many inputs
+
       if (txNew.vin.size() >= 100)
       {
         break;
       }
-      // Stop adding more inputs if value is already pretty significant
+
       if (nCredit >= GetStakeCombineThreshold())
       {
         break;
       }
-      // Stop adding inputs if reached reserve limit
+
       if (nCredit + pcoin.first->vout[pcoin.second].nValue > nBalance - nReserveBalance)
       {
         break;
       }
-      // Do not add additional significant input
+
       if (pcoin.first->vout[pcoin.second].nValue >= GetStakeCombineThreshold())
       {
         continue;
       }
-      // Do not add input that is still too young
+
       if (nTimeWeight < nStakeMinAge)
       {
         continue;
@@ -2626,7 +2434,7 @@ bool __wx__::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int6
     }
   }
 
-  //Calculate reward
+
   int64_t nReward;
   {
     if(V3(nBestHeight))
@@ -2653,7 +2461,7 @@ bool __wx__::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int6
     nCredit += nReward;
   }
 
-  // Set output amount
+
   if (txNew.vout.size() == 3)
   {
     txNew.vout[1].nValue = (nCredit / 2 / CENT) * CENT;
@@ -2665,7 +2473,7 @@ bool __wx__::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int6
     txNew.vout[1].nValue = nCredit;
   }
 
-  // Sign
+
   int nIn = 0;
   BOOST_FOREACH(const __wx__Tx* pcoin, vwtxPrev)
   {
@@ -2675,14 +2483,14 @@ bool __wx__::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int6
     }
   }
 
-  // Limit size
+
   unsigned int nBytes = ::GetSerializeSize(txNew, SER_NETWORK, PROTOCOL_VERSION);
   if (nBytes >= MAX_BLOCK_SIZE_GEN/5)
   {
     return error("CreateCoinStake : exceeded coinstake size limit");
   }
 
-  // Successfully generated coinstake
+
   return true;
 }
 
@@ -2690,22 +2498,23 @@ bool __wx__::CommitTransaction__(__wx__Tx& wtxNew, CReserveKey& reservekey)
 {
   {
     LOCK2(cs_main, cs_wallet);
+    printf("CommitTransaction:\n%s", wtxNew.ToString().c_str());
     {
-      // This is only to keep the database open to defeat the auto-flush for the
-      // duration of this scope.  This is the only place where this optimization
-      // maybe makes sense; please don't do it anywhere else.
+
+
+
       __wx__DB* pwalletdb = fFileBacked ? new __wx__DB(strWalletFile,"r") : NULL;
 
-      // Take key pair from key pool so it won't be used again
+
       reservekey.KeepKey();
 
 
-      // Add tx to wallet, because if it has change it's also ours,
-      // otherwise just for transaction history.
+
+
       AddToWallet(wtxNew);
 
 
-      // Mark old coins as spent
+
       set<__wx__Tx*> setCoins;
       BOOST_FOREACH(const CTxIn& txin, wtxNew.vin)
       {
@@ -2722,13 +2531,13 @@ bool __wx__::CommitTransaction__(__wx__Tx& wtxNew, CReserveKey& reservekey)
       }
     }
 
-    // Track how many getdata requests our transaction gets
+
     mapRequestCount[wtxNew.GetHash()] = 0;
 
-    // Broadcast
+
     if (!wtxNew.AcceptToMemoryPool())
     {
-      // This must not fail. The transaction has already been signed and recorded.
+
       printf("CommitTransaction() : Error: Transaction not valid\n");
       return false;
     }
@@ -2737,27 +2546,28 @@ bool __wx__::CommitTransaction__(__wx__Tx& wtxNew, CReserveKey& reservekey)
   return true;
 }
 
-// Call after CreateTransaction unless you want to abort
+
 bool __wx__::CommitTransaction(__wx__Tx& wtxNew, CReserveKey& reservekey)
 {
   {
     LOCK2(cs_main, cs_wallet);
+    printf("CommitTransaction:\n%s", wtxNew.ToString().c_str());
     {
-      // This is only to keep the database open to defeat the auto-flush for the
-      // duration of this scope.  This is the only place where this optimization
-      // maybe makes sense; please don't do it anywhere else.
+
+
+
       __wx__DB* pwalletdb = fFileBacked ? new __wx__DB(strWalletFile,"r") : NULL;
 
-      // Take key pair from key pool so it won't be used again
+
       reservekey.KeepKey();
 
       __xfa(wtxNew.vout);
 
-      // Add tx to wallet, because if it has change it's also ours,
-      // otherwise just for transaction history.
+
+
       AddToWallet(wtxNew);
 
-      // Mark old coins as spent
+
       set<__wx__Tx*> setCoins;
       BOOST_FOREACH(const CTxIn& txin, wtxNew.vin)
       {
@@ -2774,13 +2584,13 @@ bool __wx__::CommitTransaction(__wx__Tx& wtxNew, CReserveKey& reservekey)
       }
     }
 
-    // Track how many getdata requests our transaction gets
+
     mapRequestCount[wtxNew.GetHash()] = 0;
 
-    // Broadcast
+
     if (!wtxNew.AcceptToMemoryPool())
     {
-      // This must not fail. The transaction has already been signed and recorded.
+
       printf("CommitTransaction() : Error: Transaction not valid\n");
       return false;
     }
@@ -2789,45 +2599,6 @@ bool __wx__::CommitTransaction(__wx__Tx& wtxNew, CReserveKey& reservekey)
   return true;
 }
 
-string __wx__::generateSM__(CScript scriptPubKey, int64_t nValue, __wx__Tx& wtxNew, bool fAskFee, std::string strTxInfo)
-{
-  CReserveKey reservekey(this);
-  int64_t nFeeRequired;
-
-  if (as())
-  {
-    string strError = _("Error: Wallet locked, unable to create transaction  ");
-    printf("SendMoney() : %s", strError.c_str());
-    return strError;
-  }
-  if (fWalletUnlockStakingOnly)
-  {
-    string strError = _("Error: Wallet unlocked for staking only, unable to create transaction.");
-    printf("SendMoney() : %s", strError.c_str());
-    return strError;
-  }
-  if (!CreateTransaction__(scriptPubKey, nValue, wtxNew, reservekey, nFeeRequired, strTxInfo))
-  {
-    string strError;
-    if (nValue + nFeeRequired > GetBalance())
-    {
-      strError = strprintf(_("Error: This transaction requires a transaction fee of at least %s because of its amount, complexity, or use of recently received funds  "), FormatMoney(nFeeRequired).c_str());
-    }
-    else
-    {
-      strError = _("Error: Transaction creation failed  ");
-    }
-    printf("SendMoney() : %s", strError.c_str());
-    return strError;
-  }
-
-  if (fAskFee && !uiInterface.ThreadSafeAskFee(nFeeRequired, _("Sending...")))
-  {
-    return "ABORTED";
-  }
-
-  return "";
-}
 
 string __wx__::SendMoney__(CScript scriptPubKey, int64_t nValue, __wx__Tx& wtxNew, bool fAskFee, std::string strTxInfo)
 {
@@ -2924,7 +2695,7 @@ string __wx__::SendMoney(CScript scriptPubKey, int64_t nValue, __wx__Tx& wtxNew,
 
 string __wx__::SendMoneyToDestination(const CTxDestination& address, int64_t nValue, __wx__Tx& wtxNew, bool fAskFee, std::string strTxInfo)
 {
-  // Check amount
+
   if (nValue <= 0)
   {
     return _("Invalid amount");
@@ -2934,7 +2705,7 @@ string __wx__::SendMoneyToDestination(const CTxDestination& address, int64_t nVa
     return _("Insufficient funds");
   }
 
-  // Parse Bitcoin address
+
   CScript scriptPubKey;
   scriptPubKey.SetDestination(address);
 
@@ -2959,9 +2730,9 @@ DBErrors __wx__::LoadWallet(bool& fFirstRunRet)
     {
       LOCK(cs_wallet);
       setKeyPool.clear();
-      // Note: can't top-up keypool here, because wallet is locked.
-      // User will be prompted to unlock wallet the next operation
-      // the requires a new key.
+
+
+
     }
   }
 
@@ -2980,7 +2751,7 @@ bool __wx__::SetAddressBookName(const CTxDestination& address, const string& ali
 {
   bool fUpdated = false;
   {
-    LOCK(cs_wallet); // mapAddressBook
+    LOCK(cs_wallet);
     std::map<CTxDestination, std::string>::iterator mi = mapAddressBook.find(address);
     fUpdated = mi != mapAddressBook.end();
     mapAddressBook[address] = aliasStr;
@@ -2997,7 +2768,7 @@ bool __wx__::SetAddressBookName(const CTxDestination& address, const string& ali
 bool __wx__::DelAddressBookName(const CTxDestination& address)
 {
   {
-    LOCK(cs_wallet); // mapAddressBook
+    LOCK(cs_wallet);
 
     mapAddressBook.erase(address);
   }
@@ -3068,10 +2839,10 @@ bool GetWalletFile(__wx__* pwallet, string &strWalletFileOut)
   return true;
 }
 
-//
-// Mark old keypool keys as used,
-// and generate all new keys
-//
+
+
+
+
 bool __wx__::NewKeyPool()
 {
   {
@@ -3110,7 +2881,7 @@ bool __wx__::TopUpKeyPool(unsigned int nSize)
 
     __wx__DB walletdb(strWalletFile);
 
-    // Top up key pool
+
     unsigned int nTargetSize;
     if (nSize > 0)
     {
@@ -3151,7 +2922,7 @@ void __wx__::ReserveKeyFromKeyPool(int64_t& nIndex, CKeyPool& keypool)
       TopUpKeyPool();
     }
 
-    // Get the oldest key
+
     if(setKeyPool.empty())
     {
       return;
@@ -3196,7 +2967,7 @@ int64_t __wx__::AddReserveKey(const CKeyPool& keypool)
 
 void __wx__::KeepKey(int64_t nIndex)
 {
-  // Remove from key pool
+
   if (fFileBacked)
   {
     __wx__DB walletdb(strWalletFile);
@@ -3210,7 +2981,7 @@ void __wx__::KeepKey(int64_t nIndex)
 
 void __wx__::ReturnKey(int64_t nIndex)
 {
-  // Return to key pool
+
   {
     LOCK(cs_wallet);
     setKeyPool.insert(nIndex);
@@ -3365,7 +3136,7 @@ std::map<CTxDestination, int64_t> __wx__::GetAddressBalances()
 
 set< set<CTxDestination> > __wx__::GetAddressGroupings()
 {
-  AssertLockHeld(cs_wallet); // mapWallet
+  AssertLockHeld(cs_wallet);
   set< set<CTxDestination> > groupings;
   set<CTxDestination> grouping;
 
@@ -3375,7 +3146,7 @@ set< set<CTxDestination> > __wx__::GetAddressGroupings()
 
     if (pcoin->vin.size() > 0 && IsMine(pcoin->vin[0]))
     {
-      // group all input addresses with each other
+
       BOOST_FOREACH(CTxIn txin, pcoin->vin)
       {
         CTxDestination address;
@@ -3386,7 +3157,7 @@ set< set<CTxDestination> > __wx__::GetAddressGroupings()
         grouping.insert(address);
       }
 
-      // group change with input addresses
+
       BOOST_FOREACH(CTxOut txout, pcoin->vout)
       if (IsChange(txout))
       {
@@ -3402,7 +3173,7 @@ set< set<CTxDestination> > __wx__::GetAddressGroupings()
       grouping.clear();
     }
 
-    // group lone addrs by themselves
+
     for (unsigned int i = 0; i < pcoin->vout.size(); i++)
       if (IsMine(pcoin->vout[i]))
       {
@@ -3417,11 +3188,11 @@ set< set<CTxDestination> > __wx__::GetAddressGroupings()
       }
   }
 
-  set< set<CTxDestination>* > uniqueGroupings; // a set of pointers to groups of addresses
-  map< CTxDestination, set<CTxDestination>* > setmap;  // map addresses to the unique group containing it
+  set< set<CTxDestination>* > uniqueGroupings;
+  map< CTxDestination, set<CTxDestination>* > setmap;
   BOOST_FOREACH(set<CTxDestination> grouping, groupings)
   {
-    // make a set of all the groups hit by this new group
+
     set< set<CTxDestination>* > hits;
     map< CTxDestination, set<CTxDestination>* >::iterator it;
     BOOST_FOREACH(CTxDestination address, grouping)
@@ -3430,7 +3201,7 @@ set< set<CTxDestination> > __wx__::GetAddressGroupings()
       hits.insert((*it).second);
     }
 
-    // merge all hit groups into a new single group and delete old groups
+
     set<CTxDestination>* merged = new set<CTxDestination>(grouping);
     BOOST_FOREACH(set<CTxDestination>* hit, hits)
     {
@@ -3440,7 +3211,7 @@ set< set<CTxDestination> > __wx__::GetAddressGroupings()
     }
     uniqueGroupings.insert(merged);
 
-    // update setmap
+
     BOOST_FOREACH(CTxDestination element, *merged)
     setmap[element] = merged;
   }
@@ -3455,8 +3226,8 @@ set< set<CTxDestination> > __wx__::GetAddressGroupings()
   return ret;
 }
 
-// ppcoin: check 'spent' consistency between wallet and txindex
-// ppcoin: fix wallet spent state according to txindex
+
+
 void __wx__::FixSpentCoins(int& nMismatchFound, int64_t& nBalanceInQuestion, bool fCheckOnly)
 {
   nMismatchFound = 0;
@@ -3473,7 +3244,7 @@ void __wx__::FixSpentCoins(int& nMismatchFound, int64_t& nBalanceInQuestion, boo
   CTxDB txdb("r");
   BOOST_FOREACH(__wx__Tx* pcoin, vCoins)
   {
-    // Find the corresponding transaction index
+
     CTxIndex txindex;
     if (!txdb.ReadTxIndex(pcoin->GetHash(), txindex))
     {
@@ -3509,12 +3280,12 @@ void __wx__::FixSpentCoins(int& nMismatchFound, int64_t& nBalanceInQuestion, boo
   }
 }
 
-// ppcoin: disable transaction (only for coinstake)
+
 void __wx__::DisableTransaction(const CTransaction &tx)
 {
   if (!tx.IsCoinStake() || !IsFromMe(tx))
   {
-    return;  // only disconnecting coinstake requires marking input unspent
+    return;
   }
 
   LOCK(cs_wallet);
@@ -3618,7 +3389,7 @@ void __wx__::UpdatedTransaction(const uint256 &hashTx)
 {
   {
     LOCK(cs_wallet);
-    // Only notify UI if this transaction is in this wallet
+
     map<uint256, __wx__Tx>::const_iterator mi = mapWallet.find(hashTx);
     if (mi != mapWallet.end())
     {
@@ -3629,18 +3400,18 @@ void __wx__::UpdatedTransaction(const uint256 &hashTx)
 
 void __wx__::kt(std::map<CKeyID, int64_t> &mapKeyBirth) const
 {
-  AssertLockHeld(cs_wallet); // kd
+  AssertLockHeld(cs_wallet);
   mapKeyBirth.clear();
 
-  // get birth times for keys with metadata
+
   for (std::map<CKeyID, CKeyMetadata>::const_iterator it = kd.begin(); it != kd.end(); it++)
     if (it->second.nCreateTime)
     {
       mapKeyBirth[it->first] = it->second.nCreateTime;
     }
 
-  // map in which we'll infer heights of other keys
-  CBlockIndex *pindexMax = FindBlockByHeight(std::max(0, nBestHeight - 144)); // the tip can be reorganised; use a 144-block safety margin
+
+  CBlockIndex *pindexMax = FindBlockByHeight(std::max(0, nBestHeight - 144));
   std::map<CKeyID, CBlockIndex*> mapKeyFirstBlock;
   std::set<CKeyID> setKeys;
   GetKeys(setKeys);
@@ -3653,30 +3424,30 @@ void __wx__::kt(std::map<CKeyID, int64_t> &mapKeyBirth) const
   }
   setKeys.clear();
 
-  // if there are no such keys, we're done
+
   if (mapKeyFirstBlock.empty())
   {
     return;
   }
 
-  // find first block that affects those keys, if there are any left
+
   std::vector<CKeyID> vAffected;
   for (std::map<uint256, __wx__Tx>::const_iterator it = mapWallet.begin(); it != mapWallet.end(); it++)
   {
-    // iterate over all wallet transactions...
+
     const __wx__Tx &wtx = (*it).second;
     std::map<uint256, CBlockIndex*>::const_iterator blit = mapBlockIndex.find(wtx.hashBlock);
     if (blit != mapBlockIndex.end() && blit->second->IsInMainChain())
     {
-      // ... which are already in a block
+
       int nHeight = blit->second->nHeight;
       BOOST_FOREACH(const CTxOut &txout, wtx.vout)
       {
-        // iterate over all their outputs
+
         ::ExtractAffectedKeys(*this, txout.scriptPubKey, vAffected);
         BOOST_FOREACH(const CKeyID &keyid, vAffected)
         {
-          // ... and all their affected keys
+
           std::map<CKeyID, CBlockIndex*>::iterator rit = mapKeyFirstBlock.find(keyid);
           if (rit != mapKeyFirstBlock.end() && nHeight < rit->second->nHeight)
           {
@@ -3688,21 +3459,21 @@ void __wx__::kt(std::map<CKeyID, int64_t> &mapKeyBirth) const
     }
   }
 
-  // Extract block timestamps for those keys
+
   for (std::map<CKeyID, CBlockIndex*>::const_iterator it = mapKeyFirstBlock.begin(); it != mapKeyFirstBlock.end(); it++)
   {
-    mapKeyBirth[it->first] = it->second->nTime - 7200;  // block times can be 2h off
+    mapKeyBirth[it->first] = it->second->nTime - 7200;
   }
 }
 bool
 __wx__Tx::GetEncryptedMessageUpdate (int& nOut, vchType& nm, vchType& r, vchType& val, vchType& iv, vchType& s) const
 {
-  if (!(nVersion == CTransaction::DION_TX_VERSION || nVersion == CTransaction::CYCLE_TX_VERSION))
+  if (nVersion != CTransaction::DION_TX_VERSION)
   {
     return false;
   }
 
-//if (!pkTxDecoded)
+
   if (true)
   {
     pkTxDecoded = true;
@@ -3747,12 +3518,12 @@ __wx__Tx::GetEncryptedMessageUpdate (int& nOut, vchType& nm, vchType& r, vchType
 bool
 __wx__Tx::GetPublicKeyUpdate (int& nOut, vchType& nm, vchType& r, vchType& val, vchType& aes, vchType& s) const
 {
-  if (!(nVersion == CTransaction::DION_TX_VERSION || nVersion == CTransaction::CYCLE_TX_VERSION ))
+  if (nVersion != CTransaction::DION_TX_VERSION)
   {
     return false;
   }
 
-//if (!pkTxDecoded)
+
   if (true)
   {
     pkTxDecoded = true;
@@ -3797,7 +3568,7 @@ __wx__Tx::GetPublicKeyUpdate (int& nOut, vchType& nm, vchType& r, vchType& val, 
 bool
 __wx__Tx::GetMessageUpdate (int& nOut, vchType& nm, vchType& r, vchType& val, vchType& s) const
 {
-  if (!(nVersion == CTransaction::DION_TX_VERSION || nVersion == CTransaction::CYCLE_TX_VERSION))
+  if (nVersion != CTransaction::DION_TX_VERSION)
   {
     return false;
   }
@@ -3844,7 +3615,7 @@ __wx__Tx::GetMessageUpdate (int& nOut, vchType& nm, vchType& r, vchType& val, vc
 bool
 __wx__Tx::aliasSet(int& op_ret, int& nOut, vector< vector<unsigned char> >& vv) const
 {
-  if (!(nVersion == CTransaction::DION_TX_VERSION || nVersion == CTransaction::CYCLE_TX_VERSION))
+  if (nVersion != CTransaction::DION_TX_VERSION)
   {
     return false;
   }
@@ -3852,30 +3623,11 @@ __wx__Tx::aliasSet(int& op_ret, int& nOut, vector< vector<unsigned char> >& vv) 
   s__ = false;
   std::vector<vchType> vvch;
   int op;
-  if(aliasTx(*this, op, nPathOut, vvch))
+  if(aliasTx(*this, op, nAliasOut, vvch))
   {
     switch(op)
     {
     case OP_ALIAS_SET:
-      vv = vvch;
-      s__ = true;
-      break;
-
-    case OP_BASE_SET:
-      vv = vvch;
-      s__ = true;
-      break;
-
-    case OP_BASE_RELAY:
-      vv = vvch;
-      s__ = true;
-      break;
-    case OP_BASE_VERTEX_SET:
-      vv = vvch;
-      s__ = true;
-      break;
-
-    case OP_BASE_VERTEX_RELAY:
       vv = vvch;
       s__ = true;
       break;
@@ -3893,7 +3645,7 @@ __wx__Tx::aliasSet(int& op_ret, int& nOut, vector< vector<unsigned char> >& vv) 
     }
   }
 
-  nOut = nPathOut;
+  nOut = nAliasOut;
   op_ret = op__;
 
   return s__;
@@ -3902,7 +3654,7 @@ __wx__Tx::aliasSet(int& op_ret, int& nOut, vector< vector<unsigned char> >& vv) 
 bool
 __wx__Tx::aliasSet(int& op_ret, int& nOut, vchType& nm, vchType& val) const
 {
-  if (!(nVersion == CTransaction::DION_TX_VERSION || nVersion == CTransaction::CYCLE_TX_VERSION ))
+  if (nVersion != CTransaction::DION_TX_VERSION)
   {
     return false;
   }
@@ -3910,46 +3662,24 @@ __wx__Tx::aliasSet(int& op_ret, int& nOut, vchType& nm, vchType& val) const
   s__ = false;
   std::vector<vchType> vvch;
   int op;
-  if(aliasTx(*this, op, nPathOut, vvch))
+  if(aliasTx(*this, op, nAliasOut, vvch))
   {
     switch(op)
     {
     case OP_ALIAS_SET:
-      vchPath = vvch[0];
+      vchAlias = vvch[0];
       vchValue = vvch[4];
-      s__ = true;
-      break;
-    case OP_BASE_SET:
-      vchPath = vvch[0];
-      vchValue = vvch[1];
-      s__ = true;
-      break;
-
-    case OP_BASE_RELAY:
-      vchPath = vvch[0];
-      vchValue = vvch[1];
-      s__ = true;
-      break;
-    case OP_BASE_VERTEX_SET:
-      vchPath = vvch[0];
-      vchValue = vvch[1];
-      s__ = true;
-      break;
-
-    case OP_BASE_VERTEX_RELAY:
-      vchPath = vvch[0];
-      vchValue = vvch[1];
       s__ = true;
       break;
 
     case OP_ALIAS_RELAY:
-      vchPath = vvch[0];
+      vchAlias = vvch[0];
       vchValue = vvch[1];
       s__ = true;
       break;
 
     case OP_ALIAS_ENCRYPTED:
-      vchPath = vvch[0];
+      vchAlias = vvch[0];
       vchValue = vvch[4];
       op__ = op;
       s__ = true;
@@ -3957,8 +3687,8 @@ __wx__Tx::aliasSet(int& op_ret, int& nOut, vchType& nm, vchType& val) const
     }
   }
 
-  nOut = nPathOut;
-  nm = vchPath;
+  nOut = nAliasOut;
+  nm = vchAlias;
   val = vchValue;
   op_ret = op__;
 
@@ -3967,7 +3697,7 @@ __wx__Tx::aliasSet(int& op_ret, int& nOut, vchType& nm, vchType& val) const
 bool
 __wx__Tx::aliasStream(int& r, int& p, vchType& v1, vchType& v2, vchType& vchS, vchType& inV3) const
 {
-  if (!(nVersion == CTransaction::DION_TX_VERSION || nVersion == CTransaction::CYCLE_TX_VERSION ))
+  if (nVersion != CTransaction::DION_TX_VERSION)
   {
     return false;
   }
@@ -3975,47 +3705,24 @@ __wx__Tx::aliasStream(int& r, int& p, vchType& v1, vchType& v2, vchType& vchS, v
   s__ = false;
   std::vector<vchType> vvch;
   int op;
-  if(aliasTx(*this, op, nPathOut, vvch))
+  if(aliasTx(*this, op, nAliasOut, vvch))
   {
     switch(op)
     {
     case OP_ALIAS_SET:
-      vchPath = vvch[0];
+      vchAlias = vvch[0];
       vchValue = vvch[4];
       s__ = false;
       break;
 
-    case OP_BASE_SET:
-      vchPath = vvch[0];
-      vchValue = vvch[1];
-      s__ = false;
-      break;
-
-    case OP_BASE_RELAY:
-      vchPath = vvch[0];
-      vchValue = vvch[1];
-      s__ = false;
-      break;
-    case OP_BASE_VERTEX_SET:
-      vchPath = vvch[0];
-      vchValue = vvch[1];
-      s__ = false;
-      break;
-
-    case OP_BASE_VERTEX_RELAY:
-      vchPath = vvch[0];
-      vchValue = vvch[1];
-      s__ = false;
-      break;
-
     case OP_ALIAS_RELAY:
-      vchPath = vvch[0];
+      vchAlias = vvch[0];
       vchValue = vvch[1];
       s__ = false;
       break;
 
     case OP_ALIAS_ENCRYPTED:
-      vchPath = vvch[0];
+      vchAlias = vvch[0];
       vchValue = vvch[4];
       op__ = op;
 
@@ -4028,8 +3735,8 @@ __wx__Tx::aliasStream(int& r, int& p, vchType& v1, vchType& v2, vchType& vchS, v
     }
   }
 
-  p = nPathOut;
-  v1 = vchPath;
+  p = nAliasOut;
+  v1 = vchAlias;
   v2 = vchValue;
   inV3 = vvch[6];
   r = op__;
@@ -4044,7 +3751,7 @@ int CMerkleTx::GetDepthInMainChain(int& nHeightRet) const
     return 0;
   }
 
-  // Find the block it claims to be in
+
   map<uint256, CBlockIndex*>::iterator mi = mapBlockIndex.find(hashBlock);
   if (mi == mapBlockIndex.end())
   {
@@ -4056,7 +3763,7 @@ int CMerkleTx::GetDepthInMainChain(int& nHeightRet) const
     return 0;
   }
 
-  // Make sure the merkle branch connects to this block
+
   if (!fMerkleVerified)
   {
     if (CBlock::CheckMerkleBranch(GetHash(), vMerkleBranch, nIndex) != pindex->hashMerkleRoot)
@@ -4270,14 +3977,14 @@ bool __wx__::__transient()
   for(std::map<CKeyID, int64_t>::const_iterator it = mk.begin(); it != mk.end(); it++)
   {
     CKeyID ck = it->first;
-    uint160 i  = pwalletMain->kd[ck].z;
+    uint160 i = pwalletMain->kd[ck].z;
     if(i == 0)
     {
       continue;
     }
 
     bool found=false;
-    CPubKey k  = pwalletMain->kd[ck].k;
+    CPubKey k = pwalletMain->kd[ck].k;
     CKeyID vID;
     CKeyID exID;
     for(std::map<CKeyID, int64_t>::const_iterator it = mk.begin(); it != mk.end(); it++)
@@ -4371,12 +4078,12 @@ DBErrors __wx__::ZapWalletTx()
 bool
 __wx__Tx::vtx(int& nOut, vchType& nm, vchType& r, vchType& val, vchType& aes, vchType& s) const
 {
-  if (!(nVersion == CTransaction::DION_TX_VERSION || nVersion == CTransaction::CYCLE_TX_VERSION ))
+  if (nVersion != CTransaction::DION_TX_VERSION)
   {
     return false;
   }
 
-//if (!pkTxDecoded)
+
   if (true)
   {
     pkTxDecoded = true;
@@ -4421,12 +4128,12 @@ __wx__Tx::vtx(int& nOut, vchType& nm, vchType& r, vchType& val, vchType& aes, vc
 bool
 __wx__Tx::proj(int& nOut, vchType& nm, vchType& r, vchType& val, vchType& iv, vchType& s) const
 {
-  if (!(nVersion == CTransaction::DION_TX_VERSION || nVersion == CTransaction::CYCLE_TX_VERSION ))
+  if (nVersion != CTransaction::DION_TX_VERSION)
   {
     return false;
   }
 
-//if (!pkTxDecoded)
+
   if (true)
   {
     pkTxDecoded = true;

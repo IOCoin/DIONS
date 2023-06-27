@@ -1,11 +1,3 @@
-
-
-
-// Copyright (c) 2009-2010 Satoshi Nakamoto
-// Copyright (c) 2009-2012 The Bitcoin developers
-// Distributed under the MIT/X11 software license, see the accompanying
-// file COPYING or http://www.opensource.org/licenses/mit-license.php.
-
 #include "irc.h"
 #include "net.h"
 #include "strlcpy.h"
@@ -210,8 +202,8 @@ bool GetIPFromIRC(SOCKET hSocket, string strMyName, CNetAddr& ipRet)
   }
   string strHost = str.substr(str.rfind("@")+1);
 
-  // Hybrid IRC used by lfnet always returns IP when you userhost yourself,
-  // but in case another IRC is ever used this should work.
+
+
   printf("GetIPFromIRC() got userhost %s\n", strHost.c_str());
   CNetAddr addr(strHost, true);
   if (!addr.IsValid())
@@ -227,7 +219,7 @@ bool GetIPFromIRC(SOCKET hSocket, string strMyName, CNetAddr& ipRet)
 
 void ThreadIRCSeed(void* parg)
 {
-  // Make this thread recognisable as the IRC seeding thread
+
   RenameThread("iocoin-ircseed");
 
   try
@@ -247,19 +239,19 @@ void ThreadIRCSeed(void* parg)
 
 void ThreadIRCSeed2(void* parg)
 {
-  // Don't connect to IRC if we won't use IPv4 connections.
+
   if (IsLimited(NET_IPV4))
   {
     return;
   }
 
-  // ... or if we won't make outbound connections and won't accept inbound ones.
+
   if (mapArgs.count("-connect") && fNoListen)
   {
     return;
   }
 
-  // ... or if IRC is not enabled.
+
   if (!GetBoolArg("-irc", false))
   {
     return;
@@ -272,7 +264,7 @@ void ThreadIRCSeed2(void* parg)
 
   while (!fShutdown)
   {
-    CService addrConnect("92.243.23.21", 6667); // irc.lfnet.org
+    CService addrConnect("92.243.23.21", 6667);
 
     CService addrIRC("irc.lfnet.org", 6667, true);
     if (addrIRC.IsValid())
@@ -310,11 +302,11 @@ void ThreadIRCSeed2(void* parg)
       }
     }
 
-    CNetAddr addrIPv4("1.2.3.4"); // arbitrary IPv4 address to make GetLocal prefer IPv4 addresses
+    CNetAddr addrIPv4("1.2.3.4");
     CService addrLocal;
     string strMyName;
-    // Don't use our IP as our nick if we're not listening
-    // or if it keeps failing because the nick is already in use.
+
+
     if (!fNoListen && GetLocal(addrLocal, &addrIPv4) && nNameRetry<3)
     {
       strMyName = EncodeAddress(GetLocalAddress(&addrConnect));
@@ -352,15 +344,15 @@ void ThreadIRCSeed2(void* parg)
     nNameRetry = 0;
     MilliSleep(500);
 
-    // Get our external IP from the IRC server and re-nick before joining the channel
+
     CNetAddr addrFromIRC;
     if (GetIPFromIRC(hSocket, strMyName, addrFromIRC))
     {
       printf("GetIPFromIRC() returned %s\n", addrFromIRC.ToString().c_str());
-      // Don't use our IP as our nick if we're not listening
+
       if (!fNoListen && addrFromIRC.IsRoutable())
       {
-        // IRC lets you to re-nick
+
         AddLocal(addrFromIRC, LOCAL_IRC);
         strMyName = EncodeAddress(GetLocalAddress(&addrConnect));
         Send(hSocket, strprintf("NICK %s\r", strMyName.c_str()).c_str());
@@ -374,11 +366,11 @@ void ThreadIRCSeed2(void* parg)
     }
     else
     {
-      // randomly join #iocoin00-#iocoin05
+
       int channel_number = GetRandInt(5);
 
-      // Channel number is always 0 for initial release
-      //int channel_number = 0;
+
+
       Send(hSocket, strprintf("JOIN #iocoin%02d\r", channel_number).c_str());
       Send(hSocket, strprintf("WHO #iocoin%02d\r", channel_number).c_str());
     }
@@ -405,15 +397,15 @@ void ThreadIRCSeed2(void* parg)
 
       if (vWords[1] == "352" && vWords.size() >= 8)
       {
-        // index 7 is limited to 16 characters
-        // could get full length name at index 10, but would be different from join messages
+
+
         strlcpy(pszName, vWords[7].c_str(), sizeof(pszName));
         printf("IRC got who\n");
       }
 
       if (vWords[1] == "JOIN" && vWords[0].size() > 1)
       {
-        // :username!username@50000007.F000000B.90000002.IP JOIN :#channelname
+
         strlcpy(pszName, vWords[0].c_str() + 1, sizeof(pszName));
         if (strchr(pszName, '!'))
         {
@@ -456,16 +448,7 @@ void ThreadIRCSeed2(void* parg)
     }
   }
 }
-
-
-
-
-
-
-
-
-
-
+# 466 "irc.cpp"
 #ifdef TEST
 int main(int argc, char *argv[])
 {

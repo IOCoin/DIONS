@@ -1,11 +1,3 @@
-
-
-
-// Copyright (c) 2010 Satoshi Nakamoto
-// Copyright (c) 2009-2012 The Bitcoin developers
-// Distributed under the MIT/X11 software license, see the accompanying
-// file COPYING or http://www.opensource.org/licenses/mit-license.php.
-
 #include <boost/assign/list_of.hpp>
 
 #include "base58.h"
@@ -51,105 +43,7 @@ void spj(const CScript& scriptPubKey, Object& out, bool fIncludeHex)
   a.push_back(cba(addr).ToString());
   out.push_back(Pair("addresses", a));
 }
-/*
-void spj(const CScript& scriptPubKey, Object& out, bool fIncludeHex)
-{
-    //txnouttype type;
-    //vector<CTxDestination> addresses;
-    string address;
-    int nRequired = 1;
-
-    std::string aliasPrefix = "";
-    CScript script(scriptPubKey);
-    int op;
-    vector<vector<unsigned char> > vvch;
-    CScript::const_iterator pc = script.begin();
-    if (aliasScript(script, op, vvch, pc))
-    {
-        Object aliasOperation;
-
-        switch (op)
-        {
-        case OP_PUBLIC_KEY:
-        {
-            assert(vvch.size() == 3);
-            aliasOperation.push_back(Pair("op", "public_key"));
-            const std::string sender(vvch[0].begin(), vvch[0].end());
-            const std::string key(vvch[1].begin(), vvch[1].end());
-            const std::string signature(vvch[2].begin(), vvch[2].end());
-            aliasOperation.push_back(Pair("sender", sender));
-            aliasOperation.push_back(Pair("key", key));
-            aliasOperation.push_back(Pair("signature", signature));
-            break;
-        }
-
-        case OP_MESSAGE:
-        {
-            assert(vvch.size() == 1);
-            const std::string rand = HexStr(vvch[0].begin(), vvch[0].end());
-            aliasOperation.push_back(Pair("op", "message"));
-            break;
-        }
-
-        case OP_ALIAS_ENCRYPTED:
-        {
-            assert(vvch.size() == 6);
-            const std::string rand = stringFromVch(vvch[0]);
-            aliasOperation.push_back(Pair("op", "node_split"));
-            aliasOperation.push_back(Pair("rand", rand));
-            break;
-        }
-
-        case OP_ALIAS_SET:
-        {
-            assert(vvch.size() == 3);
-            const std::string alias(vvch[0].begin(), vvch[0].end());
-            const std::string rand = HexStr(vvch[1].begin(), vvch[1].end());
-            const std::string val(vvch[2].begin(), vvch[2].end());
-            aliasOperation.push_back(Pair("op", "node_open"));
-            aliasOperation.push_back(Pair("alias", alias));
-            aliasOperation.push_back(Pair("rand", rand));
-            aliasOperation.push_back(Pair("value", val));
-            break;
-        }
-
-        case OP_ALIAS_RELAY:
-        {
-            assert(vvch.size() == 2);
-            const std::string alias(vvch[0].begin(), vvch[0].end());
-            const std::string val(vvch[1].begin(), vvch[1].end());
-            aliasOperation.push_back(Pair("op", "node_relay"));
-            aliasOperation.push_back(Pair("alias", alias));
-            aliasOperation.push_back(Pair("value", val));
-            break;
-        }
-
-        default:
-            aliasOperation.push_back(Pair("op", "unknown"));
-            break;
-        }
-
-        out.push_back(Pair("aliasOperation", aliasOperation));
-        aliasPrefix = "ALIAS_OP";
-        script = CScript(pc, script.end());
-    }
-
-    out.push_back(Pair("asm", aliasPrefix + script.ToString()));
-    if (fIncludeHex)
-        out.push_back(Pair("hex", HexStr(scriptPubKey.begin(), scriptPubKey.end())));
-    out.push_back(Pair("hex", HexStr(scriptPubKey.begin(), scriptPubKey.end())));
-
-    out.push_back(Pair("reqSigs", nRequired));
-    out.push_back(Pair("type", GetTxnOutputType(type) ));
-
-    Array a;
-    //BOOST_FOREACH(const CTxDestination& addr, addresses)
-    //    a.push_back(cba(addr).ToString());
-    a.push_back(address);
-
-    out.push_back(Pair("addresses", a));
-} */
-
+# 150 "rpcrawtransaction.cpp"
 void TxToJSON(const CTransaction& tx, const uint256 hashBlock, Object& entry)
 {
   entry.push_back(Pair("txid", tx.GetHash().GetHex()));
@@ -474,12 +368,13 @@ Value crawgen(const Array& params, bool fHelp)
     cba address(s.name_);
     if(!address.IsValid())
     {
-      vector<PathIndex> vtxPos;
+      vector<AliasIndex> vtxPos;
       string aliasStr = s.name_;
-      vchType vchPath = vchFromString(aliasStr);
-      if (ln1Db->lKey(vchPath))
+      std::transform(aliasStr.begin(), aliasStr.end(), aliasStr.begin(), ::tolower);
+      vchType vchAlias = vchFromString(aliasStr);
+      if (ln1Db->lKey(vchAlias))
       {
-        if (!ln1Db->lGet (vchPath, vtxPos))
+        if (!ln1Db->lGet (vchAlias, vtxPos))
         {
           return error("crawgen : failed to read from alias DB");
         }
@@ -488,7 +383,7 @@ Value crawgen(const Array& params, bool fHelp)
           return -1;
         }
 
-        PathIndex& txPos = vtxPos.back ();
+        AliasIndex& txPos = vtxPos.back ();
         if(txPos.nHeight + scaleMonitor() <= nBestHeight)
         {
           throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "extern alias");
@@ -606,12 +501,13 @@ Value createrawtransaction(const Array& params, bool fHelp)
     cba address(s.name_);
     if(!address.IsValid())
     {
-      vector<PathIndex> vtxPos;
+      vector<AliasIndex> vtxPos;
       string aliasStr = s.name_;
-      vchType vchPath = vchFromString(aliasStr);
-      if (ln1Db->lKey (vchPath))
+      std::transform(aliasStr.begin(), aliasStr.end(), aliasStr.begin(), ::tolower);
+      vchType vchAlias = vchFromString(aliasStr);
+      if (ln1Db->lKey (vchAlias))
       {
-        if (!ln1Db->lGet (vchPath, vtxPos))
+        if (!ln1Db->lGet (vchAlias, vtxPos))
         {
           return error("aliasHeight() : failed to read from alias DB");
         }
@@ -620,7 +516,7 @@ Value createrawtransaction(const Array& params, bool fHelp)
           return -1;
         }
 
-        PathIndex& txPos = vtxPos.back ();
+        AliasIndex& txPos = vtxPos.back ();
         if(txPos.nHeight + scaleMonitor() <= nBestHeight)
         {
           throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "extern alias");
@@ -699,7 +595,7 @@ Value decodescript(const Array& params, bool fHelp)
   }
   else
   {
-    // Empty scripts are valid
+
   }
   spj(script, r, false);
 
@@ -748,12 +644,12 @@ Value signrawtransaction(const Array& params, bool fHelp)
     throw JSONRPCError(RPC_DESERIALIZATION_ERROR, "Missing transaction");
   }
 
-  // mergedTx will end up with all the signatures; it
-  // starts as a clone of the rawtx:
+
+
   CTransaction mergedTx(txVariants[0]);
   bool fComplete = true;
 
-  // Fetch previous transactions (inputs):
+
   map<COutPoint, CScript> mapPrevOut;
   for (unsigned int i = 0; i < mergedTx.vin.size(); i++)
   {
@@ -763,11 +659,11 @@ Value signrawtransaction(const Array& params, bool fHelp)
     map<uint256, CTxIndex> unused;
     bool fInvalid;
 
-    // FetchInputs aborts on failure, so we go one at a time.
+
     tempTx.vin.push_back(mergedTx.vin[i]);
     tempTx.FetchInputs(txdb, unused, false, false, mapPrevTx, fInvalid);
 
-    // Copy results into mapPrevOut:
+
     BOOST_FOREACH(const CTxIn& txin, tempTx.vin)
     {
       const uint256& prevHash = txin.prevout.hash;
@@ -778,7 +674,7 @@ Value signrawtransaction(const Array& params, bool fHelp)
     }
   }
 
-  // Add previous txouts given in the RPC call:
+
   if (params.size() > 1 && params[1].type() != null_type)
   {
     Array prevTxs = params[1].get_array();
@@ -818,7 +714,7 @@ Value signrawtransaction(const Array& params, bool fHelp)
       COutPoint outpoint(txid, nOut);
       if (mapPrevOut.count(outpoint))
       {
-        // Complain if scriptPubKey doesn't match
+
         if (mapPrevOut[outpoint] != scriptPubKey)
         {
           string err("Previous output scriptPubKey mismatch:\n");
@@ -887,7 +783,7 @@ Value signrawtransaction(const Array& params, bool fHelp)
 
   bool fHashSingle = ((nHashType & ~SIGHASH_ANYONECANPAY) == SIGHASH_SINGLE);
 
-  // Sign what we can:
+
   for (unsigned int i = 0; i < mergedTx.vin.size(); i++)
   {
     CTxIn& txin = mergedTx.vin[i];
@@ -899,13 +795,13 @@ Value signrawtransaction(const Array& params, bool fHelp)
     const CScript& prevPubKey = mapPrevOut[txin.prevout];
 
     txin.scriptSig.clear();
-    // Only sign SIGHASH_SINGLE if there's a corresponding output:
+
     if (!fHashSingle || (i < mergedTx.vout.size()))
     {
       SignSignature(keystore, prevPubKey, mergedTx, i, nHashType);
     }
 
-    // ... and merge in other signatures:
+
     BOOST_FOREACH(const CTransaction& txv, txVariants)
     {
       txin.scriptSig = CombineSignatures(prevPubKey, mergedTx, i, txin.scriptSig, txv.vin[i].scriptSig);
@@ -934,12 +830,12 @@ Value sendrawtransaction(const Array& params, bool fHelp)
 
   RPCTypeCheck(params, list_of(str_type));
 
-  // parse hex string from parameter
+
   vector<unsigned char> txData(ParseHex(params[0].get_str()));
   CDataStream ssData(txData, SER_NETWORK, PROTOCOL_VERSION);
   CTransaction tx;
 
-  // deserialize binary data stream
+
   try
   {
     ssData >> tx;
@@ -950,8 +846,8 @@ Value sendrawtransaction(const Array& params, bool fHelp)
   }
   uint256 hashTx = tx.GetHash();
 
-  // See if the transaction is already in a block
-  // or in the memory pool:
+
+
   CTransaction existingTx;
   uint256 hashBlock = 0;
   if (GetTransaction(hashTx, existingTx, hashBlock))
@@ -960,12 +856,12 @@ Value sendrawtransaction(const Array& params, bool fHelp)
     {
       throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, string("transaction already in block ")+hashBlock.GetHex());
     }
-    // Not in block, but already in the memory pool; will drop
-    // through to re-relay it.
+
+
   }
   else
   {
-    // push to local node
+
     if (!AcceptToMemoryPool(mempool, tx, NULL))
     {
       throw JSONRPCError(RPC_DESERIALIZATION_ERROR, "TX rejected");

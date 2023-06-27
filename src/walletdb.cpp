@@ -1,11 +1,3 @@
-
-
-
-// Copyright (c) 2009-2010 Satoshi Nakamoto
-// Copyright (c) 2009-2012 The Bitcoin developers
-// Distributed under the MIT/X11 software license, see the accompanying
-// file COPYING or http://www.opensource.org/licenses/mit-license.php.
-
 #include "walletdb.h"
 #include "wallet.h"
 #include <boost/version.hpp>
@@ -18,9 +10,9 @@ using namespace boost;
 static uint64_t nAccountingEntryNumber = 0;
 extern bool fWalletUnlockStakingOnly;
 
-//
-// __wx__DB
-//
+
+
+
 
 bool __wx__DB::WriteName(const string& strAddress, const string& aliasStr)
 {
@@ -30,8 +22,8 @@ bool __wx__DB::WriteName(const string& strAddress, const string& aliasStr)
 
 bool __wx__DB::EraseName(const string& strAddress)
 {
-  // This should only be used for sending addresses, never for receiving addresses,
-  // receiving addresses must always have an address book entry if they're not change return.
+
+
   nWalletDBUpdated++;
   return Erase(make_pair(string("name"), strAddress));
 }
@@ -81,7 +73,7 @@ void __wx__DB::ListAccountCreditDebit(const string& strAccount, list<CAccounting
   unsigned int fFlags = DB_SET_RANGE;
   while (true)
   {
-    // Read next record
+
     CDataStream ssKey(SER_DISK, CLIENT_VERSION);
     if (fFlags == DB_SET_RANGE)
     {
@@ -100,7 +92,7 @@ void __wx__DB::ListAccountCreditDebit(const string& strAccount, list<CAccounting
       throw runtime_error("__wx__DB::ListAccountCreditDebit() : error scanning DB");
     }
 
-    // Unserialize
+
     string strType;
     ssKey >> strType;
     if (strType != "acentry")
@@ -127,10 +119,10 @@ DBErrors
 __wx__DB::ReorderTransactions(__wx__* pwallet)
 {
   LOCK(pwallet->cs_wallet);
-  // Old wallets didn't have any defined order for transactions
-  // Probably a bad idea to change the output of this
 
-  // First: get all __wx__Tx and CAccountingEntry into a sorted-by-time multimap.
+
+
+
   typedef pair<__wx__Tx*, CAccountingEntry*> TxPair;
   typedef multimap<int64_t, TxPair > TxItems;
   TxItems txByTime;
@@ -162,7 +154,7 @@ __wx__DB::ReorderTransactions(__wx__* pwallet)
       nOrderPosOffsets.push_back(nOrderPos);
 
       if (pacentry)
-        // Have to write accounting regardless, since we don't keep it in memory
+
         if (!WriteAccountingEntry(pacentry->nEntryNo, *pacentry))
         {
           return DB_LOAD_FAIL;
@@ -186,7 +178,7 @@ __wx__DB::ReorderTransactions(__wx__* pwallet)
         continue;
       }
 
-      // Since we're changing the order, write it back
+
       if (pwtx)
       {
         if (!WriteTx(pwtx->GetHash(), *pwtx))
@@ -230,9 +222,9 @@ ReadKeyValue(__wx__* pwallet, CDataStream& ssKey, CDataStream& ssValue,
 {
   try
   {
-    // Unserialize
-    // Taking advantage of the fact that pair serialization
-    // is just the two items serialized one after the other
+
+
+
     ssKey >> strType;
     if (strType == "name")
     {
@@ -256,7 +248,7 @@ ReadKeyValue(__wx__* pwallet, CDataStream& ssKey, CDataStream& ssValue,
         return false;
       }
 
-      // Undo serialize changes in 31600
+
       if (31404 <= wtx.fTimeReceivedIsTxTime && wtx.fTimeReceivedIsTxTime <= 31703)
       {
         if (!ssValue.empty())
@@ -280,14 +272,7 @@ ReadKeyValue(__wx__* pwallet, CDataStream& ssKey, CDataStream& ssValue,
       {
         wss.fAnyUnordered = true;
       }
-
-      //// debug print
-      //printf("LoadWallet  %s\n", wtx.GetHash().ToString().c_str());
-      //printf(" %12"PRId64"  %s  %s  %s\n",
-      //    wtx.vout[0].nValue,
-      //    DateTimeStrFormat("%x %H:%M:%S", wtx.GetBlockTime()).c_str(),
-      //    wtx.hashBlock.ToString().substr(0,20).c_str(),
-      //    wtx.mapValue["message"].c_str());
+# 288 "walletdb.cpp"
     }
     else if (strType == "acentry")
     {
@@ -405,7 +390,7 @@ ReadKeyValue(__wx__* pwallet, CDataStream& ssKey, CDataStream& ssValue,
 
       pwallet->LoadKeyMetadata(vchPubKey, keyMeta);
 
-      // find earliest key creation time, as wallet birthday
+
       if (!pwallet->nTimeFirstKey ||
           (keyMeta.nCreateTime < pwallet->nTimeFirstKey))
       {
@@ -433,9 +418,9 @@ ReadKeyValue(__wx__* pwallet, CDataStream& ssKey, CDataStream& ssValue,
       ssValue >> keypool;
       pwallet->setKeyPool.insert(nIndex);
 
-      // If no metadata exists yet, create a default with the pool key's
-      // creation time. Note that this may be overwritten by actually
-      // stored metadata for that key later, which is fine.
+
+
+
       CKeyID keyid = keypool.vchPubKey.GetID();
       if (pwallet->kd.count(keyid) == 0)
       {
@@ -501,7 +486,7 @@ DBErrors __wx__DB::LoadWallet(__wx__* pwallet)
       pwallet->LoadMinVersion(nMinVersion);
     }
 
-    // Get cursor
+
     Dbc* pcursor = GetCursor();
     if (!pcursor)
     {
@@ -511,7 +496,7 @@ DBErrors __wx__DB::LoadWallet(__wx__* pwallet)
 
     while (true)
     {
-      // Read next record
+
       CDataStream ssKey(SER_DISK, CLIENT_VERSION);
       CDataStream ssValue(SER_DISK, CLIENT_VERSION);
       int ret = ReadAtCursor(pcursor, ssKey, ssValue);
@@ -525,22 +510,22 @@ DBErrors __wx__DB::LoadWallet(__wx__* pwallet)
         return DB_CORRUPT;
       }
 
-      // Try to be tolerant of single corrupt records:
+
       string strType, strErr;
       if (!ReadKeyValue(pwallet, ssKey, ssValue, wss, strType, strErr))
       {
-        // losing keys is considered a catastrophic error, anything else
-        // we assume the user can live with:
+
+
         if (IsKeyType(strType))
         {
           result = DB_CORRUPT;
         }
         else
         {
-          // Leave other errors alone, if we try to fix them we might make things worse.
-          fNoncriticalErrors = true; // ... but do warn the user there is something wrong.
+
+          fNoncriticalErrors = true;
           if (strType == "tx")
-            // Rescan if there is a bad transaction record:
+
           {
             SoftSetBoolArg("-rescan", true);
           }
@@ -563,8 +548,8 @@ DBErrors __wx__DB::LoadWallet(__wx__* pwallet)
     result = DB_NONCRITICAL_ERROR;
   }
 
-  // Any wallet corruption at all: skip any rewriting or
-  // upgrading, we don't want to make it worse.
+
+
   if (result != DB_LOAD_OK)
   {
     return result;
@@ -575,23 +560,23 @@ DBErrors __wx__DB::LoadWallet(__wx__* pwallet)
   printf("Keys: %u plaintext, %u encrypted, %u w/ metadata, %u total\n",
          wss.nKeys, wss.nCKeys, wss.nKeyMeta, wss.nKeys + wss.nCKeys);
 
-  // nTimeFirstKey is only reliable if all keys have metadata
+
   if ((wss.nKeys + wss.nCKeys) != wss.nKeyMeta)
   {
-    pwallet->nTimeFirstKey = 1;  // 0 would be considered 'no value'
+    pwallet->nTimeFirstKey = 1;
   }
 
 
   BOOST_FOREACH(uint256 hash, wss.vWalletUpgrade)
   WriteTx(hash, pwallet->mapWallet[hash]);
 
-  // Rewrite encrypted wallets of versions 0.4.0 and 0.5.0rc:
+
   if (wss.fIsEncrypted && (wss.nFileVersion == 40000 || wss.nFileVersion == 50000))
   {
     return DB_NEED_REWRITE;
   }
 
-  if (wss.nFileVersion < CLIENT_VERSION) // Update
+  if (wss.nFileVersion < CLIENT_VERSION)
   {
     WriteVersion(CLIENT_VERSION);
   }
@@ -605,18 +590,18 @@ DBErrors __wx__DB::LoadWallet(__wx__* pwallet)
 }
 
 
-//
-// Try to (very carefully!) recover wallet.dat if there is a problem.
-//
+
+
+
 bool __wx__DB::Recover(CDBEnv& dbenv, std::string filename, bool fOnlyKeys)
 {
-  // Recovery procedure:
-  // move wallet.dat to wallet.timestamp.bak
-  // Call Salvage with fAggressive=true to
-  // get as much data as possible.
-  // Rewrite salvaged data to wallet.dat
-  // Set -rescan so any missing transactions will be
-  // found.
+
+
+
+
+
+
+
   int64_t now = GetTime();
   std::string newFilename = strprintf("wallet.%" PRId64 ".bak", now);
 
@@ -643,11 +628,11 @@ bool __wx__DB::Recover(CDBEnv& dbenv, std::string filename, bool fOnlyKeys)
 
   bool fSuccess = allOK;
   Db* pdbCopy = new Db(&dbenv.dbenv, 0);
-  int ret = pdbCopy->open(NULL,                 // Txn pointer
-                          filename.c_str(),   // Filename
-                          "main",    // Logical db name
-                          DB_BTREE,  // Database type
-                          DB_CREATE,    // Flags
+  int ret = pdbCopy->open(NULL,
+                          filename.c_str(),
+                          "main",
+                          DB_BTREE,
+                          DB_CREATE,
                           0);
   if (ret > 0)
   {
@@ -737,7 +722,7 @@ DBErrors __wx__DB::FindWalletTx(__wx__* pwallet, vector<uint256>& vTxHash)
       pwallet->LoadMinVersion(nMinVersion);
     }
 
-    // Get cursor
+
     Dbc* pcursor = GetCursor();
     if (!pcursor)
     {

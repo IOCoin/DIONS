@@ -1,6 +1,3 @@
-// Copyright (c) 2018 The I/O Coin developers
-//
-//
 #include "db.h"
 #include "txdb-leveldb.h"
 #include "keystore.h"
@@ -107,11 +104,11 @@ extern bool Solver(const CKeyStore& keystore, const CScript& scriptPubKey, uint2
 extern bool VerifyScript(const CScript& scriptSig, const CScript& scriptPubKey, const CTransaction& txTo, unsigned int nIn, int nHashType);
 extern Value sendtoaddress(const Array& params, bool fHelp);
 
-//Ext frame
+
 bool relaySigFrame(int,vchType&);
 bool frlRelay(int&);
 
-//VX
+
 Value alias(const Array& params, bool fHelp);
 Value updateEncrypt(const Array& params, bool fHelp);
 Value statusList(const Array& params, bool fHelp);
@@ -234,9 +231,13 @@ Value vertexScan(const Array& params, bool fHelp)
         printf("  k2 %s\n", a.c_str());
         o.push_back(Pair("vertex", a));
 
+
         CDataStream ssValue((char*)data.get_data(), (char*)data.get_data() + data.get_size(), SER_DISK, CLIENT_VERSION);
         vchType val;
         ssValue >> val;
+
+
+
 
         o.push_back(Pair("vertex ref", stringFromVch(val)));
         oRes.push_back(o);
@@ -244,19 +245,19 @@ Value vertexScan(const Array& params, bool fHelp)
     }
     if (ret != DB_NOTFOUND)
     {
-      // ret should be DB_NOTFOUND upon exiting the loop.
-      // Dbc::get() will by default throw an exception if any
-      // significant errors occur, so by default this if block
-      // can never be reached.
+
+
+
+
     }
   }
   catch(DbException &e)
   {
-    //ln1Db.err(e.get_errno(), "Error!");
+
   }
   catch(std::exception &e)
   {
-    //ln1Db.errx("Error! %s", e.what());
+
   }
 
   if (cursorp != NULL)
@@ -366,19 +367,19 @@ Value gw1(const Array& params, bool fHelp)
     }
     if (ret != DB_NOTFOUND)
     {
-      // ret should be DB_NOTFOUND upon exiting the loop.
-      // Dbc::get() will by default throw an exception if any
-      // significant errors occur, so by default this if block
-      // can never be reached.
+
+
+
+
     }
   }
   catch(DbException &e)
   {
-    //ln1Db.err(e.get_errno(), "Error!");
+
   }
   catch(std::exception &e)
   {
-    //ln1Db.errx("Error! %s", e.what());
+
   }
 
   if (cursorp != NULL)
@@ -2184,9 +2185,9 @@ Value nodeRetrieve(const Array& params, bool fHelp)
   LEAVE_CRITICAL_SECTION(cs_main)
 
 
-  //Array oRes;
-  //BOOST_FOREACH(const PAIRTYPE(vector<unsigned char>, Object)& item, aliasMapVchObj)
-  //    oRes.push_back(item.second);
+
+
+
 
   return oRes;
 }
@@ -3457,7 +3458,7 @@ Value vextract(const Array& params, bool fHelp)
     throw runtime_error("Invalid out put path");
   }
 
-  //vex
+
   Array oRes;
   LocatorNodeDB ln1Db("r");
 
@@ -3505,11 +3506,11 @@ Value vextract(const Array& params, bool fHelp)
   }
   catch(DbException &e)
   {
-    //ln1Db.err(e.get_errno(), "Error!");
+
   }
   catch(std::exception &e)
   {
-    //ln1Db.errx("Error! %s", e.what());
+
   }
 
   if (cursorp != NULL)
@@ -3546,7 +3547,7 @@ Value vEPID(const Array& params, bool fHelp)
     );
 
 
-  //VX series
+
   vchType vchNodeLocator;
   string k =(params[0]).get_str();
   cba k1(k);
@@ -5841,23 +5842,31 @@ Value updateAliasFile(const Array& params, bool fHelp)
   return wtx.GetHash().GetHex();
 }
 
-Value projectCache(const Array& params, bool fHelp)
+Value updateAlias_executeContractPayload(const Array& params, bool fHelp)
 {
-  if(fHelp || params.size() < 2 || params.size() > 3)
+  if(fHelp || params.size() < 2 || params.size() > 4)
     throw runtime_error(
-      "projectCache <alias> <value> [<toaddress>]\nUpdate and possibly transfer a alias"
+      "updateAlias_executeContractPayload <alias> <value> [<toaddress>]\nUpdate and possibly transfer a alias"
       + HelpRequiringPassphrase());
+
+
+
 
   string locatorStr = params[0].get_str();
   std::transform(locatorStr.begin(), locatorStr.end(), locatorStr.begin(), ::tolower);
-  const vchType vchAlias = vchFromValue(locatorStr);      
-  string cacheAliasStr = params[1].get_str(); 
+  const vchType vchAlias = vchFromValue(locatorStr);
+  string targetContractAliasStr = params[1].get_str();
+
+
+
+
   vchType inputDataVch = vchFromValue(params[2].get_str());
+
   cba address(targetContractAliasStr);
   if(!address.IsValid())
   {
     vector<AliasIndex> vtxPos;
-    vchType vchAlias = vchFromString(cacheAliasStr);
+    vchType vchAlias = vchFromString(targetContractAliasStr);
     if (ln1Db->lKey (vchAlias))
     {
       printf("  name exists\n");
@@ -5883,24 +5892,54 @@ Value projectCache(const Array& params, bool fHelp)
     }
   }
 
+  std::cout << "execution alias " << locatorStr << std::endl;
+  std::cout << "target contract alias " << targetContractAliasStr << std::endl;
+  std::cout << "target contract address " << address.ToString() << std::endl;
+  std::cout << "execution data " << params[2].get_str() << std::endl;
   uint160 hash160;
   bool isValid = AddressToHash160(address.ToString(), hash160);
-  std::vector<unsigned char> payload(hash160.begin(), hash160.end());
-  vchType cacheData = vchFromString(params[2].get_str());
-  payload.insert(payload.end(), cacheData.begin(), cacheData.end());
+  std::cout << "target contract 20 byte address " << hash160.GetHex() << std::endl;
+
+
+
+
+
+  vchType targetContractAliasVch = vchFromString(targetContractAliasStr);
+  std::vector<unsigned char> payload(targetContractAliasVch.begin(), targetContractAliasVch.end());
+  vchType executionData = vchFromString(params[2].get_str());
+  payload.insert(payload.end(), executionData.begin(), executionData.end());
+
 
   uint256 hash256 = Hash(payload.begin(), payload.end());
+  std::cout << "payload hash prior to pack " << hash256.GetHex() << std::endl;
 
-  std::vector<unsigned char> transmission_cache(hash256.begin(),hash256.end());
-  transmission_cache.insert(transmission_cache.end(), payload.begin(), payload.end());
+  std::vector<unsigned char> hash_plus_payload(hash256.begin(),hash256.end());
+  hash_plus_payload.insert(hash_plus_payload.end(), payload.begin(), payload.end());
+
+
+
+  std::vector<unsigned char> bytes_without_hash(hash_plus_payload.begin()+32,hash_plus_payload.end());
+  uint256 recon_hash256 = Hash(bytes_without_hash.begin(), bytes_without_hash.end());
+  std::cout << "payload hash after extracting the byte payload " << recon_hash256.GetHex() << std::endl;
+
+
+  vector<unsigned char> hash_bytes(hash_plus_payload.begin(),hash_plus_payload.begin()+32);
+  uint256 hash256_from_payload_bytes(hash_bytes);
+
+  std::cout << "compare given hash bytes with computed " << (hash256 == hash256_from_payload_bytes) << std::endl;
+
+
+
+
+
 
   __wx__Tx wtx;
   wtx.nVersion = CTransaction::DION_TX_VERSION;
   CScript scriptPubKeyOrig;
 
-  if(params.size() == 3)
+  if(params.size() == 4)
   {
-    string strAddress = params[2].get_str();
+    string strAddress = params[3].get_str();
     uint160 hash160;
     bool isValid = AddressToHash160(strAddress, hash160);
     if(!isValid)
@@ -5909,10 +5948,14 @@ Value projectCache(const Array& params, bool fHelp)
     }
     scriptPubKeyOrig.SetBitcoinAddress(strAddress);
   }
-
+# 5964 "dions.cpp"
   vchType vchValue;
   CScript scriptPubKey;
-  scriptPubKey << OP_ALIAS_RELAY << vchAlias << vchValue << OP_2DROP << OP_DROP;
+
+  scriptPubKey << OP_ALIAS_RELAY << vchAlias << hash_plus_payload << OP_2DROP << OP_DROP;
+  std::cout << "update_execute : vchAlias " << stringFromVch(vchAlias) << std::endl;
+
+
 
   ENTER_CRITICAL_SECTION(cs_main)
   {
@@ -5950,7 +5993,7 @@ Value projectCache(const Array& params, bool fHelp)
         throw runtime_error("this coin is not in your wallet");
       }
 
-      if(params.size() == 2)
+      if(params.size() == 3)
       {
         string strAddress = "";
         aliasAddress(tx, strAddress);
@@ -6010,6 +6053,11 @@ Value updateAlias(const Array& params, bool fHelp)
     }
     scriptPubKeyOrig.SetBitcoinAddress(strAddress);
   }
+
+
+
+
+
 
   CScript scriptPubKey;
   scriptPubKey << OP_ALIAS_RELAY << vchAlias << vchValue << OP_2DROP << OP_DROP;
@@ -6888,6 +6936,8 @@ Value registerAliasGenerate(const Array& params, bool fHelp)
 
   string locatorStr = params[0].get_str();
 
+  std::cout << "alias name size in bytes " << locatorStr.size() << std::endl;
+
   locatorStr = stripSpacesAndQuotes(locatorStr);
 
   if(isOnlyWhiteSpace(locatorStr))
@@ -7491,6 +7541,9 @@ bool IsMinePost(const CTransaction& tx, const CTxOut& txout, bool ignore_registe
 bool
 AcceptToMemoryPoolPost(const CTransaction& tx)
 {
+
+
+
   if(tx.nVersion != CTransaction::DION_TX_VERSION)
   {
     return true;
@@ -8011,7 +8064,7 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
     {
       return error("expired alias, or there is a pending transaction on the alias");
     }
-
+# 8089 "dions.cpp"
     break;
   default:
     return error("alias transaction has unknown op");

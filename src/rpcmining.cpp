@@ -1,11 +1,3 @@
-
-
-
-// Copyright (c) 2010 Satoshi Nakamoto
-// Copyright (c) 2009-2012 The Bitcoin developers
-// Distributed under the MIT/X11 software license, see the accompanying
-// file COPYING or http://www.opensource.org/licenses/mit-license.php.
-
 #include "main.h"
 #include "db.h"
 #include "txdb.h"
@@ -50,29 +42,29 @@ Value getmininginfo(const Array& params, bool fHelp)
   pwalletMain->GetStakeWeight(nWeight);
 
   Object obj, diff, weight;
-  obj.push_back(Pair("blocks",        (int)nBestHeight));
+  obj.push_back(Pair("blocks", (int)nBestHeight));
   obj.push_back(Pair("currentblocksize",(uint64_t)nLastBlockSize));
   obj.push_back(Pair("currentblocktx",(uint64_t)nLastBlockTx));
 
-  diff.push_back(Pair("proof-of-work",        GetDifficulty()));
-  diff.push_back(Pair("proof-of-stake",       GetDifficulty(GetLastBlockIndex(pindexBest, true))));
+  diff.push_back(Pair("proof-of-work", GetDifficulty()));
+  diff.push_back(Pair("proof-of-stake", GetDifficulty(GetLastBlockIndex(pindexBest, true))));
 
-  diff.push_back(Pair("search-interval",      (int)nLastCoinStakeSearchInterval));
-  obj.push_back(Pair("difficulty",    diff));
+  diff.push_back(Pair("search-interval", (int)nLastCoinStakeSearchInterval));
+  obj.push_back(Pair("difficulty", diff));
 
-  obj.push_back(Pair("blockvalue",    (uint64_t)GetProofOfWorkReward((int)nBestHeight, 0)));
-  obj.push_back(Pair("netmhashps",     GetPoWMHashPS()));
+  obj.push_back(Pair("blockvalue", (uint64_t)GetProofOfWorkReward((int)nBestHeight, 0)));
+  obj.push_back(Pair("netmhashps", GetPoWMHashPS()));
   obj.push_back(Pair("netstakeweight", GetPoSKernelPS()));
-  obj.push_back(Pair("errors",        GetWarnings("statusbar")));
-  obj.push_back(Pair("pooledtx",      (uint64_t)mempool.size()));
+  obj.push_back(Pair("errors", GetWarnings("statusbar")));
+  obj.push_back(Pair("pooledtx", (uint64_t)mempool.size()));
 
-  weight.push_back(Pair("minimum",    (uint64_t)nWeight));
-  weight.push_back(Pair("maximum",    (uint64_t)0));
-  weight.push_back(Pair("combined",  (uint64_t)nWeight));
+  weight.push_back(Pair("minimum", (uint64_t)nWeight));
+  weight.push_back(Pair("maximum", (uint64_t)0));
+  weight.push_back(Pair("combined", (uint64_t)nWeight));
   obj.push_back(Pair("stakeweight", weight));
 
-  obj.push_back(Pair("stakeinterest",    (uint64_t)GetProofOfStakeInterest(nBestHeight)));
-  obj.push_back(Pair("testnet",       fTestNet));
+  obj.push_back(Pair("stakeinterest", (uint64_t)GetProofOfStakeInterest(nBestHeight)));
+  obj.push_back(Pair("testnet", fTestNet));
   return obj;
 }
 
@@ -142,7 +134,7 @@ Value getworkex(const Array& params, bool fHelp)
 
   if (params.size() == 0)
   {
-    // Update block
+
     static unsigned int nTransactionsUpdatedLast;
     static CBlockIndex* pindexPrev;
     static int64_t nStart;
@@ -152,7 +144,7 @@ Value getworkex(const Array& params, bool fHelp)
     {
       if (pindexPrev != pindexBest)
       {
-        // Deallocate old blocks since they're obsolete now
+
         mapNewBlock.clear();
         BOOST_FOREACH(CBlock* pblock, vNewBlock)
         delete pblock;
@@ -162,7 +154,7 @@ Value getworkex(const Array& params, bool fHelp)
       pindexPrev = pindexBest;
       nStart = GetTime();
 
-      // Create new block
+
       pblock = CreateNewBlock(pwalletMain);
       if (!pblock)
       {
@@ -171,18 +163,18 @@ Value getworkex(const Array& params, bool fHelp)
       vNewBlock.push_back(pblock);
     }
 
-    // Update nTime
+
     pblock->nTime = max(pindexPrev->GetPastTimeLimit()+1, GetAdjustedTime());
     pblock->nNonce = 0;
 
-    // Update nExtraNonce
+
     static unsigned int nExtraNonce = 0;
     IncrementExtraNonce(pblock, pindexPrev, nExtraNonce);
 
-    // Save
+
     mapNewBlock[pblock->hashMerkleRoot] = make_pair(pblock, pblock->vtx[0].vin[0].scriptSig);
 
-    // Prebuild hash buffers
+
     char pmidstate[32];
     char pdata[128];
     char phash1[64];
@@ -194,8 +186,8 @@ Value getworkex(const Array& params, bool fHelp)
     std::vector<uint256> merkle = pblock->GetMerkleBranch(0);
 
     Object result;
-    result.push_back(Pair("data",     HexStr(BEGIN(pdata), END(pdata))));
-    result.push_back(Pair("target",   HexStr(BEGIN(hashTarget), END(hashTarget))));
+    result.push_back(Pair("data", HexStr(BEGIN(pdata), END(pdata))));
+    result.push_back(Pair("target", HexStr(BEGIN(hashTarget), END(hashTarget))));
 
     CDataStream ssTx(SER_NETWORK, PROTOCOL_VERSION);
     ssTx << coinbaseTx;
@@ -215,7 +207,7 @@ Value getworkex(const Array& params, bool fHelp)
   }
   else
   {
-    // Parse parameters
+
     vector<unsigned char> vchData = ParseHex(params[0].get_str());
     vector<unsigned char> coinbase;
 
@@ -231,13 +223,13 @@ Value getworkex(const Array& params, bool fHelp)
 
     CBlock* pdata = (CBlock*)&vchData[0];
 
-    // Byte reverse
+
     for (int i = 0; i < 128/4; i++)
     {
       ((unsigned int*)pdata)[i] = ByteReverse(((unsigned int*)pdata)[i]);
     }
 
-    // Get saved block
+
     if (!mapNewBlock.count(pdata->hashMerkleRoot))
     {
       return false;
@@ -253,7 +245,7 @@ Value getworkex(const Array& params, bool fHelp)
     }
     else
     {
-      CDataStream(coinbase, SER_NETWORK, PROTOCOL_VERSION) >> pblock->vtx[0];  // FIXME - HACK!
+      CDataStream(coinbase, SER_NETWORK, PROTOCOL_VERSION) >> pblock->vtx[0];
     }
 
     pblock->hashMerkleRoot = pblock->BuildMerkleTree();
@@ -268,9 +260,9 @@ Value getwork(const Array& params, bool fHelp)
     throw runtime_error(
       "getwork [data]\n"
       "If [data] is not specified, returns formatted hash data to work on:\n"
-      "  \"midstate\" : precomputed hash state after hashing the first half of the data (DEPRECATED)\n" // deprecated
+      "  \"midstate\" : precomputed hash state after hashing the first half of the data (DEPRECATED)\n"
       "  \"data\" : block data\n"
-      "  \"hash1\" : formatted hash buffer for second hash (DEPRECATED)\n" // deprecated
+      "  \"hash1\" : formatted hash buffer for second hash (DEPRECATED)\n"
       "  \"target\" : little endian hash target\n"
       "If [data] is specified, tries to solve the block and returns true if it was successful.");
 
@@ -291,13 +283,13 @@ Value getwork(const Array& params, bool fHelp)
   }
 
   typedef map<uint256, pair<CBlock*, CScript> > mapNewBlock_t;
-  static mapNewBlock_t mapNewBlock;    // FIXME: thread safety
+  static mapNewBlock_t mapNewBlock;
   static vector<CBlock*> vNewBlock;
   static CReserveKey reservekey(pwalletMain);
 
   if (params.size() == 0)
   {
-    // Update block
+
     static unsigned int nTransactionsUpdatedLast;
     static CBlockIndex* pindexPrev;
     static int64_t nStart;
@@ -307,22 +299,22 @@ Value getwork(const Array& params, bool fHelp)
     {
       if (pindexPrev != pindexBest)
       {
-        // Deallocate old blocks since they're obsolete now
+
         mapNewBlock.clear();
         BOOST_FOREACH(CBlock* pblock, vNewBlock)
         delete pblock;
         vNewBlock.clear();
       }
 
-      // Clear pindexPrev so future getworks make a new block, despite any failures from here on
+
       pindexPrev = NULL;
 
-      // Store the pindexBest used before CreateNewBlock, to avoid races
+
       nTransactionsUpdatedLast = nTransactionsUpdated;
       CBlockIndex* pindexPrevNew = pindexBest;
       nStart = GetTime();
 
-      // Create new block
+
       pblock = CreateNewBlock(pwalletMain);
       if (!pblock)
       {
@@ -330,22 +322,22 @@ Value getwork(const Array& params, bool fHelp)
       }
       vNewBlock.push_back(pblock);
 
-      // Need to update only after we know CreateNewBlock succeeded
+
       pindexPrev = pindexPrevNew;
     }
 
-    // Update nTime
+
     pblock->UpdateTime(pindexPrev);
     pblock->nNonce = 0;
 
-    // Update nExtraNonce
+
     static unsigned int nExtraNonce = 0;
     IncrementExtraNonce(pblock, pindexPrev, nExtraNonce);
 
-    // Save
+
     mapNewBlock[pblock->hashMerkleRoot] = make_pair(pblock, pblock->vtx[0].vin[0].scriptSig);
 
-    // Pre-build hash buffers
+
     char pmidstate[32];
     char pdata[128];
     char phash1[64];
@@ -354,15 +346,15 @@ Value getwork(const Array& params, bool fHelp)
     uint256 hashTarget = CBigNum().SetCompact(pblock->nBits).getuint256();
 
     Object result;
-    result.push_back(Pair("midstate", HexStr(BEGIN(pmidstate), END(pmidstate)))); // deprecated
-    result.push_back(Pair("data",     HexStr(BEGIN(pdata), END(pdata))));
-    result.push_back(Pair("hash1",    HexStr(BEGIN(phash1), END(phash1)))); // deprecated
-    result.push_back(Pair("target",   HexStr(BEGIN(hashTarget), END(hashTarget))));
+    result.push_back(Pair("midstate", HexStr(BEGIN(pmidstate), END(pmidstate))));
+    result.push_back(Pair("data", HexStr(BEGIN(pdata), END(pdata))));
+    result.push_back(Pair("hash1", HexStr(BEGIN(phash1), END(phash1))));
+    result.push_back(Pair("target", HexStr(BEGIN(hashTarget), END(hashTarget))));
     return result;
   }
   else
   {
-    // Parse parameters
+
     vector<unsigned char> vchData = ParseHex(params[0].get_str());
     if (vchData.size() != 128)
     {
@@ -370,13 +362,13 @@ Value getwork(const Array& params, bool fHelp)
     }
     CBlock* pdata = (CBlock*)&vchData[0];
 
-    // Byte reverse
+
     for (int i = 0; i < 128/4; i++)
     {
       ((unsigned int*)pdata)[i] = ByteReverse(((unsigned int*)pdata)[i]);
     }
 
-    // Get saved block
+
     if (!mapNewBlock.count(pdata->hashMerkleRoot))
     {
       return false;
@@ -398,9 +390,9 @@ Value tmpTest(const Array& params, bool fHelp)
     throw runtime_error(
       "tmpTest [data]\n"
       "If [data] is not specified, returns formatted hash data to work on:\n"
-      "  \"midstate\" : precomputed hash state after hashing the first half of the data (DEPRECATED)\n" // deprecated
+      "  \"midstate\" : precomputed hash state after hashing the first half of the data (DEPRECATED)\n"
       "  \"data\" : block data\n"
-      "  \"hash1\" : formatted hash buffer for second hash (DEPRECATED)\n" // deprecated
+      "  \"hash1\" : formatted hash buffer for second hash (DEPRECATED)\n"
       "  \"target\" : little endian hash target\n"
       "If [data] is specified, tries to solve the block and returns true if it was successful.");
 
@@ -423,14 +415,14 @@ Value tmpTest(const Array& params, bool fHelp)
     }
 
     typedef map<uint256, pair<CBlock*, CScript> > mapNewBlock_t;
-    static mapNewBlock_t mapNewBlock;    // FIXME: thread safety
+    static mapNewBlock_t mapNewBlock;
     static vector<CBlock*> vNewBlock;
     static CReserveKey reservekey(pwalletMain);
 
     Object result;
     if (params.size() == 0)
     {
-      // Update block
+
       static unsigned int nTransactionsUpdatedLast;
       static CBlockIndex* pindexPrev;
       static int64_t nStart;
@@ -440,22 +432,22 @@ Value tmpTest(const Array& params, bool fHelp)
       {
         if (pindexPrev != pindexBest)
         {
-          // Deallocate old blocks since they're obsolete now
+
           mapNewBlock.clear();
           BOOST_FOREACH(CBlock* pblock, vNewBlock)
           delete pblock;
           vNewBlock.clear();
         }
 
-        // Clear pindexPrev so future getworks make a new block, despite any failures from here on
+
         pindexPrev = NULL;
 
-        // Store the pindexBest used before CreateNewBlock, to avoid races
+
         nTransactionsUpdatedLast = nTransactionsUpdated;
         CBlockIndex* pindexPrevNew = pindexBest;
         nStart = GetTime();
 
-        // Create new block
+
         pblock = CreateNewBlock(pwalletMain);
         if (!pblock)
         {
@@ -463,22 +455,22 @@ Value tmpTest(const Array& params, bool fHelp)
         }
         vNewBlock.push_back(pblock);
 
-        // Need to update only after we know CreateNewBlock succeeded
+
         pindexPrev = pindexPrevNew;
       }
 
-      // Update nTime
+
       pblock->UpdateTime(pindexPrev);
       pblock->nNonce = 0;
 
-      // Update nExtraNonce
+
       static unsigned int nExtraNonce = 0;
       IncrementExtraNonce(pblock, pindexPrev, nExtraNonce);
 
-      // Save
+
       mapNewBlock[pblock->hashMerkleRoot] = make_pair(pblock, pblock->vtx[0].vin[0].scriptSig);
 
-      // Pre-build hash buffers
+
       char pmidstate[32];
       char pdata[128];
       char phash1[64];
@@ -486,18 +478,18 @@ Value tmpTest(const Array& params, bool fHelp)
 
       uint256 hashTarget = CBigNum().SetCompact(pblock->nBits).getuint256();
 
-      result.push_back(Pair("midstate", HexStr(BEGIN(pmidstate), END(pmidstate)))); // deprecated
-      result.push_back(Pair("data",     HexStr(BEGIN(pdata), END(pdata))));
-      result.push_back(Pair("hash1",    HexStr(BEGIN(phash1), END(phash1)))); // deprecated
-      result.push_back(Pair("target",   HexStr(BEGIN(hashTarget), END(hashTarget))));
-      //return result;
+      result.push_back(Pair("midstate", HexStr(BEGIN(pmidstate), END(pmidstate))));
+      result.push_back(Pair("data", HexStr(BEGIN(pdata), END(pdata))));
+      result.push_back(Pair("hash1", HexStr(BEGIN(phash1), END(phash1))));
+      result.push_back(Pair("target", HexStr(BEGIN(hashTarget), END(hashTarget))));
+
     }
-    //else
+
     {
       const Pair& p = result[1];
       printf("getwork parsing data %s\n", p.value_.get_str().c_str());
       string data = p.value_.get_str().c_str();
-      // Parse parameters
+
       vector<unsigned char> vchData = ParseHex(data);
       if (vchData.size() != 128)
       {
@@ -505,13 +497,13 @@ Value tmpTest(const Array& params, bool fHelp)
       }
       CBlock* pdata = (CBlock*)&vchData[0];
 
-      // Byte reverse
+
       for (int i = 0; i < 128/4; i++)
       {
         ((unsigned int*)pdata)[i] = ByteReverse(((unsigned int*)pdata)[i]);
       }
 
-      // Get saved block
+
       if (!mapNewBlock.count(pdata->hashMerkleRoot))
       {
         return false;
@@ -567,7 +559,7 @@ Value getblocktemplate(const Array& params, bool fHelp)
     }
     else if (modeval.type() == null_type)
     {
-      /* Do nothing */
+
     }
     else
     {
@@ -598,7 +590,7 @@ Value getblocktemplate(const Array& params, bool fHelp)
 
   static CReserveKey reservekey(pwalletMain);
 
-  // Update block
+
   static unsigned int nTransactionsUpdatedLast;
   static CBlockIndex* pindexPrev;
   static int64_t nStart;
@@ -606,15 +598,15 @@ Value getblocktemplate(const Array& params, bool fHelp)
   if (pindexPrev != pindexBest ||
       (nTransactionsUpdated != nTransactionsUpdatedLast && GetTime() - nStart > 5))
   {
-    // Clear pindexPrev so future calls make a new block, despite any failures from here on
+
     pindexPrev = NULL;
 
-    // Store the pindexBest used before CreateNewBlock, to avoid races
+
     nTransactionsUpdatedLast = nTransactionsUpdated;
     CBlockIndex* pindexPrevNew = pindexBest;
     nStart = GetTime();
 
-    // Create new block
+
     if(pblock)
     {
       delete pblock;
@@ -626,11 +618,11 @@ Value getblocktemplate(const Array& params, bool fHelp)
       throw JSONRPCError(RPC_OUT_OF_MEMORY, "Out of memory");
     }
 
-    // Need to update only after we know CreateNewBlock succeeded
+
     pindexPrev = pindexPrevNew;
   }
 
-  // Update nTime
+
   pblock->UpdateTime(pindexPrev);
   pblock->nNonce = 0;
 
