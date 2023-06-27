@@ -1,0 +1,2 @@
+/usr/bin/ar qc libdevcore.a CMakeFiles/devcore.dir/Address.o CMakeFiles/devcore.dir/Common.o CMakeFiles/devcore.dir/CommonData.o CMakeFiles/devcore.dir/DBFactory.o CMakeFiles/devcore.dir/FileSystem.o CMakeFiles/devcore.dir/FixedHash.o CMakeFiles/devcore.dir/LevelDB.o CMakeFiles/devcore.dir/OverlayDB.o CMakeFiles/devcore.dir/RLP.o CMakeFiles/devcore.dir/SHA3.o CMakeFiles/devcore.dir/StateCacheDB.o CMakeFiles/devcore.dir/TrieCommon.o CMakeFiles/devcore.dir/TrieHash.o CMakeFiles/devcore.dir/Account.o
+/usr/bin/ranlib libdevcore.a

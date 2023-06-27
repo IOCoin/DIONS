@@ -1,3 +1,9 @@
+// Copyright 2014-2019 Aleth Authors.
+// Copyright 2022-2023 blastdoor7.
+// Licensed under the GNU General Public License, Version 3.
+
+#pragma once
+
 #include "ptrie/FixedHash.h"
 #include <boost/exception/diagnostic_information.hpp>
 #include <boost/exception/errinfo_api_function.hpp>
@@ -12,27 +18,24 @@
 
 namespace dev
 {
-
+/// Base class for all exceptions.
 struct Exception : virtual std::exception, virtual boost::exception
 {
-  const char* what() const noexcept override
-  {
-    return boost::diagnostic_information_what(*this);
-  }
+    const char* what() const noexcept override { return boost::diagnostic_information_what(*this); }
 };
 
-#define DEV_SIMPLE_EXCEPTION(X) \
+#define DEV_SIMPLE_EXCEPTION(X)  \
     struct X : virtual Exception \
-    { \
+    {                            \
     }
 
-
+/// Base class for all RLP exceptions.
 struct RLPException : virtual Exception
 {
 };
 #define DEV_SIMPLE_EXCEPTION_RLP(X) \
     struct X : virtual RLPException \
-    { \
+    {                               \
     }
 
 DEV_SIMPLE_EXCEPTION_RLP(BadCast);
@@ -57,7 +60,7 @@ DEV_SIMPLE_EXCEPTION(InterfaceNotSupported);
 DEV_SIMPLE_EXCEPTION(ExternalFunctionFailure);
 DEV_SIMPLE_EXCEPTION(WaitTimeout);
 
-
+// error information to be added to exceptions
 using errinfo_invalidSymbol = boost::error_info<struct tag_invalidSymbol, char>;
 using errinfo_wrongAddress = boost::error_info<struct tag_address, std::string>;
 using errinfo_comment = boost::error_info<struct tag_comment, std::string>;

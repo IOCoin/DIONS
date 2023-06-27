@@ -1,0 +1,41 @@
+
+add_library(
+    devcore
+    Address.cpp
+    Address.h
+    Common.cpp
+    Common.h
+    CommonData.cpp
+    CommonData.h
+    db.h
+    DBFactory.cpp
+    DBFactory.h
+    dbfwd.h
+    FileSystem.cpp
+    FileSystem.h
+    FixedHash.cpp
+    FixedHash.h
+    LevelDB.cpp
+    LevelDB.h
+    OverlayDB.cpp
+    OverlayDB.h
+    RLP.cpp
+    RLP.h
+    SHA3.cpp
+    SHA3.h
+    StateCacheDB.cpp
+    StateCacheDB.h
+    TrieCommon.cpp
+    TrieCommon.h
+    TrieDB.h
+    TrieHash.cpp
+    TrieHash.h
+    Account.h
+    Account.cpp
+    vector_ref.h
+)
+
+include_directories("${CMAKE_SOURCE_DIR}")
+include_directories("..")
+include_directories("../dvm/ethash/include")
+include_directories("../leveldb/include")

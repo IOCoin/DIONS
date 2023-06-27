@@ -1,3 +1,9 @@
+// Copyright 2014-2019 Aleth Authors.
+// Copyright 2022-2023 blastdoor7.
+// Licensed under the GNU General Public License, Version 3.
+
+#pragma once
+
 #include "Common.h"
 #include "ptrie/db.h"
 
@@ -10,15 +16,15 @@ namespace db
 {
 enum class DatabaseKind
 {
-  LevelDB
+    LevelDB
 };
 
-
-
-
-
+/// Provide a set of program options related to databases
+///
+/// @param _lineLength  The line length for description text wrapping, the same as in
+///                     boost::program_options::options_description::options_description().
 boost::program_options::options_description databaseProgramOptions(
-  unsigned _lineLength = boost::program_options::options_description::m_default_line_length);
+    unsigned _lineLength = boost::program_options::options_description::m_default_line_length);
 
 bool isDiskDatabase();
 DatabaseKind databaseKind();
@@ -29,16 +35,16 @@ boost::filesystem::path databasePath();
 class DBFactory
 {
 public:
-  DBFactory() = delete;
-  ~DBFactory() = delete;
+    DBFactory() = delete;
+    ~DBFactory() = delete;
 
-  static std::unique_ptr<DatabaseFace> create();
-  static std::unique_ptr<DatabaseFace> create(boost::filesystem::path const& _path);
-  static std::unique_ptr<DatabaseFace> create(DatabaseKind _kind);
-  static std::unique_ptr<DatabaseFace> create(
-    DatabaseKind _kind, boost::filesystem::path const& _path);
+    static std::unique_ptr<DatabaseFace> create();
+    static std::unique_ptr<DatabaseFace> create(boost::filesystem::path const& _path);
+    static std::unique_ptr<DatabaseFace> create(DatabaseKind _kind);
+    static std::unique_ptr<DatabaseFace> create(
+        DatabaseKind _kind, boost::filesystem::path const& _path);
 
 private:
 };
-}
-}
+}  // namespace db
+}  // namespace dev
