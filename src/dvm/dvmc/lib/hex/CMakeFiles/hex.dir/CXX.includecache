@@ -6,7 +6,7 @@
 
 #IncludeRegexTransform: 
 
-/home/ioc/DIONS/src/dvm/dvmc/lib/hex/hex.cpp
+/home/argon/rem/CC-net/src/dvm/dvmc/lib/hex/hex.cpp
 dvmc/hex.hpp
 -
 cctype

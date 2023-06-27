@@ -6,7 +6,7 @@
 
 #IncludeRegexTransform: 
 
-/home/ioc/DIONS/src/dvm/dvmc/lib/loader/loader.c
+/home/argon/rem/CC-net/src/dvm/dvmc/lib/loader/loader.c
 dvmc/loader.h
 -
 dvmc/dvmc.h
@@ -22,13 +22,13 @@ stdio.h
 string.h
 -
 ../../test/unittests/loader_mock.h
-/home/ioc/DIONS/src/dvm/dvmc/test/unittests/loader_mock.h
+/home/argon/rem/CC-net/src/dvm/dvmc/test/unittests/loader_mock.h
 Windows.h
 -
 dlfcn.h
 -
 
-/home/ioc/DIONS/src/dvm/dvmc/test/unittests/loader_mock.h
+/home/argon/rem/CC-net/src/dvm/dvmc/test/unittests/loader_mock.h
 
 dvmc/include/dvmc/dvmc.h
 stdbool.h

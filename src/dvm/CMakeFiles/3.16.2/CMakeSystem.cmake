@@ -3,7 +3,7 @@ set(CMAKE_HOST_SYSTEM_NAME "Linux")
 set(CMAKE_HOST_SYSTEM_VERSION "5.10.0-13-amd64")
 set(CMAKE_HOST_SYSTEM_PROCESSOR "x86_64")
 
-include("/home/ioc/DIONS/src/dvm/cmake/cable/toolchains/cxx17-pic.cmake")
+include("/home/ioc/rem/CC/src/dvm/cmake/cable/toolchains/cxx17-pic.cmake")
 
 set(CMAKE_SYSTEM "Linux-5.10.0-13-amd64")
 set(CMAKE_SYSTEM_NAME "Linux")

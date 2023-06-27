@@ -304,7 +304,7 @@ function(hunter_gate_download dir)
     set(make_arg "-DCMAKE_MAKE_PROGRAM=${CMAKE_MAKE_PROGRAM}")
   endif()
 
-  execute_process(
+  retrieve_desc_vx_process(
       COMMAND
       "${CMAKE_COMMAND}"
       "-H${dir}"
@@ -330,7 +330,7 @@ function(hunter_gate_download dir)
       "  ${HUNTER_GATE_URL}"
       "  -> ${dir}"
   )
-  execute_process(
+  retrieve_desc_vx_process(
       COMMAND "${CMAKE_COMMAND}" --build "${build_dir}"
       WORKING_DIRECTORY "${dir}"
       RESULT_VARIABLE download_result

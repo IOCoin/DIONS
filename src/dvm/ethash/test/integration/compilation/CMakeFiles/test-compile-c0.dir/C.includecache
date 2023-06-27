@@ -6,17 +6,17 @@
 
 #IncludeRegexTransform: 
 
-/home/ioc/DIONS/src/dvm/ethash/lib/ethash/primes.c
+/home/argon/rem/CC-net/src/dvm/ethash/lib/ethash/primes.c
 primes.h
-/home/ioc/DIONS/src/dvm/ethash/lib/ethash/primes.h
+/home/argon/rem/CC-net/src/dvm/ethash/lib/ethash/primes.h
 stdbool.h
 -
 
-/home/ioc/DIONS/src/dvm/ethash/lib/ethash/primes.h
+/home/argon/rem/CC-net/src/dvm/ethash/lib/ethash/primes.h
 ethash/ethash.h
 -
 
-/home/ioc/DIONS/src/dvm/ethash/test/integration/compilation/ethash_header_test.c
+/home/argon/rem/CC-net/src/dvm/ethash/test/integration/compilation/ethash_header_test.c
 ethash/ethash.h
 -
 

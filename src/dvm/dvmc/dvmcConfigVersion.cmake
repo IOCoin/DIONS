@@ -9,6 +9,13 @@
 # The variable CVF_VERSION must be set before calling configure_file().
 
 
+if (PACKAGE_FIND_VERSION_RANGE)
+  message(AUTHOR_WARNING
+    "`find_package()` specify a version range but the version strategy "
+    "(ExactVersion) of the module `${PACKAGE_FIND_NAME}` is incompatible "
+    "with this request. Only the lower endpoint of the range will be used.")
+endif()
+
 set(PACKAGE_VERSION "10.0.0-alpha.5")
 
 if("10.0.0-alpha.5" MATCHES "^([0-9]+\\.[0-9]+\\.[0-9]+)\\.") # strip the tweak version

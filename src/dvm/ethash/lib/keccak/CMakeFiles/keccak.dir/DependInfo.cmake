@@ -4,7 +4,7 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_C
-  "/home/ioc/DIONS/src/dvm/ethash/lib/keccak/keccak.c" "/home/ioc/DIONS/src/dvm/ethash/lib/keccak/CMakeFiles/keccak.dir/keccak.c.o"
+  "/home/argon/rem/CC-net/src/dvm/ethash/lib/keccak/keccak.c" "/home/argon/rem/CC-net/src/dvm/ethash/lib/keccak/CMakeFiles/keccak.dir/keccak.c.o"
   )
 set(CMAKE_C_COMPILER_ID "GNU")
 

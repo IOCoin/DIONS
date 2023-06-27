@@ -6,23 +6,23 @@
 
 #IncludeRegexTransform: 
 
-/home/ioc/DIONS/src/dvm/ethash/lib/ethash/endianness.hpp
+/home/argon/rem/CC-net/src/dvm/ethash/lib/ethash/endianness.hpp
 ../support/attributes.h
-/home/ioc/DIONS/src/dvm/ethash/lib/support/attributes.h
+/home/argon/rem/CC-net/src/dvm/ethash/lib/support/attributes.h
 ethash/ethash.hpp
 -
 stdlib.h
 -
 
-/home/ioc/DIONS/src/dvm/ethash/lib/ethash/ethash-internal.hpp
+/home/argon/rem/CC-net/src/dvm/ethash/lib/ethash/ethash-internal.hpp
 endianness.hpp
-/home/ioc/DIONS/src/dvm/ethash/lib/ethash/endianness.hpp
+/home/argon/rem/CC-net/src/dvm/ethash/lib/ethash/endianness.hpp
 ethash/ethash.hpp
 -
 
-/home/ioc/DIONS/src/dvm/ethash/lib/global_context/global_context.cpp
+/home/argon/rem/CC-net/src/dvm/ethash/lib/global_context/global_context.cpp
 ../ethash/ethash-internal.hpp
-/home/ioc/DIONS/src/dvm/ethash/lib/ethash/ethash-internal.hpp
+/home/argon/rem/CC-net/src/dvm/ethash/lib/ethash/ethash-internal.hpp
 ethash/global_context.h
 -
 memory
@@ -30,7 +30,7 @@ memory
 mutex
 -
 
-/home/ioc/DIONS/src/dvm/ethash/lib/support/attributes.h
+/home/argon/rem/CC-net/src/dvm/ethash/lib/support/attributes.h
 
 include/ethash/ethash.h
 ethash/hash_types.h
