@@ -152,18 +152,23 @@ OBJS= \
 all: iocoind
 
 LIBS += $(CURDIR)/leveldb/libleveldb.a $(CURDIR)/leveldb/libmemenv.a
+LIBS += $(CURDIR)/ptrie/libdevcore.a 
 DEFS += $(addprefix -I,$(CURDIR)/leveldb/include)
 DEFS += $(addprefix -I,$(CURDIR)/leveldb/helpers)
+DEFS += $(addprefix -I,$(CURDIR)/ptrie)
 OBJS += obj/txdb-leveldb.o
 leveldb/libleveldb.a:
 	@echo "Building LevelDB ..."; cd leveldb; make libleveldb.a libmemenv.a; cd ..;
 obj/txdb-leveldb.o: leveldb/libleveldb.a
+ptrie/libdevcore.a:
+	@echo "Building libdevcore ..."; cd ptrie; cmake CMakeLists.txt; make ; cd ..;
 
 LIBS += $(CURDIR)/dvm/lib/libdvmone.a
 LIBS += $(CURDIR)/dvm/ethash/lib/ethash/libethash.a
 LIBS += $(CURDIR)/dvm/ethash/lib/keccak/libkeccak.a
 LIBS += $(CURDIR)/dvm/dvmc/lib/hex/libhex.a
 LIBS += $(CURDIR)/dvm/dvmc/lib/instructions/libdvmc-instructions.a
+DEFS += $(addprefix -I,$(CURDIR)/dvm/ethash/include)
 DEFS += $(addprefix -I,$(CURDIR)/dvmone/include)
 DEFS += $(addprefix -I,$(CURDIR)/dvmone/dvmc/include)
 DEFS += $(addprefix -I,$(CURDIR)/dvm/include)
@@ -172,7 +177,7 @@ dvm/ethash/lib/ethash/libethash.a:
 	@echo "Building DVM ..."; cd dvm/ethash; cmake CMakeLists.txt; make; cd ..;
 dvm/lib/libdvmone.a:
 	@echo "Building DVM ..."; cd dvm; cmake CMakeLists.txt; make; cd ethash; cmake CMakeLists.txt; make; cd ..;
-iocoind: dvm/lib/libdvmone.a dvm/ethash/lib/ethash/libethash.a
+iocoind: dvm/lib/libdvmone.a dvm/ethash/lib/ethash/libethash.a ptrie/libdevcore.a
 
 # auto-generated dependencies:
 -include obj/*.P
@@ -214,6 +219,7 @@ optimize: $(OBJS:obj/%=obj/%)
 clean:
 	-rm -f iocoind
 	-cd dvm; make clean; rm -f CMakeCache.txt
+	-cd ptrie; make clean; rm -f CMakeCache.txt;
 	-cd dvm/ethash; make clean; rm -f CMakeCache.txt
 	-rm -f obj/*.o
 	-rm -f obj/*.P
