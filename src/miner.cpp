@@ -218,7 +218,6 @@ CBlock* CreateNewBlock(__wx__* pwallet, bool fProofOfStake, int64_t* pFees)
     for (map<uint256, CTransaction>::iterator mi = mempool.mapTx.begin(); mi != mempool.mapTx.end(); ++mi)
     {
       CTransaction& tx = (*mi).second;
-# 250 "miner.cpp"
       std::vector<vchType> vvchArgs;
       for(unsigned int i=0; i < tx.vout.size(); i++)
       {
@@ -284,102 +283,8 @@ CBlock* CreateNewBlock(__wx__* pwallet, bool fProofOfStake, int64_t* pFees)
                   }
                   CKeyID keyID_test_sender_address = newKey_test_sender_address.GetID();
                   dvmc::address test_sender_address = dvmc::literals::internal::from_hex<dvmc::address>(keyID_test_sender_address.GetHex().c_str());
-
-                  dvmc::address test_recipient_address = test_sender_address;
-
-                  dvmc::VertexNode host;
-                  dvmc::TransitionalNode created_account;
-                  dvmc::TransitionalNode sender_account;
-                  sender_account.set_balance(3141);
-                  dvmc_message msg{};
-                  msg.track = std::numeric_limits<int64_t>::max();
-
-                  dvmc::bytes_view exec_code = code;
-                  {
-                    dvmc_message create_msg{};
-                    create_msg.kind = DVMC_CREATE;
-                    create_msg.recipient = create_address;
-                    create_msg.track = std::numeric_limits<int64_t>::max();
-
-                    dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
-                    dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
-                    const auto create_result = vm.retrieve_desc_vx(host, rev, create_msg, code.data(), code.size());
-                    if (create_result.status_code != DVMC_SUCCESS)
-                    {
-
-                    }
-
-                    auto& created_account = host.accounts[create_address];
-                    created_account.set_balance(100000000000000);
-                    created_account.code = dvmc::bytes(create_result.output_data, create_result.output_size);
-
-                    msg.recipient = create_address;
-                    exec_code = created_account.code;
-
-
-
-                    dev::eth::Account tmpAcc(0,0);
-                    {
-                      dev::u256 nonce = 12345678;
-                      dev::u256 balance = 1010101010101;
-                      dev::RLPStream s(4);
-                      s << nonce << balance;
-
-                      {
-
-                        dev::SecureTrieDB<dev::h256, dev::StateCacheDB> storageDB(state->db(), tmpAcc.baseRoot());
-
-                        for(auto pair : created_account.storage)
-                        {
-
-                          auto storage_key = pair.first.bytes;
-                          dev::bytes key;
-                          for(int i=0; i<32; i++)
-                          {
-                            key.push_back(storage_key[i]);
-                          }
-
-                          dev::h256 key256(key);
-
-                          auto storage_bytes = pair.second.value;
-                          dev::bytes val;
-                          for(int i=0; i<32; i++)
-                          {
-                            val.push_back(storage_bytes.bytes[i]);
-                          }
-
-                          storageDB.insert(key256, dev::rlp(val));
-
-                        }
-                        s << storageDB.root();
-                      }
-
-                      s << tmpAcc.codeHash();
-
-
-                      state->insert(target_addr, &s.out());
-
-                      overlayDB__->commit();
-                      std::ostringstream os;
-                      state->debugStructure(os);
-
-
-                      std::cout << "integratedTest5 AFTER contract state insert : state root " << state->root() << std::endl;
-                      pblock->stateRoot=state->root();
-                    }
-                  }
-                }
-
-                {
-                }
-
-                {
-                }
-
-                {
                 }
               }
-# 445 "miner.cpp"
             }
           }
         }
