@@ -1,1 +1,1 @@
-/usr/bin/c++ -O3 -DNDEBUG CMakeFiles/dvmc-tool.dir/main.cpp.o -o ../../../bin/dvmc  ../../lib/tooling/libtooling.a ../../lib/loader/libdvmc-loader.a ../../lib/hex/libhex.a -ldl 
+/usr/bin/c++  -O3 -DNDEBUG   CMakeFiles/dvmc-tool.dir/main.cpp.o  -o ../../../bin/dvmc  ../../lib/tooling/libtooling.a ../../lib/loader/libdvmc-loader.a ../../lib/hex/libhex.a -ldl 

@@ -1,6 +1,6 @@
-CREATE /home/argon/rem/CC-net/src/dvm/lib/libdvmone-standalone.a
-ADDLIB /home/argon/rem/CC-net/src/dvm/lib/libdvmone.a
-ADDLIB /home/argon/rem/CC-net/src/dvm/dvmc/lib/instructions/libdvmc-instructions.a
-ADDLIB /home/argon/rem/CC-net/src/dvm/dvmc/lib/hex/libhex.a
-ADDLIB /home/argon/.hunter/_Base/135567a/9c1ec73/42ea3f6/Install/lib/libkeccak.a
+CREATE /home/ioc/DIONS/src/dvm/lib/libdvmone-standalone.a
+ADDLIB /home/ioc/DIONS/src/dvm/lib/libdvmone.a
+ADDLIB /home/ioc/DIONS/src/dvm/dvmc/lib/instructions/libdvmc-instructions.a
+ADDLIB /home/ioc/DIONS/src/dvm/dvmc/lib/hex/libhex.a
+ADDLIB /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/lib/libkeccak.a
 SAVE

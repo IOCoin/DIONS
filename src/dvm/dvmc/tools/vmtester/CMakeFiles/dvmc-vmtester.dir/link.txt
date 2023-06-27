@@ -1,1 +1,1 @@
-/usr/bin/c++ -O3 -DNDEBUG CMakeFiles/dvmc-vmtester.dir/vmtester.cpp.o CMakeFiles/dvmc-vmtester.dir/tests.cpp.o -o ../../../bin/dvmc-vmtester  ../../lib/loader/libdvmc-loader.a /home/argon/.hunter/_Base/135567a/9c1ec73/42ea3f6/Install/lib/libgtest.a -ldl -lpthread 
+/usr/bin/c++  -O3 -DNDEBUG   CMakeFiles/dvmc-vmtester.dir/vmtester.cpp.o CMakeFiles/dvmc-vmtester.dir/tests.cpp.o  -o ../../../bin/dvmc-vmtester  ../../lib/loader/libdvmc-loader.a /home/ioc/.hunter/_Base/135567a/bb9b654/42ea3f6/Install/lib/libgtest.a -ldl -lpthread 

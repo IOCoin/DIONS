@@ -1,2 +1,2 @@
-/usr/bin/ar qc libtestutils-dump.a CMakeFiles/testutils-dump.dir/dump.cpp.o
+/usr/bin/ar qc libtestutils-dump.a  CMakeFiles/testutils-dump.dir/dump.cpp.o
 /usr/bin/ranlib libtestutils-dump.a

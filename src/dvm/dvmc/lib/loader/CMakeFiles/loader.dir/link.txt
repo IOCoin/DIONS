@@ -1,2 +1,2 @@
-/usr/bin/ar qc libdvmc-loader.a CMakeFiles/loader.dir/loader.c.o
+/usr/bin/ar qc libdvmc-loader.a  CMakeFiles/loader.dir/loader.c.o
 /usr/bin/ranlib libdvmc-loader.a

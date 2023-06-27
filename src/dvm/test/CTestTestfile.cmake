@@ -1,6 +1,6 @@
 # CMake generated Testfile for 
-# Source directory: /home/argon/rem/CC-net/src/dvm/test
-# Build directory: /home/argon/rem/CC-net/src/dvm/test
+# Source directory: /home/ioc/DIONS/src/dvm/test
+# Build directory: /home/ioc/DIONS/src/dvm/test
 # 
 # This file includes the relevant testing commands required for 
 # testing this directory and lists subdirectories to be tested as well.

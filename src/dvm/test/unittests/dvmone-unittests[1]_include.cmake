@@ -1,5 +1,5 @@
-if(EXISTS "/home/argon/rem/CC-net/src/dvm/test/unittests/dvmone-unittests[1]_tests.cmake")
-  include("/home/argon/rem/CC-net/src/dvm/test/unittests/dvmone-unittests[1]_tests.cmake")
+if(EXISTS "/home/ioc/DIONS/src/dvm/test/unittests/dvmone-unittests[1]_tests.cmake")
+  include("/home/ioc/DIONS/src/dvm/test/unittests/dvmone-unittests[1]_tests.cmake")
 else()
   add_test(dvmone-unittests_NOT_BUILT dvmone-unittests_NOT_BUILT)
 endif()

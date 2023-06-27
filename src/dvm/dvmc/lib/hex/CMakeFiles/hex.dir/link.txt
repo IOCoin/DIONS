@@ -1,2 +1,2 @@
-/usr/bin/ar qc libhex.a CMakeFiles/hex.dir/hex.cpp.o
+/usr/bin/ar qc libhex.a  CMakeFiles/hex.dir/hex.cpp.o
 /usr/bin/ranlib libhex.a

@@ -6,11 +6,11 @@
 
 #IncludeRegexTransform: 
 
-/home/argon/rem/CC-net/src/dvm/dvmc/lib/instructions/instruction_metrics.c
+/home/ioc/DIONS/src/dvm/dvmc/lib/instructions/instruction_metrics.c
 dvmc/instructions.h
 -
 
-/home/argon/rem/CC-net/src/dvm/dvmc/lib/instructions/instruction_names.c
+/home/ioc/DIONS/src/dvm/dvmc/lib/instructions/instruction_names.c
 dvmc/instructions.h
 -
 
