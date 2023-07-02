@@ -1,8 +1,6 @@
+
 #include "twister.h"
-
 const unsigned CYCLE = 0x100;
-
-
 const unsigned C_TRANS_ = 0xff;
 int block_units[][0x10] =
 {
@@ -33,7 +31,6 @@ const int transition_seq[] = { 0xce, 0xab, 0xdf, 0xcf, 0xee,
                                0xcb, 0xbd, 0xba, 0xac, 0xdf,
                                0xdf, 0xde, 0xcd, 0xfd, 0xca
                              };
-
 int ENTRY_LINK__ = 0x05;
 int ENTRY_LINK__TEST = 0x09;
 int ENTRY_C_REF_ECM = 0x10;
@@ -50,9 +47,6 @@ int ENTRY_C_INNER_PROD_ELIP_TEST = 0xca;
 int ENTRY_C_INNER_PROD_RELAY_TEST = 0xf5;
 int ENTRY_C_BLOCK_REL_FLAG_TEST = 0x0fffffff;
 int ENTRY_C_BLOCK_REL_FLAG_VECTOR = 0x0effffff;
-
-
-
 unsigned reflect(unsigned center, unsigned (*r)(unsigned))
 {
   return (*r)(center)^center;
@@ -61,16 +55,17 @@ unsigned char base(unsigned char a, unsigned char (*s)(unsigned char), int pos)
 {
   return (*s)(pos)^a;
 }
-
 void transHomExt(vector<unsigned char>& data, unsigned char (*f)(unsigned char), unsigned char (*g)(unsigned char))
 {
   for(unsigned i = 0; i<data.size(); i++)
   {
     unsigned char d = data[i];
+
     for(unsigned j=0; j<CYCLE; j++)
     {
       d = (*f)(d)^base(d, g, d);
     }
+
     data[i] = d;
   }
 }
@@ -79,31 +74,34 @@ void transHom(vector<unsigned char>& data, unsigned char (*f)(unsigned char), un
   for(unsigned i = 0; i<data.size(); i++)
   {
     unsigned char d = data[i];
+
     for(unsigned j=0; j<CYCLE; j++)
     {
       d = (*f)(d)^(*g)(d);
     }
+
     data[i] = d;
   }
 }
-
 void trans(vector<unsigned char>& data, unsigned char (*f)(unsigned char))
 {
   for(unsigned i = 0; i<data.size(); i++)
   {
     unsigned char d = data[i];
+
     for(unsigned j=0; j<CYCLE; j++)
     {
       d = (*f)(d);
     }
+
     data[i] = d;
   }
 }
-
 vector<double> f_dist(vector<unsigned char>& in)
 {
   vector<double> fdist;
   fdist.resize(256);
+
   for(unsigned i = 0; i<in.size(); i++)
   {
     fdist[in[i]]++;
@@ -116,7 +114,6 @@ vector<double> f_dist(vector<unsigned char>& in)
 
   return fdist;
 }
-
 double s_entropy(vector<double>& v)
 {
   double entropy = 0;
@@ -125,12 +122,15 @@ double s_entropy(vector<double>& v)
   for(unsigned i = 0; i < v.size(); i++)
   {
     p = v[i] / 100;
+
     if (p == 0)
     {
       continue;
     }
+
     entropy += p * std::log(p) / std::log(2);
   }
+
   return -entropy;
 }
 void rms(const string& s, string& r)
@@ -141,16 +141,14 @@ void rms(const string& s, string& r)
     {
       continue;
     }
+
     r+= s[i];
   }
 }
-
 double sw(double weight, int i, int j, int (*inv)(int, int))
 {
   return weight*(*inv)(i, j);
 }
-
-
 void hPerm(int s, int n, void (*p)(int), void (*inv)(int, int), void (*center)(int))
 {
   if(transition_seq[ENTRY_C_INNER_PROD_RELAY_TEST] == s)
@@ -158,19 +156,23 @@ void hPerm(int s, int n, void (*p)(int), void (*inv)(int, int), void (*center)(i
     (*center)(s);
     return;
   }
+
   if(transition_seq[ENTRY_C_INNER_PROD_ELIP_TEST ] == s)
   {
     (*p)(s);
     return;
   }
+
   if(s == 1)
   {
     (*p)(n);
     return;
   }
+
   for(int i=0; i< s; i++)
   {
     hPerm(s-1, n, p, inv, p);
+
     if(s%2 == 1)
     {
       (*inv)(0, s-1);
@@ -181,41 +183,44 @@ void hPerm(int s, int n, void (*p)(int), void (*inv)(int, int), void (*center)(i
     }
   }
 }
-
 double ic(const string& t)
 {
   string text;
   rms(t, text);
   vector<double> freq(256,0);
+
   for(unsigned int i=0; i<text.size(); i++)
   {
     if(text[i] == ' ')
     {
       continue;
     }
+
     freq[text[i]] ++;
   }
+
   double sum=0;
+
   for(unsigned int i=0; i<freq.size(); i++)
   {
     if(freq[i] != 0)
     {
       double c = freq[i];
+
       if(c != 0)
       {
         sum += c * (c - 1);
       }
     }
   }
+
   double ic = 26 * sum / (text.size() * (text.size() - 1));
   return ic;
 }
-
 int outer_sect(int (*s)(int), int (*t)(int), int r, int q)
 {
   return (*s)(r) * (*t)(q);
 }
-
 void multiChan(unsigned char* (*p)(unsigned char, unsigned char), unsigned char m)
 {
   unsigned char* chanIndicator = (*p)(transition_seq[ENTRY_C_REF_ECM], m);
@@ -223,47 +228,37 @@ void multiChan(unsigned char* (*p)(unsigned char, unsigned char), unsigned char 
   *chanIndicator = *chanIndicator ^ *crossCh;
   *crossCh = *chanIndicator ^ *crossCh;
   *chanIndicator = *chanIndicator ^ *crossCh;
-
 }
-
 void switchIO(unsigned char (*p)(unsigned char, unsigned char), unsigned char m)
 {
-
   (*p)(transition_seq[ENTRY_LINK__], m);
   (*p)(transition_seq[ENTRY_LINK__TEST], m);
-
-
-
-
   (*p)(transition_seq[ENTRY_C_REF_ECM], m ^ 0xff );
   (*p)(transition_seq[ENTRY_C_INNER_PROD_ELIP_TEST ], m);
   (*p)(transition_seq[ENTRY_LINK__TEST], m ^ transition_seq[ENTRY_LINK__TEST]);
   (*p)(transition_seq[ENTRY_LINK__TEST], m ^ transition_seq[ENTRY_C_REF_ECM]);
   (*p)(transition_seq[ENTRY_LINK__TEST], m ^ transition_seq[ENTRY_C_INNER_PROD_ELIP_TEST]);
-
 }
-
-
 std::tuple<int, int, int> extended_gcd(int __alpha, int __beta, int (*col)(int x, int y))
 {
   if(__alpha == 0)
   {
     return make_tuple(__beta,0,1);
   }
+
   int __com=0;
   int x=0;
   int y=0;
   tie(__com, x, y) = extended_gcd(__beta%__alpha, __alpha, col);
   return make_tuple(__com, y-(__beta/__alpha)*x, x);
 }
-
-
 std::tuple<int, int, int> extended_gcd(int __alpha, int __beta)
 {
   if(__alpha == 0)
   {
     return make_tuple(__beta,0,1);
   }
+
   int __com=0;
   int x=0;
   int y=0;

@@ -1,3 +1,4 @@
+
 #include "txdb.h"
 #include "walletdb.h"
 #include "bitcoinrpc.h"
@@ -12,22 +13,16 @@
 #include <boost/interprocess/sync/file_lock.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <openssl/crypto.h>
-
 #include "ptrie/DBFactory.h"
 #include "ptrie/OverlayDB.h"
 #include "ptrie/TrieDB.h"
 #include "ptrie/Address.h"
-
 #include "main.h"
-
 #ifndef WIN32
 #include <signal.h>
 #endif
-
-
 using namespace std;
 using namespace boost;
-
 extern void xsc(CBlockIndex*);
 __wx__* pwalletMain;
 CClientUIInterface uiInterface;
@@ -42,11 +37,6 @@ enum Checkpoints::CPMode CheckpointsMode;
 LocatorNodeDB* ln1Db = NULL;
 VertexNodeDB* vertexDB__ = NULL;
 dev::OverlayDB* overlayDB__ = NULL;
-
-
-
-
-
 void ExitTimeout(void* parg)
 {
 #ifdef WIN32
@@ -54,29 +44,23 @@ void ExitTimeout(void* parg)
   ExitProcess(0);
 #endif
 }
-
 void StartShutdown()
 {
 #ifdef QT_GUI
-
   uiInterface.QueueShutdown();
 #else
-
   NewThread(Shutdown, NULL);
 #endif
 }
-
 void Shutdown(void* parg)
 {
   static CCriticalSection cs_Shutdown;
   static bool fTaken;
-
-
   RenameThread("iocoin-shutoff");
-
   bool fFirstThread = false;
   {
     TRY_LOCK(cs_Shutdown, lockShutdown);
+
     if (lockShutdown)
     {
       fFirstThread = !fTaken;
@@ -84,6 +68,7 @@ void Shutdown(void* parg)
     }
   }
   static bool fExit;
+
   if (fFirstThread)
   {
     fShutdown = true;
@@ -101,7 +86,6 @@ void Shutdown(void* parg)
     printf("I/OCoin exited\n\n");
     fExit = true;
 #ifndef QT_GUI
-
     exit(0);
 #endif
   }
@@ -111,16 +95,15 @@ void Shutdown(void* parg)
     {
       MilliSleep(500);
     }
+
     MilliSleep(100);
     ExitThread(0);
   }
 }
-
 void HandleSIGTERM(int)
 {
   fRequestShutdown = true;
 }
-
 void HandleSIGHUP(int)
 {
   fReopenDebugLog = true;
@@ -130,36 +113,31 @@ void HandleSIGHUP(int)
 bool AppInit(int argc, char* argv[])
 {
   bool fRet = false;
+
   try
   {
-
-
-
-
     ParseParameters(argc, argv);
+
     if (!boost::filesystem::is_directory(GetDataDir(false)))
     {
       fprintf(stderr, "Error: Specified directory does not exist\n");
       Shutdown(NULL);
     }
+
     ReadConfigFile(mapArgs, mapMultiArgs);
 
     if (mapArgs.count("-?") || mapArgs.count("--help"))
     {
-
       std::string strUsage = _("I/OCoin version") + " " + FormatFullVersion() + "\n\n" +
                              _("Usage:") + "\n" +
                              "  iocoind [options]                     " + "\n" +
                              "  iocoind [options] <command> [params]  " + _("Send command to -server or iocoind") + "\n" +
                              "  iocoind [options] help                " + _("List commands") + "\n" +
                              "  iocoind [options] help <command>      " + _("Get help for a command") + "\n";
-
       strUsage += "\n" + HelpMessage();
-
       fprintf(stdout, "%s", strUsage.c_str());
       return false;
     }
-
 
     for (int i = 1; i < argc; i++)
       if (!IsSwitchChar(argv[i][0]) && !boost::algorithm::istarts_with(argv[i], "iocoin:"))
@@ -183,21 +161,19 @@ bool AppInit(int argc, char* argv[])
   {
     PrintException(NULL, "AppInit()");
   }
+
   if (!fRet)
   {
     Shutdown(NULL);
   }
+
   return fRet;
 }
-
 extern void noui_connect();
 int main(int argc, char* argv[])
 {
   bool fRet = false;
-
-
   noui_connect();
-
   fRet = AppInit(argc, argv);
 
   if (fRet && fDaemon)
@@ -208,39 +184,37 @@ int main(int argc, char* argv[])
   return 1;
 }
 #endif
-
 bool static InitError(const std::string &str)
 {
   uiInterface.ThreadSafeMessageBox(str, _("I/OCoin"), CClientUIInterface::OK | CClientUIInterface::MODAL);
   return false;
 }
-
 bool static InitWarning(const std::string &str)
 {
   uiInterface.ThreadSafeMessageBox(str, _("I/OCoin"), CClientUIInterface::OK | CClientUIInterface::ICON_EXCLAMATION | CClientUIInterface::MODAL);
   return true;
 }
-
-
 bool static Bind(const CService &addr, bool fError = true)
 {
   if (IsLimited(addr))
   {
     return false;
   }
+
   std::string strError;
+
   if (!BindListenPort(addr, strError))
   {
     if (fError)
     {
       return InitError(strError);
     }
+
     return false;
   }
+
   return true;
 }
-
-
 std::string HelpMessage()
 {
   string strUsage = _("Options:") + "\n" +
@@ -311,25 +285,17 @@ std::string HelpMessage()
                     "  -checkblocks=<n>       " + _("How many blocks to check at startup (default: 2500, 0 = all)") + "\n" +
                     "  -checklevel=<n>        " + _("How thorough the block verification is (0-6, default: 1)") + "\n" +
                     "  -loadblock=<file>      " + _("Imports blocks from external blk000?.dat file") + "\n" +
-
                     "\n" + _("Block creation options:") + "\n" +
                     "  -blockminsize=<n>      " + _("Set minimum block size in bytes (default: 0)") + "\n" +
                     "  -blockmaxsize=<n>      " + _("Set maximum block size in bytes (default: 250000)") + "\n" +
                     "  -blockprioritysize=<n> " + _("Set maximum size of high-priority/low-fee transactions in bytes (default: 27000)") + "\n" +
-
                     "\n" + _("SSL options: (see the Bitcoin Wiki for SSL setup instructions)") + "\n" +
                     "  -rpcssl                                  " + _("Use OpenSSL (https) for JSON-RPC connections") + "\n" +
                     "  -rpcsslcertificatechainfile=<file.cert>  " + _("Server certificate file (default: server.cert)") + "\n" +
                     "  -rpcsslprivatekeyfile=<file.pem>         " + _("Server private key (default: server.pem)") + "\n" +
                     "  -rpcsslciphers=<ciphers>                 " + _("Acceptable ciphers (default: TLSv1+HIGH:!SSLv2:!aNULL:!eNULL:!AH:!3DES:@STRENGTH)") + "\n";
-
   return strUsage;
 }
-
-
-
-
-
 bool InitSanityCheck(void)
 {
   if(!ECC_InitSanityCheck())
@@ -339,71 +305,49 @@ bool InitSanityCheck(void)
     return false;
   }
 
-
-
   return true;
 }
-
-
-
-
 bool AppInit2()
 {
-
 #ifdef _MSC_VER
-
   _CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_FILE);
   _CrtSetReportFile(_CRT_WARN, CreateFileA("NUL", GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, 0));
 #endif
 #if _MSC_VER >= 1400
-
   _set_abort_behavior(0, _WRITE_ABORT_MSG | _CALL_REPORTFAULT);
 #endif
 #ifdef WIN32
-
-
-
 #ifndef PROCESS_DEP_ENABLE
-
-
 #define PROCESS_DEP_ENABLE 0x00000001
 #endif
   typedef BOOL (WINAPI *PSETPROCDEPPOL)(DWORD);
   PSETPROCDEPPOL setProcDEPPol = (PSETPROCDEPPOL)GetProcAddress(GetModuleHandleA("Kernel32.dll"), "SetProcessDEPPolicy");
+
   if (setProcDEPPol != NULL)
   {
     setProcDEPPol(PROCESS_DEP_ENABLE);
   }
+
 #endif
 #ifndef WIN32
   umask(077);
-
-
   struct sigaction sa;
   sa.sa_handler = HandleSIGTERM;
   sigemptyset(&sa.sa_mask);
   sa.sa_flags = 0;
   sigaction(SIGTERM, &sa, NULL);
   sigaction(SIGINT, &sa, NULL);
-
-
   struct sigaction sa_hup;
   sa_hup.sa_handler = HandleSIGHUP;
   sigemptyset(&sa_hup.sa_mask);
   sa_hup.sa_flags = 0;
   sigaction(SIGHUP, &sa_hup, NULL);
 #endif
-
-
-
   nNodeLifespan = GetArg("-addrlifespan", 7);
   fUseFastIndex = GetBoolArg("-fastindex", true);
   nMinerSleep = GetArg("-minersleep", 500);
-
-
   CheckpointsMode = Checkpoints::STRICT;
   std::string strCpMode = GetArg("-cppolicy", "strict");
-
   strDNSSeedNode = GetArg("-dnsseednode", "default");
 
   if(strCpMode == "strict")
@@ -422,14 +366,15 @@ bool AppInit2()
   }
 
   nDerivationMethodIndex = 0;
-
   fTestNet = GetBoolArg("-testnet");
+
   if (fTestNet)
   {
     SoftSetBoolArg("-irc", true);
   }
 
   fViewWallet = GetBoolArg("-viewwallet");
+
   if(fViewWallet)
   {
     if(boost::filesystem::exists(GetDataDir() / "wallet.dat"))
@@ -447,42 +392,34 @@ bool AppInit2()
 
   if (mapArgs.count("-bind"))
   {
-
-
     SoftSetBoolArg("-listen", true);
   }
 
   if (mapArgs.count("-connect") && mapMultiArgs["-connect"].size() > 0)
   {
-
     SoftSetBoolArg("-dnsseed", false);
     SoftSetBoolArg("-listen", false);
   }
 
   if (mapArgs.count("-proxy"))
   {
-
     SoftSetBoolArg("-listen", false);
   }
 
   if (!GetBoolArg("-listen", true))
   {
-
     SoftSetBoolArg("-discover", false);
   }
 
   if (mapArgs.count("-externalip"))
   {
-
     SoftSetBoolArg("-discover", false);
   }
 
   if (GetBoolArg("-salvagewallet"))
   {
-
     SoftSetBoolArg("-rescan", true);
   }
-
 
   if (GetBoolArg("-zapwallettxes", false))
   {
@@ -492,10 +429,7 @@ bool AppInit2()
     }
   }
 
-
-
   fDebug = GetBoolArg("-debug");
-
 
   if (fDebug)
   {
@@ -521,7 +455,6 @@ bool AppInit2()
     fServer = GetBoolArg("-server");
   }
 
-
 #if !defined(QT_GUI)
   fServer = true;
 #endif
@@ -532,6 +465,7 @@ bool AppInit2()
   if (mapArgs.count("-timeout"))
   {
     int nNewTimeout = GetArg("-timeout", 5000);
+
     if (nNewTimeout > 0 && nNewTimeout < 600000)
     {
       nConnectTimeout = nNewTimeout;
@@ -544,6 +478,7 @@ bool AppInit2()
     {
       return InitError(strprintf(_("Invalid amount for -paytxfee=<amount>: '%s'"), mapArgs["-paytxfee"].c_str()));
     }
+
     if (nTransactionFee > 0.25 * COIN)
     {
       InitWarning(_("Warning: -paytxfee is set very high! This is the transaction fee you will pay if you send a transaction."));
@@ -561,8 +496,6 @@ bool AppInit2()
     }
   }
 
-
-
   if (!InitSanityCheck())
   {
     return InitError(_("Initialization sanity check failed. I/OCoin is shutting down."));
@@ -571,35 +504,38 @@ bool AppInit2()
   std::string strDataDir = GetDataDir().string();
   std::string strWalletFileName = GetArg("-wallet", "wallet.dat");
 
-
   if (strWalletFileName != boost::filesystem::basename(strWalletFileName) + boost::filesystem::extension(strWalletFileName))
   {
     return InitError(strprintf(_("Wallet %s resides outside data directory %s."), strWalletFileName.c_str(), strDataDir.c_str()));
   }
 
-
   boost::filesystem::path pathLockFile = GetDataDir() / ".lock";
   FILE* file = fopen(pathLockFile.string().c_str(), "a");
+
   if (file)
   {
     fclose(file);
   }
+
   static boost::interprocess::file_lock lock(pathLockFile.string().c_str());
+
   if (!lock.try_lock())
   {
     return InitError(strprintf(_("Cannot obtain a lock on data directory %s.  I/OCoin is probably already running."), strDataDir.c_str()));
   }
 
 #if !defined(WIN32) && !defined(QT_GUI)
+
   if (fDaemon)
   {
-
     pid_t pid = fork();
+
     if (pid < 0)
     {
       fprintf(stderr, "Error: fork() returned %d errno %d\n", pid, errno);
       return false;
     }
+
     if (pid > 0)
     {
       CreatePidFile(GetPidFile(), pid);
@@ -607,24 +543,29 @@ bool AppInit2()
     }
 
     pid_t sid = setsid();
+
     if (sid < 0)
     {
       fprintf(stderr, "Error: setsid() returned %d errno %d\n", sid, errno);
     }
   }
+
 #endif
 
   if (GetBoolArg("-shrinkdebugfile", !fDebug))
   {
     ShrinkDebugFile();
   }
+
   printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
   printf("I/OCoin version %s (%s)\n", FormatFullVersion().c_str(), CLIENT_DATE.c_str());
   printf("Using OpenSSL version %s\n", SSLeay_version(SSLEAY_VERSION));
+
   if (!fLogTimestamps)
   {
     printf("Startup time: %s\n", DateTimeStrFormat("%x %H:%M:%S", GetTime()).c_str());
   }
+
   printf("Default data directory %s\n", GetDefaultDataDir().string().c_str());
   printf("Used data directory %s\n", strDataDir.c_str());
   std::ostringstream strErrors;
@@ -635,9 +576,6 @@ bool AppInit2()
   }
 
   int64_t nStart;
-
-
-
   uiInterface.InitMessage(_("Verifying database integrity..."));
 
   if (!bitdb.Open(GetDataDir()))
@@ -650,7 +588,6 @@ bool AppInit2()
 
   if (GetBoolArg("-salvagewallet"))
   {
-
     if (!__wx__DB::Recover(bitdb, strWalletFileName, true))
     {
       return false;
@@ -660,6 +597,7 @@ bool AppInit2()
   if (boost::filesystem::exists(GetDataDir() / strWalletFileName))
   {
     CDBEnv::VerifyResult r = bitdb.Verify(strWalletFileName, __wx__DB::Recover);
+
     if (r == CDBEnv::RECOVER_OK)
     {
       string msg = strprintf(_("Warning: wallet.dat corrupt, data salvaged!"
@@ -668,13 +606,12 @@ bool AppInit2()
                                " restore from a backup."), strDataDir.c_str());
       uiInterface.ThreadSafeMessageBox(msg, _("I/OCoin"), CClientUIInterface::OK | CClientUIInterface::ICON_EXCLAMATION | CClientUIInterface::MODAL);
     }
+
     if (r == CDBEnv::RECOVER_FAIL)
     {
       return InitError(_("wallet.dat corrupt, salvage failed"));
     }
   }
-
-
 
   int nSocksVersion = GetArg("-socks", 5);
 
@@ -689,15 +626,19 @@ bool AppInit2()
     BOOST_FOREACH(std::string snet, mapMultiArgs["-onlynet"])
     {
       enum Network net = ParseNetwork(snet);
+
       if (net == NET_UNROUTABLE)
       {
         return InitError(strprintf(_("Unknown network specified in -onlynet: '%s'"), snet.c_str()));
       }
+
       nets.insert(net);
     }
+
     for (int n = 0; n < NET_MAX; n++)
     {
       enum Network net = (enum Network)n;
+
       if (!nets.count(net))
       {
         SetLimited(net);
@@ -707,9 +648,11 @@ bool AppInit2()
 
   CService addrProxy;
   bool fProxy = false;
+
   if (mapArgs.count("-proxy"))
   {
     addrProxy = CService(mapArgs["-proxy"], 9050);
+
     if (!addrProxy.IsValid())
     {
       return InitError(strprintf(_("Invalid -proxy address: '%s'"), mapArgs["-proxy"].c_str()));
@@ -719,21 +662,24 @@ bool AppInit2()
     {
       SetProxy(NET_IPV4, addrProxy, nSocksVersion);
     }
+
     if (nSocksVersion > 4)
     {
       if (!IsLimited(NET_IPV6))
       {
         SetProxy(NET_IPV6, addrProxy, nSocksVersion);
       }
+
       SetNameProxy(addrProxy, nSocksVersion);
     }
+
     fProxy = true;
   }
-
 
   if (!(mapArgs.count("-tor") && mapArgs["-tor"] == "0") && (fProxy || mapArgs.count("-tor")))
   {
     CService addrOnion;
+
     if (!mapArgs.count("-tor"))
     {
       addrOnion = addrProxy;
@@ -742,32 +688,36 @@ bool AppInit2()
     {
       addrOnion = CService(mapArgs["-tor"], 9050);
     }
+
     if (!addrOnion.IsValid())
     {
       return InitError(strprintf(_("Invalid -tor address: '%s'"), mapArgs["-tor"].c_str()));
     }
+
     SetProxy(NET_TOR, addrOnion, 5);
     SetReachable(NET_TOR);
   }
 
-
   fNoListen = !GetBoolArg("-listen", true);
   fDiscover = GetBoolArg("-discover", true);
   fNameLookup = GetBoolArg("-dns", true);
-
   bool fBound = false;
+
   if (!fNoListen)
   {
     std::string strError;
+
     if (mapArgs.count("-bind"))
     {
       BOOST_FOREACH(std::string strBind, mapMultiArgs["-bind"])
       {
         CService addrBind;
+
         if (!Lookup(strBind.c_str(), addrBind, GetListenPort(), false))
         {
           return InitError(strprintf(_("Cannot resolve -bind address: '%s'"), strBind.c_str()));
         }
+
         fBound |= Bind(addrBind);
       }
     }
@@ -775,15 +725,18 @@ bool AppInit2()
     {
       struct in_addr inaddr_any;
       inaddr_any.s_addr = INADDR_ANY;
+
       if (!IsLimited(NET_IPV6))
       {
         fBound |= Bind(CService(in6addr_any, GetListenPort()), false);
       }
+
       if (!IsLimited(NET_IPV4))
       {
         fBound |= Bind(CService(inaddr_any, GetListenPort()), !fBound);
       }
     }
+
     if (!fBound)
     {
       return InitError(_("Failed to listen on any port. Use -listen=0 if you want this."));
@@ -795,10 +748,12 @@ bool AppInit2()
     BOOST_FOREACH(string strAddr, mapMultiArgs["-externalip"])
     {
       CService addrLocal(strAddr, GetListenPort(), fNameLookup);
+
       if (!addrLocal.IsValid())
       {
         return InitError(strprintf(_("Cannot resolve -externalip address: '%s'"), strAddr.c_str()));
       }
+
       AddLocal(CService(strAddr, GetListenPort(), fNameLookup), LOCAL_MANUAL);
     }
   }
@@ -823,50 +778,50 @@ bool AppInit2()
   BOOST_FOREACH(string strDest, mapMultiArgs["-seednode"])
   AddOneShot(strDest);
 
-    try
-    {
-        printf("Opening state database...\n");
-                  std::cout << "INIT OPEN STATE DB" << std::endl;
-        std::unique_ptr<dev::db::DatabaseFace> db = dev::db::DBFactory::create(GetDataDir() / "state");
-        overlayDB__ = new dev::OverlayDB(std::move(db));
+  try
+  {
+    printf("Opening state database...\n");
+    std::cout << "INIT OPEN STATE DB" << std::endl;
+    std::unique_ptr<dev::db::DatabaseFace> db = dev::db::DBFactory::create(GetDataDir() / "state");
+    overlayDB__ = new dev::OverlayDB(std::move(db));
 # 865 "init.cpp"
-    }
-    catch (boost::exception const& ex)
+  }
+  catch (boost::exception const& ex)
+  {
+    if (dev::db::isDiskDatabase())
     {
-        if (dev::db::isDiskDatabase())
-        {
-            printf("Error opening state database\n");
-            dev::db::DatabaseStatus const dbStatus =
-                *boost::get_error_info<dev::db::errinfo_dbStatusCode>(ex);
-            if (boost::filesystem::space(GetDataDir() / "state").available < 1024)
-            {
-                return InitError("Insufficient disk space : "
-                                 "Not enough available space on hard drive."
-                                 "Please back up disk first - free up some space and then re run. Exiting.");
-            }
-            else if (dbStatus == dev::db::DatabaseStatus::Corruption)
-            {
-                printf("Database corruption detected. Please see the exception for corruption "
-                        "details. Exception: %s\n", boost::diagnostic_information(ex));
-                throw runtime_error("Database corruption");
-                string msg = strprintf(_(
-                                           " Database corruption detected. Details : Exception %s\n"
-                                       ), boost::diagnostic_information(ex));
-                return InitError(msg);
-            }
-            else if (dbStatus == dev::db::DatabaseStatus::IOError)
-            {
-                return InitError("Database already open. You appear to have "
-                                 "another instance running on the same data path.");
-            }
-        }
+      printf("Error opening state database\n");
+      dev::db::DatabaseStatus const dbStatus =
+        *boost::get_error_info<dev::db::errinfo_dbStatusCode>(ex);
+
+      if (boost::filesystem::space(GetDataDir() / "state").available < 1024)
+      {
+        return InitError("Insufficient disk space : "
+                         "Not enough available space on hard drive."
+                         "Please back up disk first - free up some space and then re run. Exiting.");
+      }
+      else if (dbStatus == dev::db::DatabaseStatus::Corruption)
+      {
+        printf("Database corruption detected. Please see the exception for corruption "
+               "details. Exception: %s\n", boost::diagnostic_information(ex));
+        throw runtime_error("Database corruption");
         string msg = strprintf(_(
-                                   "statedb: Unknown error encountered when opening state database. Details : Exception %s\n"
+                                 " Database corruption detected. Details : Exception %s\n"
                                ), boost::diagnostic_information(ex));
         return InitError(msg);
+      }
+      else if (dbStatus == dev::db::DatabaseStatus::IOError)
+      {
+        return InitError("Database already open. You appear to have "
+                         "another instance running on the same data path.");
+      }
     }
 
-
+    string msg = strprintf(_(
+                             "statedb: Unknown error encountered when opening state database. Details : Exception %s\n"
+                           ), boost::diagnostic_information(ex));
+    return InitError(msg);
+  }
 
   if (!bitdb.Open(GetDataDir()))
   {
@@ -887,20 +842,18 @@ bool AppInit2()
   uiInterface.InitMessage(_("Loading block index..."));
   printf("Loading block index...\n");
   nStart = GetTimeMillis();
+
   if (!LoadBlockIndex())
   {
     return InitError(_("Error loading blkindex.dat"));
   }
-
-
-
-
 
   if (fRequestShutdown)
   {
     printf("Shutdown requested. Exiting.\n");
     return false;
   }
+
   printf(" block index %15" PRId64 "ms\n", GetTimeMillis() - nStart);
 
   if (GetBoolArg("-printblockindex") || GetBoolArg("-printblocktree"))
@@ -913,9 +866,11 @@ bool AppInit2()
   {
     string strMatch = mapArgs["-printblock"];
     int nFound = 0;
+
     for (map<uint256, CBlockIndex*>::iterator mi = mapBlockIndex.begin(); mi != mapBlockIndex.end(); ++mi)
     {
       uint256 hash = (*mi).first;
+
       if (strncmp(hash.ToString().c_str(), strMatch.c_str(), strMatch.size()) == 0)
       {
         CBlockIndex* pindex = (*mi).second;
@@ -927,21 +882,21 @@ bool AppInit2()
         nFound++;
       }
     }
+
     if (nFound == 0)
     {
       printf("No blocks matching %s were found\n", strMatch.c_str());
     }
+
     return false;
   }
-
-
 
   if (GetBoolArg("-zapwallettxes", false))
   {
     printf("Zapping all transactions from wallet...");
-
     pwalletMain = new __wx__("wallet.dat");
     DBErrors nZapWalletRet = pwalletMain->ZapWalletTx();
+
     if (nZapWalletRet != DB_LOAD_OK)
     {
       printf("Error loading wallet.dat: Wallet corrupted");
@@ -958,6 +913,7 @@ bool AppInit2()
   bool fFirstRun = true;
   pwalletMain = new __wx__(strWalletFileName);
   DBErrors nLoadWalletRet = pwalletMain->LoadWallet(fFirstRun);
+
   if (nLoadWalletRet != DB_LOAD_OK)
   {
     if (nLoadWalletRet == DB_CORRUPT)
@@ -989,6 +945,7 @@ bool AppInit2()
   if (GetBoolArg("-upgradewallet", fFirstRun))
   {
     int nMaxVersion = GetArg("-upgradewallet", 0);
+
     if (nMaxVersion == 0)
     {
       printf("Performing wallet upgrade to %i\n", FEATURE_LATEST);
@@ -1007,22 +964,24 @@ bool AppInit2()
     {
       printf("Allowing wallet upgrade up to %i\n", nMaxVersion);
     }
+
     if (nMaxVersion < pwalletMain->GetVersion())
     {
       strErrors << _("Cannot downgrade wallet") << "\n";
     }
+
     pwalletMain->SetMaxVersion(nMaxVersion);
   }
 
   if (fFirstRun && !fViewWallet)
   {
-
     RandAddSeedPerfmon();
-
     CPubKey newDefaultKey;
+
     if (pwalletMain->GetKeyFromPool(newDefaultKey, false))
     {
       pwalletMain->SetDefaultKey(newDefaultKey);
+
       if (!pwalletMain->SetAddressBookName(pwalletMain->vchDefaultKey.GetID(), ""))
       {
         strErrors << _("Cannot write default address") << "\n";
@@ -1032,13 +991,13 @@ bool AppInit2()
 
   printf("%s", strErrors.str().c_str());
   printf(" wallet      %15" PRId64 "ms\n", GetTimeMillis() - nStart);
-
   RegisterWallet(pwalletMain);
 
   if(GetBoolArg("-xscan"))
   {
     boost::filesystem::path dc = GetDataDir() / "aliascache.dat";
     FILE *file = fopen(dc.string().c_str(), "rb");
+
     if (file)
     {
       boost::filesystem::path dc__ = GetDataDir() / "aliascache.dat.old";
@@ -1048,8 +1007,8 @@ bool AppInit2()
 
   ln1Db = new LocatorNodeDB("cr+");
   vertexDB__ = new VertexNodeDB("cr+");
-
   CBlockIndex *pindexRescan = pindexBest;
+
   if(GetBoolArg("-rescan") || GetBoolArg("-xscan") || GetBoolArg("-upgradewallet"))
   {
     pindexRescan = pindexGenesisBlock;
@@ -1058,14 +1017,17 @@ bool AppInit2()
   {
     __wx__DB walletdb(strWalletFileName);
     CBlockLocator locator;
+
     if (walletdb.ReadBestBlock(locator))
     {
       pindexRescan = locator.GetBlockIndex();
     }
   }
+
   if (pindexBest != pindexRescan && pindexBest && pindexRescan && pindexBest->nHeight > pindexRescan->nHeight)
   {
     uiInterface.InitMessage(_("Rescanning..."));
+
     if(GetBoolArg("-rescan"))
     {
       printf("Rescanning last %i blocks (from block %i)...\n", pindexBest->nHeight - pindexRescan->nHeight, pindexRescan->nHeight);
@@ -1080,15 +1042,13 @@ bool AppInit2()
     }
   }
 
-
-
   if (mapArgs.count("-loadblock"))
   {
     uiInterface.InitMessage(_("Importing blockchain data file."));
-
     BOOST_FOREACH(string strFile, mapMultiArgs["-loadblock"])
     {
       FILE *file = fopen(strFile.c_str(), "rb");
+
       if (file)
       {
         LoadExternalBlockFile(file);
@@ -1098,11 +1058,12 @@ bool AppInit2()
   }
 
   boost::filesystem::path pathBootstrap = GetDataDir() / "bootstrap.dat";
+
   if (boost::filesystem::exists(pathBootstrap))
   {
     uiInterface.InitMessage(_("Importing bootstrap blockchain data file."));
-
     FILE *file = fopen(pathBootstrap.string().c_str(), "rb");
+
     if (file)
     {
       boost::filesystem::path pathBootstrapOld = GetDataDir() / "bootstrap.dat.old";
@@ -1111,24 +1072,19 @@ bool AppInit2()
     }
   }
 
-
-
   uiInterface.InitMessage(_("Loading addresses..."));
   printf("Loading addresses...\n");
   nStart = GetTimeMillis();
-
   {
     CAddrDB adb;
+
     if (!adb.Read(addrman))
     {
       printf("Invalid or missing peers.dat; recreating\n");
     }
   }
-
   printf("Loaded %i addresses from peers.dat  %" PRId64 "ms\n",
          addrman.size(), GetTimeMillis() - nStart);
-
-
 
   if (!CheckDiskSpace())
   {
@@ -1136,8 +1092,6 @@ bool AppInit2()
   }
 
   RandAddSeedPerfmon();
-
-
   printf("mapBlockIndex.size() = %" PRIszu "\n", mapBlockIndex.size());
   printf("nBestHeight = %d\n", nBestHeight);
   printf("setKeyPool.size() = %" PRIszu "\n", pwalletMain->setKeyPool.size());
@@ -1154,8 +1108,6 @@ bool AppInit2()
     NewThread(ThreadRPCServer, NULL);
   }
 
-
-
   uiInterface.InitMessage(_("Done loading"));
   printf("Done loading\n");
 
@@ -1164,17 +1116,14 @@ bool AppInit2()
     return InitError(strErrors.str());
   }
 
-
   pwalletMain->ReacceptWalletTransactions();
-
 #if !defined(QT_GUI)
-
 
   while (1)
   {
     MilliSleep(5000);
   }
-#endif
 
+#endif
   return true;
 }

@@ -1,11 +1,8 @@
-#include <map>
 
+#include <map>
 #include <openssl/ecdsa.h>
 #include <openssl/obj_mac.h>
-
 #include "key.h"
-
-
 class __fbase__
 {
 public:
@@ -26,7 +23,6 @@ public:
     EC_GROUP_free(this->_group);
     BN_CTX_free(this->ctx);
   }
-
   EC_GROUP* _group=NULL;
   BIGNUM* _g1=NULL;
   EC_POINT* _g0=NULL;
@@ -41,7 +37,6 @@ public:
   BIGNUM* _t=NULL;
   BN_CTX* ctx=NULL;
 };
-
 struct __convol__77
 {
   BN_CTX* ctx;
@@ -52,7 +47,6 @@ struct __convol__77
   EC_POINT* q5;
   BIGNUM* q6;
 };
-
 void __convol_x__(__convol__77* c)
 {
   BN_CTX_free(c->ctx);
@@ -63,7 +57,6 @@ void __convol_x__(__convol__77* c)
   EC_POINT_free(c->q5);
   BN_free(c->q6);
 }
-
 struct __conv__intern__
 {
   BN_CTX* ctx;
@@ -75,7 +68,6 @@ struct __conv__intern__
   BIGNUM* s6;
   BIGNUM* s7;
 };
-
 void __conv_intern__x__(__conv__intern__* c)
 {
   BN_CTX_free(c->ctx);
@@ -87,8 +79,6 @@ void __conv_intern__x__(__conv__intern__* c)
   BN_free(c->s6);
   BN_free(c->s7);
 }
-
-
 int EC_KEY_regenerate_key(EC_KEY *eckey, BIGNUM *priv_key)
 {
   int ok = 0;
@@ -121,15 +111,14 @@ int EC_KEY_regenerate_key(EC_KEY *eckey, BIGNUM *priv_key)
 
   EC_KEY_set_private_key(eckey,priv_key);
   EC_KEY_set_public_key(eckey,pub_key);
-
   ok = 1;
-
 err:
 
   if (pub_key)
   {
     EC_POINT_free(pub_key);
   }
+
   if (ctx != NULL)
   {
     BN_CTX_free(ctx);
@@ -137,10 +126,6 @@ err:
 
   return(ok);
 }
-
-
-
-
 int ECDSA_SIG_recover_key_GFp(EC_KEY *eckey, ECDSA_SIG *ecsig, const unsigned char *msg, int msglen, int recid, int check)
 {
   if (!eckey)
@@ -150,7 +135,6 @@ int ECDSA_SIG_recover_key_GFp(EC_KEY *eckey, ECDSA_SIG *ecsig, const unsigned ch
 
   int ret = 0;
   BN_CTX *ctx = NULL;
-
   BIGNUM *x = NULL;
   BIGNUM *e = NULL;
   BIGNUM *order = NULL;
@@ -164,60 +148,72 @@ int ECDSA_SIG_recover_key_GFp(EC_KEY *eckey, ECDSA_SIG *ecsig, const unsigned ch
   BIGNUM *zero = NULL;
   int n = 0;
   int i = recid / 2;
-
   const EC_GROUP *group = EC_KEY_get0_group(eckey);
   const BIGNUM* pr;
   const BIGNUM* ps;
   ECDSA_SIG_get0(ecsig, &pr, &ps);
+
   if ((ctx = BN_CTX_new()) == NULL)
   {
     ret = -1;
     goto err;
   }
+
   BN_CTX_start(ctx);
   order = BN_CTX_get(ctx);
+
   if (!EC_GROUP_get_order(group, order, ctx))
   {
     ret = -2;
     goto err;
   }
+
   x = BN_CTX_get(ctx);
+
   if (!BN_copy(x, order))
   {
     ret=-1;
     goto err;
   }
+
   if (!BN_mul_word(x, i))
   {
     ret=-1;
     goto err;
   }
+
   if (!BN_add(x, x, pr))
   {
     ret=-1;
     goto err;
   }
+
   field = BN_CTX_get(ctx);
+
   if (!EC_GROUP_get_curve_GFp(group, field, NULL, NULL, ctx))
   {
     ret=-2;
     goto err;
   }
+
   if (BN_cmp(x, field) >= 0)
   {
     ret=0;
     goto err;
   }
+
   if ((R = EC_POINT_new(group)) == NULL)
   {
     ret = -2;
     goto err;
   }
+
   if (!EC_POINT_set_compressed_coordinates_GFp(group, R, x, recid % 2, ctx))
   {
     ret=0;
     goto err;
   }
+
   if (check)
   {
     if ((O = EC_POINT_new(group)) == NULL)
@@ -225,67 +221,84 @@ int ECDSA_SIG_recover_key_GFp(EC_KEY *eckey, ECDSA_SIG *ecsig, const unsigned ch
       ret = -2;
       goto err;
     }
+
     if (!EC_POINT_mul(group, O, NULL, R, order, ctx))
     {
       ret=-2;
       goto err;
     }
+
     if (!EC_POINT_is_at_infinity(group, O))
     {
       ret = 0;
       goto err;
     }
   }
+
   if ((Q = EC_POINT_new(group)) == NULL)
   {
     ret = -2;
     goto err;
   }
+
   n = EC_GROUP_get_degree(group);
   e = BN_CTX_get(ctx);
+
   if (!BN_bin2bn(msg, msglen, e))
   {
     ret=-1;
     goto err;
   }
+
   if (8*msglen > n)
   {
     BN_rshift(e, e, 8-(n & 7));
   }
+
   zero = BN_CTX_get(ctx);
+
   if (!BN_zero(zero))
   {
     ret=-1;
     goto err;
   }
+
   if (!BN_mod_sub(e, zero, e, order, ctx))
   {
     ret=-1;
     goto err;
   }
+
   rr = BN_CTX_get(ctx);
+
   if (!BN_mod_inverse(rr, pr, order, ctx))
   {
     ret=-1;
     goto err;
   }
+
   sor = BN_CTX_get(ctx);
+
   if (!BN_mod_mul(sor, ps, rr, order, ctx))
   {
     ret=-1;
     goto err;
   }
+
   eor = BN_CTX_get(ctx);
+
   if (!BN_mod_mul(eor, e, rr, order, ctx))
   {
     ret=-1;
     goto err;
   }
+
   if (!EC_POINT_mul(group, Q, eor, R, sor, ctx))
   {
     ret=-2;
     goto err;
   }
+
   if (!EC_KEY_set_public_key(eckey, Q))
   {
     ret=-2;
@@ -293,91 +306,92 @@ int ECDSA_SIG_recover_key_GFp(EC_KEY *eckey, ECDSA_SIG *ecsig, const unsigned ch
   }
 
   ret = 1;
-
 err:
+
   if (ctx)
   {
     BN_CTX_end(ctx);
     BN_CTX_free(ctx);
   }
+
   if (R != NULL)
   {
     EC_POINT_free(R);
   }
+
   if (O != NULL)
   {
     EC_POINT_free(O);
   }
+
   if (Q != NULL)
   {
     EC_POINT_free(Q);
   }
+
   return ret;
 }
-
 void CKey::SetCompressedPubKey()
 {
   EC_KEY_set_conv_form(pkey, POINT_CONVERSION_COMPRESSED);
   fCompressedPubKey = true;
 }
-
 void CKey::Reset()
 {
   fCompressedPubKey = false;
+
   if (pkey != NULL)
   {
     EC_KEY_free(pkey);
   }
+
   pkey = EC_KEY_new_by_curve_name(NID_secp256k1);
+
   if (pkey == NULL)
   {
     throw key_error("CKey::CKey() : EC_KEY_new_by_curve_name failed");
   }
+
   fSet = false;
 }
-
-
 CKey::CKey()
 {
   pkey = NULL;
   Reset();
 }
-
 CKey::CKey(const CKey& b)
 {
   pkey = EC_KEY_dup(b.pkey);
+
   if (pkey == NULL)
   {
     throw key_error("CKey::CKey(const CKey&) : EC_KEY_dup failed");
   }
+
   fSet = b.fSet;
 }
-
 CKey& CKey::operator=(const CKey& b)
 {
   if (!EC_KEY_copy(pkey, b.pkey))
   {
     throw key_error("CKey::operator=(const CKey&) : EC_KEY_copy failed");
   }
+
   fSet = b.fSet;
   return (*this);
 }
-
 CKey::~CKey()
 {
   EC_KEY_free(pkey);
 }
-
 bool CKey::IsNull() const
 {
   return !fSet;
 }
-
 bool CKey::IsCompressed() const
 {
   return fCompressedPubKey;
 }
-
 int CompareBigEndian(const unsigned char *c1, size_t c1len, const unsigned char *c2, size_t c2len)
 {
   while (c1len > c2len)
@@ -386,36 +400,41 @@ int CompareBigEndian(const unsigned char *c1, size_t c1len, const unsigned char 
     {
       return 1;
     }
+
     c1++;
     c1len--;
   }
+
   while (c2len > c1len)
   {
     if (*c2)
     {
       return -1;
     }
+
     c2++;
     c2len--;
   }
+
   while (c1len > 0)
   {
     if (*c1 > *c2)
     {
       return 1;
     }
+
     if (*c2 > *c1)
     {
       return -1;
     }
+
     c1++;
     c2++;
     c1len--;
   }
+
   return 0;
 }
-
-
 const unsigned char vchMaxModOrder[32] =
 {
   0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
@@ -423,8 +442,6 @@ const unsigned char vchMaxModOrder[32] =
   0xBA,0xAE,0xDC,0xE6,0xAF,0x48,0xA0,0x3B,
   0xBF,0xD2,0x5E,0x8C,0xD0,0x36,0x41,0x40
 };
-
-
 const unsigned char vchMaxModHalfOrder[32] =
 {
   0x7F,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
@@ -432,36 +449,32 @@ const unsigned char vchMaxModHalfOrder[32] =
   0x5D,0x57,0x6E,0x73,0x57,0xA4,0x50,0x1D,
   0xDF,0xE9,0x2F,0x46,0x68,0x1B,0x20,0xA0
 };
-
 const unsigned char vchZero[0] = {};
-
 bool CKey::CheckSignatureElement(const unsigned char *vch, int len, bool half)
 {
   return CompareBigEndian(vch, len, vchZero, 0) > 0 &&
          CompareBigEndian(vch, len, half ? vchMaxModHalfOrder : vchMaxModOrder, 32) <= 0;
 }
-
 void CKey::MakeNewKey(bool fCompressed)
 {
   if (!EC_KEY_generate_key(pkey))
   {
     throw key_error("CKey::MakeNewKey() : EC_KEY_generate_key failed");
   }
+
   if (fCompressed)
   {
     SetCompressedPubKey();
   }
+
   fSet = true;
 }
-
 bool CKey::SetPrivKey(const CPrivKey& vchPrivKey)
 {
   const unsigned char* pbegin = &vchPrivKey[0];
+
   if (d2i_ECPrivateKey(&pkey, &pbegin, vchPrivKey.size()))
   {
-
-
-
     if (EC_KEY_check_key(pkey))
     {
       fSet = true;
@@ -469,122 +482,138 @@ bool CKey::SetPrivKey(const CPrivKey& vchPrivKey)
     }
   }
 
-
-
-
   pkey = NULL;
   Reset();
   return false;
 }
-
 bool CKey::SetSecret(const CSecret& vchSecret, bool fCompressed)
 {
   EC_KEY_free(pkey);
   pkey = EC_KEY_new_by_curve_name(NID_secp256k1);
+
   if (pkey == NULL)
   {
     throw key_error("CKey::SetSecret() : EC_KEY_new_by_curve_name failed");
   }
+
   if (vchSecret.size() != 32)
   {
     throw key_error("CKey::SetSecret() : secret must be 32 bytes");
   }
+
   BIGNUM *bn = BN_bin2bn(&vchSecret[0],32,BN_new());
+
   if (bn == NULL)
   {
     throw key_error("CKey::SetSecret() : BN_bin2bn failed");
   }
+
   if (!EC_KEY_regenerate_key(pkey,bn))
   {
     BN_clear_free(bn);
     throw key_error("CKey::SetSecret() : EC_KEY_regenerate_key failed");
   }
+
   BN_clear_free(bn);
   fSet = true;
+
   if (fCompressed || fCompressedPubKey)
   {
     SetCompressedPubKey();
   }
+
   return true;
 }
-
 CSecret CKey::GetSecret(bool &fCompressed) const
 {
   CSecret vchRet;
   vchRet.resize(32);
   const BIGNUM *bn = EC_KEY_get0_private_key(pkey);
   int nBytes = BN_num_bytes(bn);
+
   if (bn == NULL)
   {
     throw key_error("CKey::GetSecret() : EC_KEY_get0_private_key failed");
   }
+
   int n=BN_bn2bin(bn,&vchRet[32 - nBytes]);
+
   if (n != nBytes)
   {
     throw key_error("CKey::GetSecret(): BN_bn2bin failed");
   }
+
   fCompressed = fCompressedPubKey;
   return vchRet;
 }
-
 CPrivKey CKey::GetPrivKey() const
 {
   int nSize = i2d_ECPrivateKey(pkey, NULL);
+
   if (!nSize)
   {
     throw key_error("CKey::GetPrivKey() : i2d_ECPrivateKey failed");
   }
+
   CPrivKey vchPrivKey(nSize, 0);
   unsigned char* pbegin = &vchPrivKey[0];
+
   if (i2d_ECPrivateKey(pkey, &pbegin) != nSize)
   {
     throw key_error("CKey::GetPrivKey() : i2d_ECPrivateKey returned unexpected size");
   }
+
   return vchPrivKey;
 }
-
 bool CKey::SetPubKey(const CPubKey& vchPubKey)
 {
   const unsigned char* pbegin = &vchPubKey.vchPubKey[0];
+
   if (o2i_ECPublicKey(&pkey, &pbegin, vchPubKey.vchPubKey.size()))
   {
     fSet = true;
+
     if (vchPubKey.vchPubKey.size() == 33)
     {
       SetCompressedPubKey();
     }
+
     return true;
   }
+
   pkey = NULL;
   Reset();
   return false;
 }
-
 CPubKey CKey::GetPubKey() const
 {
   int nSize = i2o_ECPublicKey(pkey, NULL);
+
   if (!nSize)
   {
     throw key_error("CKey::GetPubKey() : i2o_ECPublicKey failed");
   }
+
   std::vector<unsigned char> vchPubKey(nSize, 0);
   unsigned char* pbegin = &vchPubKey[0];
+
   if (i2o_ECPublicKey(pkey, &pbegin) != nSize)
   {
     throw key_error("CKey::GetPubKey() : i2o_ECPublicKey returned unexpected size");
   }
+
   return CPubKey(vchPubKey);
 }
-
 bool CKey::Sign(uint256 hash, std::vector<unsigned char>& vchSig)
 {
   vchSig.clear();
-
   ECDSA_SIG *sig = ECDSA_do_sign((unsigned char*)&hash, sizeof(hash), pkey);
+
   if (sig == NULL)
   {
     return false;
   }
+
   BN_CTX *ctx = BN_CTX_new();
   BN_CTX_start(ctx);
   const EC_GROUP *group = EC_KEY_get0_group(pkey);
@@ -595,9 +624,9 @@ bool CKey::Sign(uint256 hash, std::vector<unsigned char>& vchSig)
   const BIGNUM* pr=0;
   const BIGNUM* ps=0;
   ECDSA_SIG_get0(sig, &pr, &ps);
+
   if (BN_cmp(ps, halforder) > 0)
   {
-
     BIGNUM* r=0;
     r = BN_dup(pr);
     BIGNUM* s=0;
@@ -605,6 +634,7 @@ bool CKey::Sign(uint256 hash, std::vector<unsigned char>& vchSig)
     BN_sub(s, order, ps);
     ECDSA_SIG_set0(sig, r, s);
   }
+
   BN_CTX_end(ctx);
   BN_CTX_free(ctx);
   unsigned int nSize = ECDSA_size(pkey);
@@ -613,22 +643,18 @@ bool CKey::Sign(uint256 hash, std::vector<unsigned char>& vchSig)
   nSize = i2d_ECDSA_SIG(sig, &pos);
   ECDSA_SIG_free(sig);
   vchSig.resize(nSize);
-
   return true;
 }
-
-
-
-
-
 bool CKey::SignCompact(uint256 hash, std::vector<unsigned char>& vchSig)
 {
   bool fOk = false;
   ECDSA_SIG *sig = ECDSA_do_sign((unsigned char*)&hash, sizeof(hash), pkey);
+
   if (sig==NULL)
   {
     return false;
   }
+
   vchSig.clear();
   vchSig.resize(65,0);
   const BIGNUM* r;
@@ -636,17 +662,21 @@ bool CKey::SignCompact(uint256 hash, std::vector<unsigned char>& vchSig)
   ECDSA_SIG_get0(sig, &r, &s);
   int nBitsR = BN_num_bits(r);
   int nBitsS = BN_num_bits(s);
+
   if (nBitsR <= 256 && nBitsS <= 256)
   {
     int nRecId = -1;
+
     for (int i=0; i<4; i++)
     {
       CKey keyRec;
       keyRec.fSet = true;
+
       if (fCompressedPubKey)
       {
         keyRec.SetCompressedPubKey();
       }
+
       if (ECDSA_SIG_recover_key_GFp(keyRec.pkey, sig, (unsigned char*)&hash, sizeof(hash), i, 1) == 1)
         if (keyRec.GetPubKey() == this->GetPubKey())
         {
@@ -666,25 +696,24 @@ bool CKey::SignCompact(uint256 hash, std::vector<unsigned char>& vchSig)
     BN_bn2bin(s,&vchSig[65-(nBitsS+7)/8]);
     fOk = true;
   }
+
   ECDSA_SIG_free(sig);
   return fOk;
 }
-
-
-
-
-
 bool CKey::SetCompactSignature(uint256 hash, const std::vector<unsigned char>& vchSig)
 {
   if (vchSig.size() != 65)
   {
     return false;
   }
+
   int nV = vchSig[0];
+
   if (nV<27 || nV>=35)
   {
     return false;
   }
+
   ECDSA_SIG *sig = ECDSA_SIG_new();
   BIGNUM* r=0;
   BIGNUM* s=0;
@@ -692,28 +721,28 @@ bool CKey::SetCompactSignature(uint256 hash, const std::vector<unsigned char>& v
   s = BN_new();
   BN_bin2bn(&vchSig[1],32,r);
   BN_bin2bn(&vchSig[33],32,s);
-
   ECDSA_SIG_set0(sig, r, s);
   EC_KEY_free(pkey);
   pkey = EC_KEY_new_by_curve_name(NID_secp256k1);
+
   if (nV >= 31)
   {
     SetCompressedPubKey();
     nV -= 4;
   }
+
   if (ECDSA_SIG_recover_key_GFp(pkey, sig, (unsigned char*)&hash, sizeof(hash), nV - 27, 0) == 1)
   {
     fSet = true;
     ECDSA_SIG_free(sig);
     return true;
   }
+
   ECDSA_SIG_free(sig);
   return false;
 }
-
 bool CKey::Verify(uint256 hash, const std::vector<unsigned char>& vchSig)
 {
-
   if (ECDSA_verify(0, (unsigned char*)&hash, sizeof(hash), &vchSig[0], vchSig.size(), pkey) != 1)
   {
     return false;
@@ -721,7 +750,6 @@ bool CKey::Verify(uint256 hash, const std::vector<unsigned char>& vchSig)
 
   return true;
 }
-
 bool CKey::IsValid()
 {
   if (!fSet)
@@ -740,26 +768,24 @@ bool CKey::IsValid()
   key2.SetSecret(secret, fCompr);
   return GetPubKey() == key2.GetPubKey();
 }
-
 bool ECC_InitSanityCheck()
 {
   EC_KEY *pkey = EC_KEY_new_by_curve_name(NID_secp256k1);
+
   if(pkey == NULL)
   {
     return false;
   }
-  EC_KEY_free(pkey);
 
+  EC_KEY_free(pkey);
   return true;
 }
-
 int reflection(__pq__& v)
 {
   std::vector<unsigned char> vt_;
-
   __fbase__ __fb ;
-
   __fb._group = EC_GROUP_new_by_curve_name(NID_secp256k1);
+
   if (!__fb._group)
   {
     return -1;
@@ -795,8 +821,8 @@ int reflection(__pq__& v)
     return -1;
   };
 
-
   vt_.resize(0x21);
+
   if (BN_num_bytes(__fb._q) != 0x21
       || BN_bn2bin(__fb._q, &vt_[0]) != 0x21)
   {
@@ -825,7 +851,6 @@ int reflection(__pq__& v)
     return -1;
   };
 
-
   if (!(__fb._kvtx = EC_POINT_bn2point(__fb._group, __fb._q1, NULL, __fb.ctx)))
   {
     return -1;
@@ -851,29 +876,28 @@ int reflection(__pq__& v)
     return -1;
   };
 
-
   v.__fq5.resize(0x21);
+
   if (BN_num_bytes(__fb._g1) != 0x21
       || BN_bn2bin(__fb._g1, &v.__fq5[0]) != 0x21)
   {
     return -1;
   };
 
-
   return 0;
 }
-
 int invert(__inv__& inv)
 {
   EC_GROUP* group = EC_GROUP_new_by_curve_name(NID_secp256k1);
+
   if (!group)
   {
     EC_GROUP_free(group);
     return -1;
   }
 
-
   BIGNUM* i7 = BN_bin2bn(&inv.__inv7[0], 0x20, BN_new());
+
   if(!i7)
   {
     BN_free(i7);
@@ -898,19 +922,19 @@ int invert(__inv__& inv)
   EC_POINT_free(__i1);
   BN_free(i7);
   EC_GROUP_free(group);
-
   return 0;
 }
-
 int __synth_piv__conv77(__im__& offset1, __im__& g, __im__& s)
 {
   EC_GROUP *group = EC_GROUP_new_by_curve_name(NID_secp256k1);
+
   if(!group)
   {
     throw runtime_error("conv synth");
   }
 
   __convol__77 __c7;
+
   if(!(__c7.ctx = BN_CTX_new()))
   {
     EC_GROUP_free(group);
@@ -982,6 +1006,7 @@ int __synth_piv__conv77(__im__& offset1, __im__& g, __im__& s)
   }
 
   s.resize(0x21);
+
   if(BN_num_bytes(__c7.q6) != 0x21 || BN_bn2bin(__c7.q6, &s[0]) != 0x21)
   {
     EC_GROUP_free(group);
@@ -991,20 +1016,20 @@ int __synth_piv__conv77(__im__& offset1, __im__& g, __im__& s)
 
   EC_GROUP_free(group);
   __convol_x__(&__c7);
-
   return 0;
 }
-
 int __synth_piv__conv71__intern(__im__& x_intern, __im__& im,
                                 __im__& y_intern, __im__& p_intern)
 {
   EC_GROUP* group = EC_GROUP_new_by_curve_name(NID_secp256k1);
+
   if(!group)
   {
     throw runtime_error("synth conv, group");
   }
 
   __conv__intern__ conv;
+
   if(!(conv.ctx = BN_CTX_new()))
   {
     __conv_intern__x__(&conv);
@@ -1039,7 +1064,6 @@ int __synth_piv__conv71__intern(__im__& x_intern, __im__& im,
     EC_GROUP_free(group);
     return -1;
   }
-
 
   if(!(conv.s4 = EC_POINT_point2bn(group, conv.s3, POINT_CONVERSION_COMPRESSED, BN_new(), conv.ctx)))
   {
@@ -1099,6 +1123,7 @@ int __synth_piv__conv71__intern(__im__& x_intern, __im__& im,
 
   memset(&p_intern[0], 0, 0x20);
   int n_;
+
   if((n_ = BN_num_bytes(conv.s7)) > 0x20
       || BN_bn2bin(conv.s7, &p_intern[0x20-n_]) != n_)
   {
@@ -1108,17 +1133,16 @@ int __synth_piv__conv71__intern(__im__& x_intern, __im__& im,
   };
 
   __conv_intern__x__(&conv);
+
   EC_GROUP_free(group);
 
   return 0;
 }
-
 int __synth_piv__conv71__outer(__im__& t, __im__& i,
                                __im__& outer_offset, __im__& c)
 {
   __fbase__ __fb;
   std::vector<unsigned char> vt_;
-
   EC_GROUP* group = EC_GROUP_new_by_curve_name(NID_secp256k1);
 
   if (!group)
@@ -1150,6 +1174,7 @@ int __synth_piv__conv71__outer(__im__& t, __im__& i,
   {
     return -1;
   };
+
   if (!EC_POINT_mul(group, __fb._kvtx, NULL, __fb._g0, __fb._g1, __fb.ctx))
   {
     return -1;
@@ -1160,8 +1185,8 @@ int __synth_piv__conv71__outer(__im__& t, __im__& i,
     return -1;
   };
 
-
   vt_.resize(0x21);
+
   if (BN_num_bytes(__fb._q1) != 0x21
       || BN_bn2bin(__fb._q1, &vt_[0]) != 0x21)
   {
@@ -1169,7 +1194,9 @@ int __synth_piv__conv71__outer(__im__& t, __im__& i,
   };
 
   vector<unsigned char> v;
+
   v.resize(0x21);
+
   SHA256(&vt_[0], vt_.size(), &v[0]);
 
   if (!(__fb._l1 = BN_bin2bn(&v[0], 0x20, BN_new())))
@@ -1191,6 +1218,7 @@ int __synth_piv__conv71__outer(__im__& t, __im__& i,
   {
     return -1;
   }
+
   if (!(__fb._k = EC_POINT_bn2point(group, __fb._q, NULL, __fb.ctx)))
   {
     return -1;
@@ -1200,6 +1228,7 @@ int __synth_piv__conv71__outer(__im__& t, __im__& i,
   {
     return -1;
   };
+
   if (!EC_POINT_add(group, __fb._f, __fb._o1, __fb._k, __fb.ctx))
   {
     return -1;
@@ -1211,6 +1240,7 @@ int __synth_piv__conv71__outer(__im__& t, __im__& i,
   };
 
   c.resize(0x21);
+
   if(BN_num_bytes(__fb._t) != 0x21
       || BN_bn2bin(__fb._t, &c[0]) != 0x21)
   {

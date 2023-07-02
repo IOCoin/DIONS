@@ -1,18 +1,16 @@
+
 #include "protocol.h"
 #include "util.h"
 #include "netbase.h"
-
 #ifndef WIN32
 # include <arpa/inet.h>
 #endif
-
 static const char* ppszTypeName[] =
 {
   "ERROR",
   "tx",
   "block",
 };
-
 CMessageHeader::CMessageHeader()
 {
   memcpy(pchMessageStart, ::pchMessageStart, sizeof(pchMessageStart));
@@ -21,7 +19,6 @@ CMessageHeader::CMessageHeader()
   nMessageSize = -1;
   nChecksum = 0;
 }
-
 CMessageHeader::CMessageHeader(const char* pszCommand, unsigned int nMessageSizeIn)
 {
   memcpy(pchMessageStart, ::pchMessageStart, sizeof(pchMessageStart));
@@ -29,7 +26,6 @@ CMessageHeader::CMessageHeader(const char* pszCommand, unsigned int nMessageSize
   nMessageSize = nMessageSizeIn;
   nChecksum = 0;
 }
-
 std::string CMessageHeader::GetCommand() const
 {
   if (pchCommand[COMMAND_SIZE-1] == 0)
@@ -41,21 +37,17 @@ std::string CMessageHeader::GetCommand() const
     return std::string(pchCommand, pchCommand + COMMAND_SIZE);
   }
 }
-
 bool CMessageHeader::IsValid() const
 {
-
   if (memcmp(pchMessageStart, ::pchMessageStart, sizeof(pchMessageStart)) != 0)
   {
     return false;
   }
 
-
   for (const char* p1 = pchCommand; p1 < pchCommand + COMMAND_SIZE; p1++)
   {
     if (*p1 == 0)
     {
-
       for (; p1 < pchCommand + COMMAND_SIZE; p1++)
         if (*p1 != 0)
         {
@@ -68,7 +60,6 @@ bool CMessageHeader::IsValid() const
     }
   }
 
-
   if (nMessageSize > MAX_SIZE)
   {
     printf("CMessageHeader::IsValid() : (%s, %u bytes) nMessageSize > MAX_SIZE\n", GetCommand().c_str(), nMessageSize);
@@ -77,42 +68,35 @@ bool CMessageHeader::IsValid() const
 
   return true;
 }
-
-
-
 CAddress::CAddress() : CService()
 {
   Init();
 }
-
 CAddress::CAddress(CService ipIn, uint64_t nServicesIn) : CService(ipIn)
 {
   Init();
   nServices = nServicesIn;
 }
-
 void CAddress::Init()
 {
   nServices = NODE_NETWORK;
   nTime = 100000000;
   nLastTry = 0;
 }
-
 CInv::CInv()
 {
   type = 0;
   hash = 0;
 }
-
 CInv::CInv(int typeIn, const uint256& hashIn)
 {
   type = typeIn;
   hash = hashIn;
 }
-
 CInv::CInv(const std::string& strType, const uint256& hashIn)
 {
   unsigned int i;
+
   for (i = 1; i < ARRAYLEN(ppszTypeName); i++)
   {
     if (strType == ppszTypeName[i])
@@ -121,37 +105,35 @@ CInv::CInv(const std::string& strType, const uint256& hashIn)
       break;
     }
   }
+
   if (i == ARRAYLEN(ppszTypeName))
   {
     throw std::out_of_range(strprintf("CInv::CInv(string, uint256) : unknown type '%s'", strType.c_str()));
   }
+
   hash = hashIn;
 }
-
 bool operator<(const CInv& a, const CInv& b)
 {
   return (a.type < b.type || (a.type == b.type && a.hash < b.hash));
 }
-
 bool CInv::IsKnownType() const
 {
   return (type >= 1 && type < (int)ARRAYLEN(ppszTypeName));
 }
-
 const char* CInv::GetCommand() const
 {
   if (!IsKnownType())
   {
     throw std::out_of_range(strprintf("CInv::GetCommand() : type=%d unknown type", type));
   }
+
   return ppszTypeName[type];
 }
-
 std::string CInv::ToString() const
 {
   return strprintf("%s %s", GetCommand(), hash.ToString().substr(0,20).c_str());
 }
-
 void CInv::print() const
 {
   printf("CInv(%s)\n", ToString().c_str());

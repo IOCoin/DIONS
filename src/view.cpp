@@ -1,6 +1,6 @@
+
 #include "view.h"
 #include "script.h"
-
 bool CViewKeyStore::ak(const CKeyID& ckid)
 {
   {
@@ -9,7 +9,6 @@ bool CViewKeyStore::ak(const CKeyID& ckid)
   }
   return true;
 }
-
 bool CViewKeyStore::AddCScript(const CScript& redeemScript)
 {
   if (redeemScript.size() > MAX_SCRIPT_ELEMENT_SIZE)
@@ -21,9 +20,9 @@ bool CViewKeyStore::AddCScript(const CScript& redeemScript)
     LOCK(cs_KeyStore);
     mapScripts[redeemScript.GetID()] = redeemScript;
   }
+
   return true;
 }
-
 bool CViewKeyStore::HaveCScript(const CScriptID& hash) const
 {
   bool result;
@@ -33,13 +32,12 @@ bool CViewKeyStore::HaveCScript(const CScriptID& hash) const
   }
   return result;
 }
-
-
 bool CViewKeyStore::GetCScript(const CScriptID &hash, CScript& redeemScriptOut) const
 {
   {
     LOCK(cs_KeyStore);
     ScriptMap::const_iterator mi = mapScripts.find(hash);
+
     if (mi != mapScripts.end())
     {
       redeemScriptOut = (*mi).second;

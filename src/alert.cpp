@@ -1,25 +1,19 @@
+
 #include <algorithm>
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/foreach.hpp>
 #include <map>
-
 #include "alert.h"
 #include "key.h"
 #include "net.h"
 #include "sync.h"
 #include "ui_interface.h"
-
 using namespace std;
-
 map<uint256, CAlert> mapAlerts;
 CCriticalSection cs_mapAlerts;
-
 static const char* pszMainKey = "04d2045ae17f45675e7c0eaa19d47fca3462defec5a713a7eda2bd04b86fafc8a2eece56562025fc131cf03bd96f3501dfb0ac0f2faa5557d69f7a7778711994f1";
-
-
 static const char* pszTestKey = "0434fba4959f7c6980f91a0ce0ed0dce5d78634da9590abe7182425538986462b7a64b503b48673b828ab6979081da78c7de0a52f565cc296de67a7d02b6e4085b";
-
 void CUnsignedAlert::SetNull()
 {
   nVersion = 1;
@@ -32,12 +26,10 @@ void CUnsignedAlert::SetNull()
   nMaxVer = 0;
   setSubVer.clear();
   nPriority = 0;
-
   strComment.clear();
   strStatusBar.clear();
   strReserved.clear();
 }
-
 std::string CUnsignedAlert::ToString() const
 {
   std::string strSetCancel;
@@ -74,56 +66,47 @@ std::string CUnsignedAlert::ToString() const
            strComment.c_str(),
            strStatusBar.c_str());
 }
-
 void CUnsignedAlert::print() const
 {
   printf("%s", ToString().c_str());
 }
-
 void CAlert::SetNull()
 {
   CUnsignedAlert::SetNull();
   vchMsg.clear();
   vchSig.clear();
 }
-
 bool CAlert::IsNull() const
 {
   return (nExpiration == 0);
 }
-
 uint256 CAlert::GetHash() const
 {
   return Hash(this->vchMsg.begin(), this->vchMsg.end());
 }
-
 bool CAlert::IsInEffect() const
 {
   return (GetAdjustedTime() < nExpiration);
 }
-
 bool CAlert::Cancels(const CAlert& alert) const
 {
   if (!IsInEffect())
   {
     return false;
   }
+
   return (alert.nID <= nCancel || setCancel.count(alert.nID));
 }
-
 bool CAlert::AppliesTo(int nVersion, std::string strSubVerIn) const
 {
-
   return (IsInEffect() &&
           nMinVer <= nVersion && nVersion <= nMaxVer &&
           (setSubVer.empty() || setSubVer.count(strSubVerIn)));
 }
-
 bool CAlert::AppliesToMe() const
 {
   return (strStatusBar.size() > 0) && AppliesTo(PROTOCOL_VERSION, FormatSubVersion(CLIENT_NAME, CLIENT_VERSION, std::vector<std::string>()));
 }
-
 bool CAlert::RelayTo(CNode* pnode) const
 {
   if (!IsInEffect())
@@ -141,33 +124,34 @@ bool CAlert::RelayTo(CNode* pnode) const
       return true;
     }
   }
+
   return false;
 }
-
 bool CAlert::CheckSignature() const
 {
   CKey key;
+
   if (!key.SetPubKey(ParseHex(fTestNet ? pszTestKey : pszMainKey)))
   {
     return error("CAlert::CheckSignature() : SetPubKey failed");
   }
+
   if (!key.Verify(Hash(vchMsg.begin(), vchMsg.end()), vchSig))
   {
     return error("CAlert::CheckSignature() : verify signature failed");
   }
 
-
   CDataStream sMsg(vchMsg, SER_NETWORK, PROTOCOL_VERSION);
   sMsg >> *(CUnsignedAlert*)this;
   return true;
 }
-
 CAlert CAlert::getAlertByHash(const uint256 &hash)
 {
   CAlert retval;
   {
     LOCK(cs_mapAlerts);
     map<uint256, CAlert>::iterator mi = mapAlerts.find(hash);
+
     if(mi != mapAlerts.end())
     {
       retval = mi->second;
@@ -175,19 +159,21 @@ CAlert CAlert::getAlertByHash(const uint256 &hash)
   }
   return retval;
 }
-
 bool CAlert::ProcessAlert(bool fThread)
 {
   if (!CheckSignature())
   {
     return false;
   }
+
   if (!IsInEffect())
   {
     return false;
   }
+
 # 201 "alert.cpp"
   int maxInt = std::numeric_limits<int>::max();
+
   if (nID == maxInt)
   {
     if (!(
@@ -210,6 +196,7 @@ bool CAlert::ProcessAlert(bool fThread)
     for (map<uint256, CAlert>::iterator mi = mapAlerts.begin(); mi != mapAlerts.end();)
     {
       const CAlert& alert = (*mi).second;
+
       if (Cancels(alert))
       {
         printf("cancelling alert %d\n", alert.nID);
@@ -228,34 +215,29 @@ bool CAlert::ProcessAlert(bool fThread)
       }
     }
 
-
     BOOST_FOREACH(PAIRTYPE(const uint256, CAlert)& item, mapAlerts)
     {
       const CAlert& alert = item.second;
+
       if (alert.Cancels(*this))
       {
         printf("alert already cancelled by %d\n", alert.nID);
         return false;
       }
     }
-
-
     mapAlerts.insert(make_pair(GetHash(), *this));
 
     if(AppliesToMe())
     {
       uiInterface.NotifyAlertChanged(GetHash(), CT_NEW);
       std::string strCmd = GetArg("-alertnotify", "");
+
       if (!strCmd.empty())
       {
-
-
-
         std::string singleQuote("'");
-
-
         std::string safeChars("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890 .,;_/:?@");
         std::string safeStatus;
+
         for (std::string::size_type i = 0; i < strStatusBar.size(); i++)
         {
           if (safeChars.find(strStatusBar[i]) != std::string::npos)
@@ -263,6 +245,7 @@ bool CAlert::ProcessAlert(bool fThread)
             safeStatus.push_back(strStatusBar[i]);
           }
         }
+
         safeStatus = singleQuote+safeStatus+singleQuote;
         boost::replace_all(strCmd, "%s", safeStatus);
 

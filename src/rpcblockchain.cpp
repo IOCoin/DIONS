@@ -1,20 +1,16 @@
+
 #include "main.h"
 #include "bitcoinrpc.h"
 #include "kernel.h"
 #include "util.h"
 #include <cmath>
-
 using namespace json_spirit;
 using namespace std;
-
 extern void spj(const CScript& scriptPubKey, Object& out, bool fIncludeHex);
 extern void TxToJSON(const CTransaction& tx, const uint256 hashBlock, json_spirit::Object& entry);
 extern enum Checkpoints::CPMode CheckpointsMode;
-
 double GetDifficulty(const CBlockIndex* blockindex)
 {
-
-
   if (blockindex == NULL)
   {
     if (pindexBest == NULL)
@@ -29,14 +25,15 @@ double GetDifficulty(const CBlockIndex* blockindex)
 
   return nBitsToDifficulty(blockindex->nBits);
 }
-
 double GetPoWMHashPS(int nBlocks, int nHeight)
 {
   if ((nHeight < 0) || (nHeight > pindexBest->nHeight))
   {
     nHeight = pindexBest->nHeight;
   }
+
   int nPowHeight = GetPowHeight(pindexBest);
+
   if (nPowHeight >= LAST_POW_BLOCK)
   {
     return 0;
@@ -44,10 +41,8 @@ double GetPoWMHashPS(int nBlocks, int nHeight)
 
   int nPoWInterval = 72;
   int64_t nTargetSpacingWorkMin = 30, nTargetSpacingWork = 30;
-
   CBlockIndex* pindex = FindBlockByHeight(nHeight);
   CBlockIndex* pindexPrevWork = FindBlockByHeight(nHeight);
-
   double currentDifficulty = 0.0;
   bool first = true;
 
@@ -59,6 +54,7 @@ double GetPoWMHashPS(int nBlocks, int nHeight)
       {
         currentDifficulty = GetDifficulty(pindexPrevWork);
       }
+
       int64_t nActualSpacingWork = pindex->GetBlockTime() - pindexPrevWork->GetBlockTime();
       nTargetSpacingWork = ((nPoWInterval - 1) * nTargetSpacingWork + nActualSpacingWork + nActualSpacingWork) / (nPoWInterval + 1);
       nTargetSpacingWork = max(nTargetSpacingWork, nTargetSpacingWorkMin);
@@ -71,13 +67,11 @@ double GetPoWMHashPS(int nBlocks, int nHeight)
 
   return currentDifficulty * 4294.967296 / nTargetSpacingWork;
 }
-
 double GetPoSKernelPS(int nHeight)
 {
   int nPoSInterval = 72;
   double dStakeKernelsTriedAvg = 0;
   int nStakesHandled = 0, nStakesTime = 0;
-
   CBlockIndex* pindex = pindexBest;;
   CBlockIndex* pindexPrevStake = NULL;
 
@@ -113,7 +107,6 @@ double GetPoSKernelPS(int nHeight)
 
   return result;
 }
-
 Object blockToJSON(const CBlock& block, const CBlockIndex* blockindex, bool fPrintTransactionDetail)
 {
   Object result;
@@ -132,10 +125,12 @@ Object blockToJSON(const CBlock& block, const CBlockIndex* blockindex, bool fPri
   result.push_back(Pair("difficulty", GetDifficulty(blockindex)));
   result.push_back(Pair("blocktrust", leftTrim(blockindex->GetBlockTrust().GetHex(), '0')));
   result.push_back(Pair("chaintrust", leftTrim(blockindex->nChainTrust.GetHex(), '0')));
+
   if (blockindex->pprev)
   {
     result.push_back(Pair("previousblockhash", blockindex->pprev->GetBlockHash().GetHex()));
   }
+
   if (blockindex->pnext)
   {
     result.push_back(Pair("nextblockhash", blockindex->pnext->GetBlockHash().GetHex()));
@@ -152,10 +147,8 @@ Object blockToJSON(const CBlock& block, const CBlockIndex* blockindex, bool fPri
     if (fPrintTransactionDetail)
     {
       Object entry;
-
       entry.push_back(Pair("txid", tx.GetHash().GetHex()));
       TxToJSON(tx, 0, entry);
-
       txinfo.push_back(entry);
     }
     else
@@ -163,7 +156,6 @@ Object blockToJSON(const CBlock& block, const CBlockIndex* blockindex, bool fPri
       txinfo.push_back(tx.GetHash().GetHex());
     }
   }
-
   result.push_back(Pair("tx", txinfo));
 
   if (block.IsProofOfStake())
@@ -173,7 +165,6 @@ Object blockToJSON(const CBlock& block, const CBlockIndex* blockindex, bool fPri
 
   return result;
 }
-
 Value getbestblockhash(const Array& params, bool fHelp)
 {
   if (fHelp || params.size() != 0)
@@ -183,7 +174,6 @@ Value getbestblockhash(const Array& params, bool fHelp)
 
   return hashBestChain.GetHex();
 }
-
 Value getblockcount(const Array& params, bool fHelp)
 {
   if (fHelp || params.size() != 0)
@@ -193,7 +183,6 @@ Value getblockcount(const Array& params, bool fHelp)
 
   return nBestHeight;
 }
-
 Value getpowblocks(const Array& params, bool fHelp)
 {
   if (fHelp || params.size() > 1)
@@ -202,6 +191,7 @@ Value getpowblocks(const Array& params, bool fHelp)
       "Returns the number of PoW blocks mined in the longest block chain at height `block`, defaults to best height.");
 
   int nHeight = (params.size() > 0) ? params[0].get_int() : nBestHeight;
+
   if (nHeight < 0 || nHeight > nBestHeight)
   {
     throw runtime_error("Block number out of range.");
@@ -210,7 +200,6 @@ Value getpowblocks(const Array& params, bool fHelp)
   CBlockIndex* block = FindBlockByHeight(nHeight);
   return GetPowHeight(block);
 }
-
 Value getpowblocksleft(const Array& params, bool fHelp)
 {
   if (fHelp || params.size() > 1)
@@ -219,6 +208,7 @@ Value getpowblocksleft(const Array& params, bool fHelp)
       "Returns the number of PoW blocks left for mining in the longest block chain at height `block`, defaults to best height..");
 
   int nHeight = (params.size() > 0) ? params[0].get_int() : nBestHeight;
+
   if (nHeight < 0 || nHeight > nBestHeight)
   {
     throw runtime_error("Block number out of range.");
@@ -226,12 +216,9 @@ Value getpowblocksleft(const Array& params, bool fHelp)
 
   CBlockIndex* block = FindBlockByHeight(nHeight);
   int powHeight = GetPowHeight(block);
-
   return (powHeight > LAST_POW_BLOCK) ?
          0 : LAST_POW_BLOCK - powHeight;
 }
-
-
 double GetBlocktime(CBlockIndex * block, int blocks,
                     bool proofOfWork, bool proofOfStake)
 {
@@ -243,6 +230,7 @@ double GetBlocktime(CBlockIndex * block, int blocks,
 
   CBlockIndex * end = block->pprev;
   int checked = blocks;
+
   while (end->pprev && (checked > 0))
   {
     if ((proofOfStake && end->IsProofOfStake()) ||
@@ -250,11 +238,12 @@ double GetBlocktime(CBlockIndex * block, int blocks,
     {
       --checked;
     }
+
     end = end->pprev;
   }
+
   return abs(static_cast<double>(block->nTime - end->nTime)) / static_cast<double>(blocks);
 }
-
 Value getpowtimeleft(const Array& params, bool fHelp)
 {
   if (fHelp || params.size() > 2)
@@ -274,6 +263,7 @@ Value getpowtimeleft(const Array& params, bool fHelp)
   if (params.size() > 0)
   {
     std::string timeUnit = params[0].get_str();
+
     if (timeUnit == "d" || timeUnit == "days")
     {
       divisor = 60 * 60 * 24;
@@ -295,6 +285,7 @@ Value getpowtimeleft(const Array& params, bool fHelp)
       throw runtime_error("The time-unit should be one of {d,h,m,s,days,hours,minutes,seconds}.");
     }
   }
+
   CBlockIndex* block = FindBlockByHeight(nHeight);
   int powHeight = GetPowHeight(block);
   int powLeft = (powHeight > LAST_POW_BLOCK) ?
@@ -302,7 +293,6 @@ Value getpowtimeleft(const Array& params, bool fHelp)
   double blocktime = GetBlocktime(block, 300, true, false);
   return (blocktime * powLeft) / divisor;
 }
-
 Value getdifficulty(const Array& params, bool fHelp)
 {
   if (fHelp || params.size() != 0)
@@ -316,8 +306,6 @@ Value getdifficulty(const Array& params, bool fHelp)
   obj.push_back(Pair("search-interval", (int)nLastCoinStakeSearchInterval));
   return obj;
 }
-
-
 Value settxfee(const Array& params, bool fHelp)
 {
   if (fHelp || params.size() < 1 || params.size() > 1 || AmountFromValue(params[0]) < MIN_TX_FEE)
@@ -327,10 +315,8 @@ Value settxfee(const Array& params, bool fHelp)
 
   nTransactionFee = AmountFromValue(params[0]);
   nTransactionFee = (nTransactionFee / CENT) * CENT;
-
   return true;
 }
-
 Value getrawmempool(const Array& params, bool fHelp)
 {
   if (fHelp || params.size() != 0)
@@ -340,14 +326,11 @@ Value getrawmempool(const Array& params, bool fHelp)
 
   vector<uint256> vtxid;
   mempool.queryHashes(vtxid);
-
   Array a;
   BOOST_FOREACH(const uint256& hash, vtxid)
   a.push_back(hash.ToString());
-
   return a;
 }
-
 Value getblockhash(const Array& params, bool fHelp)
 {
   if (fHelp || params.size() != 1)
@@ -356,6 +339,7 @@ Value getblockhash(const Array& params, bool fHelp)
       "Returns hash of block in best-block-chain at <index>.");
 
   int nHeight = params[0].get_int();
+
   if (nHeight < 0 || nHeight > nBestHeight)
   {
     throw runtime_error("Block number out of range.");
@@ -364,7 +348,6 @@ Value getblockhash(const Array& params, bool fHelp)
   CBlockIndex* pblockindex = FindBlockByHeight(nHeight);
   return pblockindex->phashBlock->GetHex();
 }
-
 Value getblock(const Array& params, bool fHelp)
 {
   if (fHelp || params.size() < 1 || params.size() > 2)
@@ -384,10 +367,8 @@ Value getblock(const Array& params, bool fHelp)
   CBlock block;
   CBlockIndex* pblockindex = mapBlockIndex[hash];
   block.ReadFromDisk(pblockindex, true);
-
   return blockToJSON(block, pblockindex, params.size() > 1 ? params[1].get_bool() : false);
 }
-
 Value getblockbynumber(const Array& params, bool fHelp)
 {
   if (fHelp || params.size() < 1 || params.size() > 2)
@@ -397,6 +378,7 @@ Value getblockbynumber(const Array& params, bool fHelp)
       "Returns details of a block with given block-number.");
 
   int nHeight = params[0].get_int();
+
   if (nHeight < 0 || nHeight > nBestHeight)
   {
     throw runtime_error("Block number out of range.");
@@ -404,20 +386,17 @@ Value getblockbynumber(const Array& params, bool fHelp)
 
   CBlock block;
   CBlockIndex* pblockindex = mapBlockIndex[hashBestChain];
+
   while (pblockindex->nHeight > nHeight)
   {
     pblockindex = pblockindex->pprev;
   }
 
   uint256 hash = *pblockindex->phashBlock;
-
   pblockindex = mapBlockIndex[hash];
   block.ReadFromDisk(pblockindex, true);
-
   return blockToJSON(block, pblockindex, params.size() > 1 ? params[1].get_bool() : false);
 }
-
-
 Value getcheckpoint(const Array& params, bool fHelp)
 {
   if (fHelp || params.size() != 0)
@@ -427,12 +406,10 @@ Value getcheckpoint(const Array& params, bool fHelp)
 
   Object result;
   CBlockIndex* pindexCheckpoint;
-
   result.push_back(Pair("synccheckpoint", Checkpoints::hashSyncCheckpoint.ToString().c_str()));
   pindexCheckpoint = mapBlockIndex[Checkpoints::hashSyncCheckpoint];
   result.push_back(Pair("height", pindexCheckpoint->nHeight));
   result.push_back(Pair("timestamp", DateTimeStrFormat(pindexCheckpoint->GetBlockTime()).c_str()));
-
 
   if (CheckpointsMode == Checkpoints::STRICT)
   {
@@ -456,7 +433,6 @@ Value getcheckpoint(const Array& params, bool fHelp)
 
   return result;
 }
-
 Value gettxout(const Array& params, bool fHelp)
 {
   if (fHelp || params.size() < 2 || params.size() > 3)
@@ -489,13 +465,12 @@ Value gettxout(const Array& params, bool fHelp)
     );
 
   LOCK(cs_main);
-
   Object ret;
-
   uint256 hash;
   hash.SetHex(params[0].get_str());
   int n = params[1].get_int();
   bool mem = true;
+
   if (params.size() == 3)
   {
     mem = params[2].get_bool();
@@ -503,6 +478,7 @@ Value gettxout(const Array& params, bool fHelp)
 
   CTransaction tx;
   uint256 hashBlock = 0;
+
   if (!GetTransaction(hash, tx, hashBlock, mem))
   {
     return Value::null;
@@ -521,14 +497,17 @@ Value gettxout(const Array& params, bool fHelp)
   else
   {
     map<uint256, CBlockIndex*>::iterator mi = mapBlockIndex.find(hashBlock);
+
     if (mi != mapBlockIndex.end() && (*mi).second)
     {
       CBlockIndex* pindex = (*mi).second;
+
       if (pindex->IsInMainChain())
       {
         bool isSpent=false;
         CBlockIndex* p = pindex;
         p=p->pnext;
+
         for (; p; p = p->pnext)
         {
           CBlock block;
@@ -571,6 +550,7 @@ Value gettxout(const Array& params, bool fHelp)
         return Value::null;
       }
     }
+
     ret.push_back(Pair("bestblock", hashBlock.GetHex()));
   }
 
@@ -580,6 +560,5 @@ Value gettxout(const Array& params, bool fHelp)
   ret.push_back(Pair("scriptPubKey", o));
   ret.push_back(Pair("coinbase", tx.IsCoinBase()));
   ret.push_back(Pair("coinstake", tx.IsCoinStake()));
-
   return ret;
 }
