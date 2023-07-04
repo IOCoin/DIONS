@@ -98,6 +98,55 @@ endif
 # LDFLAGS can be specified on the make command line, so we use xLDFLAGS that only
 # adds some defaults in front. Unfortunately, LDFLAGS=... $(LDFLAGS) does not work.
 xLDFLAGS=$(LDHARDENING) $(LDFLAGS)
+ASM= \
+    obj/alert.s \
+    asm/version.s \
+    asm/checkpoints.s \
+    asm/netbase.s \
+    asm/addrman.s \
+    asm/crypter.s \
+    asm/key.s \
+    asm/db.s \
+    asm/init.s \
+    asm/irc.s \
+    asm/keystore.s \
+    asm/view.s \
+    asm/miner.s \
+    asm/main.s \
+    asm/net.s \
+    asm/protocol.s \
+    asm/bitcoinrpc.s \
+    asm/rpcdump.s \
+    asm/rpcnet.s \
+    asm/rpcmining.s \
+    asm/rpcwallet.s \
+    asm/rpcblockchain.s \
+    asm/rpcrawtransaction.s \
+    asm/script.s \
+    asm/sync.s \
+    asm/util.s \
+    asm/wallet.s \
+    asm/walletdb.s \
+    asm/state.s \
+    asm/twister.s \
+    asm/tor.s \
+    asm/dions.s \
+    asm/base_reflect.s \
+    asm/noui.s \
+    asm/cubehash.s \
+    asm/luffa.s \
+    asm/aes_helper.s \
+    asm/echo.s \
+    asm/shavite.s \
+    asm/simd.s \
+    asm/blake.s\
+    asm/bmw.s\
+    asm/groestl.s\
+    asm/jh.s\
+    asm/keccak.s\
+    asm/skein.s \
+    asm/kernel.s \
+    asm/pbkdf2.s 
 
 OBJS= \
     obj/alert.o \
@@ -209,12 +258,27 @@ obj/%.o: %.c
 	  sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
 	      -e '/^$$/ d' -e 's/$$/ :/' < $(@:%.o=%.d) >> $(@:%.o=%.P); \
 	  rm -f $(@:%.o=%.d)
+asm/%.s: %.cpp
+	$(CXX) -c $(xCXXFLAGS) -MMD -MF -c -S -o $@ $<
+	#@cp $(@:%.o=%.d) $(@:%.o=%.P); \
+	#  sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
+	#      -e '/^$$/ d' -e 's/$$/ :/' < $(@:%.o=%.d) >> $(@:%.o=%.P); \
+	#  rm -f $(@:%.o=%.d)
+
+asm/%.s: %.c
+	$(CC) -c $(xCXXFLAGS) -MMD -MF -S $@ $<
+	#@cp $(@:%.o=%.d) $(@:%.o=%.P); \
+	#  sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
+	#      -e '/^$$/ d' -e 's/$$/ :/' < $(@:%.o=%.d) >> $(@:%.o=%.P); \
+	#  rm -f $(@:%.o=%.d)
 
 iocoind: $(OBJS:obj/%=obj/%)
 	$(LINK) $(xCXXFLAGS) -o $@ $^ $(xLDFLAGS) $(LIBS)
 
-optimize: $(OBJS:obj/%=obj/%)
-	$(LINK) $(xCXXFLAGS) -o $@ $^ $(xLDFLAGS) $(LIBS)
+#asm_gen: $(ASM:asm/%=asm/%)
+#	$(xCXXFLAGS) $@ $^ 
+asm_gen: $(ASM:asm/%=asm/%)
+	$(xCXXFLAGS)  
 
 clean:
 	-rm -f iocoind
