@@ -70,7 +70,7 @@ LIBS+= \
 
     # -D_FORTIFY_SOURCE=2 does some checking for potentially exploitable code patterns in
     # the source such overflowing a statically defined buffer.
-    HARDENING+=-D_FORTIFY_SOURCE=2
+    #HARDENING+=-D_FORTIFY_SOURCE=2
 #
 
 
@@ -85,6 +85,7 @@ endif
 # CXXFLAGS can be specified on the make command line, so we use xCXXFLAGS that only
 # adds some defaults in front. Unfortunately, CXXFLAGS=... $(CXXFLAGS) does not work.
 ifeq ($(OPTIMIZE), yes)
+    HARDENING+=-D_FORTIFY_SOURCE=2
 xCXXFLAGS=-O03 $(EXT_OPTIONS) -pthread -Wall -Wextra -Wno-ignored-qualifiers -Wformat -Wformat-security -Wno-unused-parameter \
     $(DEFS) $(HARDENING) $(CXXFLAGS)
 else ifeq ($(PROFILE),yes)
