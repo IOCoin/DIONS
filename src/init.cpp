@@ -108,7 +108,6 @@ void HandleSIGHUP(int)
 {
   fReopenDebugLog = true;
 }
-# 141 "init.cpp"
 #if !defined(QT_GUI)
 bool AppInit(int argc, char* argv[])
 {
@@ -784,7 +783,6 @@ bool AppInit2()
     std::cout << "INIT OPEN STATE DB" << std::endl;
     std::unique_ptr<dev::db::DatabaseFace> db = dev::db::DBFactory::create(GetDataDir() / "state");
     overlayDB__ = new dev::OverlayDB(std::move(db));
-# 865 "init.cpp"
   }
   catch (boost::exception const& ex)
   {
@@ -803,7 +801,7 @@ bool AppInit2()
       else if (dbStatus == dev::db::DatabaseStatus::Corruption)
       {
         printf("Database corruption detected. Please see the exception for corruption "
-               "details. Exception: %s\n", boost::diagnostic_information(ex));
+               "details. Exception: %s\n", boost::diagnostic_information(ex).c_str());
         throw runtime_error("Database corruption");
         string msg = strprintf(_(
                                  " Database corruption detected. Details : Exception %s\n"
