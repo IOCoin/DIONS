@@ -1,5 +1,5 @@
 #ifndef BITCOIN_MAIN_H
-#define BITCOIN_MAIN_H 
+#define BITCOIN_MAIN_H
 
 #include "bignum.h"
 #include "sync.h"
@@ -344,7 +344,6 @@ public:
     printf("%s\n", ToString().c_str());
   }
 };
-# 366 "main.h"
 class CTxIn
 {
 public:
@@ -381,6 +380,14 @@ public:
   bool IsFinal() const
   {
     return (nSequence == std::numeric_limits<unsigned int>::max());
+  }
+
+  CTxIn& operator=(const CTxIn& o)
+  {
+    this->prevout = o.prevout;
+    this->scriptSig = o.scriptSig;
+    this->nSequence = o.nSequence;
+    return *this;
   }
 
   friend bool operator==(const CTxIn& a, const CTxIn& b)
@@ -487,6 +494,13 @@ public:
   {
     return IsEmpty() ||
            (scriptPubKey.size() > 0 && *scriptPubKey.begin() == OP_RETURN);
+  }
+
+  CTxOut& operator=(const CTxOut& o)
+  {
+    this->nValue = o.nValue;
+    this->scriptPubKey = o.scriptPubKey;
+    return *this;
   }
 
   friend bool operator==(const CTxOut& a, const CTxOut& b)

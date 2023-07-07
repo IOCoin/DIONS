@@ -1,5 +1,5 @@
 #ifndef H_BITCOIN_SCRIPT
-#define H_BITCOIN_SCRIPT 
+#define H_BITCOIN_SCRIPT
 
 #include <string>
 #include <vector>
@@ -565,6 +565,12 @@ public:
 #ifndef _MSC_VER
   CScript(const unsigned char* pbegin, const unsigned char* pend) : std::vector<unsigned char>(pbegin, pend) { }
 #endif
+
+  CScript& operator=(const CScript& b)
+  {
+    std::vector<unsigned char>::operator=(b);
+    return *this;
+  }
 
   CScript& operator+=(const CScript& b)
   {
