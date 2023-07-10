@@ -246,9 +246,6 @@ CBlock* CreateNewBlock(__wx__* pwallet, bool fProofOfStake, int64_t* pFees)
                     throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
                   }
 
-                  CKeyID keyID_test_sender_address = newKey_test_sender_address.GetID();
-                  dvmc::address test_sender_address = dvmc::literals::internal::from_hex<dvmc::address>(keyID_test_sender_address.GetHex().c_str());
-                  dvmc::address test_recipient_address = test_sender_address;
                   const auto code = dvmc::from_hex(erc20_22112022_withdraw_with_parameter_subtract_15);
                   dvmc::VertexNode host;
                   dvmc::TransitionalNode created_account;
@@ -577,7 +574,9 @@ void FormatHashBuffers(CBlock* pblock, char* pmidstate, char* pdata, char* phash
     unsigned char pchPadding1[64];
   }
   tmp;
-  memset(&tmp, 0, sizeof(tmp));
+  memset(tmp.pchPadding0, 0, sizeof(tmp.pchPadding0));
+  memset(tmp.pchPadding1, 0, sizeof(tmp.pchPadding1));
+  
   tmp.block.nVersion = pblock->nVersion;
   tmp.block.hashPrevBlock = pblock->hashPrevBlock;
   tmp.block.hashMerkleRoot = pblock->hashMerkleRoot;

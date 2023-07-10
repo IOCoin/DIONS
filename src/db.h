@@ -367,7 +367,7 @@ class AliasIndex
 {
 public:
   CDiskTxPos txPos;
-  unsigned int nHeight;
+  int nHeight;
   std::vector<unsigned char> vValue;
   std::string vAddress;
 

@@ -530,7 +530,7 @@ public:
     }
     if (fNegative)
     {
-      BIGNUM* zero;
+      BIGNUM* zero=0;;
       BN_zero(zero);
       BN_sub(this->bn_, zero, this->bn_);
     }

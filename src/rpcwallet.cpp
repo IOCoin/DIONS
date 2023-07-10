@@ -17,7 +17,7 @@ static unsigned char trans__ydwi[] =
 extern unsigned int CONSISTENCY_MARGIN;
 extern void TxToJSON(const CTransaction& tx, const uint256 hashBlock, json_spirit::Object& entry);
 extern LocatorNodeDB* ln1Db;
-extern unsigned int scaleMonitor();
+extern int scaleMonitor();
 static void accountingDeprecationCheck()
 {
   if (!GetBoolArg("-enableaccounts", false))

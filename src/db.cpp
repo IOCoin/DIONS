@@ -13,7 +13,7 @@
 using namespace std;
 using namespace boost;
 unsigned int nWalletDBUpdated;
-extern unsigned int scaleMonitor();
+extern int scaleMonitor();
 CDBEnv bitdb;
 void CDBEnv::EnvShutdown()
 {
@@ -199,7 +199,6 @@ bool CDBEnv::Salvage(std::string strFile, bool fAggressive,
     return false;
   }
 
-# 233 "db.cpp"
   string strLine;
 
   while (!strDump.eof() && strLine != "HEADER=END")

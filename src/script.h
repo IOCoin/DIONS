@@ -1,5 +1,5 @@
 #ifndef H_BITCOIN_SCRIPT
-#define H_BITCOIN_SCRIPT
+#define H_BITCOIN_SCRIPT 
 
 #include <string>
 #include <vector>
@@ -568,9 +568,9 @@ public:
 
   CScript& operator=(const CScript& b)
   {
-    std::vector<unsigned char>::operator=(b);
+	  std::vector<unsigned char>::operator=(b);
     return *this;
-  }
+  } 
 
   CScript& operator+=(const CScript& b)
   {

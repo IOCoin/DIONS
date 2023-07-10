@@ -1,4 +1,3 @@
-
 #include "db.h"
 #include "txdb-leveldb.h"
 #include "keystore.h"
@@ -431,7 +430,7 @@ bool channel(string l, string f, string& k, bool& black)
   k = stringFromVch(alphaVch);
   return true;
 }
-unsigned int scaleMonitor()
+int scaleMonitor()
 {
   if(!fTestNet)
   {
@@ -823,7 +822,7 @@ bool aliasTx(LocatorNodeDB& aliasCacheDB, const vector<unsigned char> &vchAlias,
   }
 
   AliasIndex& txPos = vtxPos.back();
-  unsigned int nHeight = txPos.nHeight;
+  int nHeight = txPos.nHeight;
 
   if(nHeight + scaleMonitor() <= pindexBest->nHeight)
   {
@@ -3442,7 +3441,6 @@ Value vextract(const Array& params, bool fHelp)
 
   Array oRes;
   LocatorNodeDB ln1Db("r");
-  bool loc=false;
   vchType intern;
   Dbc* cursorp;
 
@@ -3473,7 +3471,6 @@ Value vextract(const Array& params, bool fHelp)
         if(ep == i.vAddress && pos_ == (int)i.nHeight)
         {
           cout << "FOUND" << endl;
-          loc=true;
           intern = i.vValue;
           break;
         }
@@ -4166,7 +4163,6 @@ Value updateEncryptedAliasFile(const Array& params, bool fHelp)
   }
 
   const vchType vchValue = vchFromValue(s);
-  int CRC__KEY = relay_inv(INTERN_REF0__, EXTERN_REF0__);
   __wx__Tx wtx;
   wtx.nVersion = CTransaction::DION_TX_VERSION;
   ENTER_CRITICAL_SECTION(cs_main)
@@ -5859,7 +5855,6 @@ Value updateAlias_executeContractPayload(const Array& params, bool fHelp)
   std::cout << "target contract address " << address.ToString() << std::endl;
   std::cout << "execution data " << params[2].get_str() << std::endl;
   uint160 hash160;
-  bool isValid = AddressToHash160(address.ToString(), hash160);
   std::cout << "target contract 20 byte address " << hash160.GetHex() << std::endl;
   vchType targetContractAliasVch = vchFromString(targetContractAliasStr);
   std::vector<unsigned char> payload(targetContractAliasVch.begin(), targetContractAliasVch.end());
@@ -5893,7 +5888,6 @@ Value updateAlias_executeContractPayload(const Array& params, bool fHelp)
     scriptPubKeyOrig.SetBitcoinAddress(strAddress);
   }
 
-# 5964 "dions.cpp"
   vchType vchValue;
   CScript scriptPubKey;
   scriptPubKey << OP_ALIAS_RELAY << vchAlias << hash_plus_payload << OP_2DROP << OP_DROP;
@@ -7602,7 +7596,7 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
   printf("CIP tx %s\n",
          tx.GetHash().GetHex().c_str());
 
-  for(int i = 0; i < tx.vin.size(); i++)
+  for(unsigned int i = 0; i < tx.vin.size(); i++)
   {
     const CTxOut& out = vTxPrev[i].vout[tx.vin[i].prevout.n];
     std::vector<vchType> vvchPrevArgsRead;
@@ -7985,7 +7979,6 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
       return error("expired alias, or there is a pending transaction on the alias");
     }
 
-# 8089 "dions.cpp"
     break;
 
   default:

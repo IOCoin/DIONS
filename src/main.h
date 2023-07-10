@@ -1,5 +1,5 @@
 #ifndef BITCOIN_MAIN_H
-#define BITCOIN_MAIN_H
+#define BITCOIN_MAIN_H 
 
 #include "bignum.h"
 #include "sync.h"
@@ -498,9 +498,9 @@ public:
 
   CTxOut& operator=(const CTxOut& o)
   {
-    this->nValue = o.nValue;
-    this->scriptPubKey = o.scriptPubKey;
-    return *this;
+	  this->nValue = o.nValue;
+	  this->scriptPubKey = o.scriptPubKey;
+	  return *this;
   }
 
   friend bool operator==(const CTxOut& a, const CTxOut& b)

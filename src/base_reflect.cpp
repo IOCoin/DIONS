@@ -56,7 +56,7 @@ using namespace boost::iostreams;
 namespace fs = boost::filesystem;
 extern LocatorNodeDB* ln1Db;
 extern bool aliasTx(LocatorNodeDB& aliasCacheDB, const vector<unsigned char> &vchPath, CTransaction& tx);
-extern unsigned int scaleMonitor();
+extern int scaleMonitor();
 extern string txRelay(const CScript& scriptPubKey, int64_t nValue, const __wx__Tx& wtxIn, __wx__Tx& wtxNew, bool fAskFee);
 extern bool aliasAddress(const CTransaction& tx, std::string& strAddress);
 extern Object JSONRPCError(int code, const string& message);
@@ -460,7 +460,6 @@ void sectionTest(std::vector<CTransaction>& testTxVector, dev::SecureTrieDB<dev:
         std::cout << "sectionTest : retrieve storage root for contract 9" << std::endl;
         retrievedAcc.setNonce(nonce);
         retrievedAcc.setStorageRoot(targetAccStorageRoot);
-        std::cout << "sectionTest : retrieve storage root for contract 10" << std::endl;
         string code_hex_str = contractCode;
         uint256 r;
         string val;
