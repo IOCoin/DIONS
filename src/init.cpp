@@ -307,7 +307,7 @@ bool InitSanityCheck(void)
   return true;
 }
 bool AppInit2()
-{ 
+{
 #ifdef _MSC_VER
   _CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_FILE);
   _CrtSetReportFile(_CRT_WARN, CreateFileA("NUL", GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, 0));
@@ -779,7 +779,6 @@ bool AppInit2()
   try
   {
     printf("Opening state database...\n");
-    std::cout << "INIT OPEN STATE DB" << std::endl;
     std::unique_ptr<dev::db::DatabaseFace> db = dev::db::DBFactory::create(GetDataDir() / "state");
     overlayDB__ = new dev::OverlayDB(std::move(db));
   }

@@ -576,7 +576,7 @@ void FormatHashBuffers(CBlock* pblock, char* pmidstate, char* pdata, char* phash
   tmp;
   memset(tmp.pchPadding0, 0, sizeof(tmp.pchPadding0));
   memset(tmp.pchPadding1, 0, sizeof(tmp.pchPadding1));
-  
+
   tmp.block.nVersion = pblock->nVersion;
   tmp.block.hashPrevBlock = pblock->hashPrevBlock;
   tmp.block.hashMerkleRoot = pblock->hashMerkleRoot;
