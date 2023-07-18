@@ -188,7 +188,7 @@ CBlock* CreateNewBlock(__wx__* pwallet, bool fProofOfStake, int64_t* pFees)
 
         if(aliasScript(tx.vout[i].scriptPubKey, op, vvchArgs))
         {
-          if(op == OP_ALIAS_RELAY)
+          if(op == OP_ALIAS_RELAY && vvchArgs[1].size() > 32)
           {
             vector<unsigned char> hash_bytes(vvchArgs[1].begin(),vvchArgs[1].begin()+32);
             uint256 hash256_from_payload_bytes(hash_bytes);
@@ -203,6 +203,7 @@ CBlock* CreateNewBlock(__wx__* pwallet, bool fProofOfStake, int64_t* pFees)
 
               if(sectionVertex(target20ByteAliasStr, contractCode))
               {
+                std::cout << "retrieved contract code " << contractCode << std::endl;
               }
 
               pblock->stateRoot = pindexPrev->stateRootIndex;
@@ -246,11 +247,10 @@ CBlock* CreateNewBlock(__wx__* pwallet, bool fProofOfStake, int64_t* pFees)
                     throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
                   }
 
-                  const auto code = dvmc::from_hex(erc20_22112022_withdraw_with_parameter_subtract_15);
+                  const auto code = dvmc::from_hex(contractCode);
                   dvmc::VertexNode host;
                   dvmc::TransitionalNode created_account;
                   dvmc::TransitionalNode sender_account;
-                  sender_account.set_balance(3141);
                   dvmc_message msg{};
                   msg.track = std::numeric_limits<int64_t>::max();
                   dvmc::bytes_view exec_code = code;
@@ -267,52 +267,6 @@ CBlock* CreateNewBlock(__wx__* pwallet, bool fProofOfStake, int64_t* pFees)
                     {
                     }
 
-                    auto& created_account = host.accounts[create_address];
-                    created_account.set_balance(100000000000000);
-                    created_account.code = dvmc::bytes(create_result.output_data, create_result.output_size);
-                    msg.recipient = create_address;
-                    exec_code = created_account.code;
-                    dev::eth::Account tmpAcc(0,0);
-                    {
-                      dev::u256 nonce = 12345678;
-                      dev::u256 balance = 1010101010101;
-                      dev::RLPStream s(4);
-                      s << nonce << balance;
-                      {
-                        dev::SecureTrieDB<dev::h256, dev::StateCacheDB> storageDB(state->db(), tmpAcc.baseRoot());
-
-                        for(auto pair : created_account.storage)
-                        {
-                          auto storage_key = pair.first.bytes;
-                          dev::bytes key;
-
-                          for(int i=0; i<32; i++)
-                          {
-                            key.push_back(storage_key[i]);
-                          }
-
-                          dev::h256 key256(key);
-                          auto storage_bytes = pair.second.value;
-                          dev::bytes val;
-
-                          for(int i=0; i<32; i++)
-                          {
-                            val.push_back(storage_bytes.bytes[i]);
-                          }
-
-                          storageDB.insert(key256, dev::rlp(val));
-                        }
-
-                        s << storageDB.root();
-                      }
-                      s << tmpAcc.codeHash();
-                      state->insert(target_addr, &s.out());
-                      overlayDB__->commit();
-                      std::ostringstream os;
-                      state->debugStructure(os);
-                      std::cout << "integratedTest5 AFTER contract state insert : state root " << state->root() << std::endl;
-                      pblock->stateRoot=state->root();
-                    }
                   }
                 }
               }
@@ -576,7 +530,7 @@ void FormatHashBuffers(CBlock* pblock, char* pmidstate, char* pdata, char* phash
   tmp;
   memset(tmp.pchPadding0, 0, sizeof(tmp.pchPadding0));
   memset(tmp.pchPadding1, 0, sizeof(tmp.pchPadding1));
-
+  
   tmp.block.nVersion = pblock->nVersion;
   tmp.block.hashPrevBlock = pblock->hashPrevBlock;
   tmp.block.hashMerkleRoot = pblock->hashMerkleRoot;

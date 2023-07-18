@@ -577,7 +577,7 @@ bool CAddrDB::Read(CAddrMan& addr)
 
   if (!filein)
   {
-    return error("CAddrman::Read() : open failed");
+    return warn("CAddrman::Read() : open failed");
   }
 
   int fileSize = boost::filesystem::file_size(pathAddr);

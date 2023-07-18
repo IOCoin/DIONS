@@ -114,7 +114,6 @@ inline void MilliSleep(int64_t n)
 #else
 #define ATTR_WARN_PRINTF(X,Y) 
 #endif
-# 130 "util.h"
 extern std::map<std::string, std::string> mapArgs;
 extern std::map<std::string, std::vector<std::string> > mapMultiArgs;
 extern bool fDebug;
@@ -155,6 +154,7 @@ std::string real_strprintf(const std::string &format, int dummy, ...);
 std::string vstrprintf(const char *format, va_list ap);
 
 bool ATTR_WARN_PRINTF(1,2) error(const char *format, ...);
+bool ATTR_WARN_PRINTF(1,2) warn(const char *format, ...);
 
 
 

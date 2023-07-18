@@ -1,4 +1,3 @@
-
 #include "db.h"
 #include "txdb-leveldb.h"
 #include "keystore.h"
@@ -317,7 +316,6 @@ bool section_vertex_serial_n(const string& origin, const string& data, __wx__Tx&
   scriptPubKey += scriptPubKeyOrig;
   vector< pair<CScript, int64_t> > vecSend;
   vecSend.push_back(make_pair(scriptPubKey, CTRL__));
-# 404 "base_reflect.cpp"
   return true;
 }
 bool sectionVertex(const string& target, string& code)
@@ -377,14 +375,14 @@ void sectionTest(std::vector<CTransaction>& testTxVector, dev::SecureTrieDB<dev:
 {
   std::cout << "XXXX Entered sectionTest" << std::endl;
 
-  for(int index=0; index<testTxVector.size(); index++)
+  for(unsigned int index=0; index<testTxVector.size(); index++)
   {
     cba cAddr_;
     CTransaction& tx = testTxVector[index];
     {
       string origin;
 
-      for(int i = 0; i < tx.vout.size(); i++)
+      for(unsigned int i = 0; i < tx.vout.size(); i++)
       {
         const CTxOut& out = tx.vout[i];
         std::vector<vchType> vvchArgs;
@@ -460,6 +458,7 @@ void sectionTest(std::vector<CTransaction>& testTxVector, dev::SecureTrieDB<dev:
         std::cout << "sectionTest : retrieve storage root for contract 9" << std::endl;
         retrievedAcc.setNonce(nonce);
         retrievedAcc.setStorageRoot(targetAccStorageRoot);
+        std::cout << "sectionTest : retrieve storage root for contract 10" << std::endl;
         string code_hex_str = contractCode;
         uint256 r;
         string val;
@@ -469,7 +468,6 @@ void sectionTest(std::vector<CTransaction>& testTxVector, dev::SecureTrieDB<dev:
           {
             {
               std::cout << "sectionTest : memdb" << std::endl;
-# 599 "base_reflect.cpp"
             }
           }
           std::unordered_map<dvmc::bytes32, dvmc::storage_value>& storage_recon = account_recon.storage;
@@ -942,7 +940,6 @@ Value integratedTest1(const Array& params, bool fHelp)
         }
 
         std::cout << "================== scan values end ================== " << std::endl;
-# 1153 "base_reflect.cpp"
       }
 
       dvmc::TransitionalNode account_recon;
@@ -1030,7 +1027,6 @@ Value integratedTest1(const Array& params, bool fHelp)
   }
   return res;
 }
-# 1317 "base_reflect.cpp"
 Value integratedTest2(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() > 0)
@@ -1056,7 +1052,7 @@ Value integratedTest2(const Array& params, bool fHelp)
   ("val1", po::value<dev::u256>()->value_name("<v2>"), "hljhkljh");
   po::variables_map m;
   int arg_count = 3;
-  char* args[] =
+  const char* args[] =
   {
     "program",
     "--key1=123",
@@ -1176,7 +1172,6 @@ Value integratedTest2(const Array& params, bool fHelp)
   vector<Value> res;
   return res;
 }
-# 1530 "base_reflect.cpp"
 Value integratedTest3(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() > 0)
@@ -1248,7 +1243,6 @@ Value integratedTest3(const Array& params, bool fHelp)
       std::cout << "map val.second " << val.second << std::endl;
     }
   }
-# 1622 "base_reflect.cpp"
   vector<Value> res;
   return res;
 }
@@ -1425,7 +1419,6 @@ Value integratedTest5(const Array& params, bool fHelp)
   std::vector<CTransaction> testTxVector;
   dev::h256 ROOT("7a8a519e3b0f84ef31cc28b83f4a27e2e376dba75789cecf5252811f2682974f");
   dev::SecureTrieDB<dev::Address, dev::OverlayDB> state(overlayDB__,ROOT);
-# 1861 "base_reflect.cpp"
 
   if(state.isNull())
   {
@@ -1537,13 +1530,10 @@ Value integratedTest5(const Array& params, bool fHelp)
     }
   }
   {
-# 2183 "base_reflect.cpp"
   }
   {
-# 2213 "base_reflect.cpp"
   }
   {
-# 2225 "base_reflect.cpp"
   }
   {
   }
