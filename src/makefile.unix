@@ -109,7 +109,6 @@ ASM= \
     asm/key.s \
     asm/db.s \
     asm/init.s \
-    asm/irc.s \
     asm/keystore.s \
     asm/view.s \
     asm/miner.s \
@@ -159,7 +158,6 @@ OBJS= \
     obj/key.o \
     obj/db.o \
     obj/init.o \
-    obj/irc.o \
     obj/keystore.o \
     obj/view.o \
     obj/miner.o \

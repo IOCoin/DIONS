@@ -1,5 +1,4 @@
 
-#include "irc.h"
 #include "db.h"
 #include "net.h"
 #include "init.h"
@@ -700,7 +699,6 @@ int CNetMessage::readData(const char *pch, unsigned int nBytes)
   nDataPos += nCopy;
   return nCopy;
 }
-# 782 "net.cpp"
 void SocketSendData(CNode *pnode)
 {
   std::deque<CSerializeData>::iterator it = pnode->vSendMsg.begin();
@@ -1491,7 +1489,6 @@ bool OpenNetworkConnection(const CAddress& addrConnect, CSemaphoreGrant *grantOu
 
   return true;
 }
-# 1592 "net.cpp"
 void ThreadMessageHandler(void* parg)
 {
   RenameThread("iocoin-msghand");
@@ -1799,11 +1796,6 @@ void StartNode(void* parg)
   if (fUseUPnP)
   {
     MapPort();
-  }
-
-  if (!NewThread(ThreadIRCSeed, NULL))
-  {
-    printf("Error: NewThread(ThreadIRCSeed) failed\n");
   }
 
   if (!NewThread(ThreadSocketHandler, NULL))
