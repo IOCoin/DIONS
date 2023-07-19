@@ -251,9 +251,6 @@ CBlock* CreateNewBlock(__wx__* pwallet, bool fProofOfStake, int64_t* pFees)
                   dvmc::VertexNode host;
                   dvmc::TransitionalNode created_account;
                   dvmc::TransitionalNode sender_account;
-                  dvmc_message msg{};
-                  msg.track = std::numeric_limits<int64_t>::max();
-                  dvmc::bytes_view exec_code = code;
                   {
                     dvmc_message create_msg{};
                     create_msg.kind = DVMC_CREATE;

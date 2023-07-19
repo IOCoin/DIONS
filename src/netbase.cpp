@@ -717,7 +717,7 @@ bool CNetAddr::SetSpecial(const std::string &aliasStr)
       return false;
     }
 
-    memcpy(ip, pchOnionCat, sizeof(pchGarliCat));
+    memcpy(ip, pchGarliCat, sizeof(pchGarliCat));
 
     for (unsigned int i=0; i<16-sizeof(pchGarliCat); i++)
     {
