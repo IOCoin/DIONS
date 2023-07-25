@@ -811,9 +811,9 @@ bool __wx__::AddToWallet(const __wx__Tx& wtxIn)
         fUpdated = true;
       }
 
-      if (wtxIn.nIndex != -1 && (wtxIn.vMerkleBranch != wtx.vMerkleBranch || wtxIn.nIndex != wtx.nIndex))
+      if (wtxIn.nIndex != -1 && (wtxIn.vTxMerkleBranch != wtx.vTxMerkleBranch || wtxIn.nIndex != wtx.nIndex))
       {
-        wtx.vMerkleBranch = wtxIn.vMerkleBranch;
+        wtx.vTxMerkleBranch = wtxIn.vTxMerkleBranch;
         wtx.nIndex = wtxIn.nIndex;
         fUpdated = true;
       }
@@ -958,7 +958,6 @@ int64_t __wx__::GetDebit(const CTxIn &txin) const
 bool __wx__::IsChange(const CTxOut& txout) const
 {
   CTxDestination address;
-# 1024 "wallet.cpp"
 
   if (ExtractDestination(txout.scriptPubKey, address) && ::IsMine(*this, address))
   {
@@ -1394,7 +1393,6 @@ void __wx__::ResendWalletTransactions(bool fForce)
     }
   }
 }
-# 1481 "wallet.cpp"
 int64_t __wx__::GetBalance() const
 {
   int64_t nTotal = 0;
@@ -1431,7 +1429,7 @@ int64_t __wx__::GetUnconfirmedBalance() const
   }
   return nTotal;
 }
-int64_t __wx__::GetImmatureBalance() const
+int64_t __wx__::ImmatureBalance() const
 {
   int64_t nTotal = 0;
   {
@@ -1441,7 +1439,7 @@ int64_t __wx__::GetImmatureBalance() const
     {
       const __wx__Tx& pcoin = (*it).second;
 
-      if (pcoin.IsCoinBase() && pcoin.GetBlocksToMaturity() > 0 && pcoin.IsInMainChain())
+      if (pcoin.IsCoinBase() && pcoin.GetBlocksToMaturity() > 0 && pcoin.OnMainChain())
       {
         nTotal += GetCredit(pcoin);
       }
@@ -1872,7 +1870,6 @@ bool __wx__::CreateTransaction__(const vector<pair<CScript, int64_t> >& vecSend,
           }
           else
           {
-# 1998 "wallet.cpp"
             CPubKey vchPubKey;
             assert(reservekey.GetReservedKey(vchPubKey));
             scriptChange.SetDestination(vchPubKey.GetID());
@@ -2000,7 +1997,6 @@ bool __wx__::CreateTransaction(const vector<pair<CScript, int64_t> >& vecSend, _
           }
           else
           {
-# 2146 "wallet.cpp"
             CPubKey vchPubKey;
             assert(reservekey.GetReservedKey(vchPubKey));
             scriptChange.SetDestination(vchPubKey.GetID());
@@ -3567,40 +3563,6 @@ __wx__Tx::aliasStream(int& r, int& p, vchType& v1, vchType& v2, vchType& vchS, v
   inV3 = vvch[6];
   r = op__;
   return s__;
-}
-int CMerkleTx::GetDepthInMainChain(int& nHeightRet) const
-{
-  if (hashBlock == 0 || nIndex == -1)
-  {
-    return 0;
-  }
-
-  map<uint256, CBlockIndex*>::iterator mi = mapBlockIndex.find(hashBlock);
-
-  if (mi == mapBlockIndex.end())
-  {
-    return 0;
-  }
-
-  CBlockIndex* pindex = (*mi).second;
-
-  if (!pindex || !pindex->IsInMainChain())
-  {
-    return 0;
-  }
-
-  if (!fMerkleVerified)
-  {
-    if (CBlock::CheckMerkleBranch(GetHash(), vMerkleBranch, nIndex) != pindex->hashMerkleRoot)
-    {
-      return 0;
-    }
-
-    fMerkleVerified = true;
-  }
-
-  nHeightRet = pindex->nHeight;
-  return pindexBest->nHeight - pindex->nHeight + 1;
 }
 string __wx__::__associate_fn__(CScript pk, int64_t v, __wx__Tx& t, __im__& i)
 {

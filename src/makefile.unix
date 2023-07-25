@@ -163,6 +163,9 @@ OBJS= \
     obj/view.o \
     obj/miner.o \
     obj/main.o \
+    obj/block.o \
+    obj/api_transaction.o \
+    obj/transaction.o \
     obj/net.o \
     obj/protocol.o \
     obj/bitcoinrpc.o \

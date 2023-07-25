@@ -3,6 +3,7 @@
 #include "bitcoinrpc.h"
 #include "kernel.h"
 #include "util.h"
+#include "api_transaction.h"
 #include <cmath>
 using namespace json_spirit;
 using namespace std;

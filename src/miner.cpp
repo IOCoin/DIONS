@@ -208,16 +208,16 @@ CBlock* CreateNewBlock(__wx__* pwallet, bool fProofOfStake, int64_t* pFees)
 
               pblock->stateRoot = pindexPrev->stateRootIndex;
               std::cout << "execution request - previous state root " << pblock->stateRoot << std::endl;
-              dev::SecureTrieDB<dev::Address, dev::OverlayDB>* state;
+              //XXXX dev::SecureTrieDB<dev::Address, dev::OverlayDB>* state;
               dev::h256 Empty;
 
               if(pblock->stateRoot == Empty)
               {
-                state = new dev::SecureTrieDB<dev::Address, dev::OverlayDB>(overlayDB__);
+                pblock->state__ = new dev::SecureTrieDB<dev::Address, dev::OverlayDB>(overlayDB__);
 
-                if(state->isNull())
+                if(pblock->state__->isNull())
                 {
-                  state->init();
+                  pblock->state__->init();
                   overlayDB__->commit();
                 }
               }
@@ -225,7 +225,7 @@ CBlock* CreateNewBlock(__wx__* pwallet, bool fProofOfStake, int64_t* pFees)
               {
                 std::cout << "state root is non zero creating securetriedb instance from existing ROOT" << std::endl;
                 std::cout << "state root is " << pblock->stateRoot << std::endl;
-                state = new dev::SecureTrieDB<dev::Address, dev::OverlayDB>(overlayDB__,pblock->stateRoot);
+                pblock->state__ = new dev::SecureTrieDB<dev::Address, dev::OverlayDB>(overlayDB__,pblock->stateRoot);
               }
 
               {
@@ -263,7 +263,6 @@ CBlock* CreateNewBlock(__wx__* pwallet, bool fProofOfStake, int64_t* pFees)
                     if (create_result.status_code != DVMC_SUCCESS)
                     {
                     }
-
                   }
                 }
               }

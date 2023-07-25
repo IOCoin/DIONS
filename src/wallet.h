@@ -13,6 +13,7 @@
 #include "ui_interface.h"
 #include "util.h"
 #include "walletdb.h"
+#include "api_transaction.h"
 
 #include "ray_shade.h"
 
@@ -201,7 +202,7 @@ public:
     void ResendWalletTransactions(bool fForce = false);
     int64_t GetBalance() const;
     int64_t GetUnconfirmedBalance() const;
-    int64_t GetImmatureBalance() const;
+    int64_t ImmatureBalance() const;
     bool __transient();
     int64_t GetStake() const;
     int64_t GetNewMint() const;
