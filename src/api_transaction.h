@@ -1,5 +1,5 @@
-#ifndef HASH_TRANSACTION_H
-#define HASH_TRANSACTION_H
+#ifndef API_TRANSACTION_H
+#define API_TRANSACTION_H
 
 #include "block.h"
 
