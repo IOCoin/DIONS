@@ -1,5 +1,5 @@
-#ifndef API_TRANSACTION_H
-#define API_TRANSACTION_H
+#ifndef HASH_TRANSACTION_H
+#define HASH_TRANSACTION_H
 
 #include "block.h"
 
@@ -8,7 +8,7 @@ class CMerkleTx : public CTransaction
 private:
   int GetDepthInMainChainINTERNAL(CBlockIndex* &pindexRet) const;
 public:
-  uint256 hashBlock;
+  uint256 hashBlock_;
   std::vector<uint256> vTxMerkleBranch;
   int nIndex;
   mutable bool fMerkleVerified;
@@ -25,7 +25,7 @@ public:
 
   void Init()
   {
-    hashBlock = 0;
+    hashBlock_ = 0;
     nIndex = -1;
     fMerkleVerified = false;
   }
@@ -34,7 +34,7 @@ public:
   (
     nSerSize += SerReadWrite(s, *(CTransaction*)this, nType, nVersion, ser_action);
     nVersion = this->nVersion;
-    READWRITE(hashBlock);
+    READWRITE(hashBlock_);
     READWRITE(vTxMerkleBranch);
     READWRITE(nIndex);
   )

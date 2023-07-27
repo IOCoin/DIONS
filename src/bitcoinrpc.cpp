@@ -88,7 +88,7 @@ int64_t AmountFromValue(const Value& value)
 {
   double dAmount = value.get_real();
 
-  if (dAmount <= 0.0 || dAmount > MAX_MONEY)
+  if (dAmount <= 0.0 || dAmount > ConfigurationState::MAX_MONEY)
   {
     throw JSONRPCError(RPC_TYPE_ERROR, "Invalid amount");
   }

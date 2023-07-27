@@ -665,7 +665,6 @@ bool EvalScript(vector<vector<unsigned char> >& stack, const CScript& script, co
             return false;
           }
 
-# 627 "script.cpp"
           const CScriptNum nLockTime(stacktop(-1), 5);
 
           if(nLockTime < 0)
@@ -673,11 +672,10 @@ bool EvalScript(vector<vector<unsigned char> >& stack, const CScript& script, co
             return false;
           }
 
-# 644 "script.cpp"
 
           if (!(
-                (txTo.nLockTime < LOCKTIME_THRESHOLD && nLockTime < LOCKTIME_THRESHOLD) ||
-                (txTo.nLockTime >= LOCKTIME_THRESHOLD && nLockTime >= LOCKTIME_THRESHOLD)
+                (txTo.nLockTime < ConfigurationState::LOCKTIME_THRESHOLD && nLockTime < ConfigurationState::LOCKTIME_THRESHOLD) ||
+                (txTo.nLockTime >= ConfigurationState::LOCKTIME_THRESHOLD && nLockTime >= ConfigurationState::LOCKTIME_THRESHOLD)
               ))
           {
             return false;
@@ -687,8 +685,6 @@ bool EvalScript(vector<vector<unsigned char> >& stack, const CScript& script, co
           {
             return false;
           }
-
-# 669 "script.cpp"
 
           if (txTo.vin[nIn].IsFinal())
           {

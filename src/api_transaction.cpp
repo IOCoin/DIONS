@@ -24,7 +24,7 @@ int CMerkleTx::SetMerkleBranch(const CBlock* pblock)
     pblock = &blockTmp;
   }
 
-  hashBlock = pblock->GetHash();
+  hashBlock_ = pblock->GetHash();
 
   for (nIndex = 0; nIndex < (int)pblock->vtx.size(); nIndex++)
     if (pblock->vtx[nIndex] == *(CTransaction*)this)
@@ -41,7 +41,7 @@ int CMerkleTx::SetMerkleBranch(const CBlock* pblock)
   }
 
   vTxMerkleBranch = pblock->GetMerkleBranch(nIndex);
-  map<uint256, CBlockIndex*>::iterator mi = mapBlockIndex.find(hashBlock);
+  map<uint256, CBlockIndex*>::iterator mi = mapBlockIndex.find(hashBlock_);
 
   if (mi == mapBlockIndex.end())
   {
@@ -59,13 +59,13 @@ int CMerkleTx::SetMerkleBranch(const CBlock* pblock)
 }
 int CMerkleTx::GetDepthInMainChainINTERNAL(CBlockIndex* &pindexRet) const
 {
-  if (hashBlock == 0 || nIndex == -1)
+  if (hashBlock_ == 0 || nIndex == -1)
   {
     return 0;
   }
 
   AssertLockHeld(cs_main);
-  map<uint256, CBlockIndex*>::iterator mi = mapBlockIndex.find(hashBlock);
+  map<uint256, CBlockIndex*>::iterator mi = mapBlockIndex.find(hashBlock_);
 
   if (mi == mapBlockIndex.end())
   {
@@ -119,12 +119,12 @@ bool CMerkleTx::AcceptToMemoryPool()
 }
 int CMerkleTx::GetDepthInMainChain(int& nHeightRet) const
 {
-  if (hashBlock == 0 || nIndex == -1)
+  if (hashBlock_ == 0 || nIndex == -1)
   {
     return 0;
   }
 
-  map<uint256, CBlockIndex*>::iterator mi = mapBlockIndex.find(hashBlock);
+  map<uint256, CBlockIndex*>::iterator mi = mapBlockIndex.find(hashBlock_);
 
   if (mi == mapBlockIndex.end())
   {

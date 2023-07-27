@@ -45,6 +45,8 @@ class CBlock
 public:
 
   static const int CURRENT_VERSION = 8;
+  static const unsigned int MAX_BLOCK_SIZE = 4.0 * 1024 * 1024;
+  static const unsigned int MAX_BLOCK_SIZE_GEN = MAX_BLOCK_SIZE;
   int nVersion;
   uint256 hashPrevBlock;
   uint256 hashMerkleRoot;

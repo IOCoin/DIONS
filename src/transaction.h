@@ -383,6 +383,9 @@ public:
   static const int CURRENT_VERSION=1;
   static const int VERSION_WITH_INFO=3;
   static const int DION_TX_VERSION=5;
+  static const int64_t MIN_TX_FEE = 10000;
+  static const int64_t MIN_RELAY_TX_FEE = MIN_TX_FEE;
+  static const int64_t S_MIN_TX_FEE = 100000;
   int nVersion;
   unsigned int nTime;
   std::vector<CTxIn> vin;
@@ -412,9 +415,9 @@ public:
     READWRITE(nLockTime);
 
     if (this->nVersion >= VERSION_WITH_INFO)
-{
-  READWRITE(strTxInfo);
-  }
+    {
+      READWRITE(strTxInfo);
+    }
   )
 
   void SetNull()

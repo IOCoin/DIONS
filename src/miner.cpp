@@ -155,13 +155,13 @@ CBlock* CreateNewBlock(__wx__* pwallet, bool fProofOfStake, int64_t* pFees)
   }
 
   pblock->vtx.push_back(txNew);
-  unsigned int nBlockMaxSize = GetArg("-blockmaxsize", MAX_BLOCK_SIZE_GEN/2);
-  nBlockMaxSize = std::max((unsigned int)1000, std::min((unsigned int)(MAX_BLOCK_SIZE-1000), nBlockMaxSize));
+  unsigned int nBlockMaxSize = GetArg("-blockmaxsize", CBlock::MAX_BLOCK_SIZE_GEN/2);
+  nBlockMaxSize = std::max((unsigned int)1000, std::min((unsigned int)(CBlock::MAX_BLOCK_SIZE-1000), nBlockMaxSize));
   unsigned int nBlockPrioritySize = GetArg("-blockprioritysize", 27000);
   nBlockPrioritySize = std::min(nBlockMaxSize, nBlockPrioritySize);
   unsigned int nBlockMinSize = GetArg("-blockminsize", 0);
   nBlockMinSize = std::min(nBlockMaxSize, nBlockMinSize);
-  int64_t nMinTxFee = MIN_TX_FEE;
+  int64_t nMinTxFee = CTransaction::MIN_TX_FEE;
 
   if (mapArgs.count("-mintxfee"))
   {
@@ -208,7 +208,6 @@ CBlock* CreateNewBlock(__wx__* pwallet, bool fProofOfStake, int64_t* pFees)
 
               pblock->stateRoot = pindexPrev->stateRootIndex;
               std::cout << "execution request - previous state root " << pblock->stateRoot << std::endl;
-              //XXXX dev::SecureTrieDB<dev::Address, dev::OverlayDB>* state;
               dev::h256 Empty;
 
               if(pblock->stateRoot == Empty)
@@ -223,8 +222,6 @@ CBlock* CreateNewBlock(__wx__* pwallet, bool fProofOfStake, int64_t* pFees)
               }
               else
               {
-                std::cout << "state root is non zero creating securetriedb instance from existing ROOT" << std::endl;
-                std::cout << "state root is " << pblock->stateRoot << std::endl;
                 pblock->state__ = new dev::SecureTrieDB<dev::Address, dev::OverlayDB>(overlayDB__,pblock->stateRoot);
               }
 
@@ -368,7 +365,7 @@ CBlock* CreateNewBlock(__wx__* pwallet, bool fProofOfStake, int64_t* pFees)
 
       unsigned int nTxSigOps = tx.GetLegacySigOpCount();
 
-      if (nBlockSigOps + nTxSigOps >= MAX_BLOCK_SIGOPS)
+      if (nBlockSigOps + nTxSigOps >= ConfigurationState::MAX_BLOCK_SIGOPS)
       {
         continue;
       }
@@ -411,7 +408,7 @@ CBlock* CreateNewBlock(__wx__* pwallet, bool fProofOfStake, int64_t* pFees)
 
       nTxSigOps += tx.GetP2SHSigOpCount(mapInputs);
 
-      if (nBlockSigOps + nTxSigOps >= MAX_BLOCK_SIGOPS)
+      if (nBlockSigOps + nTxSigOps >= ConfigurationState::MAX_BLOCK_SIGOPS)
       {
         continue;
       }

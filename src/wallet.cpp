@@ -18,6 +18,7 @@
 #include <boost/algorithm/string/predicate.hpp>
 using namespace std;
 using namespace boost;
+extern ConfigurationState globalState;
 static unsigned int GetStakeSplitAge()
 {
   return IsProtocolV2(nBestHeight) ? (10 * 24 * 60 * 60) : (1 * 24 * 60 * 60);
@@ -741,9 +742,9 @@ bool __wx__::AddToWallet(const __wx__Tx& wtxIn)
       wtx.nOrderPos = IncOrderPosNext();
       wtx.nTimeSmart = wtx.nTimeReceived;
 
-      if (wtxIn.hashBlock != 0)
+      if (wtxIn.hashBlock_ != 0)
       {
-        if (mapBlockIndex.count(wtxIn.hashBlock))
+        if (mapBlockIndex.count(wtxIn.hashBlock_))
         {
           unsigned int latestNow = wtx.nTimeReceived;
           unsigned int latestEntry = 0;
@@ -791,13 +792,13 @@ bool __wx__::AddToWallet(const __wx__Tx& wtxIn)
               }
             }
           }
-          unsigned int& blocktime = mapBlockIndex[wtxIn.hashBlock]->nTime;
+          unsigned int& blocktime = mapBlockIndex[wtxIn.hashBlock_]->nTime;
           wtx.nTimeSmart = std::max(latestEntry, std::min(blocktime, latestNow));
         }
         else
           printf("AddToWallet() : found %s in block %s not in index\n",
                  wtxIn.GetHash().ToString().substr(0,10).c_str(),
-                 wtxIn.hashBlock.ToString().c_str());
+                 wtxIn.hashBlock_.ToString().c_str());
       }
     }
 
@@ -805,9 +806,9 @@ bool __wx__::AddToWallet(const __wx__Tx& wtxIn)
 
     if (!fInsertedNew)
     {
-      if (wtxIn.hashBlock != 0 && wtxIn.hashBlock != wtx.hashBlock)
+      if (wtxIn.hashBlock_ != 0 && wtxIn.hashBlock_ != wtx.hashBlock_)
       {
-        wtx.hashBlock = wtxIn.hashBlock;
+        wtx.hashBlock_ = wtxIn.hashBlock_;
         fUpdated = true;
       }
 
@@ -857,7 +858,7 @@ bool __wx__::AddToWallet(const __wx__Tx& wtxIn)
     }
 
 #endif
-    WalletUpdateSpent(wtx, (wtxIn.hashBlock != 0));
+    WalletUpdateSpent(wtx, (wtxIn.hashBlock_ != 0));
     NotifyTransactionChanged(this, hash, fInsertedNew ? CT_NEW : CT_UPDATED);
     std::string strCmd = GetArg("-walletnotify", "");
 
@@ -984,9 +985,9 @@ int __wx__Tx::GetRequestCount() const
 
     if (IsCoinBase() || IsCoinStake())
     {
-      if (hashBlock != 0)
+      if (this->hashBlock_ != 0)
       {
-        map<uint256, int>::const_iterator mi = pwallet->mapRequestCount.find(hashBlock);
+        map<uint256, int>::const_iterator mi = pwallet->mapRequestCount.find(this->hashBlock_);
 
         if (mi != pwallet->mapRequestCount.end())
         {
@@ -1002,9 +1003,9 @@ int __wx__Tx::GetRequestCount() const
       {
         nRequests = (*mi).second;
 
-        if (nRequests == 0 && hashBlock != 0)
+        if (nRequests == 0 && this->hashBlock_ != 0)
         {
-          map<uint256, int>::const_iterator mi = pwallet->mapRequestCount.find(hashBlock);
+          map<uint256, int>::const_iterator mi = pwallet->mapRequestCount.find(this->hashBlock_);
 
           if (mi != pwallet->mapRequestCount.end())
           {
@@ -1813,9 +1814,9 @@ bool __wx__::CreateTransaction__(const vector<pair<CScript, int64_t> >& vecSend,
   wtxNew.BindWallet(this);
   wtxNew.strTxInfo = strTxInfo;
 
-  if (wtxNew.strTxInfo.length() > MAX_TX_INFO_LEN)
+  if (wtxNew.strTxInfo.length() > ConfigurationState::MAX_TX_INFO_LEN)
   {
-    wtxNew.strTxInfo.resize(MAX_TX_INFO_LEN);
+    wtxNew.strTxInfo.resize(ConfigurationState::MAX_TX_INFO_LEN);
   }
 
   if (wtxNew.strTxInfo.length()>0)
@@ -1853,9 +1854,9 @@ bool __wx__::CreateTransaction__(const vector<pair<CScript, int64_t> >& vecSend,
         }
         int64_t nChange = nValueIn - nValue - nFeeRet;
 
-        if (nFeeRet < MIN_TX_FEE && nChange > 0 && nChange < CENT)
+        if (nFeeRet < CTransaction::MIN_TX_FEE && nChange > 0 && nChange < CENT)
         {
-          int64_t nMoveToFee = min(nChange, MIN_TX_FEE - nFeeRet);
+          int64_t nMoveToFee = min(nChange, CTransaction::MIN_TX_FEE - nFeeRet);
           nChange -= nMoveToFee;
           nFeeRet += nMoveToFee;
         }
@@ -1895,13 +1896,13 @@ bool __wx__::CreateTransaction__(const vector<pair<CScript, int64_t> >& vecSend,
 
         unsigned int nBytes = ::GetSerializeSize(*(CTransaction*)&wtxNew, SER_NETWORK, PROTOCOL_VERSION);
 
-        if (nBytes >= MAX_STANDARD_TX_SIZE)
+        if (nBytes >= ConfigurationState::MAX_STANDARD_TX_SIZE)
         {
           return false;
         }
 
         dPriority /= nBytes;
-        int64_t nPayFee = nTransactionFee * (1 + (int64_t)nBytes / 1000);
+        int64_t nPayFee = globalState.nTransactionFee * (1 + (int64_t)nBytes / 1000);
         int64_t nMinFee = wtxNew.GetMinFee(1, GMF_SEND, nBytes);
 
         if (nFeeRet < max(nPayFee, nMinFee))
@@ -1940,9 +1941,9 @@ bool __wx__::CreateTransaction(const vector<pair<CScript, int64_t> >& vecSend, _
   wtxNew.BindWallet(this);
   wtxNew.strTxInfo = strTxInfo;
 
-  if (wtxNew.strTxInfo.length() > MAX_TX_INFO_LEN)
+  if (wtxNew.strTxInfo.length() > ConfigurationState::MAX_TX_INFO_LEN)
   {
-    wtxNew.strTxInfo.resize(MAX_TX_INFO_LEN);
+    wtxNew.strTxInfo.resize(ConfigurationState::MAX_TX_INFO_LEN);
   }
 
   if (wtxNew.strTxInfo.length()>0)
@@ -1954,7 +1955,7 @@ bool __wx__::CreateTransaction(const vector<pair<CScript, int64_t> >& vecSend, _
     LOCK2(cs_main, cs_wallet);
     CTxDB txdb("r");
     {
-      nFeeRet = S_MIN_TX_FEE;
+      nFeeRet = CTransaction::S_MIN_TX_FEE;
 
       while (true)
       {
@@ -1980,9 +1981,9 @@ bool __wx__::CreateTransaction(const vector<pair<CScript, int64_t> >& vecSend, _
         }
         int64_t nChange = nValueIn - nValue - nFeeRet;
 
-        if (nFeeRet < MIN_TX_FEE && nChange > 0 && nChange < CENT)
+        if (nFeeRet < CTransaction::MIN_TX_FEE && nChange > 0 && nChange < CENT)
         {
-          int64_t nMoveToFee = min(nChange, MIN_TX_FEE - nFeeRet);
+          int64_t nMoveToFee = min(nChange, CTransaction::MIN_TX_FEE - nFeeRet);
           nChange -= nMoveToFee;
           nFeeRet += nMoveToFee;
         }
@@ -2022,13 +2023,13 @@ bool __wx__::CreateTransaction(const vector<pair<CScript, int64_t> >& vecSend, _
         }
         unsigned int nBytes = ::GetSerializeSize(*(CTransaction*)&wtxNew, SER_NETWORK, PROTOCOL_VERSION);
 
-        if (nBytes >= MAX_STANDARD_TX_SIZE)
+        if (nBytes >= ConfigurationState::MAX_STANDARD_TX_SIZE)
         {
           return false;
         }
 
         dPriority /= nBytes;
-        int64_t nPayFee = nTransactionFee * (1 + (int64_t)nBytes / 1000);
+        int64_t nPayFee = globalState.nTransactionFee * (1 + (int64_t)nBytes / 1000);
         int64_t nMinFee = wtxNew.GetMinFee(1, GMF_SEND, nBytes);
 
         if (nFeeRet < max(nPayFee, nMinFee))
@@ -2357,7 +2358,7 @@ bool __wx__::CreateCoinStake(const CKeyStore& keystore, unsigned int nBits, int6
   }
   unsigned int nBytes = ::GetSerializeSize(txNew, SER_NETWORK, PROTOCOL_VERSION);
 
-  if (nBytes >= MAX_BLOCK_SIZE_GEN/5)
+  if (nBytes >= CBlock::MAX_BLOCK_SIZE_GEN/5)
   {
     return error("CreateCoinStake : exceeded coinstake size limit");
   }
@@ -2540,7 +2541,7 @@ string __wx__::SendMoneyToDestination(const CTxDestination& address, int64_t nVa
     return _("Invalid amount");
   }
 
-  if (nValue + S_MIN_TX_FEE > GetBalance())
+  if (nValue + CTransaction::S_MIN_TX_FEE > GetBalance())
   {
     return _("Insufficient funds");
   }
@@ -3261,7 +3262,7 @@ void __wx__::kt(std::map<CKeyID, int64_t> &mapKeyBirth) const
   for (std::map<uint256, __wx__Tx>::const_iterator it = mapWallet.begin(); it != mapWallet.end(); it++)
   {
     const __wx__Tx &wtx = (*it).second;
-    std::map<uint256, CBlockIndex*>::const_iterator blit = mapBlockIndex.find(wtx.hashBlock);
+    std::map<uint256, CBlockIndex*>::const_iterator blit = mapBlockIndex.find(wtx.hashBlock_);
 
     if (blit != mapBlockIndex.end() && blit->second->IsInMainChain())
     {

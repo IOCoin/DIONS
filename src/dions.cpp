@@ -609,7 +609,7 @@ bool txPost(const vector<pair<CScript, int64_t> >& vecSend, const __wx__Tx& wtxI
         }
         unsigned int nBytes = ::GetSerializeSize(*(CTransaction*)&wtxNew, SER_NETWORK);
 
-        if(nBytes >= MAX_BLOCK_SIZE)
+        if(nBytes >= CBlock::MAX_BLOCK_SIZE)
         {
           LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
           LEAVE_CRITICAL_SECTION(cs_main)

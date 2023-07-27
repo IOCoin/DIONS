@@ -10,6 +10,7 @@ using namespace std;
 extern void spj(const CScript& scriptPubKey, Object& out, bool fIncludeHex);
 extern void TxToJSON(const CTransaction& tx, const uint256 hashBlock, json_spirit::Object& entry);
 extern enum Checkpoints::CPMode CheckpointsMode;
+extern ConfigurationState globalState;
 double GetDifficulty(const CBlockIndex* blockindex)
 {
   if (blockindex == NULL)
@@ -35,7 +36,7 @@ double GetPoWMHashPS(int nBlocks, int nHeight)
 
   int nPowHeight = GetPowHeight(pindexBest);
 
-  if (nPowHeight >= LAST_POW_BLOCK)
+  if (nPowHeight >= ConfigurationState::LAST_POW_BLOCK)
   {
     return 0;
   }
@@ -217,8 +218,8 @@ Value getpowblocksleft(const Array& params, bool fHelp)
 
   CBlockIndex* block = FindBlockByHeight(nHeight);
   int powHeight = GetPowHeight(block);
-  return (powHeight > LAST_POW_BLOCK) ?
-         0 : LAST_POW_BLOCK - powHeight;
+  return (powHeight > ConfigurationState::LAST_POW_BLOCK) ?
+         0 : ConfigurationState::LAST_POW_BLOCK - powHeight;
 }
 double GetBlocktime(CBlockIndex * block, int blocks,
                     bool proofOfWork, bool proofOfStake)
@@ -289,8 +290,8 @@ Value getpowtimeleft(const Array& params, bool fHelp)
 
   CBlockIndex* block = FindBlockByHeight(nHeight);
   int powHeight = GetPowHeight(block);
-  int powLeft = (powHeight > LAST_POW_BLOCK) ?
-                0 : LAST_POW_BLOCK - powHeight;
+  int powLeft = (powHeight > ConfigurationState::LAST_POW_BLOCK) ?
+                0 : ConfigurationState::LAST_POW_BLOCK - powHeight;
   double blocktime = GetBlocktime(block, 300, true, false);
   return (blocktime * powLeft) / divisor;
 }
@@ -309,13 +310,13 @@ Value getdifficulty(const Array& params, bool fHelp)
 }
 Value settxfee(const Array& params, bool fHelp)
 {
-  if (fHelp || params.size() < 1 || params.size() > 1 || AmountFromValue(params[0]) < MIN_TX_FEE)
+  if (fHelp || params.size() < 1 || params.size() > 1 || AmountFromValue(params[0]) < CTransaction::MIN_TX_FEE)
     throw runtime_error(
       "settxfee <amount>\n"
       "<amount> is a real and is rounded to the nearest 0.01");
 
-  nTransactionFee = AmountFromValue(params[0]);
-  nTransactionFee = (nTransactionFee / CENT) * CENT;
+  globalState.nTransactionFee = AmountFromValue(params[0]);
+  globalState.nTransactionFee = (globalState.nTransactionFee / CENT) * CENT;
   return true;
 }
 Value getrawmempool(const Array& params, bool fHelp)

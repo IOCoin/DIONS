@@ -37,6 +37,7 @@ enum Checkpoints::CPMode CheckpointsMode;
 LocatorNodeDB* ln1Db = NULL;
 VertexNodeDB* vertexDB__ = NULL;
 dev::OverlayDB* overlayDB__ = NULL;
+extern ConfigurationState globalState;
 void ExitTimeout(void* parg)
 {
 #ifdef WIN32
@@ -169,6 +170,7 @@ bool AppInit(int argc, char* argv[])
   return fRet;
 }
 extern void noui_connect();
+ConfigurationState globalState;
 int main(int argc, char* argv[])
 {
   bool fRet = false;
@@ -453,6 +455,8 @@ bool AppInit2()
     fServer = GetBoolArg("-server");
   }
 
+
+
 #if !defined(QT_GUI)
   fServer = true;
 #endif
@@ -472,12 +476,12 @@ bool AppInit2()
 
   if (mapArgs.count("-paytxfee"))
   {
-    if (!ParseMoney(mapArgs["-paytxfee"], nTransactionFee))
+    if (!ParseMoney(mapArgs["-paytxfee"], globalState.nTransactionFee))
     {
       return InitError(strprintf(_("Invalid amount for -paytxfee=<amount>: '%s'"), mapArgs["-paytxfee"].c_str()));
     }
 
-    if (nTransactionFee > 0.25 * COIN)
+    if (globalState.nTransactionFee > 0.25 * COIN)
     {
       InitWarning(_("Warning: -paytxfee is set very high! This is the transaction fee you will pay if you send a transaction."));
     }

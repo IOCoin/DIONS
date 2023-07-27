@@ -1,8 +1,14 @@
 #include "transaction.h"
+#include "configuration_state.h"
 #include "block.h"
 #include "dions.h"
 #include "checkpoints.h"
 extern int nCoinbaseMaturity;
+
+inline bool MoneyRange(int64_t nValue)
+{
+  return (nValue >= 0 && nValue <= ConfigurationState::MAX_MONEY);
+}
 bool CTransaction::ConnectInputs(CTxDB& txdb, MapPrevTx inputs, map<uint256, CTxIndex>& mapTestPool, CDiskTxPos& posThisTx,
                                  CBlockIndex* pindexBlock, bool fBlock, bool fMiner, int flags)
 {
@@ -119,4 +125,113 @@ bool CTransaction::ConnectInputs(CTxDB& txdb, MapPrevTx inputs, map<uint256, CTx
   }
 
   return true;
+}
+bool CTransaction::CheckTransaction() const
+{
+  if (vin.empty())
+  {
+    return DoS(10, error("CTransaction::CheckTransaction() : vin empty"));
+  }
+
+  if (vout.empty())
+  {
+    return DoS(10, error("CTransaction::CheckTransaction() : vout empty"));
+  }
+
+  if (::GetSerializeSize(*this, SER_NETWORK, PROTOCOL_VERSION) > CBlock::MAX_BLOCK_SIZE)
+  {
+    return DoS(100, error("CTransaction::CheckTransaction() : size limits failed"));
+  }
+
+  int64_t nValueOut = 0;
+
+  for (unsigned int i = 0; i < vout.size(); i++)
+  {
+    const CTxOut& txout = vout[i];
+
+    if (txout.IsEmpty() && !IsCoinBase() && !IsCoinStake())
+    {
+      return DoS(100, error("CTransaction::CheckTransaction() : txout empty for user transaction"));
+    }
+
+    if (txout.nValue < 0)
+    {
+      return DoS(100, error("CTransaction::CheckTransaction() : txout.nValue negative"));
+    }
+
+    if (txout.nValue > ConfigurationState::MAX_MONEY)
+    {
+      return DoS(100, error("CTransaction::CheckTransaction() : txout.nValue too high"));
+    }
+
+    nValueOut += txout.nValue;
+
+    if (!MoneyRange(nValueOut))
+    {
+      return DoS(100, error("CTransaction::CheckTransaction() : txout total out of range"));
+    }
+  }
+
+  set<COutPoint> vInOutPoints;
+  BOOST_FOREACH(const CTxIn& txin, vin)
+  {
+    if (vInOutPoints.count(txin.prevout))
+    {
+      return false;
+    }
+
+    vInOutPoints.insert(txin.prevout);
+  }
+
+  if (IsCoinBase())
+  {
+    if (vin[0].scriptSig.size() < 2 || vin[0].scriptSig.size() > 100)
+    {
+      return DoS(100, error("CTransaction::CheckTransaction() : coinbase script size is invalid"));
+    }
+  }
+  else
+  {
+    BOOST_FOREACH(const CTxIn& txin, vin)
+
+    if (txin.prevout.IsNull())
+    {
+      return DoS(10, error("CTransaction::CheckTransaction() : prevout is null"));
+    }
+  }
+
+  return true;
+}
+int64_t CTransaction::GetMinFee(unsigned int nBlockSize, enum GetMinFee_mode mode, unsigned int nBytes) const
+{
+  int64_t nBaseFee = (mode == GMF_RELAY) ? MIN_RELAY_TX_FEE : MIN_TX_FEE;
+  unsigned int nNewBlockSize = nBlockSize + nBytes;
+  int64_t nMinFee = (1 + (int64_t)nBytes / 1000) * nBaseFee;
+
+  if (nMinFee < nBaseFee)
+  {
+    BOOST_FOREACH(const CTxOut& txout, vout)
+
+    if (txout.nValue < CENT)
+    {
+      nMinFee = nBaseFee;
+    }
+  }
+
+  if (nBlockSize != 1 && nNewBlockSize >= CBlock::MAX_BLOCK_SIZE_GEN/2)
+  {
+    if (nNewBlockSize >= CBlock::MAX_BLOCK_SIZE_GEN)
+    {
+      return ConfigurationState::MAX_MONEY;
+    }
+
+    nMinFee *= CBlock::MAX_BLOCK_SIZE_GEN / (CBlock::MAX_BLOCK_SIZE_GEN - nNewBlockSize);
+  }
+
+  if (!MoneyRange(nMinFee))
+  {
+    nMinFee = ConfigurationState::MAX_MONEY;
+  }
+
+  return nMinFee;
 }

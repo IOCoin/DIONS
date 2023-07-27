@@ -472,7 +472,7 @@ Value createrawtransaction(const Array& params, bool fHelp)
   {
     std::string txinfo = params[2].get_str();
 
-    if (txinfo.length() > MAX_TX_INFO_LEN)
+    if (txinfo.length() > ConfigurationState::MAX_TX_INFO_LEN)
     {
       txinfo.resize(140);
     }

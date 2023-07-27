@@ -7,6 +7,7 @@
 #include "dions.h"
 using namespace json_spirit;
 using namespace std;
+extern ConfigurationState globalState;
 int64_t nWalletUnlockTime;
 static CCriticalSection cs_nWalletUnlockTime;
 static unsigned char trans__ydwi[] =
@@ -61,9 +62,9 @@ void WalletTxToJSON(const __wx__Tx& wtx, Object& entry)
 
   if (confirms > 0)
   {
-    entry.push_back(Pair("blockhash", wtx.hashBlock.GetHex()));
+    entry.push_back(Pair("blockhash", wtx.hashBlock_.GetHex()));
     entry.push_back(Pair("blockindex", wtx.nIndex));
-    entry.push_back(Pair("blocktime", (int64_t)(mapBlockIndex[wtx.hashBlock]->nTime)));
+    entry.push_back(Pair("blocktime", (int64_t)(mapBlockIndex[wtx.hashBlock_]->nTime)));
   }
 
   entry.push_back(Pair("txid", wtx.GetHash().GetHex()));
@@ -109,7 +110,7 @@ Value getinfo(const Array& params, bool fHelp)
   obj.push_back(Pair("stake", ValueFromAmount(pwalletMain->GetStake())));
   obj.push_back(Pair("blocks", (int)nBestHeight));
   obj.push_back(Pair("powblocks", (int)GetPowHeight(pindexBest)));
-  obj.push_back(Pair("powblocksleft", LAST_POW_BLOCK - (int)GetPowHeight(pindexBest)));
+  obj.push_back(Pair("powblocksleft", ConfigurationState::LAST_POW_BLOCK - (int)GetPowHeight(pindexBest)));
   obj.push_back(Pair("timeoffset", (int64_t)GetTimeOffset()));
   obj.push_back(Pair("connections", (int)vNodes.size()));
   obj.push_back(Pair("proxy", (proxy.first.IsValid() ? proxy.first.ToStringIPPort() : string())));
@@ -120,7 +121,7 @@ Value getinfo(const Array& params, bool fHelp)
   obj.push_back(Pair("testnet", fTestNet));
   obj.push_back(Pair("keypoololdest", (int64_t)pwalletMain->GetOldestKeyPoolTime()));
   obj.push_back(Pair("keypoolsize", (int)pwalletMain->GetKeyPoolSize()));
-  obj.push_back(Pair("paytxfee", ValueFromAmount(nTransactionFee)));
+  obj.push_back(Pair("paytxfee", ValueFromAmount(globalState.nTransactionFee)));
   obj.push_back(Pair("mininput", ValueFromAmount(nMinimumInputValue)));
 
   if (pwalletMain->IsCrypted())
@@ -830,9 +831,9 @@ Value sendtoaddress(const Array& params, bool fHelp)
   {
     txdetails = params[4].get_str();
 
-    if (txdetails.length() > MAX_TX_INFO_LEN)
+    if (txdetails.length() > ConfigurationState::MAX_TX_INFO_LEN)
     {
-      txdetails.resize(MAX_TX_INFO_LEN);
+      txdetails.resize(ConfigurationState::MAX_TX_INFO_LEN);
     }
   }
 
@@ -1486,9 +1487,9 @@ Value sendfrom(const Array& params, bool fHelp)
   {
     txdetails = params[6].get_str();
 
-    if (txdetails.length() > MAX_TX_INFO_LEN)
+    if (txdetails.length() > ConfigurationState::MAX_TX_INFO_LEN)
     {
-      txdetails.resize(MAX_TX_INFO_LEN);
+      txdetails.resize(ConfigurationState::MAX_TX_INFO_LEN);
     }
   }
 

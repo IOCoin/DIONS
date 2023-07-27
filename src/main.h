@@ -21,61 +21,23 @@ class CBlockIndex;
 class CKeyItem;
 class CReserveKey;
 class COutPoint;
-
 class CAddress;
 class CInv;
 class CRequestTracker;
 class CNode;
-
 class CTxMemPool;
-
 #include "constants.h"
-
-
+#include "configuration_state.h"
 extern bool fReindex;
-
-const int LAST_POW_BLOCK = 12815;
-
 
 #define LR_R 0x32
 
 
-const unsigned int MAX_BLOCK_SIZE = 4.0 * 1024 * 1024;
-
-
-
-const unsigned int MAX_BLOCK_SIZE_GEN = MAX_BLOCK_SIZE;
-
-
-static const unsigned int MAX_STANDARD_TX_SIZE = 0.6 * MAX_BLOCK_SIZE_GEN;
-
-const unsigned int MAX_BLOCK_SIGOPS = MAX_BLOCK_SIZE/50;
-
-static const unsigned int MAX_ORPHAN_TRANSACTIONS = MAX_BLOCK_SIZE/100;
-
-static const unsigned int MAX_INV_SZ = 50000;
-
-static const int64_t MIN_TX_FEE = 10000;
-
-static const int64_t MIN_RELAY_TX_FEE = MIN_TX_FEE;
-static const int64_t S_MIN_TX_FEE = 100000;
-
-static const int64_t MAX_MONEY = std::numeric_limits<int64_t>::max();
 inline bool MoneyRange(int64_t nValue)
 {
-  return (nValue >= 0 && nValue <= MAX_MONEY);
+  return (nValue >= 0 && nValue <= ConfigurationState::MAX_MONEY);
 }
 
-static const unsigned int LOCKTIME_THRESHOLD = 500000000;
-static const unsigned int MAX_TX_INFO_LEN = 140;
-static const int64_t MIN_COIN_YEAR_REWARD = 1 * CENT;
-static const int64_t MAX_COIN_YEAR_REWARD = 3 * CENT;
-
-
-
-const int SHADE_FEATURE_UPDATE = 75 * 500 + 1860837;
-const int BASELINE_LOCK = 0x00ff0;
-const int BLOCK_REWARD_HALVING = 0x2dc6c0;
 
 inline bool IsProtocolV2(int nHeight)
 {
@@ -87,11 +49,11 @@ inline bool V3(int nHeight)
 }
 inline bool V4(int nHeight)
 {
-  return fTestNet ? nHeight >= 0x10 : nHeight >= SHADE_FEATURE_UPDATE;
+  return fTestNet ? nHeight >= 0x10 : nHeight >= ConfigurationState::SHADE_FEATURE_UPDATE;
 }
 inline bool V5(int nHeight)
 {
-  return fTestNet ? nHeight >= 0x20 : nHeight >= BLOCK_REWARD_HALVING;
+  return fTestNet ? nHeight >= 0x20 : nHeight >= ConfigurationState::BLOCK_REWARD_HALVING;
 }
 
 inline int64_t PastDrift(int64_t nTime, int nHeight)
@@ -107,7 +69,6 @@ inline unsigned int GetTargetSpacing(int nHeight)
 {
   return IsProtocolV2(nHeight) ? 64 : 60;
 }
-
 
 extern unsigned int nCoinCacheSize;
 extern CScript COINBASE_FLAGS;
@@ -136,7 +97,6 @@ extern unsigned char pchMessageStart[4];
 extern std::map<uint256, CBlock*> mapOrphanBlocks;
 
 
-extern int64_t nTransactionFee;
 extern int64_t nReserveBalance;
 extern int64_t nMinimumInputValue;
 extern bool fUseFastIndex;
@@ -257,5 +217,6 @@ public:
 };
 
 extern CTxMemPool mempool;
+
 
 #endif

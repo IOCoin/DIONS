@@ -2,22 +2,33 @@
 #include "kernel.h"
 #include "db.h"
 #include "checkpoints.h"
+#include "wallet.h"
 
 #include "ui_interface.h"
+#include <boost/algorithm/string/replace.hpp>
 
-extern const unsigned int MAX_BLOCK_SIZE; 
-extern const unsigned int MAX_BLOCK_SIZE_GEN;
-extern const unsigned int MAX_BLOCK_SIGOPS;
-extern const int LAST_POW_BLOCK ;
+extern int STAKE_INTEREST_V3;
 extern inline bool V4(int nHeight);
 extern int GetPowHeight(const CBlockIndex* pindex);
 extern inline int64_t FutureDrift(int64_t nTime, int nHeight);
+extern void InvalidChainFound(CBlockIndex* pindexNew);
+extern bool Reorganize(CTxDB& txdb, CBlockIndex* pindexNew);
+extern void SetBestChain(const CBlockLocator& loc);
 extern enum Checkpoints::CPMode CheckpointsMode;
+extern LocatorNodeDB* ln1Db;
+extern CBlockIndex* pblockindexFBBHLast;
 extern CCriticalSection cs_main;
+int CONSISTENCY_MARGIN = 100;
+CBlockIndex* p__ = NULL;
 static boost::filesystem::path BlockFilePath(unsigned int nFile)
 {
   string strBlockFn = strprintf("blk%04u.dat", nFile);
   return GetDataDir() / strBlockFn;
+}
+void UpdatedTransaction(const uint256& hashTx)
+{
+  BOOST_FOREACH(__wx__* pwallet, setpwalletRegistered)
+  pwallet->UpdatedTransaction(hashTx);
 }
 FILE* OpenBlockFile(unsigned int nFile, unsigned int nBlockPos, const char* pszMode)
 {
@@ -120,7 +131,7 @@ bool CBlock::CheckBlock(bool fCheckPOW, bool fCheckMerkleRoot, bool fCheckSig) c
     nSigOps += tx.GetLegacySigOpCount();
   }
 
-  if (nSigOps > MAX_BLOCK_SIGOPS)
+  if (nSigOps > ConfigurationState::MAX_BLOCK_SIGOPS)
   {
     return DoS(100, error("CheckBlock() : out-of-bounds SigOpCount"));
   }
@@ -171,7 +182,7 @@ bool CBlock::AcceptBlock()
     return DoS(100, error("AcceptBlock() : reject too new nVersion = %d", nVersion));
   }
 
-  if (IsProofOfWork() && nPowHeight > LAST_POW_BLOCK)
+  if (IsProofOfWork() && nPowHeight > ConfigurationState::LAST_POW_BLOCK)
   {
     return DoS(100, error("AcceptBlock() : reject proof-of-work at height %d", nHeight));
   }
@@ -308,4 +319,592 @@ bool CBlock::AcceptBlock()
 
   Checkpoints::AcceptPendingSyncCheckpoint();
   return true;
+}
+bool CBlock::ReadFromDisk(const CBlockIndex* pindex, bool fReadTransactions)
+{
+  if (!fReadTransactions)
+  {
+    *this = pindex->GetBlockHeader();
+    return true;
+  }
+
+  if (!ReadFromDisk(pindex->nFile, pindex->nBlockPos, fReadTransactions))
+  {
+    return false;
+  }
+
+  if (GetHash() != pindex->GetBlockHash())
+  {
+    return error("CBlock::ReadFromDisk() : GetHash() doesn't match index");
+  }
+
+  return true;
+}
+void CBlock::UpdateTime(const CBlockIndex* pindexPrev)
+{
+  nTime = max(GetBlockTime(), GetAdjustedTime());
+}
+bool CBlock::DisconnectBlock(CTxDB& txdb, CBlockIndex* pindex)
+{
+  for (int i = vtx.size()-1; i >= 0; i--)
+    if (!vtx[i].DisconnectInputs(txdb))
+    {
+      return false;
+    }
+
+  if (pindex->pprev)
+  {
+    CDiskBlockIndex blockindexPrev(pindex->pprev);
+    blockindexPrev.hashNext = 0;
+
+    if (!txdb.WriteBlockIndex(blockindexPrev))
+    {
+      return error("DisconnectBlock() : WriteBlockIndex failed");
+    }
+  }
+
+  BOOST_FOREACH(CTransaction& tx, vtx)
+  SyncWithWallets(tx, this, false, false);
+  return true;
+}
+bool CBlock::ConnectBlock(CTxDB& txdb, CBlockIndex* pindex, bool fJustCheck)
+{
+  if (!CheckBlock(!fJustCheck, !fJustCheck, false))
+  {
+    return false;
+  }
+
+  unsigned int flags = SCRIPT_VERIFY_NOCACHE;
+
+  if(V3(pindex->nHeight))
+  {
+    flags |= SCRIPT_VERIFY_NULLDUMMY |
+             SCRIPT_VERIFY_STRICTENC |
+             SCRIPT_VERIFY_ALLOW_EMPTY_SIG |
+             SCRIPT_VERIFY_FIX_HASHTYPE |
+             SCRIPT_VERIFY_CHECKLOCKTIMEVERIFY;
+  }
+
+  unsigned int nTxPos;
+
+  if (fJustCheck)
+  {
+    nTxPos = 1;
+  }
+  else
+  {
+    nTxPos = pindex->nBlockPos + ::GetSerializeSize(CBlock(), SER_DISK, CLIENT_VERSION) - (2 * GetSizeOfCompactSize(0)) + GetSizeOfCompactSize(vtx.size());
+  }
+
+  map<uint256, CTxIndex> mapQueuedChanges;
+  int64_t nFees = 0;
+  int64_t nValueIn = 0;
+  int64_t nValueOut = 0;
+  int64_t nStakeReward = 0;
+  unsigned int nSigOps = 0;
+  BOOST_FOREACH(CTransaction& tx, vtx)
+  {
+    uint256 hashTx = tx.GetHash();
+    CTxIndex txindexOld;
+
+    if (txdb.ReadTxIndex(hashTx, txindexOld))
+    {
+      BOOST_FOREACH(CDiskTxPos &pos, txindexOld.vSpent)
+
+      if (pos.IsNull())
+      {
+        return false;
+      }
+    }
+
+    nSigOps += tx.GetLegacySigOpCount();
+
+    if (nSigOps > ConfigurationState::MAX_BLOCK_SIGOPS)
+    {
+      return DoS(100, error("ConnectBlock() : too many sigops"));
+    }
+
+    CDiskTxPos posThisTx(pindex->nFile, pindex->nBlockPos, nTxPos);
+
+    if (!fJustCheck)
+    {
+      nTxPos += ::GetSerializeSize(tx, SER_DISK, CLIENT_VERSION);
+    }
+
+    MapPrevTx mapInputs;
+
+    if (tx.IsCoinBase())
+    {
+      nValueOut += tx.GetValueOut();
+    }
+    else
+    {
+      bool fInvalid;
+
+      if (!tx.FetchInputs(txdb, mapQueuedChanges, true, false, mapInputs, fInvalid))
+      {
+        return false;
+      }
+
+      nSigOps += tx.GetP2SHSigOpCount(mapInputs);
+
+      if (nSigOps > ConfigurationState::MAX_BLOCK_SIGOPS)
+      {
+        return DoS(100, error("ConnectBlock() : too many sigops"));
+      }
+
+      int64_t nTxValueIn = tx.GetValueIn(mapInputs);
+      int64_t nTxValueOut = tx.GetValueOut();
+
+      if (tx.IsCoinStake() and pindex->nHeight<=STAKE_INTEREST_V3)
+      {
+        double nNetworkDriftBuffer = nTxValueOut*.02;
+        nTxValueOut = nTxValueOut - nNetworkDriftBuffer;
+        nStakeReward = nTxValueOut - nTxValueIn;
+      }
+
+      nValueIn += nTxValueIn;
+      nValueOut += nTxValueOut;
+
+      if (!tx.IsCoinStake())
+      {
+        nFees += nTxValueIn - nTxValueOut;
+      }
+
+      if (tx.IsCoinStake())
+      {
+        nStakeReward = nTxValueOut - nTxValueIn;
+      }
+
+      bool pre = tx.ConnectInputs(txdb, mapInputs, mapQueuedChanges, posThisTx, pindex, true, false, flags);
+
+      if(!pre && tx.nVersion == CTransaction::DION_TX_VERSION)
+      {
+        return DoS(100, error("pre count"));
+      }
+      else if(!pre)
+      {
+        return false;
+      }
+    }
+
+    mapQueuedChanges[hashTx] = CTxIndex(posThisTx, tx.vout.size());
+  }
+
+  if (IsProofOfWork())
+  {
+    int64_t nReward = GetProofOfWorkReward(GetPowHeight(pindex), nFees);
+
+    if (vtx[0].GetValueOut() > nReward)
+      return DoS(50, error("ConnectBlock() : coinbase reward exceeded (actual=%" PRId64 " vs calculated=%" PRId64 ")",
+                           vtx[0].GetValueOut(),
+                           nReward));
+  }
+
+  if (IsProofOfStake())
+  {
+    uint64_t nCoinAge;
+
+    if (!vtx[1].GetCoinAge(txdb, pindex->pprev, nCoinAge))
+    {
+      return error("ConnectBlock() : %s unable to get coin age for coinstake", vtx[1].GetHash().ToString().substr(0,10).c_str());
+    }
+
+    int64_t nCalculatedStakeReward = GetProofOfStakeReward(nCoinAge, nFees, pindex->nHeight);
+
+    if (nStakeReward > nCalculatedStakeReward)
+    {
+      return DoS(100, error("ConnectBlock() : coinstake pays too much(actual=%" PRId64 " vs calculated=%" PRId64 ")", nStakeReward, nCalculatedStakeReward));
+    }
+  }
+
+  pindex->nMint = nValueOut - nValueIn + nFees;
+  pindex->nMoneySupply = (pindex->pprev? pindex->pprev->nMoneySupply : 0) + nValueOut - nValueIn;
+
+  if (!txdb.WriteBlockIndex(CDiskBlockIndex(pindex)))
+  {
+    return error("Connect() : WriteBlockIndex for pindex failed");
+  }
+
+  if (fJustCheck)
+  {
+    return true;
+  }
+
+  for (map<uint256, CTxIndex>::iterator mi = mapQueuedChanges.begin(); mi != mapQueuedChanges.end(); ++mi)
+  {
+    if (!txdb.UpdateTxIndex((*mi).first, (*mi).second))
+    {
+      return error("ConnectBlock() : UpdateTxIndex failed");
+    }
+  }
+
+  if (pindex->pprev)
+  {
+    CDiskBlockIndex blockindexPrev(pindex->pprev);
+    blockindexPrev.hashNext = pindex->GetBlockHash();
+
+    if (!txdb.WriteBlockIndex(blockindexPrev))
+    {
+      return error("ConnectBlock() : WriteBlockIndex failed");
+    }
+  }
+
+  BOOST_FOREACH(CTransaction& tx, vtx)
+  SyncWithWallets(tx, this, true);
+  return true;
+}
+bool CBlock::SetBestChainInner(CTxDB& txdb, CBlockIndex *pindexNew)
+{
+  uint256 hash = GetHash();
+
+  if (!ConnectBlock(txdb, pindexNew) || !txdb.WriteHashBestChain(hash))
+  {
+    txdb.TxnAbort();
+    InvalidChainFound(pindexNew);
+    return false;
+  }
+
+  if (!txdb.TxnCommit())
+  {
+    return error("SetBestChain() : TxnCommit failed");
+  }
+
+  pindexNew->pprev->pnext = pindexNew;
+  BOOST_FOREACH(CTransaction& tx, vtx)
+  mempool.remove(tx);
+  ln1Db->filter(pindexNew);
+  return true;
+}
+bool CBlock::SetBestChain(CTxDB& txdb, CBlockIndex* pindexNew)
+{
+  uint256 hash = GetHash();
+
+  if (!txdb.TxnBegin())
+  {
+    return error("SetBestChain() : TxnBegin failed");
+  }
+
+  if (pindexGenesisBlock == NULL && hash == (!fTestNet ? hashGenesisBlock : hashGenesisBlockTestNet))
+  {
+    txdb.WriteHashBestChain(hash);
+
+    if (!txdb.TxnCommit())
+    {
+      return error("SetBestChain() : TxnCommit failed");
+    }
+
+    pindexGenesisBlock = pindexNew;
+    p__ = pindexNew;
+  }
+  else if (hashPrevBlock == hashBestChain)
+  {
+    if (!SetBestChainInner(txdb, pindexNew))
+    {
+      return error("SetBestChain() : SetBestChainInner failed");
+    }
+  }
+  else
+  {
+    CBlockIndex *pindexIntermediate = pindexNew;
+    std::vector<CBlockIndex*> vpindexSecondary;
+
+    while (pindexIntermediate->pprev && pindexIntermediate->pprev->nChainTrust > pindexBest->nChainTrust)
+    {
+      vpindexSecondary.push_back(pindexIntermediate);
+      pindexIntermediate = pindexIntermediate->pprev;
+    }
+
+    if (!vpindexSecondary.empty())
+    {
+      printf("Postponing %" PRIszu " reconnects\n", vpindexSecondary.size());
+    }
+
+    if (!Reorganize(txdb, pindexIntermediate))
+    {
+      txdb.TxnAbort();
+      InvalidChainFound(pindexNew);
+      return error("SetBestChain() : Reorganize failed");
+    }
+
+    BOOST_REVERSE_FOREACH(CBlockIndex *pindex, vpindexSecondary)
+    {
+      CBlock block;
+
+      if (!block.ReadFromDisk(pindex))
+      {
+        printf("SetBestChain() : ReadFromDisk failed\n");
+        break;
+      }
+
+      if (!txdb.TxnBegin())
+      {
+        printf("SetBestChain() : TxnBegin 2 failed\n");
+        break;
+      }
+
+      if (!block.SetBestChainInner(txdb, pindex))
+      {
+        break;
+      }
+    }
+  }
+
+  bool fIsInitialDownload = IsInitialBlockDownload();
+
+  if (!fIsInitialDownload)
+  {
+    const CBlockLocator locator(pindexNew);
+    ::SetBestChain(locator);
+  }
+
+  hashBestChain = hash;
+  pindexBest = pindexNew;
+  pblockindexFBBHLast = NULL;
+  nBestHeight = pindexBest->nHeight;
+  nBestChainTrust = pindexNew->nChainTrust;
+  nTimeBestReceived = GetTime();
+  nTransactionsUpdated++;
+  uint256 nBestBlockTrust = pindexBest->nHeight != 0 ? (pindexBest->nChainTrust - pindexBest->pprev->nChainTrust) : pindexBest->nChainTrust;
+  printf("SetBestChain: new best=%s  height=%d  trust=%s  blocktrust=%" PRId64 "  date=%s\n",
+         hashBestChain.ToString().substr(0,20).c_str(), nBestHeight,
+         CBigNum(nBestChainTrust).ToString().c_str(),
+         nBestBlockTrust.Get64(),
+         DateTimeStrFormat("%x %H:%M:%S", pindexBest->GetBlockTime()).c_str());
+
+  if (!fIsInitialDownload)
+  {
+    int nUpgraded = 0;
+    const CBlockIndex* pindex = pindexBest;
+
+    for (int i = 0; i < CONSISTENCY_MARGIN && pindex != NULL; i++)
+    {
+      if (pindex->nVersion > CBlock::CURRENT_VERSION)
+      {
+        ++nUpgraded;
+      }
+
+      pindex = pindex->pprev;
+    }
+
+    if (nUpgraded > 0)
+    {
+      printf("SetBestChain: %d of last 100 blocks above version %d\n", nUpgraded, CBlock::CURRENT_VERSION);
+    }
+
+    if (nUpgraded > 100/2)
+    {
+      strMiscWarning = _("Warning: This version is obsolete, upgrade required!");
+    }
+  }
+
+  std::string strCmd = GetArg("-blocknotify", "");
+
+  if (!fIsInitialDownload && !strCmd.empty())
+  {
+    boost::replace_all(strCmd, "%s", hashBestChain.GetHex());
+    boost::thread t(runCommand, strCmd);
+  }
+
+  return true;
+}
+bool CBlock::AddToBlockIndex(unsigned int nFile, unsigned int nBlockPos, const uint256& hashProof)
+{
+  uint256 hash = GetHash();
+
+  if (mapBlockIndex.count(hash))
+  {
+    return error("AddToBlockIndex() : %s already exists", hash.ToString().substr(0,20).c_str());
+  }
+
+  CBlockIndex* pindexNew = new CBlockIndex(nFile, nBlockPos, *this);
+
+  if (!pindexNew)
+  {
+    return error("AddToBlockIndex() : new CBlockIndex failed");
+  }
+
+  pindexNew->phashBlock = &hash;
+  map<uint256, CBlockIndex*>::iterator miPrev = mapBlockIndex.find(hashPrevBlock);
+
+  if (miPrev != mapBlockIndex.end())
+  {
+    pindexNew->pprev = (*miPrev).second;
+    pindexNew->nHeight = pindexNew->pprev->nHeight + 1;
+    pindexNew->stateRootIndex = pindexNew->pprev->stateRootIndex;
+  }
+
+  pindexNew->nChainTrust = (pindexNew->pprev ? pindexNew->pprev->nChainTrust : 0) + pindexNew->GetBlockTrust();
+
+  if (!pindexNew->SetStakeEntropyBit(GetStakeEntropyBit()))
+  {
+    return error("AddToBlockIndex() : SetStakeEntropyBit() failed");
+  }
+
+  pindexNew->hashProof = hashProof;
+  uint64_t nStakeModifier = 0;
+  bool fGeneratedStakeModifier = false;
+
+  if (!ComputeNextStakeModifier(pindexNew->pprev, nStakeModifier, fGeneratedStakeModifier))
+  {
+    return error("AddToBlockIndex() : ComputeNextStakeModifier() failed");
+  }
+
+  pindexNew->SetStakeModifier(nStakeModifier, fGeneratedStakeModifier);
+  pindexNew->nStakeModifierChecksum = GetStakeModifierChecksum(pindexNew);
+
+  if (!CheckStakeModifierCheckpoints(pindexNew->nHeight, pindexNew->nStakeModifierChecksum))
+  {
+    return error("AddToBlockIndex() : Rejected by stake modifier checkpoint height=%d, modifier=0x%016" PRIx64, pindexNew->nHeight, nStakeModifier);
+  }
+
+  map<uint256, CBlockIndex*>::iterator mi = mapBlockIndex.insert(make_pair(hash, pindexNew)).first;
+
+  if (pindexNew->IsProofOfStake())
+  {
+    setStakeSeen.insert(make_pair(pindexNew->prevoutStake, pindexNew->nStakeTime));
+  }
+
+  pindexNew->phashBlock = &((*mi).first);
+  CTxDB txdb;
+
+  if (!txdb.TxnBegin())
+  {
+    return false;
+  }
+
+  dev::h256 zero;
+
+  if(this->stateRoot != zero)
+  {
+    pindexNew->stateRootIndex = this->stateRoot;
+    std::cout << "copied working state root " << pindexNew->stateRootIndex << " block index stateRootIndex " << std::endl;
+  }
+  else
+  {
+    if(pindexNew->pprev != 0)
+    {
+      pindexNew->stateRootIndex = pindexNew->pprev->stateRootIndex;
+    }
+  }
+
+  txdb.WriteBlockIndex(CDiskBlockIndex(pindexNew));
+
+  if (!txdb.TxnCommit())
+  {
+    return false;
+  }
+
+  LOCK(cs_main);
+
+  if (pindexNew->nChainTrust > nBestChainTrust)
+    if (!SetBestChain(txdb, pindexNew))
+    {
+      return false;
+    }
+
+  if (pindexNew == pindexBest)
+  {
+    static uint256 hashPrevBestCoinBase;
+    UpdatedTransaction(hashPrevBestCoinBase);
+    hashPrevBestCoinBase = vtx[0].GetHash();
+  }
+
+  uiInterface.NotifyBlocksChanged();
+  return true;
+}
+bool CBlock::SignBlock(__wx__& wallet, int64_t nFees)
+{
+  if (!vtx[0].vout[0].IsEmpty())
+  {
+    return false;
+  }
+
+  if (IsProofOfStake())
+  {
+    return true;
+  }
+
+  static int64_t nLastCoinStakeSearchTime = GetAdjustedTime();
+  CKey key;
+  CTransaction txCoinStake;
+
+  if (IsProtocolV2(nBestHeight+1))
+  {
+    txCoinStake.nTime &= ~STAKE_TIMESTAMP_MASK;
+  }
+
+  int64_t nSearchTime = txCoinStake.nTime;
+
+  if (nSearchTime > nLastCoinStakeSearchTime)
+  {
+    int64_t nSearchInterval = IsProtocolV2(nBestHeight+1) ? 1 : nSearchTime - nLastCoinStakeSearchTime;
+
+    if (wallet.CreateCoinStake(wallet, nBits, nSearchInterval, nFees, txCoinStake, key, pindexBest->nHeight+1))
+    {
+      if (txCoinStake.nTime >= max(pindexBest->GetPastTimeLimit()+1, PastDrift(pindexBest->GetBlockTime(), pindexBest->nHeight+1)))
+      {
+        vtx[0].nTime = nTime = txCoinStake.nTime;
+        nTime = max(pindexBest->GetPastTimeLimit()+1, GetMaxTransactionTime());
+        nTime = max(GetBlockTime(), PastDrift(pindexBest->GetBlockTime(), pindexBest->nHeight+1));
+
+        for (vector<CTransaction>::iterator it = vtx.begin(); it != vtx.end();)
+          if (it->nTime > nTime)
+          {
+            it = vtx.erase(it);
+          }
+          else
+          {
+            ++it;
+          }
+
+        vtx.insert(vtx.begin() + 1, txCoinStake);
+        hashMerkleRoot = BuildMerkleTree();
+        printf("CBlock::SignBlock GetHash().GetHex() %s\n", GetHash().GetHex().c_str());
+        printf("CBlock::SignBlock vchBlockSig.size() %lu\n", vchBlockSig.size());
+        return key.Sign(GetHash(), vchBlockSig);
+      }
+    }
+
+    nLastCoinStakeSearchInterval = nSearchTime - nLastCoinStakeSearchTime;
+    nLastCoinStakeSearchTime = nSearchTime;
+  }
+
+  return false;
+}
+bool CBlock::CheckBlockSignature() const
+{
+  if (IsProofOfWork())
+  {
+    return vchBlockSig.empty();
+  }
+
+  vector<valtype> vSolutions;
+  txnouttype whichType;
+  const CTxOut& txout = vtx[1].vout[1];
+
+  if (!Solver(txout.scriptPubKey, whichType, vSolutions))
+  {
+    return false;
+  }
+
+  if (whichType == TX_PUBKEY)
+  {
+    valtype& vchPubKey = vSolutions[0];
+    CKey key;
+
+    if (!key.SetPubKey(vchPubKey))
+    {
+      return false;
+    }
+
+    if (vchBlockSig.empty())
+    {
+      return false;
+    }
+
+    return key.Verify(GetHash(), vchBlockSig);
+  }
+
+  return false;
 }

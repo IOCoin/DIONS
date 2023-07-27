@@ -162,6 +162,7 @@ OBJS= \
     obj/keystore.o \
     obj/view.o \
     obj/miner.o \
+    obj/configuration_state.o \
     obj/main.o \
     obj/block.o \
     obj/api_transaction.o \
