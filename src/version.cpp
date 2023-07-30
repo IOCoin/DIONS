@@ -7,7 +7,7 @@ const std::string CLIENT_NAME("Satoshi");
 # include "build.h"
 #endif
 #ifdef GIT_ARCHIVE
-#define GIT_COMMIT_ID         "$Id: 0f05da312af7c0872edabcb9cc70987c25132f50 $"
+#define GIT_COMMIT_ID         "$Id$"
 #define GIT_COMMIT_HASH       "$Format:%H$"
 #define GIT_COMMIT_ABREV_HASH "$Format:%h$"
 #define GIT_COMMITTER_DATE    "$Format:%cD$"
