@@ -3,6 +3,7 @@
 #include "db.h"
 #include "checkpoints.h"
 #include "wallet.h"
+#include "txmempool.h"
 
 #include "ui_interface.h"
 #include <boost/algorithm/string/replace.hpp>
@@ -664,7 +665,7 @@ bool CBlock::SetBestChain(CTxDB& txdb, CBlockIndex* pindexNew)
   nBestHeight = pindexBest->nHeight;
   nBestChainTrust = pindexNew->nChainTrust;
   nTimeBestReceived = GetTime();
-  nTransactionsUpdated++;
+  CTxMemPool::nTransactionsUpdated++;
   uint256 nBestBlockTrust = pindexBest->nHeight != 0 ? (pindexBest->nChainTrust - pindexBest->pprev->nChainTrust) : pindexBest->nChainTrust;
   printf("SetBestChain: new best=%s  height=%d  trust=%s  blocktrust=%" PRId64 "  date=%s\n",
          hashBestChain.ToString().substr(0,20).c_str(), nBestHeight,

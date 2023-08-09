@@ -22,6 +22,7 @@ public:
   static const int SHADE_FEATURE_UPDATE ;
   static const int BASELINE_LOCK ;
   static const int BLOCK_REWARD_HALVING ;
+  static int nStakeMinConfirmations;
 
   int64_t trace();
 

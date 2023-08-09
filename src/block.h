@@ -201,6 +201,54 @@ public:
 
       j += nSize;
     }
+    /////////////////////////////////////////////////////////////////////////////////
+    //  vtx 6     
+    //  hash0 hash1 hash2 hash3 hash4 hash5
+    //  hash0 hash1 hash2 hash3 hash4 hash5 hash01 hash23 hash45
+    //  hash0 hash1 hash2 hash3 hash4 hash5 hash01 hash23 hash45 hash0123 hash4545
+    //  hash0 hash1 hash2 hash3 hash4 hash5 hash01 hash23 hash45 hash0123 hash4545 hash01234545
+    //
+    //  j=0
+    //  for nSize=6
+    //    for i=0 i<6 i+=2
+    //      i2 = min 1, 5  = 1
+    //      tree push Hash(tree[0 + 0] and tree[0 + 1])
+    //      i += 2
+    //      i2 = min 3, 5  = 3
+    //      tree push Hash(tree[0 + 2] and tree[0 + 3])
+    //      i += 2
+    //      i2 = min 5, 5  = 5
+    //      tree push Hash(tree[0 + 4] and tree[0 + 5])
+    //      i += 2 <- 6 end
+    //
+    //      tree has now 9 elements
+    //
+    //    j += nSize <- 6
+    //    nSize = (6 + 1) / 2 = 3
+    //    for i=0 i<3 i+=2
+    //      i2 = min 1, 3-1  = 1
+    //      tree push Hash(tree[6 + 0] and tree[6 + 1])
+    //      i += 2
+    //      i2 = min 2, 3-1  = 2
+    //      tree push Hash(tree[6 + 2] and tree[6 + 2])
+    //      i+=2 <- 4 end
+    //
+    //      tree has now 11 elements
+    //    j += nSize <- 6 + 3 = 9
+    //    nSize = (3 + 1) / 2 = 2
+    //    for i=0 i<2 i+=2
+    //      i2 = min 1, 2-1  = 1
+    //      tree push Hash(tree[9 + 0] and tree[9 + 1])
+    //      i+=2 <- 2 end
+    //  
+    //      tree has now 12 elements
+    //    j += nSize <- 9 + 2 = 11
+    //    nSize = (2+1)/2 = 1 end
+    //
+    //
+    //
+    /////////////////////////////////////////////////////////////////////////////////
+
     return (vMerkleTree.empty() ? 0 : vMerkleTree.back());
   }
 
@@ -221,6 +269,45 @@ public:
       nIndex >>= 1;
       j += nSize;
     }
+    ////////////////////////////////////////////////////////////////////////
+    //
+    //  tree
+    //  hash0 hash1 hash2 hash3 hash4 hash5 hash01 hash23 hash45 hash0123 hash4545 hash01234545
+    //
+    //  suppose nIndex = 3
+    //  bramch
+    //  hash2 hash01 hash4545
+    //
+    //                                        012345
+    //                                  0123          4545
+    //                               01      23     45      45
+    //                              0  1    2  3   4  5    4  5 
+    //
+    //
+    //  j=0
+    //
+    //  for nSize=6 nSize>1 nSize = (nSize + 1) / 2
+    //    i = min nIndex xor 1, nSize-1 = min 2, 5
+    //    branch push tree[0 + 2] 
+    //    nIndex>>=1 <- 1
+    //    j+=nSize <- 6
+    //    nSize = (6 + 1) / 2 <- 3
+    //    i = min nIndex xor 1, nSize-1 = min 0, 2 = 0
+    //    branch push tree[6 + 0] 
+    //    nIndex>>=1 <- 0
+    //    j+=nSize <- 6 + 3 = 9
+    //    nSize = (3 + 1) / 2 <- 2
+    //    i = min nIndex xor 1, nSize-1 = min 1, 1 = 1
+    //    branch push tree[9 + 1] 
+    //    nIndex>>=1 <- 0
+    //    j+=nSize <- 9 + 2 = 11 
+    //    nSize = (2 + 1) / 2 <- 1 end
+    //
+    //
+    //
+    //
+    ////////////////////////////////////////////////////////////////////////
+
     return vMerkleBranch;
   }
 

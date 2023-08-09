@@ -22,8 +22,6 @@ CCriticalSection cs_setpwalletRegistered;
 set<__wx__*> setpwalletRegistered;
 CCriticalSection cs_main;
 CTxMemPool mempool;
-unsigned int nTransactionsUpdated = 0;
-int nStakeMinConfirmations = 500;
 bool fReindex = false;
 map<uint256, CBlockIndex*> mapBlockIndex;
 set<pair<COutPoint, unsigned int> > setStakeSeen;
@@ -280,39 +278,6 @@ unsigned int LimitOrphanTxSize(unsigned int nMaxOrphans)
 
   return nEvicted;
 }
-bool CTransaction::ReadFromDisk(CTxDB& txdb, COutPoint prevout, CTxIndex& txindexRet)
-{
-  SetNull();
-
-  if (!txdb.ReadTxIndex(prevout.hash, txindexRet))
-  {
-    return false;
-  }
-
-  if (!ReadFromDisk(txindexRet.pos))
-  {
-    return false;
-  }
-
-  if (prevout.n >= vout.size())
-  {
-    SetNull();
-    return false;
-  }
-
-  return true;
-}
-bool CTransaction::ReadFromDisk(CTxDB& txdb, COutPoint prevout)
-{
-  CTxIndex txindex;
-  return ReadFromDisk(txdb, prevout, txindex);
-}
-bool CTransaction::ReadFromDisk(COutPoint prevout)
-{
-  CTxDB txdb("r");
-  CTxIndex txindex;
-  return ReadFromDisk(txdb, prevout, txindex);
-}
 bool IsStandardTx(const CTransaction& tx)
 {
   if (tx.nVersion > CTransaction::CURRENT_VERSION)
@@ -418,106 +383,6 @@ bool IsFinalTx(const CTransaction &tx, int nBlockHeight, int64_t nBlockTime)
   }
 
   return true;
-}
-bool CTransaction::AreInputsStandard(const MapPrevTx& mapInputs) const
-{
-  if (IsCoinBase())
-  {
-    return true;
-  }
-
-  for (unsigned int i = 0; i < vin.size(); i++)
-  {
-    const CTxOut& prev = GetOutputFor(vin[i], mapInputs);
-    vector<vector<unsigned char> > vSolutions;
-    txnouttype whichType;
-    const CScript& prevScript = prev.scriptPubKey;
-    int op;
-    std::vector<vchType> vvch;
-    CScript::const_iterator pc = prevScript.begin ();
-    CScript rawScript;
-
-    if (aliasScript(prevScript, op, vvch, pc))
-    {
-      rawScript = CScript(pc, prevScript.end ());
-    }
-    else
-    {
-      rawScript = prevScript;
-    }
-
-    if (!Solver(rawScript, whichType, vSolutions))
-    {
-      return false;
-    }
-
-    int nArgsExpected = ScriptSigArgsExpected(whichType, vSolutions);
-
-    if (nArgsExpected < 0)
-    {
-      return false;
-    }
-
-    vector<vector<unsigned char> > stack;
-
-    if(!EvalScript(stack, vin[i].scriptSig, *this, i, SCRIPT_VERIFY_NONE, 0))
-    {
-      return false;
-    }
-
-    if (whichType == TX_SCRIPTHASH)
-    {
-      if (stack.empty())
-      {
-        return false;
-      }
-
-      CScript subscript(stack.back().begin(), stack.back().end());
-      vector<vector<unsigned char> > vSolutions2;
-      txnouttype whichType2;
-
-      if (!Solver(subscript, whichType2, vSolutions2))
-      {
-        return false;
-      }
-
-      if (whichType2 == TX_SCRIPTHASH)
-      {
-        return false;
-      }
-
-      int tmpExpected;
-      tmpExpected = ScriptSigArgsExpected(whichType2, vSolutions2);
-
-      if (tmpExpected < 0)
-      {
-        return false;
-      }
-
-      nArgsExpected += tmpExpected;
-    }
-
-    if (stack.size() != (unsigned int)nArgsExpected)
-    {
-      return false;
-    }
-  }
-
-  return true;
-}
-unsigned int
-CTransaction::GetLegacySigOpCount() const
-{
-  unsigned int nSigOps = 0;
-  BOOST_FOREACH(const CTxIn& txin, vin)
-  {
-    nSigOps += txin.scriptSig.GetSigOpCount(false);
-  }
-  BOOST_FOREACH(const CTxOut& txout, vout)
-  {
-    nSigOps += txout.scriptPubKey.GetSigOpCount(false);
-  }
-  return nSigOps;
 }
 bool AcceptToMemoryPool(CTxMemPool& pool, CTransaction &tx,
                         bool* pfMissingInputs)
@@ -699,87 +564,6 @@ bool AcceptToMemoryPool(CTxMemPool& pool, CTransaction &tx,
          hash.ToString().substr(0,10).c_str(),
          pool.mapTx.size());
   return true;
-}
-bool CTxMemPool::addUnchecked(const uint256& hash, CTransaction &tx)
-{
-  {
-    mapTx[hash] = tx;
-
-    for (unsigned int i = 0; i < tx.vin.size(); i++)
-    {
-      mapNextTx[tx.vin[i].prevout] = CInPoint(&mapTx[hash], i);
-    }
-
-    nTransactionsUpdated++;
-  }
-  return true;
-}
-bool CTxMemPool::remove(const CTransaction &tx, bool fRecursive)
-{
-  RemoveFromMemoryPoolPost(tx);
-  {
-    LOCK(cs);
-    uint256 hash = tx.GetHash();
-
-    if (mapTx.count(hash))
-    {
-      if (fRecursive)
-      {
-        for (unsigned int i = 0; i < tx.vout.size(); i++)
-        {
-          std::map<COutPoint, CInPoint>::iterator it = mapNextTx.find(COutPoint(hash, i));
-
-          if (it != mapNextTx.end())
-          {
-            remove(*it->second.ptx, true);
-          }
-        }
-      }
-
-      BOOST_FOREACH(const CTxIn& txin, tx.vin)
-      mapNextTx.erase(txin.prevout);
-      mapTx.erase(hash);
-      nTransactionsUpdated++;
-    }
-  }
-  return true;
-}
-bool CTxMemPool::removeConflicts(const CTransaction &tx)
-{
-  LOCK(cs);
-  BOOST_FOREACH(const CTxIn &txin, tx.vin)
-  {
-    std::map<COutPoint, CInPoint>::iterator it = mapNextTx.find(txin.prevout);
-
-    if (it != mapNextTx.end())
-    {
-      const CTransaction &txConflict = *it->second.ptx;
-
-      if (txConflict != tx)
-      {
-        remove(txConflict, true);
-      }
-    }
-  }
-  return true;
-}
-void CTxMemPool::clear()
-{
-  LOCK(cs);
-  mapTx.clear();
-  mapNextTx.clear();
-  ++nTransactionsUpdated;
-}
-void CTxMemPool::queryHashes(std::vector<uint256>& vtxid)
-{
-  vtxid.clear();
-  LOCK(cs);
-  vtxid.reserve(mapTx.size());
-
-  for (map<uint256, CTransaction>::iterator mi = mapTx.begin(); mi != mapTx.end(); ++mi)
-  {
-    vtxid.push_back((*mi).first);
-  }
 }
 bool __wx__Tx::AcceptWalletTransaction(CTxDB& txdb)
 {
@@ -1707,7 +1491,7 @@ bool CTransaction::GetCoinAge(CTxDB& txdb, const CBlockIndex* pindexPrev, uint64
     {
       int nSpendDepth;
 
-      if(!minBase(txindex, pindexPrev, nStakeMinConfirmations - 1, nSpendDepth))
+      if(!minBase(txindex, pindexPrev, ConfigurationState::nStakeMinConfirmations - 1, nSpendDepth))
       {
         continue;
       }
@@ -1953,7 +1737,7 @@ bool LoadBlockIndex(bool fAllowNew)
     bnProofOfWorkLimit = bnProofOfWorkLimitTestNet;
     nStakeMinAge = 1 * 60 * 60;
     nCoinbaseMaturity = 10;
-    nStakeMinConfirmations = 10;
+    ConfigurationState::nStakeMinConfirmations = 10;
   }
   else
   {

@@ -61,7 +61,6 @@ extern bool aliasAddress(const CTransaction& tx, std::string& strAddress);
 extern Object JSONRPCError(int code, const string& message);
 extern Value xtu_url__(const string& url);
 extern dev::OverlayDB* overlayDB__;
-dev::OverlayDB* overlayDB_;
 template<typename T> void ConvertTo(Value& value, bool fAllowNull=false);
 std::map<vchType, uint256> mapMyMessages_cycle;
 std::map<vchType, uint256> mapLocator_cycle;
@@ -747,7 +746,7 @@ Value integratedTest1(const Array& params, bool fHelp)
     msg_test_bytes +=1;
     const auto track_used = msg.track - result.track_left;
   }
-  dev::SecureTrieDB<dev::Address, dev::OverlayDB> state(overlayDB_);
+  dev::SecureTrieDB<dev::Address, dev::OverlayDB> state(overlayDB__);
   state.init();
   dev::Address tmpAddr("9999999999999996789012345678901234567890");
   dev::eth::Account tmpAcc(0,0);
@@ -803,7 +802,7 @@ Value integratedTest1(const Array& params, bool fHelp)
     }
     s << tmpAcc.codeHash();
     state.insert(tmpAddr, &s.out());
-    overlayDB_->commit();
+    overlayDB__->commit();
   }
   auto created_acc = host.accounts[create_address];
   dvmc::TransitionalNode account_recon;
@@ -855,7 +854,7 @@ Value integratedTest1(const Array& params, bool fHelp)
 
       {
         {
-          dev::SecureTrieDB<dev::h256, dev::OverlayDB> memdb(const_cast<dev::OverlayDB*>(overlayDB_), tmpAccstorageRoot);
+          dev::SecureTrieDB<dev::h256, dev::OverlayDB> memdb(const_cast<dev::OverlayDB*>(overlayDB__), tmpAccstorageRoot);
 
           for (auto it = memdb.hashedBegin(); it != memdb.hashedEnd(); ++it)
           {
@@ -965,9 +964,9 @@ Value integratedTest1(const Array& params, bool fHelp)
         storage_recon[reconKey] = sv;
       }
 
-      auto& created_account___ = host.accounts[create_address];
+      auto& created_account__ = host.accounts[create_address];
       {
-        for(auto pair : created_account___.storage)
+        for(auto pair : created_account__.storage)
         {
           for(auto pair_r : account_recon.storage)
           {
@@ -990,7 +989,7 @@ Value integratedTest1(const Array& params, bool fHelp)
         }
       }
       {
-        for(auto pair : created_account___.storage)
+        for(auto pair : created_account__.storage)
         {
           dvmc::storage_value sv = account_recon.storage[pair.first];
 
@@ -1004,10 +1003,10 @@ Value integratedTest1(const Array& params, bool fHelp)
           }
         }
       }
-      account_recon.nonce = created_account___.nonce;
-      account_recon.balance = created_account___.balance;
-      account_recon.code = created_account___.code;
-      created_account___ = account_recon;
+      account_recon.nonce = created_account__.nonce;
+      account_recon.balance = created_account__.balance;
+      account_recon.code = created_account__.code;
+      created_account__ = account_recon;
       {
         std::cout << "RECON TEST" << std::endl;
         std::cout << "\n";
@@ -1546,6 +1545,13 @@ Value integratedTest6(const Array& params, bool fHelp)
     throw runtime_error(
       "integratedTest6 args"
       + HelpRequiringPassphrase());
+
+  dev::h256 Empty;
+  std::cout << "empty hash " << Empty << std::endl; 
+  dev::SecureTrieDB<dev::Address, dev::OverlayDB> state(overlayDB__);
+  state.init();
+  std::cout << "state root after init " << state.root() << std::endl; 
+
 
   VertexNodeDB vertexDB("rw+");
   std::string hash1 = "1234567890123456789012345678901234567890123456789012345678901234";

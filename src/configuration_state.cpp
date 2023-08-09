@@ -14,9 +14,9 @@
   const int ConfigurationState::BASELINE_LOCK = 0x00ff0;
   const int ConfigurationState::BLOCK_REWARD_HALVING = 0x2dc6c0;
 
+  int ConfigurationState::nStakeMinConfirmations = 500;
+
 int64_t ConfigurationState::trace() 
 {  
-	
-  const int64_t tmp = MAX_COIN_YEAR_REWARD;
   return MIN_COIN_YEAR_REWARD ;
 }

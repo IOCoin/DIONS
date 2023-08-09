@@ -1,14 +1,12 @@
 #include "transaction.h"
+#include "txdb-leveldb.h"
 #include "configuration_state.h"
 #include "block.h"
 #include "dions.h"
 #include "checkpoints.h"
 extern int nCoinbaseMaturity;
 
-inline bool MoneyRange(int64_t nValue)
-{
-  return (nValue >= 0 && nValue <= ConfigurationState::MAX_MONEY);
-}
+extern inline bool MoneyRange(int64_t nValue);
 bool CTransaction::ConnectInputs(CTxDB& txdb, MapPrevTx inputs, map<uint256, CTxIndex>& mapTestPool, CDiskTxPos& posThisTx,
                                  CBlockIndex* pindexBlock, bool fBlock, bool fMiner, int flags)
 {
@@ -234,4 +232,137 @@ int64_t CTransaction::GetMinFee(unsigned int nBlockSize, enum GetMinFee_mode mod
   }
 
   return nMinFee;
+}
+bool CTransaction::ReadFromDisk(CTxDB& txdb, COutPoint prevout, CTxIndex& txindexRet)
+{
+  SetNull();
+
+  if (!txdb.ReadTxIndex(prevout.hash, txindexRet))
+  {
+    return false;
+  }
+
+  if (!ReadFromDisk(txindexRet.pos))
+  {
+    return false;
+  }
+
+  if (prevout.n >= vout.size())
+  {
+    SetNull();
+    return false;
+  }
+
+  return true;
+}
+bool CTransaction::ReadFromDisk(CTxDB& txdb, COutPoint prevout)
+{
+  CTxIndex txindex;
+  return ReadFromDisk(txdb, prevout, txindex);
+}
+bool CTransaction::ReadFromDisk(COutPoint prevout)
+{
+  CTxDB txdb("r");
+  CTxIndex txindex;
+  return ReadFromDisk(txdb, prevout, txindex);
+}
+bool CTransaction::AreInputsStandard(const MapPrevTx& mapInputs) const
+{
+  if (IsCoinBase())
+  {
+    return true;
+  }
+
+  for (unsigned int i = 0; i < vin.size(); i++)
+  {
+    const CTxOut& prev = GetOutputFor(vin[i], mapInputs);
+    vector<vector<unsigned char> > vSolutions;
+    txnouttype whichType;
+    const CScript& prevScript = prev.scriptPubKey;
+    int op;
+    std::vector<vchType> vvch;
+    CScript::const_iterator pc = prevScript.begin ();
+    CScript rawScript;
+
+    if (aliasScript(prevScript, op, vvch, pc))
+    {
+      rawScript = CScript(pc, prevScript.end ());
+    }
+    else
+    {
+      rawScript = prevScript;
+    }
+
+    if (!Solver(rawScript, whichType, vSolutions))
+    {
+      return false;
+    }
+
+    int nArgsExpected = ScriptSigArgsExpected(whichType, vSolutions);
+
+    if (nArgsExpected < 0)
+    {
+      return false;
+    }
+
+    vector<vector<unsigned char> > stack;
+
+    if(!EvalScript(stack, vin[i].scriptSig, *this, i, SCRIPT_VERIFY_NONE, 0))
+    {
+      return false;
+    }
+
+    if (whichType == TX_SCRIPTHASH)
+    {
+      if (stack.empty())
+      {
+        return false;
+      }
+
+      CScript subscript(stack.back().begin(), stack.back().end());
+      vector<vector<unsigned char> > vSolutions2;
+      txnouttype whichType2;
+
+      if (!Solver(subscript, whichType2, vSolutions2))
+      {
+        return false;
+      }
+
+      if (whichType2 == TX_SCRIPTHASH)
+      {
+        return false;
+      }
+
+      int tmpExpected;
+      tmpExpected = ScriptSigArgsExpected(whichType2, vSolutions2);
+
+      if (tmpExpected < 0)
+      {
+        return false;
+      }
+
+      nArgsExpected += tmpExpected;
+    }
+
+    if (stack.size() != (unsigned int)nArgsExpected)
+    {
+      return false;
+    }
+  }
+
+  return true;
+}
+unsigned int
+CTransaction::GetLegacySigOpCount() const
+{
+  unsigned int nSigOps = 0;
+  BOOST_FOREACH(const CTxIn& txin, vin)
+  {
+    nSigOps += txin.scriptSig.GetSigOpCount(false);
+  }
+  BOOST_FOREACH(const CTxOut& txout, vout)
+  {
+    nSigOps += txout.scriptPubKey.GetSigOpCount(false);
+  }
+  return nSigOps;
 }

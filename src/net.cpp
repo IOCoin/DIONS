@@ -1840,7 +1840,7 @@ bool StopNode()
 {
   printf("StopNode()\n");
   fShutdown = true;
-  nTransactionsUpdated++;
+  CTxMemPool::nTransactionsUpdated++;
   int64_t nStart = GetTime();
 
   if (semOutbound)

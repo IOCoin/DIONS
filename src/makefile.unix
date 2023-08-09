@@ -167,6 +167,7 @@ OBJS= \
     obj/block.o \
     obj/api_transaction.o \
     obj/transaction.o \
+    obj/txmempool.o \
     obj/net.o \
     obj/protocol.o \
     obj/bitcoinrpc.o \

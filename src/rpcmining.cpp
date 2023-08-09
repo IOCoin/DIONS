@@ -121,7 +121,7 @@ Value getworkex(const Array& params, bool fHelp)
     static CBlock* pblock;
 
     if (pindexPrev != pindexBest ||
-        (nTransactionsUpdated != nTransactionsUpdatedLast && GetTime() - nStart > 60))
+        (CTxMemPool::nTransactionsUpdated != nTransactionsUpdatedLast && GetTime() - nStart > 60))
     {
       if (pindexPrev != pindexBest)
       {
@@ -131,7 +131,7 @@ Value getworkex(const Array& params, bool fHelp)
         vNewBlock.clear();
       }
 
-      nTransactionsUpdatedLast = nTransactionsUpdated;
+      nTransactionsUpdatedLast = CTxMemPool::nTransactionsUpdated;
       pindexPrev = pindexBest;
       nStart = GetTime();
       pblock = CreateNewBlock(pwalletMain);
@@ -256,7 +256,7 @@ Value getwork(const Array& params, bool fHelp)
     static CBlock* pblock;
 
     if (pindexPrev != pindexBest ||
-        (nTransactionsUpdated != nTransactionsUpdatedLast && GetTime() - nStart > 60))
+        (CTxMemPool::nTransactionsUpdated != nTransactionsUpdatedLast && GetTime() - nStart > 60))
     {
       if (pindexPrev != pindexBest)
       {
@@ -267,7 +267,7 @@ Value getwork(const Array& params, bool fHelp)
       }
 
       pindexPrev = NULL;
-      nTransactionsUpdatedLast = nTransactionsUpdated;
+      nTransactionsUpdatedLast = CTxMemPool::nTransactionsUpdated;
       CBlockIndex* pindexPrevNew = pindexBest;
       nStart = GetTime();
       pblock = CreateNewBlock(pwalletMain);
@@ -374,7 +374,7 @@ Value tmpTest(const Array& params, bool fHelp)
       static CBlock* pblock;
 
       if (pindexPrev != pindexBest ||
-          (nTransactionsUpdated != nTransactionsUpdatedLast && GetTime() - nStart > 60))
+          (CTxMemPool::nTransactionsUpdated != nTransactionsUpdatedLast && GetTime() - nStart > 60))
       {
         if (pindexPrev != pindexBest)
         {
@@ -385,7 +385,7 @@ Value tmpTest(const Array& params, bool fHelp)
         }
 
         pindexPrev = NULL;
-        nTransactionsUpdatedLast = nTransactionsUpdated;
+        nTransactionsUpdatedLast = CTxMemPool::nTransactionsUpdated;
         CBlockIndex* pindexPrevNew = pindexBest;
         nStart = GetTime();
         pblock = CreateNewBlock(pwalletMain);
@@ -525,10 +525,10 @@ Value getblocktemplate(const Array& params, bool fHelp)
   static CBlock* pblock;
 
   if (pindexPrev != pindexBest ||
-      (nTransactionsUpdated != nTransactionsUpdatedLast && GetTime() - nStart > 5))
+      (CTxMemPool::nTransactionsUpdated != nTransactionsUpdatedLast && GetTime() - nStart > 5))
   {
     pindexPrev = NULL;
-    nTransactionsUpdatedLast = nTransactionsUpdated;
+    nTransactionsUpdatedLast = CTxMemPool::nTransactionsUpdated;
     CBlockIndex* pindexPrevNew = pindexBest;
     nStart = GetTime();
 

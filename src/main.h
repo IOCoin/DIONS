@@ -11,6 +11,7 @@
 #include "ptrie/TrieDB.h"
 #include "ptrie/OverlayDB.h"
 #include "ptrie/Address.h"
+#include "txmempool.h"
 
 #include <list>
 
@@ -85,7 +86,6 @@ extern uint256 nBestChainTrust;
 extern uint256 nBestInvalidTrust;
 extern uint256 hashBestChain;
 extern CBlockIndex* pindexBest;
-extern unsigned int nTransactionsUpdated;
 extern uint64_t nLastBlockTx;
 extern uint64_t nLastBlockSize;
 extern int64_t nLastCoinStakeSearchInterval;
@@ -103,7 +103,6 @@ extern bool fUseFastIndex;
 extern unsigned int nDerivationMethodIndex;
 
 extern bool fEnforceCanonical;
-extern int nStakeMinConfirmations;
 
 static const uint64_t nMinDiskSpace = 52428800;
 
@@ -146,75 +145,11 @@ void ResendWalletTransactions(bool fForce = false);
 bool AcceptToMemoryPool(CTxMemPool& pool, CTransaction &tx,
                         bool* pfMissingInputs);
 bool GetWalletFile(__wx__* pwallet, std::string &strWalletFileOut);
-class CInPoint
-{
-public:
-  CTransaction* ptx;
-  unsigned int n;
-
-  CInPoint()
-  {
-    SetNull();
-  }
-  CInPoint(CTransaction* ptxIn, unsigned int nIn)
-  {
-    ptx = ptxIn;
-    n = nIn;
-  }
-  void SetNull()
-  {
-    ptx = NULL;
-    n = (unsigned int) -1;
-  }
-  bool IsNull() const
-  {
-    return (ptx == NULL && n == (unsigned int) -1);
-  }
-};
 
 bool IsStandardTx(const CTransaction& tx);
 
 bool IsFinalTx(const CTransaction &tx, int nBlockHeight = 0, int64_t nBlockTime = 0);
 
-class CTxMemPool
-{
-public:
-  mutable CCriticalSection cs;
-  std::map<uint256, CTransaction> mapTx;
-  std::map<COutPoint, CInPoint> mapNextTx;
-
-  bool addUnchecked(const uint256& hash, CTransaction &tx);
-  bool remove(const CTransaction &tx, bool fRecursive = false);
-  bool removeConflicts(const CTransaction &tx);
-  void clear();
-  void queryHashes(std::vector<uint256>& vtxid);
-
-  unsigned long size() const
-  {
-    LOCK(cs);
-    return mapTx.size();
-  }
-
-  bool exists(uint256 hash) const
-  {
-    LOCK(cs);
-    return (mapTx.count(hash) != 0);
-  }
-
-  bool lookup(uint256 hash, CTransaction& result) const
-  {
-    LOCK(cs);
-    std::map<uint256, CTransaction>::const_iterator i = mapTx.find(hash);
-
-    if (i == mapTx.end())
-    {
-      return false;
-    }
-
-    result = i->second;
-    return true;
-  }
-};
 
 extern CTxMemPool mempool;
 

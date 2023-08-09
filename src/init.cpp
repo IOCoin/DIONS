@@ -73,7 +73,7 @@ void Shutdown(void* parg)
   if (fFirstThread)
   {
     fShutdown = true;
-    nTransactionsUpdated++;
+    CTxMemPool::nTransactionsUpdated++;
     bitdb.Flush(false);
     StopNode();
     bitdb.Flush(true);

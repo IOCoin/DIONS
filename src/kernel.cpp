@@ -391,7 +391,7 @@ bool CheckKernel(CBlockIndex* pindexPrev, unsigned int nBits, int64_t nTime, con
   {
     int base;
 
-    if(!minBase(txindex, pindexPrev, nStakeMinConfirmations - 1, base))
+    if(!minBase(txindex, pindexPrev, ConfigurationState::nStakeMinConfirmations - 1, base))
     {
       return false;
     }
@@ -446,7 +446,7 @@ bool CheckProofOfStake(CBlockIndex* pindexPrev, const CTransaction& tx, unsigned
   {
     int base;
 
-    if(!minBase(txindex, pindexPrev, nStakeMinConfirmations - 1, base))
+    if(!minBase(txindex, pindexPrev, ConfigurationState::nStakeMinConfirmations - 1, base))
     {
       return tx.DoS(100, error("CheckProofOfStake() : insufficient depth %d", base + 1));
     }

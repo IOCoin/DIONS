@@ -1537,7 +1537,7 @@ void __wx__::AvailableCoinsForStaking(vector<COutput>& vCoins, unsigned int nSpe
         continue;
       }
 
-      if (nDepth < nStakeMinConfirmations)
+      if (nDepth < ConfigurationState::nStakeMinConfirmations)
       {
         continue;
       }
@@ -2094,7 +2094,7 @@ bool __wx__::GetStakeWeight(uint64_t& nWeight)
       continue;
     }
 
-    if(pcoin.first->GetDepthInMainChain() >= nStakeMinConfirmations)
+    if(pcoin.first->GetDepthInMainChain() >= ConfigurationState::nStakeMinConfirmations)
     {
       nWeight += pcoin.first->vout[pcoin.second].nValue;
     }

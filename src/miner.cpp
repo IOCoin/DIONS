@@ -208,6 +208,7 @@ CBlock* CreateNewBlock(__wx__* pwallet, bool fProofOfStake, int64_t* pFees)
 
               pblock->stateRoot = pindexPrev->stateRootIndex;
               std::cout << "execution request - previous state root " << pblock->stateRoot << std::endl;
+              //XXXX dev::SecureTrieDB<dev::Address, dev::OverlayDB>* state;
               dev::h256 Empty;
 
               if(pblock->stateRoot == Empty)
@@ -222,6 +223,8 @@ CBlock* CreateNewBlock(__wx__* pwallet, bool fProofOfStake, int64_t* pFees)
               }
               else
               {
+                std::cout << "state root is non zero creating securetriedb instance from existing ROOT" << std::endl;
+                std::cout << "state root is " << pblock->stateRoot << std::endl;
                 pblock->state__ = new dev::SecureTrieDB<dev::Address, dev::OverlayDB>(overlayDB__,pblock->stateRoot);
               }
 
