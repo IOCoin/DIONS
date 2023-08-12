@@ -1,3 +1,4 @@
+
 #include "api_transaction.h"
 #include "txdb-leveldb.h"
 
@@ -112,10 +113,6 @@ int CMerkleTx::GetBlocksToMaturity() const
   }
 
   return max(0, (nCoinbaseMaturity+10) - GetDepthInMainChain());
-}
-bool CMerkleTx::AcceptToMemoryPool()
-{
-  return ::AcceptToMemoryPool(mempool, *this, NULL);
 }
 int CMerkleTx::GetDepthInMainChain(int& nHeightRet) const
 {

@@ -1,4 +1,5 @@
 
+
 #include <boost/assign/list_of.hpp>
 #include "base58.h"
 #include "bitcoinrpc.h"
@@ -868,7 +869,7 @@ Value sendrawtransaction(const Array& params, bool fHelp)
   }
   else
   {
-    if (!AcceptToMemoryPool(mempool, tx, NULL))
+    if (!mempool.accept(tx, NULL))
     {
       throw JSONRPCError(RPC_DESERIALIZATION_ERROR, "TX rejected");
     }

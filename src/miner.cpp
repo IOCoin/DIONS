@@ -1,3 +1,4 @@
+
 #include "txdb.h"
 #include "miner.h"
 #include "kernel.h"
@@ -208,7 +209,6 @@ CBlock* CreateNewBlock(__wx__* pwallet, bool fProofOfStake, int64_t* pFees)
 
               pblock->stateRoot = pindexPrev->stateRootIndex;
               std::cout << "execution request - previous state root " << pblock->stateRoot << std::endl;
-              //XXXX dev::SecureTrieDB<dev::Address, dev::OverlayDB>* state;
               dev::h256 Empty;
 
               if(pblock->stateRoot == Empty)
@@ -526,7 +526,6 @@ void FormatHashBuffers(CBlock* pblock, char* pmidstate, char* pdata, char* phash
   tmp;
   memset(tmp.pchPadding0, 0, sizeof(tmp.pchPadding0));
   memset(tmp.pchPadding1, 0, sizeof(tmp.pchPadding1));
-  
   tmp.block.nVersion = pblock->nVersion;
   tmp.block.hashPrevBlock = pblock->hashPrevBlock;
   tmp.block.hashMerkleRoot = pblock->hashMerkleRoot;

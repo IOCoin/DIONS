@@ -23,7 +23,7 @@ public:
   bool removeConflicts(const CTransaction &tx);
   void clear();
   void queryHashes(std::vector<uint256>& vtxid);
-  bool AcceptToMemoryPool(CTxMemPool& pool, CTransaction &tx,
+  bool accept(CTransaction &tx,
                         bool* pfMissingInputs);
 
   unsigned long size() const

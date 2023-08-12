@@ -1,4 +1,5 @@
 
+
 #include "txdb.h"
 #include "walletdb.h"
 #include "bitcoinrpc.h"
@@ -309,7 +310,7 @@ bool InitSanityCheck(void)
   return true;
 }
 bool AppInit2()
-{ 
+{
 #ifdef _MSC_VER
   _CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_FILE);
   _CrtSetReportFile(_CRT_WARN, CreateFileA("NUL", GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, 0));
@@ -395,6 +396,7 @@ bool AppInit2()
   {
     SoftSetBoolArg("-listen", true);
   }
+
   if (mapArgs.count("-connect") && mapMultiArgs["-connect"].size() > 0)
   {
     SoftSetBoolArg("-dnsseed", false);
@@ -454,8 +456,6 @@ bool AppInit2()
   {
     fServer = GetBoolArg("-server");
   }
-
-
 
 #if !defined(QT_GUI)
   fServer = true;

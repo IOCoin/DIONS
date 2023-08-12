@@ -1,3 +1,4 @@
+
 #include "alert.h"
 #include "main.h"
 #include "checkpoints.h"
@@ -133,17 +134,6 @@ void UnregisterWallet(__wx__* pwalletIn)
     setpwalletRegistered.erase(pwalletIn);
   }
 }
-bool static IsFromMe(CTransaction& tx)
-{
-  BOOST_FOREACH(__wx__* pwallet, setpwalletRegistered)
-
-  if (pwallet->IsFromMe(tx))
-  {
-    return true;
-  }
-
-  return false;
-}
 bool static GetTransaction(const uint256& hashTx, __wx__Tx& wtx)
 {
   BOOST_FOREACH(__wx__* pwallet, setpwalletRegistered)
@@ -154,11 +144,6 @@ bool static GetTransaction(const uint256& hashTx, __wx__Tx& wtx)
   }
 
   return false;
-}
-void static EraseFromWallets(uint256 hash)
-{
-  BOOST_FOREACH(__wx__* pwallet, setpwalletRegistered)
-  pwallet->EraseFromWallet(hash);
 }
 bool minBase(const CTxIndex& txindex, const CBlockIndex* pindexFrom, int nMaxDepth, int& nActualDepth)
 {
@@ -285,7 +270,6 @@ bool IsStandardTx(const CTransaction& tx)
     return false;
   }
 
-
   if (!IsFinalTx(tx, nBestHeight + 1))
   {
     return false;
@@ -384,187 +368,6 @@ bool IsFinalTx(const CTransaction &tx, int nBlockHeight, int64_t nBlockTime)
 
   return true;
 }
-bool AcceptToMemoryPool(CTxMemPool& pool, CTransaction &tx,
-                        bool* pfMissingInputs)
-{
-  AssertLockHeld(cs_main);
-
-  if (pfMissingInputs)
-  {
-    *pfMissingInputs = false;
-  }
-
-  if (!tx.CheckTransaction())
-  {
-    return error("AcceptToMemoryPool : CheckTransaction failed");
-  }
-
-  if (tx.IsCoinBase())
-  {
-    return tx.DoS(100, error("AcceptToMemoryPool : coinbase as individual tx"));
-  }
-
-  if (tx.IsCoinStake())
-  {
-    return tx.DoS(100, error("AcceptToMemoryPool : coinstake as individual tx"));
-  }
-
-  if (!fTestNet && tx.nVersion == CTransaction::DION_TX_VERSION && !V3(nBestHeight))
-  {
-    return error("AcceptToMemoryPool : type");
-  }
-
-  if (!IsStandardTx(tx) && tx.nVersion != CTransaction::DION_TX_VERSION)
-  {
-    return error("AcceptToMemoryPool : nonstandard transaction type");
-  }
-
-  uint256 hash = tx.GetHash();
-
-  if (pool.exists(hash))
-  {
-    return false;
-  }
-
-  CTransaction* ptxOld = NULL;
-  {
-    LOCK(pool.cs);
-
-    for (unsigned int i = 0; i < tx.vin.size(); i++)
-    {
-      COutPoint outpoint = tx.vin[i].prevout;
-
-      if (pool.mapNextTx.count(outpoint))
-      {
-        return false;
-
-        if (i != 0)
-        {
-          return false;
-        }
-
-        ptxOld = pool.mapNextTx[outpoint].ptx;
-
-        if (IsFinalTx(*ptxOld))
-        {
-          return false;
-        }
-
-        if (!tx.IsNewerThan(*ptxOld))
-        {
-          return false;
-        }
-
-        for (unsigned int i = 0; i < tx.vin.size(); i++)
-        {
-          COutPoint outpoint = tx.vin[i].prevout;
-
-          if (!pool.mapNextTx.count(outpoint) || pool.mapNextTx[outpoint].ptx != ptxOld)
-          {
-            return false;
-          }
-        }
-
-        break;
-      }
-    }
-  }
-  {
-    CTxDB txdb("r");
-
-    if (txdb.ContainsTx(hash))
-    {
-      return false;
-    }
-
-    MapPrevTx mapInputs;
-    map<uint256, CTxIndex> mapUnused;
-    bool fInvalid = false;
-
-    if (!tx.FetchInputs(txdb, mapUnused, false, false, mapInputs, fInvalid))
-    {
-      if (fInvalid)
-      {
-        return error("AcceptToMemoryPool : FetchInputs found invalid tx %s", hash.ToString().substr(0,10).c_str());
-      }
-
-      if (pfMissingInputs)
-      {
-        *pfMissingInputs = true;
-      }
-
-      return false;
-    }
-
-    if (!tx.AreInputsStandard(mapInputs))
-    {
-      return error("AcceptToMemoryPool : nonstandard transaction input");
-    }
-
-    int64_t nFees = tx.GetValueIn(mapInputs)-tx.GetValueOut();
-    unsigned int nSize = ::GetSerializeSize(tx, SER_NETWORK, PROTOCOL_VERSION);
-    int64_t txMinFee = tx.GetMinFee(1000, GMF_RELAY, nSize);
-
-    if (nFees < txMinFee)
-      return error("AcceptToMemoryPool : not enough fees %s, %" PRId64 " < %" PRId64,
-                   hash.ToString().c_str(),
-                   nFees, txMinFee);
-
-    if(nFees < CTransaction::MIN_RELAY_TX_FEE)
-    {
-      static CCriticalSection cs;
-      static double dFreeCount;
-      static int64_t nLastTime;
-      int64_t nNow = GetTime();
-      {
-        LOCK(pool.cs);
-        dFreeCount *= pow(1.0 - 1.0/600.0, (double)(nNow - nLastTime));
-        nLastTime = nNow;
-
-        if (dFreeCount > GetArg("-limitfreerelay", 15)*10*1000 && !IsFromMe(tx))
-        {
-          return error("AcceptToMemoryPool : free transaction rejected by rate limiter");
-        }
-
-        if (fDebug)
-        {
-          printf("Rate limit dFreeCount: %g => %g\n", dFreeCount, dFreeCount+nSize);
-        }
-
-        dFreeCount += nSize;
-      }
-    }
-
-    CDiskTxPos cDiskTxPos = CDiskTxPos(1,1,1);
-
-    if(!tx.ConnectInputs(txdb, mapInputs, mapUnused, cDiskTxPos, pindexBest, false, false, STANDARD_SCRIPT_VERIFY_FLAGS))
-    {
-      return error("AcceptToMemoryPool : ConnectInputs failed %s", hash.ToString().substr(0,10).c_str());
-    }
-  }
-  AcceptToMemoryPoolPost(tx);
-  {
-    LOCK(pool.cs);
-
-    if (ptxOld)
-    {
-      printf("AcceptToMemoryPool : replacing tx %s with new version\n", ptxOld->GetHash().ToString().c_str());
-      pool.remove(*ptxOld);
-    }
-
-    pool.addUnchecked(hash, tx);
-  }
-
-  if (ptxOld)
-  {
-    EraseFromWallets(ptxOld->GetHash());
-  }
-
-  printf("AcceptToMemoryPool : accepted %s (poolsz %" PRIszu ")\n",
-         hash.ToString().substr(0,10).c_str(),
-         pool.mapTx.size());
-  return true;
-}
 bool __wx__Tx::AcceptWalletTransaction(CTxDB& txdb)
 {
   {
@@ -576,11 +379,11 @@ bool __wx__Tx::AcceptWalletTransaction(CTxDB& txdb)
 
         if (!mempool.exists(hash) && !txdb.ContainsTx(hash))
         {
-          tx.AcceptToMemoryPool();
+          mempool.accept(tx, NULL);
         }
       }
     }
-    return AcceptToMemoryPool();
+    return mempool.accept(*this, NULL);
   }
   return false;
 }
@@ -1397,7 +1200,7 @@ bool Reorganize(CTxDB& txdb, CBlockIndex* pindexNew)
   }
   BOOST_FOREACH(CTransaction& tx, vResurrect)
   {
-    AcceptToMemoryPool(mempool, tx, NULL);
+    mempool.accept(tx, NULL);
   }
   BOOST_FOREACH(CTransaction& tx, vDelete)
   {
@@ -1590,7 +1393,6 @@ bool ProcessBlock(CNode* pfrom, CBlock* pblock)
 
       return error("ProcessBlock() : block with timestamp before last checkpoint");
     }
-
   }
 
   if (!pblock->CheckBlock())
@@ -2548,7 +2350,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
     pfrom->AddInventoryKnown(inv);
     bool fMissingInputs = false;
 
-    if (AcceptToMemoryPool(mempool, tx, &fMissingInputs))
+    if (mempool.accept(tx, &fMissingInputs))
     {
       SyncWithWallets(tx, NULL, true);
       RelayTransaction(tx, inv.hash);
@@ -2568,7 +2370,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
           CTransaction& orphanTx = mapOrphanTransactions[orphanTxHash];
           bool fMissingInputs2 = false;
 
-          if (AcceptToMemoryPool(mempool, orphanTx, &fMissingInputs2))
+          if (mempool.accept(orphanTx, &fMissingInputs2))
           {
             printf("   accepted orphan tx %s\n", orphanTxHash.ToString().substr(0,10).c_str());
             SyncWithWallets(tx, NULL, true);

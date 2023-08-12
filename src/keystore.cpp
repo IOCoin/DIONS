@@ -1,4 +1,5 @@
 
+
 #include "keystore.h"
 #include "script.h"
 bool CKeyStore::GetPubKey(const CKeyID &address, CPubKey &vchPubKeyOut) const

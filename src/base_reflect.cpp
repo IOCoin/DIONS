@@ -1,3 +1,4 @@
+
 #include "db.h"
 #include "txdb-leveldb.h"
 #include "keystore.h"
@@ -372,8 +373,6 @@ bool sectionVertex(const string& target, string& code)
 }
 void sectionTest(std::vector<CTransaction>& testTxVector, dev::SecureTrieDB<dev::Address, dev::OverlayDB>& state)
 {
-  std::cout << "XXXX Entered sectionTest" << std::endl;
-
   for(unsigned int index=0; index<testTxVector.size(); index++)
   {
     cba cAddr_;
@@ -1547,12 +1546,10 @@ Value integratedTest6(const Array& params, bool fHelp)
       + HelpRequiringPassphrase());
 
   dev::h256 Empty;
-  std::cout << "empty hash " << Empty << std::endl; 
+  std::cout << "empty hash " << Empty << std::endl;
   dev::SecureTrieDB<dev::Address, dev::OverlayDB> state(overlayDB__);
   state.init();
-  std::cout << "state root after init " << state.root() << std::endl; 
-
-
+  std::cout << "state root after init " << state.root() << std::endl;
   VertexNodeDB vertexDB("rw+");
   std::string hash1 = "1234567890123456789012345678901234567890123456789012345678901234";
   std::string hash2 = "abcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcd";

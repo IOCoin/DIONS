@@ -1,3 +1,4 @@
+
 #include "db.h"
 #include "txdb-leveldb.h"
 #include "keystore.h"
@@ -536,7 +537,6 @@ bool txPost(const vector<pair<CScript, int64_t> >& vecSend, const __wx__Tx& wtxI
     return false;
   }
 
-  wtxNew.pwallet = pwalletMain;
   ENTER_CRITICAL_SECTION(cs_main)
   {
     CTxDB txdb("r");
@@ -625,7 +625,7 @@ bool txPost(const vector<pair<CScript, int64_t> >& vecSend, const __wx__Tx& wtxI
           continue;
         }
 
-        wtxNew.AddSupportingTransactions(txdb);
+        pwalletMain->AddSupportingTransactions(wtxNew,txdb);
         wtxNew.fTimeReceivedIsTxTime = true;
         break;
       }

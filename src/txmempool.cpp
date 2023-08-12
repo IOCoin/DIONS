@@ -1,3 +1,4 @@
+
 #include "txmempool.h"
 #include "txdb-leveldb.h"
 #include "wallet.h"
@@ -107,7 +108,7 @@ void CTxMemPool::queryHashes(std::vector<uint256>& vtxid)
     vtxid.push_back((*mi).first);
   }
 }
-bool CTxMemPool::AcceptToMemoryPool(CTxMemPool& pool, CTransaction &tx,
+bool CTxMemPool::accept(CTransaction &tx,
                         bool* pfMissingInputs)
 {
   AssertLockHeld(cs_main);
@@ -144,20 +145,20 @@ bool CTxMemPool::AcceptToMemoryPool(CTxMemPool& pool, CTransaction &tx,
 
   uint256 hash = tx.GetHash();
 
-  if (pool.exists(hash))
+  if (this->exists(hash))
   {
     return false;
   }
 
   CTransaction* ptxOld = NULL;
   {
-    LOCK(pool.cs);
+    LOCK(this->cs);
 
     for (unsigned int i = 0; i < tx.vin.size(); i++)
     {
       COutPoint outpoint = tx.vin[i].prevout;
 
-      if (pool.mapNextTx.count(outpoint))
+      if (this->mapNextTx.count(outpoint))
       {
         return false;
 
@@ -166,7 +167,7 @@ bool CTxMemPool::AcceptToMemoryPool(CTxMemPool& pool, CTransaction &tx,
           return false;
         }
 
-        ptxOld = pool.mapNextTx[outpoint].ptx;
+        ptxOld = this->mapNextTx[outpoint].ptx;
 
         if (IsFinalTx(*ptxOld))
         {
@@ -182,7 +183,7 @@ bool CTxMemPool::AcceptToMemoryPool(CTxMemPool& pool, CTransaction &tx,
         {
           COutPoint outpoint = tx.vin[i].prevout;
 
-          if (!pool.mapNextTx.count(outpoint) || pool.mapNextTx[outpoint].ptx != ptxOld)
+          if (!this->mapNextTx.count(outpoint) || this->mapNextTx[outpoint].ptx != ptxOld)
           {
             return false;
           }
@@ -240,7 +241,7 @@ bool CTxMemPool::AcceptToMemoryPool(CTxMemPool& pool, CTransaction &tx,
       static int64_t nLastTime;
       int64_t nNow = GetTime();
       {
-        LOCK(pool.cs);
+        LOCK(this->cs);
         dFreeCount *= pow(1.0 - 1.0/600.0, (double)(nNow - nLastTime));
         nLastTime = nNow;
 
@@ -267,15 +268,15 @@ bool CTxMemPool::AcceptToMemoryPool(CTxMemPool& pool, CTransaction &tx,
   }
   AcceptToMemoryPoolPost(tx);
   {
-    LOCK(pool.cs);
+    LOCK(this->cs);
 
     if (ptxOld)
     {
       printf("AcceptToMemoryPool : replacing tx %s with new version\n", ptxOld->GetHash().ToString().c_str());
-      pool.remove(*ptxOld);
+      this->remove(*ptxOld);
     }
 
-    pool.addUnchecked(hash, tx);
+    this->addUnchecked(hash, tx);
   }
 
   if (ptxOld)
@@ -285,6 +286,6 @@ bool CTxMemPool::AcceptToMemoryPool(CTxMemPool& pool, CTransaction &tx,
 
   printf("AcceptToMemoryPool : accepted %s (poolsz %" PRIszu ")\n",
          hash.ToString().substr(0,10).c_str(),
-         pool.mapTx.size());
+         this->mapTx.size());
   return true;
 }

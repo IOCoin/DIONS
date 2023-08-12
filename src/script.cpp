@@ -1,4 +1,5 @@
 
+
 #include <boost/foreach.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <boost/tuple/tuple_comparison.hpp>
@@ -671,7 +672,6 @@ bool EvalScript(vector<vector<unsigned char> >& stack, const CScript& script, co
           {
             return false;
           }
-
 
           if (!(
                 (txTo.nLockTime < ConfigurationState::LOCKTIME_THRESHOLD && nLockTime < ConfigurationState::LOCKTIME_THRESHOLD) ||

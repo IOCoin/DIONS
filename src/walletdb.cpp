@@ -1,4 +1,5 @@
 
+
 #include "walletdb.h"
 #include "wallet.h"
 #include <boost/version.hpp>
@@ -217,7 +218,7 @@ ReadKeyValue(__wx__* pwallet, CDataStream& ssKey, CDataStream& ssValue,
 
       if (wtx.CheckTransaction() && (wtx.GetHash() == hash))
       {
-        wtx.BindWallet(pwallet);
+        wtx.BindWallet();
       }
       else
       {

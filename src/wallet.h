@@ -16,6 +16,9 @@
 #include "api_transaction.h"
 
 #include "ray_shade.h"
+#include "wallet_transaction.h"
+#include "api_transaction.h"
+#include "type_mapvalue.h"
 
 extern bool fWalletUnlockStakingOnly;
 extern bool fConfChange;
@@ -24,7 +27,6 @@ class __wx__Tx;
 class CReserveKey;
 class COutput;
 class CCoinControl;
-
 
 enum WalletFeature
 {
@@ -67,9 +69,6 @@ public:
     )
 };
 
-
-
-
 class __wx__ : public CCryptoKeyStore
 {
 private:
@@ -85,10 +84,6 @@ private:
 
 public:
     bool SelectCoins(int64_t nTargetValue, unsigned int nSpendTime, std::set<std::pair<const __wx__Tx*,unsigned int> >& setCoinsRet, int64_t& nValueRet, const CCoinControl *coinControl=NULL) const;
-
-
-
-
 
     mutable CCriticalSection cs_wallet;
 
@@ -177,18 +172,10 @@ public:
 
     void kt(std::map<CKeyID, int64_t> &mapKeyBirth) const;
 
-
-
-
-
     int64_t IncOrderPosNext(__wx__DB *pwalletdb = NULL);
 
     typedef std::pair<__wx__Tx*, CAccountingEntry*> TxPair;
     typedef std::multimap<int64_t, TxPair > TxItems;
-
-
-
-
 
     TxItems OrderedTxItems(std::list<CAccountingEntry>& acentries, std::string strAccount = "");
 
@@ -244,6 +231,65 @@ public:
     bool __xfa(const vector<CTxOut>& vout) const;
     bool IsMine(const CTxIn& txin) const;
     int64_t GetDebit(const CTxIn& txin) const;
+    void GetAccountAmounts(const __wx__Tx& wtx, const string& strAccount, int64_t& nReceived,
+                                 int64_t& nSent, int64_t& nFee) const;
+    void AddSupportingTransactions(__wx__Tx& wtx, CTxDB& txdb);
+    bool WriteTxToDisk(const __wx__Tx&);
+    int64_t GetTxDebit(const __wx__Tx& wtx) const
+    {
+        if (wtx.vin.empty())
+            return 0;
+        if (wtx.fDebitCached)
+            return wtx.nDebitCached;
+        wtx.nDebitCached = GetDebit(wtx);
+        wtx.fDebitCached = true;
+        return wtx.nDebitCached;
+    }
+    int64_t GetTxCredit(__wx__Tx& wtx,bool fUseCache=true) const
+    {
+
+        if ((wtx.IsCoinBase() || wtx.IsCoinStake()) && wtx.GetBlocksToMaturity() > 0)
+            return 0;
+
+
+        if (fUseCache && wtx.fCreditCached)
+            return wtx.nCreditCached;
+        wtx.nCreditCached = this->GetCredit(wtx);
+        wtx.fCreditCached = true;
+        return wtx.nCreditCached;
+    }
+    int64_t GetTxChange(__wx__Tx& wtx) const
+    {
+        if (wtx.fChangeCached)
+            return wtx.nChangeCached;
+        wtx.nChangeCached = this->GetChange(wtx);
+        wtx.fChangeCached = true;
+        return wtx.nChangeCached;
+    }
+    int64_t GetAvailableTxCredit(const __wx__Tx& wtx, bool fUseCache=true) const
+    {
+        if ((wtx.IsCoinBase() || wtx.IsCoinStake()) && wtx.GetBlocksToMaturity() > 0)
+            return 0;
+
+        if (fUseCache && wtx.fAvailableCreditCached)
+            return wtx.nAvailableCreditCached;
+
+        int64_t nCredit = 0;
+        for (unsigned int i = 0; i < wtx.vout.size(); i++)
+        {
+            if (!wtx.IsSpent(i))
+            {
+                const CTxOut &txout = wtx.vout[i];
+                nCredit += this->GetCredit(txout);
+                if (!MoneyRange(nCredit))
+                    throw std::runtime_error("__wx__Tx::GetAvailableCredit() : value out of range");
+            }
+        }
+
+        wtx.nAvailableCreditCached = nCredit;
+        wtx.fAvailableCreditCached = true;
+        return nCredit;
+    }
     bool IsMine(const CTxOut& txout) const
     {
         return ::IsMine(*this, txout.scriptPubKey);
@@ -279,6 +325,69 @@ public:
 
         return s;
     }
+    bool IsTrusted(const __wx__Tx& wtx) const
+    {
+      if(!this->IsFromMe(wtx) || !this->IsTrustedTx(wtx))
+	      return false;
+     
+       return true; 
+    }
+    bool IsTrustedTx(const __wx__Tx& wtx) const
+    {
+        if (!IsFinalTx(wtx))
+            return false;
+        int nDepth = wtx.GetDepthInMainChain();
+        if (nDepth >= 1)
+        {
+            return true;
+        }
+        if (nDepth < 0)
+        {
+            return false;
+        }
+        if (fConfChange)
+          return false;
+
+        std::map<uint256, const CMerkleTx*> mapPrev;
+        std::vector<const CMerkleTx*> vWorkQueue;
+        vWorkQueue.reserve(wtx.vtxPrev.size()+1);
+        vWorkQueue.push_back(&wtx);
+        for (unsigned int i = 0; i < vWorkQueue.size(); i++)
+        {
+            const CMerkleTx* ptx = vWorkQueue[i];
+
+            if (!IsFinalTx(*ptx))
+            {
+                return false;
+            }
+            int nPDepth = ptx->GetDepthInMainChain();
+            if (nPDepth >= 1)
+            {
+                continue;
+            }
+            if (nPDepth < 0)
+            {
+                return false;
+            }
+
+            if (mapPrev.empty())
+            {
+                BOOST_FOREACH(const CMerkleTx& tx, wtx.vtxPrev)
+                    mapPrev[tx.GetHash()] = &tx;
+            }
+
+            BOOST_FOREACH(const CTxIn& txin, ptx->vin)
+            {
+                if (!mapPrev.count(txin.prevout.hash))
+                {
+                    return false;
+                }
+                vWorkQueue.push_back(mapPrev[txin.prevout.hash]);
+            }
+        }
+
+        return true;
+    }
     bool IsFromMe(const CTransaction& tx) const
     {
         return (GetDebit(tx) > 0);
@@ -294,6 +403,10 @@ public:
         }
         return nDebit;
     }
+
+    void GetTxAmounts(const __wx__Tx&, list<pair<CTxDestination, int64_t> >& listReceived,
+                      list<pair<CTxDestination, int64_t> >& listSent, int64_t& nFee, string& strSentAccount) const;
+
     int64_t GetCredit(const CTransaction& tx) const
     {
         int64_t nCredit = 0;
@@ -315,6 +428,14 @@ public:
                 throw std::runtime_error("__wx__::GetChange() : value out of range");
         }
         return nChange;
+    }
+    int64_t GetTxChange(const __wx__Tx& wtx) const
+    {
+        if (wtx.fChangeCached)
+            return wtx.nChangeCached;
+        wtx.nChangeCached = this->GetChange(wtx);
+        wtx.fChangeCached = true;
+        return wtx.nChangeCached;
     }
     void SetBestChain(const CBlockLocator& loc);
 
@@ -399,411 +520,6 @@ public:
     void KeepKey();
 };
 
-
-typedef std::map<std::string, std::string> mapValue_t;
-
-
-static void ReadOrderPos(int64_t& nOrderPos, mapValue_t& mapValue)
-{
-    if (!mapValue.count("n"))
-    {
-        nOrderPos = -1;
-        return;
-    }
-    nOrderPos = atoi64(mapValue["n"].c_str());
-}
-
-
-static void WriteOrderPos(const int64_t& nOrderPos, mapValue_t& mapValue)
-{
-    if (nOrderPos == -1)
-        return;
-    mapValue["n"] = i64tostr(nOrderPos);
-}
-
-
-
-
-
-class __wx__Tx : public CMerkleTx
-{
-private:
-
-public:
-    const __wx__* pwallet;
-    std::vector<CMerkleTx> vtxPrev;
-    mapValue_t mapValue;
-    std::vector<std::pair<std::string, std::string> > vOrderForm;
-    unsigned int fTimeReceivedIsTxTime;
-    unsigned int nTimeReceived;
-    unsigned int nTimeSmart;
-    char fFromMe;
-    std::string strFromAccount;
-    std::vector<char> vfSpent;
-    int64_t nOrderPos;
-
-
-    mutable bool fDebitCached;
-    mutable bool fCreditCached;
-    mutable bool fAvailableCreditCached;
-    mutable bool fChangeCached;
-    mutable int64_t nDebitCached;
-    mutable int64_t nCreditCached;
-    mutable int64_t nAvailableCreditCached;
-    mutable int64_t nChangeCached;
-
-    mutable int nAliasOut;
-    mutable vchType vchAlias;
-    mutable vchType vchValue;
-    mutable int op__;
-    mutable bool s__;
-
-    mutable bool messageTxDecoded;
-    mutable bool messageTxDecodeSuccess;
-    mutable int nMessageOut;
-    mutable vchType vchMessage;
-
-    mutable bool pkTxDecoded;
-    mutable bool pkTxDecodeSuccess;
-    mutable int nPKOut;
-    mutable vchType vchSender;
-    mutable vchType vchRecipient;
-    mutable vchType vchKey;
-    mutable vchType vchAESKeyEncrypted;
-    mutable vchType iv128Base64Vch;
-    mutable vchType vchSignature;
-
-    __wx__Tx()
-    {
-        Init(NULL);
-    }
-
-    __wx__Tx(const __wx__* pwalletIn)
-    {
-        Init(pwalletIn);
-    }
-
-    __wx__Tx(const __wx__* pwalletIn, const CMerkleTx& txIn) : CMerkleTx(txIn)
-    {
-        Init(pwalletIn);
-    }
-
-    __wx__Tx(const __wx__* pwalletIn, const CTransaction& txIn) : CMerkleTx(txIn)
-    {
-        Init(pwalletIn);
-    }
-
-    void Init(const __wx__* pwalletIn)
-    {
-        pwallet = pwalletIn;
-        vtxPrev.clear();
-        mapValue.clear();
-        vOrderForm.clear();
-        fTimeReceivedIsTxTime = false;
-        nTimeReceived = 0;
-        nTimeSmart = 0;
-        fFromMe = false;
-        strFromAccount.clear();
-        vfSpent.clear();
-        fDebitCached = false;
-        fCreditCached = false;
-        fAvailableCreditCached = false;
-        fChangeCached = false;
-        nDebitCached = 0;
-        nCreditCached = 0;
-        nAvailableCreditCached = 0;
-        nChangeCached = 0;
-        nOrderPos = -1;
-    }
-
-    IMPLEMENT_SERIALIZE
-    (
-        __wx__Tx* pthis = const_cast<__wx__Tx*>(this);
-        if (fRead)
-            pthis->Init(NULL);
-        char fSpent = false;
-
-        if (!fRead)
-        {
-            pthis->mapValue["fromaccount"] = pthis->strFromAccount;
-
-            std::string str;
-            BOOST_FOREACH(char f, vfSpent)
-            {
-                str += (f ? '1' : '0');
-                if (f)
-                    fSpent = true;
-            }
-            pthis->mapValue["spent"] = str;
-
-            WriteOrderPos(pthis->nOrderPos, pthis->mapValue);
-
-            if (nTimeSmart)
-                pthis->mapValue["timesmart"] = strprintf("%u", nTimeSmart);
-        }
-
-        nSerSize += SerReadWrite(s, *(CMerkleTx*)this, nType, nVersion,ser_action);
-        READWRITE(vtxPrev);
-        READWRITE(mapValue);
-        READWRITE(vOrderForm);
-        READWRITE(fTimeReceivedIsTxTime);
-        READWRITE(nTimeReceived);
-        READWRITE(fFromMe);
-        READWRITE(fSpent);
-
-        if (fRead)
-        {
-            pthis->strFromAccount = pthis->mapValue["fromaccount"];
-
-            if (mapValue.count("spent"))
-                BOOST_FOREACH(char c, pthis->mapValue["spent"])
-                    pthis->vfSpent.push_back(c != '0');
-            else
-                pthis->vfSpent.assign(vout.size(), fSpent);
-
-            ReadOrderPos(pthis->nOrderPos, pthis->mapValue);
-
-            pthis->nTimeSmart = mapValue.count("timesmart") ? (unsigned int)atoi64(pthis->mapValue["timesmart"]) : 0;
-        }
-
-        pthis->mapValue.erase("fromaccount");
-        pthis->mapValue.erase("version");
-        pthis->mapValue.erase("spent");
-        pthis->mapValue.erase("n");
-        pthis->mapValue.erase("timesmart");
-    )
-
-
-
-    bool UpdateSpent(const std::vector<char>& vfNewSpent)
-    {
-        bool fReturn = false;
-        for (unsigned int i = 0; i < vfNewSpent.size(); i++)
-        {
-            if (i == vfSpent.size())
-                break;
-
-            if (vfNewSpent[i] && !vfSpent[i])
-            {
-                vfSpent[i] = true;
-                fReturn = true;
-                fAvailableCreditCached = false;
-            }
-        }
-        return fReturn;
-    }
-
-
-    void MarkDirty()
-    {
-        fCreditCached = false;
-        fAvailableCreditCached = false;
-        fDebitCached = false;
-        fChangeCached = false;
-    }
-
-    void BindWallet(__wx__ *pwalletIn)
-    {
-        pwallet = pwalletIn;
-        MarkDirty();
-    }
-
-    void MarkSpent(unsigned int nOut)
-    {
-
-        if (nOut >= vout.size())
-            throw std::runtime_error("__wx__Tx::MarkSpent() : nOut out of range");
-        vfSpent.resize(vout.size());
-        if (!vfSpent[nOut])
-        {
-            vfSpent[nOut] = true;
-            fAvailableCreditCached = false;
-        }
-    }
-
-    void MarkUnspent(unsigned int nOut)
-    {
-        if (nOut >= vout.size())
-            throw std::runtime_error("__wx__Tx::MarkUnspent() : nOut out of range");
-        vfSpent.resize(vout.size());
-        if (vfSpent[nOut])
-        {
-            vfSpent[nOut] = false;
-            fAvailableCreditCached = false;
-        }
-    }
-
-    bool IsSpent(unsigned int nOut) const
-    {
-        if (nOut >= vout.size())
-            throw std::runtime_error("__wx__Tx::IsSpent() : nOut out of range");
-        if (nOut >= vfSpent.size())
-            return false;
-        return (!!vfSpent[nOut]);
-    }
-
-    int64_t GetDebit() const
-    {
-        if (vin.empty())
-            return 0;
-        if (fDebitCached)
-            return nDebitCached;
-        nDebitCached = pwallet->GetDebit(*this);
-        fDebitCached = true;
-        return nDebitCached;
-    }
-
-    int64_t GetCredit(bool fUseCache=true) const
-    {
-
-        if ((IsCoinBase() || IsCoinStake()) && GetBlocksToMaturity() > 0)
-            return 0;
-
-
-        if (fUseCache && fCreditCached)
-            return nCreditCached;
-        nCreditCached = pwallet->GetCredit(*this);
-        fCreditCached = true;
-        return nCreditCached;
-    }
-
-    int64_t GetAvailableCredit(bool fUseCache=true) const
-    {
-
-        if ((IsCoinBase() || IsCoinStake()) && GetBlocksToMaturity() > 0)
-            return 0;
-
-        if (fUseCache && fAvailableCreditCached)
-            return nAvailableCreditCached;
-
-        int64_t nCredit = 0;
-        for (unsigned int i = 0; i < vout.size(); i++)
-        {
-            if (!IsSpent(i))
-            {
-                const CTxOut &txout = vout[i];
-                nCredit += pwallet->GetCredit(txout);
-                if (!MoneyRange(nCredit))
-                    throw std::runtime_error("__wx__Tx::GetAvailableCredit() : value out of range");
-            }
-        }
-
-        nAvailableCreditCached = nCredit;
-        fAvailableCreditCached = true;
-        return nCredit;
-    }
-
-
-    int64_t GetChange() const
-    {
-        if (fChangeCached)
-            return nChangeCached;
-        nChangeCached = pwallet->GetChange(*this);
-        fChangeCached = true;
-        return nChangeCached;
-    }
-
-    void GetAmounts(std::list<std::pair<CTxDestination, int64_t> >& listReceived,
-                    std::list<std::pair<CTxDestination, int64_t> >& listSent, int64_t& nFee, std::string& strSentAccount) const;
-
-    void GetAccountAmounts(const std::string& strAccount, int64_t& nReceived,
-                           int64_t& nSent, int64_t& nFee) const;
-
-    bool IsFromMe() const
-    {
-        return (GetDebit() > 0);
-    }
-
-    bool IsTrusted() const
-    {
-
-        if (!IsFinalTx(*this))
-            return false;
-        int nDepth = GetDepthInMainChain();
-        if (nDepth >= 1)
-        {
-            return true;
-        }
-        if (nDepth < 0)
-        {
-            return false;
-        }
-        if (fConfChange || !IsFromMe())
-            return false;
-
-
-
-        std::map<uint256, const CMerkleTx*> mapPrev;
-        std::vector<const CMerkleTx*> vWorkQueue;
-        vWorkQueue.reserve(vtxPrev.size()+1);
-        vWorkQueue.push_back(this);
-        for (unsigned int i = 0; i < vWorkQueue.size(); i++)
-        {
-            const CMerkleTx* ptx = vWorkQueue[i];
-
-            if (!IsFinalTx(*ptx))
-            {
-                return false;
-            }
-            int nPDepth = ptx->GetDepthInMainChain();
-            if (nPDepth >= 1)
-            {
-                continue;
-            }
-            if (nPDepth < 0)
-            {
-                return false;
-            }
-            if (!pwallet->IsFromMe(*ptx))
-            {
-                return false;
-             }
-
-            if (mapPrev.empty())
-            {
-                BOOST_FOREACH(const CMerkleTx& tx, vtxPrev)
-                    mapPrev[tx.GetHash()] = &tx;
-            }
-
-            BOOST_FOREACH(const CTxIn& txin, ptx->vin)
-            {
-                if (!mapPrev.count(txin.prevout.hash))
-                {
-                    return false;
-                }
-                vWorkQueue.push_back(mapPrev[txin.prevout.hash]);
-            }
-        }
-
-        return true;
-    }
-
-    bool GetEncryptedMessageUpdate(int& nOut, vchType& nm, vchType& r, vchType& val, vchType& iv, vchType& s) const;
-    bool GetMessageUpdate (int& nOut, vchType& nm, vchType& r, vchType& val, vchType& s) const;
-    bool GetPublicKeyUpdate (int& nOut, vchType& nm, vchType& r, vchType& val, vchType& aes, vchType& s) const;
-    bool vtx (int& nOut, vchType& nm, vchType& r, vchType& val, vchType& aes, vchType& s) const;
-    bool proj(int& nOut, vchType& nm, vchType& r, vchType& val, vchType& iv, vchType& s) const;
-    bool aliasSet(int& r, int& p, vector< vector<unsigned char> >& vv) const;
-    bool aliasSet(int& r, int& p, vchType& v1, vchType& val) const;
-    bool aliasStream(int& r, int& p, vchType& v1, vchType& val, vchType& vchS, vchType& inV3) const;
-
-    bool WriteToDisk();
-
-    int64_t GetTxTime() const;
-    int GetRequestCount() const;
-
-    void AddSupportingTransactions(CTxDB& txdb);
-
-    bool AcceptWalletTransaction(CTxDB& txdb);
-    bool AcceptWalletTransaction();
-
-    void RelayWalletTransaction(CTxDB& txdb);
-    void RelayWalletTransaction();
-};
-
-
-
-
 class COutput
 {
 public:
@@ -827,10 +543,6 @@ public:
     }
 };
 
-
-
-
-
 class __wx__Key
 {
 public:
@@ -838,8 +550,6 @@ public:
     int64_t nTimeCreated;
     int64_t nTimeExpires;
     std::string strComment;
-
-
 
     __wx__Key(int64_t nExpires=0)
     {
@@ -857,7 +567,6 @@ public:
         READWRITE(strComment);
     )
 };
-# 872 "wallet.h"
 class CAccount
 {
 public:
@@ -880,11 +589,6 @@ public:
         READWRITE(vchPubKey);
     )
 };
-
-
-
-
-
 
 class CAccountingEntry
 {
@@ -925,7 +629,8 @@ public:
 
         if (!fRead)
         {
-            WriteOrderPos(nOrderPos, me.mapValue);
+            if (nOrderPos != -1)
+              me.mapValue["n"] = i64tostr(nOrderPos);
 
             if (!(mapValue.empty() && _ssExtra.empty()))
             {
@@ -949,7 +654,13 @@ public:
                 ss >> me.mapValue;
                 me._ssExtra = std::vector<char>(ss.begin(), ss.end());
             }
-            ReadOrderPos(me.nOrderPos, me.mapValue);
+
+            if(!me.mapValue.count("n"))
+            {
+                me.nOrderPos = -1;
+            }
+	    else
+              me.nOrderPos = atoi64(me.mapValue["n"].c_str());
         }
         if (std::string::npos != nSepPos)
             me.strComment.erase(nSepPos);

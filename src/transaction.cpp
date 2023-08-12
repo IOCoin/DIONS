@@ -1,3 +1,4 @@
+
 #include "transaction.h"
 #include "txdb-leveldb.h"
 #include "configuration_state.h"
