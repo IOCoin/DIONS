@@ -89,7 +89,6 @@ enum
     }
 
 #define READWRITE(obj) (nSerSize += ::SerReadWrite(s, (obj), nType, nVersion, ser_action))
-# 106 "serialize.h"
 #define WRITEDATA(s,obj) s.write((char*)&(obj), sizeof(obj))
 #define READDATA(s,obj) s.read((char*)&(obj), sizeof(obj))
 
@@ -267,7 +266,6 @@ template<typename Stream> inline void Unserialize(Stream& s, bool& a, int, int=0
   READDATA(s, f);
   a=f;
 }
-# 296 "serialize.h"
 inline unsigned int GetSizeOfCompactSize(uint64_t nSize)
 {
   if (nSize < 253)
@@ -464,7 +462,6 @@ template<typename Stream, typename K, typename T, typename Pred, typename A> voi
 template<typename K, typename Pred, typename A> unsigned int GetSerializeSize(const std::set<K, Pred, A>& m, int nType, int nVersion);
 template<typename Stream, typename K, typename Pred, typename A> void Serialize(Stream& os, const std::set<K, Pred, A>& m, int nType, int nVersion);
 template<typename Stream, typename K, typename Pred, typename A> void Unserialize(Stream& is, std::set<K, Pred, A>& m, int nType, int nVersion);
-# 503 "serialize.h"
 template<typename T>
 inline unsigned int GetSerializeSize(const T& a)
 {
@@ -483,7 +480,6 @@ inline void Unserialize(Stream& is, T& a, long nType, int nVersion)
 {
   a.Unserialize(is, (int)nType, nVersion);
 }
-# 529 "serialize.h"
 template<typename C>
 unsigned int GetSerializeSize(const std::basic_string<C>& str, int, int)
 {
@@ -510,11 +506,6 @@ void Unserialize(Stream& is, std::basic_string<C>& str, int, int)
     is.read((char*)&str[0], nSize * sizeof(str[0]));
   }
 }
-
-
-
-
-
 
 template<typename T, typename A>
 unsigned int GetSerializeSize_impl(const std::vector<T, A>& v, int nType, int nVersion, const boost::true_type&)
@@ -845,7 +836,6 @@ struct ser_streamplaceholder
   int nType;
   int nVersion;
 };
-# 901 "serialize.h"
 typedef std::vector<char, zero_after_free_allocator<char> > CSerializeData;
 
 
@@ -1245,7 +1235,6 @@ public:
     clear();
   }
 };
-# 1316 "serialize.h"
 class CAutoFile
 {
 protected:

@@ -6,7 +6,7 @@
 #include "net.h"
 #include "script.h"
 #include "hashblock.h"
-#include "block.h"
+#include "block_index.h"
 #include "ptrie/FixedHash.h"
 #include "ptrie/TrieDB.h"
 #include "ptrie/OverlayDB.h"
@@ -38,7 +38,6 @@ inline bool MoneyRange(int64_t nValue)
 {
   return (nValue >= 0 && nValue <= ConfigurationState::MAX_MONEY);
 }
-
 
 inline bool IsProtocolV2(int nHeight)
 {

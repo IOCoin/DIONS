@@ -165,6 +165,7 @@ OBJS= \
     obj/configuration_state.o \
     obj/main.o \
     obj/block.o \
+    obj/block_index.o \
     obj/api_transaction.o \
     obj/transaction.o \
     obj/wallet_transaction.o \

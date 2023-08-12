@@ -19,6 +19,7 @@
 #include "ptrie/TrieDB.h"
 #include "ptrie/Address.h"
 #include "main.h"
+#include "disk_block_locator.h"
 #ifndef WIN32
 #include <signal.h>
 #endif
