@@ -97,12 +97,6 @@ public:
   }
 };
 
-
-
-
-
-
-
 typedef boost::variant<CNoDestination, CKeyID, CScriptID> CTxDestination;
 
 const char* GetTxnOutputType(txnouttype t);
@@ -263,7 +257,6 @@ public:
 
 class CScriptNum
 {
-# 287 "script.h"
 public:
 
   explicit CScriptNum(const int64_t& n)
@@ -461,7 +454,6 @@ public:
       result.push_back(absvalue & 0xff);
       absvalue >>= 8;
     }
-# 495 "script.h"
     if (result.back() & 0x80)
     {
       result.push_back(neg ? 0x80 : 0);
@@ -526,7 +518,6 @@ inline std::string StackString(const std::vector<std::vector<unsigned char> >& v
   }
   return str;
 }
-# 568 "script.h"
 class CScript : public std::vector<unsigned char>
 {
 protected:
