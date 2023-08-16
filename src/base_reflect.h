@@ -3,8 +3,6 @@
 
 #include "json/json_spirit.h"
 
-#include "reactor_relay.h"
-
 static const int64_t CTRL___cycle = 0;
 
 class cba;

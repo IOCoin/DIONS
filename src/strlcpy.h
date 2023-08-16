@@ -4,11 +4,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-
-
-
-
-
 inline size_t strlcpy(char *dst, const char *src, size_t siz)
 {
   char *d = dst;
@@ -40,8 +35,7 @@ inline size_t strlcpy(char *dst, const char *src, size_t siz)
 
   return(s - src - 1);
 }
-# 66 "strlcpy.h"
-inline size_t strlcat(char *dst, const char *src, size_t siz)
+inline size_t strlcatXXXX(char *dst, const char *src, size_t siz)
 {
   char *d = dst;
   const char *s = src;
