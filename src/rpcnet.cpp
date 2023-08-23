@@ -1,5 +1,4 @@
 
-
 #include "net.h"
 #include "bitcoinrpc.h"
 #include "alert.h"

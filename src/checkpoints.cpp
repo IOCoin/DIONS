@@ -1,8 +1,8 @@
 
-
 #include <boost/assign/list_of.hpp>
 #include <boost/foreach.hpp>
 #include "checkpoints.h"
+#include "block_index.h"
 #include "txdb.h"
 #include "main.h"
 #include "uint256.h"

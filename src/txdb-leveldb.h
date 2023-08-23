@@ -9,7 +9,7 @@
 
 #include <leveldb/db.h>
 #include <leveldb/write_batch.h>
-# 30 "txdb-leveldb.h"
+#include "block_index.h"
 class CTxDB
 {
 public:

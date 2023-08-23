@@ -1,5 +1,4 @@
 
-
 #include "txdb.h"
 #include "wallet.h"
 #include "walletdb.h"
@@ -697,7 +696,7 @@ void __wx__::WalletUpdateSpent(const CTransaction &tx, bool fBlock)
         {
           printf("WalletUpdateSpent found spent coin %s IO %s\n", FormatMoney(wtx.GetCredit()).c_str(), wtx.GetHash().ToString().c_str());
           wtx.MarkSpent(txin.prevout.n);
-          this->WriteTxToDisk(wtx);
+          wtx.WriteToDisk();
           NotifyTransactionChanged(this, txin.prevout.hash, CT_UPDATED);
         }
       }
@@ -713,7 +712,7 @@ void __wx__::WalletUpdateSpent(const CTransaction &tx, bool fBlock)
         if (IsMine(txout))
         {
           wtx.MarkUnspent(&txout - &tx.vout[0]);
-          this->WriteTxToDisk(wtx);
+          wtx.WriteToDisk();
           NotifyTransactionChanged(this, hash, CT_UPDATED);
         }
       }
@@ -735,7 +734,7 @@ bool __wx__::AddToWallet(const __wx__Tx& wtxIn)
     LOCK(cs_wallet);
     pair<map<uint256, __wx__Tx>::iterator, bool> ret = mapWallet.insert(make_pair(hash, wtxIn));
     __wx__Tx& wtx = (*ret.first).second;
-    wtx.BindWallet();
+    wtx.BindWallet(this);
     bool fInsertedNew = ret.second;
 
     if (fInsertedNew)
@@ -833,7 +832,7 @@ bool __wx__::AddToWallet(const __wx__Tx& wtxIn)
     printf("AddToWallet %s  %s%s\n", wtxIn.GetHash().ToString().substr(0,10).c_str(), (fInsertedNew ? "new" : ""), (fUpdated ? "update" : ""));
 
     if (fInsertedNew || fUpdated)
-      if(!this->WriteTxToDisk(wtx))
+      if (!wtx.WriteToDisk())
       {
         return false;
       }
@@ -886,7 +885,7 @@ bool __wx__::AddToWalletIfInvolvingMe(const CTransaction& tx, const CBlock* pblo
 
     if (fExisted || IsMine(tx) || IsFromMe(tx) || collx(tx))
     {
-      __wx__Tx wtx(tx);
+      __wx__Tx wtx(this,tx);
 
       if (pblock)
       {
@@ -974,6 +973,240 @@ bool __wx__::IsChange(const CTxOut& txout) const
 
   return false;
 }
+int64_t __wx__Tx::GetTxTime() const
+{
+  int64_t n = nTimeSmart;
+  return n ? n : nTimeReceived;
+}
+int __wx__Tx::GetRequestCount() const
+{
+  int nRequests = -1;
+  {
+    LOCK(pwallet->cs_wallet);
+
+    if (IsCoinBase() || IsCoinStake())
+    {
+      if (this->hashBlock_ != 0)
+      {
+        map<uint256, int>::const_iterator mi = pwallet->mapRequestCount.find(this->hashBlock_);
+
+        if (mi != pwallet->mapRequestCount.end())
+        {
+          nRequests = (*mi).second;
+        }
+      }
+    }
+    else
+    {
+      map<uint256, int>::const_iterator mi = pwallet->mapRequestCount.find(GetHash());
+
+      if (mi != pwallet->mapRequestCount.end())
+      {
+        nRequests = (*mi).second;
+
+        if (nRequests == 0 && this->hashBlock_ != 0)
+        {
+          map<uint256, int>::const_iterator mi = pwallet->mapRequestCount.find(this->hashBlock_);
+
+          if (mi != pwallet->mapRequestCount.end())
+          {
+            nRequests = (*mi).second;
+          }
+          else
+          {
+            nRequests = 1;
+          }
+        }
+      }
+    }
+  }
+  return nRequests;
+}
+void __wx__Tx::GetAmounts(list<pair<CTxDestination, int64_t> >& listReceived,
+                          list<pair<CTxDestination, int64_t> >& listSent, int64_t& nFee, string& strSentAccount) const
+{
+  nFee = 0;
+  listReceived.clear();
+  listSent.clear();
+  strSentAccount = strFromAccount;
+  int64_t nDebit = GetDebit();
+
+  if (nDebit > 0)
+  {
+    int64_t nValueOut = GetValueOut();
+    nFee = nDebit - nValueOut;
+  }
+
+  BOOST_FOREACH(const CTxOut& txout, vout)
+  {
+    if (txout.scriptPubKey.empty())
+    {
+      continue;
+    }
+
+    vector<valtype> vs;
+    txnouttype t;
+
+    if(Solver(txout.scriptPubKey, t, vs))
+    {
+      if(t == TX_NULL_DATA)
+      {
+        continue;
+      }
+    }
+
+    bool fIsMine;
+
+    if (nDebit > 0)
+    {
+      if (pwallet->IsChange(txout))
+      {
+        continue;
+      }
+
+      fIsMine = pwallet->IsMine(txout);
+    }
+    else if (!(fIsMine = pwallet->IsMine(txout)))
+    {
+      continue;
+    }
+
+    CTxDestination address;
+    std::vector<vchType> vvchPrevArgsRead;
+    int prevOp;
+
+    if(aliasScript(txout.scriptPubKey, prevOp, vvchPrevArgsRead))
+    {
+      const CScript& s1_ = aliasStrip(txout.scriptPubKey);
+
+      if (!ExtractDestination(s1_, address))
+      {
+        printf("__wx__Tx::GetAmounts: Unknown transaction type found, txid %s\n",
+               this->GetHash().ToString().c_str());
+        address = CNoDestination();
+      }
+    }
+    else if (!ExtractDestination(txout.scriptPubKey, address))
+    {
+      printf("__wx__Tx::GetAmounts: Unknown transaction type found, txid %s\n",
+             this->GetHash().ToString().c_str());
+      address = CNoDestination();
+    }
+
+    if (nDebit > 0)
+    {
+      listSent.push_back(make_pair(address, txout.nValue));
+    }
+
+    if(fIsMine)
+    {
+      listReceived.push_back(make_pair(address, txout.nValue));
+    }
+  }
+}
+void __wx__Tx::GetAccountAmounts(const string& strAccount, int64_t& nReceived,
+                                 int64_t& nSent, int64_t& nFee) const
+{
+  nReceived = nSent = nFee = 0;
+  int64_t allFee;
+  string strSentAccount;
+  list<pair<CTxDestination, int64_t> > listReceived;
+  list<pair<CTxDestination, int64_t> > listSent;
+  GetAmounts(listReceived, listSent, allFee, strSentAccount);
+
+  if (strAccount == strSentAccount)
+  {
+    BOOST_FOREACH(const PAIRTYPE(CTxDestination,int64_t)& s, listSent)
+    nSent += s.second;
+    nFee = allFee;
+  }
+
+  {
+    LOCK(pwallet->cs_wallet);
+    BOOST_FOREACH(const PAIRTYPE(CTxDestination,int64_t)& r, listReceived)
+    {
+      if (pwallet->mapAddressBook.count(r.first))
+      {
+        map<CTxDestination, string>::const_iterator mi = pwallet->mapAddressBook.find(r.first);
+
+        if (mi != pwallet->mapAddressBook.end() && (*mi).second == strAccount)
+        {
+          nReceived += r.second;
+        }
+      }
+      else if (strAccount.empty())
+      {
+        nReceived += r.second;
+      }
+    }
+  }
+}
+void __wx__Tx::AddSupportingTransactions(CTxDB& txdb)
+{
+  vtxPrev.clear();
+  const int COPY_DEPTH = 3;
+
+  if (SetMerkleBranch() < COPY_DEPTH)
+  {
+    vector<uint256> vWorkQueue;
+    BOOST_FOREACH(const CTxIn& txin, vin)
+    vWorkQueue.push_back(txin.prevout.hash);
+    {
+      LOCK(pwallet->cs_wallet);
+      map<uint256, const CMerkleTx*> mapWalletPrev;
+      set<uint256> setAlreadyDone;
+
+      for (unsigned int i = 0; i < vWorkQueue.size(); i++)
+      {
+        uint256 hash = vWorkQueue[i];
+
+        if (setAlreadyDone.count(hash))
+        {
+          continue;
+        }
+
+        setAlreadyDone.insert(hash);
+        CMerkleTx tx;
+        map<uint256, __wx__Tx>::const_iterator mi = pwallet->mapWallet.find(hash);
+
+        if (mi != pwallet->mapWallet.end())
+        {
+          tx = (*mi).second;
+          BOOST_FOREACH(const CMerkleTx& txWalletPrev, (*mi).second.vtxPrev)
+          mapWalletPrev[txWalletPrev.GetHash()] = &txWalletPrev;
+        }
+        else if (mapWalletPrev.count(hash))
+        {
+          tx = *mapWalletPrev[hash];
+        }
+        else if (txdb.ReadDiskTx(hash, tx))
+        {
+          ;
+        }
+        else
+        {
+          printf("ERROR: AddSupportingTransactions() : unsupported transaction\n");
+          continue;
+        }
+
+        int nDepth = tx.SetMerkleBranch();
+        vtxPrev.push_back(tx);
+
+        if (nDepth < COPY_DEPTH)
+        {
+          BOOST_FOREACH(const CTxIn& txin, tx.vin)
+          vWorkQueue.push_back(txin.prevout.hash);
+        }
+      }
+    }
+  }
+
+  reverse(vtxPrev.begin(), vtxPrev.end());
+}
+bool __wx__Tx::WriteToDisk()
+{
+  return __wx__DB(pwallet->strWalletFile).WriteTx(GetHash(), *this);
+}
 int __wx__::ScanForWalletTransactions(CBlockIndex* pindexStart, bool fUpdate)
 {
   int ret = 0;
@@ -1052,7 +1285,7 @@ void __wx__::ReacceptWalletTransactions()
         {
           printf("ReacceptWalletTransactions found spent coin %s IO %s\n", FormatMoney(wtx.GetCredit()).c_str(), wtx.GetHash().ToString().c_str());
           wtx.MarkDirty();
-          this->WriteTxToDisk(wtx);
+          wtx.WriteToDisk();
         }
       }
       else
@@ -1172,9 +1405,9 @@ int64_t __wx__::GetBalance() const
     {
       const __wx__Tx* pcoin = &(*it).second;
 
-      if (this->IsTrusted(*pcoin))
+      if (pcoin->IsTrusted())
       {
-        nTotal += this->GetAvailableTxCredit(*pcoin);
+        nTotal += pcoin->GetAvailableCredit();
       }
     }
   }
@@ -1190,9 +1423,9 @@ int64_t __wx__::GetUnconfirmedBalance() const
     {
       const __wx__Tx* pcoin = &(*it).second;
 
-      if (!IsFinalTx(*pcoin) || (!this->IsTrusted(*pcoin) && pcoin->GetDepthInMainChain() == 0))
+      if (!IsFinalTx(*pcoin) || (!pcoin->IsTrusted() && pcoin->GetDepthInMainChain() == 0))
       {
-        nTotal += this->GetAvailableTxCredit(*pcoin);
+        nTotal += pcoin->GetAvailableCredit();
       }
     }
   }
@@ -1250,7 +1483,7 @@ void __wx__::AvailableCoins(vector<COutput>& vCoins, bool fOnlyConfirmed, const 
         continue;
       }
 
-      if (fOnlyConfirmed && !this->IsTrusted(*pcoin))
+      if (fOnlyConfirmed && !pcoin->IsTrusted())
       {
         continue;
       }
@@ -1579,7 +1812,7 @@ bool __wx__::CreateTransaction__(const vector<pair<CScript, int64_t> >& vecSend,
     return false;
   }
 
-  wtxNew.BindWallet();
+  wtxNew.BindWallet(this);
   wtxNew.strTxInfo = strTxInfo;
 
   if (wtxNew.strTxInfo.length() > ConfigurationState::MAX_TX_INFO_LEN)
@@ -1679,7 +1912,7 @@ bool __wx__::CreateTransaction__(const vector<pair<CScript, int64_t> >& vecSend,
           continue;
         }
 
-        this->AddSupportingTransactions(wtxNew,txdb);
+        wtxNew.AddSupportingTransactions(txdb);
         wtxNew.fTimeReceivedIsTxTime = true;
         break;
       }
@@ -1706,7 +1939,7 @@ bool __wx__::CreateTransaction(const vector<pair<CScript, int64_t> >& vecSend, _
     return false;
   }
 
-  wtxNew.BindWallet();
+  wtxNew.BindWallet(this);
   wtxNew.strTxInfo = strTxInfo;
 
   if (wtxNew.strTxInfo.length() > ConfigurationState::MAX_TX_INFO_LEN)
@@ -1806,7 +2039,7 @@ bool __wx__::CreateTransaction(const vector<pair<CScript, int64_t> >& vecSend, _
           continue;
         }
 
-        this->AddSupportingTransactions(wtxNew,txdb);
+        wtxNew.AddSupportingTransactions(txdb);
         wtxNew.fTimeReceivedIsTxTime = true;
         break;
       }
@@ -2146,9 +2379,9 @@ bool __wx__::CommitTransaction__(__wx__Tx& wtxNew, CReserveKey& reservekey)
       BOOST_FOREACH(const CTxIn& txin, wtxNew.vin)
       {
         __wx__Tx &coin = mapWallet[txin.prevout.hash];
-        coin.BindWallet();
+        coin.BindWallet(this);
         coin.MarkSpent(txin.prevout.n);
-        this->WriteTxToDisk(coin);
+        coin.WriteToDisk();
         NotifyTransactionChanged(this, coin.GetHash(), CT_UPDATED);
       }
 
@@ -2183,9 +2416,9 @@ bool __wx__::CommitTransaction(__wx__Tx& wtxNew, CReserveKey& reservekey)
       BOOST_FOREACH(const CTxIn& txin, wtxNew.vin)
       {
         __wx__Tx &coin = mapWallet[txin.prevout.hash];
-        coin.BindWallet();
+        coin.BindWallet(this);
         coin.MarkSpent(txin.prevout.n);
-        this->WriteTxToDisk(coin);
+        coin.WriteToDisk();
         NotifyTransactionChanged(this, coin.GetHash(), CT_UPDATED);
       }
 
@@ -2692,7 +2925,7 @@ std::map<CTxDestination, int64_t> __wx__::GetAddressBalances()
     {
       __wx__Tx *pcoin = &walletEntry.second;
 
-      if (!IsFinalTx(*pcoin) || !this->IsTrusted(*pcoin))
+      if (!IsFinalTx(*pcoin) || !pcoin->IsTrusted())
       {
         continue;
       }
@@ -2859,7 +3092,7 @@ void __wx__::FixSpentCoins(int& nMismatchFound, int64_t& nBalanceInQuestion, boo
         if (!fCheckOnly)
         {
           pcoin->MarkUnspent(n);
-          this->WriteTxToDisk(*pcoin);
+          pcoin->WriteToDisk();
         }
       }
       else if (IsMine(pcoin->vout[n]) && !pcoin->IsSpent(n) && (txindex.vSpent.size() > n && !txindex.vSpent[n].IsNull()))
@@ -2872,7 +3105,7 @@ void __wx__::FixSpentCoins(int& nMismatchFound, int64_t& nBalanceInQuestion, boo
         if (!fCheckOnly)
         {
           pcoin->MarkSpent(n);
-          this->WriteTxToDisk(*pcoin);
+          pcoin->WriteToDisk();
         }
       }
     }
@@ -2897,7 +3130,7 @@ void __wx__::DisableTransaction(const CTransaction &tx)
       if (txin.prevout.n < prev.vout.size() && IsMine(prev.vout[txin.prevout.n]))
       {
         prev.MarkUnspent(txin.prevout.n);
-        this->WriteTxToDisk(prev);
+        prev.WriteToDisk();
       }
     }
   }
@@ -3757,189 +3990,20 @@ __wx__Tx::proj(int& nOut, vchType& nm, vchType& r, vchType& val, vchType& iv, vc
   s = vchSignature;
   return true;
 }
-
-void __wx__::GetTxAmounts(const __wx__Tx& wtx, list<pair<CTxDestination, int64_t> >& listReceived,
-                          list<pair<CTxDestination, int64_t> >& listSent, int64_t& nFee, string& strSentAccount) const
+void ReadOrderPos(int64_t& nOrderPos, mapValue_t& mapValue)
 {
-  nFee = 0;
-  listReceived.clear();
-  listSent.clear();
-  strSentAccount = wtx.strFromAccount;
-  int64_t nDebit = this->GetTxDebit(wtx);
-
-  if (nDebit > 0)
-  {
-    int64_t nValueOut = wtx.GetValueOut();
-    nFee = nDebit - nValueOut;
-  }
-
-  BOOST_FOREACH(const CTxOut& txout, wtx.vout)
-  {
-    if (txout.scriptPubKey.empty())
+    if (!mapValue.count("n"))
     {
-      continue;
+        nOrderPos = -1;
+        return;
     }
-
-    vector<valtype> vs;
-    txnouttype t;
-
-    if(Solver(txout.scriptPubKey, t, vs))
-    {
-      if(t == TX_NULL_DATA)
-      {
-        continue;
-      }
-    }
-
-    bool fIsMine;
-
-    if (nDebit > 0)
-    {
-      if (this->IsChange(txout))
-      {
-        continue;
-      }
-
-      fIsMine = this->IsMine(txout);
-    }
-    else if (!(fIsMine = this->IsMine(txout)))
-    {
-      continue;
-    }
-
-    CTxDestination address;
-    std::vector<vchType> vvchPrevArgsRead;
-    int prevOp;
-
-    if(aliasScript(txout.scriptPubKey, prevOp, vvchPrevArgsRead))
-    {
-      const CScript& s1_ = aliasStrip(txout.scriptPubKey);
-
-      if (!ExtractDestination(s1_, address))
-      {
-        printf("__wx__Tx::GetAmounts: Unknown transaction type found, txid %s\n",
-               wtx.GetHash().ToString().c_str());
-        address = CNoDestination();
-      }
-    }
-    else if (!ExtractDestination(txout.scriptPubKey, address))
-    {
-      printf("__wx__Tx::GetAmounts: Unknown transaction type found, txid %s\n",
-             wtx.GetHash().ToString().c_str());
-      address = CNoDestination();
-    }
-
-    if (nDebit > 0)
-    {
-      listSent.push_back(make_pair(address, txout.nValue));
-    }
-
-    if(fIsMine)
-    {
-      listReceived.push_back(make_pair(address, txout.nValue));
-    }
-  }
+    nOrderPos = atoi64(mapValue["n"].c_str());
 }
-void __wx__::GetAccountAmounts(const __wx__Tx& wtx, const string& strAccount, int64_t& nReceived,
-                               int64_t& nSent, int64_t& nFee) const
+
+
+void WriteOrderPos(const int64_t& nOrderPos, mapValue_t& mapValue)
 {
-  nReceived = nSent = nFee = 0;
-  int64_t allFee;
-  string strSentAccount;
-  list<pair<CTxDestination, int64_t> > listReceived;
-  list<pair<CTxDestination, int64_t> > listSent;
-  this->GetTxAmounts(wtx,listReceived, listSent, allFee, strSentAccount);
-
-  if (strAccount == strSentAccount)
-  {
-    BOOST_FOREACH(const PAIRTYPE(CTxDestination,int64_t)& s, listSent)
-    nSent += s.second;
-    nFee = allFee;
-  }
-
-  {
-    LOCK(this->cs_wallet);
-    BOOST_FOREACH(const PAIRTYPE(CTxDestination,int64_t)& r, listReceived)
-    {
-      if (this->mapAddressBook.count(r.first))
-      {
-        map<CTxDestination, string>::const_iterator mi = this->mapAddressBook.find(r.first);
-
-        if (mi != this->mapAddressBook.end() && (*mi).second == strAccount)
-        {
-          nReceived += r.second;
-        }
-      }
-      else if (strAccount.empty())
-      {
-        nReceived += r.second;
-      }
-    }
-  }
-}
-void __wx__::AddSupportingTransactions(__wx__Tx& wtx, CTxDB& txdb)
-{
-  wtx.vtxPrev.clear();
-  const int COPY_DEPTH = 3;
-
-  if (wtx.SetMerkleBranch() < COPY_DEPTH)
-  {
-    vector<uint256> vWorkQueue;
-    BOOST_FOREACH(const CTxIn& txin, wtx.vin)
-    vWorkQueue.push_back(txin.prevout.hash);
-    {
-      LOCK(this->cs_wallet);
-      map<uint256, const CMerkleTx*> mapWalletPrev;
-      set<uint256> setAlreadyDone;
-
-      for (unsigned int i = 0; i < vWorkQueue.size(); i++)
-      {
-        uint256 hash = vWorkQueue[i];
-
-        if (setAlreadyDone.count(hash))
-        {
-          continue;
-        }
-
-        setAlreadyDone.insert(hash);
-        CMerkleTx tx;
-        map<uint256, __wx__Tx>::const_iterator mi = this->mapWallet.find(hash);
-
-        if (mi != this->mapWallet.end())
-        {
-          tx = (*mi).second;
-          BOOST_FOREACH(const CMerkleTx& txWalletPrev, (*mi).second.vtxPrev)
-          mapWalletPrev[txWalletPrev.GetHash()] = &txWalletPrev;
-        }
-        else if (mapWalletPrev.count(hash))
-        {
-          tx = *mapWalletPrev[hash];
-        }
-        else if (txdb.ReadDiskTx(hash, tx))
-        {
-          ;
-        }
-        else
-        {
-          printf("ERROR: AddSupportingTransactions() : unsupported transaction\n");
-          continue;
-        }
-
-        int nDepth = tx.SetMerkleBranch();
-        wtx.vtxPrev.push_back(tx);
-
-        if (nDepth < COPY_DEPTH)
-        {
-          BOOST_FOREACH(const CTxIn& txin, tx.vin)
-          vWorkQueue.push_back(txin.prevout.hash);
-        }
-      }
-    }
-  }
-
-  reverse(wtx.vtxPrev.begin(), wtx.vtxPrev.end());
-}
-bool __wx__::WriteTxToDisk(const __wx__Tx& wtx)
-{
-  return __wx__DB(this->strWalletFile).WriteTx(wtx.GetHash(), wtx);
+    if (nOrderPos == -1)
+        return;
+    mapValue["n"] = i64tostr(nOrderPos);
 }

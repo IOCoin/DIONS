@@ -1,5 +1,4 @@
 
-
 #include "view.h"
 #include "script.h"
 bool CViewKeyStore::ak(const CKeyID& ckid)

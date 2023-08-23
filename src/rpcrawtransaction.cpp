@@ -1,5 +1,4 @@
 
-
 #include <boost/assign/list_of.hpp>
 #include "base58.h"
 #include "bitcoinrpc.h"

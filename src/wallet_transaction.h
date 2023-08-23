@@ -1,16 +1,20 @@
 #ifndef WALLET_TX_H
 #define WALLET_TX_H
 
-#include <vector>
-#include "api_transaction.h"
+#include "wallet.h"
 #include "type_mapvalue.h"
-
+class CCoinControl;
+class COutput;
+extern bool fWalletUnlockStakingOnly;
 extern bool fConfChange;
+extern void ReadOrderPos(int64_t& nOrderPos, mapValue_t& mapValue);
+extern void WriteOrderPos(const int64_t& nOrderPos, mapValue_t& mapValue);
 class __wx__Tx : public CMerkleTx
 {
 private:
 
 public:
+    const __wx__* pwallet;
     std::vector<CMerkleTx> vtxPrev;
     mapValue_t mapValue;
     std::vector<std::pair<std::string, std::string> > vOrderForm;
@@ -55,21 +59,27 @@ public:
 
     __wx__Tx()
     {
-        Init();
+        Init(NULL);
     }
 
-    __wx__Tx(const CMerkleTx& txIn) : CMerkleTx(txIn)
+    __wx__Tx(const __wx__* pwalletIn)
     {
-        Init();
+        Init(pwalletIn);
     }
 
-    __wx__Tx(const CTransaction& txIn) : CMerkleTx(txIn)
+    __wx__Tx(const __wx__* pwalletIn, const CMerkleTx& txIn) : CMerkleTx(txIn)
     {
-        Init();
+        Init(pwalletIn);
     }
 
-    void Init()
+    __wx__Tx(const __wx__* pwalletIn, const CTransaction& txIn) : CMerkleTx(txIn)
     {
+        Init(pwalletIn);
+    }
+
+    void Init(const __wx__* pwalletIn)
+    {
+        pwallet = pwalletIn;
         vtxPrev.clear();
         mapValue.clear();
         vOrderForm.clear();
@@ -94,7 +104,7 @@ public:
     (
         __wx__Tx* pthis = const_cast<__wx__Tx*>(this);
         if (fRead)
-            pthis->Init();
+            pthis->Init(NULL);
         char fSpent = false;
 
         if (!fRead)
@@ -110,8 +120,7 @@ public:
             }
             pthis->mapValue["spent"] = str;
 
-            if (nOrderPos != -1)
-              pthis->mapValue["n"] = i64tostr(nOrderPos);
+            WriteOrderPos(pthis->nOrderPos, pthis->mapValue);
 
             if (nTimeSmart)
                 pthis->mapValue["timesmart"] = strprintf("%u", nTimeSmart);
@@ -136,12 +145,7 @@ public:
             else
                 pthis->vfSpent.assign(vout.size(), fSpent);
 
-    if (!pthis->mapValue.count("n"))
-    {
-        pthis->nOrderPos = -1;
-    }
-    else
-      pthis->nOrderPos = atoi64(pthis->mapValue["n"].c_str());
+            ReadOrderPos(pthis->nOrderPos, pthis->mapValue);
 
             pthis->nTimeSmart = mapValue.count("timesmart") ? (unsigned int)atoi64(pthis->mapValue["timesmart"]) : 0;
         }
@@ -155,16 +159,95 @@ public:
 
 
 
-    bool UpdateSpent(const std::vector<char>& vfNewSpent);
-    void MarkDirty();
-    void BindWallet();
-    void MarkSpent(unsigned int nOut);
-    void MarkUnspent(unsigned int nOut);
-    bool IsSpent(unsigned int nOut) const;
+    bool UpdateSpent(const std::vector<char>& vfNewSpent)
+    {
+        bool fReturn = false;
+        for (unsigned int i = 0; i < vfNewSpent.size(); i++)
+        {
+            if (i == vfSpent.size())
+                break;
+
+            if (vfNewSpent[i] && !vfSpent[i])
+            {
+                vfSpent[i] = true;
+                fReturn = true;
+                fAvailableCreditCached = false;
+            }
+        }
+        return fReturn;
+    }
+
+
+    void MarkDirty()
+    {
+        fCreditCached = false;
+        fAvailableCreditCached = false;
+        fDebitCached = false;
+        fChangeCached = false;
+    }
+
+    void BindWallet(__wx__ *pwalletIn)
+    {
+        pwallet = pwalletIn;
+        MarkDirty();
+    }
+
+    void MarkSpent(unsigned int nOut)
+    {
+
+        if (nOut >= vout.size())
+            throw std::runtime_error("__wx__Tx::MarkSpent() : nOut out of range");
+        vfSpent.resize(vout.size());
+        if (!vfSpent[nOut])
+        {
+            vfSpent[nOut] = true;
+            fAvailableCreditCached = false;
+        }
+    }
+
+    void MarkUnspent(unsigned int nOut)
+    {
+        if (nOut >= vout.size())
+            throw std::runtime_error("__wx__Tx::MarkUnspent() : nOut out of range");
+        vfSpent.resize(vout.size());
+        if (vfSpent[nOut])
+        {
+            vfSpent[nOut] = false;
+            fAvailableCreditCached = false;
+        }
+    }
+
+    bool IsSpent(unsigned int nOut) const
+    {
+        if (nOut >= vout.size())
+            throw std::runtime_error("__wx__Tx::IsSpent() : nOut out of range");
+        if (nOut >= vfSpent.size())
+            return false;
+        return (!!vfSpent[nOut]);
+    }
+
     int64_t GetDebit() const;
+
     int64_t GetCredit(bool fUseCache=true) const;
+
+    int64_t GetAvailableCredit(bool fUseCache=true) const;
+
+
     int64_t GetChange() const;
-    bool IsFromMe() const;
+
+    void GetAmounts(std::list<std::pair<CTxDestination, int64_t> >& listReceived,
+                    std::list<std::pair<CTxDestination, int64_t> >& listSent, int64_t& nFee, std::string& strSentAccount) const;
+
+    void GetAccountAmounts(const std::string& strAccount, int64_t& nReceived,
+                           int64_t& nSent, int64_t& nFee) const;
+
+    bool IsFromMe() const
+    {
+        return (GetDebit() > 0);
+    }
+
+    bool IsTrusted() const;
+
     bool GetEncryptedMessageUpdate(int& nOut, vchType& nm, vchType& r, vchType& val, vchType& iv, vchType& s) const;
     bool GetMessageUpdate (int& nOut, vchType& nm, vchType& r, vchType& val, vchType& s) const;
     bool GetPublicKeyUpdate (int& nOut, vchType& nm, vchType& r, vchType& val, vchType& aes, vchType& s) const;
@@ -173,8 +256,14 @@ public:
     bool aliasSet(int& r, int& p, vector< vector<unsigned char> >& vv) const;
     bool aliasSet(int& r, int& p, vchType& v1, vchType& val) const;
     bool aliasStream(int& r, int& p, vchType& v1, vchType& val, vchType& vchS, vchType& inV3) const;
+
+    bool WriteToDisk();
+
     int64_t GetTxTime() const;
     int GetRequestCount() const;
+
+    void AddSupportingTransactions(CTxDB& txdb);
+
     bool AcceptWalletTransaction(CTxDB& txdb);
     bool AcceptWalletTransaction();
 
@@ -182,5 +271,30 @@ public:
     void RelayWalletTransaction();
 };
 
+
+
+
+class COutput
+{
+public:
+    const __wx__Tx *tx;
+    int i;
+    int nDepth;
+
+    COutput(const __wx__Tx *txIn, int iIn, int nDepthIn)
+    {
+        tx = txIn; i = iIn; nDepth = nDepthIn;
+    }
+
+    std::string ToString() const
+    {
+        return strprintf("COutput(%s, %d, %d) [%s]", tx->GetHash().ToString().substr(0,10).c_str(), i, nDepth, FormatMoney(tx->vout[i].nValue).c_str());
+    }
+
+    void print() const
+    {
+        printf("%s\n", ToString().c_str());
+    }
+};
 
 #endif

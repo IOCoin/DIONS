@@ -5,7 +5,6 @@
 #include "base58.h"
 
 #include "relay.h"
-#include "disk_block_locator.h"
 
 class CKeyPool;
 class CAccount;

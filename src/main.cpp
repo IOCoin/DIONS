@@ -269,6 +269,7 @@ bool IsStandardTx(const CTransaction& tx)
     return false;
   }
 
+
   if (!IsFinalTx(tx, nBestHeight + 1))
   {
     return false;
@@ -926,6 +927,167 @@ void InvalidChainFound(CBlockIndex* pindexNew)
          nBestBlockTrust.Get64(),
          DateTimeStrFormat("%x %H:%M:%S", pindexBest->GetBlockTime()).c_str());
 }
+bool CTransaction::DisconnectInputs(CTxDB& txdb)
+{
+  if (!IsCoinBase())
+  {
+    BOOST_FOREACH(const CTxIn& txin, vin)
+    {
+      COutPoint prevout = txin.prevout;
+      CTxIndex txindex;
+
+      if (!txdb.ReadTxIndex(prevout.hash, txindex))
+      {
+        return error("DisconnectInputs() : ReadTxIndex failed");
+      }
+
+      if (prevout.n >= txindex.vSpent.size())
+      {
+        return error("DisconnectInputs() : prevout.n out of range");
+      }
+
+      txindex.vSpent[prevout.n].SetNull();
+
+      if (!txdb.UpdateTxIndex(prevout.hash, txindex))
+      {
+        return error("DisconnectInputs() : UpdateTxIndex failed");
+      }
+    }
+  }
+
+  txdb.EraseTxIndex(*this);
+  return true;
+}
+bool CTransaction::FetchInputs(CTxDB& txdb, const map<uint256, CTxIndex>& mapTestPool,
+                               bool fBlock, bool fMiner, MapPrevTx& inputsRet, bool& fInvalid)
+{
+  fInvalid = false;
+
+  if (IsCoinBase())
+  {
+    return true;
+  }
+
+  for (unsigned int i = 0; i < vin.size(); i++)
+  {
+    COutPoint prevout = vin[i].prevout;
+
+    if (inputsRet.count(prevout.hash))
+    {
+      continue;
+    }
+
+    CTxIndex& txindex = inputsRet[prevout.hash].first;
+    bool fFound = true;
+
+    if ((fBlock || fMiner) && mapTestPool.count(prevout.hash))
+    {
+      txindex = mapTestPool.find(prevout.hash)->second;
+    }
+    else
+    {
+      fFound = txdb.ReadTxIndex(prevout.hash, txindex);
+    }
+
+    if (!fFound && (fBlock || fMiner))
+    {
+      return fMiner ? false : error("FetchInputs() : %s prev tx %s index entry not found", GetHash().ToString().substr(0,10).c_str(), prevout.hash.ToString().substr(0,10).c_str());
+    }
+
+    CTransaction& txPrev = inputsRet[prevout.hash].second;
+
+    if (!fFound || txindex.pos == CDiskTxPos(1,1,1))
+    {
+      if (!mempool.lookup(prevout.hash, txPrev))
+      {
+        return error("FetchInputs() : %s mempool Tx prev not found %s", GetHash().ToString().substr(0,10).c_str(), prevout.hash.ToString().substr(0,10).c_str());
+      }
+
+      if (!fFound)
+      {
+        txindex.vSpent.resize(txPrev.vout.size());
+      }
+    }
+    else
+    {
+      if (!txPrev.ReadFromDisk(txindex.pos))
+      {
+        return error("FetchInputs() : %s ReadFromDisk prev tx %s failed", GetHash().ToString().substr(0,10).c_str(), prevout.hash.ToString().substr(0,10).c_str());
+      }
+    }
+  }
+
+  for (unsigned int i = 0; i < vin.size(); i++)
+  {
+    const COutPoint prevout = vin[i].prevout;
+    assert(inputsRet.count(prevout.hash) != 0);
+    const CTxIndex& txindex = inputsRet[prevout.hash].first;
+    const CTransaction& txPrev = inputsRet[prevout.hash].second;
+
+    if (prevout.n >= txPrev.vout.size() || prevout.n >= txindex.vSpent.size())
+    {
+      fInvalid = true;
+      return DoS(100, error("FetchInputs() : %s prevout.n out of range %d %" PRIszu " %" PRIszu " prev tx %s\n%s", GetHash().ToString().substr(0,10).c_str(), prevout.n, txPrev.vout.size(), txindex.vSpent.size(), prevout.hash.ToString().substr(0,10).c_str(), txPrev.ToString().c_str()));
+    }
+  }
+
+  return true;
+}
+const CTxOut& CTransaction::GetOutputFor(const CTxIn& input, const MapPrevTx& inputs) const
+{
+  MapPrevTx::const_iterator mi = inputs.find(input.prevout.hash);
+
+  if (mi == inputs.end())
+  {
+    throw std::runtime_error("CTransaction::GetOutputFor() : prevout.hash not found");
+  }
+
+  const CTransaction& txPrev = (mi->second).second;
+
+  if (input.prevout.n >= txPrev.vout.size())
+  {
+    throw std::runtime_error("CTransaction::GetOutputFor() : prevout.n out of range");
+  }
+
+  return txPrev.vout[input.prevout.n];
+}
+int64_t CTransaction::GetValueIn(const MapPrevTx& inputs) const
+{
+  if (IsCoinBase())
+  {
+    return 0;
+  }
+
+  int64_t nResult = 0;
+
+  for (unsigned int i = 0; i < vin.size(); i++)
+  {
+    nResult += GetOutputFor(vin[i], inputs).nValue;
+  }
+
+  return nResult;
+}
+unsigned int CTransaction::GetP2SHSigOpCount(const MapPrevTx& inputs) const
+{
+  if (IsCoinBase())
+  {
+    return 0;
+  }
+
+  unsigned int nSigOps = 0;
+
+  for (unsigned int i = 0; i < vin.size(); i++)
+  {
+    const CTxOut& prevout = GetOutputFor(vin[i], inputs);
+
+    if (prevout.scriptPubKey.IsPayToScriptHash())
+    {
+      nSigOps += prevout.scriptPubKey.GetSigOpCount(vin[i].scriptSig);
+    }
+  }
+
+  return nSigOps;
+}
 bool Reorganize(CTxDB& txdb, CBlockIndex* pindexNew)
 {
   printf("REORGANIZE\n");
@@ -1048,6 +1210,128 @@ bool Reorganize(CTxDB& txdb, CBlockIndex* pindexNew)
   printf("REORGANIZE: done\n");
   return true;
 }
+bool CTransaction::GetCoinAge(CTxDB& txdb, uint64_t& nCoinAge) const
+{
+  CBigNum bnCentSecond = 0;
+  nCoinAge = 0;
+
+  if (IsCoinBase())
+  {
+    return true;
+  }
+
+  BOOST_FOREACH(const CTxIn& txin, vin)
+  {
+    CTransaction txPrev;
+    CTxIndex txindex;
+
+    if (!txPrev.ReadFromDisk(txdb, txin.prevout, txindex))
+    {
+      continue;
+    }
+
+    if (nTime < txPrev.nTime)
+    {
+      return false;
+    }
+
+    CBlock block;
+
+    if (!block.ReadFromDisk(txindex.pos.nFile, txindex.pos.nBlockPos, false))
+    {
+      return false;
+    }
+
+    if (block.GetBlockTime() + nStakeMinAge > nTime)
+    {
+      continue;
+    }
+
+    int64_t nValueIn = txPrev.vout[txin.prevout.n].nValue;
+    bnCentSecond += CBigNum(nValueIn) * (nTime-txPrev.nTime) / CENT;
+
+    if (fDebug && GetBoolArg("-printcoinage"))
+    {
+      printf("coin age nValueIn=%" PRId64 " nTimeDiff=%d bnCentSecond=%s\n", nValueIn, nTime - txPrev.nTime, bnCentSecond.ToString().c_str());
+    }
+  }
+  CBigNum bnCoinDay = bnCentSecond * CENT / COIN / (24 * 60 * 60);
+
+  if (fDebug && GetBoolArg("-printcoinage"))
+  {
+    printf("coin age bnCoinDay=%s\n", bnCoinDay.ToString().c_str());
+  }
+
+  nCoinAge = bnCoinDay.getuint64();
+  return true;
+}
+bool CTransaction::GetCoinAge(CTxDB& txdb, const CBlockIndex* pindexPrev, uint64_t& nCoinAge) const
+{
+  CBigNum bnCentSecond = 0;
+  nCoinAge = 0;
+
+  if (IsCoinBase())
+  {
+    return true;
+  }
+
+  BOOST_FOREACH(const CTxIn& txin, vin)
+  {
+    CTransaction txPrev;
+    CTxIndex txindex;
+
+    if (!txPrev.ReadFromDisk(txdb, txin.prevout, txindex))
+    {
+      continue;
+    }
+
+    if (nTime < txPrev.nTime)
+    {
+      return false;
+    }
+
+    if(V3(pindexPrev->nHeight))
+    {
+      int nSpendDepth;
+
+      if(!minBase(txindex, pindexPrev, ConfigurationState::nStakeMinConfirmations - 1, nSpendDepth))
+      {
+        continue;
+      }
+    }
+    else
+    {
+      CBlock block;
+
+      if (!block.ReadFromDisk(txindex.pos.nFile, txindex.pos.nBlockPos, false))
+      {
+        return false;
+      }
+
+      if (block.GetBlockTime() + nStakeMinAge > nTime)
+      {
+        continue;
+      }
+
+      int64_t nValueIn = txPrev.vout[txin.prevout.n].nValue;
+      bnCentSecond += CBigNum(nValueIn) * (nTime-txPrev.nTime) / CENT;
+
+      if (fDebug && GetBoolArg("-printcoinage"))
+      {
+        printf("coin age nValueIn=%" PRId64 " nTimeDiff=%d bnCentSecond=%s\n", nValueIn, nTime - txPrev.nTime, bnCentSecond.ToString().c_str());
+      }
+    }
+  }
+  CBigNum bnCoinDay = bnCentSecond * CENT / COIN / (24 * 60 * 60);
+
+  if (fDebug && GetBoolArg("-printcoinage"))
+  {
+    printf("coin age bnCoinDay=%s\n", bnCoinDay.ToString().c_str());
+  }
+
+  nCoinAge = bnCoinDay.getuint64();
+  return true;
+}
 bool ProcessBlock(CNode* pfrom, CBlock* pblock)
 {
   AssertLockHeld(cs_main);
@@ -1081,6 +1365,7 @@ bool ProcessBlock(CNode* pfrom, CBlock* pblock)
 
       return error("ProcessBlock() : block with timestamp before last checkpoint");
     }
+
   }
 
   if (!pblock->CheckBlock())

@@ -1,5 +1,4 @@
 
-
 #include "wallet.h"
 #include "walletdb.h"
 #include "bitcoinrpc.h"
@@ -1303,7 +1302,7 @@ int64_t GetAccountBalance(__wx__DB& walletdb, const string& strAccount, int nMin
     }
 
     int64_t nReceived, nSent, nFee;
-    pwalletMain->GetAccountAmounts(wtx,strAccount, nReceived, nSent, nFee);
+    wtx.GetAccountAmounts(strAccount, nReceived, nSent, nFee);
 
     if (nReceived != 0 && wtx.GetDepthInMainChain() >= nMinDepth && wtx.GetBlocksToMaturity() == 0)
     {
@@ -1359,7 +1358,7 @@ Value getbalance(const Array& params, bool fHelp)
     {
       const __wx__Tx& wtx = (*it).second;
 
-      if (!pwalletMain->IsTrusted(wtx))
+      if (!wtx.IsTrusted())
       {
         continue;
       }
@@ -1368,7 +1367,7 @@ Value getbalance(const Array& params, bool fHelp)
       string strSentAccount;
       list<pair<CTxDestination, int64_t> > listReceived;
       list<pair<CTxDestination, int64_t> > listSent;
-      pwalletMain->GetTxAmounts(wtx,listReceived,listSent,allFee,strSentAccount);
+      wtx.GetAmounts(listReceived, listSent, allFee, strSentAccount);
 
       if (wtx.GetDepthInMainChain() >= nMinDepth && wtx.GetBlocksToMaturity() == 0)
       {
@@ -1867,7 +1866,7 @@ void ListTransactions(const __wx__Tx& wtx, const string& strAccount, int nMinDep
   string strSentAccount;
   list<pair<CTxDestination, int64_t> > listReceived;
   list<pair<CTxDestination, int64_t> > listSent;
-  pwalletMain->GetTxAmounts(wtx,listReceived,listSent,nFee,strSentAccount);
+  wtx.GetAmounts(listReceived, listSent, nFee, strSentAccount);
   bool fAllAccounts = (strAccount == string("*"));
 
   if ((!wtx.IsCoinStake()) && (!listSent.empty() || nFee != 0) && (fAllAccounts || strAccount == strSentAccount))
@@ -2202,7 +2201,7 @@ Value listaccounts(const Array& params, bool fHelp)
       continue;
     }
 
-    pwalletMain->GetTxAmounts(wtx,listReceived,listSent,nFee,strSentAccount);
+    wtx.GetAmounts(listReceived, listSent, nFee, strSentAccount);
     mapAccountBalances[strSentAccount] -= nFee;
     BOOST_FOREACH(const PAIRTYPE(CTxDestination, int64_t)& s, listSent)
     mapAccountBalances[strSentAccount] -= s.second;

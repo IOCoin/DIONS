@@ -1,4 +1,3 @@
-
 #include "api_transaction.h"
 #include "txdb-leveldb.h"
 

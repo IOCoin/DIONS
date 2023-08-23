@@ -1,5 +1,4 @@
 
-
 #include <string>
 #include "version.h"
 const std::string CLIENT_NAME("Satoshi");

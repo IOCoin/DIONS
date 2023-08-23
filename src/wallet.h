@@ -14,19 +14,16 @@
 #include "util.h"
 #include "walletdb.h"
 #include "api_transaction.h"
+#include "wallet_transaction.h"
 
 #include "ray_shade.h"
-#include "wallet_transaction.h"
-#include "api_transaction.h"
-#include "type_mapvalue.h"
 
-extern bool fWalletUnlockStakingOnly;
-extern bool fConfChange;
 class CAccountingEntry;
 class __wx__Tx;
 class CReserveKey;
 class COutput;
 class CCoinControl;
+
 
 enum WalletFeature
 {
@@ -69,6 +66,9 @@ public:
     )
 };
 
+
+
+
 class __wx__ : public CCryptoKeyStore
 {
 private:
@@ -84,6 +84,10 @@ private:
 
 public:
     bool SelectCoins(int64_t nTargetValue, unsigned int nSpendTime, std::set<std::pair<const __wx__Tx*,unsigned int> >& setCoinsRet, int64_t& nValueRet, const CCoinControl *coinControl=NULL) const;
+
+
+
+
 
     mutable CCriticalSection cs_wallet;
 
@@ -172,10 +176,18 @@ public:
 
     void kt(std::map<CKeyID, int64_t> &mapKeyBirth) const;
 
+
+
+
+
     int64_t IncOrderPosNext(__wx__DB *pwalletdb = NULL);
 
     typedef std::pair<__wx__Tx*, CAccountingEntry*> TxPair;
     typedef std::multimap<int64_t, TxPair > TxItems;
+
+
+
+
 
     TxItems OrderedTxItems(std::list<CAccountingEntry>& acentries, std::string strAccount = "");
 
@@ -231,65 +243,6 @@ public:
     bool __xfa(const vector<CTxOut>& vout) const;
     bool IsMine(const CTxIn& txin) const;
     int64_t GetDebit(const CTxIn& txin) const;
-    void GetAccountAmounts(const __wx__Tx& wtx, const string& strAccount, int64_t& nReceived,
-                                 int64_t& nSent, int64_t& nFee) const;
-    void AddSupportingTransactions(__wx__Tx& wtx, CTxDB& txdb);
-    bool WriteTxToDisk(const __wx__Tx&);
-    int64_t GetTxDebit(const __wx__Tx& wtx) const
-    {
-        if (wtx.vin.empty())
-            return 0;
-        if (wtx.fDebitCached)
-            return wtx.nDebitCached;
-        wtx.nDebitCached = GetDebit(wtx);
-        wtx.fDebitCached = true;
-        return wtx.nDebitCached;
-    }
-    int64_t GetTxCredit(__wx__Tx& wtx,bool fUseCache=true) const
-    {
-
-        if ((wtx.IsCoinBase() || wtx.IsCoinStake()) && wtx.GetBlocksToMaturity() > 0)
-            return 0;
-
-
-        if (fUseCache && wtx.fCreditCached)
-            return wtx.nCreditCached;
-        wtx.nCreditCached = this->GetCredit(wtx);
-        wtx.fCreditCached = true;
-        return wtx.nCreditCached;
-    }
-    int64_t GetTxChange(__wx__Tx& wtx) const
-    {
-        if (wtx.fChangeCached)
-            return wtx.nChangeCached;
-        wtx.nChangeCached = this->GetChange(wtx);
-        wtx.fChangeCached = true;
-        return wtx.nChangeCached;
-    }
-    int64_t GetAvailableTxCredit(const __wx__Tx& wtx, bool fUseCache=true) const
-    {
-        if ((wtx.IsCoinBase() || wtx.IsCoinStake()) && wtx.GetBlocksToMaturity() > 0)
-            return 0;
-
-        if (fUseCache && wtx.fAvailableCreditCached)
-            return wtx.nAvailableCreditCached;
-
-        int64_t nCredit = 0;
-        for (unsigned int i = 0; i < wtx.vout.size(); i++)
-        {
-            if (!wtx.IsSpent(i))
-            {
-                const CTxOut &txout = wtx.vout[i];
-                nCredit += this->GetCredit(txout);
-                if (!MoneyRange(nCredit))
-                    throw std::runtime_error("__wx__Tx::GetAvailableCredit() : value out of range");
-            }
-        }
-
-        wtx.nAvailableCreditCached = nCredit;
-        wtx.fAvailableCreditCached = true;
-        return nCredit;
-    }
     bool IsMine(const CTxOut& txout) const
     {
         return ::IsMine(*this, txout.scriptPubKey);
@@ -325,69 +278,6 @@ public:
 
         return s;
     }
-    bool IsTrusted(const __wx__Tx& wtx) const
-    {
-      if(!this->IsFromMe(wtx) || !this->IsTrustedTx(wtx))
-	      return false;
-     
-       return true; 
-    }
-    bool IsTrustedTx(const __wx__Tx& wtx) const
-    {
-        if (!IsFinalTx(wtx))
-            return false;
-        int nDepth = wtx.GetDepthInMainChain();
-        if (nDepth >= 1)
-        {
-            return true;
-        }
-        if (nDepth < 0)
-        {
-            return false;
-        }
-        if (fConfChange)
-          return false;
-
-        std::map<uint256, const CMerkleTx*> mapPrev;
-        std::vector<const CMerkleTx*> vWorkQueue;
-        vWorkQueue.reserve(wtx.vtxPrev.size()+1);
-        vWorkQueue.push_back(&wtx);
-        for (unsigned int i = 0; i < vWorkQueue.size(); i++)
-        {
-            const CMerkleTx* ptx = vWorkQueue[i];
-
-            if (!IsFinalTx(*ptx))
-            {
-                return false;
-            }
-            int nPDepth = ptx->GetDepthInMainChain();
-            if (nPDepth >= 1)
-            {
-                continue;
-            }
-            if (nPDepth < 0)
-            {
-                return false;
-            }
-
-            if (mapPrev.empty())
-            {
-                BOOST_FOREACH(const CMerkleTx& tx, wtx.vtxPrev)
-                    mapPrev[tx.GetHash()] = &tx;
-            }
-
-            BOOST_FOREACH(const CTxIn& txin, ptx->vin)
-            {
-                if (!mapPrev.count(txin.prevout.hash))
-                {
-                    return false;
-                }
-                vWorkQueue.push_back(mapPrev[txin.prevout.hash]);
-            }
-        }
-
-        return true;
-    }
     bool IsFromMe(const CTransaction& tx) const
     {
         return (GetDebit(tx) > 0);
@@ -403,10 +293,6 @@ public:
         }
         return nDebit;
     }
-
-    void GetTxAmounts(const __wx__Tx&, list<pair<CTxDestination, int64_t> >& listReceived,
-                      list<pair<CTxDestination, int64_t> >& listSent, int64_t& nFee, string& strSentAccount) const;
-
     int64_t GetCredit(const CTransaction& tx) const
     {
         int64_t nCredit = 0;
@@ -428,14 +314,6 @@ public:
                 throw std::runtime_error("__wx__::GetChange() : value out of range");
         }
         return nChange;
-    }
-    int64_t GetTxChange(const __wx__Tx& wtx) const
-    {
-        if (wtx.fChangeCached)
-            return wtx.nChangeCached;
-        wtx.nChangeCached = this->GetChange(wtx);
-        wtx.fChangeCached = true;
-        return wtx.nChangeCached;
     }
     void SetBestChain(const CBlockLocator& loc);
 
@@ -520,28 +398,12 @@ public:
     void KeepKey();
 };
 
-class COutput
-{
-public:
-    const __wx__Tx *tx;
-    int i;
-    int nDepth;
 
-    COutput(const __wx__Tx *txIn, int iIn, int nDepthIn)
-    {
-        tx = txIn; i = iIn; nDepth = nDepthIn;
-    }
+typedef std::map<std::string, std::string> mapValue_t;
 
-    std::string ToString() const
-    {
-        return strprintf("COutput(%s, %d, %d) [%s]", tx->GetHash().ToString().substr(0,10).c_str(), i, nDepth, FormatMoney(tx->vout[i].nValue).c_str());
-    }
 
-    void print() const
-    {
-        printf("%s\n", ToString().c_str());
-    }
-};
+void ReadOrderPos(int64_t& nOrderPos, mapValue_t& mapValue);
+void WriteOrderPos(const int64_t& nOrderPos, mapValue_t& mapValue);
 
 class __wx__Key
 {
@@ -550,6 +412,8 @@ public:
     int64_t nTimeCreated;
     int64_t nTimeExpires;
     std::string strComment;
+
+
 
     __wx__Key(int64_t nExpires=0)
     {
@@ -567,6 +431,7 @@ public:
         READWRITE(strComment);
     )
 };
+# 872 "wallet.h"
 class CAccount
 {
 public:
@@ -589,6 +454,11 @@ public:
         READWRITE(vchPubKey);
     )
 };
+
+
+
+
+
 
 class CAccountingEntry
 {
@@ -629,8 +499,7 @@ public:
 
         if (!fRead)
         {
-            if (nOrderPos != -1)
-              me.mapValue["n"] = i64tostr(nOrderPos);
+            WriteOrderPos(nOrderPos, me.mapValue);
 
             if (!(mapValue.empty() && _ssExtra.empty()))
             {
@@ -654,13 +523,7 @@ public:
                 ss >> me.mapValue;
                 me._ssExtra = std::vector<char>(ss.begin(), ss.end());
             }
-
-            if(!me.mapValue.count("n"))
-            {
-                me.nOrderPos = -1;
-            }
-	    else
-              me.nOrderPos = atoi64(me.mapValue["n"].c_str());
+            ReadOrderPos(me.nOrderPos, me.mapValue);
         }
         if (std::string::npos != nSepPos)
             me.strComment.erase(nSepPos);

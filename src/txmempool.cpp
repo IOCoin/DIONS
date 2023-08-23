@@ -1,4 +1,3 @@
-
 #include "txmempool.h"
 #include "txdb-leveldb.h"
 #include "wallet.h"
