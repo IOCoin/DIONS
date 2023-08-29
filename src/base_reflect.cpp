@@ -60,7 +60,6 @@ extern string txRelay(const CScript& scriptPubKey, int64_t nValue, const __wx__T
 extern bool aliasAddress(const CTransaction& tx, std::string& strAddress);
 extern Object JSONRPCError(int code, const string& message);
 extern Value xtu_url__(const string& url);
-extern dev::OverlayDB* overlayDB__;
 template<typename T> void ConvertTo(Value& value, bool fAllowNull=false);
 std::map<vchType, uint256> mapMyMessages_cycle;
 std::map<vchType, uint256> mapLocator_cycle;
@@ -746,6 +745,7 @@ Value integratedTest1(const Array& params, bool fHelp)
     msg_test_bytes +=1;
     const auto track_used = msg.track - result.track_left;
   }
+  dev::OverlayDB* overlayDB__ = new dev::OverlayDB();
   dev::SecureTrieDB<dev::Address, dev::OverlayDB> state(overlayDB__);
   state.init();
   dev::Address tmpAddr("9999999999999996789012345678901234567890");
@@ -854,6 +854,7 @@ Value integratedTest1(const Array& params, bool fHelp)
 
       {
         {
+		dev::OverlayDB* overlayDB__ = new dev::OverlayDB();
           dev::SecureTrieDB<dev::h256, dev::OverlayDB> memdb(const_cast<dev::OverlayDB*>(overlayDB__), tmpAccstorageRoot);
 
           for (auto it = memdb.hashedBegin(); it != memdb.hashedEnd(); ++it)
@@ -1417,6 +1418,7 @@ Value integratedTest5(const Array& params, bool fHelp)
 
   std::vector<CTransaction> testTxVector;
   dev::h256 ROOT("7a8a519e3b0f84ef31cc28b83f4a27e2e376dba75789cecf5252811f2682974f");
+  dev::OverlayDB* overlayDB__ = new dev::OverlayDB();
   dev::SecureTrieDB<dev::Address, dev::OverlayDB> state(overlayDB__,ROOT);
 
   if(state.isNull())
@@ -1548,6 +1550,7 @@ Value integratedTest6(const Array& params, bool fHelp)
 
   dev::h256 Empty;
   std::cout << "empty hash " << Empty << std::endl; 
+  dev::OverlayDB* overlayDB__ = new dev::OverlayDB();
   dev::SecureTrieDB<dev::Address, dev::OverlayDB> state(overlayDB__);
   state.init();
   std::cout << "state root after init " << state.root() << std::endl; 

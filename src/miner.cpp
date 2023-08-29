@@ -20,7 +20,7 @@
 using namespace std;
 extern __wx__* pwalletMain;
 extern unsigned int nMinerSleep;
-extern dev::OverlayDB* overlayDB__;
+//extern dev::OverlayDB* overlayDB__;
 extern bool sectionVertex(const string&, string&);
 extern string erc20_22112022_withdraw_with_parameter_subtract_15;
 int static FormatHashBlocks(void* pbuffer, unsigned int len)
@@ -208,25 +208,6 @@ CBlock* CreateNewBlock(__wx__* pwallet, bool fProofOfStake, int64_t* pFees)
 
               pblock->stateRoot = pindexPrev->stateRootIndex;
               std::cout << "execution request - previous state root " << pblock->stateRoot << std::endl;
-              //XXXX dev::SecureTrieDB<dev::Address, dev::OverlayDB>* state;
-              dev::h256 Empty;
-
-              if(pblock->stateRoot == Empty)
-              {
-                pblock->state__ = new dev::SecureTrieDB<dev::Address, dev::OverlayDB>(overlayDB__);
-
-                if(pblock->state__->isNull())
-                {
-                  pblock->state__->init();
-                  overlayDB__->commit();
-                }
-              }
-              else
-              {
-                std::cout << "state root is non zero creating securetriedb instance from existing ROOT" << std::endl;
-                std::cout << "state root is " << pblock->stateRoot << std::endl;
-                pblock->state__ = new dev::SecureTrieDB<dev::Address, dev::OverlayDB>(overlayDB__,pblock->stateRoot);
-              }
 
               {
                 std::vector<CTransaction> testTxVector;
