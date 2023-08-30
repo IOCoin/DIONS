@@ -1,5 +1,5 @@
-#ifndef CLIENT_H
-#define CLIENT_H
+#ifndef NETWORK_NODE_H
+#define NETWORK_NODE_H
 
 #include "txdb.h"
 #include "walletdb.h"
@@ -25,21 +25,28 @@
 #include <signal.h>
 #endif
 #include "ptrie/OverlayDB.h"
-class Client
+
+#include "client.h"
+
+class NetworkNode
 {
   public:
-    Client() = default;
-    Client(CClientUIInterface* uiFace) { uiFace_=uiFace; }
+    NetworkNode() = default;
 
-    ~Client() = default;
+    NetworkNode(boost::filesystem::path const& _dbPath, bool testNet = false);
 
-    dev::OverlayDB const& stateDB() const { return overlayDB_; }
+    ~NetworkNode() = default;
+
+    bool init();
+
+    Client& client() { return this->client_; }
 
   private:
-    bool init(boost::filesystem::path const& _dbPath);
-
-    CClientUIInterface* uiFace_;
-    dev::OverlayDB overlayDB_;
+    __wx__ pwalletMain_;
+    LocatorNodeDB* ln1Db_;
+    VertexNodeDB* vertexDB_;
+    Client client_;
+    CClientUIInterface uiFace;
 };
 
 #endif

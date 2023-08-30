@@ -1,5 +1,5 @@
 #ifndef BITCOIN_UI_INTERFACE_H
-#define BITCOIN_UI_INTERFACE_H 
+#define BITCOIN_UI_INTERFACE_H
 
 #include <boost/signals2/last_value.hpp>
 #include <boost/signals2/signal.hpp>
@@ -57,6 +57,22 @@ public:
     MODAL = 0x00040000
   };
 
+  std::string translate(const char* psz)
+  {
+    boost::optional<std::string> rv = this->Translate(psz);
+    return rv ? (*rv) : psz;
+  }
+
+  bool initError_(const std::string &str)
+  {
+    this->ThreadSafeMessageBox(str, translate("I/OCoin"), CClientUIInterface::OK | CClientUIInterface::MODAL);
+    return false;
+  }
+  bool initWarning_(const std::string &str)
+  {
+    this->ThreadSafeMessageBox(str, translate("I/OCoin"), CClientUIInterface::OK | CClientUIInterface::ICON_EXCLAMATION | CClientUIInterface::MODAL);
+    return true;
+  }
 
   boost::signals2::signal<void (const std::string& message, const std::string& caption, int style)> ThreadSafeMessageBox;
 
@@ -89,10 +105,6 @@ public:
 };
 
 extern CClientUIInterface uiInterface;
-
-
-
-
 
 inline std::string _(const char* psz)
 {

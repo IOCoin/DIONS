@@ -166,6 +166,7 @@ OBJS= \
     obj/main.o \
     obj/block.o \
     obj/block_index.o \
+    obj/network_node.o \
     obj/client.o \
     obj/api_transaction.o \
     obj/transaction.o \

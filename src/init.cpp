@@ -1,4 +1,3 @@
-
 #include "txdb.h"
 #include "walletdb.h"
 #include "bitcoinrpc.h"
@@ -19,7 +18,7 @@
 #include "ptrie/Address.h"
 #include "main.h"
 #include "disk_block_locator.h"
-#include "client.h"
+#include "network_node.h"
 #ifndef WIN32
 #include <signal.h>
 #endif
@@ -154,11 +153,8 @@ int main(int argc, char* argv[])
       exit(ret);
     }
 
-	std::cout << "Client scope enter" << std::endl;
-    Client client;
-    pwalletMain = client.wallet();
-    fRet = client.init();
-	std::cout << "Client scope exit" << std::endl;
+    NetworkNode networkNode;
+    fRet = networkNode.init();
   }
   catch (std::exception& e)
   {
