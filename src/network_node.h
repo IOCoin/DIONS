@@ -31,18 +31,27 @@
 class NetworkNode
 {
   public:
-    NetworkNode() = default;
+    NetworkNode() 
+    { 
+	    pwalletMain_ = new __wx__("wallet.dat");
+    }
 
     NetworkNode(boost::filesystem::path const& _dbPath, bool testNet = false);
 
     ~NetworkNode() = default;
 
     bool init();
+    __wx__* wallet() { return this->pwalletMain_; }
 
     Client& client() { return this->client_; }
 
   private:
-    __wx__ pwalletMain_;
+    bool InitError_(const std::string &str);
+    bool InitWarning_(const std::string &str);
+    bool Bind_(const CService &addr, bool fError = true);
+    bool InitSanityCheck_();
+
+    __wx__* pwalletMain_;
     LocatorNodeDB* ln1Db_;
     VertexNodeDB* vertexDB_;
     Client client_;

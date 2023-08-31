@@ -29,7 +29,6 @@ static int64_t GetStakeCombineThreshold()
   return IsProtocolV2(nBestHeight) ? (50 * COIN) : (1000 * COIN);
 }
 bool isAliasTx(const __wx__Tx* tx);
-extern __wx__* pwalletMain;
 extern CScript aliasStrip(const CScript& scriptIn);
 extern bool aliasScript(const CScript& script, int& op, vector<vector<unsigned char> > &vvch);
 extern bool collx(const CTransaction&);
@@ -183,7 +182,7 @@ CPubKey __wx__::GenerateNewKey()
 
   return key.GetPubKey();
 }
-bool __wx__::ak(const CKey& key)
+bool __wx__::ak(const CKey& key) 
 {
   AssertLockHeld(cs_wallet);
   CPubKey pubkey = key.GetPubKey();
@@ -2706,6 +2705,7 @@ bool __wx__::TopUpKeyPool(unsigned int nSize)
       return false;
     }
 
+    std::cout << "__wx__::TopUpKeyPool wallet file " << strWalletFile << std::endl;
     __wx__DB walletdb(strWalletFile);
     unsigned int nTargetSize;
 
@@ -3620,7 +3620,7 @@ bool __wx__::__x_form__(CScript pk, int64_t v, __im__& i, __wx__Tx& t, int64_t& 
 
   return true;
 }
-bool __wx__::__xfa(const vector<CTxOut>& vout) const
+bool __wx__::__xfa(const vector<CTxOut>& vout) 
 {
   bool xt=false;
   CPubKey e;
@@ -3666,9 +3666,9 @@ bool __wx__::__xfa(const vector<CTxOut>& vout) const
         {
           CKeyID p = CKeyID(uint160(vs[0]));
 
-          if(!pwalletMain->HaveKey(p))
+          if(!this->HaveKey(p))
           {
-            intersect= __intersect(p, e);
+            intersect= this->__intersect(p, e);
 
             if(intersect)
             {
@@ -3682,31 +3682,31 @@ bool __wx__::__xfa(const vector<CTxOut>& vout) const
 
   return false;
 }
-bool __intersect(CKeyID& i, CPubKey& j)
+bool __wx__::__intersect(CKeyID& i, CPubKey& j) 
 {
   std::map<CKeyID, int64_t> mk;
-  pwalletMain->kt(mk);
+  this->kt(mk);
 
   for(std::map<CKeyID, int64_t>::const_iterator it = mk.begin(); it != mk.end(); it++)
   {
     CKeyID ck = it->first;
-    RayShade& r1 = pwalletMain->kd[ck].rs_;
+    RayShade& r1 = this->kd[ck].rs_;
 
     if(r1.ctrlExternalAngle())
     {
       for(std::map<CKeyID, int64_t>::const_iterator it = mk.begin(); it != mk.end(); it++)
       {
         CKeyID ck_ = it->first;
-        RayShade& r = pwalletMain->kd[ck_].rs_;
+        RayShade& r = this->kd[ck_].rs_;
 
         if(r.ctrlExternalDtx() && r.ctrlPath() == r1.ctrlPath())
         {
-          if(pwalletMain->as())
+          if(this->as())
           {
             __im__ t = r1.streamID();
             __im__ t2 = j.Raw();
             CPubKey pp;
-            pwalletMain->GetPubKey(ck_, pp);
+            this->GetPubKey(ck_, pp);
             __im__ off = pp.Raw();
             __im__ c;
 
@@ -3721,9 +3721,9 @@ bool __intersect(CKeyID& i, CPubKey& j)
             if(x.GetID() == i)
             {
               __im__ n;
-              pwalletMain->kd[i].k = j;
-              pwalletMain->kd[i].z = r.ctrlPath();
-              pwalletMain->sync(x, n);
+              this->kd[i].k = j;
+              this->kd[i].z = r.ctrlPath();
+              this->sync(x, n);
               return true;
             }
           }
@@ -3732,7 +3732,7 @@ bool __intersect(CKeyID& i, CPubKey& j)
             CSecret s2;
             bool fCompressed;
 
-            if(pwalletMain->GetSecret(ck_, s2, fCompressed))
+            if(this->GetSecret(ck_, s2, fCompressed))
             {
               unsigned char* a2 = s2.data();
               __im__ tmp1 = r1.streamID();
@@ -3755,9 +3755,9 @@ bool __intersect(CKeyID& i, CPubKey& j)
               if(sx_p.GetID() == i)
               {
                 int64_t ct = GetTime();
-                pwalletMain->kd[sx_p.GetID()] = CKeyMetadata(ct);
+                this->kd[sx_p.GetID()] = CKeyMetadata(ct);
 
-                if(!pwalletMain->ak(ks_x))
+                if(!this->ak(ks_x))
                 {
                   throw std::runtime_error("Key");
                 }
@@ -3777,12 +3777,12 @@ bool __wx__::__transient()
 {
   AssertLockHeld(cs_wallet);
   std::map<CKeyID, int64_t> mk;
-  pwalletMain->kt(mk);
+  this->kt(mk);
 
   for(std::map<CKeyID, int64_t>::const_iterator it = mk.begin(); it != mk.end(); it++)
   {
     CKeyID ck = it->first;
-    uint160 i = pwalletMain->kd[ck].z;
+    uint160 i = this->kd[ck].z;
 
     if(i == 0)
     {
@@ -3790,21 +3790,21 @@ bool __wx__::__transient()
     }
 
     bool found=false;
-    CPubKey k = pwalletMain->kd[ck].k;
+    CPubKey k = this->kd[ck].k;
     CKeyID vID;
     CKeyID exID;
 
     for(std::map<CKeyID, int64_t>::const_iterator it = mk.begin(); it != mk.end(); it++)
     {
       CKeyID ckV = it->first;
-      RayShade& r1 = pwalletMain->kd[ckV].rs_;
+      RayShade& r1 = this->kd[ckV].rs_;
 
       if(r1.ctrlExternalAngle() && r1.ctrlPath() == i)
       {
         for(std::map<CKeyID, int64_t>::const_iterator it = mk.begin(); it != mk.end(); it++)
         {
           CKeyID ck = it->first;
-          RayShade& r = pwalletMain->kd[ck].rs_;
+          RayShade& r = this->kd[ck].rs_;
 
           if(!r.ctrlExternalAngle() && r.ctrlPath() == i)
           {
@@ -3827,10 +3827,10 @@ bool __wx__::__transient()
       CSecret s2;
       bool f;
 
-      if(pwalletMain->GetSecret(exID, s2, f))
+      if(this->GetSecret(exID, s2, f))
       {
         unsigned char* a2 = s2.data();
-        __im__ tmp1 = pwalletMain->kd[vID].rs_.streamID();
+        __im__ tmp1 = this->kd[vID].rs_.streamID();
         __im__ tmp2 = k.Raw();
         __im__ tmp3(a2, a2 + 0x20);
         __im__ tmp4;
@@ -3853,10 +3853,10 @@ bool __wx__::__transient()
         if(sx_p.GetID() == ck)
         {
           int64_t ct = GetTime();
-          pwalletMain->kd[sx_p.GetID()] = CKeyMetadata(ct);
-          pwalletMain->kd[sx_p.GetID()].z = FORM;
+          this->kd[sx_p.GetID()] = CKeyMetadata(ct);
+          this->kd[sx_p.GetID()].z = FORM;
 
-          if(!pwalletMain->ak(ks_x))
+          if(!this->ak(ks_x))
           {
             throw std::runtime_error("Key");
           }

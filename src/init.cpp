@@ -37,7 +37,6 @@ bool fUseFastIndex;
 enum Checkpoints::CPMode CheckpointsMode;
 LocatorNodeDB* ln1Db = NULL;
 VertexNodeDB* vertexDB__ = NULL;
-//dev::OverlayDB* overlayDB__ = NULL;
 extern ConfigurationState globalState;
 void ExitTimeout(void* parg)
 {
@@ -154,6 +153,8 @@ int main(int argc, char* argv[])
     }
 
     NetworkNode networkNode;
+
+    pwalletMain = networkNode.wallet();
     fRet = networkNode.init();
   }
   catch (std::exception& e)

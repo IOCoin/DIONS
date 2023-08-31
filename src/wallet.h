@@ -240,7 +240,7 @@ public:
     std::set< std::set<CTxDestination> > GetAddressGroupings();
     std::map<CTxDestination, int64_t> GetAddressBalances();
 
-    bool __xfa(const vector<CTxOut>& vout) const;
+    bool __xfa(const vector<CTxOut>& vout);
     bool IsMine(const CTxIn& txin) const;
     int64_t GetDebit(const CTxIn& txin) const;
     bool IsMine(const CTxOut& txout) const
@@ -264,7 +264,7 @@ public:
             throw std::runtime_error("__wx__::GetChange() : value out of range");
         return (IsChange(txout) ? txout.nValue : 0);
     }
-    bool IsMine(const CTransaction& tx) const
+    bool IsMine(const CTransaction& tx) 
     {
         bool s = __xfa(tx.vout);
         BOOST_FOREACH(const CTxOut& txout, tx.vout)
@@ -357,6 +357,7 @@ public:
 
 
     int GetVersion() { LOCK(cs_wallet); return nWalletVersion; }
+    bool __intersect(CKeyID& i, CPubKey& j);
 
 
     void FixSpentCoins(int& nMismatchSpent, int64_t& nBalanceInQuestion, bool fCheckOnly = false);
