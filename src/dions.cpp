@@ -135,10 +135,10 @@ bool channelPredicate(string ext, string& tor)
 {
   ENTER_CRITICAL_SECTION(cs_main)
   {
-    ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    ENTER_CRITICAL_SECTION(pwalletMainId->cs_wallet)
     {
       BOOST_FOREACH(PAIRTYPE(const uint256, __wx__Tx)& item,
-                    pwalletMain->mapWallet)
+                    pwalletMainId->mapWallet)
       {
         const __wx__Tx& tx = item.second;
         vchType vchS, vchR, vchKey, vchAes, vchSig;
@@ -162,9 +162,9 @@ bool channelPredicate(string ext, string& tor)
         r.GetKeyID(keyID);
         CKey key;
 
-        if(!pwalletMain->GetKey(keyID, key))
+        if(!pwalletMainId->GetKey(keyID, key))
         {
-          LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+          LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
           LEAVE_CRITICAL_SECTION(cs_main)
           return false;
         }
@@ -174,7 +174,7 @@ bool channelPredicate(string ext, string& tor)
         }
       }
     }
-    LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
   }
   LEAVE_CRITICAL_SECTION(cs_main)
   return true;
@@ -416,9 +416,9 @@ bool channel(string l, string f, string& k, bool& black)
     cba keyAddress(l);
     keyAddress.GetKeyID(keyID);
     CPubKey vchPubKey;
-    pwalletMain->GetPubKey(keyID, vchPubKey);
+    pwalletMainId->GetPubKey(keyID, vchPubKey);
 
-    if(pwalletMain->aes_(vchPubKey, f, k))
+    if(pwalletMainId->aes_(vchPubKey, f, k))
     {
       black=false;
       return true;
@@ -511,7 +511,7 @@ bool IsLocator(const CTransaction& tx, const CTxOut& txout)
   CScript scriptSig;
   txnouttype whichType;
 
-  if(!Solver(*pwalletMain, scriptPubKey, 0, 0, scriptSig, whichType))
+  if(!Solver(*pwalletMainId, scriptPubKey, 0, 0, scriptSig, whichType))
   {
     return false;
   }
@@ -536,11 +536,11 @@ bool txPost(const vector<pair<CScript, int64_t> >& vecSend, const __wx__Tx& wtxI
     return false;
   }
 
-  wtxNew.pwallet = pwalletMain;
+  wtxNew.pwallet = pwalletMainId;
   ENTER_CRITICAL_SECTION(cs_main)
   {
     CTxDB txdb("r");
-    ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    ENTER_CRITICAL_SECTION(pwalletMainId->cs_wallet)
     {
       nFeeRet = CENT;
 
@@ -558,9 +558,9 @@ bool txPost(const vector<pair<CScript, int64_t> >& vecSend, const __wx__Tx& wtxI
 
         if(nTotalValue - nWtxinCredit > 0)
         {
-          if(!pwalletMain->SelectCoins(nTotalValue - nWtxinCredit, wtxNew.nTime, setCoins, nValueIn))
+          if(!pwalletMainId->SelectCoins(nTotalValue - nWtxinCredit, wtxNew.nTime, setCoins, nValueIn))
           {
-            LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+            LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
             LEAVE_CRITICAL_SECTION(cs_main)
             return false;
           }
@@ -578,7 +578,7 @@ bool txPost(const vector<pair<CScript, int64_t> >& vecSend, const __wx__Tx& wtxI
 
           if(!reservekey.GetReservedKey(pubkey))
           {
-            LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+            LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
             LEAVE_CRITICAL_SECTION(cs_main)
             return false;
           }
@@ -600,9 +600,9 @@ bool txPost(const vector<pair<CScript, int64_t> >& vecSend, const __wx__Tx& wtxI
         int nIn = 0;
         BOOST_FOREACH(PAIRTYPE(const __wx__Tx*, unsigned int)& coin, vecCoins)
         {
-          if(!SignSignature(*pwalletMain, *coin.first, wtxNew, nIn++))
+          if(!SignSignature(*pwalletMainId, *coin.first, wtxNew, nIn++))
           {
-            LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+            LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
             LEAVE_CRITICAL_SECTION(cs_main)
             return false;
           }
@@ -611,7 +611,7 @@ bool txPost(const vector<pair<CScript, int64_t> >& vecSend, const __wx__Tx& wtxI
 
         if(nBytes >= CBlock::MAX_BLOCK_SIZE)
         {
-          LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+          LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
           LEAVE_CRITICAL_SECTION(cs_main)
           return false;
         }
@@ -630,7 +630,7 @@ bool txPost(const vector<pair<CScript, int64_t> >& vecSend, const __wx__Tx& wtxI
         break;
       }
     }
-    LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
   }
   LEAVE_CRITICAL_SECTION(cs_main)
   return true;
@@ -723,13 +723,13 @@ bool txRelayPre__(const CScript& scriptPubKey, const __wx__Tx& wtxIn, __wx__Tx& 
     return false;
   }
 
-  CReserveKey reservekey(pwalletMain);
+  CReserveKey reservekey(pwalletMainId);
   vector< pair<CScript, int64_t> > vecSend;
   vecSend.push_back(make_pair(scriptPubKey, CTRL__));
 
   if(!txPost(vecSend, wtxIn, nTxOut, wtxNew, reservekey, t))
   {
-    if(CTRL__ + t > pwalletMain->GetBalance())
+    if(CTRL__ + t > pwalletMainId->GetBalance())
     {
       e = strprintf(_("Error: This transaction requires a transaction fee of at least %s because of its amount, complexity, or use of recently received funds "), FormatMoney(t).c_str());
     }
@@ -752,7 +752,7 @@ string txRelay(const CScript& scriptPubKey, int64_t nValue, const __wx__Tx& wtxI
     return "error out index";
   }
 
-  CReserveKey reservekey(pwalletMain);
+  CReserveKey reservekey(pwalletMainId);
   int64_t nFeeRequired;
   vector< pair<CScript, int64_t> > vecSend;
   vecSend.push_back(make_pair(scriptPubKey, nValue));
@@ -761,7 +761,7 @@ string txRelay(const CScript& scriptPubKey, int64_t nValue, const __wx__Tx& wtxI
   {
     string strError;
 
-    if(nValue + nFeeRequired > pwalletMain->GetBalance())
+    if(nValue + nFeeRequired > pwalletMainId->GetBalance())
     {
       strError = strprintf(_("Error: This transaction requires a transaction fee of at least %s because of its amount, complexity, or use of recently received funds "), FormatMoney(nFeeRequired).c_str());
     }
@@ -773,7 +773,7 @@ string txRelay(const CScript& scriptPubKey, int64_t nValue, const __wx__Tx& wtxI
     return strError;
   }
 
-  if(!pwalletMain->CommitTransaction(wtxNew, reservekey))
+  if(!pwalletMainId->CommitTransaction(wtxNew, reservekey))
   {
     return _("Error: The transaction was rejected.  This might happen if some of the coins in your wallet were already spent, such as if you used a copy of wallet.dat and coins were spent in the copy but not marked as spent here.");
   }
@@ -873,7 +873,7 @@ Value myRSAKeys(const Array& params, bool fHelp)
     );
 
   Array jsonAddressRSAList;
-  BOOST_FOREACH(const PAIRTYPE(cba, string)& item, pwalletMain->mapAddressBook)
+  BOOST_FOREACH(const PAIRTYPE(cba, string)& item, pwalletMainId->mapAddressBook)
   {
     const cba& a = item.first;
     Object oAddressInfo;
@@ -899,14 +899,14 @@ Value myRSAKeys(const Array& params, bool fHelp)
 
     CKey key;
 
-    if(!pwalletMain->GetKey(keyID, key))
+    if(!pwalletMainId->GetKey(keyID, key))
     {
       return jsonAddressRSAList;
     }
 
     CPubKey pubKey = key.GetPubKey();
     string rsaPrivKey;
-    bool found = pwalletMain->envCP0(pubKey, rsaPrivKey);
+    bool found = pwalletMainId->envCP0(pubKey, rsaPrivKey);
 
     if(found == false)
     {
@@ -926,7 +926,7 @@ Value myRSAKeys__(const Array& params, bool fHelp)
     );
 
   Array jsonAddressRSAList;
-  BOOST_FOREACH(const PAIRTYPE(cba, string)& item, pwalletMain->mapAddressBook)
+  BOOST_FOREACH(const PAIRTYPE(cba, string)& item, pwalletMainId->mapAddressBook)
   {
     const cba& a = item.first;
     Object oAddressInfo;
@@ -952,14 +952,14 @@ Value myRSAKeys__(const Array& params, bool fHelp)
 
     CKey key;
 
-    if(!pwalletMain->GetKey(keyID, key))
+    if(!pwalletMainId->GetKey(keyID, key))
     {
       return jsonAddressRSAList;
     }
 
     CPubKey pubKey = key.GetPubKey();
     string rsaPrivKey;
-    bool found = pwalletMain->envCP0(pubKey, rsaPrivKey);
+    bool found = pwalletMainId->envCP0(pubKey, rsaPrivKey);
 
     if(found == false)
     {
@@ -990,10 +990,10 @@ Value publicKeyExports(const Array& params, bool fHelp)
   Array oRes;
   ENTER_CRITICAL_SECTION(cs_main)
   {
-    ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    ENTER_CRITICAL_SECTION(pwalletMainId->cs_wallet)
     {
       BOOST_FOREACH(PAIRTYPE(const uint256, __wx__Tx)& item,
-                    pwalletMain->mapWallet)
+                    pwalletMainId->mapWallet)
       {
         const __wx__Tx& tx = item.second;
         vchType vchSender, vchRecipient, vchKey, vchAes, vchSig;
@@ -1025,7 +1025,7 @@ Value publicKeyExports(const Array& params, bool fHelp)
         oRes.push_back(aliasObj);
       }
     }
-    LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
   }
   LEAVE_CRITICAL_SECTION(cs_main)
   BOOST_FOREACH(const PAIRTYPE(vector<unsigned char>, Object)& item, aliasMapVchObj)
@@ -1051,10 +1051,10 @@ Value publicKeys(const Array& params, bool fHelp)
   Array oRes;
   ENTER_CRITICAL_SECTION(cs_main)
   {
-    ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    ENTER_CRITICAL_SECTION(pwalletMainId->cs_wallet)
     {
       BOOST_FOREACH(PAIRTYPE(const uint256, __wx__Tx)& item,
-                    pwalletMain->mapWallet)
+                    pwalletMainId->mapWallet)
       {
         const __wx__Tx& tx = item.second;
         vchType vchS, vchR, vchKey, vchAes, vchSig;
@@ -1072,7 +1072,7 @@ Value publicKeys(const Array& params, bool fHelp)
         CKey key;
         bool imported=false;
 
-        if(!pwalletMain->GetKey(keyID, key))
+        if(!pwalletMainId->GetKey(keyID, key))
         {
           imported=true;
         }
@@ -1123,7 +1123,7 @@ Value publicKeys(const Array& params, bool fHelp)
         oRes.push_back(aliasObj);
       }
     }
-    LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
   }
   LEAVE_CRITICAL_SECTION(cs_main)
 
@@ -1166,7 +1166,7 @@ bool hk(string addrStr)
 
   CKey key;
 
-  if(!pwalletMain->GetKey(keyID, key))
+  if(!pwalletMainId->GetKey(keyID, key))
   {
     return false;
   }
@@ -1192,10 +1192,10 @@ Value decryptedMessageList(const Array& params, bool fHelp)
   Array oRes;
   ENTER_CRITICAL_SECTION(cs_main)
   {
-    ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    ENTER_CRITICAL_SECTION(pwalletMainId->cs_wallet)
     {
       BOOST_FOREACH(PAIRTYPE(const uint256, __wx__Tx)& item,
-                    pwalletMain->mapWallet)
+                    pwalletMainId->mapWallet)
       {
         const __wx__Tx& tx = item.second;
         vchType vchSender, vchRecipient, vchEncryptedMessage, ivVch, vchSig;
@@ -1245,7 +1245,7 @@ Value decryptedMessageList(const Array& params, bool fHelp)
 
         CKey key;
 
-        if(!pwalletMain->GetKey(keyID, key))
+        if(!pwalletMainId->GetKey(keyID, key))
         {
           continue;
         }
@@ -1254,7 +1254,7 @@ Value decryptedMessageList(const Array& params, bool fHelp)
         string aesBase64Plain;
         vector<unsigned char> aesRawVector;
 
-        if(pwalletMain->aes_(pubKey, fKey, aesBase64Plain))
+        if(pwalletMainId->aes_(pubKey, fKey, aesBase64Plain))
         {
           bool fInvalid = false;
           aesRawVector = DecodeBase64(aesBase64Plain.c_str(), &fInvalid);
@@ -1269,7 +1269,7 @@ Value decryptedMessageList(const Array& params, bool fHelp)
             string aesKeyBase64Encrypted = stringFromVch(aesKeyBase64EncryptedVch);
             string privRSAKey;
 
-            if(!pwalletMain->envCP0(pubKey, privRSAKey))
+            if(!pwalletMainId->envCP0(pubKey, privRSAKey))
             {
               throw JSONRPCError(RPC_TYPE_ERROR, "Failed to retrieve private RSA key");
             }
@@ -1299,7 +1299,7 @@ Value decryptedMessageList(const Array& params, bool fHelp)
         aliasMapVchObj[vchSender] = aliasObj;
       }
     }
-    LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
   }
   LEAVE_CRITICAL_SECTION(cs_main)
   return oRes;
@@ -1323,10 +1323,10 @@ Value plainTextMessageList(const Array& params, bool fHelp)
   Array oRes;
   ENTER_CRITICAL_SECTION(cs_main)
   {
-    ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    ENTER_CRITICAL_SECTION(pwalletMainId->cs_wallet)
     {
       BOOST_FOREACH(PAIRTYPE(const uint256, __wx__Tx)& item,
-                    pwalletMain->mapWallet)
+                    pwalletMainId->mapWallet)
       {
         const __wx__Tx& tx = item.second;
         vchType vchSender, vchRecipient, vchEncryptedMessage, ivVch, vchSig;
@@ -1346,7 +1346,7 @@ Value plainTextMessageList(const Array& params, bool fHelp)
         oRes.push_back(aliasObj);
       }
     }
-    LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
   }
   LEAVE_CRITICAL_SECTION(cs_main)
   return oRes;
@@ -1370,14 +1370,14 @@ Value externFrame__(const Array& params, bool fHelp)
   scriptPubKey << OP_ALIAS_RELAY << vchNodeLocator;
   ENTER_CRITICAL_SECTION(cs_main)
   {
-    ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    ENTER_CRITICAL_SECTION(pwalletMainId->cs_wallet)
     {
       if(mapState.count(vchNodeLocator) && mapState[vchNodeLocator].size())
       {
         error("externFrame__() : %lu pending operations , including %s",
               mapState[vchNodeLocator].size(),
               mapState[vchNodeLocator].begin()->GetHex().c_str());
-        LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+        LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
         LEAVE_CRITICAL_SECTION(cs_main)
         throw runtime_error("pending ops ");
       }
@@ -1388,18 +1388,18 @@ Value externFrame__(const Array& params, bool fHelp)
 
       if(!aliasTx(ln1Db, vchNodeLocator, tx))
       {
-        LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+        LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
         LEAVE_CRITICAL_SECTION(cs_main)
         throw runtime_error("could not find a coin with this alias");
       }
 
       uint256 wtxInHash = tx.GetHash();
 
-      if(!pwalletMain->mapWallet.count(wtxInHash))
+      if(!pwalletMainId->mapWallet.count(wtxInHash))
       {
         error("externFrame__() : not present %s",
               wtxInHash.GetHex().c_str());
-        LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+        LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
         LEAVE_CRITICAL_SECTION(cs_main)
         throw runtime_error("not present");
       }
@@ -1421,7 +1421,7 @@ Value externFrame__(const Array& params, bool fHelp)
       }
 
       scriptPubKeyOrig.SetBitcoinAddress(strAddress);
-      const __wx__Tx& wtxIn = pwalletMain->mapWallet[wtxInHash];
+      const __wx__Tx& wtxIn = pwalletMainId->mapWallet[wtxInHash];
       int op__;
       int nOut;
       vchType vX;
@@ -1434,12 +1434,12 @@ Value externFrame__(const Array& params, bool fHelp)
 
       if(strError != "")
       {
-        LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+        LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
         LEAVE_CRITICAL_SECTION(cs_main)
         throw JSONRPCError(RPC_WALLET_ERROR, strError);
       }
     }
-    LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
   }
   LEAVE_CRITICAL_SECTION(cs_main)
   return wtx.GetHash().GetHex();
@@ -1493,7 +1493,7 @@ Value internFrame__(const Array& params, bool fHelp)
       throw runtime_error("not found");
     }
 
-    if(!pwalletMain->mapWallet.count(wtxInHash))
+    if(!pwalletMainId->mapWallet.count(wtxInHash))
     {
       LEAVE_CRITICAL_SECTION(cs_main)
       throw runtime_error("not in the wallet");
@@ -1501,7 +1501,7 @@ Value internFrame__(const Array& params, bool fHelp)
 
     CScript scriptPubKeyOrig;
     CScript scriptPubKey;
-    __wx__Tx& wtxIn = pwalletMain->mapWallet[wtxInHash];
+    __wx__Tx& wtxIn = pwalletMainId->mapWallet[wtxInHash];
     bool found = false;
     BOOST_FOREACH(CTxOut& out, wtxIn.vout)
     {
@@ -1552,14 +1552,14 @@ Value internFrame__(const Array& params, bool fHelp)
 
                 CKey k_;
 
-                if(!pwalletMain->GetKey(k, k_))
+                if(!pwalletMainId->GetKey(k, k_))
                 {
                   throw JSONRPCError(RPC_TYPE_ERROR, "not found");
                 }
 
                 CPubKey pk = k_.GetPubKey();
                 string q;
-                pwalletMain->envCP0(pk, q);
+                pwalletMainId->envCP0(pk, q);
                 DecryptMessage(q, csKStr, alpha);
                 csKStr=alpha;
               }
@@ -1574,17 +1574,17 @@ Value internFrame__(const Array& params, bool fHelp)
               string value = decrypted;
               Relay r;
 
-              if(!pwalletMain->relay_(vvch[2], r))
+              if(!pwalletMainId->relay_(vvch[2], r))
               {
                 vchType kAlpha;
                 GenerateAESKey(kAlpha);
                 string alpha = EncodeBase64(&kAlpha[0], kAlpha.size());
                 r.ctrl(alpha);
-                pwalletMain->relay(vvch[2], r);
-                __wx__DB walletdb(pwalletMain->strWalletFile, "r+");
-                pwalletMain->LoadRelay(vchNodeLocator, r);
+                pwalletMainId->relay(vvch[2], r);
+                __wx__DB walletdb(pwalletMainId->strWalletFile, "r+");
+                pwalletMainId->LoadRelay(vchNodeLocator, r);
 
-                if(!walletdb.UpdateKey(vchNodeLocator, pwalletMain->lCache[vchNodeLocator]))
+                if(!walletdb.UpdateKey(vchNodeLocator, pwalletMainId->lCache[vchNodeLocator]))
                 {
                   throw JSONRPCError(RPC_TYPE_ERROR, "Failed to write data for key");
                 }
@@ -1650,13 +1650,13 @@ Value internFrame__(const Array& params, bool fHelp)
 
         CKey key;
 
-        if(!pwalletMain->GetKey(keyID, key))
+        if(!pwalletMainId->GetKey(keyID, key))
         {
           throw JSONRPCError(RPC_WALLET_ERROR, "Private key not available");
         }
 
         CPubKey vchPubKey;
-        pwalletMain->GetPubKey(keyID, vchPubKey);
+        pwalletMainId->GetPubKey(keyID, vchPubKey);
         vector<unsigned char> vchSig;
 
         if(!key.SignCompact(Hash(ss.begin(), ss.end()), vchSig))
@@ -1715,10 +1715,10 @@ Value aliasOut(const Array& params, bool fHelp)
   bool found=false;
   ENTER_CRITICAL_SECTION(cs_main)
   {
-    ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    ENTER_CRITICAL_SECTION(pwalletMainId->cs_wallet)
     {
       BOOST_FOREACH(PAIRTYPE(const uint256, __wx__Tx)& item,
-                    pwalletMain->mapWallet)
+                    pwalletMainId->mapWallet)
       {
         const __wx__Tx& tx = item.second;
         vchType vchAlias, vchValue;
@@ -1761,14 +1761,14 @@ Value aliasOut(const Array& params, bool fHelp)
 
           CKey key;
 
-          if(!pwalletMain->GetKey(keyID, key))
+          if(!pwalletMainId->GetKey(keyID, key))
           {
             continue;
           }
 
           CPubKey pubKey = key.GetPubKey();
 
-          if(pwalletMain->envCP0(pubKey, rsaPrivKey) == false)
+          if(pwalletMainId->envCP0(pubKey, rsaPrivKey) == false)
           {
             continue;
           }
@@ -1812,7 +1812,7 @@ Value aliasOut(const Array& params, bool fHelp)
         }
       }
     }
-    LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
   }
   LEAVE_CRITICAL_SECTION(cs_main)
 
@@ -1848,10 +1848,10 @@ Value nodeValidate(const Array& params, bool fHelp)
   Array oRes;
   ENTER_CRITICAL_SECTION(cs_main)
   {
-    ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    ENTER_CRITICAL_SECTION(pwalletMainId->cs_wallet)
     {
       BOOST_FOREACH(PAIRTYPE(const uint256, __wx__Tx)& item,
-                    pwalletMain->mapWallet)
+                    pwalletMainId->mapWallet)
       {
         const __wx__Tx& tx = item.second;
         vchType vchAlias, vchValue;
@@ -1896,7 +1896,7 @@ Value nodeValidate(const Array& params, bool fHelp)
 
           CKey key;
 
-          if(!pwalletMain->GetKey(keyID, key))
+          if(!pwalletMainId->GetKey(keyID, key))
           {
             aliasObj.push_back(Pair("alias", stringFromVch(vchAlias)));
           }
@@ -1904,7 +1904,7 @@ Value nodeValidate(const Array& params, bool fHelp)
           {
             CPubKey pubKey = key.GetPubKey();
 
-            if(pwalletMain->envCP0(pubKey, rsaPrivKey) == false)
+            if(pwalletMainId->envCP0(pubKey, rsaPrivKey) == false)
             {
               continue;
             }
@@ -1939,7 +1939,7 @@ Value nodeValidate(const Array& params, bool fHelp)
         CKeyID keyID;
         keyAddress.GetKeyID(keyID);
         CPubKey vchPubKey;
-        pwalletMain->GetPubKey(keyID, vchPubKey);
+        pwalletMainId->GetPubKey(keyID, vchPubKey);
         vchType vchRand;
         const int ex = nHeight + scaleMonitor() - pindexBest->nHeight;
         aliasObj.push_back(Pair("expires_in", ex));
@@ -1972,7 +1972,7 @@ Value nodeValidate(const Array& params, bool fHelp)
         oRes.push_back(aliasObj);
       }
     }
-    LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
   }
   LEAVE_CRITICAL_SECTION(cs_main)
   return oRes;
@@ -1992,7 +1992,7 @@ Value validateLocator(const Array& params, bool fHelp)
   {
     ret.push_back(Pair("isvalid", true));
     CTxDestination dest = address.Get();
-    bool mine = IsMine(*pwalletMain, dest);
+    bool mine = IsMine(*pwalletMainId, dest);
     ret.push_back(Pair("ismine", mine));
     vchType rConvert__;
 
@@ -2031,10 +2031,10 @@ Value nodeRetrieve(const Array& params, bool fHelp)
   Array oRes;
   ENTER_CRITICAL_SECTION(cs_main)
   {
-    ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    ENTER_CRITICAL_SECTION(pwalletMainId->cs_wallet)
     {
       BOOST_FOREACH(PAIRTYPE(const uint256, __wx__Tx)& item,
-                    pwalletMain->mapWallet)
+                    pwalletMainId->mapWallet)
       {
         const __wx__Tx& tx = item.second;
         vchType vchAlias, vchValue;
@@ -2079,14 +2079,14 @@ Value nodeRetrieve(const Array& params, bool fHelp)
 
           CKey key;
 
-          if(!pwalletMain->GetKey(keyID, key))
+          if(!pwalletMainId->GetKey(keyID, key))
           {
             continue;
           }
 
           CPubKey pubKey = key.GetPubKey();
 
-          if(pwalletMain->envCP0(pubKey, rsaPrivKey) == false)
+          if(pwalletMainId->envCP0(pubKey, rsaPrivKey) == false)
           {
             continue;
           }
@@ -2125,7 +2125,7 @@ Value nodeRetrieve(const Array& params, bool fHelp)
         CKeyID keyID;
         keyAddress.GetKeyID(keyID);
         CPubKey vchPubKey;
-        pwalletMain->GetPubKey(keyID, vchPubKey);
+        pwalletMainId->GetPubKey(keyID, vchPubKey);
         vchType vchRand;
         const int expiresIn = nHeight + scaleMonitor() - pindexBest->nHeight;
         aliasObj.push_back(Pair("expires_in", expiresIn));
@@ -2153,7 +2153,7 @@ Value nodeRetrieve(const Array& params, bool fHelp)
         oRes.push_back(aliasObj);
       }
     }
-    LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
   }
   LEAVE_CRITICAL_SECTION(cs_main)
   return oRes;
@@ -2178,10 +2178,10 @@ Value getNodeRecord(const Array& params, bool fHelp)
   std::map<vchType, Object> aliasMapVchObj;
   ENTER_CRITICAL_SECTION(cs_main)
   {
-    ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    ENTER_CRITICAL_SECTION(pwalletMainId->cs_wallet)
     {
       BOOST_FOREACH(PAIRTYPE(const uint256, __wx__Tx)& item,
-                    pwalletMain->mapWallet)
+                    pwalletMainId->mapWallet)
       {
         const __wx__Tx& tx = item.second;
         vchType vchAlias, vchValue;
@@ -2226,14 +2226,14 @@ Value getNodeRecord(const Array& params, bool fHelp)
 
           CKey key;
 
-          if(!pwalletMain->GetKey(keyID, key))
+          if(!pwalletMainId->GetKey(keyID, key))
           {
             continue;
           }
 
           CPubKey pubKey = key.GetPubKey();
 
-          if(pwalletMain->envCP0(pubKey, rsaPrivKey) == false)
+          if(pwalletMainId->envCP0(pubKey, rsaPrivKey) == false)
           {
             continue;
           }
@@ -2284,7 +2284,7 @@ Value getNodeRecord(const Array& params, bool fHelp)
         CKeyID keyID;
         keyAddress.GetKeyID(keyID);
         CPubKey vchPubKey;
-        pwalletMain->GetPubKey(keyID, vchPubKey);
+        pwalletMainId->GetPubKey(keyID, vchPubKey);
         vchType vchRand;
         const int expiresIn = nHeight + scaleMonitor() - pindexBest->nHeight;
         aliasObj.push_back(Pair("expires_in", expiresIn));
@@ -2319,7 +2319,7 @@ Value getNodeRecord(const Array& params, bool fHelp)
         }
       }
     }
-    LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
   }
   LEAVE_CRITICAL_SECTION(cs_main)
   Array oRes;
@@ -2333,10 +2333,10 @@ bool searchAliasEncrypted2(string alias, uint256& wtxInHash)
   bool found=false;
   ENTER_CRITICAL_SECTION(cs_main)
   {
-    ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    ENTER_CRITICAL_SECTION(pwalletMainId->cs_wallet)
     {
       BOOST_FOREACH(PAIRTYPE(const uint256, __wx__Tx)& item,
-                    pwalletMain->mapWallet)
+                    pwalletMainId->mapWallet)
       {
         const __wx__Tx& tx = item.second;
         vchType vchAlias, vchValue;
@@ -2391,14 +2391,14 @@ bool searchAliasEncrypted2(string alias, uint256& wtxInHash)
 
           CKey key;
 
-          if(!pwalletMain->GetKey(keyID, key))
+          if(!pwalletMainId->GetKey(keyID, key))
           {
             continue;
           }
 
           CPubKey pubKey = key.GetPubKey();
 
-          if(pwalletMain->envCP0(pubKey, rsaPrivKey) == false)
+          if(pwalletMainId->envCP0(pubKey, rsaPrivKey) == false)
           {
             continue;
           }
@@ -2415,7 +2415,7 @@ bool searchAliasEncrypted2(string alias, uint256& wtxInHash)
         }
       }
     }
-    LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
   }
   LEAVE_CRITICAL_SECTION(cs_main)
   return found;
@@ -2425,10 +2425,10 @@ bool searchAliasEncrypted(string alias, uint256& wtxInHash)
   bool found=false;
   ENTER_CRITICAL_SECTION(cs_main)
   {
-    ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    ENTER_CRITICAL_SECTION(pwalletMainId->cs_wallet)
     {
       BOOST_FOREACH(PAIRTYPE(const uint256, __wx__Tx)& item,
-                    pwalletMain->mapWallet)
+                    pwalletMainId->mapWallet)
       {
         const __wx__Tx& tx = item.second;
         vchType vchAlias, vchValue;
@@ -2476,14 +2476,14 @@ bool searchAliasEncrypted(string alias, uint256& wtxInHash)
 
           CKey key;
 
-          if(!pwalletMain->GetKey(keyID, key))
+          if(!pwalletMainId->GetKey(keyID, key))
           {
             throw JSONRPCError(RPC_WALLET_ERROR, "sae : Private key not available");
           }
 
           CPubKey pubKey = key.GetPubKey();
 
-          if(pwalletMain->envCP0(pubKey, rsaPrivKey) == false)
+          if(pwalletMainId->envCP0(pubKey, rsaPrivKey) == false)
           {
             throw JSONRPCError(RPC_WALLET_ERROR, "error p0");
           }
@@ -2499,7 +2499,7 @@ bool searchAliasEncrypted(string alias, uint256& wtxInHash)
         }
       }
     }
-    LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
   }
   LEAVE_CRITICAL_SECTION(cs_main)
   return found;
@@ -2522,17 +2522,17 @@ Value aliasList__(const Array& params, bool fHelp)
   std::map<vchType, Object> aliasMapVchObj;
   Array oRes;
 
-  if(pwalletMain->as())
+  if(pwalletMainId->as())
   {
     return oRes;
   }
 
   ENTER_CRITICAL_SECTION(cs_main)
   {
-    ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    ENTER_CRITICAL_SECTION(pwalletMainId->cs_wallet)
     {
       BOOST_FOREACH(PAIRTYPE(const uint256, __wx__Tx)& item,
-                    pwalletMain->mapWallet)
+                    pwalletMainId->mapWallet)
       {
         const __wx__Tx& tx = item.second;
         vchType vchAlias, vchValue;
@@ -2582,11 +2582,11 @@ Value aliasList__(const Array& params, bool fHelp)
 
           CKey key;
 
-          if(pwalletMain->GetKey(keyID, key))
+          if(pwalletMainId->GetKey(keyID, key))
           {
             CPubKey pubKey = key.GetPubKey();
 
-            if(pwalletMain->envCP0(pubKey, rsaPrivKey) == true)
+            if(pwalletMainId->envCP0(pubKey, rsaPrivKey) == true)
             {
               DecryptMessage(rsaPrivKey, stringFromVch(vchAlias), decrypted);
               aliasObj.push_back(Pair("alias", decrypted));
@@ -2597,7 +2597,7 @@ Value aliasList__(const Array& params, bool fHelp)
             for(unsigned int i=0; i < tx.vin.size(); i++)
             {
               COutPoint prevout = tx.vin[i].prevout;
-              __wx__Tx& txPrev = pwalletMain->mapWallet[prevout.hash];
+              __wx__Tx& txPrev = pwalletMainId->mapWallet[prevout.hash];
               CTxOut& out = txPrev.vout[prevout.n];
               std::vector<vchType> vvchPrevArgsRead;
               int prevOp;
@@ -2622,11 +2622,11 @@ Value aliasList__(const Array& params, bool fHelp)
 
                 CKey key0;
 
-                if(pwalletMain->GetKey(keyID_0, key0))
+                if(pwalletMainId->GetKey(keyID_0, key0))
                 {
                   CPubKey pubKey = key0.GetPubKey();
 
-                  if(pwalletMain->envCP0(pubKey, rsaPrivKey) == true)
+                  if(pwalletMainId->envCP0(pubKey, rsaPrivKey) == true)
                   {
                     DecryptMessage(rsaPrivKey, stringFromVch(vvchPrevArgsRead[0]), decrypted);
                     aliasObj.push_back(Pair("alias", decrypted));
@@ -2677,7 +2677,7 @@ Value aliasList__(const Array& params, bool fHelp)
         CKeyID keyID;
         keyAddress.GetKeyID(keyID);
         CPubKey vchPubKey;
-        pwalletMain->GetPubKey(keyID, vchPubKey);
+        pwalletMainId->GetPubKey(keyID, vchPubKey);
         vchType vchRand;
         const int ex = nHeight + scaleMonitor() - pindexBest->nHeight;
         aliasObj.push_back(Pair("expires_in", ex));
@@ -2724,7 +2724,7 @@ Value aliasList__(const Array& params, bool fHelp)
         }
       }
     }
-    LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
   }
   LEAVE_CRITICAL_SECTION(cs_main)
   BOOST_FOREACH(const PAIRTYPE(vector<unsigned char>, Object)& item, aliasMapVchObj)
@@ -2749,10 +2749,10 @@ Value aliasList(const Array& params, bool fHelp)
   std::map<vchType, Object> aliasMapVchObj;
   ENTER_CRITICAL_SECTION(cs_main)
   {
-    ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    ENTER_CRITICAL_SECTION(pwalletMainId->cs_wallet)
     {
       BOOST_FOREACH(PAIRTYPE(const uint256, __wx__Tx)& item,
-                    pwalletMain->mapWallet)
+                    pwalletMainId->mapWallet)
       {
         __wx__Tx& tx = item.second;
         vchType vchAlias, vchValue;
@@ -2803,11 +2803,11 @@ Value aliasList(const Array& params, bool fHelp)
 
           CKey key;
 
-          if(pwalletMain->GetKey(keyID, key))
+          if(pwalletMainId->GetKey(keyID, key))
           {
             CPubKey pubKey = key.GetPubKey();
 
-            if(pwalletMain->envCP0(pubKey, rsaPrivKey) == true)
+            if(pwalletMainId->envCP0(pubKey, rsaPrivKey) == true)
             {
               DecryptMessage(rsaPrivKey, stringFromVch(vchAlias), decrypted);
               aliasObj.push_back(Pair("alias", decrypted));
@@ -2818,7 +2818,7 @@ Value aliasList(const Array& params, bool fHelp)
             for(unsigned int i=0; i < tx.vin.size(); i++)
             {
               COutPoint prevout = tx.vin[i].prevout;
-              __wx__Tx& txPrev = pwalletMain->mapWallet[prevout.hash];
+              __wx__Tx& txPrev = pwalletMainId->mapWallet[prevout.hash];
               CTxOut& out = txPrev.vout[prevout.n];
               std::vector<vchType> vvchPrevArgsRead;
               int prevOp;
@@ -2843,11 +2843,11 @@ Value aliasList(const Array& params, bool fHelp)
 
                 CKey key0;
 
-                if(pwalletMain->GetKey(keyID_0, key0))
+                if(pwalletMainId->GetKey(keyID_0, key0))
                 {
                   CPubKey pubKey = key0.GetPubKey();
 
-                  if(pwalletMain->envCP0(pubKey, rsaPrivKey) == true)
+                  if(pwalletMainId->envCP0(pubKey, rsaPrivKey) == true)
                   {
                     DecryptMessage(rsaPrivKey, stringFromVch(vvchPrevArgsRead[0]), decrypted);
                     aliasObj.push_back(Pair("alias", decrypted));
@@ -2899,7 +2899,7 @@ Value aliasList(const Array& params, bool fHelp)
         CKeyID keyID;
         keyAddress.GetKeyID(keyID);
         CPubKey vchPubKey;
-        pwalletMain->GetPubKey(keyID, vchPubKey);
+        pwalletMainId->GetPubKey(keyID, vchPubKey);
         vchType vchRand;
         const int ex = nHeight + scaleMonitor() - pindexBest->nHeight;
         aliasObj.push_back(Pair("expires_in", ex));
@@ -2939,7 +2939,7 @@ Value aliasList(const Array& params, bool fHelp)
         }
       }
     }
-    LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
   }
   LEAVE_CRITICAL_SECTION(cs_main)
   Array oRes;
@@ -2964,7 +2964,7 @@ Value nodeDebug(const Array& params, bool fHelp)
       uint256 hash;
       BOOST_FOREACH(hash, pairPending.second)
       {
-        if(!pwalletMain->mapWallet.count(hash))
+        if(!pwalletMainId->mapWallet.count(hash))
         {
           printf("foreign ");
         }
@@ -3085,7 +3085,7 @@ Value primaryCXValidate(const Array& params, bool fHelp)
 
   CKey pid_;
 
-  if(!pwalletMain->GetKey(pid, pid_))
+  if(!pwalletMainId->GetKey(pid, pid_))
   {
     throw JSONRPCError(RPC_WALLET_ERROR, "pid_");
   }
@@ -3145,7 +3145,7 @@ Value primaryCXValidate(const Array& params, bool fHelp)
 
   CKey l0id_;
 
-  if(!pwalletMain->GetKey(l0id, l0id_))
+  if(!pwalletMainId->GetKey(l0id, l0id_))
   {
     throw JSONRPCError(RPC_WALLET_ERROR, "l0id_");
   }
@@ -3153,7 +3153,7 @@ Value primaryCXValidate(const Array& params, bool fHelp)
   vchType vchRand;
   string r_;
 
-  if(!pwalletMain->GetRandomKeyMetadata(pid_.GetPubKey(), vchRand, r_))
+  if(!pwalletMainId->GetRandomKeyMetadata(pid_.GetPubKey(), vchRand, r_))
   {
     throw JSONRPCError(RPC_WALLET_ERROR, "random key");
   }
@@ -3175,7 +3175,7 @@ Value primaryCXValidate(const Array& params, bool fHelp)
 
     string cskStr;
 
-    if(pwalletMain->aes_(vchPubKey, f, cskStr))
+    if(pwalletMainId->aes_(vchPubKey, f, cskStr))
     {
       bool fInvalid = false;
       cskVec = DecodeBase64(cskStr.c_str(), &fInvalid);
@@ -3191,7 +3191,7 @@ Value primaryCXValidate(const Array& params, bool fHelp)
 
     if(channelList == "I")
     {
-      if(pwalletMain->aes_(l0id_.GetPubKey(), f, channelList))
+      if(pwalletMainId->aes_(l0id_.GetPubKey(), f, channelList))
       {
         bool fInvalid = false;
         cskVec = DecodeBase64(channelList.c_str(), &fInvalid);
@@ -3201,7 +3201,7 @@ Value primaryCXValidate(const Array& params, bool fHelp)
     {
       string p0;
 
-      if(!pwalletMain->envCP0(l0id_.GetPubKey(), p0))
+      if(!pwalletMainId->envCP0(l0id_.GetPubKey(), p0))
       {
         throw JSONRPCError(RPC_TYPE_ERROR, "intrinsic");
       }
@@ -3229,25 +3229,25 @@ Value primaryCXValidate(const Array& params, bool fHelp)
       throw runtime_error("could not find this alias");
     }
 
-    ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    ENTER_CRITICAL_SECTION(pwalletMainId->cs_wallet)
     {
       if(mapState.count(vchLocator) && mapState[vchLocator].size())
       {
         error("xfer encrypted: there are %lu pending operations on that alias, including %s",
               mapState[vchLocator].size(),
               mapState[vchLocator].begin()->GetHex().c_str());
-        LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+        LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
         LEAVE_CRITICAL_SECTION(cs_main)
         throw runtime_error("there are pending operations on that alias");
       }
 
       EnsureWalletIsUnlocked();
 
-      if(!pwalletMain->mapWallet.count(wtxInHash))
+      if(!pwalletMainId->mapWallet.count(wtxInHash))
       {
         error("this coin is not in your wallet %s",
               wtxInHash.GetHex().c_str());
-        LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+        LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
         LEAVE_CRITICAL_SECTION(cs_main)
         throw runtime_error("this coin is not in your wallet");
       }
@@ -3258,7 +3258,7 @@ Value primaryCXValidate(const Array& params, bool fHelp)
       EncryptMessage(stringFromVch(extVch), randBase64, encryptedRandForRecipient);
       string encryptedAliasForRecipient;
       EncryptMessage(stringFromVch(extVch), locatorStr, encryptedAliasForRecipient);
-      const __wx__Tx& wtxIn = pwalletMain->mapWallet[wtxInHash];
+      const __wx__Tx& wtxIn = pwalletMainId->mapWallet[wtxInHash];
       bool found = false;
       BOOST_FOREACH(const CTxOut& out, wtxIn.vout)
       {
@@ -3310,7 +3310,7 @@ Value primaryCXValidate(const Array& params, bool fHelp)
               string csK;
               Relay r;
 
-              if(pwalletMain->relay_(vchLocator, r))
+              if(pwalletMainId->relay_(vchLocator, r))
               {
                 string ctrl_ = r.ctrl_();
                 bool fInvalid = false;
@@ -3368,7 +3368,7 @@ Value primaryCXValidate(const Array& params, bool fHelp)
 
           CKey key;
 
-          if(!pwalletMain->GetKey(keyID, key))
+          if(!pwalletMainId->GetKey(keyID, key))
           {
             throw JSONRPCError(RPC_WALLET_ERROR, "Private key not available");
           }
@@ -3409,12 +3409,12 @@ Value primaryCXValidate(const Array& params, bool fHelp)
 
       if(strError != "")
       {
-        LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+        LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
         LEAVE_CRITICAL_SECTION(cs_main)
         throw JSONRPCError(RPC_WALLET_ERROR, strError);
       }
     }
-    LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
   }
   LEAVE_CRITICAL_SECTION(cs_main)
   return ret;
@@ -3545,10 +3545,10 @@ Value vEPID(const Array& params, bool fHelp)
   bool found=false;
   ENTER_CRITICAL_SECTION(cs_main)
   {
-    ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    ENTER_CRITICAL_SECTION(pwalletMainId->cs_wallet)
     {
       BOOST_FOREACH(PAIRTYPE(const uint256, __wx__Tx)& item,
-                    pwalletMain->mapWallet)
+                    pwalletMainId->mapWallet)
       {
         const __wx__Tx& tx = item.second;
         vector< vector<unsigned char> > vv;
@@ -3595,7 +3595,7 @@ Value vEPID(const Array& params, bool fHelp)
 
           CKey key;
 
-          if(!pwalletMain->GetKey(keyID, key))
+          if(!pwalletMainId->GetKey(keyID, key))
           {
             continue;
           }
@@ -3603,7 +3603,7 @@ Value vEPID(const Array& params, bool fHelp)
           CPubKey pubKey = key.GetPubKey();
           string rsaPrivKey;
 
-          if(pwalletMain->envCP0(pubKey, rsaPrivKey) == false)
+          if(pwalletMainId->envCP0(pubKey, rsaPrivKey) == false)
           {
             continue;
           }
@@ -3630,7 +3630,7 @@ Value vEPID(const Array& params, bool fHelp)
         }
       }
     }
-    LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
   }
   LEAVE_CRITICAL_SECTION(cs_main)
 
@@ -3644,7 +3644,7 @@ Value vEPID(const Array& params, bool fHelp)
     {
       Relay r;
 
-      if(pwalletMain->relay_(vchNodeLocator, r))
+      if(pwalletMainId->relay_(vchNodeLocator, r))
       {
         string ctrl_ = r.ctrl_();
         bool fInvalid = false;
@@ -3691,14 +3691,14 @@ Value vEPID(const Array& params, bool fHelp)
 
           CKey k_;
 
-          if(!pwalletMain->GetKey(k, k_))
+          if(!pwalletMainId->GetKey(k, k_))
           {
             throw JSONRPCError(RPC_TYPE_ERROR, "not found");
           }
 
           CPubKey pk = k_.GetPubKey();
           string q;
-          pwalletMain->envCP0(pk, q);
+          pwalletMainId->envCP0(pk, q);
           DecryptMessage(q, csKStr, alpha);
           csKStr=alpha;
         }
@@ -3763,10 +3763,10 @@ Value validate(const Array& params, bool fHelp)
   bool found=false;
   ENTER_CRITICAL_SECTION(cs_main)
   {
-    ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    ENTER_CRITICAL_SECTION(pwalletMainId->cs_wallet)
     {
       BOOST_FOREACH(PAIRTYPE(const uint256, __wx__Tx)& item,
-                    pwalletMain->mapWallet)
+                    pwalletMainId->mapWallet)
       {
         const __wx__Tx& tx = item.second;
         vector< vector<unsigned char> > vv;
@@ -3813,7 +3813,7 @@ Value validate(const Array& params, bool fHelp)
 
           CKey key;
 
-          if(!pwalletMain->GetKey(keyID, key))
+          if(!pwalletMainId->GetKey(keyID, key))
           {
             continue;
           }
@@ -3821,7 +3821,7 @@ Value validate(const Array& params, bool fHelp)
           CPubKey pubKey = key.GetPubKey();
           string rsaPrivKey;
 
-          if(pwalletMain->envCP0(pubKey, rsaPrivKey) == false)
+          if(pwalletMainId->envCP0(pubKey, rsaPrivKey) == false)
           {
             continue;
           }
@@ -3846,7 +3846,7 @@ Value validate(const Array& params, bool fHelp)
         }
       }
     }
-    LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
   }
   LEAVE_CRITICAL_SECTION(cs_main)
 
@@ -3860,7 +3860,7 @@ Value validate(const Array& params, bool fHelp)
     {
       Relay r;
 
-      if(pwalletMain->relay_(vchNodeLocator, r))
+      if(pwalletMainId->relay_(vchNodeLocator, r))
       {
         string ctrl_ = r.ctrl_();
         bool fInvalid = false;
@@ -3907,14 +3907,14 @@ Value validate(const Array& params, bool fHelp)
 
           CKey k_;
 
-          if(!pwalletMain->GetKey(k, k_))
+          if(!pwalletMainId->GetKey(k, k_))
           {
             throw JSONRPCError(RPC_TYPE_ERROR, "not found");
           }
 
           CPubKey pk = k_.GetPubKey();
           string q;
-          pwalletMain->envCP0(pk, q);
+          pwalletMainId->envCP0(pk, q);
           DecryptMessage(q, csKStr, alpha);
           csKStr=alpha;
         }
@@ -4028,7 +4028,7 @@ Value transientStatus__C(const Array& params, bool fHelp)
       return ret;
     }
 
-    if(!pwalletMain->mapWallet.count(wtxInHash))
+    if(!pwalletMainId->mapWallet.count(wtxInHash))
     {
       LEAVE_CRITICAL_SECTION(cs_main)
       ret.push_back(Pair("status", "error"));
@@ -4038,7 +4038,7 @@ Value transientStatus__C(const Array& params, bool fHelp)
 
     CScript scriptPubKeyOrig;
     CScript scriptPubKey;
-    __wx__Tx& wtxIn = pwalletMain->mapWallet[wtxInHash];
+    __wx__Tx& wtxIn = pwalletMainId->mapWallet[wtxInHash];
     bool found = false;
     BOOST_FOREACH(CTxOut& out, wtxIn.vout)
     {
@@ -4084,7 +4084,7 @@ Value transientStatus__C(const Array& params, bool fHelp)
 
         CKey key;
 
-        if(!pwalletMain->GetKey(keyID, key))
+        if(!pwalletMainId->GetKey(keyID, key))
         {
           ret.push_back(Pair("status", "error"));
           ret.push_back(Pair("message", "intern: priv key"));
@@ -4092,7 +4092,7 @@ Value transientStatus__C(const Array& params, bool fHelp)
         }
 
         CPubKey vchPubKey;
-        pwalletMain->GetPubKey(keyID, vchPubKey);
+        pwalletMainId->GetPubKey(keyID, vchPubKey);
         vector<unsigned char> vchSig;
 
         if(!key.SignCompact(Hash(ss.begin(), ss.end()), vchSig))
@@ -4200,7 +4200,7 @@ Value updateEncryptedAliasFile(const Array& params, bool fHelp)
       throw runtime_error("could not find a coin with this alias, try specifying the registerAlias transaction id");
     }
 
-    if(!pwalletMain->mapWallet.count(wtxInHash))
+    if(!pwalletMainId->mapWallet.count(wtxInHash))
     {
       LEAVE_CRITICAL_SECTION(cs_main)
       throw runtime_error("previous transaction is not in the wallet");
@@ -4208,7 +4208,7 @@ Value updateEncryptedAliasFile(const Array& params, bool fHelp)
 
     CScript scriptPubKeyOrig;
     CScript scriptPubKey;
-    __wx__Tx& wtxIn = pwalletMain->mapWallet[wtxInHash];
+    __wx__Tx& wtxIn = pwalletMainId->mapWallet[wtxInHash];
     bool found = false;
     BOOST_FOREACH(CTxOut& out, wtxIn.vout)
     {
@@ -4248,13 +4248,13 @@ Value updateEncryptedAliasFile(const Array& params, bool fHelp)
 
         CKey key;
 
-        if(!pwalletMain->GetKey(keyID, key))
+        if(!pwalletMainId->GetKey(keyID, key))
         {
           throw JSONRPCError(RPC_WALLET_ERROR, "Private key not available");
         }
 
         CPubKey vchPubKey;
-        pwalletMain->GetPubKey(keyID, vchPubKey);
+        pwalletMainId->GetPubKey(keyID, vchPubKey);
         vector<unsigned char> vchSig;
 
         if(!key.SignCompact(Hash(ss.begin(), ss.end()), vchSig))
@@ -4332,7 +4332,7 @@ Value updateEncryptedAlias(const Array& params, bool fHelp)
       throw runtime_error("could not find a coin with this alias, try specifying the registerAlias transaction id");
     }
 
-    if(!pwalletMain->mapWallet.count(wtxInHash))
+    if(!pwalletMainId->mapWallet.count(wtxInHash))
     {
       LEAVE_CRITICAL_SECTION(cs_main)
       throw runtime_error("previous transaction is not in the wallet");
@@ -4340,7 +4340,7 @@ Value updateEncryptedAlias(const Array& params, bool fHelp)
 
     CScript scriptPubKeyOrig;
     CScript scriptPubKey;
-    __wx__Tx& wtxIn = pwalletMain->mapWallet[wtxInHash];
+    __wx__Tx& wtxIn = pwalletMainId->mapWallet[wtxInHash];
     bool found = false;
     BOOST_FOREACH(CTxOut& out, wtxIn.vout)
     {
@@ -4380,13 +4380,13 @@ Value updateEncryptedAlias(const Array& params, bool fHelp)
 
         CKey key;
 
-        if(!pwalletMain->GetKey(keyID, key))
+        if(!pwalletMainId->GetKey(keyID, key))
         {
           throw JSONRPCError(RPC_WALLET_ERROR, "Private key not available");
         }
 
         CPubKey vchPubKey;
-        pwalletMain->GetPubKey(keyID, vchPubKey);
+        pwalletMainId->GetPubKey(keyID, vchPubKey);
         vector<unsigned char> vchSig;
 
         if(!key.SignCompact(Hash(ss.begin(), ss.end()), vchSig))
@@ -4445,16 +4445,16 @@ Value decryptAlias(const Array& params, bool fHelp)
 
   CKey key;
 
-  if(!pwalletMain->GetKey(keyID, key))
+  if(!pwalletMainId->GetKey(keyID, key))
   {
     throw JSONRPCError(RPC_WALLET_ERROR, "1 Private key not available");
   }
 
   CPubKey vchPubKey;
-  pwalletMain->GetPubKey(keyID, vchPubKey);
+  pwalletMainId->GetPubKey(keyID, vchPubKey);
   string rsaPubKeyStr = "";
 
-  if(!pwalletMain->envCP1(key.GetPubKey(), rsaPubKeyStr))
+  if(!pwalletMainId->envCP1(key.GetPubKey(), rsaPubKeyStr))
   {
     throw JSONRPCError(RPC_WALLET_ERROR, "no rsa key available for address");
   }
@@ -4462,7 +4462,7 @@ Value decryptAlias(const Array& params, bool fHelp)
   vchType vchRand;
   string r_;
 
-  if(!pwalletMain->GetRandomKeyMetadata(key.GetPubKey(), vchRand, r_))
+  if(!pwalletMainId->GetRandomKeyMetadata(key.GetPubKey(), vchRand, r_))
   {
     throw JSONRPCError(RPC_WALLET_ERROR, "no random key available for address");
   }
@@ -4503,7 +4503,7 @@ Value decryptAlias(const Array& params, bool fHelp)
       throw runtime_error("could not find a coin with this alias, try specifying the registerAlias transaction id");
     }
 
-    if(!pwalletMain->mapWallet.count(wtxInHash))
+    if(!pwalletMainId->mapWallet.count(wtxInHash))
     {
       LEAVE_CRITICAL_SECTION(cs_main)
       throw runtime_error("previous transaction is not in the wallet");
@@ -4512,7 +4512,7 @@ Value decryptAlias(const Array& params, bool fHelp)
     CScript scriptPubKeyOrig;
     scriptPubKeyOrig.SetBitcoinAddress(addressOfOwner);
     CScript scriptPubKey;
-    __wx__Tx& wtxIn = pwalletMain->mapWallet[wtxInHash];
+    __wx__Tx& wtxIn = pwalletMainId->mapWallet[wtxInHash];
     const int nHeight = wtxIn.GetHeightInMainChain();
     const int ex = nHeight + scaleMonitor() - pindexBest->nHeight;
 
@@ -4556,13 +4556,13 @@ Value decryptAlias(const Array& params, bool fHelp)
 
         CKey key;
 
-        if(!pwalletMain->GetKey(keyID, key))
+        if(!pwalletMainId->GetKey(keyID, key))
         {
           throw JSONRPCError(RPC_WALLET_ERROR, "2 Private key not available");
         }
 
         CPubKey vchPubKey;
-        pwalletMain->GetPubKey(keyID, vchPubKey);
+        pwalletMainId->GetPubKey(keyID, vchPubKey);
         vector<unsigned char> vchSig;
 
         if(!key.SignCompact(Hash(ss.begin(), ss.end()), vchSig))
@@ -4619,7 +4619,7 @@ Value transferEncryptedExtPredicate(const Array& params, bool fHelp)
 
   CKey pid_;
 
-  if(!pwalletMain->GetKey(pid, pid_))
+  if(!pwalletMainId->GetKey(pid, pid_))
   {
     throw JSONRPCError(RPC_WALLET_ERROR, "pid_");
   }
@@ -4640,7 +4640,7 @@ Value transferEncryptedExtPredicate(const Array& params, bool fHelp)
 
   CKey l0id_;
 
-  if(!pwalletMain->GetKey(l0id, l0id_))
+  if(!pwalletMainId->GetKey(l0id, l0id_))
   {
     throw JSONRPCError(RPC_WALLET_ERROR, "l0id_");
   }
@@ -4662,7 +4662,7 @@ Value transferEncryptedExtPredicate(const Array& params, bool fHelp)
   vchType vchRand;
   string r_;
 
-  if(!pwalletMain->GetRandomKeyMetadata(pid_.GetPubKey(), vchRand, r_))
+  if(!pwalletMainId->GetRandomKeyMetadata(pid_.GetPubKey(), vchRand, r_))
   {
     throw JSONRPCError(RPC_WALLET_ERROR, "random key");
   }
@@ -4684,7 +4684,7 @@ Value transferEncryptedExtPredicate(const Array& params, bool fHelp)
 
     string cskStr;
 
-    if(pwalletMain->aes_(vchPubKey, f, cskStr))
+    if(pwalletMainId->aes_(vchPubKey, f, cskStr))
     {
       bool fInvalid = false;
       cskVec = DecodeBase64(cskStr.c_str(), &fInvalid);
@@ -4700,7 +4700,7 @@ Value transferEncryptedExtPredicate(const Array& params, bool fHelp)
 
     if(channelList == "I")
     {
-      if(pwalletMain->aes_(l0id_.GetPubKey(), f, channelList))
+      if(pwalletMainId->aes_(l0id_.GetPubKey(), f, channelList))
       {
         bool fInvalid = false;
         cskVec = DecodeBase64(channelList.c_str(), &fInvalid);
@@ -4710,7 +4710,7 @@ Value transferEncryptedExtPredicate(const Array& params, bool fHelp)
     {
       string p0;
 
-      if(!pwalletMain->envCP0(l0id_.GetPubKey(), p0))
+      if(!pwalletMainId->envCP0(l0id_.GetPubKey(), p0))
       {
         throw JSONRPCError(RPC_TYPE_ERROR, "intrinsic");
       }
@@ -4737,25 +4737,25 @@ Value transferEncryptedExtPredicate(const Array& params, bool fHelp)
       throw runtime_error("could not find this alias");
     }
 
-    ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    ENTER_CRITICAL_SECTION(pwalletMainId->cs_wallet)
     {
       if(mapState.count(vchLocator) && mapState[vchLocator].size())
       {
         error("xfer encrypted: there are %lu pending operations on that alias, including %s",
               mapState[vchLocator].size(),
               mapState[vchLocator].begin()->GetHex().c_str());
-        LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+        LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
         LEAVE_CRITICAL_SECTION(cs_main)
         throw runtime_error("there are pending operations on that alias");
       }
 
       EnsureWalletIsUnlocked();
 
-      if(!pwalletMain->mapWallet.count(wtxInHash))
+      if(!pwalletMainId->mapWallet.count(wtxInHash))
       {
         error("this coin is not in your wallet %s",
               wtxInHash.GetHex().c_str());
-        LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+        LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
         LEAVE_CRITICAL_SECTION(cs_main)
         throw runtime_error("this coin is not in your wallet");
       }
@@ -4766,7 +4766,7 @@ Value transferEncryptedExtPredicate(const Array& params, bool fHelp)
       EncryptMessage(stringFromVch(extVch), randBase64, encryptedRandForRecipient);
       string encryptedAliasForRecipient;
       EncryptMessage(stringFromVch(extVch), locatorStr, encryptedAliasForRecipient);
-      const __wx__Tx& wtxIn = pwalletMain->mapWallet[wtxInHash];
+      const __wx__Tx& wtxIn = pwalletMainId->mapWallet[wtxInHash];
       bool found = false;
       BOOST_FOREACH(const CTxOut& out, wtxIn.vout)
       {
@@ -4818,7 +4818,7 @@ Value transferEncryptedExtPredicate(const Array& params, bool fHelp)
               string csK;
               Relay r;
 
-              if(pwalletMain->relay_(vchLocator, r))
+              if(pwalletMainId->relay_(vchLocator, r))
               {
                 string ctrl_ = r.ctrl_();
                 bool fInvalid = false;
@@ -4876,7 +4876,7 @@ Value transferEncryptedExtPredicate(const Array& params, bool fHelp)
 
           CKey key;
 
-          if(!pwalletMain->GetKey(keyID, key))
+          if(!pwalletMainId->GetKey(keyID, key))
           {
             throw JSONRPCError(RPC_WALLET_ERROR, "Private key not available");
           }
@@ -4905,12 +4905,12 @@ Value transferEncryptedExtPredicate(const Array& params, bool fHelp)
 
       if(strError != "")
       {
-        LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+        LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
         LEAVE_CRITICAL_SECTION(cs_main)
         throw JSONRPCError(RPC_WALLET_ERROR, strError);
       }
     }
-    LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
   }
   LEAVE_CRITICAL_SECTION(cs_main)
   return wtx.GetHash().GetHex();
@@ -4941,7 +4941,7 @@ Value transferEncryptedAlias(const Array& params, bool fHelp)
 
   CKey pid_;
 
-  if(!pwalletMain->GetKey(pid, pid_))
+  if(!pwalletMainId->GetKey(pid, pid_))
   {
     throw JSONRPCError(RPC_WALLET_ERROR, "pid_");
   }
@@ -5001,7 +5001,7 @@ Value transferEncryptedAlias(const Array& params, bool fHelp)
 
   CKey l0id_;
 
-  if(!pwalletMain->GetKey(l0id, l0id_))
+  if(!pwalletMainId->GetKey(l0id, l0id_))
   {
     throw JSONRPCError(RPC_WALLET_ERROR, "l0id_");
   }
@@ -5009,7 +5009,7 @@ Value transferEncryptedAlias(const Array& params, bool fHelp)
   vchType vchRand;
   string r_;
 
-  if(!pwalletMain->GetRandomKeyMetadata(pid_.GetPubKey(), vchRand, r_))
+  if(!pwalletMainId->GetRandomKeyMetadata(pid_.GetPubKey(), vchRand, r_))
   {
     throw JSONRPCError(RPC_WALLET_ERROR, "random key");
   }
@@ -5031,7 +5031,7 @@ Value transferEncryptedAlias(const Array& params, bool fHelp)
 
     string cskStr;
 
-    if(pwalletMain->aes_(vchPubKey, f, cskStr))
+    if(pwalletMainId->aes_(vchPubKey, f, cskStr))
     {
       bool fInvalid = false;
       cskVec = DecodeBase64(cskStr.c_str(), &fInvalid);
@@ -5047,7 +5047,7 @@ Value transferEncryptedAlias(const Array& params, bool fHelp)
 
     if(channelList == "I")
     {
-      if(pwalletMain->aes_(l0id_.GetPubKey(), f, channelList))
+      if(pwalletMainId->aes_(l0id_.GetPubKey(), f, channelList))
       {
         bool fInvalid = false;
         cskVec = DecodeBase64(channelList.c_str(), &fInvalid);
@@ -5057,7 +5057,7 @@ Value transferEncryptedAlias(const Array& params, bool fHelp)
     {
       string p0;
 
-      if(!pwalletMain->envCP0(l0id_.GetPubKey(), p0))
+      if(!pwalletMainId->envCP0(l0id_.GetPubKey(), p0))
       {
         throw JSONRPCError(RPC_TYPE_ERROR, "intrinsic");
       }
@@ -5084,25 +5084,25 @@ Value transferEncryptedAlias(const Array& params, bool fHelp)
       throw runtime_error("could not find this alias");
     }
 
-    ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    ENTER_CRITICAL_SECTION(pwalletMainId->cs_wallet)
     {
       if(mapState.count(vchLocator) && mapState[vchLocator].size())
       {
         error("xfer encrypted: there are %lu pending operations on that alias, including %s",
               mapState[vchLocator].size(),
               mapState[vchLocator].begin()->GetHex().c_str());
-        LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+        LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
         LEAVE_CRITICAL_SECTION(cs_main)
         throw runtime_error("there are pending operations on that alias");
       }
 
       EnsureWalletIsUnlocked();
 
-      if(!pwalletMain->mapWallet.count(wtxInHash))
+      if(!pwalletMainId->mapWallet.count(wtxInHash))
       {
         error("this coin is not in your wallet %s",
               wtxInHash.GetHex().c_str());
-        LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+        LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
         LEAVE_CRITICAL_SECTION(cs_main)
         throw runtime_error("this coin is not in your wallet");
       }
@@ -5113,7 +5113,7 @@ Value transferEncryptedAlias(const Array& params, bool fHelp)
       EncryptMessage(stringFromVch(extVch), randBase64, encryptedRandForRecipient);
       string encryptedAliasForRecipient;
       EncryptMessage(stringFromVch(extVch), locatorStr, encryptedAliasForRecipient);
-      const __wx__Tx& wtxIn = pwalletMain->mapWallet[wtxInHash];
+      const __wx__Tx& wtxIn = pwalletMainId->mapWallet[wtxInHash];
       bool found = false;
       BOOST_FOREACH(const CTxOut& out, wtxIn.vout)
       {
@@ -5165,7 +5165,7 @@ Value transferEncryptedAlias(const Array& params, bool fHelp)
               string csK;
               Relay r;
 
-              if(pwalletMain->relay_(vchLocator, r))
+              if(pwalletMainId->relay_(vchLocator, r))
               {
                 string ctrl_ = r.ctrl_();
                 bool fInvalid = false;
@@ -5223,7 +5223,7 @@ Value transferEncryptedAlias(const Array& params, bool fHelp)
 
           CKey key;
 
-          if(!pwalletMain->GetKey(keyID, key))
+          if(!pwalletMainId->GetKey(keyID, key))
           {
             throw JSONRPCError(RPC_WALLET_ERROR, "Private key not available");
           }
@@ -5252,12 +5252,12 @@ Value transferEncryptedAlias(const Array& params, bool fHelp)
 
       if(strError != "")
       {
-        LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+        LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
         LEAVE_CRITICAL_SECTION(cs_main)
         throw JSONRPCError(RPC_WALLET_ERROR, strError);
       }
     }
-    LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
   }
   LEAVE_CRITICAL_SECTION(cs_main)
   return wtx.GetHash().GetHex();
@@ -5311,14 +5311,14 @@ Value transferAlias(const Array& params, bool fHelp)
   scriptPubKey << OP_ALIAS_RELAY << vchAlias ;
   ENTER_CRITICAL_SECTION(cs_main)
   {
-    ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    ENTER_CRITICAL_SECTION(pwalletMainId->cs_wallet)
     {
       if(mapState.count(vchAlias) && mapState[vchAlias].size())
       {
         error("updateEncryptedAlias() : there are %lu pending operations on that alias, including %s",
               mapState[vchAlias].size(),
               mapState[vchAlias].begin()->GetHex().c_str());
-        LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+        LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
         LEAVE_CRITICAL_SECTION(cs_main)
         throw runtime_error("there are pending operations on that alias");
       }
@@ -5329,23 +5329,23 @@ Value transferAlias(const Array& params, bool fHelp)
 
       if(!aliasTx(aliasCacheDB, vchAlias, tx))
       {
-        LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+        LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
         LEAVE_CRITICAL_SECTION(cs_main)
         throw runtime_error("could not find a coin with this alias");
       }
 
       uint256 wtxInHash = tx.GetHash();
 
-      if(!pwalletMain->mapWallet.count(wtxInHash))
+      if(!pwalletMainId->mapWallet.count(wtxInHash))
       {
         error("updateEncryptedAlias() : this coin is not in your wallet %s",
               wtxInHash.GetHex().c_str());
-        LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+        LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
         LEAVE_CRITICAL_SECTION(cs_main)
         throw runtime_error("this coin is not in your wallet");
       }
 
-      const __wx__Tx& wtxIn = pwalletMain->mapWallet[wtxInHash];
+      const __wx__Tx& wtxIn = pwalletMainId->mapWallet[wtxInHash];
       int op__;
       int nOut;
       vchType vchValue;
@@ -5358,12 +5358,12 @@ Value transferAlias(const Array& params, bool fHelp)
 
       if(strError != "")
       {
-        LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+        LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
         LEAVE_CRITICAL_SECTION(cs_main)
         throw JSONRPCError(RPC_WALLET_ERROR, strError);
       }
     }
-    LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
   }
   LEAVE_CRITICAL_SECTION(cs_main)
   return wtx.GetHash().GetHex();
@@ -5389,7 +5389,7 @@ Value uC(const Array& params, bool fHelp)
   vchType l = vchFromString(locatorStr);
   Relay r;
 
-  if(pwalletMain->relay_(l, r))
+  if(pwalletMainId->relay_(l, r))
   {
     string ctrl_ = r.ctrl_();
   }
@@ -5399,11 +5399,11 @@ Value uC(const Array& params, bool fHelp)
     GenerateAESKey(kAlpha);
     string alpha = EncodeBase64(&kAlpha[0], kAlpha.size());
     r.ctrl(alpha);
-    pwalletMain->relay(l, r);
-    __wx__DB walletdb(pwalletMain->strWalletFile, "r+");
-    pwalletMain->LoadRelay(vchAlias, r);
+    pwalletMainId->relay(l, r);
+    __wx__DB walletdb(pwalletMainId->strWalletFile, "r+");
+    pwalletMainId->LoadRelay(vchAlias, r);
 
-    if(!walletdb.UpdateKey(l, pwalletMain->lCache[l]))
+    if(!walletdb.UpdateKey(l, pwalletMainId->lCache[l]))
     {
       throw JSONRPCError(RPC_TYPE_ERROR, "Failed to write data for key");
     }
@@ -5466,7 +5466,7 @@ Value uC(const Array& params, bool fHelp)
       throw runtime_error("could not find a coin with this alias, try specifying the registerAlias transaction id");
     }
 
-    if(!pwalletMain->mapWallet.count(wtxInHash))
+    if(!pwalletMainId->mapWallet.count(wtxInHash))
     {
       LEAVE_CRITICAL_SECTION(cs_main)
       throw runtime_error("previous transaction is not in the wallet");
@@ -5474,7 +5474,7 @@ Value uC(const Array& params, bool fHelp)
 
     CScript scriptPubKeyOrig;
     CScript scriptPubKey;
-    __wx__Tx& wtxIn = pwalletMain->mapWallet[wtxInHash];
+    __wx__Tx& wtxIn = pwalletMainId->mapWallet[wtxInHash];
     bool found = false;
     BOOST_FOREACH(CTxOut& out, wtxIn.vout)
     {
@@ -5514,13 +5514,13 @@ Value uC(const Array& params, bool fHelp)
 
         CKey key;
 
-        if(!pwalletMain->GetKey(keyID, key))
+        if(!pwalletMainId->GetKey(keyID, key))
         {
           throw JSONRPCError(RPC_WALLET_ERROR, "Private key not available");
         }
 
         CPubKey vchPubKey;
-        pwalletMain->GetPubKey(keyID, vchPubKey);
+        pwalletMainId->GetPubKey(keyID, vchPubKey);
         vector<unsigned char> vchSig;
 
         if(!key.SignCompact(Hash(ss.begin(), ss.end()), vchSig))
@@ -5596,11 +5596,11 @@ Value transientStatus__(const Array& params, bool fHelp)
   scriptPubKey << OP_ALIAS_RELAY << vchAlias << vchValue << OP_2DROP << OP_DROP;
   ENTER_CRITICAL_SECTION(cs_main)
   {
-    ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    ENTER_CRITICAL_SECTION(pwalletMainId->cs_wallet)
     {
       if(mapState.count(vchAlias) && mapState[vchAlias].size())
       {
-        LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+        LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
         LEAVE_CRITICAL_SECTION(cs_main)
         ret.push_back(Pair("status", "error"));
         ret.push_back(Pair("message", "pending ops on that alias"));
@@ -5613,7 +5613,7 @@ Value transientStatus__(const Array& params, bool fHelp)
 
       if(!aliasTx(aliasCacheDB, vchAlias, tx))
       {
-        LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+        LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
         LEAVE_CRITICAL_SECTION(cs_main)
         ret.push_back(Pair("status", "error"));
         ret.push_back(Pair("message", "could not find that alias"));
@@ -5647,14 +5647,14 @@ Value transientStatus__(const Array& params, bool fHelp)
 
       uint256 wtxInHash = tx.GetHash();
 
-      if(!pwalletMain->mapWallet.count(wtxInHash))
+      if(!pwalletMainId->mapWallet.count(wtxInHash))
       {
         ret.push_back(Pair("status", "error"));
         ret.push_back(Pair("message", "coin is not in your wallet"));
         return ret;
       }
 
-      __wx__Tx& wtxIn = pwalletMain->mapWallet[wtxInHash];
+      __wx__Tx& wtxIn = pwalletMainId->mapWallet[wtxInHash];
       scriptPubKey += scriptPubKeyOrig;
       int64_t t;
       string strError;
@@ -5662,7 +5662,7 @@ Value transientStatus__(const Array& params, bool fHelp)
 
       if(!s)
       {
-        LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+        LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
         LEAVE_CRITICAL_SECTION(cs_main)
         ret.push_back(Pair("status", "error"));
         ret.push_back(Pair("message", strError));
@@ -5672,7 +5672,7 @@ Value transientStatus__(const Array& params, bool fHelp)
       ret.push_back(Pair("status", "ok"));
       ret.push_back(Pair("fee", ValueFromAmount(t)));
     }
-    LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
   }
   LEAVE_CRITICAL_SECTION(cs_main)
   return ret;
@@ -5731,14 +5731,14 @@ Value updateAliasFile(const Array& params, bool fHelp)
   scriptPubKey << OP_ALIAS_RELAY << vchAlias << vchValue << OP_2DROP << OP_DROP;
   ENTER_CRITICAL_SECTION(cs_main)
   {
-    ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    ENTER_CRITICAL_SECTION(pwalletMainId->cs_wallet)
     {
       if(mapState.count(vchAlias) && mapState[vchAlias].size())
       {
         error("updateAlias() : there are %lu pending operations on that alias, including %s",
               mapState[vchAlias].size(),
               mapState[vchAlias].begin()->GetHex().c_str());
-        LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+        LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
         LEAVE_CRITICAL_SECTION(cs_main)
         throw runtime_error("there are pending operations on that alias");
       }
@@ -5749,7 +5749,7 @@ Value updateAliasFile(const Array& params, bool fHelp)
 
       if(!aliasTx(aliasCacheDB, vchAlias, tx))
       {
-        LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+        LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
         LEAVE_CRITICAL_SECTION(cs_main)
         throw runtime_error("could not find a coin with this alias");
       }
@@ -5777,27 +5777,27 @@ Value updateAliasFile(const Array& params, bool fHelp)
 
       uint256 wtxInHash = tx.GetHash();
 
-      if(!pwalletMain->mapWallet.count(wtxInHash))
+      if(!pwalletMainId->mapWallet.count(wtxInHash))
       {
         error("updateAlias() : this coin is not in your wallet %s",
               wtxInHash.GetHex().c_str());
-        LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+        LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
         LEAVE_CRITICAL_SECTION(cs_main)
         throw runtime_error("this coin is not in your wallet");
       }
 
-      __wx__Tx& wtxIn = pwalletMain->mapWallet[wtxInHash];
+      __wx__Tx& wtxIn = pwalletMainId->mapWallet[wtxInHash];
       scriptPubKey += scriptPubKeyOrig;
       string strError = txRelay(scriptPubKey, CTRL__, wtxIn, wtx, false);
 
       if(strError != "")
       {
-        LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+        LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
         LEAVE_CRITICAL_SECTION(cs_main)
         throw JSONRPCError(RPC_WALLET_ERROR, strError);
       }
     }
-    LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
   }
   LEAVE_CRITICAL_SECTION(cs_main)
   return wtx.GetHash().GetHex();
@@ -5894,14 +5894,14 @@ Value updateAlias_executeContractPayload(const Array& params, bool fHelp)
   std::cout << "update_execute : vchAlias " << stringFromVch(vchAlias) << std::endl;
   ENTER_CRITICAL_SECTION(cs_main)
   {
-    ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    ENTER_CRITICAL_SECTION(pwalletMainId->cs_wallet)
     {
       if(mapState.count(vchAlias) && mapState[vchAlias].size())
       {
         error("updateAlias() : there are %lu pending operations on that alias, including %s",
               mapState[vchAlias].size(),
               mapState[vchAlias].begin()->GetHex().c_str());
-        LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+        LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
         LEAVE_CRITICAL_SECTION(cs_main)
         throw runtime_error("there are pending operations on that alias");
       }
@@ -5912,18 +5912,18 @@ Value updateAlias_executeContractPayload(const Array& params, bool fHelp)
 
       if(!aliasTx(aliasCacheDB, vchAlias, tx))
       {
-        LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+        LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
         LEAVE_CRITICAL_SECTION(cs_main)
         throw runtime_error("could not find a coin with this alias");
       }
 
       uint256 wtxInHash = tx.GetHash();
 
-      if(!pwalletMain->mapWallet.count(wtxInHash))
+      if(!pwalletMainId->mapWallet.count(wtxInHash))
       {
         error("updateAlias() : this coin is not in your wallet %s",
               wtxInHash.GetHex().c_str());
-        LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+        LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
         LEAVE_CRITICAL_SECTION(cs_main)
         throw runtime_error("this coin is not in your wallet");
       }
@@ -5949,18 +5949,18 @@ Value updateAlias_executeContractPayload(const Array& params, bool fHelp)
         scriptPubKeyOrig.SetBitcoinAddress(strAddress);
       }
 
-      __wx__Tx& wtxIn = pwalletMain->mapWallet[wtxInHash];
+      __wx__Tx& wtxIn = pwalletMainId->mapWallet[wtxInHash];
       scriptPubKey += scriptPubKeyOrig;
       string strError = txRelay(scriptPubKey, CTRL__, wtxIn, wtx, false);
 
       if(strError != "")
       {
-        LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+        LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
         LEAVE_CRITICAL_SECTION(cs_main)
         throw JSONRPCError(RPC_WALLET_ERROR, strError);
       }
     }
-    LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
   }
   LEAVE_CRITICAL_SECTION(cs_main)
   return wtx.GetHash().GetHex();
@@ -5998,14 +5998,14 @@ Value updateAlias(const Array& params, bool fHelp)
   scriptPubKey << OP_ALIAS_RELAY << vchAlias << vchValue << OP_2DROP << OP_DROP;
   ENTER_CRITICAL_SECTION(cs_main)
   {
-    ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    ENTER_CRITICAL_SECTION(pwalletMainId->cs_wallet)
     {
       if(mapState.count(vchAlias) && mapState[vchAlias].size())
       {
         error("updateAlias() : there are %lu pending operations on that alias, including %s",
               mapState[vchAlias].size(),
               mapState[vchAlias].begin()->GetHex().c_str());
-        LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+        LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
         LEAVE_CRITICAL_SECTION(cs_main)
         throw runtime_error("there are pending operations on that alias");
       }
@@ -6016,18 +6016,18 @@ Value updateAlias(const Array& params, bool fHelp)
 
       if(!aliasTx(aliasCacheDB, vchAlias, tx))
       {
-        LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+        LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
         LEAVE_CRITICAL_SECTION(cs_main)
         throw runtime_error("could not find a coin with this alias");
       }
 
       uint256 wtxInHash = tx.GetHash();
 
-      if(!pwalletMain->mapWallet.count(wtxInHash))
+      if(!pwalletMainId->mapWallet.count(wtxInHash))
       {
         error("updateAlias() : this coin is not in your wallet %s",
               wtxInHash.GetHex().c_str());
-        LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+        LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
         LEAVE_CRITICAL_SECTION(cs_main)
         throw runtime_error("this coin is not in your wallet");
       }
@@ -6053,18 +6053,18 @@ Value updateAlias(const Array& params, bool fHelp)
         scriptPubKeyOrig.SetBitcoinAddress(strAddress);
       }
 
-      __wx__Tx& wtxIn = pwalletMain->mapWallet[wtxInHash];
+      __wx__Tx& wtxIn = pwalletMainId->mapWallet[wtxInHash];
       scriptPubKey += scriptPubKeyOrig;
       string strError = txRelay(scriptPubKey, CTRL__, wtxIn, wtx, false);
 
       if(strError != "")
       {
-        LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+        LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
         LEAVE_CRITICAL_SECTION(cs_main)
         throw JSONRPCError(RPC_WALLET_ERROR, strError);
       }
     }
-    LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
   }
   LEAVE_CRITICAL_SECTION(cs_main)
   return wtx.GetHash().GetHex();
@@ -6077,7 +6077,7 @@ Value publicKey(const Array& params, bool fHelp)
       + HelpRequiringPassphrase());
 
   EnsureWalletIsUnlocked();
-  __wx__DB walletdb(pwalletMain->strWalletFile, "r+");
+  __wx__DB walletdb(pwalletMainId->strWalletFile, "r+");
   string myAddress = params[0].get_str();
   cba addr(myAddress);
 
@@ -6095,7 +6095,7 @@ Value publicKey(const Array& params, bool fHelp)
 
   CKey key;
 
-  if(!pwalletMain->GetKey(keyID, key))
+  if(!pwalletMainId->GetKey(keyID, key))
   {
     throw JSONRPCError(RPC_WALLET_ERROR, "Private key not available");
   }
@@ -6103,24 +6103,24 @@ Value publicKey(const Array& params, bool fHelp)
   CPubKey pubKey = key.GetPubKey();
   string testKey;
 
-  if(!pwalletMain->SetRSAMetadata(pubKey))
+  if(!pwalletMainId->SetRSAMetadata(pubKey))
   {
     throw JSONRPCError(RPC_TYPE_ERROR, "Failed set");
   }
 
-  if(!walletdb.UpdateKey(pubKey, pwalletMain->kd[pubKey.GetID()]))
+  if(!walletdb.UpdateKey(pubKey, pwalletMainId->kd[pubKey.GetID()]))
   {
     throw JSONRPCError(RPC_TYPE_ERROR, "Failed to write meta data for key");
   }
 
-  if(!pwalletMain->envCP1(pubKey, testKey))
+  if(!pwalletMainId->envCP1(pubKey, testKey))
   {
     throw JSONRPCError(RPC_TYPE_ERROR, "Failed load alpha");
   }
 
   string pKey;
 
-  if(!pwalletMain->envCP0(pubKey, pKey))
+  if(!pwalletMainId->envCP0(pubKey, pKey))
   {
     throw JSONRPCError(RPC_TYPE_ERROR, "Failed load beta");
   }
@@ -6158,7 +6158,7 @@ Value sendSymmetric(const Array& params, bool fHelp)
 
   CKey key;
 
-  if(!pwalletMain->GetKey(keyID, key))
+  if(!pwalletMainId->GetKey(keyID, key))
   {
     throw JSONRPCError(RPC_WALLET_ERROR, "Private key not available");
   }
@@ -6174,7 +6174,7 @@ Value sendSymmetric(const Array& params, bool fHelp)
   f = aRecipient.ToString();
   string rsaPubKeyStr = "";
 
-  if(!pwalletMain->envCP1(key.GetPubKey(), rsaPubKeyStr))
+  if(!pwalletMainId->envCP1(key.GetPubKey(), rsaPubKeyStr))
   {
     throw JSONRPCError(RPC_WALLET_ERROR, "no rsa key available for address");
   }
@@ -6210,7 +6210,7 @@ Value sendSymmetric(const Array& params, bool fHelp)
   ENTER_CRITICAL_SECTION(cs_main)
   {
     EnsureWalletIsUnlocked();
-    string strError = pwalletMain->SendMoney__(scriptPubKey, CTRL__, wtx, false);
+    string strError = pwalletMainId->SendMoney__(scriptPubKey, CTRL__, wtx, false);
 
     if(strError != "")
     {
@@ -6238,7 +6238,7 @@ bool internalReference__(string ref__, vchType& recipientPubKeyVch)
   bool s__=false;
   ENTER_CRITICAL_SECTION(cs_main)
   {
-    ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    ENTER_CRITICAL_SECTION(pwalletMainId->cs_wallet)
     {
       cba a(ref__) ;
       CKeyID keyID;
@@ -6247,12 +6247,12 @@ bool internalReference__(string ref__, vchType& recipientPubKeyVch)
       {
         CKey key;
 
-        if(pwalletMain->GetKey(keyID, key))
+        if(pwalletMainId->GetKey(keyID, key))
         {
           CPubKey pubKey = key.GetPubKey();
           string r1__;
 
-          if(pwalletMain->envCP1(pubKey, r1__))
+          if(pwalletMainId->envCP1(pubKey, r1__))
           {
             recipientPubKeyVch = vchFromString(r1__);
             s__=true;
@@ -6260,7 +6260,7 @@ bool internalReference__(string ref__, vchType& recipientPubKeyVch)
         }
       }
     }
-    LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
   }
   LEAVE_CRITICAL_SECTION(cs_main)
   return s__;
@@ -6269,10 +6269,10 @@ bool getImportedPubKey(string fKey, vchType& recipientPubKeyVch)
 {
   ENTER_CRITICAL_SECTION(cs_main)
   {
-    ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    ENTER_CRITICAL_SECTION(pwalletMainId->cs_wallet)
     {
       BOOST_FOREACH(PAIRTYPE(const uint256, __wx__Tx)& item,
-                    pwalletMain->mapWallet)
+                    pwalletMainId->mapWallet)
       {
         const __wx__Tx& tx = item.second;
         vchType vchSender, vchRecipient, vchKey, vchAes, vchSig;
@@ -6288,13 +6288,13 @@ bool getImportedPubKey(string fKey, vchType& recipientPubKeyVch)
         if(senderAddr == fKey)
         {
           recipientPubKeyVch = vchKey;
-          LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+          LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
           LEAVE_CRITICAL_SECTION(cs_main)
           return true;
         }
       }
     }
-    LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
   }
   LEAVE_CRITICAL_SECTION(cs_main)
   return false;
@@ -6303,10 +6303,10 @@ bool getImportedPubKey(string myAddress, string fKey, vchType& recipientPubKeyVc
 {
   ENTER_CRITICAL_SECTION(cs_main)
   {
-    ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    ENTER_CRITICAL_SECTION(pwalletMainId->cs_wallet)
     {
       BOOST_FOREACH(PAIRTYPE(const uint256, __wx__Tx)& item,
-                    pwalletMain->mapWallet)
+                    pwalletMainId->mapWallet)
       {
         const __wx__Tx& tx = item.second;
         vchType vchSender, vchRecipient, vchKey, vchAes, vchSig;
@@ -6331,13 +6331,13 @@ bool getImportedPubKey(string myAddress, string fKey, vchType& recipientPubKeyVc
             transientThreshold = true;
           }
 
-          LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+          LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
           LEAVE_CRITICAL_SECTION(cs_main)
           return true;
         }
       }
     }
-    LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
   }
   LEAVE_CRITICAL_SECTION(cs_main)
   return false;
@@ -6346,10 +6346,10 @@ bool getImportedPubKey(string myAddress, string fKey, vchType& recipientPubKeyVc
 {
   ENTER_CRITICAL_SECTION(cs_main)
   {
-    ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    ENTER_CRITICAL_SECTION(pwalletMainId->cs_wallet)
     {
       BOOST_FOREACH(PAIRTYPE(const uint256, __wx__Tx)& item,
-                    pwalletMain->mapWallet)
+                    pwalletMainId->mapWallet)
       {
         const __wx__Tx& tx = item.second;
         vchType vchSender, vchRecipient, vchKey, vchAes, vchSig;
@@ -6367,13 +6367,13 @@ bool getImportedPubKey(string myAddress, string fKey, vchType& recipientPubKeyVc
         {
           recipientPubKeyVch = vchKey;
           aesKeyBase64EncryptedVch = vchAes;
-          LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+          LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
           LEAVE_CRITICAL_SECTION(cs_main)
           return true;
         }
       }
     }
-    LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
   }
   LEAVE_CRITICAL_SECTION(cs_main)
   return false;
@@ -6454,16 +6454,16 @@ Value sendPublicKey(const Array& params, bool fHelp)
 
   CKey key;
 
-  if(!pwalletMain->GetKey(keyID, key))
+  if(!pwalletMainId->GetKey(keyID, key))
   {
     throw JSONRPCError(RPC_WALLET_ERROR, "Private key not available");
   }
 
   CPubKey vchPubKey;
-  pwalletMain->GetPubKey(keyID, vchPubKey);
+  pwalletMainId->GetPubKey(keyID, vchPubKey);
   string rsaPubKeyStr = "";
 
-  if(!pwalletMain->envCP1(key.GetPubKey(), rsaPubKeyStr))
+  if(!pwalletMainId->envCP1(key.GetPubKey(), rsaPubKeyStr))
   {
     throw JSONRPCError(RPC_WALLET_ERROR, "no rsa key available for address");
   }
@@ -6497,14 +6497,14 @@ Value sendPublicKey(const Array& params, bool fHelp)
     string aesKeyStr = EncodeBase64(&aes256Key[0], aes256Key.size());
     const string publicKeyStr = stringFromVch(recipientPubKeyVch);
     EncryptMessage(publicKeyStr, aesKeyStr, encrypted);
-    __wx__DB walletdb(pwalletMain->strWalletFile, "r+");
+    __wx__DB walletdb(pwalletMainId->strWalletFile, "r+");
 
-    if(!pwalletMain->aes(vchPubKey, f, aesKeyStr))
+    if(!pwalletMainId->aes(vchPubKey, f, aesKeyStr))
     {
       throw JSONRPCError(RPC_TYPE_ERROR, "Failed to set meta data for key");
     }
 
-    if(!walletdb.UpdateKey(vchPubKey, pwalletMain->kd[vchPubKey.GetID()]))
+    if(!walletdb.UpdateKey(vchPubKey, pwalletMainId->kd[vchPubKey.GetID()]))
     {
       throw JSONRPCError(RPC_TYPE_ERROR, "Failed to write meta data for key");
     }
@@ -6543,7 +6543,7 @@ Value sendPublicKey(const Array& params, bool fHelp)
   ENTER_CRITICAL_SECTION(cs_main)
   {
     EnsureWalletIsUnlocked();
-    string strError = pwalletMain->SendMoney__(scriptPubKey, CTRL__, wtx, false);
+    string strError = pwalletMainId->SendMoney__(scriptPubKey, CTRL__, wtx, false);
 
     if(strError != "")
     {
@@ -6583,7 +6583,7 @@ Value sendPlainMessage(const Array& params, bool fHelp)
 
   CKey key;
 
-  if(!pwalletMain->GetKey(keyID, key))
+  if(!pwalletMainId->GetKey(keyID, key))
   {
     throw JSONRPCError(RPC_WALLET_ERROR, "Private key not available");
   }
@@ -6631,7 +6631,7 @@ Value sendPlainMessage(const Array& params, bool fHelp)
   ENTER_CRITICAL_SECTION(cs_main)
   {
     EnsureWalletIsUnlocked();
-    string strError = pwalletMain->SendMoney__(scriptPubKey, CTRL__, wtx, false);
+    string strError = pwalletMainId->SendMoney__(scriptPubKey, CTRL__, wtx, false);
 
     if(strError != "")
     {
@@ -6690,16 +6690,16 @@ Value sendMessage(const Array& params, bool fHelp)
       throw JSONRPCError(RPC_TYPE_ERROR, "senderAddr does not refer to key");
     }
 
-    if(!pwalletMain->GetKey(keyID, key))
+    if(!pwalletMainId->GetKey(keyID, key))
     {
       throw JSONRPCError(RPC_WALLET_ERROR, "Private key not available");
     }
 
     CPubKey vchPubKey;
-    pwalletMain->GetPubKey(keyID, vchPubKey);
+    pwalletMainId->GetPubKey(keyID, vchPubKey);
     string aesBase64Plain;
 
-    if(pwalletMain->aes_(vchPubKey, f, aesBase64Plain))
+    if(pwalletMainId->aes_(vchPubKey, f, aesBase64Plain))
     {
       bool fInvalid = false;
       aesRawVector = DecodeBase64(aesBase64Plain.c_str(), &fInvalid);
@@ -6713,7 +6713,7 @@ Value sendMessage(const Array& params, bool fHelp)
         string aesKeyBase64Encrypted = stringFromVch(aesKeyBase64EncryptedVch);
         string privRSAKey;
 
-        if(!pwalletMain->envCP0(vchPubKey, privRSAKey))
+        if(!pwalletMainId->envCP0(vchPubKey, privRSAKey))
         {
           throw JSONRPCError(RPC_TYPE_ERROR, "Failed to retrieve private RSA key");
         }
@@ -6763,7 +6763,7 @@ Value sendMessage(const Array& params, bool fHelp)
   ENTER_CRITICAL_SECTION(cs_main)
   {
     EnsureWalletIsUnlocked();
-    string strError = pwalletMain->SendMoney__(scriptPubKey, CTRL__, wtx, false);
+    string strError = pwalletMainId->SendMoney__(scriptPubKey, CTRL__, wtx, false);
 
     if(strError != "")
     {
@@ -6797,7 +6797,7 @@ bool sign_verifymessage(string address)
 
   CKey key;
 
-  if(!pwalletMain->GetKey(keyID, key))
+  if(!pwalletMainId->GetKey(keyID, key))
   {
     throw JSONRPCError(RPC_WALLET_ERROR, "Private key not available");
   }
@@ -6872,7 +6872,7 @@ Value registerAliasGenerate(const Array& params, bool fHelp)
 
   if(searchAliasEncrypted2(locatorStr, wtxInHash__) == true)
   {
-    __wx__Tx& wtxIn = pwalletMain->mapWallet[wtxInHash__];
+    __wx__Tx& wtxIn = pwalletMainId->mapWallet[wtxInHash__];
     const int nHeight = wtxIn.GetHeightInMainChain();
     const int ex = nHeight + scaleMonitor() - pindexBest->nHeight;
 
@@ -6907,7 +6907,7 @@ Value registerAliasGenerate(const Array& params, bool fHelp)
   vchToHash.insert(vchToHash.end(), vchAlias.begin(), vchAlias.end());
   const uint160 hash = Hash160(vchToHash);
   CPubKey vchPubKey;
-  CReserveKey reservekey(pwalletMain);
+  CReserveKey reservekey(pwalletMainId);
 
   if(!reservekey.GetReservedKey(vchPubKey))
   {
@@ -6918,46 +6918,46 @@ Value registerAliasGenerate(const Array& params, bool fHelp)
   cba keyAddress(vchPubKey.GetID());
   CKeyID keyID;
   keyAddress.GetKeyID(keyID);
-  pwalletMain->SetAddressBookName(keyID, "");
-  __wx__DB walletdb(pwalletMain->strWalletFile, "r+");
+  pwalletMainId->SetAddressBookName(keyID, "");
+  __wx__DB walletdb(pwalletMainId->strWalletFile, "r+");
 
-  if(!pwalletMain->SetRSAMetadata(vchPubKey))
+  if(!pwalletMainId->SetRSAMetadata(vchPubKey))
   {
     throw JSONRPCError(RPC_TYPE_ERROR, "Failed to load meta data for key");
   }
 
-  if(!walletdb.UpdateKey(vchPubKey, pwalletMain->kd[vchPubKey.GetID()]))
+  if(!walletdb.UpdateKey(vchPubKey, pwalletMainId->kd[vchPubKey.GetID()]))
   {
     throw JSONRPCError(RPC_TYPE_ERROR, "Failed to write meta data for key");
   }
 
   string pKey;
 
-  if(!pwalletMain->envCP0(vchPubKey, pKey))
+  if(!pwalletMainId->envCP0(vchPubKey, pKey))
   {
     throw JSONRPCError(RPC_TYPE_ERROR, "Failed to load alpha");
   }
 
   string pub_k;
 
-  if(!pwalletMain->envCP1(vchPubKey, pub_k))
+  if(!pwalletMainId->envCP1(vchPubKey, pub_k))
   {
     throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "address has no associated RSA keys");
   }
 
-  if(!pwalletMain->SetRandomKeyMetadata(vchPubKey, vchRand))
+  if(!pwalletMainId->SetRandomKeyMetadata(vchPubKey, vchRand))
   {
     throw JSONRPCError(RPC_WALLET_ERROR, "Failed to set meta data for key");
   }
 
-  if(!walletdb.UpdateKey(vchPubKey, pwalletMain->kd[vchPubKey.GetID()]))
+  if(!walletdb.UpdateKey(vchPubKey, pwalletMainId->kd[vchPubKey.GetID()]))
   {
     throw JSONRPCError(RPC_TYPE_ERROR, "Failed to write meta data for key");
   }
 
   CKey key;
 
-  if(!pwalletMain->GetKey(keyID, key))
+  if(!pwalletMainId->GetKey(keyID, key))
   {
     throw JSONRPCError(RPC_WALLET_ERROR, "Private key not available");
   }
@@ -6990,7 +6990,7 @@ Value registerAliasGenerate(const Array& params, bool fHelp)
   ENTER_CRITICAL_SECTION(cs_main)
   {
     EnsureWalletIsUnlocked();
-    string strError = pwalletMain->SendMoney__(scriptPubKey, CTRL__, wtx, false);
+    string strError = pwalletMainId->SendMoney__(scriptPubKey, CTRL__, wtx, false);
 
     if(strError != "")
     {
@@ -7074,29 +7074,29 @@ Value registerAlias(const Array& params, bool fHelp)
   CKeyID keyID;
   keyAddress.GetKeyID(keyID);
   CPubKey vchPubKey;
-  pwalletMain->GetPubKey(keyID, vchPubKey);
+  pwalletMainId->GetPubKey(keyID, vchPubKey);
   string pub_k;
 
-  if(!pwalletMain->envCP1(vchPubKey, pub_k))
+  if(!pwalletMainId->envCP1(vchPubKey, pub_k))
   {
     throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "address has no associated RSA keys");
   }
 
-  if(!pwalletMain->SetRandomKeyMetadata(vchPubKey, vchRand))
+  if(!pwalletMainId->SetRandomKeyMetadata(vchPubKey, vchRand))
   {
     throw JSONRPCError(RPC_WALLET_ERROR, "Failed to set meta data for key");
   }
 
-  __wx__DB walletdb(pwalletMain->strWalletFile, "r+");
+  __wx__DB walletdb(pwalletMainId->strWalletFile, "r+");
 
-  if(!walletdb.UpdateKey(vchPubKey, pwalletMain->kd[vchPubKey.GetID()]))
+  if(!walletdb.UpdateKey(vchPubKey, pwalletMainId->kd[vchPubKey.GetID()]))
   {
     throw JSONRPCError(RPC_TYPE_ERROR, "Failed to write meta data for key");
   }
 
   CKey key;
 
-  if(!pwalletMain->GetKey(keyID, key))
+  if(!pwalletMainId->GetKey(keyID, key))
   {
     throw JSONRPCError(RPC_WALLET_ERROR, "Private key not available");
   }
@@ -7129,7 +7129,7 @@ Value registerAlias(const Array& params, bool fHelp)
   ENTER_CRITICAL_SECTION(cs_main)
   {
     EnsureWalletIsUnlocked();
-    string strError = pwalletMain->SendMoney__(scriptPubKey, CTRL__, wtx, false);
+    string strError = pwalletMainId->SendMoney__(scriptPubKey, CTRL__, wtx, false);
 
     if(strError != "")
     {
@@ -7835,41 +7835,41 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
 
       CKey key;
 
-      if(!pwalletMain->GetKey(keyID, key))
+      if(!pwalletMainId->GetKey(keyID, key))
       {
         throw JSONRPCError(RPC_WALLET_ERROR, "Private key not available");
       }
 
       CPubKey vchPubKey;
-      pwalletMain->GetPubKey(keyID, vchPubKey);
+      pwalletMainId->GetPubKey(keyID, vchPubKey);
       bool fInvalid;
       string decryptedRand;
       string privRSAKey;
       ENTER_CRITICAL_SECTION(cs_main)
       {
-        ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
+        ENTER_CRITICAL_SECTION(pwalletMainId->cs_wallet)
         {
-          if(!pwalletMain->envCP0(vchPubKey, privRSAKey))
+          if(!pwalletMainId->envCP0(vchPubKey, privRSAKey))
           {
-            LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+            LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
             LEAVE_CRITICAL_SECTION(cs_main)
             throw JSONRPCError(RPC_TYPE_ERROR, "Failed to retrieve private RSA key");
           }
         }
-        LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+        LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
       }
       LEAVE_CRITICAL_SECTION(cs_main)
       DecryptMessage(privRSAKey, r, decryptedRand);
       vchType vchRand = DecodeBase64(decryptedRand.c_str(), &fInvalid);
 
-      if(!pwalletMain->SetRandomKeyMetadata(vchPubKey, vchRand))
+      if(!pwalletMainId->SetRandomKeyMetadata(vchPubKey, vchRand))
       {
         throw JSONRPCError(RPC_WALLET_ERROR, "Failed to set meta data for key");
       }
 
-      __wx__DB walletdb(pwalletMain->strWalletFile, "r+");
+      __wx__DB walletdb(pwalletMainId->strWalletFile, "r+");
 
-      if(!walletdb.UpdateKey(vchPubKey, pwalletMain->kd[vchPubKey.GetID()]))
+      if(!walletdb.UpdateKey(vchPubKey, pwalletMainId->kd[vchPubKey.GetID()]))
       {
         throw JSONRPCError(RPC_TYPE_ERROR, "Failed to write meta data for key");
       }
@@ -8131,18 +8131,18 @@ Value vtx(const Array& params, bool fHelp)
 
   keyAddress.GetKeyID(keyID);
   CPubKey vchPubKey;
-  pwalletMain->GetPubKey(keyID, vchPubKey);
+  pwalletMainId->GetPubKey(keyID, vchPubKey);
   vchType kAlpha;
   GenerateAESKey(kAlpha);
   string s = EncodeBase64(&kAlpha[0], kAlpha.size());
-  __wx__DB walletdb(pwalletMain->strWalletFile, "r+");
+  __wx__DB walletdb(pwalletMainId->strWalletFile, "r+");
 
-  if(!pwalletMain->vtx(vchPubKey, s))
+  if(!pwalletMainId->vtx(vchPubKey, s))
   {
     throw JSONRPCError(RPC_TYPE_ERROR, "Failed to set meta data for key");
   }
 
-  if(!walletdb.UpdateKey(vchPubKey, pwalletMain->kd[vchPubKey.GetID()]))
+  if(!walletdb.UpdateKey(vchPubKey, pwalletMainId->kd[vchPubKey.GetID()]))
   {
     throw JSONRPCError(RPC_TYPE_ERROR, "Failed to write meta data for key");
   }
@@ -8224,16 +8224,16 @@ Value mapVertex(const Array& params, bool fHelp)
 
   CKey key;
 
-  if(!pwalletMain->GetKey(keyID, key))
+  if(!pwalletMainId->GetKey(keyID, key))
   {
     throw JSONRPCError(RPC_WALLET_ERROR, "Private key not available");
   }
 
   CPubKey vchPubKey;
-  pwalletMain->GetPubKey(keyID, vchPubKey);
+  pwalletMainId->GetPubKey(keyID, vchPubKey);
   string rsaPubKeyStr = "";
 
-  if(!pwalletMain->envCP1(key.GetPubKey(), rsaPubKeyStr))
+  if(!pwalletMainId->envCP1(key.GetPubKey(), rsaPubKeyStr))
   {
     throw JSONRPCError(RPC_WALLET_ERROR, "no rsa key available for address");
   }
@@ -8257,14 +8257,14 @@ Value mapVertex(const Array& params, bool fHelp)
   {
     string s;
 
-    if(!pwalletMain->vtx_(vchPubKey, s))
+    if(!pwalletMainId->vtx_(vchPubKey, s))
     {
       throw JSONRPCError(RPC_TYPE_ERROR, "key trace");
     }
 
     const string publicKeyStr = stringFromVch(recipientPubKeyVch);
     EncryptMessage(publicKeyStr, s, encrypted);
-    __wx__DB walletdb(pwalletMain->strWalletFile, "r+");
+    __wx__DB walletdb(pwalletMainId->strWalletFile, "r+");
     ss <<(rsaPubKeyStr + encrypted);
 
     if(!key.SignCompact(Hash(ss.begin(), ss.end()), vchSig))
@@ -8299,7 +8299,7 @@ Value mapVertex(const Array& params, bool fHelp)
   ENTER_CRITICAL_SECTION(cs_main)
   {
     EnsureWalletIsUnlocked();
-    string strError = pwalletMain->SendMoney__(scriptPubKey, CTRL__, wtx, false);
+    string strError = pwalletMainId->SendMoney__(scriptPubKey, CTRL__, wtx, false);
 
     if(strError != "")
     {
@@ -8317,10 +8317,10 @@ bool pk(string myAddress, string fKey, vchType& recipientPubKeyVch, vchType& aes
 {
   ENTER_CRITICAL_SECTION(cs_main)
   {
-    ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    ENTER_CRITICAL_SECTION(pwalletMainId->cs_wallet)
     {
       BOOST_FOREACH(PAIRTYPE(const uint256, __wx__Tx)& item,
-                    pwalletMain->mapWallet)
+                    pwalletMainId->mapWallet)
       {
         const __wx__Tx& tx = item.second;
         vchType vchSender, vchRecipient, vchKey, vchAes, vchSig;
@@ -8338,13 +8338,13 @@ bool pk(string myAddress, string fKey, vchType& recipientPubKeyVch, vchType& aes
         {
           recipientPubKeyVch = vchKey;
           aesKeyBase64EncryptedVch = vchAes;
-          LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+          LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
           LEAVE_CRITICAL_SECTION(cs_main)
           return true;
         }
       }
     }
-    LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
   }
   LEAVE_CRITICAL_SECTION(cs_main)
   return false;
@@ -8368,10 +8368,10 @@ Value vtxtrace(const Array& params, bool fHelp)
   Array oRes;
   ENTER_CRITICAL_SECTION(cs_main)
   {
-    ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    ENTER_CRITICAL_SECTION(pwalletMainId->cs_wallet)
     {
       BOOST_FOREACH(PAIRTYPE(const uint256, __wx__Tx)& item,
-                    pwalletMain->mapWallet)
+                    pwalletMainId->mapWallet)
       {
         const __wx__Tx& tx = item.second;
         vchType vchS, vchR, vchKey, vchAes, vchSig;
@@ -8389,7 +8389,7 @@ Value vtxtrace(const Array& params, bool fHelp)
         CKey key;
         bool imported=false;
 
-        if(!pwalletMain->GetKey(keyID, key))
+        if(!pwalletMainId->GetKey(keyID, key))
         {
           imported=true;
         }
@@ -8447,7 +8447,7 @@ Value vtxtrace(const Array& params, bool fHelp)
         oRes.push_back(aliasObj);
       }
     }
-    LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
   }
   LEAVE_CRITICAL_SECTION(cs_main)
 
@@ -8561,16 +8561,16 @@ Value mapProject(const Array& params, bool fHelp)
     throw JSONRPCError(RPC_TYPE_ERROR, "node does not refer to key");
   }
 
-  if(!pwalletMain->GetKey(keyID, key))
+  if(!pwalletMainId->GetKey(keyID, key))
   {
     throw JSONRPCError(RPC_WALLET_ERROR, "Private key not available");
   }
 
   CPubKey vchPubKey;
-  pwalletMain->GetPubKey(keyID, vchPubKey);
+  pwalletMainId->GetPubKey(keyID, vchPubKey);
   string aesBase64Plain;
 
-  if(pwalletMain->vtx_(vchPubKey, aesBase64Plain))
+  if(pwalletMainId->vtx_(vchPubKey, aesBase64Plain))
   {
     bool fInvalid = false;
     aesRawVector = DecodeBase64(aesBase64Plain.c_str(), &fInvalid);
@@ -8584,7 +8584,7 @@ Value mapProject(const Array& params, bool fHelp)
       string aesKeyBase64Encrypted = stringFromVch(aesKeyBase64EncryptedVch);
       string privRSAKey;
 
-      if(!pwalletMain->envCP0(vchPubKey, privRSAKey))
+      if(!pwalletMainId->envCP0(vchPubKey, privRSAKey))
       {
         throw JSONRPCError(RPC_TYPE_ERROR, "Failed to retrieve private RSA key");
       }
@@ -8633,7 +8633,7 @@ Value mapProject(const Array& params, bool fHelp)
   ENTER_CRITICAL_SECTION(cs_main)
   {
     EnsureWalletIsUnlocked();
-    string strError = pwalletMain->SendMoney__(scriptPubKey, CTRL__, wtx, false);
+    string strError = pwalletMainId->SendMoney__(scriptPubKey, CTRL__, wtx, false);
 
     if(strError != "")
     {
@@ -8697,10 +8697,10 @@ Value projection(const Array& params, bool fHelp)
   Array oRes;
   ENTER_CRITICAL_SECTION(cs_main)
   {
-    ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    ENTER_CRITICAL_SECTION(pwalletMainId->cs_wallet)
     {
       BOOST_FOREACH(PAIRTYPE(const uint256, __wx__Tx)& item,
-                    pwalletMain->mapWallet)
+                    pwalletMainId->mapWallet)
       {
         const __wx__Tx& tx = item.second;
         vchType vchV0, vchV1, vchEncryptedMessage, ivVch, vchSig;
@@ -8771,7 +8771,7 @@ Value projection(const Array& params, bool fHelp)
 
         CKey key;
 
-        if(!pwalletMain->GetKey(keyID, key))
+        if(!pwalletMainId->GetKey(keyID, key))
         {
           continue;
         }
@@ -8780,7 +8780,7 @@ Value projection(const Array& params, bool fHelp)
         string aesBase64Plain;
         vector<unsigned char> aesRawVector;
 
-        if(pwalletMain->vtx_(pubKey, aesBase64Plain))
+        if(pwalletMainId->vtx_(pubKey, aesBase64Plain))
         {
           bool fInvalid = false;
           aesRawVector = DecodeBase64(aesBase64Plain.c_str(), &fInvalid);
@@ -8795,7 +8795,7 @@ Value projection(const Array& params, bool fHelp)
             string aesKeyBase64Encrypted = stringFromVch(aesKeyBase64EncryptedVch);
             string privRSAKey;
 
-            if(!pwalletMain->envCP0(pubKey, privRSAKey))
+            if(!pwalletMainId->envCP0(pubKey, privRSAKey))
             {
               throw JSONRPCError(RPC_TYPE_ERROR, "Failed to retrieve private RSA key");
             }
@@ -8843,7 +8843,7 @@ Value projection(const Array& params, bool fHelp)
         aliasMapVchObj[vchV0] = aliasObj;
       }
     }
-    LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
   }
   LEAVE_CRITICAL_SECTION(cs_main)
   return oRes;
@@ -8890,10 +8890,10 @@ bool vclose(string& v, string& w)
   Array oRes;
   ENTER_CRITICAL_SECTION(cs_main)
   {
-    ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    ENTER_CRITICAL_SECTION(pwalletMainId->cs_wallet)
     {
       BOOST_FOREACH(PAIRTYPE(const uint256, __wx__Tx)& item,
-                    pwalletMain->mapWallet)
+                    pwalletMainId->mapWallet)
       {
         const __wx__Tx& tx = item.second;
         vchType vchS, vchR, vchKey, vchAes, vchSig;
@@ -8911,7 +8911,7 @@ bool vclose(string& v, string& w)
         CKey key;
         bool imported=false;
 
-        if(!pwalletMain->GetKey(keyID, key))
+        if(!pwalletMainId->GetKey(keyID, key))
         {
           imported=true;
         }
@@ -8962,7 +8962,7 @@ bool vclose(string& v, string& w)
         oRes.push_back(aliasObj);
       }
     }
-    LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
   }
   LEAVE_CRITICAL_SECTION(cs_main)
 
@@ -9044,12 +9044,12 @@ Value xstat(const Array& params, bool fHelp)
   }
 
   CPubKey vchPubKey;
-  pwalletMain->GetPubKey(keyID, vchPubKey);
+  pwalletMainId->GetPubKey(keyID, vchPubKey);
   Array oRes;
   string r;
   Object o;
 
-  if(pwalletMain->vtx_(vchPubKey, r))
+  if(pwalletMainId->vtx_(vchPubKey, r))
   {
     o.push_back(Pair("xstat", "true"));
   }
@@ -9098,9 +9098,9 @@ static bool xs(string& s)
   }
 
   CPubKey vchPubKey;
-  pwalletMain->GetPubKey(keyID, vchPubKey);
+  pwalletMainId->GetPubKey(keyID, vchPubKey);
   string r;
-  return pwalletMain->vtx_(vchPubKey, r);
+  return pwalletMainId->vtx_(vchPubKey, r);
 }
 Value svtx(const Array& params, bool fHelp)
 {
@@ -9160,7 +9160,7 @@ Value svtx(const Array& params, bool fHelp)
 
   CKey key;
 
-  if(!pwalletMain->GetKey(keyID, key))
+  if(!pwalletMainId->GetKey(keyID, key))
   {
     throw JSONRPCError(RPC_TYPE_ERROR, "external");
   }
@@ -9169,10 +9169,10 @@ Value svtx(const Array& params, bool fHelp)
   std::map<vchType, Object> aliasMapVchObj;
   ENTER_CRITICAL_SECTION(cs_main)
   {
-    ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    ENTER_CRITICAL_SECTION(pwalletMainId->cs_wallet)
     {
       BOOST_FOREACH(PAIRTYPE(const uint256, __wx__Tx)& item,
-                    pwalletMain->mapWallet)
+                    pwalletMainId->mapWallet)
       {
         const __wx__Tx& tx = item.second;
         vchType vchS, vchR, vchKey, vchAes, vchSig;
@@ -9190,7 +9190,7 @@ Value svtx(const Array& params, bool fHelp)
         CKey key;
         bool imported=false;
 
-        if(!pwalletMain->GetKey(keyID, key))
+        if(!pwalletMainId->GetKey(keyID, key))
         {
           imported=true;
         }
@@ -9241,7 +9241,7 @@ Value svtx(const Array& params, bool fHelp)
         oRes.push_back(aliasObj);
       }
     }
-    LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
   }
   LEAVE_CRITICAL_SECTION(cs_main)
   Array res_;
@@ -9333,14 +9333,14 @@ Value simplexU(const Array& params, bool fHelp)
   scriptPubKey << OP_ALIAS_RELAY << vchAlias << vchFromString(r) << OP_2DROP << OP_DROP;
   ENTER_CRITICAL_SECTION(cs_main)
   {
-    ENTER_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    ENTER_CRITICAL_SECTION(pwalletMainId->cs_wallet)
     {
       if(mapState.count(vchAlias) && mapState[vchAlias].size())
       {
         error("updateAlias() : there are %lu pending operations on that alias, including %s",
               mapState[vchAlias].size(),
               mapState[vchAlias].begin()->GetHex().c_str());
-        LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+        LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
         LEAVE_CRITICAL_SECTION(cs_main)
         throw runtime_error("there are pending operations on that alias");
       }
@@ -9351,7 +9351,7 @@ Value simplexU(const Array& params, bool fHelp)
 
       if(!aliasTx(aliasCacheDB, vchAlias, tx))
       {
-        LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+        LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
         LEAVE_CRITICAL_SECTION(cs_main)
         throw runtime_error("could not find a coin with this alias");
       }
@@ -9379,27 +9379,27 @@ Value simplexU(const Array& params, bool fHelp)
 
       uint256 wtxInHash = tx.GetHash();
 
-      if(!pwalletMain->mapWallet.count(wtxInHash))
+      if(!pwalletMainId->mapWallet.count(wtxInHash))
       {
         error("updateAlias() : this coin is not in your wallet %s",
               wtxInHash.GetHex().c_str());
-        LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+        LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
         LEAVE_CRITICAL_SECTION(cs_main)
         throw runtime_error("this coin is not in your wallet");
       }
 
-      __wx__Tx& wtxIn = pwalletMain->mapWallet[wtxInHash];
+      __wx__Tx& wtxIn = pwalletMainId->mapWallet[wtxInHash];
       scriptPubKey += scriptPubKeyOrig;
       string strError = txRelay(scriptPubKey, CTRL__, wtxIn, wtx, false);
 
       if(strError != "")
       {
-        LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+        LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
         LEAVE_CRITICAL_SECTION(cs_main)
         throw JSONRPCError(RPC_WALLET_ERROR, strError);
       }
     }
-    LEAVE_CRITICAL_SECTION(pwalletMain->cs_wallet)
+    LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
   }
   LEAVE_CRITICAL_SECTION(cs_main)
   return wtx.GetHash().GetHex();

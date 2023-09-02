@@ -225,7 +225,6 @@ Value stop(const Array& params, bool fHelp)
   StartShutdown();
   return "I/OCoin server stopping";
 }
-# 253 "bitcoinrpc.cpp"
 static const CRPCCommand vRPCCommands[] =
 {
   { "help", &help, true, true },
@@ -431,7 +430,6 @@ const json_spirit::Value CRPCTable::operator()() const
 
   return v;
 }
-# 468 "bitcoinrpc.cpp"
 string HTTPPost(const string& strMsg, const map<string,string>& mapRequestHeaders)
 {
   ostringstream s;
@@ -629,7 +627,6 @@ bool HTTPAuthorized(map<string, string>& mapHeaders)
   string strUserPass = DecodeBase64(strUserPass64);
   return TimingResistantEqual(strUserPass, strRPCUserColonPass);
 }
-# 672 "bitcoinrpc.cpp"
 string JSONRPCRequest(const string& strMethod, const Array& params, const Value& id)
 {
   Object request;
@@ -859,6 +856,7 @@ static void RPCListen(boost::shared_ptr< basic_socket_acceptor<Protocol, SocketA
                 conn,
                 boost::asio::placeholders::error));
 }
+
 template <typename Protocol, typename SocketAcceptorService>
 static void RPCAcceptHandler(boost::shared_ptr< basic_socket_acceptor<Protocol, SocketAcceptorService> > acceptor,
                              boost::asio::io_context& io_context,
@@ -898,7 +896,7 @@ static void RPCAcceptHandler(boost::shared_ptr< basic_socket_acceptor<Protocol, 
   }
 
   vnThreadsRunning[THREAD_RPCLISTENER]--;
-}
+} 
 void ThreadRPCServer2(void* parg)
 {
   printf("ThreadRPCServer started\n");
@@ -1258,7 +1256,7 @@ json_spirit::Value CRPCTable::execute(const std::string &strMethod, const json_s
       }
       else
       {
-        LOCK2(cs_main, pwalletMain->cs_wallet);
+        LOCK2(cs_main, pwalletMainId->cs_wallet);
         result = pcmd->actor(params, false);
       }
     }

@@ -141,25 +141,25 @@ Value importprivkey(const Array& params, bool fHelp)
   key.SetSecret(secret, fCompressed);
   CKeyID vchAddress = key.GetPubKey().GetID();
   {
-    LOCK2(cs_main, pwalletMain->cs_wallet);
-    pwalletMain->MarkDirty();
-    pwalletMain->SetAddressBookName(vchAddress, strLabel);
+    LOCK2(cs_main, pwalletMainId->cs_wallet);
+    pwalletMainId->MarkDirty();
+    pwalletMainId->SetAddressBookName(vchAddress, strLabel);
 
-    if (pwalletMain->HaveKey(vchAddress))
+    if (pwalletMainId->HaveKey(vchAddress))
     {
       return Value::null;
     }
 
-    pwalletMain->kd[vchAddress].nCreateTime = 1;
+    pwalletMainId->kd[vchAddress].nCreateTime = 1;
 
-    if (!pwalletMain->ak(key))
+    if (!pwalletMainId->ak(key))
     {
       throw JSONRPCError(RPC_WALLET_ERROR, "Error adding key to wallet");
     }
 
-    pwalletMain->nTimeFirstKey = 1;
-    pwalletMain->ScanForWalletTransactions(pindexGenesisBlock, true);
-    pwalletMain->ReacceptWalletTransactions();
+    pwalletMainId->nTimeFirstKey = 1;
+    pwalletMainId->ScanForWalletTransactions(pindexGenesisBlock, true);
+    pwalletMainId->ReacceptWalletTransactions();
   }
   return Value::null;
 }
@@ -218,7 +218,7 @@ Value importwalletRT(const Array& params, bool fHelp)
     key.SetSecret(secret, fCompressed);
     CKeyID keyid = key.GetPubKey().GetID();
 
-    if (pwalletMain->HaveKey(keyid))
+    if (pwalletMainId->HaveKey(keyid))
     {
       printf("Skipping import of %s (key already present)\n", cba(keyid).ToString().c_str());
       continue;
@@ -254,17 +254,17 @@ Value importwalletRT(const Array& params, bool fHelp)
 
     printf("Importing %s...\n", cba(keyid).ToString().c_str());
 
-    if (!pwalletMain->ak(key))
+    if (!pwalletMainId->ak(key))
     {
       fGood = false;
       continue;
     }
 
-    pwalletMain->kd[keyid].nCreateTime = nTime;
+    pwalletMainId->kd[keyid].nCreateTime = nTime;
 
     if (fLabel)
     {
-      pwalletMain->SetAddressBookName(keyid, strLabel);
+      pwalletMainId->SetAddressBookName(keyid, strLabel);
     }
 
     nTimeBegin = std::min(nTimeBegin, nTime);
@@ -278,15 +278,15 @@ Value importwalletRT(const Array& params, bool fHelp)
     pindex = pindex->pprev;
   }
 
-  if (!pwalletMain->nTimeFirstKey || nTimeBegin < pwalletMain->nTimeFirstKey)
+  if (!pwalletMainId->nTimeFirstKey || nTimeBegin < pwalletMainId->nTimeFirstKey)
   {
-    pwalletMain->nTimeFirstKey = nTimeBegin;
+    pwalletMainId->nTimeFirstKey = nTimeBegin;
   }
 
   printf("Rescanning last %i blocks\n", pindexBest->nHeight - pindex->nHeight + 1);
-  pwalletMain->ScanForWalletTransactions(pindex);
-  pwalletMain->ReacceptWalletTransactions();
-  pwalletMain->MarkDirty();
+  pwalletMainId->ScanForWalletTransactions(pindex);
+  pwalletMainId->ReacceptWalletTransactions();
+  pwalletMainId->MarkDirty();
 
   if (!fGood)
   {
@@ -326,7 +326,7 @@ Value dumpprivkey(const Array& params, bool fHelp)
   CSecret vchSecret;
   bool fCompressed;
 
-  if (!pwalletMain->GetSecret(keyID, vchSecret, fCompressed))
+  if (!pwalletMainId->GetSecret(keyID, vchSecret, fCompressed))
   {
     throw JSONRPCError(RPC_WALLET_ERROR, "Private key for address " + strAddress + " is not known");
   }
@@ -351,8 +351,8 @@ Value dumpwalletRT(const Array& params, bool fHelp)
 
   std::map<CKeyID, int64_t> mapKeyBirth;
   std::set<CKeyID> setKeyPool;
-  pwalletMain->kt(mapKeyBirth);
-  pwalletMain->GetAllReserveKeys(setKeyPool);
+  pwalletMainId->kt(mapKeyBirth);
+  pwalletMainId->GetAllReserveKeys(setKeyPool);
   std::vector<std::pair<int64_t, CKeyID> > vKeyBirth;
 
   for (std::map<CKeyID, int64_t>::const_iterator it = mapKeyBirth.begin(); it != mapKeyBirth.end(); it++)
@@ -376,12 +376,12 @@ Value dumpwalletRT(const Array& params, bool fHelp)
     bool IsCompressed;
     CKey key;
 
-    if (pwalletMain->GetKey(keyid, key))
+    if (pwalletMainId->GetKey(keyid, key))
     {
-      if (pwalletMain->mapAddressBook.count(keyid))
+      if (pwalletMainId->mapAddressBook.count(keyid))
       {
         CSecret secret = key.GetSecret(IsCompressed);
-        file << strprintf("%s %s label=%s # addr=%s\n", CBitcoinSecret(secret, IsCompressed).ToString().c_str(), strTime.c_str(), EncodeDumpString(pwalletMain->mapAddressBook[keyid]).c_str(), strAddr.c_str());
+        file << strprintf("%s %s label=%s # addr=%s\n", CBitcoinSecret(secret, IsCompressed).ToString().c_str(), strTime.c_str(), EncodeDumpString(pwalletMainId->mapAddressBook[keyid]).c_str(), strAddr.c_str());
       }
       else if (setKeyPool.count(keyid))
       {
@@ -405,9 +405,9 @@ Value ydwiWhldw_base_diff(const Array& params, bool fHelp)
 {
   Array a;
   std::map<CKeyID, int64_t> mk;
-  pwalletMain->kt(mk);
+  pwalletMainId->kt(mk);
   std::set<CKeyID> setKeyPool;
-  pwalletMain->GetAllReserveKeys(setKeyPool);
+  pwalletMainId->GetAllReserveKeys(setKeyPool);
   bool set=false;
 
   for(map< CKeyID, int64_t >::const_iterator it = mk.begin(); it != mk.end(); it++)
@@ -418,9 +418,9 @@ Value ydwiWhldw_base_diff(const Array& params, bool fHelp)
     string delta = a_.ToString();
     Object o;
 
-    if(pwalletMain->mapAddressBook.count(it->first))
+    if(pwalletMainId->mapAddressBook.count(it->first))
     {
-      string t0 = EncodeDumpString(pwalletMain->mapAddressBook[it->first]);
+      string t0 = EncodeDumpString(pwalletMainId->mapAddressBook[it->first]);
       o.push_back(Pair(t0, delta));
       a.push_back(o);
 
@@ -435,7 +435,7 @@ Value ydwiWhldw_base_diff(const Array& params, bool fHelp)
       s.SetDestination(a_.Get());
       bool f=false;
 
-      for (map<uint256, __wx__Tx>::iterator it = pwalletMain->mapWallet.begin(); it != pwalletMain->mapWallet.end(); ++it)
+      for (map<uint256, __wx__Tx>::iterator it = pwalletMainId->mapWallet.begin(); it != pwalletMainId->mapWallet.end(); ++it)
       {
         if(!setKeyPool.count(k))
         {
@@ -475,27 +475,27 @@ Value ydwiWhldw_base_diff(const Array& params, bool fHelp)
   {
     Object o;
 
-    if(!pwalletMain->as())
+    if(!pwalletMainId->as())
     {
-      pwalletMain->TopUpKeyPool();
+      pwalletMainId->TopUpKeyPool();
     }
 
     CPubKey newKey;
 
-    if(!pwalletMain->GetKeyFromPool(newKey, false))
+    if(!pwalletMainId->GetKeyFromPool(newKey, false))
     {
       throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
     }
 
     CKeyID keyID = newKey.GetID();
-    BOOST_FOREACH(const PAIRTYPE(cba, string)& item, pwalletMain->mapAddressBook)
+    BOOST_FOREACH(const PAIRTYPE(cba, string)& item, pwalletMainId->mapAddressBook)
     {
       if(item.second == "sparechange")
       {
-        pwalletMain->SetAddressBookName(item.first.Get(), "");
+        pwalletMainId->SetAddressBookName(item.first.Get(), "");
       }
     }
-    pwalletMain->SetAddressBookName(keyID, "sparechange");
+    pwalletMainId->SetAddressBookName(keyID, "sparechange");
     o.push_back(Pair("sparechange", cba(keyID).ToString()));
     a.push_back(o);
   }
@@ -524,7 +524,7 @@ Value importwallet(const Array& params, bool fHelp)
   }
 
   string strWalletFile;
-  GetWalletFile(pwalletMain, strWalletFile);
+  GetWalletFile(pwalletMainId, strWalletFile);
   uint160 sector(0);
   int64_t nTimeBegin = pindexBest->nTime;
   bool fGood = true;
@@ -560,7 +560,7 @@ Value importwallet(const Array& params, bool fHelp)
     key.SetSecret(secret, fCompressed);
     CKeyID keyid = key.GetPubKey().GetID();
 
-    if (pwalletMain->HaveKey(keyid))
+    if (pwalletMainId->HaveKey(keyid))
     {
       printf("Skipping import of %s (key already present)\n", cba(keyid).ToString().c_str());
       continue;
@@ -595,36 +595,36 @@ Value importwallet(const Array& params, bool fHelp)
 
       if(vstr[nStr] == "outer=1" && vstr[nStr+1] != "sector=" + sector.ToString())
       {
-        RayShade& r = pwalletMain->kd[keyid].rs_;
+        RayShade& r = pwalletMainId->kd[keyid].rs_;
         string path = DecodeDumpString(vstr[nStr+1].substr(7));
         r.ctrlExternalDtx(RayShade::RAY_VTX, uint160(path));
         unsigned char* a1 = secret.data();
         vector<unsigned char> v(a1, a1 + 0x20);
         r.streamID(v);
-        __wx__DB(strWalletFile).UpdateKey(key.GetPubKey(), pwalletMain->kd[keyid]);
+        __wx__DB(strWalletFile).UpdateKey(key.GetPubKey(), pwalletMainId->kd[keyid]);
       }
       else if(vstr[nStr] == "outer=0" && vstr[nStr+1] != "sector=" + sector.ToString())
       {
-        RayShade& r = pwalletMain->kd[keyid].rs_;
+        RayShade& r = pwalletMainId->kd[keyid].rs_;
         string path = DecodeDumpString(vstr[nStr+1].substr(7));
         r.ctrlExternalDtx(RayShade::RAY_SET, uint160(path));
-        __wx__DB(strWalletFile).UpdateKey(key.GetPubKey(), pwalletMain->kd[keyid]);
+        __wx__DB(strWalletFile).UpdateKey(key.GetPubKey(), pwalletMainId->kd[keyid]);
       }
 
       if(vstr[nStr].substr(0,5) == "priv=")
       {
         string priv_ = DecodeDumpString(vstr[nStr].substr(5));
-        CoordinateVector& p = pwalletMain->kd[keyid].patch;
+        CoordinateVector& p = pwalletMainId->kd[keyid].patch;
         p.domain(priv_);
-        __wx__DB(strWalletFile).UpdateKey(key.GetPubKey(), pwalletMain->kd[keyid]);
+        __wx__DB(strWalletFile).UpdateKey(key.GetPubKey(), pwalletMainId->kd[keyid]);
       }
 
       if(vstr[nStr].substr(0,4) == "pub=")
       {
         string pub_ = DecodeDumpString(vstr[nStr].substr(4));
-        CoordinateVector& p = pwalletMain->kd[keyid].patch;
+        CoordinateVector& p = pwalletMainId->kd[keyid].patch;
         p.codomain(pub_);
-        __wx__DB(strWalletFile).UpdateKey(key.GetPubKey(), pwalletMain->kd[keyid]);
+        __wx__DB(strWalletFile).UpdateKey(key.GetPubKey(), pwalletMainId->kd[keyid]);
       }
 
       if(vstr[nStr].substr(0,5) == "rand=")
@@ -632,9 +632,9 @@ Value importwallet(const Array& params, bool fHelp)
         string r_ = DecodeDumpString(vstr[nStr].substr(5));
         bool e;
         vchType v = DecodeBase64(r_.c_str(), &e);
-        pwalletMain->kd[keyid].random = v;
-        pwalletMain->kd[keyid].r = stringFromVch(v);
-        __wx__DB(strWalletFile).UpdateKey(key.GetPubKey(), pwalletMain->kd[keyid]);
+        pwalletMainId->kd[keyid].random = v;
+        pwalletMainId->kd[keyid].r = stringFromVch(v);
+        __wx__DB(strWalletFile).UpdateKey(key.GetPubKey(), pwalletMainId->kd[keyid]);
       }
 
       if(vstr[nStr].substr(0,2) == "m=")
@@ -645,8 +645,8 @@ Value importwallet(const Array& params, bool fHelp)
         ss << m_ser;
         boost::archive::text_iarchive iar(ss);
         iar >> m_;
-        pwalletMain->kd[keyid].m = m_;
-        __wx__DB(strWalletFile).UpdateKey(key.GetPubKey(), pwalletMain->kd[keyid]);
+        pwalletMainId->kd[keyid].m = m_;
+        __wx__DB(strWalletFile).UpdateKey(key.GetPubKey(), pwalletMainId->kd[keyid]);
       }
 
       if(vstr[nStr].substr(0,2) == "k=")
@@ -655,32 +655,32 @@ Value importwallet(const Array& params, bool fHelp)
         bool e;
         vchType v = DecodeBase64(k_str.c_str(), &e);
         CPubKey pk(v);
-        pwalletMain->kd[keyid].k = pk;
-        __wx__DB(strWalletFile).UpdateKey(key.GetPubKey(), pwalletMain->kd[keyid]);
+        pwalletMainId->kd[keyid].k = pk;
+        __wx__DB(strWalletFile).UpdateKey(key.GetPubKey(), pwalletMainId->kd[keyid]);
       }
 
       if(vstr[nStr].substr(0,2) == "z=")
       {
         string z_str = DecodeDumpString(vstr[nStr].substr(2));
         uint160 z_(z_str);
-        pwalletMain->kd[keyid].z = z_;
-        __wx__DB(strWalletFile).UpdateKey(key.GetPubKey(), pwalletMain->kd[keyid]);
+        pwalletMainId->kd[keyid].z = z_;
+        __wx__DB(strWalletFile).UpdateKey(key.GetPubKey(), pwalletMainId->kd[keyid]);
       }
     }
 
     printf("Importing %s...\n", cba(keyid).ToString().c_str());
 
-    if (!pwalletMain->ak(key))
+    if (!pwalletMainId->ak(key))
     {
       fGood = false;
       continue;
     }
 
-    pwalletMain->kd[keyid].nCreateTime = nTime;
+    pwalletMainId->kd[keyid].nCreateTime = nTime;
 
     if (fLabel)
     {
-      pwalletMain->SetAddressBookName(keyid, strLabel);
+      pwalletMainId->SetAddressBookName(keyid, strLabel);
     }
 
     nTimeBegin = std::min(nTimeBegin, nTime);
@@ -694,15 +694,15 @@ Value importwallet(const Array& params, bool fHelp)
     pindex = pindex->pprev;
   }
 
-  if (!pwalletMain->nTimeFirstKey || nTimeBegin < pwalletMain->nTimeFirstKey)
+  if (!pwalletMainId->nTimeFirstKey || nTimeBegin < pwalletMainId->nTimeFirstKey)
   {
-    pwalletMain->nTimeFirstKey = nTimeBegin;
+    pwalletMainId->nTimeFirstKey = nTimeBegin;
   }
 
   printf("Rescanning last %i blocks\n", pindexBest->nHeight - pindex->nHeight + 1);
-  pwalletMain->ScanForWalletTransactions(pindex);
-  pwalletMain->ReacceptWalletTransactions();
-  pwalletMain->MarkDirty();
+  pwalletMainId->ScanForWalletTransactions(pindex);
+  pwalletMainId->ReacceptWalletTransactions();
+  pwalletMainId->MarkDirty();
 
   if (!fGood)
   {
@@ -729,8 +729,8 @@ Value dumpwallet(const Array& params, bool fHelp)
 
   std::map<CKeyID, int64_t> mapKeyBirth;
   std::set<CKeyID> setKeyPool;
-  pwalletMain->kt(mapKeyBirth);
-  pwalletMain->GetAllReserveKeys(setKeyPool);
+  pwalletMainId->kt(mapKeyBirth);
+  pwalletMainId->GetAllReserveKeys(setKeyPool);
   std::vector<std::pair<int64_t, CKeyID> > vKeyBirth;
 
   for (std::map<CKeyID, int64_t>::const_iterator it = mapKeyBirth.begin(); it != mapKeyBirth.end(); it++)
@@ -755,40 +755,40 @@ Value dumpwallet(const Array& params, bool fHelp)
     string pub_k;
     string priv_k;
     CPubKey pk;
-    pwalletMain->GetPubKey(keyid, pk);
+    pwalletMainId->GetPubKey(keyid, pk);
 
-    if(!pwalletMain->envCP0(pk, priv_k))
+    if(!pwalletMainId->envCP0(pk, priv_k))
     {
       priv_k = "0";
     }
 
-    if(!pwalletMain->envCP1(pk, pub_k))
+    if(!pwalletMainId->envCP1(pk, pub_k))
     {
       pub_k = "0";
     }
 
-    vchType r = pwalletMain->kd[keyid].random;
+    vchType r = pwalletMainId->kd[keyid].random;
     string rStr = EncodeBase64(&r[0], r.size());
-    map<string,string> m_ = pwalletMain->kd[keyid].m;
+    map<string,string> m_ = pwalletMainId->kd[keyid].m;
     stringstream ss;
     boost::archive::text_oarchive ar(ss);
     ar << m_;
     string m_ser = ss.str();
-    CPubKey k_ = pwalletMain->kd[keyid].k;
+    CPubKey k_ = pwalletMainId->kd[keyid].k;
     string k_str = EncodeBase64(&k_.Raw()[0], k_.Raw().size());
-    uint160 z_ = pwalletMain->kd[keyid].z;
+    uint160 z_ = pwalletMainId->kd[keyid].z;
     string z_str = z_.ToString();
     CKey key;
 
-    if (pwalletMain->GetKey(keyid, key))
+    if (pwalletMainId->GetKey(keyid, key))
     {
-      RayShade& r1 = pwalletMain->kd[keyid].rs_;
+      RayShade& r1 = pwalletMainId->kd[keyid].rs_;
       uint160 p = r1.ctrlPath();
 
-      if (pwalletMain->mapAddressBook.count(keyid))
+      if (pwalletMainId->mapAddressBook.count(keyid))
       {
         CSecret secret = key.GetSecret(IsCompressed);
-        file << strprintf("%s;%s;label=%s;addr=%s;outer=%d;sector=%s;priv=%s;pub=%s;rand=%s;m=%s;k=%s;z=%s;#\n", CBitcoinSecret(secret, IsCompressed).ToString().c_str(), strTime.c_str(), EncodeDumpString(pwalletMain->mapAddressBook[keyid]).c_str(), strAddr.c_str(), r1.ctrlExternalAngle(), p.ToString().c_str(), priv_k.c_str(), pub_k.c_str(), rStr.c_str(), m_ser.c_str(), k_str.c_str(), z_str.c_str());
+        file << strprintf("%s;%s;label=%s;addr=%s;outer=%d;sector=%s;priv=%s;pub=%s;rand=%s;m=%s;k=%s;z=%s;#\n", CBitcoinSecret(secret, IsCompressed).ToString().c_str(), strTime.c_str(), EncodeDumpString(pwalletMainId->mapAddressBook[keyid]).c_str(), strAddr.c_str(), r1.ctrlExternalAngle(), p.ToString().c_str(), priv_k.c_str(), pub_k.c_str(), rStr.c_str(), m_ser.c_str(), k_str.c_str(), z_str.c_str());
       }
       else if (setKeyPool.count(keyid))
       {

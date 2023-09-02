@@ -25,7 +25,7 @@
 using namespace std;
 using namespace boost;
 extern void xsc(CBlockIndex*);
-__wx__* pwalletMain;
+__wx__* pwalletMainId;
 CClientUIInterface uiInterface;
 bool fConfChange;
 bool fEnforceCanonical;
@@ -78,7 +78,7 @@ void Shutdown(void* parg)
     StopNode();
     bitdb.Flush(true);
     boost::filesystem::remove(GetPidFile());
-    UnregisterWallet(pwalletMain);
+    UnregisterWallet(pwalletMainId);
     delete ln1Db;
     NewThread(ExitTimeout, NULL);
     MilliSleep(50);
@@ -154,7 +154,7 @@ int main(int argc, char* argv[])
 
     NetworkNode networkNode;
 
-    pwalletMain = networkNode.wallet();
+    pwalletMainId = networkNode.wallet();
     fRet = networkNode.init();
   }
   catch (std::exception& e)
@@ -176,7 +176,6 @@ int main(int argc, char* argv[])
     return 0;
   }
 
-  std::cout << "Exit main" << std::endl;
   return 1;
 }
 #endif

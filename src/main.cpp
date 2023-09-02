@@ -2448,7 +2448,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
 
     if (!mapReuseKey.count(pfrom->addr))
     {
-      pwalletMain->GetKeyFromPool(mapReuseKey[pfrom->addr], true);
+      pwalletMainId->GetKeyFromPool(mapReuseKey[pfrom->addr], true);
     }
 
     CScript scriptPubKey;

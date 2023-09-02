@@ -112,7 +112,7 @@ bool vertex_serial_n_cycle(const string& origin, const string& data, __wx__Tx& s
   }
 
   CPubKey vchPubKey;
-  CReserveKey reservekey(pwalletMain);
+  CReserveKey reservekey(pwalletMainId);
 
   if(!reservekey.GetReservedKey(vchPubKey))
   {
@@ -123,11 +123,11 @@ bool vertex_serial_n_cycle(const string& origin, const string& data, __wx__Tx& s
   cba keyAddress(vchPubKey.GetID());
   CKeyID keyID;
   keyAddress.GetKeyID(keyID);
-  pwalletMain->SetAddressBookName(keyID, "");
-  __wx__DB walletdb(pwalletMain->strWalletFile, "r+");
+  pwalletMainId->SetAddressBookName(keyID, "");
+  __wx__DB walletdb(pwalletMainId->strWalletFile, "r+");
   CKey key;
 
-  if(!pwalletMain->GetKey(keyID, key))
+  if(!pwalletMainId->GetKey(keyID, key))
   {
     throw JSONRPCError(RPC_WALLET_ERROR, "Private key not available");
   }
@@ -141,7 +141,7 @@ bool vertex_serial_n_cycle(const string& origin, const string& data, __wx__Tx& s
   ENTER_CRITICAL_SECTION(cs_main)
   {
     EnsureWalletIsUnlocked();
-    string strError = pwalletMain->SendMoney__(scriptPubKey, CTRL__, serial_n, false);
+    string strError = pwalletMainId->SendMoney__(scriptPubKey, CTRL__, serial_n, false);
 
     if(strError != "")
     {
@@ -182,7 +182,7 @@ bool vertex_serial_aux_cycle(const string& origin, const string& data, __wx__Tx&
   }
 
   CPubKey vchPubKey;
-  CReserveKey reservekey(pwalletMain);
+  CReserveKey reservekey(pwalletMainId);
 
   if(!reservekey.GetReservedKey(vchPubKey))
   {
@@ -193,11 +193,11 @@ bool vertex_serial_aux_cycle(const string& origin, const string& data, __wx__Tx&
   cba keyAddress(vchPubKey.GetID());
   CKeyID keyID;
   keyAddress.GetKeyID(keyID);
-  pwalletMain->SetAddressBookName(keyID, "");
-  __wx__DB walletdb(pwalletMain->strWalletFile, "r+");
+  pwalletMainId->SetAddressBookName(keyID, "");
+  __wx__DB walletdb(pwalletMainId->strWalletFile, "r+");
   CKey key;
 
-  if(!pwalletMain->GetKey(keyID, key))
+  if(!pwalletMainId->GetKey(keyID, key))
   {
     throw JSONRPCError(RPC_WALLET_ERROR, "Private key not available");
   }
@@ -285,7 +285,7 @@ bool section_vertex_serial_n(const string& origin, const string& data, __wx__Tx&
 
   uint256 wtxInHash__;
   CPubKey vchPubKey;
-  CReserveKey reservekey(pwalletMain);
+  CReserveKey reservekey(pwalletMainId);
 
   if(!reservekey.GetReservedKey(vchPubKey))
   {
@@ -296,11 +296,11 @@ bool section_vertex_serial_n(const string& origin, const string& data, __wx__Tx&
   cba keyAddress(vchPubKey.GetID());
   CKeyID keyID;
   keyAddress.GetKeyID(keyID);
-  pwalletMain->SetAddressBookName(keyID, "");
-  __wx__DB walletdb(pwalletMain->strWalletFile, "r+");
+  pwalletMainId->SetAddressBookName(keyID, "");
+  __wx__DB walletdb(pwalletMainId->strWalletFile, "r+");
   CKey key;
 
-  if(!pwalletMain->GetKey(keyID, key))
+  if(!pwalletMainId->GetKey(keyID, key))
   {
     throw JSONRPCError(RPC_WALLET_ERROR, "Private key not available");
   }
@@ -1255,7 +1255,7 @@ Value integratedTest4(const Array& params, bool fHelp)
 
   CPubKey newKey_contract_address;
 
-  if(!pwalletMain->GetKeyFromPool(newKey_contract_address, false))
+  if(!pwalletMainId->GetKeyFromPool(newKey_contract_address, false))
   {
     throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
   }
@@ -1264,7 +1264,7 @@ Value integratedTest4(const Array& params, bool fHelp)
   dvmc::address create_address = dvmc::literals::internal::from_hex<dvmc::address>(keyID_contract_address.GetHex().c_str());
   CPubKey newKey_test_sender_address;
 
-  if(!pwalletMain->GetKeyFromPool(newKey_test_sender_address, false))
+  if(!pwalletMainId->GetKeyFromPool(newKey_test_sender_address, false))
   {
     throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
   }
@@ -1429,7 +1429,7 @@ Value integratedTest5(const Array& params, bool fHelp)
 
   CPubKey newKey_contract_address;
   {
-    if(!pwalletMain->GetKeyFromPool(newKey_contract_address, false))
+    if(!pwalletMainId->GetKeyFromPool(newKey_contract_address, false))
     {
       throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
     }
@@ -1439,7 +1439,7 @@ Value integratedTest5(const Array& params, bool fHelp)
     dev::Address target_addr(keyID_contract_address.GetHex().c_str());
     CPubKey newKey_test_sender_address;
 
-    if(!pwalletMain->GetKeyFromPool(newKey_test_sender_address, false))
+    if(!pwalletMainId->GetKeyFromPool(newKey_test_sender_address, false))
     {
       throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
     }

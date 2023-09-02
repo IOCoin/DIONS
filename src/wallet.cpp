@@ -2705,7 +2705,6 @@ bool __wx__::TopUpKeyPool(unsigned int nSize)
       return false;
     }
 
-    std::cout << "__wx__::TopUpKeyPool wallet file " << strWalletFile << std::endl;
     __wx__DB walletdb(strWalletFile);
     unsigned int nTargetSize;
 

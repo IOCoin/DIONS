@@ -3,7 +3,7 @@
 
 #include "wallet.h"
 
-extern __wx__* pwalletMain;
+extern __wx__* pwalletMainId;
 void StartShutdown();
 void Shutdown(void* parg);
 bool AppInit2();

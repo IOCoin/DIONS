@@ -35,7 +35,7 @@ Value getmininginfo(const Array& params, bool fHelp)
       "Returns an object containing mining-related information.");
 
   uint64_t nWeight = 0;
-  pwalletMain->GetStakeWeight(nWeight);
+  pwalletMainId->GetStakeWeight(nWeight);
   Object obj, diff, weight;
   obj.push_back(Pair("blocks", (int)nBestHeight));
   obj.push_back(Pair("currentblocksize",(uint64_t)nLastBlockSize));
@@ -65,7 +65,7 @@ Value getstakinginfo(const Array& params, bool fHelp)
       "Returns an object containing staking-related information.");
 
   uint64_t nWeight = 0;
-  pwalletMain->GetStakeWeight(nWeight);
+  pwalletMainId->GetStakeWeight(nWeight);
   uint64_t nNetworkWeight = GetPoSKernelPS();
   bool staking = nLastCoinStakeSearchInterval && nWeight;
   uint64_t nExpectedTime = staking ? (GetTargetSpacing(nBestHeight) * nNetworkWeight / nWeight) : -1;
@@ -111,7 +111,7 @@ Value getworkex(const Array& params, bool fHelp)
   typedef map<uint256, pair<CBlock*, CScript> > mapNewBlock_t;
   static mapNewBlock_t mapNewBlock;
   static vector<CBlock*> vNewBlock;
-  static CReserveKey reservekey(pwalletMain);
+  static CReserveKey reservekey(pwalletMainId);
 
   if (params.size() == 0)
   {
@@ -134,7 +134,7 @@ Value getworkex(const Array& params, bool fHelp)
       nTransactionsUpdatedLast = CTxMemPool::nTransactionsUpdated;
       pindexPrev = pindexBest;
       nStart = GetTime();
-      pblock = CreateNewBlock(pwalletMain);
+      pblock = CreateNewBlock(pwalletMainId);
 
       if (!pblock)
       {
@@ -211,7 +211,7 @@ Value getworkex(const Array& params, bool fHelp)
     }
 
     pblock->hashMerkleRoot = pblock->BuildMerkleTree();
-    return CheckWork(pblock, *pwalletMain, reservekey);
+    return CheckWork(pblock, *pwalletMainId, reservekey);
   }
 }
 Value getwork(const Array& params, bool fHelp)
@@ -246,7 +246,7 @@ Value getwork(const Array& params, bool fHelp)
   typedef map<uint256, pair<CBlock*, CScript> > mapNewBlock_t;
   static mapNewBlock_t mapNewBlock;
   static vector<CBlock*> vNewBlock;
-  static CReserveKey reservekey(pwalletMain);
+  static CReserveKey reservekey(pwalletMainId);
 
   if (params.size() == 0)
   {
@@ -270,7 +270,7 @@ Value getwork(const Array& params, bool fHelp)
       nTransactionsUpdatedLast = CTxMemPool::nTransactionsUpdated;
       CBlockIndex* pindexPrevNew = pindexBest;
       nStart = GetTime();
-      pblock = CreateNewBlock(pwalletMain);
+      pblock = CreateNewBlock(pwalletMainId);
 
       if (!pblock)
       {
@@ -324,7 +324,7 @@ Value getwork(const Array& params, bool fHelp)
     pblock->nNonce = pdata->nNonce;
     pblock->vtx[0].vin[0].scriptSig = mapNewBlock[pdata->hashMerkleRoot].second;
     pblock->hashMerkleRoot = pblock->BuildMerkleTree();
-    return CheckWork(pblock, *pwalletMain, reservekey);
+    return CheckWork(pblock, *pwalletMainId, reservekey);
   }
 }
 Value tmpTest(const Array& params, bool fHelp)
@@ -363,7 +363,7 @@ Value tmpTest(const Array& params, bool fHelp)
     typedef map<uint256, pair<CBlock*, CScript> > mapNewBlock_t;
     static mapNewBlock_t mapNewBlock;
     static vector<CBlock*> vNewBlock;
-    static CReserveKey reservekey(pwalletMain);
+    static CReserveKey reservekey(pwalletMainId);
     Object result;
 
     if (params.size() == 0)
@@ -388,7 +388,7 @@ Value tmpTest(const Array& params, bool fHelp)
         nTransactionsUpdatedLast = CTxMemPool::nTransactionsUpdated;
         CBlockIndex* pindexPrevNew = pindexBest;
         nStart = GetTime();
-        pblock = CreateNewBlock(pwalletMain);
+        pblock = CreateNewBlock(pwalletMainId);
 
         if (!pblock)
         {
@@ -443,7 +443,7 @@ Value tmpTest(const Array& params, bool fHelp)
       pblock->nNonce = pdata->nNonce;
       pblock->vtx[0].vin[0].scriptSig = mapNewBlock[pdata->hashMerkleRoot].second;
       pblock->hashMerkleRoot = pblock->BuildMerkleTree();
-      found = CheckWork(pblock, *pwalletMain, reservekey);
+      found = CheckWork(pblock, *pwalletMainId, reservekey);
 
       if(found == true)
       {
@@ -518,7 +518,7 @@ Value getblocktemplate(const Array& params, bool fHelp)
     throw JSONRPCError(RPC_MISC_ERROR, "No more PoW blocks");
   }
 
-  static CReserveKey reservekey(pwalletMain);
+  static CReserveKey reservekey(pwalletMainId);
   static unsigned int nTransactionsUpdatedLast;
   static CBlockIndex* pindexPrev;
   static int64_t nStart;
@@ -538,7 +538,7 @@ Value getblocktemplate(const Array& params, bool fHelp)
       pblock = NULL;
     }
 
-    pblock = CreateNewBlock(pwalletMain);
+    pblock = CreateNewBlock(pwalletMainId);
 
     if (!pblock)
     {

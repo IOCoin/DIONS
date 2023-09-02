@@ -18,7 +18,7 @@
 #include <dvmc/tooling.hpp>
 #include "bitcoinrpc.h"
 using namespace std;
-extern __wx__* pwalletMain;
+extern __wx__* pwalletMainId;
 extern unsigned int nMinerSleep;
 //extern dev::OverlayDB* overlayDB__;
 extern bool sectionVertex(const string&, string&);
@@ -213,7 +213,7 @@ CBlock* CreateNewBlock(__wx__* pwallet, bool fProofOfStake, int64_t* pFees)
                 std::vector<CTransaction> testTxVector;
                 CPubKey newKey_contract_address;
                 {
-                  if(!pwalletMain->GetKeyFromPool(newKey_contract_address, false))
+                  if(!pwalletMainId->GetKeyFromPool(newKey_contract_address, false))
                   {
                     throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
                   }
@@ -223,7 +223,7 @@ CBlock* CreateNewBlock(__wx__* pwallet, bool fProofOfStake, int64_t* pFees)
                   dev::Address target_addr(keyID_contract_address.GetHex().c_str());
                   CPubKey newKey_test_sender_address;
 
-                  if(!pwalletMain->GetKeyFromPool(newKey_test_sender_address, false))
+                  if(!pwalletMainId->GetKeyFromPool(newKey_test_sender_address, false))
                   {
                     throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
                   }

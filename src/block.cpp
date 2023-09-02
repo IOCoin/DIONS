@@ -780,7 +780,6 @@ bool CBlock::AddToBlockIndex(unsigned int nFile, unsigned int nBlockPos, const u
   if(this->stateRoot != zero)
   {
     pindexNew->stateRootIndex = this->stateRoot;
-    std::cout << "copied working state root " << pindexNew->stateRootIndex << " block index stateRootIndex " << std::endl;
   }
   else
   {

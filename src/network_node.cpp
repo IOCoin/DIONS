@@ -68,7 +68,6 @@ NetworkNode::NetworkNode(boost::filesystem::path const& _dbPath, bool testNet)
 
 bool NetworkNode::init()
 {
-	std::cout << "bool NetworkNode::init" << std::endl;
 #ifdef _MSC_VER
   _CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_FILE);
   _CrtSetReportFile(_CRT_WARN, CreateFileA("NUL", GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, 0));
@@ -135,7 +134,6 @@ bool NetworkNode::init()
 
   fViewWallet = GetBoolArg("-viewwallet");
 
-	std::cout << "bool NetworkNode::init 1" << std::endl;
   if(fViewWallet)
   {
     if(boost::filesystem::exists(GetDataDir() / "wallet.dat"))
@@ -151,7 +149,6 @@ bool NetworkNode::init()
     }
   }
 
-	std::cout << "bool NetworkNode::init 2" << std::endl;
   if (mapArgs.count("-bind"))
   {
     SoftSetBoolArg("-listen", true);
@@ -267,7 +264,6 @@ bool NetworkNode::init()
   std::string strDataDir = GetDataDir().string();
   std::string strWalletFileName = GetArg("-wallet", "wallet.dat");
 
-	std::cout << "bool NetworkNode::init 3" << std::endl;
   if (strWalletFileName != boost::filesystem::basename(strWalletFileName) + boost::filesystem::extension(strWalletFileName))
   {
     return InitError_(strprintf(_("Wallet %s resides outside data directory %s."), strWalletFileName.c_str(), strDataDir.c_str()));
@@ -358,13 +354,9 @@ bool NetworkNode::init()
     }
   }
 
-	std::cout << "bool NetworkNode::init 4 " << strWalletFileName << std::endl;
-	std::cout << "bool NetworkNode::init 5 " << GetDataDir() << std::endl;
   if (boost::filesystem::exists(GetDataDir() / strWalletFileName))
   {
-	std::cout << "bool NetworkNode::init 6" << std::endl;
     CDBEnv::VerifyResult r = bitdb.Verify(strWalletFileName, __wx__DB::Recover);
-	std::cout << "bool NetworkNode::init 7" << std::endl;
 
     if (r == CDBEnv::RECOVER_OK)
     {
@@ -375,14 +367,12 @@ bool NetworkNode::init()
       this->uiFace.ThreadSafeMessageBox(msg, _("I/OCoin"), CClientUIInterface::OK | CClientUIInterface::ICON_EXCLAMATION | CClientUIInterface::MODAL);
     }
 
-	std::cout << "bool NetworkNode::init 8" << std::endl;
     if (r == CDBEnv::RECOVER_FAIL)
     {
       return InitError_(_("wallet.dat corrupt, salvage failed"));
     }
   }
 
-	std::cout << "bool NetworkNode::init 9" << std::endl;
   int nSocksVersion = GetArg("-socks", 5);
 
   if (nSocksVersion != 4 && nSocksVersion != 5)
@@ -405,7 +395,6 @@ bool NetworkNode::init()
       nets.insert(net);
     }
 
-	std::cout << "bool NetworkNode::init 10" << std::endl;
     for (int n = 0; n < NET_MAX; n++)
     {
       enum Network net = (enum Network)n;
@@ -434,7 +423,6 @@ bool NetworkNode::init()
       SetProxy(NET_IPV4, addrProxy, nSocksVersion);
     }
 
-	std::cout << "bool NetworkNode::init 11" << std::endl;
     if (nSocksVersion > 4)
     {
       if (!IsLimited(NET_IPV6))
@@ -475,7 +463,6 @@ bool NetworkNode::init()
   fNameLookup = GetBoolArg("-dns", true);
   bool fBound = false;
 
-	std::cout << "bool NetworkNode::init 12" << std::endl;
   if (!fNoListen)
   {
     std::string strError;
@@ -531,7 +518,6 @@ bool NetworkNode::init()
     }
   }
 
-	std::cout << "bool NetworkNode::init 13" << std::endl;
   if (mapArgs.count("-reservebalance"))
   {
     if (!ParseMoney(mapArgs["-reservebalance"], nReserveBalance))
@@ -552,7 +538,6 @@ bool NetworkNode::init()
   BOOST_FOREACH(string strDest, mapMultiArgs["-seednode"])
   AddOneShot(strDest);
 
-	std::cout << "bool NetworkNode::init 555" << std::endl;
   if (!bitdb.Open(GetDataDir()))
   {
     string msg = strprintf(_("Error initializing database environment %s!"
@@ -561,7 +546,6 @@ bool NetworkNode::init()
     return InitError_(msg);
   }
 
-	std::cout << "bool NetworkNode::init 564" << std::endl;
   if (GetBoolArg("-loadblockindextest"))
   {
     CTxDB txdb("r");
@@ -570,10 +554,7 @@ bool NetworkNode::init()
     return false;
   }
 
-	std::cout << "bool NetworkNode::init 573" << std::endl;
   this->uiFace.InitMessage(_("Loading block index..."));
-	std::cout << "bool NetworkNode::init 575" << std::endl;
-	std::cout << "bool NetworkNode::init loading block index ..." << std::endl;
   printf("Loading block index...\n");
   nStart = GetTimeMillis();
 
@@ -581,7 +562,6 @@ bool NetworkNode::init()
   {
     return InitError_(_("Error loading blkindex.dat"));
   }
-	std::cout << "bool NetworkNode::init 582" << std::endl;
 
   if (fRequestShutdown)
   {
@@ -589,7 +569,6 @@ bool NetworkNode::init()
     return false;
   }
 
-	std::cout << "bool NetworkNode::init 592" << std::endl;
   printf(" block index %15" PRId64 "ms\n", GetTimeMillis() - nStart);
 
   if (GetBoolArg("-printblockindex") || GetBoolArg("-printblocktree"))
@@ -598,7 +577,6 @@ bool NetworkNode::init()
     return false;
   }
 
-	std::cout << "bool NetworkNode::init 601" << std::endl;
   if (mapArgs.count("-printblock"))
   {
     string strMatch = mapArgs["-printblock"];
@@ -620,7 +598,6 @@ bool NetworkNode::init()
       }
     }
 
-	std::cout << "bool NetworkNode::init 623" << std::endl;
     if (nFound == 0)
     {
       printf("No blocks matching %s were found\n", strMatch.c_str());
@@ -645,10 +622,8 @@ bool NetworkNode::init()
     pwalletMain = NULL;
   }
 
-	std::cout << "bool NetworkNode::init 648" << std::endl;
   this->uiFace.InitMessage(_("Loading wallet..."));
   printf("Loading wallet...\n");
-	std::cout << "bool NetworkNode::init Loading wallet..." << std::endl;
   nStart = GetTimeMillis();
   bool fFirstRun = true;
   DBErrors nLoadWalletRet = this->pwalletMain_->LoadWallet(fFirstRun);
@@ -796,7 +771,6 @@ bool NetworkNode::init()
     exit(0);
   }
 
-	std::cout << "NetworkNode::init 788" << std::endl;
   boost::filesystem::path pathBootstrap = GetDataDir() / "bootstrap.dat";
 
   if (boost::filesystem::exists(pathBootstrap))
@@ -831,7 +805,6 @@ bool NetworkNode::init()
     return false;
   }
 
-	std::cout << "NetworkNode::init 822" << std::endl;
   RandAddSeedPerfmon();
   printf("mapBlockIndex.size() = %" PRIszu "\n", mapBlockIndex.size());
   printf("nBestHeight = %d\n", nBestHeight);
@@ -857,7 +830,6 @@ bool NetworkNode::init()
     return InitError_(strErrors.str());
   }
 
-	std::cout << "NetworkNode::init wallet reaccept" << std::endl;
   this->pwalletMain_->ReacceptWalletTransactions();
 #if !defined(QT_GUI)
 
@@ -867,6 +839,5 @@ bool NetworkNode::init()
   }
 
 #endif
-	std::cout << "Leave bool NetworkNode::init" << std::endl;
   return true;
 }

@@ -38,7 +38,6 @@ void spj(const CScript& scriptPubKey, Object& out, bool fIncludeHex)
   a.push_back(cba(addr).ToString());
   out.push_back(Pair("addresses", a));
 }
-# 150 "rpcrawtransaction.cpp"
 void TxToJSON(const CTransaction& tx, const uint256 hashBlock, Object& entry)
 {
   entry.push_back(Pair("txid", tx.GetHash().GetHex()));
@@ -161,7 +160,7 @@ Array listunspent__(double p, double& iR)
   double i=0;
   Array results;
   vector<COutput> vecOutputs;
-  pwalletMain->AvailableCoins(vecOutputs, false);
+  pwalletMainId->AvailableCoins(vecOutputs, false);
   BOOST_FOREACH(const COutput& out, vecOutputs)
   {
     if (out.nDepth < nMinDepth || out.nDepth > nMaxDepth)
@@ -195,9 +194,9 @@ Array listunspent__(double p, double& iR)
     {
       entry.push_back(Pair("address", cba(address).ToString()));
 
-      if (pwalletMain->mapAddressBook.count(address))
+      if (pwalletMainId->mapAddressBook.count(address))
       {
-        entry.push_back(Pair("account", pwalletMain->mapAddressBook[address]));
+        entry.push_back(Pair("account", pwalletMainId->mapAddressBook[address]));
       }
     }
 
@@ -273,7 +272,7 @@ Value listunspent(const Array& params, bool fHelp)
 
   Array results;
   vector<COutput> vecOutputs;
-  pwalletMain->AvailableCoins(vecOutputs, false);
+  pwalletMainId->AvailableCoins(vecOutputs, false);
   BOOST_FOREACH(const COutput& out, vecOutputs)
   {
     if (out.nDepth < nMinDepth || out.nDepth > nMaxDepth)
@@ -307,9 +306,9 @@ Value listunspent(const Array& params, bool fHelp)
     {
       entry.push_back(Pair("address", cba(address).ToString()));
 
-      if (pwalletMain->mapAddressBook.count(address))
+      if (pwalletMainId->mapAddressBook.count(address))
       {
-        entry.push_back(Pair("account", pwalletMain->mapAddressBook[address]));
+        entry.push_back(Pair("account", pwalletMainId->mapAddressBook[address]));
       }
     }
 
@@ -770,7 +769,7 @@ Value signrawtransaction(const Array& params, bool fHelp)
     EnsureWalletIsUnlocked();
   }
 
-  const CKeyStore& keystore = (fGivenKeys ? tempKeystore : *pwalletMain);
+  const CKeyStore& keystore = (fGivenKeys ? tempKeystore : *pwalletMainId);
   int nHashType = SIGHASH_ALL;
 
   if (params.size() > 3 && params[3].type() != null_type)

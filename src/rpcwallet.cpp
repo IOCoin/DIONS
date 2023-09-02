@@ -34,13 +34,13 @@ static void accountingDeprecationCheck()
 }
 std::string HelpRequiringPassphrase()
 {
-  return pwalletMain->IsCrypted()
+  return pwalletMainId->IsCrypted()
          ? "\nrequires wallet passphrase to be set with walletpassphrase first"
          : "";
 }
 void EnsureWalletIsUnlocked()
 {
-  if (pwalletMain->as())
+  if (pwalletMainId->as())
   {
     throw JSONRPCError(RPC_WALLET_UNLOCK_NEEDED, "Error: Please enter the wallet passphrase with walletpassphrase first.");
   }
@@ -97,17 +97,17 @@ Value getinfo(const Array& params, bool fHelp)
   Object obj, diff;
   obj.push_back(Pair("version", FormatFullVersion()));
   obj.push_back(Pair("protocolversion",(int)PROTOCOL_VERSION));
-  obj.push_back(Pair("walletversion", pwalletMain->GetVersion()));
+  obj.push_back(Pair("walletversion", pwalletMainId->GetVersion()));
 
   if(fViewWallet)
   {
     obj.push_back(Pair("VIEWWALLET", "The wallet is configured for view only!"));
   }
 
-  obj.push_back(Pair("balance", ValueFromAmount(pwalletMain->GetBalance())));
-  obj.push_back(Pair("pending", ValueFromAmount(pwalletMain->GetUnconfirmedBalance())));
-  obj.push_back(Pair("newmint", ValueFromAmount(pwalletMain->GetNewMint())));
-  obj.push_back(Pair("stake", ValueFromAmount(pwalletMain->GetStake())));
+  obj.push_back(Pair("balance", ValueFromAmount(pwalletMainId->GetBalance())));
+  obj.push_back(Pair("pending", ValueFromAmount(pwalletMainId->GetUnconfirmedBalance())));
+  obj.push_back(Pair("newmint", ValueFromAmount(pwalletMainId->GetNewMint())));
+  obj.push_back(Pair("stake", ValueFromAmount(pwalletMainId->GetStake())));
   obj.push_back(Pair("blocks", (int)nBestHeight));
   obj.push_back(Pair("powblocks", (int)GetPowHeight(pindexBest)));
   obj.push_back(Pair("powblocksleft", ConfigurationState::LAST_POW_BLOCK - (int)GetPowHeight(pindexBest)));
@@ -119,12 +119,12 @@ Value getinfo(const Array& params, bool fHelp)
   diff.push_back(Pair("proof-of-stake", GetDifficulty(GetLastBlockIndex(pindexBest, true))));
   obj.push_back(Pair("difficulty", diff));
   obj.push_back(Pair("testnet", fTestNet));
-  obj.push_back(Pair("keypoololdest", (int64_t)pwalletMain->GetOldestKeyPoolTime()));
-  obj.push_back(Pair("keypoolsize", (int)pwalletMain->GetKeyPoolSize()));
+  obj.push_back(Pair("keypoololdest", (int64_t)pwalletMainId->GetOldestKeyPoolTime()));
+  obj.push_back(Pair("keypoolsize", (int)pwalletMainId->GetKeyPoolSize()));
   obj.push_back(Pair("paytxfee", ValueFromAmount(globalState.nTransactionFee)));
   obj.push_back(Pair("mininput", ValueFromAmount(nMinimumInputValue)));
 
-  if (pwalletMain->IsCrypted())
+  if (pwalletMainId->IsCrypted())
   {
     obj.push_back(Pair("unlocked_until", (int64_t)nWalletUnlockTime / 1000));
   }
@@ -146,20 +146,20 @@ Value getnewpubkey(const Array& params, bool fHelp)
     strAccount = AccountFromValue(params[0]);
   }
 
-  if (!pwalletMain->as())
+  if (!pwalletMainId->as())
   {
-    pwalletMain->TopUpKeyPool();
+    pwalletMainId->TopUpKeyPool();
   }
 
   CPubKey newKey;
 
-  if (!pwalletMain->GetKeyFromPool(newKey, false))
+  if (!pwalletMainId->GetKeyFromPool(newKey, false))
   {
     throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
   }
 
   CKeyID keyID = newKey.GetID();
-  pwalletMain->SetAddressBookName(keyID, strAccount);
+  pwalletMainId->SetAddressBookName(keyID, strAccount);
   vector<unsigned char> vchPubKey = newKey.Raw();
   return HexStr(vchPubKey.begin(), vchPubKey.end());
 }
@@ -184,27 +184,27 @@ Value getnewaddress(const Array& params, bool fHelp)
     strAccount = AccountFromValue(params[0]);
   }
 
-  if(!pwalletMain->as())
+  if(!pwalletMainId->as())
   {
-    pwalletMain->TopUpKeyPool();
+    pwalletMainId->TopUpKeyPool();
   }
 
   CPubKey newKey;
 
-  if(!pwalletMain->GetKeyFromPool(newKey, false))
+  if(!pwalletMainId->GetKeyFromPool(newKey, false))
   {
     throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
   }
 
   CKeyID keyID = newKey.GetID();
-  BOOST_FOREACH(const PAIRTYPE(cba, string)& item, pwalletMain->mapAddressBook)
+  BOOST_FOREACH(const PAIRTYPE(cba, string)& item, pwalletMainId->mapAddressBook)
   {
     if(item.second == strAccount)
     {
-      pwalletMain->SetAddressBookName(item.first.Get(), "");
+      pwalletMainId->SetAddressBookName(item.first.Get(), "");
     }
   }
-  pwalletMain->SetAddressBookName(keyID, strAccount);
+  pwalletMainId->SetAddressBookName(keyID, strAccount);
   return cba(keyID).ToString();
 }
 Value sectionlog(const Array& params, bool fHelp)
@@ -214,7 +214,7 @@ Value sectionlog(const Array& params, bool fHelp)
       "sectionlog [sign] [primitive]\n"
     );
 
-  if (pwalletMain->as())
+  if (pwalletMainId->as())
   {
     throw std::runtime_error("unlock the wallet first!");
   }
@@ -249,14 +249,14 @@ Value sectionlog(const Array& params, bool fHelp)
   CKeyID i;
   s.GetKeyID(i);
   std::map<CKeyID, int64_t> mk;
-  pwalletMain->kt(mk);
+  pwalletMainId->kt(mk);
 
   for(std::map<CKeyID, int64_t>::const_iterator it = mk.begin(); it != mk.end(); it++)
   {
     CKeyID ck = it->first;
     CSecret z;
     bool fCompressed;
-    pwalletMain->GetSecret(ck, z, fCompressed);
+    pwalletMainId->GetSecret(ck, z, fCompressed);
     unsigned char* a = z.data();
     __im__ t(a, a + 0x20);
     {
@@ -267,7 +267,7 @@ Value sectionlog(const Array& params, bool fHelp)
           {
             __im__ t2 = r_p.Raw();
             CPubKey pp;
-            pwalletMain->GetPubKey(ck_, pp);
+            pwalletMainId->GetPubKey(ck_, pp);
             __im__ off = pp.Raw();
             __im__ c;
             __synth_piv__conv71__outer(t,t2,off,c);
@@ -301,22 +301,22 @@ Value shade(const Array& params, bool fHelp)
       "shade [account] [ray id]\n"
     );
 
-  if (pwalletMain->as())
+  if (pwalletMainId->as())
   {
     throw std::runtime_error("unlock the wallet first!");
   }
 
   Array oRes;
 
-  if(!pwalletMain->as())
+  if(!pwalletMainId->as())
   {
-    pwalletMain->TopUpKeyPool();
+    pwalletMainId->TopUpKeyPool();
   }
 
   CPubKey k1;
   CPubKey k2;
 
-  if(!pwalletMain->GetKeyFromPool(k1, k2, false))
+  if(!pwalletMainId->GetKeyFromPool(k1, k2, false))
   {
     throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
   }
@@ -337,21 +337,21 @@ Value shade(const Array& params, bool fHelp)
   }
 
   string s1 = EncodeBase58(&k[0], &k[0] + k.size());
-  RayShade& r = pwalletMain->kd[k1.GetID()].rs_;
+  RayShade& r = pwalletMainId->kd[k1.GetID()].rs_;
   CKey l;
 
-  if(pwalletMain->GetKey(k1.GetID(), l))
+  if(pwalletMainId->GetKey(k1.GetID(), l))
   {
     bool c;
     CSecret s1;
 
-    if(pwalletMain->GetSecret(k1.GetID(), s1, c))
+    if(pwalletMainId->GetSecret(k1.GetID(), s1, c))
     {
       unsigned char* a1 = s1.data();
       vector<unsigned char> v(a1, a1 + 0x20);
       r.streamID(v);
 
-      if(!__wx__DB(pwalletMain->strWalletFile).UpdateKey(k1, pwalletMain->kd[k1.GetID()]))
+      if(!__wx__DB(pwalletMainId->strWalletFile).UpdateKey(k1, pwalletMainId->kd[k1.GetID()]))
       {
         oRes.push_back("update error");
         return oRes;
@@ -371,26 +371,26 @@ Value sr71(const Array& params, bool fHelp)
 
   Array oRes;
   std::map<CKeyID, int64_t> mk;
-  pwalletMain->kt(mk);
+  pwalletMainId->kt(mk);
 
   for(std::map<CKeyID, int64_t>::const_iterator it = mk.begin(); it != mk.end(); it++)
   {
     CKeyID ck = it->first;
-    RayShade& r1 = pwalletMain->kd[ck].rs_;
+    RayShade& r1 = pwalletMainId->kd[ck].rs_;
 
     if(r1.ctrlExternalAngle())
     {
       for(std::map<CKeyID, int64_t>::const_iterator it = mk.begin(); it != mk.end(); it++)
       {
         CKeyID ck_ = it->first;
-        RayShade& r = pwalletMain->kd[ck_].rs_;
+        RayShade& r = pwalletMainId->kd[ck_].rs_;
 
         if(!r.ctrlExternalAngle() && r.ctrlPath() == r1.ctrlPath())
         {
           CPubKey vertex1;
-          pwalletMain->GetPubKey(ck, vertex1);
+          pwalletMainId->GetPubKey(ck, vertex1);
           CPubKey vertex2;
-          pwalletMain->GetPubKey(ck_, vertex2);
+          pwalletMainId->GetPubKey(ck_, vertex2);
           vector<unsigned char> k;
           k.reserve(1 + vertex1.Raw().size() + vertex2.Raw().size());
           vchType a = vertex1.Raw();
@@ -426,7 +426,7 @@ Value center__base__0(const Array& params, bool fHelp)
       "center [q] [r]\n"
     );
 
-  if (pwalletMain->as())
+  if (pwalletMainId->as())
   {
     throw std::runtime_error("unlock the wallet first!");
   }
@@ -441,7 +441,7 @@ Value center__base__0(const Array& params, bool fHelp)
     throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid I/OCoin address");
   }
 
-  if(!IsMine(*pwalletMain, u.Get()))
+  if(!IsMine(*pwalletMainId, u.Get()))
   {
     throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid");
   }
@@ -453,7 +453,7 @@ Value center__base__0(const Array& params, bool fHelp)
     throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid I/OCoin address");
   }
 
-  if(!IsMine(*pwalletMain, v.Get()))
+  if(!IsMine(*pwalletMainId, v.Get()))
   {
     throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid");
   }
@@ -462,28 +462,28 @@ Value center__base__0(const Array& params, bool fHelp)
   u.GetKeyID(k1);
   CKeyID k2;
   v.GetKeyID(k2);
-  RayShade& a = pwalletMain->kd[k1].rs_;
-  RayShade& b = pwalletMain->kd[k2].rs_;
+  RayShade& a = pwalletMainId->kd[k1].rs_;
+  RayShade& b = pwalletMainId->kd[k2].rs_;
   a.ctrlExternalDtx(RayShade::RAY_VTX, (uint160)(k2));
   b.ctrlExternalDtx(RayShade::RAY_SET, (uint160)(k2));
   CPubKey t0;
-  pwalletMain->GetPubKey(k1, t0);
+  pwalletMainId->GetPubKey(k1, t0);
   CPubKey t1;
-  pwalletMain->GetPubKey(k2, t1);
+  pwalletMainId->GetPubKey(k2, t1);
   bool c;
   CSecret s1;
 
-  if(pwalletMain->GetSecret(k1, s1, c))
+  if(pwalletMainId->GetSecret(k1, s1, c))
   {
     unsigned char* a1 = s1.data();
     vector<unsigned char> v(a1, a1 + 0x20);
     a.streamID(v);
   }
 
-  pwalletMain->kd[k1].nVersion = CKeyMetadata::CURRENT_VERSION;
-  pwalletMain->kd[k2].nVersion = CKeyMetadata::CURRENT_VERSION;
+  pwalletMainId->kd[k1].nVersion = CKeyMetadata::CURRENT_VERSION;
+  pwalletMainId->kd[k2].nVersion = CKeyMetadata::CURRENT_VERSION;
 
-  if((!__wx__DB(pwalletMain->strWalletFile).UpdateKey(t0, pwalletMain->kd[k1]) || !__wx__DB(pwalletMain->strWalletFile).UpdateKey(t1, pwalletMain->kd[k2])))
+  if((!__wx__DB(pwalletMainId->strWalletFile).UpdateKey(t0, pwalletMainId->kd[k1]) || !__wx__DB(pwalletMainId->strWalletFile).UpdateKey(t1, pwalletMainId->kd[k2])))
   {
     throw runtime_error("update, vtx");
   }
@@ -493,7 +493,7 @@ Value center__base__0(const Array& params, bool fHelp)
 }
 cba GetAccountAddress(string strAccount, bool bForceNew=false)
 {
-  __wx__DB walletdb(pwalletMain->strWalletFile);
+  __wx__DB walletdb(pwalletMainId->strWalletFile);
   CAccount account;
   walletdb.ReadAccount(strAccount, account);
   bool bKeyUsed = false;
@@ -503,8 +503,8 @@ cba GetAccountAddress(string strAccount, bool bForceNew=false)
     CScript scriptPubKey;
     scriptPubKey.SetDestination(account.vchPubKey.GetID());
 
-    for (map<uint256, __wx__Tx>::iterator it = pwalletMain->mapWallet.begin();
-         it != pwalletMain->mapWallet.end() && account.vchPubKey.IsValid();
+    for (map<uint256, __wx__Tx>::iterator it = pwalletMainId->mapWallet.begin();
+         it != pwalletMainId->mapWallet.end() && account.vchPubKey.IsValid();
          ++it)
     {
       const __wx__Tx& wtx = (*it).second;
@@ -519,12 +519,12 @@ cba GetAccountAddress(string strAccount, bool bForceNew=false)
 
   if (!account.vchPubKey.IsValid() || bForceNew || bKeyUsed)
   {
-    if (!pwalletMain->GetKeyFromPool(account.vchPubKey, false))
+    if (!pwalletMainId->GetKeyFromPool(account.vchPubKey, false))
     {
       throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
     }
 
-    pwalletMain->SetAddressBookName(account.vchPubKey.GetID(), strAccount);
+    pwalletMainId->SetAddressBookName(account.vchPubKey.GetID(), strAccount);
     walletdb.WriteAccount(strAccount, account);
   }
 
@@ -563,9 +563,9 @@ Value setaccount(const Array& params, bool fHelp)
     strAccount = AccountFromValue(params[1]);
   }
 
-  if (pwalletMain->mapAddressBook.count(address.Get()))
+  if (pwalletMainId->mapAddressBook.count(address.Get()))
   {
-    string strOldAccount = pwalletMain->mapAddressBook[address.Get()];
+    string strOldAccount = pwalletMainId->mapAddressBook[address.Get()];
 
     if (address == GetAccountAddress(strOldAccount))
     {
@@ -573,7 +573,7 @@ Value setaccount(const Array& params, bool fHelp)
     }
   }
 
-  pwalletMain->SetAddressBookName(address.Get(), strAccount);
+  pwalletMainId->SetAddressBookName(address.Get(), strAccount);
   return Value::null;
 }
 Value sa(const Array& params, bool fHelp)
@@ -597,7 +597,7 @@ Value sa(const Array& params, bool fHelp)
     strAccount = AccountFromValue(params[1]);
   }
 
-  pwalletMain->SetAddressBookName(address.Get(), strAccount);
+  pwalletMainId->SetAddressBookName(address.Get(), strAccount);
   return Value::null;
 }
 Value getaccount(const Array& params, bool fHelp)
@@ -615,9 +615,9 @@ Value getaccount(const Array& params, bool fHelp)
   }
 
   string strAccount;
-  map<CTxDestination, string>::iterator mi = pwalletMain->mapAddressBook.find(address.Get());
+  map<CTxDestination, string>::iterator mi = pwalletMainId->mapAddressBook.find(address.Get());
 
-  if (mi != pwalletMain->mapAddressBook.end() && !(*mi).second.empty())
+  if (mi != pwalletMainId->mapAddressBook.end() && !(*mi).second.empty())
   {
     strAccount = (*mi).second;
   }
@@ -633,7 +633,7 @@ Value getaddressesbyaccount(const Array& params, bool fHelp)
 
   string strAccount = AccountFromValue(params[0]);
   Array ret;
-  BOOST_FOREACH(const PAIRTYPE(cba, string)& item, pwalletMain->mapAddressBook)
+  BOOST_FOREACH(const PAIRTYPE(cba, string)& item, pwalletMainId->mapAddressBook)
   {
     const cba& address = item.first;
     const string& aliasStr = item.second;
@@ -837,12 +837,12 @@ Value sendtoaddress(const Array& params, bool fHelp)
     }
   }
 
-  if (pwalletMain->as())
+  if (pwalletMainId->as())
   {
     throw JSONRPCError(RPC_WALLET_UNLOCK_NEEDED, "Error: Please enter the wallet passphrase with walletpassphrase first.");
   }
 
-  string strError = pwalletMain->SendMoneyToDestination(address.Get(), nAmount, wtx, false, txdetails);
+  string strError = pwalletMainId->SendMoneyToDestination(address.Get(), nAmount, wtx, false, txdetails);
 
   if (strError != "")
   {
@@ -861,8 +861,8 @@ Value listaddressgroupings(const Array& params, bool fHelp)
       "in past transactions");
 
   Array jsonGroupings;
-  map<CTxDestination, int64_t> balances = pwalletMain->GetAddressBalances();
-  BOOST_FOREACH(set<CTxDestination> grouping, pwalletMain->GetAddressGroupings())
+  map<CTxDestination, int64_t> balances = pwalletMainId->GetAddressBalances();
+  BOOST_FOREACH(set<CTxDestination> grouping, pwalletMainId->GetAddressGroupings())
   {
     Array jsonGrouping;
     BOOST_FOREACH(CTxDestination address, grouping)
@@ -871,11 +871,11 @@ Value listaddressgroupings(const Array& params, bool fHelp)
       addressInfo.push_back(cba(address).ToString());
       addressInfo.push_back(ValueFromAmount(balances[address]));
       {
-        LOCK(pwalletMain->cs_wallet);
+        LOCK(pwalletMainId->cs_wallet);
 
-        if (pwalletMain->mapAddressBook.find(cba(address).Get()) != pwalletMain->mapAddressBook.end())
+        if (pwalletMainId->mapAddressBook.find(cba(address).Get()) != pwalletMainId->mapAddressBook.end())
         {
-          addressInfo.push_back(pwalletMain->mapAddressBook.find(cba(address).Get())->second);
+          addressInfo.push_back(pwalletMainId->mapAddressBook.find(cba(address).Get())->second);
         }
 
         string pub_k;
@@ -883,9 +883,9 @@ Value listaddressgroupings(const Array& params, bool fHelp)
         CKeyID keyID;
         cba(address).GetKeyID(keyID);
         CPubKey vchPubKey;
-        pwalletMain->GetPubKey(keyID, vchPubKey);
-        pwalletMain->envCP0(vchPubKey, priv_k);
-        pwalletMain->envCP1(vchPubKey, pub_k);
+        pwalletMainId->GetPubKey(keyID, vchPubKey);
+        pwalletMainId->envCP0(vchPubKey, priv_k);
+        pwalletMainId->envCP1(vchPubKey, pub_k);
         addressInfo.push_back(pub_k.c_str());
         addressInfo.push_back(priv_k.c_str());
       }
@@ -921,7 +921,7 @@ Value signmessage(const Array& params, bool fHelp)
 
   CKey key;
 
-  if (!pwalletMain->GetKey(keyID, key))
+  if (!pwalletMainId->GetKey(keyID, key))
   {
     throw JSONRPCError(RPC_WALLET_ERROR, "Private key not available");
   }
@@ -1021,7 +1021,7 @@ Value xtu_url__(const string& s)
 
   scriptPubKey.SetDestination(address.Get());
 
-  if (!IsMine(*pwalletMain,scriptPubKey))
+  if (!IsMine(*pwalletMainId,scriptPubKey))
   {
     return (double)0.0;
   }
@@ -1029,7 +1029,7 @@ Value xtu_url__(const string& s)
   int nMinDepth = 1;
   int64_t nAmount = 0;
 
-  for (map<uint256, __wx__Tx>::iterator it = pwalletMain->mapWallet.begin(); it != pwalletMain->mapWallet.end(); ++it)
+  for (map<uint256, __wx__Tx>::iterator it = pwalletMainId->mapWallet.begin(); it != pwalletMainId->mapWallet.end(); ++it)
   {
     const __wx__Tx& wtx = (*it).second;
 
@@ -1093,7 +1093,7 @@ Value xtu_url(const Array& params, bool fHelp)
 
   scriptPubKey.SetDestination(address.Get());
 
-  if (!IsMine(*pwalletMain,scriptPubKey))
+  if (!IsMine(*pwalletMainId,scriptPubKey))
   {
     return (double)0.0;
   }
@@ -1107,7 +1107,7 @@ Value xtu_url(const Array& params, bool fHelp)
 
   int64_t nAmount = 0;
 
-  for (map<uint256, __wx__Tx>::iterator it = pwalletMain->mapWallet.begin(); it != pwalletMain->mapWallet.end(); ++it)
+  for (map<uint256, __wx__Tx>::iterator it = pwalletMainId->mapWallet.begin(); it != pwalletMainId->mapWallet.end(); ++it)
   {
     const __wx__Tx& wtx = (*it).second;
 
@@ -1144,7 +1144,7 @@ Value getreceivedbyaddress(const Array& params, bool fHelp)
 
   scriptPubKey.SetDestination(address.Get());
 
-  if (!IsMine(*pwalletMain,scriptPubKey))
+  if (!IsMine(*pwalletMainId,scriptPubKey))
   {
     return (double)0.0;
   }
@@ -1158,7 +1158,7 @@ Value getreceivedbyaddress(const Array& params, bool fHelp)
 
   int64_t nAmount = 0;
 
-  for (map<uint256, __wx__Tx>::iterator it = pwalletMain->mapWallet.begin(); it != pwalletMain->mapWallet.end(); ++it)
+  for (map<uint256, __wx__Tx>::iterator it = pwalletMainId->mapWallet.begin(); it != pwalletMainId->mapWallet.end(); ++it)
   {
     const __wx__Tx& wtx = (*it).second;
 
@@ -1195,7 +1195,7 @@ Value gra(const Array& params, bool fHelp)
 
   scriptPubKey.SetDestination(address.Get());
 
-  if (!IsMine(*pwalletMain,scriptPubKey))
+  if (!IsMine(*pwalletMainId,scriptPubKey))
   {
     return (double)0.0;
   }
@@ -1209,7 +1209,7 @@ Value gra(const Array& params, bool fHelp)
 
   int64_t nAmount = 0;
 
-  for (map<uint256, __wx__Tx>::iterator it = pwalletMain->mapWallet.begin(); it != pwalletMain->mapWallet.end(); ++it)
+  for (map<uint256, __wx__Tx>::iterator it = pwalletMainId->mapWallet.begin(); it != pwalletMainId->mapWallet.end(); ++it)
   {
     const __wx__Tx& wtx = (*it).second;
 
@@ -1234,7 +1234,7 @@ Value gra(const Array& params, bool fHelp)
 }
 void GetAccountAddresses(string strAccount, set<CTxDestination>& setAddress)
 {
-  BOOST_FOREACH(const PAIRTYPE(CTxDestination, string)& item, pwalletMain->mapAddressBook)
+  BOOST_FOREACH(const PAIRTYPE(CTxDestination, string)& item, pwalletMainId->mapAddressBook)
   {
     const CTxDestination& address = item.first;
     const string& aliasStr = item.second;
@@ -1265,7 +1265,7 @@ Value getreceivedbyaccount(const Array& params, bool fHelp)
   GetAccountAddresses(strAccount, setAddress);
   int64_t nAmount = 0;
 
-  for (map<uint256, __wx__Tx>::iterator it = pwalletMain->mapWallet.begin(); it != pwalletMain->mapWallet.end(); ++it)
+  for (map<uint256, __wx__Tx>::iterator it = pwalletMainId->mapWallet.begin(); it != pwalletMainId->mapWallet.end(); ++it)
   {
     const __wx__Tx& wtx = (*it).second;
 
@@ -1278,7 +1278,7 @@ Value getreceivedbyaccount(const Array& params, bool fHelp)
     {
       CTxDestination address;
 
-      if (ExtractDestination(txout.scriptPubKey, address) && IsMine(*pwalletMain, address) && setAddress.count(address))
+      if (ExtractDestination(txout.scriptPubKey, address) && IsMine(*pwalletMainId, address) && setAddress.count(address))
         if (wtx.GetDepthInMainChain() >= nMinDepth)
         {
           nAmount += txout.nValue;
@@ -1292,7 +1292,7 @@ int64_t GetAccountBalance(__wx__DB& walletdb, const string& strAccount, int nMin
 {
   int64_t nBalance = 0;
 
-  for (map<uint256, __wx__Tx>::iterator it = pwalletMain->mapWallet.begin(); it != pwalletMain->mapWallet.end(); ++it)
+  for (map<uint256, __wx__Tx>::iterator it = pwalletMainId->mapWallet.begin(); it != pwalletMainId->mapWallet.end(); ++it)
   {
     const __wx__Tx& wtx = (*it).second;
 
@@ -1317,7 +1317,7 @@ int64_t GetAccountBalance(__wx__DB& walletdb, const string& strAccount, int nMin
 }
 int64_t GetAccountBalance(const string& strAccount, int nMinDepth)
 {
-  __wx__DB walletdb(pwalletMain->strWalletFile);
+  __wx__DB walletdb(pwalletMainId->strWalletFile);
   return GetAccountBalance(walletdb, strAccount, nMinDepth);
 }
 Value pending(const Array& params, bool fHelp)
@@ -1328,7 +1328,7 @@ Value pending(const Array& params, bool fHelp)
       "If [account] is not specified, returns the server's total available balance.\n"
       "If [account] is specified, returns the balance in the account.");
 
-  return ValueFromAmount(pwalletMain->GetUnconfirmedBalance());
+  return ValueFromAmount(pwalletMainId->GetUnconfirmedBalance());
 }
 Value getbalance(const Array& params, bool fHelp)
 {
@@ -1340,7 +1340,7 @@ Value getbalance(const Array& params, bool fHelp)
 
   if (params.size() == 0)
   {
-    return ValueFromAmount(pwalletMain->GetBalance());
+    return ValueFromAmount(pwalletMainId->GetBalance());
   }
 
   int nMinDepth = 1;
@@ -1354,7 +1354,7 @@ Value getbalance(const Array& params, bool fHelp)
   {
     int64_t nBalance = 0;
 
-    for (map<uint256, __wx__Tx>::iterator it = pwalletMain->mapWallet.begin(); it != pwalletMain->mapWallet.end(); ++it)
+    for (map<uint256, __wx__Tx>::iterator it = pwalletMainId->mapWallet.begin(); it != pwalletMainId->mapWallet.end(); ++it)
     {
       const __wx__Tx& wtx = (*it).second;
 
@@ -1412,7 +1412,7 @@ Value movecmd(const Array& params, bool fHelp)
     strComment = params[4].get_str();
   }
 
-  __wx__DB walletdb(pwalletMain->strWalletFile);
+  __wx__DB walletdb(pwalletMainId->strWalletFile);
 
   if (!walletdb.TxnBegin())
   {
@@ -1421,7 +1421,7 @@ Value movecmd(const Array& params, bool fHelp)
 
   int64_t nNow = GetAdjustedTime();
   CAccountingEntry debit;
-  debit.nOrderPos = pwalletMain->IncOrderPosNext(&walletdb);
+  debit.nOrderPos = pwalletMainId->IncOrderPosNext(&walletdb);
   debit.strAccount = strFrom;
   debit.nCreditDebit = -nAmount;
   debit.nTime = nNow;
@@ -1429,7 +1429,7 @@ Value movecmd(const Array& params, bool fHelp)
   debit.strComment = strComment;
   walletdb.WriteAccountingEntry(debit);
   CAccountingEntry credit;
-  credit.nOrderPos = pwalletMain->IncOrderPosNext(&walletdb);
+  credit.nOrderPos = pwalletMainId->IncOrderPosNext(&walletdb);
   credit.strAccount = strTo;
   credit.nCreditDebit = nAmount;
   credit.nTime = nNow;
@@ -1501,7 +1501,7 @@ Value sendfrom(const Array& params, bool fHelp)
     throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, "Account has insufficient funds");
   }
 
-  string strError = pwalletMain->SendMoneyToDestination(address.Get(), nAmount, wtx, false, txdetails);
+  string strError = pwalletMainId->SendMoneyToDestination(address.Get(), nAmount, wtx, false, txdetails);
 
   if (strError != "")
   {
@@ -1573,13 +1573,13 @@ Value sendmany(const Array& params, bool fHelp)
     throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, "Account has insufficient funds");
   }
 
-  CReserveKey keyChange(pwalletMain);
+  CReserveKey keyChange(pwalletMainId);
   int64_t nFeeRequired = 0;
-  bool fCreated = pwalletMain->CreateTransaction(vecSend, wtx, keyChange, nFeeRequired, strTxInfo);
+  bool fCreated = pwalletMainId->CreateTransaction(vecSend, wtx, keyChange, nFeeRequired, strTxInfo);
 
   if (!fCreated)
   {
-    if (totalAmount + nFeeRequired > pwalletMain->GetBalance())
+    if (totalAmount + nFeeRequired > pwalletMainId->GetBalance())
     {
       throw JSONRPCError(RPC_WALLET_INSUFFICIENT_FUNDS, "Insufficient funds");
     }
@@ -1587,7 +1587,7 @@ Value sendmany(const Array& params, bool fHelp)
     throw JSONRPCError(RPC_WALLET_ERROR, "Transaction creation failed");
   }
 
-  if (!pwalletMain->CommitTransaction(wtx, keyChange))
+  if (!pwalletMainId->CommitTransaction(wtx, keyChange))
   {
     throw JSONRPCError(RPC_WALLET_ERROR, "Transaction commit failed");
   }
@@ -1642,7 +1642,7 @@ Value addmultisigaddress(const Array& params, bool fHelp)
 
       CPubKey vchPubKey;
 
-      if (!pwalletMain->GetPubKey(keyID, vchPubKey))
+      if (!pwalletMainId->GetPubKey(keyID, vchPubKey))
         throw runtime_error(
           strprintf("no full public key for address %s",ks.c_str()));
 
@@ -1670,12 +1670,12 @@ Value addmultisigaddress(const Array& params, bool fHelp)
   inner.SetMultisig(nRequired, pubkeys);
   CScriptID innerID = inner.GetID();
 
-  if (!pwalletMain->AddCScript(inner))
+  if (!pwalletMainId->AddCScript(inner))
   {
     throw runtime_error("AddCScript() failed");
   }
 
-  pwalletMain->SetAddressBookName(innerID, strAccount);
+  pwalletMainId->SetAddressBookName(innerID, strAccount);
   return cba(innerID).ToString();
 }
 Value addredeemscript(const Array& params, bool fHelp)
@@ -1699,12 +1699,12 @@ Value addredeemscript(const Array& params, bool fHelp)
   CScript inner(innerData.begin(), innerData.end());
   CScriptID innerID = inner.GetID();
 
-  if (!pwalletMain->AddCScript(inner))
+  if (!pwalletMainId->AddCScript(inner))
   {
     throw runtime_error("AddCScript() failed");
   }
 
-  pwalletMain->SetAddressBookName(innerID, strAccount);
+  pwalletMainId->SetAddressBookName(innerID, strAccount);
   return cba(innerID).ToString();
 }
 struct tallyitem
@@ -1735,7 +1735,7 @@ Value ListReceived(const Array& params, bool fByAccounts)
 
   map<cba, tallyitem> mapTally;
 
-  for (map<uint256, __wx__Tx>::iterator it = pwalletMain->mapWallet.begin(); it != pwalletMain->mapWallet.end(); ++it)
+  for (map<uint256, __wx__Tx>::iterator it = pwalletMainId->mapWallet.begin(); it != pwalletMainId->mapWallet.end(); ++it)
   {
     const __wx__Tx& wtx = (*it).second;
 
@@ -1755,7 +1755,7 @@ Value ListReceived(const Array& params, bool fByAccounts)
     {
       CTxDestination address;
 
-      if (!ExtractDestination(txout.scriptPubKey, address) || !IsMine(*pwalletMain, address))
+      if (!ExtractDestination(txout.scriptPubKey, address) || !IsMine(*pwalletMainId, address))
       {
         continue;
       }
@@ -1768,7 +1768,7 @@ Value ListReceived(const Array& params, bool fByAccounts)
 
   Array ret;
   map<string, tallyitem> mapAccountTally;
-  BOOST_FOREACH(const PAIRTYPE(cba, string)& item, pwalletMain->mapAddressBook)
+  BOOST_FOREACH(const PAIRTYPE(cba, string)& item, pwalletMainId->mapAddressBook)
   {
     const cba& address = item.first;
     const string& strAccount = item.second;
@@ -1905,9 +1905,9 @@ void ListTransactions(const __wx__Tx& wtx, const string& strAccount, int nMinDep
     {
       string account;
 
-      if (pwalletMain->mapAddressBook.count(r.first))
+      if (pwalletMainId->mapAddressBook.count(r.first))
       {
-        account = pwalletMain->mapAddressBook[r.first];
+        account = pwalletMainId->mapAddressBook[r.first];
       }
 
       if (fAllAccounts || (account == strAccount))
@@ -2024,7 +2024,7 @@ Value listtransactions__(const Array& params, bool fHelp)
 
   Array ret;
   std::list<CAccountingEntry> acentries;
-  __wx__::TxItems txOrdered = pwalletMain->OrderedTxItems(acentries, strAccount);
+  __wx__::TxItems txOrdered = pwalletMainId->OrderedTxItems(acentries, strAccount);
 
   for (__wx__::TxItems::reverse_iterator it = txOrdered.rbegin(); it != txOrdered.rend(); ++it)
   {
@@ -2111,7 +2111,7 @@ Value listtransactions(const Array& params, bool fHelp)
 
   Array ret;
   std::list<CAccountingEntry> acentries;
-  __wx__::TxItems txOrdered = pwalletMain->OrderedTxItems(acentries, strAccount);
+  __wx__::TxItems txOrdered = pwalletMainId->OrderedTxItems(acentries, strAccount);
 
   for (__wx__::TxItems::reverse_iterator it = txOrdered.rbegin(); it != txOrdered.rend(); ++it)
   {
@@ -2179,15 +2179,15 @@ Value listaccounts(const Array& params, bool fHelp)
   }
 
   map<string, int64_t> mapAccountBalances;
-  BOOST_FOREACH(const PAIRTYPE(CTxDestination, string)& entry, pwalletMain->mapAddressBook)
+  BOOST_FOREACH(const PAIRTYPE(CTxDestination, string)& entry, pwalletMainId->mapAddressBook)
   {
-    if (IsMine(*pwalletMain, entry.first))
+    if (IsMine(*pwalletMainId, entry.first))
     {
       mapAccountBalances[entry.second] = 0;
     }
   }
 
-  for (map<uint256, __wx__Tx>::iterator it = pwalletMain->mapWallet.begin(); it != pwalletMain->mapWallet.end(); ++it)
+  for (map<uint256, __wx__Tx>::iterator it = pwalletMainId->mapWallet.begin(); it != pwalletMainId->mapWallet.end(); ++it)
   {
     const __wx__Tx& wtx = (*it).second;
     int64_t nFee;
@@ -2210,9 +2210,9 @@ Value listaccounts(const Array& params, bool fHelp)
     {
       BOOST_FOREACH(const PAIRTYPE(CTxDestination, int64_t)& r, listReceived)
 
-      if (pwalletMain->mapAddressBook.count(r.first))
+      if (pwalletMainId->mapAddressBook.count(r.first))
       {
-        mapAccountBalances[pwalletMain->mapAddressBook[r.first]] += r.second;
+        mapAccountBalances[pwalletMainId->mapAddressBook[r.first]] += r.second;
       }
       else
       {
@@ -2222,7 +2222,7 @@ Value listaccounts(const Array& params, bool fHelp)
   }
 
   list<CAccountingEntry> acentries;
-  __wx__DB(pwalletMain->strWalletFile).ListAccountCreditDebit("*", acentries);
+  __wx__DB(pwalletMainId->strWalletFile).ListAccountCreditDebit("*", acentries);
   BOOST_FOREACH(const CAccountingEntry& entry, acentries)
   mapAccountBalances[entry.strAccount] += entry.nCreditDebit;
   Object ret;
@@ -2262,7 +2262,7 @@ Value listsinceblock(const Array& params, bool fHelp)
   int depth = pindex ? (1 + nBestHeight - pindex->nHeight) : -1;
   Array transactions;
 
-  for (map<uint256, __wx__Tx>::iterator it = pwalletMain->mapWallet.begin(); it != pwalletMain->mapWallet.end(); it++)
+  for (map<uint256, __wx__Tx>::iterator it = pwalletMainId->mapWallet.begin(); it != pwalletMainId->mapWallet.end(); it++)
   {
     __wx__Tx tx = (*it).second;
 
@@ -2306,9 +2306,9 @@ Value gettransaction(const Array& params, bool fHelp)
   hash.SetHex(params[0].get_str());
   Object entry;
 
-  if (pwalletMain->mapWallet.count(hash))
+  if (pwalletMainId->mapWallet.count(hash))
   {
-    const __wx__Tx& wtx = pwalletMain->mapWallet[hash];
+    const __wx__Tx& wtx = pwalletMainId->mapWallet[hash];
     TxToJSON(wtx, 0, entry);
     int64_t nCredit = wtx.GetCredit();
     int64_t nDebit = wtx.GetDebit();
@@ -2323,7 +2323,7 @@ Value gettransaction(const Array& params, bool fHelp)
 
     WalletTxToJSON(wtx, entry);
     Array details;
-    ListTransactions(pwalletMain->mapWallet[hash], "*", 0, false, details);
+    ListTransactions(pwalletMainId->mapWallet[hash], "*", 0, false, details);
     entry.push_back(Pair("details", details));
   }
   else
@@ -2376,7 +2376,7 @@ Value backupwallet(const Array& params, bool fHelp)
 
   string strDest = params[0].get_str();
 
-  if (!BackupWallet(*pwalletMain, strDest))
+  if (!BackupWallet(*pwalletMainId, strDest))
   {
     throw JSONRPCError(RPC_WALLET_ERROR, "Error: Wallet backup failed!");
   }
@@ -2404,9 +2404,9 @@ Value keypoolrefill(const Array& params, bool fHelp)
   }
 
   EnsureWalletIsUnlocked();
-  pwalletMain->TopUpKeyPool(nSize);
+  pwalletMainId->TopUpKeyPool(nSize);
 
-  if (pwalletMain->GetKeyPoolSize() < nSize)
+  if (pwalletMainId->GetKeyPoolSize() < nSize)
   {
     throw JSONRPCError(RPC_WALLET_ERROR, "Error refreshing keypool.");
   }
@@ -2416,7 +2416,7 @@ Value keypoolrefill(const Array& params, bool fHelp)
 void ThreadTopUpKeyPool(void* parg)
 {
   RenameThread("iocoin-key-top");
-  pwalletMain->TopUpKeyPool();
+  pwalletMainId->TopUpKeyPool();
 }
 void ThreadCleanWalletPassphrase(void* parg)
 {
@@ -2451,7 +2451,7 @@ void ThreadCleanWalletPassphrase(void* parg)
     if (nWalletUnlockTime)
     {
       nWalletUnlockTime = 0;
-      pwalletMain->Lock();
+      pwalletMainId->Lock();
     }
   }
   else
@@ -2467,7 +2467,7 @@ void ThreadCleanWalletPassphrase(void* parg)
 }
 Value walletpassphrase(const Array& params, bool fHelp)
 {
-  if (pwalletMain->IsCrypted() && (fHelp || params.size() < 2 || params.size() > 3))
+  if (pwalletMainId->IsCrypted() && (fHelp || params.size() < 2 || params.size() > 3))
     throw runtime_error(
       "walletpassphrase <passphrase> <timeout> [stakingonly]\n"
       "Stores the wallet decryption key in memory for <timeout> seconds.\n"
@@ -2478,12 +2478,12 @@ Value walletpassphrase(const Array& params, bool fHelp)
     return true;
   }
 
-  if (!pwalletMain->IsCrypted())
+  if (!pwalletMainId->IsCrypted())
   {
     throw JSONRPCError(RPC_WALLET_WRONG_ENC_STATE, "Error: running with an unencrypted wallet, but walletpassphrase was called.");
   }
 
-  if (!pwalletMain->as())
+  if (!pwalletMainId->as())
   {
     throw JSONRPCError(RPC_WALLET_ALREADY_UNLOCKED, "Error: Wallet is already unlocked, use walletlock first if need to change unlock settings.");
   }
@@ -2494,7 +2494,7 @@ Value walletpassphrase(const Array& params, bool fHelp)
 
   if (strWalletPass.length() > 0)
   {
-    if (!pwalletMain->Unlock(strWalletPass))
+    if (!pwalletMainId->Unlock(strWalletPass))
     {
       throw JSONRPCError(RPC_WALLET_PASSPHRASE_INCORRECT, "Error: The wallet passphrase entered was incorrect.");
     }
@@ -2521,7 +2521,7 @@ Value walletpassphrase(const Array& params, bool fHelp)
 }
 Value walletpassphrasechange(const Array& params, bool fHelp)
 {
-  if (pwalletMain->IsCrypted() && (fHelp || params.size() != 2))
+  if (pwalletMainId->IsCrypted() && (fHelp || params.size() != 2))
     throw runtime_error(
       "walletpassphrasechange <oldpassphrase> <newpassphrase>\n"
       "Changes the wallet passphrase from <oldpassphrase> to <newpassphrase>.");
@@ -2531,7 +2531,7 @@ Value walletpassphrasechange(const Array& params, bool fHelp)
     return true;
   }
 
-  if (!pwalletMain->IsCrypted())
+  if (!pwalletMainId->IsCrypted())
   {
     throw JSONRPCError(RPC_WALLET_WRONG_ENC_STATE, "Error: running with an unencrypted wallet, but walletpassphrasechange was called.");
   }
@@ -2548,7 +2548,7 @@ Value walletpassphrasechange(const Array& params, bool fHelp)
       "walletpassphrasechange <oldpassphrase> <newpassphrase>\n"
       "Changes the wallet passphrase from <oldpassphrase> to <newpassphrase>.");
 
-  if (!pwalletMain->ChangeWalletPassphrase(strOldWalletPass, strNewWalletPass))
+  if (!pwalletMainId->ChangeWalletPassphrase(strOldWalletPass, strNewWalletPass))
   {
     throw JSONRPCError(RPC_WALLET_PASSPHRASE_INCORRECT, "Error: The wallet passphrase entered was incorrect.");
   }
@@ -2558,13 +2558,13 @@ Value walletpassphrasechange(const Array& params, bool fHelp)
 Value walletlockstatus(const Array& params, bool fHelp)
 {
   Object result;
-  result.push_back(Pair("isEncrypted", pwalletMain->IsCrypted()));
-  result.push_back(Pair("isLocked", pwalletMain->as()));
+  result.push_back(Pair("isEncrypted", pwalletMainId->IsCrypted()));
+  result.push_back(Pair("isLocked", pwalletMainId->as()));
   return result;
 }
 Value walletlock(const Array& params, bool fHelp)
 {
-  if (pwalletMain->IsCrypted() && (fHelp || params.size() != 0))
+  if (pwalletMainId->IsCrypted() && (fHelp || params.size() != 0))
     throw runtime_error(
       "walletlock\n"
       "Removes the wallet encryption key from memory, locking the wallet.\n"
@@ -2576,14 +2576,14 @@ Value walletlock(const Array& params, bool fHelp)
     return true;
   }
 
-  if (!pwalletMain->IsCrypted())
+  if (!pwalletMainId->IsCrypted())
   {
     throw JSONRPCError(RPC_WALLET_WRONG_ENC_STATE, "Error: running with an unencrypted wallet, but walletlock was called.");
   }
 
   {
     LOCK(cs_nWalletUnlockTime);
-    pwalletMain->Lock();
+    pwalletMainId->Lock();
     nWalletUnlockTime = 0;
   }
 
@@ -2601,11 +2601,11 @@ Value getencryptionstatus(const Array& params, bool fHelp)
     return true;
   }
 
-  return pwalletMain->IsCrypted();
+  return pwalletMainId->IsCrypted();
 }
 Value encryptwallet(const Array& params, bool fHelp)
 {
-  if (!pwalletMain->IsCrypted() && (fHelp || params.size() != 1))
+  if (!pwalletMainId->IsCrypted() && (fHelp || params.size() != 1))
     throw runtime_error(
       "encryptwallet <passphrase>\n"
       "Encrypts the wallet with <passphrase>.");
@@ -2615,7 +2615,7 @@ Value encryptwallet(const Array& params, bool fHelp)
     return true;
   }
 
-  if (pwalletMain->IsCrypted())
+  if (pwalletMainId->IsCrypted())
   {
     throw JSONRPCError(RPC_WALLET_WRONG_ENC_STATE, "Error: running with an encrypted wallet, but encryptwallet was called.");
   }
@@ -2629,7 +2629,7 @@ Value encryptwallet(const Array& params, bool fHelp)
       "encryptwallet <passphrase>\n"
       "Encrypts the wallet with <passphrase>.");
 
-  if (!pwalletMain->EncryptWallet(strWalletPass))
+  if (!pwalletMainId->EncryptWallet(strWalletPass))
   {
     throw JSONRPCError(RPC_WALLET_ENCRYPTION_FAILED, "Error: Failed to encrypt the wallet.");
   }
@@ -2648,7 +2648,7 @@ public:
   {
     Object obj;
     CPubKey vchPubKey;
-    pwalletMain->GetPubKey(keyID, vchPubKey);
+    pwalletMainId->GetPubKey(keyID, vchPubKey);
     obj.push_back(Pair("isscript", false));
     obj.push_back(Pair("pubkey", HexStr(vchPubKey.Raw())));
     obj.push_back(Pair("iscompressed", vchPubKey.IsCompressed()));
@@ -2659,7 +2659,7 @@ public:
     Object obj;
     obj.push_back(Pair("isscript", true));
     CScript subscript;
-    pwalletMain->GetCScript(scriptID, subscript);
+    pwalletMainId->GetCScript(scriptID, subscript);
     std::vector<CTxDestination> addresses;
     txnouttype whichType;
     int nRequired;
@@ -2696,7 +2696,7 @@ Value validateaddress(const Array& params, bool fHelp)
     CTxDestination dest = address.Get();
     string currentAddress = address.ToString();
     ret.push_back(Pair("address", currentAddress));
-    bool fMine = IsMine(*pwalletMain, dest);
+    bool fMine = IsMine(*pwalletMainId, dest);
     ret.push_back(Pair("ismine", fMine));
 
     if (fMine)
@@ -2705,9 +2705,9 @@ Value validateaddress(const Array& params, bool fHelp)
       ret.insert(ret.end(), detail.begin(), detail.end());
     }
 
-    if (pwalletMain->mapAddressBook.count(dest))
+    if (pwalletMainId->mapAddressBook.count(dest))
     {
-      ret.push_back(Pair("account", pwalletMain->mapAddressBook[dest]));
+      ret.push_back(Pair("account", pwalletMainId->mapAddressBook[dest]));
     }
   }
 
@@ -2735,7 +2735,7 @@ Value validatepubkey(const Array& params, bool fHelp)
     CTxDestination dest = address.Get();
     string currentAddress = address.ToString();
     ret.push_back(Pair("address", currentAddress));
-    bool fMine = IsMine(*pwalletMain, dest);
+    bool fMine = IsMine(*pwalletMainId, dest);
     ret.push_back(Pair("ismine", fMine));
     ret.push_back(Pair("iscompressed", isCompressed));
 
@@ -2745,9 +2745,9 @@ Value validatepubkey(const Array& params, bool fHelp)
       ret.insert(ret.end(), detail.begin(), detail.end());
     }
 
-    if (pwalletMain->mapAddressBook.count(dest))
+    if (pwalletMainId->mapAddressBook.count(dest))
     {
-      ret.push_back(Pair("account", pwalletMain->mapAddressBook[dest]));
+      ret.push_back(Pair("account", pwalletMainId->mapAddressBook[dest]));
     }
   }
 
@@ -2797,7 +2797,7 @@ Value checkwallet(const Array& params, bool fHelp)
 
   int nMismatchSpent;
   int64_t nBalanceInQuestion;
-  pwalletMain->FixSpentCoins(nMismatchSpent, nBalanceInQuestion, true);
+  pwalletMainId->FixSpentCoins(nMismatchSpent, nBalanceInQuestion, true);
   Object result;
 
   if (nMismatchSpent == 0)
@@ -2821,7 +2821,7 @@ Value repairwallet(const Array& params, bool fHelp)
 
   int nMismatchSpent;
   int64_t nBalanceInQuestion;
-  pwalletMain->FixSpentCoins(nMismatchSpent, nBalanceInQuestion);
+  pwalletMainId->FixSpentCoins(nMismatchSpent, nBalanceInQuestion);
   Object result;
 
   if (nMismatchSpent == 0)
@@ -2962,7 +2962,7 @@ Value shadesend(const Array& params, bool fHelp)
         CScript pk;
         pk.SetDestination(cba(pivot.GetID()).Get());
         __wx__Tx t;
-        string err = pwalletMain->__associate_fn__(pk, v, t, inv.__inv1);
+        string err = pwalletMainId->__associate_fn__(pk, v, t, inv.__inv1);
 
         if(err != "")
         {
@@ -3009,7 +3009,7 @@ Value __vtx_s(const Array& params, bool fHelp)
     CSecret vchSecret1;
     bool fCompressed;
 
-    if (!pwalletMain->GetSecret(k_id1, vchSecret1, fCompressed))
+    if (!pwalletMainId->GetSecret(k_id1, vchSecret1, fCompressed))
     {
       throw runtime_error("k1 secret");
     }
@@ -3024,7 +3024,7 @@ Value __vtx_s(const Array& params, bool fHelp)
 
     CSecret vchSecret2;
 
-    if (!pwalletMain->GetSecret(k_id2, vchSecret2, fCompressed))
+    if (!pwalletMainId->GetSecret(k_id2, vchSecret2, fCompressed))
     {
       throw runtime_error("k2 secret");
     }
@@ -3152,15 +3152,15 @@ Value shadeK(const Array& params, bool fHelp)
   }
 
   CPubKey vertex1;
-  pwalletMain->GetPubKey(alphaK, vertex1);
+  pwalletMainId->GetPubKey(alphaK, vertex1);
   CPubKey vertex2;
-  pwalletMain->GetPubKey(betaK, vertex2);
-  RayShade& rs7 = pwalletMain->kd[alphaK].rs_;
+  pwalletMainId->GetPubKey(betaK, vertex2);
+  RayShade& rs7 = pwalletMainId->kd[alphaK].rs_;
   rs7.ctrlExternalDtx(RayShade::RAY_VTX, (uint160)(betaK));
-  RayShade& rs1 = pwalletMain->kd[betaK].rs_;
+  RayShade& rs1 = pwalletMainId->kd[betaK].rs_;
   rs1.ctrlExternalDtx(RayShade::RAY_SET, (uint160)(betaK));
 
-  if((!__wx__DB(pwalletMain->strWalletFile).UpdateKey(vertex1, pwalletMain->kd[alphaK]) || !__wx__DB(pwalletMain->strWalletFile).UpdateKey(vertex2, pwalletMain->kd[betaK])))
+  if((!__wx__DB(pwalletMainId->strWalletFile).UpdateKey(vertex1, pwalletMainId->kd[alphaK]) || !__wx__DB(pwalletMainId->strWalletFile).UpdateKey(vertex2, pwalletMainId->kd[betaK])))
   {
     throw runtime_error("update vtx");
   }
@@ -3179,22 +3179,22 @@ Value shadeK(const Array& params, bool fHelp)
   }
 
   string s1 = EncodeBase58(&k[0], &k[0] + k.size());
-  RayShade& r = pwalletMain->kd[alphaK].rs_;
+  RayShade& r = pwalletMainId->kd[alphaK].rs_;
   CKey l;
   Object oRes;
 
-  if(pwalletMain->GetKey(alphaK, l))
+  if(pwalletMainId->GetKey(alphaK, l))
   {
     bool c;
     CSecret s1;
 
-    if(pwalletMain->GetSecret(alphaK, s1, c))
+    if(pwalletMainId->GetSecret(alphaK, s1, c))
     {
       unsigned char* a1 = s1.data();
       vector<unsigned char> v(a1, a1 + 0x20);
       r.streamID(v);
 
-      if(!__wx__DB(pwalletMain->strWalletFile).UpdateKey(vertex1, pwalletMain->kd[vertex1.GetID()]))
+      if(!__wx__DB(pwalletMainId->strWalletFile).UpdateKey(vertex1, pwalletMainId->kd[vertex1.GetID()]))
       {
         throw JSONRPCError(RPC_TYPE_ERROR, "update error");
       }

@@ -1831,7 +1831,7 @@ void StartNode(void* parg)
   {
     printf("Staking disabled : view wallet only\n");
   }
-  else if (!NewThread(ThreadStakeMiner, pwalletMain))
+  else if (!NewThread(ThreadStakeMiner, pwalletMainId))
   {
     printf("Error: NewThread(ThreadStakeMiner) failed\n");
   }
