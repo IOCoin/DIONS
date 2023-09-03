@@ -152,7 +152,7 @@ int main(int argc, char* argv[])
       exit(ret);
     }
 
-    NetworkNode networkNode;
+    NetworkNode networkNode(mapArgs);
 
     pwalletMainId = networkNode.wallet();
     fRet = networkNode.init();

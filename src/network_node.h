@@ -26,6 +26,7 @@
 #endif
 #include "ptrie/OverlayDB.h"
 
+#include "rpc_server.h"
 #include "client.h"
 
 class NetworkNode
@@ -34,6 +35,15 @@ class NetworkNode
     NetworkNode() 
     { 
 	    pwalletMain_ = new __wx__("wallet.dat");
+    }
+
+    NetworkNode(std::map<string,string> argsMap) 
+	    : client_(&uiFace),
+	      rpcServer_(&uiFace)
+    { 
+	    this->argsMap_ = argsMap;
+	    pwalletMain_ = new __wx__("wallet.dat");
+
     }
 
     NetworkNode(boost::filesystem::path const& _dbPath, bool testNet = false);
@@ -51,10 +61,12 @@ class NetworkNode
     bool Bind_(const CService &addr, bool fError = true);
     bool InitSanityCheck_();
 
+    std::map<string,string> argsMap_;
     __wx__* pwalletMain_;
     LocatorNodeDB* ln1Db_;
     VertexNodeDB* vertexDB_;
     Client client_;
+    RPCServer rpcServer_;
     CClientUIInterface uiFace;
 };
 

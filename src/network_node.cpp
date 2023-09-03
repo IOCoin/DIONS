@@ -819,7 +819,8 @@ bool NetworkNode::init()
 
   if (fServer)
   {
-    NewThread(ThreadRPCServer, NULL);
+    //XXXX NewThread(ThreadRPCServer, NULL);
+    this->rpcServer_.start(this->argsMap_);
   }
 
   this->uiFace.InitMessage(_("Done loading"));
