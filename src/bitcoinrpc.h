@@ -107,7 +107,6 @@ public:
   std::string help(std::string name) const;
 
   const json_spirit::Value operator()() const;
-# 123 "bitcoinrpc.h"
   json_spirit::Value execute(const std::string &method, const json_spirit::Array &params) const;
 private:
   std::map<std::string, const CRPCCommand*> mapCommands;

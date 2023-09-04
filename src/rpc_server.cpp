@@ -1,18 +1,6 @@
 #include "rpc_server.h"
 #include "base58.h"
 #include "util.h"
-#include <boost/asio.hpp>
-#include <boost/asio/ip/v6_only.hpp>
-#include <boost/bind.hpp>
-#include <boost/filesystem.hpp>
-#include <boost/foreach.hpp>
-#include <boost/iostreams/concepts.hpp>
-#include <boost/iostreams/stream.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/asio/ssl.hpp>
-#include <boost/asio/ssl/context.hpp>
-#include <boost/filesystem/fstream.hpp>
-#include <boost/shared_ptr.hpp>
 #include <list>
 
 using namespace std;
@@ -20,10 +8,205 @@ using namespace boost;
 using namespace boost::asio;
 using namespace json_spirit;
 
+static string HTTPReply(int nStatus, const string& strMsg, bool keepalive);
+int ReadHTTPStatus(std::basic_istream<char>& stream, int &proto);
+int ReadHTTPHeader(std::basic_istream<char>& stream, map<string, string>& mapHeadersRet);
+int ReadHTTP(std::basic_istream<char>& stream, map<string, string>& mapHeadersRet, string& strMessageRet);
+int ReadHTTP(std::basic_istream<char>& stream, map<string, string>& mapHeadersRet, string& strMessageRet);
+Object JSONRPCReplyObj(const Value& result, const Value& error, const Value& id);
+static Object JSONRPCExecOne(const Value& req);
+static string JSONRPCExecBatch(const Array& vReq);
 extern void StartShutdown();
+static Object JSONRPCExecOne(const Value& req)
+{
+  Object rpc_result;
+  JSONRequest jreq;
+
+  try
+  {
+    jreq.parse(req);
+    Value result = tableRPC.execute(jreq.strMethod, jreq.params);
+    rpc_result = JSONRPCReplyObj(result, Value::null, jreq.id);
+  }
+  catch (Object& objError)
+  {
+    rpc_result = JSONRPCReplyObj(Value::null, objError, jreq.id);
+  }
+  catch (std::exception& e)
+  {
+    rpc_result = JSONRPCReplyObj(Value::null,
+                                 JSONRPCError(RPC_PARSE_ERROR, e.what()), jreq.id);
+  }
+
+  return rpc_result;
+}
+int ReadHTTPStatus(std::basic_istream<char>& stream, int &proto)
+{
+  string str;
+  getline(stream, str);
+  vector<string> vWords;
+  boost::split(vWords, str, boost::is_any_of(" "));
+
+  if (vWords.size() < 2)
+  {
+    return HTTP_INTERNAL_SERVER_ERROR;
+  }
+
+  proto = 0;
+  const char *ver = strstr(str.c_str(), "HTTP/1.");
+
+  if (ver != NULL)
+  {
+    proto = atoi(ver+7);
+  }
+
+  return atoi(vWords[1].c_str());
+}
+int ReadHTTPHeader(std::basic_istream<char>& stream, map<string, string>& mapHeadersRet)
+{
+  int nLen = 0;
+
+  while (true)
+  {
+    string str;
+    std::getline(stream, str);
+
+    if (str.empty() || str == "\r")
+    {
+      break;
+    }
+
+    string::size_type nColon = str.find(":");
+
+    if (nColon != string::npos)
+    {
+      string strHeader = str.substr(0, nColon);
+      boost::trim(strHeader);
+      boost::to_lower(strHeader);
+      string strValue = str.substr(nColon+1);
+      boost::trim(strValue);
+      mapHeadersRet[strHeader] = strValue;
+
+      if (strHeader == "content-length")
+      {
+        nLen = atoi(strValue.c_str());
+      }
+    }
+  }
+
+  return nLen;
+}
+int ReadHTTP(std::basic_istream<char>& stream, map<string, string>& mapHeadersRet, string& strMessageRet)
+{
+  mapHeadersRet.clear();
+  strMessageRet = "";
+  int nProto = 0;
+  int nStatus = ReadHTTPStatus(stream, nProto);
+  int nLen = ReadHTTPHeader(stream, mapHeadersRet);
+
+  if (nLen < 0 || nLen > (int)MAX_SIZE)
+  {
+    return HTTP_INTERNAL_SERVER_ERROR;
+  }
+
+  if (nLen > 0)
+  {
+    vector<char> vch(nLen);
+    stream.read(&vch[0], nLen);
+    strMessageRet = string(vch.begin(), vch.end());
+  }
+
+  string sConHdr = mapHeadersRet["connection"];
+
+  if ((sConHdr != "close") && (sConHdr != "keep-alive"))
+  {
+    if (nProto >= 1)
+    {
+      mapHeadersRet["connection"] = "keep-alive";
+    }
+    else
+    {
+      mapHeadersRet["connection"] = "close";
+    }
+  }
+
+  return nStatus;
+}
+static string JSONRPCExecBatch(const Array& vReq)
+{
+  Array ret;
+
+  for (unsigned int reqIdx = 0; reqIdx < vReq.size(); reqIdx++)
+  {
+    ret.push_back(JSONRPCExecOne(vReq[reqIdx]));
+  }
+
+  return write_string(Value(ret), false) + "\n";
+}
+bool RPCServer::HTTPAuthorized(map<string, string>& mapHeaders)
+{
+  string strAuth = mapHeaders["authorization"];
+
+  if (strAuth.substr(0,6) != "Basic ")
+  {
+    return false;
+  }
+
+  string strUserPass64 = strAuth.substr(6);
+  boost::trim(strUserPass64);
+  string strUserPass = DecodeBase64(strUserPass64);
+  return TimingResistantEqual(strUserPass, strRPCUserColonPass);
+}
+string JSONRPCRequest(const string& strMethod, const Array& params, const Value& id)
+{
+  Object request;
+  request.push_back(Pair("method", strMethod));
+  request.push_back(Pair("params", params));
+  request.push_back(Pair("id", id));
+  return write_string(Value(request), false) + "\n";
+}
 static inline unsigned short GetDefaultRPCPort()
 {
   return GetBoolArg("-testnet", false) ? 43765 : 33765;
+}
+Object JSONRPCReplyObj(const Value& result, const Value& error, const Value& id)
+{
+  Object reply;
+
+  if (error.type() != null_type)
+  {
+    reply.push_back(Pair("result", Value::null));
+  }
+  else
+  {
+    reply.push_back(Pair("result", result));
+  }
+
+  reply.push_back(Pair("error", error));
+  reply.push_back(Pair("id", id));
+  return reply;
+}
+string JSONRPCReply(const Value& result, const Value& error, const Value& id)
+{
+  Object reply = JSONRPCReplyObj(result, error, id);
+  return write_string(Value(reply), false) + "\n";
+}
+void ErrorReply(std::ostream& stream, const Object& objError, const Value& id)
+{
+  int nStatus = HTTP_INTERNAL_SERVER_ERROR;
+  int code = find_value(objError, "code").get_int();
+
+  if (code == RPC_INVALID_REQUEST)
+  {
+    nStatus = HTTP_BAD_REQUEST;
+  }
+  else if (code == RPC_METHOD_NOT_FOUND)
+  {
+    nStatus = HTTP_NOT_FOUND;
+  }
+
+  string strReply = JSONRPCReply(Value::null, objError, id);
+  stream << HTTPReply(nStatus, strReply, false) << std::flush;
 }
 string rfc1123Time()
 {
@@ -130,122 +313,9 @@ bool ClientAllowed(const boost::asio::ip::address& address)
 
   return false;
 }
-class AcceptedConnection
-{
-public:
-  virtual ~AcceptedConnection() {}
-  virtual std::iostream& stream() = 0;
-  virtual std::string peer_address_to_string() const = 0;
-  virtual void close() = 0;
-};
 
 template <typename Protocol, typename SocketAcceptorService>
-static void RPCAcceptHandler(boost::shared_ptr< basic_socket_acceptor<Protocol, SocketAcceptorService> > acceptor,
-                             boost::asio::io_context& io_context,
-                             ssl::context& context,
-                             bool fUseSSL,
-                             AcceptedConnection* conn,
-                             const boost::system::error_code& error);
-template <typename Protocol>
-class SSLIOStreamDevice : public iostreams::device<iostreams::bidirectional>
-{
-public:
-  SSLIOStreamDevice(asio::ssl::stream<typename Protocol::socket> &streamIn, bool fUseSSLIn) : stream(streamIn)
-  {
-    fUseSSL = fUseSSLIn;
-    fNeedHandshake = fUseSSLIn;
-  }
-  void handshake(ssl::stream_base::handshake_type role)
-  {
-    if (!fNeedHandshake)
-    {
-      return;
-    }
-
-    fNeedHandshake = false;
-    stream.handshake(role);
-  }
-  std::streamsize read(char* s, std::streamsize n)
-  {
-    handshake(ssl::stream_base::server);
-
-    if (fUseSSL)
-    {
-      return stream.read_some(asio::buffer(s, n));
-    }
-
-    return stream.next_layer().read_some(asio::buffer(s, n));
-  }
-  std::streamsize write(const char* s, std::streamsize n)
-  {
-    handshake(ssl::stream_base::client);
-
-    if (fUseSSL)
-    {
-      return asio::write(stream, asio::buffer(s, n));
-    }
-
-    return asio::write(stream.next_layer(), asio::buffer(s, n));
-  }
-  bool connect(const std::string& server, const std::string& port)
-  {
-    ip::tcp::resolver resolver(stream.get_executor());
-    ip::tcp::resolver::query query(server.c_str(), port.c_str());
-    ip::tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
-    ip::tcp::resolver::iterator end;
-    boost::system::error_code error = asio::error::host_not_found;
-
-    while (error && endpoint_iterator != end)
-    {
-      stream.lowest_layer().close();
-      stream.lowest_layer().connect(*endpoint_iterator++, error);
-    }
-
-    if (error)
-    {
-      return false;
-    }
-
-    return true;
-  }
-private:
-  bool fNeedHandshake;
-  bool fUseSSL;
-  asio::ssl::stream<typename Protocol::socket>& stream;
-};
-template <typename Protocol>
-class AcceptedConnectionImpl : public AcceptedConnection
-{
-public:
-  AcceptedConnectionImpl(
-    asio::io_context& io_context,
-    ssl::context &context,
-    bool fUseSSL) :
-    sslStream(io_context, context),
-    _d(sslStream, fUseSSL),
-    _stream(_d)
-  {
-  }
-  virtual std::iostream& stream()
-  {
-    return _stream;
-  }
-  virtual std::string peer_address_to_string() const
-  {
-    return peer.address().to_string();
-  }
-  virtual void close()
-  {
-    _stream.close();
-  }
-  typename Protocol::endpoint peer;
-  asio::ssl::stream<typename Protocol::socket> sslStream;
-private:
-  SSLIOStreamDevice<Protocol> _d;
-  iostreams::stream< SSLIOStreamDevice<Protocol> > _stream;
-};
-template <typename Protocol, typename SocketAcceptorService>
-static void RPCListen(boost::shared_ptr< basic_socket_acceptor<Protocol, SocketAcceptorService> > acceptor,
+void RPCServer::RPCListen(boost::shared_ptr< basic_socket_acceptor<Protocol, SocketAcceptorService> > acceptor,
                       asio::io_context& io_context,
                       ssl::context& context,
                       const bool fUseSSL)
@@ -254,7 +324,7 @@ static void RPCListen(boost::shared_ptr< basic_socket_acceptor<Protocol, SocketA
   acceptor->async_accept(
     conn->sslStream.lowest_layer(),
     conn->peer,
-    boost::bind(&RPCAcceptHandler<Protocol, SocketAcceptorService>,
+    boost::bind(&RPCServer::RPCAcceptHandler<Protocol, SocketAcceptorService>,this,
                 acceptor,
                 boost::ref(io_context),
                 boost::ref(context),
@@ -263,7 +333,7 @@ static void RPCListen(boost::shared_ptr< basic_socket_acceptor<Protocol, SocketA
                 boost::asio::placeholders::error));
 }
 template <typename Protocol, typename SocketAcceptorService>
-static void RPCAcceptHandler(boost::shared_ptr< basic_socket_acceptor<Protocol, SocketAcceptorService> > acceptor,
+void RPCServer::RPCAcceptHandler(boost::shared_ptr< basic_socket_acceptor<Protocol, SocketAcceptorService> > acceptor,
                              boost::asio::io_context& io_context,
                              ssl::context& context,
                              const bool fUseSSL,
