@@ -171,7 +171,6 @@ void RPCListen(boost::shared_ptr< boost::asio::basic_socket_acceptor<Protocol, S
   bool HTTPAuthorized(map<string, string>& mapHeaders);
   std::map<string,string> argsMap_;
   CClientUIInterface* uiFace_;
-
 };
 
 #endif

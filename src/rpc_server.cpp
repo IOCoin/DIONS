@@ -364,7 +364,6 @@ void RPCServer::RPCAcceptHandler(boost::shared_ptr< basic_socket_acceptor<Protoc
 
     delete conn;
   }
-  //XXXX else if (!NewThread(ThreadRPCServer3, conn))
   else
   {
     try
@@ -384,10 +383,8 @@ bool RPCServer::start(map<string,string> args)
 {
   this->argsMap_ = args;
 
-  //XXXX NewThread(this->ThreadRPCServer, NULL);
   try
   {
-    //XXXX boost::thread(pfn, parg);
     boost::thread(boost::bind(&RPCServer::ThreadRPCServer, this));
   }
   catch(boost::thread_resource_error &e)

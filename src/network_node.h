@@ -43,6 +43,7 @@ class NetworkNode
     { 
 	    this->argsMap_ = argsMap;
 	    pwalletMain_ = new __wx__("wallet.dat");
+	    //this->rpcServer_.start(this->argsMap_);
 
     }
 

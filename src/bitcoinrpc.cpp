@@ -24,10 +24,8 @@ using namespace std;
 using namespace boost;
 using namespace boost::asio;
 using namespace json_spirit;
-void ThreadRPCServer2(void* parg);
 static std::string strRPCUserColonPass;
 const Object emptyobj;
-void ThreadRPCServer3(void* parg);
 static inline unsigned short GetDefaultRPCPort()
 {
   return GetBoolArg("-testnet", false) ? 43765 : 33765;
@@ -1201,39 +1199,4 @@ int CommandLineRPC(int argc, char *argv[])
 
   return nRet;
 }
-#ifdef TEST
-int main(int argc, char *argv[])
-{
-#ifdef _MSC_VER
-  _CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_FILE);
-  _CrtSetReportFile(_CRT_WARN, CreateFile("NUL", GENERIC_WRITE, 0, NULL, OPEN_EXISTING, 0, 0));
-#endif
-  setbuf(stdin, NULL);
-  setbuf(stdout, NULL);
-  setbuf(stderr, NULL);
-
-  try
-  {
-    if (argc >= 2 && string(argv[1]) == "-server")
-    {
-      printf("server ready\n");
-      ThreadRPCServer(NULL);
-    }
-    else
-    {
-      return CommandLineRPC(argc, argv);
-    }
-  }
-  catch (std::exception& e)
-  {
-    PrintException(&e, "main()");
-  }
-  catch (...)
-  {
-    PrintException(NULL, "main()");
-  }
-
-  return 0;
-}
-#endif
 const CRPCTable tableRPC;

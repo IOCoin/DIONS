@@ -203,11 +203,9 @@ CBlock* CreateNewBlock(__wx__* pwallet, bool fProofOfStake, int64_t* pFees)
 
               if(sectionVertex(target20ByteAliasStr, contractCode))
               {
-                std::cout << "retrieved contract code " << contractCode << std::endl;
               }
 
               pblock->stateRoot = pindexPrev->stateRootIndex;
-              std::cout << "execution request - previous state root " << pblock->stateRoot << std::endl;
 
               {
                 std::vector<CTransaction> testTxVector;

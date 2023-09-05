@@ -819,7 +819,6 @@ bool NetworkNode::init()
 
   if (fServer)
   {
-    //XXXX NewThread(ThreadRPCServer, NULL);
     this->rpcServer_.start(this->argsMap_);
   }
 
