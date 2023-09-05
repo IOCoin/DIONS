@@ -26,7 +26,7 @@
 #endif
 #include "ptrie/OverlayDB.h"
 
-#include "rpc_server.h"
+#include "rpc/rpc_server.h"
 #include "client.h"
 
 class NetworkNode

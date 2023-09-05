@@ -100,55 +100,6 @@ endif
 # LDFLAGS can be specified on the make command line, so we use xLDFLAGS that only
 # adds some defaults in front. Unfortunately, LDFLAGS=... $(LDFLAGS) does not work.
 xLDFLAGS=$(LDHARDENING) $(LDFLAGS)
-ASM= \
-    obj/alert.o \
-    asm/version.s \
-    asm/checkpoints.s \
-    asm/netbase.s \
-    asm/addrman.s \
-    asm/crypter.s \
-    asm/key.s \
-    asm/db.s \
-    asm/init.s \
-    asm/keystore.s \
-    asm/view.s \
-    asm/miner.s \
-    asm/main.s \
-    asm/net.s \
-    asm/protocol.s \
-    asm/bitcoinrpc.s \
-    asm/rpcdump.s \
-    asm/rpcnet.s \
-    asm/rpcmining.s \
-    asm/rpcwallet.s \
-    asm/rpcblockchain.s \
-    asm/rpcrawtransaction.s \
-    asm/script.s \
-    asm/sync.s \
-    asm/util.s \
-    asm/wallet.s \
-    asm/walletdb.s \
-    asm/state.s \
-    asm/twister.s \
-    asm/tor.s \
-    asm/dions.s \
-    asm/base_reflect.s \
-    asm/noui.s \
-    asm/cubehash.s \
-    asm/luffa.s \
-    asm/aes_helper.s \
-    asm/echo.s \
-    asm/shavite.s \
-    asm/simd.s \
-    asm/blake.s\
-    asm/bmw.s\
-    asm/groestl.s\
-    asm/jh.s\
-    asm/keccak.s\
-    asm/skein.s \
-    asm/kernel.s \
-    asm/pbkdf2.s 
-
 OBJS= \
     obj/alert.o \
     obj/version.o \
@@ -167,7 +118,7 @@ OBJS= \
     obj/block.o \
     obj/block_index.o \
     obj/network_node.o \
-    obj/rpc_server.o \
+    obj/rpc/rpc_server.o \
     obj/client.o \
     obj/api_transaction.o \
     obj/transaction.o \
@@ -175,12 +126,12 @@ OBJS= \
     obj/net.o \
     obj/protocol.o \
     obj/bitcoinrpc.o \
-    obj/rpcdump.o \
-    obj/rpcnet.o \
-    obj/rpcmining.o \
-    obj/rpcwallet.o \
-    obj/rpcblockchain.o \
-    obj/rpcrawtransaction.o \
+    obj/rpc/rpcdump.o \
+    obj/rpc/rpcnet.o \
+    obj/rpc/rpcmining.o \
+    obj/rpc/rpcwallet.o \
+    obj/rpc/rpcblockchain.o \
+    obj/rpc/rpcrawtransaction.o \
     obj/script.o \
     obj/sync.o \
     obj/util.o \
@@ -268,27 +219,9 @@ obj/%.o: %.c
 	  sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
 	      -e '/^$$/ d' -e 's/$$/ :/' < $(@:%.o=%.d) >> $(@:%.o=%.P); \
 	  rm -f $(@:%.o=%.d)
-asm/%.s: %.cpp
-	$(CXX) -c $(xCXXFLAGS) -MMD -MF -c -S -o $@ $<
-	#@cp $(@:%.o=%.d) $(@:%.o=%.P); \
-	#  sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
-	#      -e '/^$$/ d' -e 's/$$/ :/' < $(@:%.o=%.d) >> $(@:%.o=%.P); \
-	#  rm -f $(@:%.o=%.d)
-
-asm/%.s: %.c
-	$(CC) -c $(xCXXFLAGS) -MMD -MF -S $@ $<
-	#@cp $(@:%.o=%.d) $(@:%.o=%.P); \
-	#  sed -e 's/#.*//' -e 's/^[^:]*: *//' -e 's/ *\\$$//' \
-	#      -e '/^$$/ d' -e 's/$$/ :/' < $(@:%.o=%.d) >> $(@:%.o=%.P); \
-	#  rm -f $(@:%.o=%.d)
 
 iocoind: $(OBJS:obj/%=obj/%)
 	$(LINK) $(xCXXFLAGS) -o $@ $^ $(xLDFLAGS) $(LIBS)
-
-#asm_gen: $(ASM:asm/%=asm/%)
-#	$(xCXXFLAGS) $@ $^ 
-asm_gen: $(ASM:asm/%=asm/%)
-	$(xCXXFLAGS)  
 
 clean:
 	-rm -f iocoind
@@ -297,6 +230,8 @@ clean:
 	-cd dvm/ethash; make clean; rm -f CMakeCache.txt
 	-rm -f obj/*.o
 	-rm -f obj/*.P
+	-rm -f obj/rpc/*.o
+	-rm -f obj/rpc/*.P
 	-rm -f obj/build.h
 
 FORCE:
