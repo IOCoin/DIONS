@@ -16,7 +16,7 @@
 #include <dvmc/hex.hpp>
 #include <dvmc/loader.h>
 #include <dvmc/tooling.hpp>
-#include "bitcoinrpc.h"
+#include "rpc/bitcoin.h"
 using namespace std;
 extern __wx__* pwalletMainId;
 extern unsigned int nMinerSleep;

@@ -2,7 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include "init.h"
-#include "bitcoinrpc.h"
+#include "bitcoin.h"
 #include "ui_interface.h"
 #include "base58.h"
 #include <boost/date_time/posix_time/posix_time.hpp>

@@ -5,7 +5,7 @@
 #include "init.h"
 #include "base_reflect.h"
 #include "uint256.h"
-#include "bitcoinrpc.h"
+#include "rpc/bitcoin.h"
 #include "main.h"
 #include "ptrie/TrieDB.h"
 #include "ptrie/StateCacheDB.h"

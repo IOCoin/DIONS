@@ -118,20 +118,20 @@ OBJS= \
     obj/block.o \
     obj/block_index.o \
     obj/network_node.o \
-    obj/rpc/rpc_server.o \
+    obj/rpc/server.o \
     obj/client.o \
     obj/api_transaction.o \
     obj/transaction.o \
     obj/txmempool.o \
     obj/net.o \
     obj/protocol.o \
-    obj/bitcoinrpc.o \
-    obj/rpc/rpcdump.o \
-    obj/rpc/rpcnet.o \
-    obj/rpc/rpcmining.o \
-    obj/rpc/rpcwallet.o \
-    obj/rpc/rpcblockchain.o \
-    obj/rpc/rpcrawtransaction.o \
+    obj/rpc/bitcoin.o \
+    obj/rpc/dump.o \
+    obj/rpc/net.o \
+    obj/rpc/mining.o \
+    obj/rpc/wallet.o \
+    obj/rpc/blockchain.o \
+    obj/rpc/rawtransaction.o \
     obj/script.o \
     obj/sync.o \
     obj/util.o \

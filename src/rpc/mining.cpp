@@ -4,7 +4,7 @@
 #include "txdb.h"
 #include "init.h"
 #include "miner.h"
-#include "bitcoinrpc.h"
+#include "bitcoin.h"
 using namespace json_spirit;
 using namespace std;
 Value getnetworkmhashps(const Array& params, bool fHelp)

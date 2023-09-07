@@ -1,4 +1,4 @@
-#include "rpc_server.h"
+#include "server.h"
 #include "base58.h"
 #include "util.h"
 #include <list>

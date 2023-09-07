@@ -3,7 +3,7 @@
 
 #include "txdb.h"
 #include "walletdb.h"
-#include "bitcoinrpc.h"
+#include "rpc/bitcoin.h"
 #include "net.h"
 #include "init.h"
 #include "util.h"
@@ -26,7 +26,7 @@
 #endif
 #include "ptrie/OverlayDB.h"
 
-#include "rpc/rpc_server.h"
+#include "rpc/server.h"
 #include "client.h"
 
 class NetworkNode

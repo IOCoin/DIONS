@@ -1,7 +1,7 @@
 #ifndef RPC_SERVER_H
 #define RPC_SERVER_H
 
-#include "bitcoinrpc.h"
+#include "bitcoin.h"
 #include "ui_interface.h"
 #include <boost/asio.hpp>
 #include <boost/asio/ip/v6_only.hpp>

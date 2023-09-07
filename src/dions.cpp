@@ -4,7 +4,7 @@
 #include "wallet.h"
 #include "init.h"
 #include "dions.h"
-#include "bitcoinrpc.h"
+#include "rpc/bitcoin.h"
 #include "main.h"
 #include "state.h"
 #include "json/json_spirit_reader_template.h"

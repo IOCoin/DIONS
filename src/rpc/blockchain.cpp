@@ -1,6 +1,6 @@
 
 #include "main.h"
-#include "bitcoinrpc.h"
+#include "bitcoin.h"
 #include "kernel.h"
 #include "util.h"
 #include "api_transaction.h"

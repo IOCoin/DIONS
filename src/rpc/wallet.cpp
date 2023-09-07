@@ -1,7 +1,7 @@
 
 #include "wallet.h"
 #include "walletdb.h"
-#include "bitcoinrpc.h"
+#include "bitcoin.h"
 #include "init.h"
 #include "base58.h"
 #include "dions.h"
