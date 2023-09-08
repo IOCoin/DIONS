@@ -6,7 +6,7 @@
 #include "bignum.h"
 #include "key.h"
 #include "script.h"
-#include "main.h"
+#include "process.h"
 #include "dions.h"
 static const char* pszBase58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 

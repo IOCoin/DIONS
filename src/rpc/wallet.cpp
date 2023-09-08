@@ -1,8 +1,7 @@
 
-#include "wallet.h"
-#include "walletdb.h"
+#include "wallet/wallet.h"
+#include "wallet/walletdb.h"
 #include "bitcoin.h"
-#include "init.h"
 #include "base58.h"
 #include "dions.h"
 using namespace json_spirit;
@@ -18,7 +17,9 @@ static unsigned char trans__ydwi[] =
 extern unsigned int CONSISTENCY_MARGIN;
 extern void TxToJSON(const CTransaction& tx, const uint256 hashBlock, json_spirit::Object& entry);
 extern LocatorNodeDB* ln1Db;
+extern __wx__* pwalletMainId;
 extern int scaleMonitor();
+void StartShutdown();
 static void accountingDeprecationCheck()
 {
   if (!GetBoolArg("-enableaccounts", false))

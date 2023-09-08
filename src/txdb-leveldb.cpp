@@ -11,7 +11,7 @@
 #include "checkpoints.h"
 #include "txdb.h"
 #include "util.h"
-#include "main.h"
+#include "process.h"
 using namespace std;
 using namespace boost;
 leveldb::DB *txdb;

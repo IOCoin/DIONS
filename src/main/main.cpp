@@ -1,8 +1,7 @@
 #include "txdb.h"
-#include "walletdb.h"
+#include "wallet/walletdb.h"
 #include "rpc/bitcoin.h"
 #include "net.h"
-#include "init.h"
 #include "util.h"
 #include "ui_interface.h"
 #include "checkpoints.h"
@@ -16,7 +15,6 @@
 #include "ptrie/OverlayDB.h"
 #include "ptrie/TrieDB.h"
 #include "ptrie/Address.h"
-#include "main.h"
 #include "disk_block_locator.h"
 #include "network_node.h"
 #ifndef WIN32
@@ -24,6 +22,8 @@
 #endif
 using namespace std;
 using namespace boost;
+void Shutdown(void* parg);
+std::string HelpMessage();
 extern void xsc(CBlockIndex*);
 __wx__* pwalletMainId;
 CClientUIInterface uiInterface;

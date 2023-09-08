@@ -8,7 +8,7 @@
 #include "script.h"
 #include "input_point.h"
 #include "output_point.h"
-#include "transaction.h"
+#include "wallet/transaction.h"
 
 class CTxMemPool
 {

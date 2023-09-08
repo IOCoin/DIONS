@@ -15,7 +15,7 @@
 #include <openssl/evp.h>
 #include <openssl/pem.h>
 #include <openssl/conf.h>
-#include "init.h"
+#include "wallet/wallet.h"
 #include "constants.h"
 #include "base58.h"
 #include "db.h"

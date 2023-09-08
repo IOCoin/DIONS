@@ -8,7 +8,7 @@ using namespace boost;
 #include "keystore.h"
 #include "bignum.h"
 #include "key.h"
-#include "main.h"
+#include "process.h"
 #include "sync.h"
 #include "util.h"
 #include "dions.h"

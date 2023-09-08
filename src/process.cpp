@@ -1,10 +1,10 @@
 #include "alert.h"
-#include "main.h"
+#include "process.h"
 #include "checkpoints.h"
 #include "db.h"
 #include "txdb.h"
 #include "net.h"
-#include "init.h"
+#include "wallet/wallet.h"
 #include "ui_interface.h"
 #include "kernel.h"
 #include "rpc/bitcoin.h"
@@ -38,6 +38,8 @@ int nCoinbaseMaturity = 100;
 CBlockIndex* pindexGenesisBlock = NULL;
 int nBestHeight = -1;
 unsigned long EAX0_SHIFT_REGISTER__ = 0x989680;
+extern __wx__* pwalletMainId;
+void StartShutdown();
 unsigned int LR_SHIFT__[] =
 {
   0x1f, 0x29, 0x3b, 0x1a, 0x35, 0x3a, 0x61, 0x5d, 0x17, 0x54,

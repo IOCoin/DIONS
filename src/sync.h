@@ -7,7 +7,6 @@
 #include <boost/thread/locks.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/recursive_mutex.hpp>
-# 60 "sync.h"
 template <typename PARENT>
 class LOCKABLE AnnotatedMixin : public PARENT
 {
@@ -31,8 +30,6 @@ public:
 
 
 typedef AnnotatedMixin<boost::recursive_mutex> CCriticalSection;
-
-
 typedef AnnotatedMixin<boost::mutex> CWaitableCriticalSection;
 
 #ifdef DEBUG_LOCKORDER

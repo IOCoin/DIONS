@@ -10,7 +10,7 @@
 #include "ptrie/TrieDB.h"
 #include "ptrie/OverlayDB.h"
 #include "ptrie/Address.h"
-#include "transaction.h"
+#include "wallet/transaction.h"
 
 #include <list>
 extern FILE* AppendBlockFile(unsigned int& nFileRet);

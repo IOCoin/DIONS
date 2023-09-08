@@ -1,6 +1,5 @@
 
 #include "ui_interface.h"
-#include "init.h"
 #include "rpc/bitcoin.h"
 #include <string>
 static int noui_ThreadSafeMessageBox(const std::string& message, const std::string& caption, int style)

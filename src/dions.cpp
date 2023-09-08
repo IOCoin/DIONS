@@ -1,11 +1,10 @@
 #include "db.h"
 #include "txdb-leveldb.h"
 #include "keystore.h"
-#include "wallet.h"
-#include "init.h"
+#include "wallet/wallet.h"
 #include "dions.h"
 #include "rpc/bitcoin.h"
-#include "main.h"
+#include "process.h"
 #include "state.h"
 #include "json/json_spirit_reader_template.h"
 #include "json/json_spirit_writer_template.h"
@@ -32,6 +31,7 @@ namespace fs = boost::filesystem;
 extern LocatorNodeDB* ln1Db;
 extern Object JSONRPCError(int code, const string& message);
 extern Value xtu_url__(const string& url);
+extern __wx__* pwalletMainId;
 template<typename T> void ConvertTo(Value& value, bool fAllowNull=false);
 std::map<vchType, uint256> mapMyMessages;
 std::map<vchType, uint256> mapLocator;

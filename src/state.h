@@ -3,7 +3,7 @@
 
 #include <string>
 #include <vector>
-#include "main.h"
+#include "process.h"
 
 
 extern unsigned int LR_SHIFT__[LR_R];

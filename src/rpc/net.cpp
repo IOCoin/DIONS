@@ -2,9 +2,9 @@
 #include "net.h"
 #include "bitcoin.h"
 #include "alert.h"
-#include "wallet.h"
-#include "db.h"
-#include "walletdb.h"
+#include "wallet/wallet.h"
+#include "wallet/db.h"
+#include "wallet/walletdb.h"
 using namespace json_spirit;
 using namespace std;
 Value getconnectioncount(const Array& params, bool fHelp)

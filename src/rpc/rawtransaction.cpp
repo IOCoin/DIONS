@@ -3,14 +3,14 @@
 #include "base58.h"
 #include "bitcoin.h"
 #include "txdb.h"
-#include "init.h"
-#include "main.h"
+#include "process.h"
 #include "net.h"
-#include "wallet.h"
+#include "wallet/wallet.h"
 using namespace std;
 using namespace boost;
 using namespace boost::assign;
 using namespace json_spirit;
+extern __wx__* pwalletMainId;
 extern LocatorNodeDB* ln1Db;
 extern int scaleMonitor();
 void spj(const CScript& scriptPubKey, Object& out, bool fIncludeHex)

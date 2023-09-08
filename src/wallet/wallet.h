@@ -6,7 +6,7 @@
 
 #include <stdlib.h>
 
-#include "main.h"
+#include "process.h"
 #include "key.h"
 #include "keystore.h"
 #include "script.h"
@@ -414,8 +414,6 @@ public:
     int64_t nTimeExpires;
     std::string strComment;
 
-
-
     __wx__Key(int64_t nExpires=0)
     {
         nTimeCreated = (nExpires ? GetTime() : 0);
@@ -432,7 +430,6 @@ public:
         READWRITE(strComment);
     )
 };
-# 872 "wallet.h"
 class CAccount
 {
 public:

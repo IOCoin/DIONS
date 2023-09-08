@@ -1,8 +1,8 @@
 
 #include <iostream>
 #include <fstream>
-#include "init.h"
 #include "bitcoin.h"
+#include "wallet/wallet.h"
 #include "ui_interface.h"
 #include "base58.h"
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -16,6 +16,7 @@ using namespace json_spirit;
 using namespace std;
 void EnsureWalletIsUnlocked();
 namespace bt = boost::posix_time;
+extern __wx__* pwalletMainId;
 extern int checkAddress(string addr, cba& a);
 const std::locale formats[] =
 {

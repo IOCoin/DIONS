@@ -1,12 +1,11 @@
-#include "db.h"
+#include "wallet/db.h"
 #include "txdb-leveldb.h"
 #include "keystore.h"
-#include "wallet.h"
-#include "init.h"
+#include "wallet/wallet.h"
 #include "base_reflect.h"
 #include "uint256.h"
 #include "rpc/bitcoin.h"
-#include "main.h"
+#include "process.h"
 #include "ptrie/TrieDB.h"
 #include "ptrie/StateCacheDB.h"
 #include "ptrie/OverlayDB.h"
@@ -60,6 +59,7 @@ extern string txRelay(const CScript& scriptPubKey, int64_t nValue, const __wx__T
 extern bool aliasAddress(const CTransaction& tx, std::string& strAddress);
 extern Object JSONRPCError(int code, const string& message);
 extern Value xtu_url__(const string& url);
+extern __wx__* pwalletMainId;
 template<typename T> void ConvertTo(Value& value, bool fAllowNull=false);
 std::map<vchType, uint256> mapMyMessages_cycle;
 std::map<vchType, uint256> mapLocator_cycle;

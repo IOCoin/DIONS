@@ -1,7 +1,7 @@
 
 #include "db.h"
 #include "net.h"
-#include "init.h"
+#include "wallet/wallet.h"
 #include "strlcpy.h"
 #include "addrman.h"
 #include "ui_interface.h"
@@ -11,6 +11,8 @@
 using namespace std;
 using namespace boost;
 static const int MAX_OUTBOUND_CONNECTIONS = 16;
+extern __wx__* pwalletMainId;
+void StartShutdown();
 void ThreadMessageHandler2(void* parg);
 void ThreadSocketHandler2(void* parg);
 void ThreadOpenConnections2(void* parg);

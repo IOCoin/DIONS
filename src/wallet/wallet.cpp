@@ -10,7 +10,7 @@
 #include "coincontrol.h"
 #include <boost/algorithm/string/replace.hpp>
 #include "ray_shade.h"
-#include "main.h"
+#include "process.h"
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/filesystem/convenience.hpp>
@@ -18,6 +18,7 @@
 #include <boost/algorithm/string/predicate.hpp>
 using namespace std;
 using namespace boost;
+extern __wx__* pwalletMainId;
 extern ConfigurationState globalState;
 extern CTxMemPool mempool;
 static unsigned int GetStakeSplitAge()

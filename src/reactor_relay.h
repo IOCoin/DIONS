@@ -1,7 +1,6 @@
 #ifndef REACTOR_RELAY
 #define REACTOR_RELAY 
 
-#include "bbuffer.h"
 
 #define s_put(q,x) ((q)[(x)/64] |= (((uint64_t) 1) << (uint64_t) ((x)%64)))
 #define s_extract(q,x) (((q)[(x)/64] >> (uint64_t) ((x)%64)) & 1)

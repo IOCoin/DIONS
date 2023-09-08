@@ -3,7 +3,7 @@
 
 #include <cstdint>
 #include "block.h"
-#include "transaction.h"
+#include "wallet/transaction.h"
 #include "util.h"
 
 class ConfigurationState

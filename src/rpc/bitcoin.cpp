@@ -1,11 +1,11 @@
 
-#include "init.h"
 #include "util.h"
 #include "sync.h"
 #include "ui_interface.h"
 #include "base58.h"
 #include "bitcoin.h"
-#include "db.h"
+#include "wallet/db.h"
+#include "wallet/wallet.h"
 #undef printf
 #include <boost/asio.hpp>
 #include <boost/asio/ip/v6_only.hpp>
@@ -24,6 +24,8 @@ using namespace std;
 using namespace boost;
 using namespace boost::asio;
 using namespace json_spirit;
+extern __wx__* pwalletMainId;
+void StartShutdown();
 static std::string strRPCUserColonPass;
 const Object emptyobj;
 static inline unsigned short GetDefaultRPCPort()

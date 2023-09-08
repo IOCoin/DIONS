@@ -2,10 +2,9 @@
 #define NETWORK_NODE_H
 
 #include "txdb.h"
-#include "walletdb.h"
+#include "wallet/walletdb.h"
 #include "rpc/bitcoin.h"
 #include "net.h"
-#include "init.h"
 #include "util.h"
 #include "ui_interface.h"
 #include "checkpoints.h"
@@ -19,7 +18,7 @@
 #include "ptrie/OverlayDB.h"
 #include "ptrie/TrieDB.h"
 #include "ptrie/Address.h"
-#include "main.h"
+#include "process.h"
 #include "disk_block_locator.h"
 #ifndef WIN32
 #include <signal.h>

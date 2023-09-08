@@ -2,7 +2,7 @@
 #include "db.h"
 #include "net.h"
 #include "util.h"
-#include "main.h"
+#include "process.h"
 #include "ui_interface.h"
 #include "base58.h"
 #include <boost/filesystem.hpp>

@@ -1,7 +1,7 @@
 #ifndef BITCOIN_DB_H
 #define BITCOIN_DB_H 
 
-#include "main.h"
+#include "process.h"
 
 #include <map>
 #include <string>

@@ -1,9 +1,9 @@
 
 #include "block.h"
 #include "kernel.h"
-#include "db.h"
+#include "wallet/db.h"
 #include "checkpoints.h"
-#include "wallet.h"
+#include "wallet/wallet.h"
 #include "txmempool.h"
 
 #include "ui_interface.h"

@@ -42,19 +42,6 @@ public:
   {
     return 0;
   }
-  inline virtual bool burstRelay(BurstBuffer& d)
-  {
-    return true;
-  }
-  inline virtual bool transientRelay(BurstBuffer& d)
-  {
-    return true;
-  }
-  inline virtual bool internRelay(BurstBuffer& d)
-  {
-    return true;
-  }
-  inline virtual void burstTx(BurstBuffer& d) { }
   inline virtual void open() {}
   inline virtual void close() {}
   inline virtual string alias()

@@ -1,12 +1,12 @@
 
-#include "main.h"
-#include "db.h"
+#include "process.h"
+#include "wallet/db.h"
 #include "txdb.h"
-#include "init.h"
 #include "miner.h"
 #include "bitcoin.h"
 using namespace json_spirit;
 using namespace std;
+extern __wx__* pwalletMainId;
 Value getnetworkmhashps(const Array& params, bool fHelp)
 {
   if (fHelp || params.size() > 2)
