@@ -107,21 +107,21 @@ OBJS= \
     obj/netbase.o \
     obj/addrman.o \
     obj/wallet/crypter.o \
-    obj/key.o \
+    obj/crypto/key.o \
     obj/wallet/db.o \
     obj/main/main.o \
     obj/keystore.o \
     obj/view.o \
     obj/miner.o \
     obj/configuration_state.o \
-    obj/process.o \
-    obj/block.o \
+    obj/ccoin/block.o \
+    obj/ccoin/transaction.o \
+    obj/ccoin/client.o \
+    obj/ccoin/process.o \
     obj/block_index.o \
     obj/network_node.o \
     obj/rpc/server.o \
-    obj/client.o \
     obj/wallet/api_transaction.o \
-    obj/wallet/transaction.o \
     obj/txmempool.o \
     obj/net.o \
     obj/protocol.o \
@@ -134,7 +134,7 @@ OBJS= \
     obj/rpc/rawtransaction.o \
     obj/script.o \
     obj/sync.o \
-    obj/util.o \
+    obj/core/util.o \
     obj/wallet/wallet.o \
     obj/wallet/wallet_transaction.o \
     obj/wallet/walletdb.o \
@@ -144,18 +144,18 @@ OBJS= \
     obj/dions.o \
     obj/base_reflect.o \
     obj/noui.o \
-    obj/x11/cubehash.o \
-    obj/x11/luffa.o \
-    obj/x11/aes_helper.o \
-    obj/x11/echo.o \
-    obj/x11/shavite.o \
-    obj/x11/simd.o \
-    obj/x11/blake.o\
-    obj/x11/bmw.o\
-    obj/x11/groestl.o\
-    obj/x11/jh.o\
-    obj/x11/keccak.o\
-    obj/x11/skein.o \
+    obj/crypto/x11/cubehash.o \
+    obj/crypto/x11/luffa.o \
+    obj/crypto/x11/aes_helper.o \
+    obj/crypto/x11/echo.o \
+    obj/crypto/x11/shavite.o \
+    obj/crypto/x11/simd.o \
+    obj/crypto/x11/blake.o\
+    obj/crypto/x11/bmw.o\
+    obj/crypto/x11/groestl.o\
+    obj/crypto/x11/jh.o\
+    obj/crypto/x11/keccak.o\
+    obj/crypto/x11/skein.o \
     obj/kernel.o 
 
 all: iocoind
@@ -226,8 +226,14 @@ clean:
 	-rm -f obj/main/*.P
 	-rm -f obj/wallet/*.o
 	-rm -f obj/wallet/*.P
-	-rm -f obj/x11/*.o
-	-rm -f obj/x11/*.P
+	-rm -f obj/crypto/x11/*.o
+	-rm -f obj/crypto/x11/*.P
+	-rm -f obj/crypto/*.o
+	-rm -f obj/crypto/*.P
+	-rm -f obj/ccoin/*.o
+	-rm -f obj/ccoin/*.P
+	-rm -f obj/core/*.o
+	-rm -f obj/core/*.P
 	-rm -f obj/build.h
 
 FORCE:
