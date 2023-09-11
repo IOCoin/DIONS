@@ -1,6 +1,6 @@
 #include "server.h"
-#include "base58.h"
-#include "util.h"
+#include "core/base58.h"
+#include "core/util.h"
 #include <list>
 
 using namespace std;

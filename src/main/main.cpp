@@ -2,7 +2,7 @@
 #include "wallet/walletdb.h"
 #include "rpc/bitcoin.h"
 #include "net.h"
-#include "util.h"
+#include "core/util.h"
 #include "ui_interface.h"
 #include "checkpoints.h"
 #include <boost/filesystem.hpp>

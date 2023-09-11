@@ -1,10 +1,10 @@
 
 #include "db.h"
 #include "net.h"
-#include "util.h"
-#include "process.h"
+#include "core/util.h"
+#include "ccoin/process.h"
 #include "ui_interface.h"
-#include "base58.h"
+#include "core/base58.h"
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 #ifndef WIN32

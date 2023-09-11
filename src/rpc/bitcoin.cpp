@@ -1,8 +1,8 @@
 
-#include "util.h"
+#include "core/util.h"
 #include "sync.h"
 #include "ui_interface.h"
-#include "base58.h"
+#include "core/base58.h"
 #include "bitcoin.h"
 #include "wallet/db.h"
 #include "wallet/wallet.h"

@@ -1,5 +1,5 @@
 
-#include "process.h"
+#include "ccoin/process.h"
 #include "wallet/db.h"
 #include "txdb.h"
 #include "miner.h"

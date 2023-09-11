@@ -4,13 +4,13 @@
 #include "walletdb.h"
 #include "crypter.h"
 #include "ui_interface.h"
-#include "base58.h"
+#include "core/base58.h"
 #include "kernel.h"
 #include "reference.h"
 #include "coincontrol.h"
 #include <boost/algorithm/string/replace.hpp>
 #include "ray_shade.h"
-#include "process.h"
+#include "ccoin/process.h"
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/filesystem/convenience.hpp>

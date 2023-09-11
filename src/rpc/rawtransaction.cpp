@@ -1,9 +1,9 @@
 
 #include <boost/assign/list_of.hpp>
-#include "base58.h"
+#include "core/base58.h"
 #include "bitcoin.h"
 #include "txdb.h"
-#include "process.h"
+#include "ccoin/process.h"
 #include "net.h"
 #include "wallet/wallet.h"
 using namespace std;

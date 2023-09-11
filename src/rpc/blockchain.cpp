@@ -1,8 +1,8 @@
 
-#include "process.h"
+#include "ccoin/process.h"
 #include "bitcoin.h"
 #include "kernel.h"
-#include "util.h"
+#include "core/util.h"
 #include "wallet/api_transaction.h"
 #include <cmath>
 using namespace json_spirit;
