@@ -2,7 +2,7 @@
 #define BITCOIN_WALLETDB_H 
 
 #include "db.h"
-#include "base58.h"
+#include "core/base58.h"
 
 #include "relay.h"
 

@@ -10,8 +10,8 @@
 #include "kernel.h"
 #include "checkpoints.h"
 #include "txdb.h"
-#include "util.h"
-#include "process.h"
+#include "core/util.h"
+#include "ccoin/process.h"
 using namespace std;
 using namespace boost;
 leveldb::DB *txdb;

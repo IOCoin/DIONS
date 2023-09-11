@@ -1,7 +1,7 @@
 #ifndef NOVACOIN_MINER_H
 #define NOVACOIN_MINER_H 
 
-#include "process.h"
+#include "ccoin/process.h"
 #include "wallet/wallet.h"
 
 

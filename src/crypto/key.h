@@ -6,12 +6,11 @@
 
 #include "allocators.h"
 #include "serialize.h"
-#include "uint256.h"
-#include "util.h"
+#include "core/uint256.h"
+#include "core/util.h"
 #include "ray_shade.h"
 
 #include <openssl/ec.h>
-# 42 "key.h"
 class key_error : public std::runtime_error
 {
 public:

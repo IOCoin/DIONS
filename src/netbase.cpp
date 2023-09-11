@@ -1,11 +1,11 @@
 
 #include "netbase.h"
-#include "util.h"
+#include "core/util.h"
 #include "sync.h"
 #ifndef WIN32
 #include <sys/fcntl.h>
 #endif
-#include "strlcpy.h"
+#include "core/strlcpy.h"
 #include <boost/algorithm/string/case_conv.hpp>
 using namespace std;
 static proxyType proxyInfo[NET_MAX];

@@ -6,12 +6,12 @@
 
 #include <stdlib.h>
 
-#include "process.h"
-#include "key.h"
+#include "ccoin/process.h"
+#include "crypto/key.h"
 #include "keystore.h"
 #include "script.h"
 #include "ui_interface.h"
-#include "util.h"
+#include "core/util.h"
 #include "walletdb.h"
 #include "api_transaction.h"
 #include "wallet_transaction.h"

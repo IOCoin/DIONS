@@ -8,7 +8,7 @@
 #include "serialize.h"
 #include "netbase.h"
 #include <string>
-#include "uint256.h"
+#include "core/uint256.h"
 
 extern bool fTestNet;
 static inline unsigned short GetDefaultPort(const bool testnet = fTestNet)

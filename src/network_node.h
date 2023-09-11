@@ -5,7 +5,7 @@
 #include "wallet/walletdb.h"
 #include "rpc/bitcoin.h"
 #include "net.h"
-#include "util.h"
+#include "core/util.h"
 #include "ui_interface.h"
 #include "checkpoints.h"
 #include <boost/filesystem.hpp>
@@ -18,7 +18,7 @@
 #include "ptrie/OverlayDB.h"
 #include "ptrie/TrieDB.h"
 #include "ptrie/Address.h"
-#include "process.h"
+#include "ccoin/process.h"
 #include "disk_block_locator.h"
 #ifndef WIN32
 #include <signal.h>
@@ -26,7 +26,7 @@
 #include "ptrie/OverlayDB.h"
 
 #include "rpc/server.h"
-#include "client.h"
+#include "ccoin/client.h"
 
 class NetworkNode
 {

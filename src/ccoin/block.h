@@ -5,12 +5,12 @@
 #include "sync.h"
 #include "net.h"
 #include "script.h"
-#include "hashblock.h"
+#include "crypto/hashblock.h"
 #include "ptrie/FixedHash.h"
 #include "ptrie/TrieDB.h"
 #include "ptrie/OverlayDB.h"
 #include "ptrie/Address.h"
-#include "wallet/transaction.h"
+#include "transaction.h"
 
 #include <list>
 extern FILE* AppendBlockFile(unsigned int& nFileRet);

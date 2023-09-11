@@ -1,7 +1,7 @@
 #ifndef HASHBLOCK_H
 #define HASHBLOCK_H 
 
-#include "uint256.h"
+#include "core/uint256.h"
 #include "x11/sph_blake.h"
 #include "x11/sph_bmw.h"
 #include "x11/sph_groestl.h"

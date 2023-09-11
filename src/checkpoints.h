@@ -3,7 +3,7 @@
 
 #include <map>
 #include "net.h"
-#include "util.h"
+#include "core/util.h"
 
 #ifdef WIN32
 #undef STRICT

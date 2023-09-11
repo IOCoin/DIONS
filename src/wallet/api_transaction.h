@@ -1,7 +1,7 @@
 #ifndef HASH_TRANSACTION_H
 #define HASH_TRANSACTION_H
 
-#include "block.h"
+#include "ccoin/block.h"
 
 class CMerkleTx : public CTransaction
 {

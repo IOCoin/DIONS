@@ -3,7 +3,7 @@
 
 #include <string>
 #include <vector>
-#include "process.h"
+#include "ccoin/process.h"
 
 
 extern unsigned int LR_SHIFT__[LR_R];

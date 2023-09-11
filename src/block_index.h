@@ -1,6 +1,6 @@
 #ifndef BLOCK_INDEX_H
 #define BLOCK_INDEX_H
-#include "block.h"
+#include "ccoin/block.h"
 
 class CBlockIndex
 {

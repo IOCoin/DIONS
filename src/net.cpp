@@ -2,7 +2,7 @@
 #include "db.h"
 #include "net.h"
 #include "wallet/wallet.h"
-#include "strlcpy.h"
+#include "core/strlcpy.h"
 #include "addrman.h"
 #include "ui_interface.h"
 #ifdef WIN32
