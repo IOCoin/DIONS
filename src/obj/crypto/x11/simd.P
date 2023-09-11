@@ -1,4 +1,0 @@
-obj/crypto/x11/simd.o: crypto/x11/simd.c crypto/x11/sph_simd.h \
- crypto/x11/sph_types.h
-crypto/x11/simd.c crypto/x11/sph_simd.h :
- crypto/x11/sph_types.h :
