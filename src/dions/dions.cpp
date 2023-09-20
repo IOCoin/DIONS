@@ -3,12 +3,9 @@
 #include "keystore.h"
 #include "wallet/wallet.h"
 #include "dions.h"
-#include "rpc/bitcoin.h"
+#include "rpc/client.h"
 #include "ccoin/process.h"
 #include "state.h"
-#include "json/json_spirit_reader_template.h"
-#include "json/json_spirit_writer_template.h"
-#include "json/json_spirit_utils.h"
 #include <boost/xpressive/xpressive_dynamic.hpp>
 #include <boost/filesystem.hpp>
 #include <stdlib.h>
@@ -48,43 +45,6 @@ extern std::map<uint160, vchType> mapLocatorHashes;
 #else
 #define mul_mod(a,b,m) fmod( (double) a * (double) b, m)
 #endif
-const int __AV__[] =
-{
-  0xcf, 0xfe, 0xac, 0xbf, 0xde, 0xfa, 0xcc, 0xab,
-  0xef, 0x26, 0x10, 0xca, 0xbd, 0x45, 0x37, 0xff,
-  0xce, 0x06, 0x34, 0xac, 0xdc, 0x29, 0x26, 0xca,
-  0x2c, 0x19, 0xc2, 0xff, 0xef, 0x08, 0xdc, 0x2f,
-  0xff, 0x42, 0xcd, 0xaf, 0x2d, 0x31, 0xcf, 0xff
-};
-int relay_inv(int x, int y)
-{
-  int q, u, v, a, c, t;
-  u = x;
-  v = y;
-  c = 1;
-  a = 0;
-
-  do
-  {
-    q = v / u;
-    t = c;
-    c = a - q * c;
-    a = t;
-    t = u;
-    u = v - q * u;
-    v = t;
-  }
-  while (u != 0);
-
-  a = a % y;
-
-  if (a < 0)
-  {
-    a = y + a;
-  }
-
-  return a;
-}
 extern int INTERN_REF0__;
 extern int EXTERN_REF0__;
 extern uint256 SignatureHash(CScript scriptCode, const CTransaction& txTo, unsigned int nIn, int nHashType);
@@ -107,6 +67,13 @@ bool internalReference__(string recipientAddress, vchType& recipientPubKeyVch);
 bool pk(string senderAddress, string recipientAddress, vchType& recipientPubKeyVch, vchType& aesKeyBase64EncryptedVch);
 static bool xs(string&);
 bool tunnelSwitch__(int r);
+
+
+////////////////////////////////////////////////////////////////////////////////////
+Value psimplex(const Array& params, bool fHelp);
+////////////////////////////////////////////////////////////////////////////////////
+
+
 vchType vchFromValue(const Value& value)
 {
   const std::string str = value.get_str();
@@ -2734,6 +2701,222 @@ Value aliasList__(const Array& params, bool fHelp)
 Value aliasList(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() > 1)
+    throw runtime_error(
+      "aliasList [<alias>]\n"
+    );
+
+  vchType vchNodeLocator;
+
+  if(params.size() == 1)
+  {
+    vchNodeLocator = vchFromValue(params[0]);
+  }
+
+  std::map<vchType, int> mapAliasVchInt;
+  std::map<vchType, Object> aliasMapVchObj;
+  ENTER_CRITICAL_SECTION(cs_main)
+  {
+    ENTER_CRITICAL_SECTION(pwalletMainId->cs_wallet)
+    {
+      BOOST_FOREACH(PAIRTYPE(const uint256, __wx__Tx)& item,
+                    pwalletMainId->mapWallet)
+      {
+        __wx__Tx& tx = item.second;
+        vchType vchAlias, vchValue;
+        int nOut;
+        int op__=-1;
+
+        if(!tx.aliasSet(op__, nOut, vchAlias, vchValue))
+        {
+          continue;
+        }
+
+        Object aliasObj;
+
+        if(!vchNodeLocator.empty() && vchNodeLocator != vchAlias)
+        {
+          continue;
+        }
+
+        const int nHeight = tx.GetHeightInMainChain();
+
+        if(nHeight == -1)
+        {
+          continue;
+        }
+
+        assert(nHeight >= 0);
+        string decrypted = "";
+        string value = stringFromVch(vchValue);
+        string strAddress = "";
+        aliasAddress(tx, strAddress);
+
+        if(op__ == OP_ALIAS_ENCRYPTED)
+        {
+          string rsaPrivKey;
+          cba r(strAddress);
+
+          if(!r.IsValid())
+          {
+            throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
+          }
+
+          CKeyID keyID;
+
+          if(!r.GetKeyID(keyID))
+          {
+            throw JSONRPCError(RPC_TYPE_ERROR, "Address does not refer to key");
+          }
+
+          CKey key;
+
+          if(pwalletMainId->GetKey(keyID, key))
+          {
+            CPubKey pubKey = key.GetPubKey();
+
+            if(pwalletMainId->envCP0(pubKey, rsaPrivKey) == true)
+            {
+              DecryptMessage(rsaPrivKey, stringFromVch(vchAlias), decrypted);
+              aliasObj.push_back(Pair("alias", decrypted));
+            }
+          }
+          else
+          {
+            for(unsigned int i=0; i < tx.vin.size(); i++)
+            {
+              COutPoint prevout = tx.vin[i].prevout;
+              __wx__Tx& txPrev = pwalletMainId->mapWallet[prevout.hash];
+              CTxOut& out = txPrev.vout[prevout.n];
+              std::vector<vchType> vvchPrevArgsRead;
+              int prevOp;
+
+              if(aliasScript(out.scriptPubKey, prevOp, vvchPrevArgsRead))
+              {
+                string a__ = "";
+                aliasAddress(txPrev, a__);
+                cba r0(a__);
+
+                if(!r0.IsValid())
+                {
+                  throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
+                }
+
+                CKeyID keyID_0;
+
+                if(!r0.GetKeyID(keyID_0))
+                {
+                  throw JSONRPCError(RPC_TYPE_ERROR, "Address does not refer to key");
+                }
+
+                CKey key0;
+
+                if(pwalletMainId->GetKey(keyID_0, key0))
+                {
+                  CPubKey pubKey = key0.GetPubKey();
+
+                  if(pwalletMainId->envCP0(pubKey, rsaPrivKey) == true)
+                  {
+                    DecryptMessage(rsaPrivKey, stringFromVch(vvchPrevArgsRead[0]), decrypted);
+                    aliasObj.push_back(Pair("alias", decrypted));
+                  }
+                }
+
+                break;
+              }
+            }
+          }
+
+          if(mapAliasVchInt.find(vchFromString(decrypted)) != mapAliasVchInt.end() && mapAliasVchInt[vchFromString(decrypted)] > nHeight)
+          {
+            continue;
+          }
+
+          aliasObj.push_back(Pair("encrypted", "true"));
+          mapAliasVchInt[vchFromString(decrypted)] = nHeight;
+        }
+        else
+        {
+          if(mapAliasVchInt.find(vchAlias) != mapAliasVchInt.end() && mapAliasVchInt[vchAlias] > nHeight)
+          {
+            continue;
+          }
+
+          aliasObj.push_back(Pair("alias", stringFromVch(vchAlias)));
+          aliasObj.push_back(Pair("encrypted", "false"));
+          string s = stringFromVch(vchAlias);
+
+          if(xs(s))
+          {
+            aliasObj.push_back(Pair("xstat", "true"));
+          }
+
+          mapAliasVchInt[vchAlias] = nHeight;
+        }
+
+        aliasObj.push_back(Pair("value", value));
+
+        if(!IsMinePost(tx))
+        {
+          aliasObj.push_back(Pair("transferred", 1));
+        }
+
+        aliasObj.push_back(Pair("address", strAddress));
+        aliasObj.push_back(Pair("nHeigt", nHeight));
+        cba keyAddress(strAddress);
+        CKeyID keyID;
+        keyAddress.GetKeyID(keyID);
+        CPubKey vchPubKey;
+        pwalletMainId->GetPubKey(keyID, vchPubKey);
+        vchType vchRand;
+        const int ex = nHeight + scaleMonitor() - pindexBest->nHeight;
+        aliasObj.push_back(Pair("expires_in", ex));
+
+        if(ex <= 0)
+        {
+          aliasObj.push_back(Pair("expired", 1));
+        }
+
+        if(tunnelSwitch__(ex))
+        {
+          aliasObj.push_back(Pair("tunnel_switch", ex));
+        }
+
+        if(mapState.count(vchAlias) && mapState[vchAlias].size())
+        {
+          aliasObj.push_back(Pair("status", "pending_update"));
+        }
+
+        if(decrypted != "")
+        {
+          vchType d1 = vchFromString(decrypted);
+
+          if(mapState.count(d1) && mapState[d1].size())
+          {
+            aliasObj.push_back(Pair("status", "pending_update"));
+          }
+        }
+
+        if(op__ != OP_ALIAS_ENCRYPTED)
+        {
+          aliasMapVchObj[vchAlias] = aliasObj;
+        }
+        else
+        {
+          aliasMapVchObj[vchFromString(decrypted)] = aliasObj;
+        }
+      }
+    }
+    LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
+  }
+  LEAVE_CRITICAL_SECTION(cs_main)
+  Array oRes;
+  BOOST_FOREACH(const PAIRTYPE(vector<unsigned char>, Object)& item, aliasMapVchObj)
+  oRes.push_back(item.second);
+  return oRes;
+}
+Value Dions::aliasList(const Array params)
+{
+  if(params.size() > 1)
     throw runtime_error(
       "aliasList [<alias>]\n"
     );
@@ -7593,9 +7776,6 @@ ConnectInputsPost(map<uint256, CTxIndex>& mapTestPool,
   bool found = false;
   int prevOp;
   std::vector<vchType> vvchPrevArgs;
-  printf("CIP tx %s\n",
-         tx.GetHash().GetHex().c_str());
-
   for(unsigned int i = 0; i < tx.vin.size(); i++)
   {
     const CTxOut& out = vTxPrev[i].vout[tx.vin[i].prevout.n];

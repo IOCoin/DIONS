@@ -3,7 +3,7 @@
 
 #include "txdb.h"
 #include "wallet/walletdb.h"
-#include "rpc/bitcoin.h"
+#include "rpc/client.h"
 #include "net.h"
 #include "wallet/wallet.h"
 #include "core/util.h"

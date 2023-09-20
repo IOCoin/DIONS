@@ -1,6 +1,6 @@
 
 #include "net.h"
-#include "bitcoin.h"
+#include "client.h"
 #include "alert.h"
 #include "wallet/wallet.h"
 #include "wallet/db.h"

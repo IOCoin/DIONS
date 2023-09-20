@@ -1,9 +1,9 @@
 
 #include "wallet/wallet.h"
 #include "wallet/walletdb.h"
-#include "bitcoin.h"
+#include "client.h"
 #include "core/base58.h"
-#include "dions.h"
+#include "dions/dions.h"
 using namespace json_spirit;
 using namespace std;
 extern ConfigurationState globalState;

@@ -7,11 +7,11 @@
 #include "wallet/wallet.h"
 #include "ui_interface.h"
 #include "kernel.h"
-#include "rpc/bitcoin.h"
+#include "rpc/client.h"
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
-#include "dions.h"
+#include "dions/dions.h"
 #include "configuration_state.h"
 using namespace json_spirit;
 using namespace std;

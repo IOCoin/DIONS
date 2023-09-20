@@ -1,7 +1,7 @@
 
 #include <boost/assign/list_of.hpp>
 #include "core/base58.h"
-#include "bitcoin.h"
+#include "client.h"
 #include "txdb.h"
 #include "ccoin/process.h"
 #include "net.h"

@@ -2,7 +2,7 @@
 #include "txdb-leveldb.h"
 #include "configuration_state.h"
 #include "block.h"
-#include "dions.h"
+#include "dions/dions.h"
 #include "checkpoints.h"
 extern int nCoinbaseMaturity;
 

@@ -1,7 +1,7 @@
 
 #include <iostream>
 #include <fstream>
-#include "bitcoin.h"
+#include "client.h"
 #include "wallet/wallet.h"
 #include "ui_interface.h"
 #include "core/base58.h"

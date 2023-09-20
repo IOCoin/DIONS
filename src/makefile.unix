@@ -120,12 +120,13 @@ OBJS= \
     obj/ccoin/process.o \
     obj/block_index.o \
     obj/network_node.o \
-    obj/rpc/server.o \
     obj/wallet/api_transaction.o \
     obj/txmempool.o \
     obj/net.o \
     obj/protocol.o \
-    obj/rpc/bitcoin.o \
+    obj/rpc/client.o \
+    obj/rpc/util_proto.o \
+    obj/rpc/json_req.o \
     obj/rpc/dump.o \
     obj/rpc/net.o \
     obj/rpc/mining.o \
@@ -141,7 +142,7 @@ OBJS= \
     obj/state.o \
     obj/twister.o \
     obj/tor.o \
-    obj/dions.o \
+    obj/dions/dions.o \
     obj/base_reflect.o \
     obj/noui.o \
     obj/crypto/x11/cubehash.o \
@@ -234,6 +235,8 @@ clean:
 	-rm -f obj/ccoin/*.P
 	-rm -f obj/core/*.o
 	-rm -f obj/core/*.P
+	-rm -f obj/dions/*.o
+	-rm -f obj/dions/*.P
 	-rm -f obj/build.h
 
 FORCE:

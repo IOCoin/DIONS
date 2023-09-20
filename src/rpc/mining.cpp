@@ -3,7 +3,7 @@
 #include "wallet/db.h"
 #include "txdb.h"
 #include "miner.h"
-#include "bitcoin.h"
+#include "client.h"
 using namespace json_spirit;
 using namespace std;
 extern __wx__* pwalletMainId;

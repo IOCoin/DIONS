@@ -1,9 +1,14 @@
 #ifndef DIONS_H
-#define DIONS_H 
+#define DIONS_H
 
 #include "json/json_spirit.h"
 
 #include "reactor_relay.h"
+#include "ccoin/transaction.h"
+#include "json/json_spirit_reader_template.h"
+#include "json/json_spirit_writer_template.h"
+#include "json/json_spirit_utils.h"
+#include "rpc/client.h"
 
 static const int64_t CTRL__ = 0;
 
@@ -56,5 +61,31 @@ bool AcceptToMemoryPoolPost(const CTransaction& tx);
 void RemoveFromMemoryPoolPost(const CTransaction& tx);
 bool IsMinePost(const CTransaction& tx);
 bool IsMinePost(const CTransaction& tx, const CTxOut& txout, bool ignore_registerAlias = false);
+
+//XXXX template <class I> using AbstractMethodPointer = json_spirit::Value (I::*)(const json_spirit::Array& params, bool fHelp);
+
+//XXXX template <class I>
+//XXXX class CRPCCommand_
+//XXXX {
+//XXXX public:
+//XXXX   std::string name;
+//XXXX   AbstractMethodPointer<I> actor;
+//XXXX   bool okSafeMode;
+//XXXX   bool unlocked;
+//XXXX };
+
+//XXXX #include "rpc/dions_face.h"
+#include "rpc/generic_server.h"
+
+class Dions : public DionsFace
+{
+  public:
+  Dions()
+  {
+    //this->bindMethod({"aliasList", true, false }, &DionsFace::aliasList);
+  }
+  //Value aliasList(const Array& params, bool fHelp);
+  virtual json_spirit::Value aliasList(const json_spirit::Array) override;
+};
 
 #endif

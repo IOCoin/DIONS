@@ -7,7 +7,7 @@
 #include "crypto/key.h"
 #include "script.h"
 #include "ccoin/process.h"
-#include "dions.h"
+#include "dions/dions.h"
 static const char* pszBase58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 
 

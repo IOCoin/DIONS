@@ -1,6 +1,6 @@
 
 #include "ccoin/process.h"
-#include "bitcoin.h"
+#include "client.h"
 #include "kernel.h"
 #include "core/util.h"
 #include "wallet/api_transaction.h"

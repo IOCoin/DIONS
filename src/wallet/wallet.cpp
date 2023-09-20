@@ -6,7 +6,7 @@
 #include "ui_interface.h"
 #include "core/base58.h"
 #include "kernel.h"
-#include "reference.h"
+#include "dions/reference.h"
 #include "coincontrol.h"
 #include <boost/algorithm/string/replace.hpp>
 #include "ray_shade.h"

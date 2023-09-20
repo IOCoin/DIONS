@@ -3,7 +3,7 @@
 
 #include "txdb.h"
 #include "wallet/walletdb.h"
-#include "rpc/bitcoin.h"
+#include "rpc/client.h"
 #include "net.h"
 #include "core/util.h"
 #include "ui_interface.h"
@@ -25,7 +25,7 @@
 #endif
 #include "ptrie/OverlayDB.h"
 
-#include "rpc/server.h"
+#include "rpc/generic_server.h"
 #include "ccoin/client.h"
 
 class NetworkNode
@@ -37,13 +37,10 @@ class NetworkNode
     }
 
     NetworkNode(std::map<string,string> argsMap) 
-	    : client_(&uiFace),
-	      rpcServer_(&uiFace)
+	    : client_(&uiFace_)
     { 
 	    this->argsMap_ = argsMap;
 	    pwalletMain_ = new __wx__("wallet.dat");
-	    //this->rpcServer_.start(this->argsMap_);
-
     }
 
     NetworkNode(boost::filesystem::path const& _dbPath, bool testNet = false);
@@ -66,8 +63,8 @@ class NetworkNode
     LocatorNodeDB* ln1Db_;
     VertexNodeDB* vertexDB_;
     Client client_;
-    RPCServer rpcServer_;
-    CClientUIInterface uiFace;
+    std::unique_ptr<GenericServer<>> rpcServer_;
+    CClientUIInterface uiFace_;
 };
 
 #endif
