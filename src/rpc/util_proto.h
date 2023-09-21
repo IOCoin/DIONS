@@ -1,5 +1,4 @@
-#ifndef UTIL_PROTO_H
-#define UTIL_PROTO_H
+#pragma once
 
 #include <stdlib.h>
 #include <string>
@@ -44,4 +43,3 @@ std::string JSONRPCRequest(const std::string& strMethod, const json_spirit::Arra
   void ErrorReply(std::ostream& stream, const json_spirit::Object& objError, const json_spirit::Value& id);
   std::string rfc1123Time();
 
-#endif

@@ -1,5 +1,4 @@
-#ifndef DIONS_H
-#define DIONS_H
+#pragma once
 
 #include "json/json_spirit.h"
 
@@ -9,6 +8,7 @@
 #include "json/json_spirit_writer_template.h"
 #include "json/json_spirit_utils.h"
 #include "rpc/client.h"
+#include "rpc/dions_face.h"
 
 static const int64_t CTRL__ = 0;
 
@@ -36,7 +36,6 @@ extern std::map<vchType, std::set<uint256> > mapState;
 extern std::set<vchType> setNewHashes;
 
 
-unsigned char GetAddressVersion();
 class cba;
 
 int checkAddress(string addr, cba& a);
@@ -55,37 +54,78 @@ bool ConnectInputsPost( map<uint256, CTxIndex>& mapTestPool,
                         vector<CTxIndex>& vTxindex,
                         CBlockIndex* pindexBlock,
                         CDiskTxPos& txPos,
-                        bool fBlock,
-                        bool fMiner);
+                       bool fBlock,
+                       bool fMiner);
 bool AcceptToMemoryPoolPost(const CTransaction& tx);
 void RemoveFromMemoryPoolPost(const CTransaction& tx);
 bool IsMinePost(const CTransaction& tx);
-bool IsMinePost(const CTransaction& tx, const CTxOut& txout, bool ignore_registerAlias = false);
+bool IsMinePost(const CTransaction& tx, const CTxOut& txout,bool ignore_registerAlias = false);
 
-//XXXX template <class I> using AbstractMethodPointer = json_spirit::Value (I::*)(const json_spirit::Array& params, bool fHelp);
-
-//XXXX template <class I>
-//XXXX class CRPCCommand_
-//XXXX {
-//XXXX public:
-//XXXX   std::string name;
-//XXXX   AbstractMethodPointer<I> actor;
-//XXXX   bool okSafeMode;
-//XXXX   bool unlocked;
-//XXXX };
-
-//XXXX #include "rpc/dions_face.h"
-#include "rpc/generic_server.h"
 
 class Dions : public DionsFace
 {
-  public:
+public:
   Dions()
   {
-    //this->bindMethod({"aliasList", true, false }, &DionsFace::aliasList);
   }
-  //Value aliasList(const Array& params, bool fHelp);
-  virtual json_spirit::Value aliasList(const json_spirit::Array) override;
+  virtual json_spirit::Value aliasList(const json_spirit::Array&, bool) override;
+  virtual json_spirit::Value vertexScan(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value gw1(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value myRSAKeys(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value myRSAKeys__(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value publicKeyExports(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value publicKeys(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value decryptedMessageList(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value plainTextMessageList(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value externFrame__(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value internFrame__(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value aliasOut(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value nodeValidate(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value validateLocator(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value nodeRetrieve(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value getNodeRecord(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value aliasList__(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value nodeDebug(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value nodeDebug1(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value transform(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value primaryCXValidate(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value vextract(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value vEPID(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value validate(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value transientStatus__C(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value updateEncryptedAliasFile(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value updateEncryptedAlias(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value decryptAlias(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value transferEncryptedExtPredicate(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value transferEncryptedAlias(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value transferAlias(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value uC(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value transientStatus__(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value updateAliasFile(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value updateAlias_executeContractPayload(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value updateAlias(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value publicKey(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value sendSymmetric(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value sendPublicKey(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value sendPlainMessage(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value sendMessage(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value registerAliasGenerate(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value registerAlias(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value alias(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value statusList(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value updateEncrypt(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value downloadDecrypt(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value downloadDecryptEPID(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value ioget(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value extract(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value vtx(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value mapVertex(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value vtxtrace(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value mapProject(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value projection(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value xstat(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value svtx(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value simplexU(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value psimplex(const json_spirit::Array&,bool) override;
 };
 
-#endif

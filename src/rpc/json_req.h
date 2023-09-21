@@ -1,5 +1,4 @@
-#ifndef JSON_REQ_H
-#define JSON_REQ_H
+#pragma once
 
 #include <stdlib.h>
 #include <string>
@@ -27,4 +26,3 @@ public:
 };
 }
 
-#endif

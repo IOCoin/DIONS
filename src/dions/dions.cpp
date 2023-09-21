@@ -146,7 +146,7 @@ bool channelPredicate(string ext, string& tor)
   LEAVE_CRITICAL_SECTION(cs_main)
   return true;
 }
-Value vertexScan(const Array& params, bool fHelp)
+Value Dions::vertexScan(const Array& params, bool fHelp)
 {
   Array oRes;
   VertexNodeDB vertexDB("r");
@@ -257,7 +257,7 @@ Value vertexScan(const Array& params, bool fHelp)
 
   return oRes;
 }
-Value gw1(const Array& params, bool fHelp)
+Value Dions::gw1(const Array& params, bool fHelp)
 {
   Array oRes;
   LocatorNodeDB ln1Db("r");
@@ -831,7 +831,7 @@ bool aliasAddress(const CDiskTxPos& txPos, std::string& strAddress)
 
   return aliasAddress(tx, strAddress);
 }
-Value myRSAKeys(const Array& params, bool fHelp)
+Value Dions::myRSAKeys(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() > 1)
     throw runtime_error(
@@ -884,7 +884,7 @@ Value myRSAKeys(const Array& params, bool fHelp)
   }
   return jsonAddressRSAList;
 }
-Value myRSAKeys__(const Array& params, bool fHelp)
+Value Dions::myRSAKeys__(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() > 1)
     throw runtime_error(
@@ -937,7 +937,7 @@ Value myRSAKeys__(const Array& params, bool fHelp)
   }
   return jsonAddressRSAList;
 }
-Value publicKeyExports(const Array& params, bool fHelp)
+Value Dions::publicKeyExports(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() > 1)
     throw runtime_error(
@@ -999,7 +999,7 @@ Value publicKeyExports(const Array& params, bool fHelp)
   oRes.push_back(item.second);
   return oRes;
 }
-Value publicKeys(const Array& params, bool fHelp)
+Value Dions::publicKeys(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() > 1)
     throw runtime_error(
@@ -1140,7 +1140,7 @@ bool hk(string addrStr)
 
   return true;
 }
-Value decryptedMessageList(const Array& params, bool fHelp)
+Value Dions::decryptedMessageList(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() > 1)
     throw runtime_error(
@@ -1271,7 +1271,7 @@ Value decryptedMessageList(const Array& params, bool fHelp)
   LEAVE_CRITICAL_SECTION(cs_main)
   return oRes;
 }
-Value plainTextMessageList(const Array& params, bool fHelp)
+Value Dions::plainTextMessageList(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() > 1)
     throw runtime_error(
@@ -1318,7 +1318,7 @@ Value plainTextMessageList(const Array& params, bool fHelp)
   LEAVE_CRITICAL_SECTION(cs_main)
   return oRes;
 }
-Value externFrame__(const Array& params, bool fHelp)
+Value Dions::externFrame__(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() != 1)
     throw runtime_error(
@@ -1411,7 +1411,7 @@ Value externFrame__(const Array& params, bool fHelp)
   LEAVE_CRITICAL_SECTION(cs_main)
   return wtx.GetHash().GetHex();
 }
-Value internFrame__(const Array& params, bool fHelp)
+Value Dions::internFrame__(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() != 1)
     throw runtime_error(
@@ -1656,7 +1656,7 @@ Value internFrame__(const Array& params, bool fHelp)
   return wtx.GetHash().GetHex();
   return false;
 }
-Value aliasOut(const Array& params, bool fHelp)
+Value Dions::aliasOut(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() != 2)
     throw runtime_error(
@@ -1796,7 +1796,7 @@ Value aliasOut(const Array& params, bool fHelp)
 
   return false;
 }
-Value nodeValidate(const Array& params, bool fHelp)
+Value Dions::nodeValidate(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() > 1)
     throw runtime_error(
@@ -1944,7 +1944,7 @@ Value nodeValidate(const Array& params, bool fHelp)
   LEAVE_CRITICAL_SECTION(cs_main)
   return oRes;
 }
-Value validateLocator(const Array& params, bool fHelp)
+Value Dions::validateLocator(const Array& params, bool fHelp)
 {
   if (fHelp || params.size() != 1)
     throw runtime_error(
@@ -1979,7 +1979,7 @@ Value validateLocator(const Array& params, bool fHelp)
 
   return ret;
 }
-Value nodeRetrieve(const Array& params, bool fHelp)
+Value Dions::nodeRetrieve(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() > 1)
     throw runtime_error(
@@ -2125,7 +2125,7 @@ Value nodeRetrieve(const Array& params, bool fHelp)
   LEAVE_CRITICAL_SECTION(cs_main)
   return oRes;
 }
-Value getNodeRecord(const Array& params, bool fHelp)
+Value Dions::getNodeRecord(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() > 1)
     throw runtime_error(
@@ -2471,7 +2471,7 @@ bool searchAliasEncrypted(string alias, uint256& wtxInHash)
   LEAVE_CRITICAL_SECTION(cs_main)
   return found;
 }
-Value aliasList__(const Array& params, bool fHelp)
+Value Dions::aliasList__(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() > 1)
     throw runtime_error(
@@ -2698,7 +2698,7 @@ Value aliasList__(const Array& params, bool fHelp)
   oRes.push_back(item.second);
   return oRes;
 }
-Value aliasList(const Array& params, bool fHelp)
+Value Dions::aliasList(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() > 1)
     throw runtime_error(
@@ -2914,223 +2914,7 @@ Value aliasList(const Array& params, bool fHelp)
   oRes.push_back(item.second);
   return oRes;
 }
-Value Dions::aliasList(const Array params)
-{
-  if(params.size() > 1)
-    throw runtime_error(
-      "aliasList [<alias>]\n"
-    );
-
-  vchType vchNodeLocator;
-
-  if(params.size() == 1)
-  {
-    vchNodeLocator = vchFromValue(params[0]);
-  }
-
-  std::map<vchType, int> mapAliasVchInt;
-  std::map<vchType, Object> aliasMapVchObj;
-  ENTER_CRITICAL_SECTION(cs_main)
-  {
-    ENTER_CRITICAL_SECTION(pwalletMainId->cs_wallet)
-    {
-      BOOST_FOREACH(PAIRTYPE(const uint256, __wx__Tx)& item,
-                    pwalletMainId->mapWallet)
-      {
-        __wx__Tx& tx = item.second;
-        vchType vchAlias, vchValue;
-        int nOut;
-        int op__=-1;
-
-        if(!tx.aliasSet(op__, nOut, vchAlias, vchValue))
-        {
-          continue;
-        }
-
-        Object aliasObj;
-
-        if(!vchNodeLocator.empty() && vchNodeLocator != vchAlias)
-        {
-          continue;
-        }
-
-        const int nHeight = tx.GetHeightInMainChain();
-
-        if(nHeight == -1)
-        {
-          continue;
-        }
-
-        assert(nHeight >= 0);
-        string decrypted = "";
-        string value = stringFromVch(vchValue);
-        string strAddress = "";
-        aliasAddress(tx, strAddress);
-
-        if(op__ == OP_ALIAS_ENCRYPTED)
-        {
-          string rsaPrivKey;
-          cba r(strAddress);
-
-          if(!r.IsValid())
-          {
-            throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
-          }
-
-          CKeyID keyID;
-
-          if(!r.GetKeyID(keyID))
-          {
-            throw JSONRPCError(RPC_TYPE_ERROR, "Address does not refer to key");
-          }
-
-          CKey key;
-
-          if(pwalletMainId->GetKey(keyID, key))
-          {
-            CPubKey pubKey = key.GetPubKey();
-
-            if(pwalletMainId->envCP0(pubKey, rsaPrivKey) == true)
-            {
-              DecryptMessage(rsaPrivKey, stringFromVch(vchAlias), decrypted);
-              aliasObj.push_back(Pair("alias", decrypted));
-            }
-          }
-          else
-          {
-            for(unsigned int i=0; i < tx.vin.size(); i++)
-            {
-              COutPoint prevout = tx.vin[i].prevout;
-              __wx__Tx& txPrev = pwalletMainId->mapWallet[prevout.hash];
-              CTxOut& out = txPrev.vout[prevout.n];
-              std::vector<vchType> vvchPrevArgsRead;
-              int prevOp;
-
-              if(aliasScript(out.scriptPubKey, prevOp, vvchPrevArgsRead))
-              {
-                string a__ = "";
-                aliasAddress(txPrev, a__);
-                cba r0(a__);
-
-                if(!r0.IsValid())
-                {
-                  throw JSONRPCError(RPC_TYPE_ERROR, "Invalid address");
-                }
-
-                CKeyID keyID_0;
-
-                if(!r0.GetKeyID(keyID_0))
-                {
-                  throw JSONRPCError(RPC_TYPE_ERROR, "Address does not refer to key");
-                }
-
-                CKey key0;
-
-                if(pwalletMainId->GetKey(keyID_0, key0))
-                {
-                  CPubKey pubKey = key0.GetPubKey();
-
-                  if(pwalletMainId->envCP0(pubKey, rsaPrivKey) == true)
-                  {
-                    DecryptMessage(rsaPrivKey, stringFromVch(vvchPrevArgsRead[0]), decrypted);
-                    aliasObj.push_back(Pair("alias", decrypted));
-                  }
-                }
-
-                break;
-              }
-            }
-          }
-
-          if(mapAliasVchInt.find(vchFromString(decrypted)) != mapAliasVchInt.end() && mapAliasVchInt[vchFromString(decrypted)] > nHeight)
-          {
-            continue;
-          }
-
-          aliasObj.push_back(Pair("encrypted", "true"));
-          mapAliasVchInt[vchFromString(decrypted)] = nHeight;
-        }
-        else
-        {
-          if(mapAliasVchInt.find(vchAlias) != mapAliasVchInt.end() && mapAliasVchInt[vchAlias] > nHeight)
-          {
-            continue;
-          }
-
-          aliasObj.push_back(Pair("alias", stringFromVch(vchAlias)));
-          aliasObj.push_back(Pair("encrypted", "false"));
-          string s = stringFromVch(vchAlias);
-
-          if(xs(s))
-          {
-            aliasObj.push_back(Pair("xstat", "true"));
-          }
-
-          mapAliasVchInt[vchAlias] = nHeight;
-        }
-
-        aliasObj.push_back(Pair("value", value));
-
-        if(!IsMinePost(tx))
-        {
-          aliasObj.push_back(Pair("transferred", 1));
-        }
-
-        aliasObj.push_back(Pair("address", strAddress));
-        aliasObj.push_back(Pair("nHeigt", nHeight));
-        cba keyAddress(strAddress);
-        CKeyID keyID;
-        keyAddress.GetKeyID(keyID);
-        CPubKey vchPubKey;
-        pwalletMainId->GetPubKey(keyID, vchPubKey);
-        vchType vchRand;
-        const int ex = nHeight + scaleMonitor() - pindexBest->nHeight;
-        aliasObj.push_back(Pair("expires_in", ex));
-
-        if(ex <= 0)
-        {
-          aliasObj.push_back(Pair("expired", 1));
-        }
-
-        if(tunnelSwitch__(ex))
-        {
-          aliasObj.push_back(Pair("tunnel_switch", ex));
-        }
-
-        if(mapState.count(vchAlias) && mapState[vchAlias].size())
-        {
-          aliasObj.push_back(Pair("status", "pending_update"));
-        }
-
-        if(decrypted != "")
-        {
-          vchType d1 = vchFromString(decrypted);
-
-          if(mapState.count(d1) && mapState[d1].size())
-          {
-            aliasObj.push_back(Pair("status", "pending_update"));
-          }
-        }
-
-        if(op__ != OP_ALIAS_ENCRYPTED)
-        {
-          aliasMapVchObj[vchAlias] = aliasObj;
-        }
-        else
-        {
-          aliasMapVchObj[vchFromString(decrypted)] = aliasObj;
-        }
-      }
-    }
-    LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
-  }
-  LEAVE_CRITICAL_SECTION(cs_main)
-  Array oRes;
-  BOOST_FOREACH(const PAIRTYPE(vector<unsigned char>, Object)& item, aliasMapVchObj)
-  oRes.push_back(item.second);
-  return oRes;
-}
-Value nodeDebug(const Array& params, bool fHelp)
+Value Dions::nodeDebug(const Array& params, bool fHelp)
 {
   if(fHelp)
     throw runtime_error(
@@ -3160,7 +2944,7 @@ Value nodeDebug(const Array& params, bool fHelp)
   printf("----------------------------\n");
   return true;
 }
-Value nodeDebug1(const Array& params, bool fHelp)
+Value Dions::nodeDebug1(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() < 1)
     throw runtime_error(
@@ -3195,7 +2979,7 @@ Value nodeDebug1(const Array& params, bool fHelp)
   printf("-------------------------\n");
   return true;
 }
-Value transform(const Array& params, bool fHelp)
+Value Dions::transform(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() != 2)
     throw runtime_error(
@@ -3242,7 +3026,7 @@ Value transform(const Array& params, bool fHelp)
   boost::iostreams::copy(in__, file__);
   return true;
 }
-Value primaryCXValidate(const Array& params, bool fHelp)
+Value Dions::primaryCXValidate(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() != 3)
     throw runtime_error(
@@ -3602,7 +3386,7 @@ Value primaryCXValidate(const Array& params, bool fHelp)
   LEAVE_CRITICAL_SECTION(cs_main)
   return ret;
 }
-Value vextract(const Array& params, bool fHelp)
+Value Dions::vextract(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() != 3)
     throw runtime_error(
@@ -3697,7 +3481,7 @@ Value vextract(const Array& params, bool fHelp)
 
   return true;
 }
-Value vEPID(const Array& params, bool fHelp)
+Value Dions::vEPID(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() != 2)
     throw runtime_error(
@@ -3920,7 +3704,7 @@ Value vEPID(const Array& params, bool fHelp)
 
   return false;
 }
-Value validate(const Array& params, bool fHelp)
+Value Dions::validate(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() != 2)
     throw runtime_error(
@@ -4136,7 +3920,7 @@ Value validate(const Array& params, bool fHelp)
 
   return false;
 }
-Value transientStatus__C(const Array& params, bool fHelp)
+Value Dions::transientStatus__C(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() != 2)
     throw runtime_error(
@@ -4314,7 +4098,7 @@ Value transientStatus__C(const Array& params, bool fHelp)
   LEAVE_CRITICAL_SECTION(cs_main)
   return ret;
 }
-Value updateEncryptedAliasFile(const Array& params, bool fHelp)
+Value Dions::updateEncryptedAliasFile(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() != 2)
     throw runtime_error(
@@ -4469,7 +4253,7 @@ Value updateEncryptedAliasFile(const Array& params, bool fHelp)
   LEAVE_CRITICAL_SECTION(cs_main)
   return wtx.GetHash().GetHex();
 }
-Value updateEncryptedAlias(const Array& params, bool fHelp)
+Value Dions::updateEncryptedAlias(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() != 3)
     throw runtime_error(
@@ -4601,7 +4385,7 @@ Value updateEncryptedAlias(const Array& params, bool fHelp)
   LEAVE_CRITICAL_SECTION(cs_main)
   return wtx.GetHash().GetHex();
 }
-Value decryptAlias(const Array& params, bool fHelp)
+Value Dions::decryptAlias(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() != 2 )
     throw runtime_error(
@@ -4776,7 +4560,7 @@ Value decryptAlias(const Array& params, bool fHelp)
   LEAVE_CRITICAL_SECTION(cs_main)
   return wtx.GetHash().GetHex();
 }
-Value transferEncryptedExtPredicate(const Array& params, bool fHelp)
+Value Dions::transferEncryptedExtPredicate(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() < 3 || params.size() > 4)
     throw runtime_error(
@@ -5098,7 +4882,7 @@ Value transferEncryptedExtPredicate(const Array& params, bool fHelp)
   LEAVE_CRITICAL_SECTION(cs_main)
   return wtx.GetHash().GetHex();
 }
-Value transferEncryptedAlias(const Array& params, bool fHelp)
+Value Dions::transferEncryptedAlias(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() != 3)
     throw runtime_error(
@@ -5445,7 +5229,7 @@ Value transferEncryptedAlias(const Array& params, bool fHelp)
   LEAVE_CRITICAL_SECTION(cs_main)
   return wtx.GetHash().GetHex();
 }
-Value transferAlias(const Array& params, bool fHelp)
+Value Dions::transferAlias(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() != 2)
     throw runtime_error(
@@ -5551,7 +5335,7 @@ Value transferAlias(const Array& params, bool fHelp)
   LEAVE_CRITICAL_SECTION(cs_main)
   return wtx.GetHash().GetHex();
 }
-Value uC(const Array& params, bool fHelp)
+Value Dions::uC(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() != 2)
     throw runtime_error(
@@ -5735,7 +5519,7 @@ Value uC(const Array& params, bool fHelp)
   LEAVE_CRITICAL_SECTION(cs_main)
   return wtx.GetHash().GetHex();
 }
-Value transientStatus__(const Array& params, bool fHelp)
+Value Dions::transientStatus__(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() < 2 || params.size() > 3)
     throw runtime_error(
@@ -5860,7 +5644,7 @@ Value transientStatus__(const Array& params, bool fHelp)
   LEAVE_CRITICAL_SECTION(cs_main)
   return ret;
 }
-Value updateAliasFile(const Array& params, bool fHelp)
+Value Dions::updateAliasFile(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() < 2 || params.size() > 3)
     throw runtime_error(
@@ -5985,7 +5769,7 @@ Value updateAliasFile(const Array& params, bool fHelp)
   LEAVE_CRITICAL_SECTION(cs_main)
   return wtx.GetHash().GetHex();
 }
-Value updateAlias_executeContractPayload(const Array& params, bool fHelp)
+Value Dions::updateAlias_executeContractPayload(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() < 2 || params.size() > 4)
     throw runtime_error(
@@ -6148,7 +5932,7 @@ Value updateAlias_executeContractPayload(const Array& params, bool fHelp)
   LEAVE_CRITICAL_SECTION(cs_main)
   return wtx.GetHash().GetHex();
 }
-Value updateAlias(const Array& params, bool fHelp)
+Value Dions::updateAlias(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() < 2 || params.size() > 3)
     throw runtime_error(
@@ -6252,7 +6036,7 @@ Value updateAlias(const Array& params, bool fHelp)
   LEAVE_CRITICAL_SECTION(cs_main)
   return wtx.GetHash().GetHex();
 }
-Value publicKey(const Array& params, bool fHelp)
+Value Dions::publicKey(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() != 1)
     throw runtime_error(
@@ -6314,7 +6098,7 @@ Value publicKey(const Array& params, bool fHelp)
   res.push_back(testKey);
   return res;
 }
-Value sendSymmetric(const Array& params, bool fHelp)
+Value Dions::sendSymmetric(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() != 2)
     throw runtime_error(
@@ -6601,7 +6385,7 @@ int checkAddress(string addr, cba& a)
   a = address;
   return 0;
 }
-Value sendPublicKey(const Array& params, bool fHelp)
+Value Dions::sendPublicKey(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() != 2)
     throw runtime_error(
@@ -6740,7 +6524,7 @@ Value sendPublicKey(const Array& params, bool fHelp)
   res.push_back(sigBase64);
   return res;
 }
-Value sendPlainMessage(const Array& params, bool fHelp)
+Value Dions::sendPlainMessage(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() > 3)
     throw runtime_error(
@@ -6828,7 +6612,7 @@ Value sendPlainMessage(const Array& params, bool fHelp)
   res.push_back(wtx.GetHash().GetHex());
   return res;
 }
-Value sendMessage(const Array& params, bool fHelp)
+Value Dions::sendMessage(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() > 3)
     throw runtime_error(
@@ -7028,7 +6812,7 @@ bool sign_verifymessage(string address)
 
   return(key__.GetPubKey().GetID() == keyID__);
 }
-Value registerAliasGenerate(const Array& params, bool fHelp)
+Value Dions::registerAliasGenerate(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() != 1)
     throw runtime_error(
@@ -7187,7 +6971,7 @@ Value registerAliasGenerate(const Array& params, bool fHelp)
   res.push_back(wtx.GetHash().GetHex());
   return res;
 }
-Value registerAlias(const Array& params, bool fHelp)
+Value Dions::registerAlias(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() != 2)
     throw runtime_error(
@@ -8231,31 +8015,27 @@ void xsc(CBlockIndex* p)
 
   return;
 }
-unsigned char GetAddressVersion()
-{
-  return((unsigned char)(fTestNet ? 111 : 103));
-}
-Value alias(const Array& params, bool fHelp)
+Value Dions::alias(const Array& params, bool fHelp)
 {
   return registerAliasGenerate(params, fHelp);
 }
-Value statusList(const Array& params, bool fHelp)
+Value Dions::statusList(const Array& params, bool fHelp)
 {
   return aliasList__(params, fHelp);
 }
-Value updateEncrypt(const Array& params, bool fHelp)
+Value Dions::updateEncrypt(const Array& params, bool fHelp)
 {
   return uC(params, fHelp);
 }
-Value downloadDecrypt(const Array& params, bool fHelp)
+Value Dions::downloadDecrypt(const Array& params, bool fHelp)
 {
   return validate(params, fHelp);
 }
-Value downloadDecryptEPID(const Array& params, bool fHelp)
+Value Dions::downloadDecryptEPID(const Array& params, bool fHelp)
 {
   return vEPID(params, fHelp);
 }
-Value ioget(const Array& params, bool fHelp)
+Value Dions::ioget(const Array& params, bool fHelp)
 {
   return psimplex(params, fHelp);
 }
@@ -8263,7 +8043,7 @@ bool relaySigFrame(int i, vchType& s)
 {
   return LR_SHIFT__[i] == s[0];
 }
-Value extract(const Array& params, bool fHelp)
+Value Dions::extract(const Array& params, bool fHelp)
 {
   return vextract(params, fHelp);
 }
@@ -8271,7 +8051,7 @@ bool frlRelay(int& i)
 {
   return true;
 }
-Value vtx(const Array& params, bool fHelp)
+Value Dions::vtx(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() != 1)
     throw runtime_error(
@@ -8329,7 +8109,7 @@ Value vtx(const Array& params, bool fHelp)
 
   return true;
 }
-Value mapVertex(const Array& params, bool fHelp)
+Value Dions::mapVertex(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() != 2)
     throw runtime_error(
@@ -8529,7 +8309,7 @@ bool pk(string myAddress, string fKey, vchType& recipientPubKeyVch, vchType& aes
   LEAVE_CRITICAL_SECTION(cs_main)
   return false;
 }
-Value vtxtrace(const Array& params, bool fHelp)
+Value Dions::vtxtrace(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() > 1)
     throw runtime_error(
@@ -8652,7 +8432,7 @@ Value vtxtrace(const Array& params, bool fHelp)
 
   return oRes;
 }
-Value mapProject(const Array& params, bool fHelp)
+Value Dions::mapProject(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() != 3)
     throw runtime_error(
@@ -8828,7 +8608,7 @@ Value mapProject(const Array& params, bool fHelp)
   res.push_back(wtx.GetHash().GetHex());
   return res;
 }
-Value projection(const Array& params, bool fHelp)
+Value Dions::projection(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() > 1)
     throw runtime_error(
@@ -9175,7 +8955,7 @@ bool vclose(string& v, string& w)
 
   return false;
 }
-Value xstat(const Array& params, bool fHelp)
+Value Dions::xstat(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() != 1)
     throw runtime_error(
@@ -9282,7 +9062,7 @@ static bool xs(string& s)
   string r;
   return pwalletMainId->vtx_(vchPubKey, r);
 }
-Value svtx(const Array& params, bool fHelp)
+Value Dions::svtx(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() != 1)
     throw runtime_error(
@@ -9458,7 +9238,7 @@ Value svtx(const Array& params, bool fHelp)
 
   return res_;
 }
-Value simplexU(const Array& params, bool fHelp)
+Value Dions::simplexU(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() != 2)
     throw runtime_error(
@@ -9584,7 +9364,7 @@ Value simplexU(const Array& params, bool fHelp)
   LEAVE_CRITICAL_SECTION(cs_main)
   return wtx.GetHash().GetHex();
 }
-Value psimplex(const Array& params, bool fHelp)
+Value Dions::psimplex(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() != 2)
     throw runtime_error(

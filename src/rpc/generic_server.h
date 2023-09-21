@@ -1,5 +1,4 @@
-#ifndef GENERIC_SERVER_H
-#define GENERIC_SERVER_H
+#pragma once
 
 #include <stdlib.h>
 #include <string>
@@ -633,26 +632,3 @@ protected:
 private:
   Methods methods_;
 };
-
-class DionsFace : public ServerInterface<DionsFace>
-{
-public:
-  DionsFace()
-  {
-    this->bindMethod("aliasList", RPCMethod<DionsFace> {&DionsFace::aliasList, "true","false"});
-  }
-  virtual RPCModules implementedModules() const override
-  {
-    return RPCModules{RPCModule{"DIONS", "dvm.1.0"}};
-  }
-
-  inline virtual void aliasList(const json_spirit::Array &req, json_spirit::Value &res)
-  {
-    (void)req;
-    res = this->aliasList(req);
-  }
-
-  virtual json_spirit::Value aliasList(const json_spirit::Array) = 0;
-};
-
-#endif

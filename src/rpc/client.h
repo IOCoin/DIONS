@@ -1,5 +1,4 @@
-#ifndef _CLIENTRPC_H_
-#define _CLIENTRPC_H_ 1
+#pragma once
 
 #include <string>
 #include <list>
@@ -86,4 +85,3 @@ extern uint256 ParseHashV(const json_spirit::Value& v, std::string aliasStr);
 extern uint256 ParseHashO(const json_spirit::Object& o, std::string strKey);
 extern std::vector<unsigned char> ParseHexV(const json_spirit::Value& v, std::string aliasStr);
 extern std::vector<unsigned char> ParseHexO(const json_spirit::Object& o, std::string strKey);
-#endif

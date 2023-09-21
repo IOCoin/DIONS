@@ -10,6 +10,10 @@
 #include "dions/dions.h"
 static const char* pszBase58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 
+inline unsigned char GetAddressVersion()
+{
+  return((unsigned char)(fTestNet ? 111 : 103));
+}
 
 inline std::string EncodeBase58(const unsigned char* pbegin, const unsigned char* pend)
 {

@@ -1,5 +1,4 @@
-#ifndef REFERENCE_H
-#define REFERENCE_H 
+#pragma once 
 
 #include "constants.h"
 #include "dions.h"
@@ -27,4 +26,3 @@ private:
   string m_;
 };
 
-#endif
