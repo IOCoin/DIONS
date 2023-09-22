@@ -1,5 +1,4 @@
-#ifndef __CRYPTER_H__
-#define __CRYPTER_H__ 
+#pragma once
 
 #include "allocators.h"
 #include "crypto/key.h"
@@ -97,4 +96,3 @@ public:
 bool EncryptSecret(CKeyingMaterial& vMasterKey, const CSecret &vchPlaintext, const uint256& nIV, std::vector<unsigned char> &vchCiphertext);
 bool DecryptSecret(const CKeyingMaterial& vMasterKey, const std::vector<unsigned char> &vchCiphertext, const uint256& nIV, CSecret &vchPlaintext);
 
-#endif

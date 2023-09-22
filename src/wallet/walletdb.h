@@ -1,5 +1,4 @@
-#ifndef BITCOIN_WALLETDB_H
-#define BITCOIN_WALLETDB_H 
+#pragma once
 
 #include "db.h"
 #include "core/base58.h"
@@ -254,4 +253,3 @@ public:
   static bool Recover(CDBEnv& dbenv, std::string filename);
 };
 
-#endif

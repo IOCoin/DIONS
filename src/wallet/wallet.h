@@ -1,5 +1,4 @@
-#ifndef BITCOIN_WALLET_H
-#define BITCOIN_WALLET_H 
+#pragma once
 
 #include <string>
 #include <vector>
@@ -17,6 +16,7 @@
 #include "wallet_transaction.h"
 
 #include "ray_shade.h"
+#include "rpc/wallet_face.h"
 
 class CAccountingEntry;
 class __wx__Tx;
@@ -69,7 +69,7 @@ public:
 
 
 
-class __wx__ : public CCryptoKeyStore
+class __wx__ : public CCryptoKeyStore, public WalletFace
 {
 private:
     bool SelectCoinsForStaking(int64_t nTargetValue, unsigned int nSpendTime, std::set<std::pair<const __wx__Tx*,unsigned int> >& setCoinsRet, int64_t& nValueRet) const;
@@ -85,9 +85,7 @@ private:
 public:
     bool SelectCoins(int64_t nTargetValue, unsigned int nSpendTime, std::set<std::pair<const __wx__Tx*,unsigned int> >& setCoinsRet, int64_t& nValueRet, const CCoinControl *coinControl=NULL) const;
 
-
-
-
+    virtual json_spirit::Value getBalance(const json_spirit::Array&, bool) override;
 
     mutable CCriticalSection cs_wallet;
 
@@ -535,4 +533,3 @@ private:
 
 bool GetWalletFile(__wx__* pwallet, std::string &strWalletFileOut);
 
-#endif

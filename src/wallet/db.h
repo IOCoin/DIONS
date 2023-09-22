@@ -1,5 +1,4 @@
-#ifndef BITCOIN_DB_H
-#define BITCOIN_DB_H 
+#pragma once
 
 #include "ccoin/process.h"
 
@@ -467,7 +466,3 @@ public:
     return;
   };
 };
-
-
-
-#endif

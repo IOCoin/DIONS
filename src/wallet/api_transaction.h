@@ -1,5 +1,4 @@
-#ifndef HASH_TRANSACTION_H
-#define HASH_TRANSACTION_H
+#pragma once
 
 #include "ccoin/block.h"
 
@@ -70,4 +69,3 @@ public:
   }
 };
 
-#endif

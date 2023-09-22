@@ -1,5 +1,4 @@
-#ifndef WALLET_TX_H
-#define WALLET_TX_H
+#pragma once
 
 #include "wallet.h"
 #include "type_mapvalue.h"
@@ -297,4 +296,3 @@ public:
     }
 };
 
-#endif

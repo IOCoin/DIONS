@@ -4007,3 +4007,8 @@ void WriteOrderPos(const int64_t& nOrderPos, mapValue_t& mapValue)
         return;
     mapValue["n"] = i64tostr(nOrderPos);
 }
+json_spirit::Value __wx__::getBalance(const json_spirit::Array& params, bool fHelp)
+{
+	json_spirit::Value val;
+	return val;
+}
