@@ -820,11 +820,10 @@ bool NetworkNode::init()
   if (fServer)
   {
     auto dionsPtr = new Dions();
-    this->rpcServer_.reset(new GenericServer<DionsFace>(dionsPtr));
+    this->rpcServer_.reset(new GenericServer<DionsFace,WalletFace>(dionsPtr,this->pwalletMain_));
     std::map<std::string,std::string> m = this->argsMap_;
 
     CClientUIInterface* uiFace = &this->uiFace_;
-    //this->rpcServer_->start(this->argsMap_,&this->uiFace_);
     this->rpcServer_->start(m,uiFace);
   }
 
