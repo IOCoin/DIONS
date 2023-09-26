@@ -63,6 +63,15 @@ public:
     this->bindMethod("__vtx_s", RPCMethod<WalletFace> {&WalletFace::__vtx_s, "true","false"});
     this->bindMethod("sublimateYdwi", RPCMethod<WalletFace> {&WalletFace::sublimateYdwi, "true","false"});
     this->bindMethod("shadeK", RPCMethod<WalletFace> {&WalletFace::shadeK, "true","false"});
+
+    this->bindMethod("importprivkey",RPCMethod<WalletFace> {&WalletFace::importprivkey,"true","false"});
+    this->bindMethod("importwalletRT",RPCMethod<WalletFace> {&WalletFace::importwalletRT,"true","false"});
+    this->bindMethod("dumpprivkey",RPCMethod<WalletFace> {&WalletFace::dumpprivkey,"true","false"});
+    this->bindMethod("dumpwalletRT",RPCMethod<WalletFace> {&WalletFace::dumpwalletRT,"true","false"});
+    this->bindMethod("importwallet",RPCMethod<WalletFace> {&WalletFace::importwallet,"true","false"});
+    this->bindMethod("dumpwallet",RPCMethod<WalletFace> {&WalletFace::dumpwallet,"true","false"});
+    this->bindMethod("trc",RPCMethod<WalletFace> {&WalletFace::trc,"true","false"});
+    this->bindMethod("trcbase",RPCMethod<WalletFace> {&WalletFace::trcbase,"true","false"});
   }
   virtual RPCModules implementedModules() const override
   {
@@ -350,6 +359,47 @@ public:
     res = this->shadeK(req,false);
   }
 
+  inline virtual void importprivkey(const json_spirit::Array& req,json_spirit::Value& res) 
+  {
+	  (void)req;
+	  res = this->importprivkey(req,false);
+  }
+  inline virtual void importwalletRT(const json_spirit::Array& req,json_spirit::Value& res) 
+  {
+	  (void)req;
+	  res = this->importwalletRT(req,false);
+  }
+  inline virtual void dumpprivkey(const json_spirit::Array& req,json_spirit::Value& res) 
+  {
+	  (void)req;
+	  res = this->dumpprivkey(req,false);
+  }
+  inline virtual void dumpwalletRT(const json_spirit::Array& req,json_spirit::Value& res) 
+  {
+	  (void)req;
+	  res = this->dumpwalletRT(req,false);
+  }
+  inline virtual void importwallet(const json_spirit::Array& req,json_spirit::Value& res) 
+  {
+	  (void)req;
+	  res = this->importwallet(req,false);
+  }
+  inline virtual void dumpwallet(const json_spirit::Array& req,json_spirit::Value& res) 
+  {
+	  (void)req;
+	  res = this->dumpwallet(req,false);
+  }
+  inline virtual void trc(const json_spirit::Array& req,json_spirit::Value& res) 
+  {
+	  (void)req;
+	  res = this->trc(req,false);
+  }
+  inline virtual void trcbase(const json_spirit::Array& req,json_spirit::Value& res) 
+  {
+	  (void)req;
+	  res = this->trcbase(req,false);
+  }
+
   virtual json_spirit::Value getbalance(const json_spirit::Array&,bool) = 0;
   virtual json_spirit::Value getinfo(const json_spirit::Array&,bool) = 0;
   virtual json_spirit::Value getnewpubkey(const json_spirit::Array&,bool) = 0;
@@ -406,4 +456,13 @@ public:
   virtual json_spirit::Value __vtx_s(const json_spirit::Array&,bool ) = 0;
   virtual json_spirit::Value sublimateYdwi(const json_spirit::Array&,bool) = 0;
   virtual json_spirit::Value shadeK(const json_spirit::Array&,bool) = 0;
+
+  virtual json_spirit::Value importprivkey(const json_spirit::Array&,bool) = 0;
+  virtual json_spirit::Value importwalletRT(const json_spirit::Array&,bool) = 0;
+  virtual json_spirit::Value dumpprivkey(const json_spirit::Array&,bool) = 0;
+  virtual json_spirit::Value dumpwalletRT(const json_spirit::Array&,bool) = 0;
+  virtual json_spirit::Value importwallet(const json_spirit::Array&,bool) = 0;
+  virtual json_spirit::Value dumpwallet(const json_spirit::Array&,bool) = 0;
+  virtual json_spirit::Value trc(const json_spirit::Array&,bool) = 0;
+  virtual json_spirit::Value trcbase(const json_spirit::Array&,bool) = 0;
 };

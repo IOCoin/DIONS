@@ -143,6 +143,15 @@ public:
   virtual json_spirit::Value sublimateYdwi(const json_spirit::Array&,bool) override;
   virtual json_spirit::Value shadeK(const json_spirit::Array&,bool) override;
 
+  virtual json_spirit::Value importprivkey(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value importwalletRT(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value dumpprivkey(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value dumpwalletRT(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value importwallet(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value dumpwallet(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value trc(const json_spirit::Array&,bool) override;
+  virtual json_spirit::Value trcbase(const json_spirit::Array&,bool) override;
+
   mutable CCriticalSection cs_wallet;
 
   bool fFileBacked;
