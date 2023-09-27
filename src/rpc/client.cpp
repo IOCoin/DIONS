@@ -549,7 +549,6 @@ Array RPCConvertValues(const std::string &strMethod, const std::vector<std::stri
 }
 int CommandLineRPC(int argc, char *argv[])
 {
-	std::cout << "CommandLineRPC" << std::endl;
   string strPrint;
   int nRet = 0;
 

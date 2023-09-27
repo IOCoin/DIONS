@@ -322,7 +322,6 @@ public:
         if (valRequest.type() == json_spirit::obj_type)
         {
           jreq.parse(valRequest);
-          std::cout << "execute 1" << std::endl;
 	  json_spirit::Value result;
           this->handleMethodCall(jreq.strMethod,jreq.params,result);
           strReply = JSONRPCReply(result, json_spirit::Value::null, jreq.id);

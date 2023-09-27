@@ -127,7 +127,6 @@ OBJS= \
     obj/rpc/client.o \
     obj/rpc/util_proto.o \
     obj/rpc/json_req.o \
-    obj/rpc/net.o \
     obj/rpc/mining.o \
     obj/rpc/blockchain.o \
     obj/rpc/rawtransaction.o \

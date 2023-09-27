@@ -1,5 +1,4 @@
-#ifndef NETWORK_NODE_H
-#define NETWORK_NODE_H
+#pragma once 
 
 #include "txdb.h"
 #include "wallet/walletdb.h"
@@ -25,10 +24,10 @@
 #endif
 #include "ptrie/OverlayDB.h"
 
-#include "rpc/generic_server.h"
+#include "rpc/network_face.h"
 #include "ccoin/client.h"
 
-class NetworkNode
+class NetworkNode : public NetworkFace
 {
   public:
     NetworkNode() 
@@ -52,6 +51,10 @@ class NetworkNode
 
     Client& client() { return this->client_; }
 
+    virtual json_spirit::Value getconnectioncount(const json_spirit::Array&,bool) override;
+    virtual json_spirit::Value getpeerinfo(const json_spirit::Array&,bool) override;
+    virtual json_spirit::Value sendalert(const json_spirit::Array&,bool) override;
+
   private:
     bool InitError_(const std::string &str);
     bool InitWarning_(const std::string &str);
@@ -66,5 +69,3 @@ class NetworkNode
     std::unique_ptr<GenericServer<>> rpcServer_;
     CClientUIInterface uiFace_;
 };
-
-#endif
