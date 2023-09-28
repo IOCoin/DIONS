@@ -19,12 +19,6 @@ static inline unsigned short GetDefaultPort(const bool testnet = fTestNet)
 
 extern unsigned char pchMessageStart[4];
 
-
-
-
-
-
-
 class CMessageHeader
 {
     public:
