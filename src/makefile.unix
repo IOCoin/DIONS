@@ -115,6 +115,7 @@ OBJS= \
     obj/miner.o \
     obj/configuration_state.o \
     obj/ccoin/block.o \
+    obj/ccoin/state.o \
     obj/ccoin/transaction.o \
     obj/ccoin/client.o \
     obj/ccoin/process.o \

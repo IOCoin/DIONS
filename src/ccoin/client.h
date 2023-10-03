@@ -1,5 +1,4 @@
-#ifndef CLIENT_H
-#define CLIENT_H
+#pragma once
 
 #include "txdb.h"
 #include "wallet/walletdb.h"
@@ -42,4 +41,3 @@ class Client
     dev::OverlayDB overlayDB_;
 };
 
-#endif
