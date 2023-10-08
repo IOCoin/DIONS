@@ -44,6 +44,32 @@ enum class BaseState
     PreExisting,
     Empty
 };
+class TransactionReceipt
+{
+public:
+	/*
+	TransactionReceipt(bytesConstRef _rlp);
+	TransactionReceipt(h256 const& _root, u256 const& _gasUsed, LogEntries const& _log);
+	TransactionReceipt(uint8_t _status, u256 const& _gasUsed, LogEntries const& _log);
+
+	bool hasStatusCode() const;
+	h256 const& stateRoot() const;
+	uint8_t statusCode() const;
+	u256 const& cumulativeGasUsed() const { return m_gasUsed; }
+	LogBloom const& bloom() const { return m_bloom; }
+	LogEntries const& log() const { return m_log; }
+
+	void streamRLP(RLPStream& _s) const;
+	bytes rlp() const { RLPStream s; streamRLP(s); return s.out(); }
+	*/
+private:
+	//boost::variant<uint8_t,h256> m_statusCodeOrStateRoot;
+	//u256 m_gasUsed;
+	//LogBloom m_bloom;
+	//LogEntries m_log;
+};
+
+using TransactionReceipts = std::vector<TransactionReceipt>;
 
 using ChangeLog = std::vector<Change>;
 using AccountMap = std::unordered_map<dev::Address, dev::eth::Account>;
@@ -51,7 +77,7 @@ struct ExecutionResult
 {
 	dev::u256 gasUsed = 0;
 	dev::Address newAddress;
-	bytes output;
+	dev::bytes output;
 	dev::u256 gasRefunded = 0;
 	unsigned depositSize = 0; 							
 	dev::u256 gasForDeposit;
@@ -94,9 +120,9 @@ public:
 
   std::pair<AddressMap, dev::h256> addresses(dev::h256 const& _begin, size_t _maxResults) const;
 
-  std::pair<ExecutionResult, TransactionReceipt> execute(EnvInfo const& _envInfo, SealEngineFace const& _sealEngine, Transaction const& _t, Permanence _p = Permanence::Committed, OnOpFunc const& _onOp = OnOpFunc());
+  std::pair<ExecutionResult, TransactionReceipt> execute(EnvInfo const& _envInfo, Transaction const& _t, Permanence _p = Permanence::Committed, OnOpFunc const& _onOp = OnOpFunc());
 
-  void executeBlockTransactions(Block const& _block, unsigned _txCount, LastBlockHashesFace const& _lastHashes, SealEngineFace const& _sealEngine);
+  void executeBlockTransactions(Block const& _block, unsigned _txCount, LastBlockHashesFace const& _lastHashes);
 
   bool addressInUse(dev::Address const& _address) const;
 
@@ -130,13 +156,13 @@ public:
 
   void createContract(dev::Address const& _address);
 
-  void setCode(dev::Address const& _address, bytes&& _code, dev::u256 const& _version);
+  void setCode(dev::Address const& _address, dev::bytes&& _code, dev::u256 const& _version);
 
   void kill(dev::Address _a);
 
   std::map<h256, std::pair<dev::u256, dev::u256>> storage(dev::Address const& _contract) const;
 
-  bytes const& code(dev::Address const& _addr) const;
+  dev::bytes const& code(dev::Address const& _addr) const;
 
   h256 codeHash(dev::Address const& _contract) const;
 
