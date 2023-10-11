@@ -1,5 +1,6 @@
 #pragma once
 
+#include "transaction.h"
 #include "ptrie/Account.h"
 #include "ptrie/DBFactory.h"
 #include "ptrie/OverlayDB.h"
@@ -73,6 +74,12 @@ using TransactionReceipts = std::vector<TransactionReceipt>;
 
 using ChangeLog = std::vector<Change>;
 using AccountMap = std::unordered_map<dev::Address, dev::eth::Account>;
+enum class Permanence
+{
+    Reverted,
+    Committed,
+    Uncommitted
+};
 struct ExecutionResult
 {
 	dev::u256 gasUsed = 0;
@@ -81,6 +88,26 @@ struct ExecutionResult
 	dev::u256 gasRefunded = 0;
 	unsigned depositSize = 0; 							
 	dev::u256 gasForDeposit;
+};
+class EnvInfo
+{
+public:
+    EnvInfo(dev::u256 const& _gasUsed,
+        dev::u256 const& _chainID)
+      : m_gasUsed(_gasUsed), m_chainID(_chainID)
+    {}
+    EnvInfo(dev::u256 const& _gasUsed,
+        dev::u256 const& _gasLimit, dev::u256 const& _chainID)
+      : EnvInfo(_gasUsed, _chainID)
+    {
+    }
+
+    dev::u256 const& gasUsed() const { return m_gasUsed; }
+    dev::u256 const& chainID() const { return m_chainID; }
+
+private:
+    dev::u256 m_gasUsed;
+    dev::u256 m_chainID;
 };
 
 class State
@@ -120,7 +147,7 @@ public:
 
   std::pair<AddressMap, dev::h256> addresses(dev::h256 const& _begin, size_t _maxResults) const;
 
-  std::pair<ExecutionResult, TransactionReceipt> execute(EnvInfo const& _envInfo, Transaction const& _t, Permanence _p = Permanence::Committed, OnOpFunc const& _onOp = OnOpFunc());
+  std::pair<ExecutionResult, TransactionReceipt> execute(EnvInfo const& _envInfo, CTransaction const& _t, Permanence _p = Permanence::Committed, OnOpFunc const& _onOp = OnOpFunc());
 
   void executeBlockTransactions(Block const& _block, unsigned _txCount, LastBlockHashesFace const& _lastHashes);
 
