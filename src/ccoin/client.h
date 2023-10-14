@@ -14,16 +14,16 @@
 #include <boost/interprocess/sync/file_lock.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <openssl/crypto.h>
-#include "ptrie/DBFactory.h"
-#include "ptrie/OverlayDB.h"
-#include "ptrie/TrieDB.h"
-#include "ptrie/Address.h"
+#include "libdevcore/DBFactory.h"
+#include "libdevcore/OverlayDB.h"
+#include "libdevcore/TrieDB.h"
+#include "libdevcore/Address.h"
 #include "process.h"
 #include "disk_block_locator.h"
 #ifndef WIN32
 #include <signal.h>
 #endif
-#include "ptrie/OverlayDB.h"
+#include "libdevcore/OverlayDB.h"
 class Client
 {
   public:

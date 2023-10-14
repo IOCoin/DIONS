@@ -626,7 +626,7 @@ int64_t GetProofOfStakeInterestV2(int nHeight)
   if (weight > 16384)
   {
     rate = std::max(ConfigurationState::MIN_COIN_YEAR_REWARD,
-                    std::min(static_cast<int64_t>(ConfigurationState::MIN_COIN_YEAR_REWARD * log(weight / 16384.0)),
+                    std::min(static_cast<int64_t>(ConfigurationState::MIN_COIN_YEAR_REWARD * std::log(weight / 16384.0)),
                              ConfigurationState::MAX_COIN_YEAR_REWARD));
   }
 

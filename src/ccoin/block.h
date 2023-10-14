@@ -6,10 +6,10 @@
 #include "net.h"
 #include "script.h"
 #include "crypto/hashblock.h"
-#include "ptrie/FixedHash.h"
-#include "ptrie/TrieDB.h"
-#include "ptrie/OverlayDB.h"
-#include "ptrie/Address.h"
+#include "libdevcore/FixedHash.h"
+#include "libdevcore/TrieDB.h"
+#include "libdevcore/OverlayDB.h"
+#include "libdevcore/Address.h"
 #include "transaction.h"
 
 #include <list>
