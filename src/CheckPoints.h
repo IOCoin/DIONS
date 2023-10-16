@@ -2,7 +2,7 @@
 #define BITCOIN_CHECKPOINT_H 
 
 #include <map>
-#include "net.h"
+#include "Net.h"
 #include "core/util.h"
 
 #ifdef WIN32

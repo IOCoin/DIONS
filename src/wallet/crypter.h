@@ -1,8 +1,8 @@
 #pragma once
 
-#include "allocators.h"
+#include "Allocators.h"
 #include "crypto/key.h"
-#include "serialize.h"
+#include "Serialize.h"
 
 const unsigned int WALLET_CRYPTO_KEY_SIZE = 32;
 const unsigned int WALLET_CRYPTO_SALT_SIZE = 8;

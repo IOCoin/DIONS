@@ -1,18 +1,18 @@
-#include "alert.h"
+#include "Alert.h"
 #include "process.h"
-#include "checkpoints.h"
+#include "CheckPoints.h"
 #include "db.h"
-#include "txdb.h"
-#include "net.h"
+#include "TxDB.h"
+#include "Net.h"
 #include "wallet/wallet.h"
-#include "ui_interface.h"
-#include "kernel.h"
+#include "UIInterface.h"
+#include "Kernel.h"
 #include "rpc/client.h"
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include "dions/dions.h"
-#include "configuration_state.h"
+#include "ConfigurationState.h"
 using namespace json_spirit;
 using namespace std;
 using namespace boost;

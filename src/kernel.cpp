@@ -1,7 +1,7 @@
 
 #include <boost/assign/list_of.hpp>
-#include "kernel.h"
-#include "txdb.h"
+#include "Kernel.h"
+#include "TxDB.h"
 using namespace std;
 typedef std::map<int, unsigned int> MapModifierCheckpoints;
 static std::map<int, unsigned int> mapStakeModifierCheckpoints =

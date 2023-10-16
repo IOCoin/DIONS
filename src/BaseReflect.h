@@ -3,7 +3,7 @@
 
 #include "json/json_spirit.h"
 
-#include "reactor_relay.h"
+#include "ReactorRelay.h"
 
 static const int64_t CTRL___cycle = 0;
 

@@ -1,12 +1,10 @@
-#ifndef RELAY_H
-#define RELAY_H 
+#pragma once
 
-#include "node_ex.h"
-
-#include "interface_crypt.h"
-#include "coordinate.h"
-#include "coordinate_patch.h"
-#include "ray_shade.h"
+#include "NodeEx.h"
+#include "InterfaceCrypt.h"
+#include "Coordinate.h"
+#include "CoordinatePatch.h"
+#include "RayShade.h"
 
 class Relay : InterfaceCrypt
 {
@@ -54,4 +52,3 @@ private:
   string locator_;
 };
 
-#endif

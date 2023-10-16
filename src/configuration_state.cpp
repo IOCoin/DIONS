@@ -1,4 +1,4 @@
-#include "configuration_state.h"
+#include "ConfigurationState.h"
 
   const unsigned int ConfigurationState::MAX_ORPHAN_TRANSACTIONS = CBlock::MAX_BLOCK_SIZE/100;
   const unsigned int ConfigurationState::MAX_INV_SZ = 50000;

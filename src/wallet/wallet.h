@@ -7,15 +7,15 @@
 
 #include "ccoin/process.h"
 #include "crypto/key.h"
-#include "keystore.h"
-#include "script.h"
-#include "ui_interface.h"
+#include "KeyStore.h"
+#include "Script.h"
+#include "UIInterface.h"
 #include "core/util.h"
 #include "walletdb.h"
 #include "api_transaction.h"
 #include "wallet_transaction.h"
 
-#include "ray_shade.h"
+#include "RayShade.h"
 #include "rpc/wallet_face.h"
 
 class CAccountingEntry;

@@ -1,13 +1,13 @@
 #pragma once
 
-#include "txdb.h"
+#include "TxDB.h"
 #include "wallet/walletdb.h"
 #include "rpc/client.h"
-#include "net.h"
+#include "Net.h"
 #include "wallet/wallet.h"
 #include "core/util.h"
-#include "ui_interface.h"
-#include "checkpoints.h"
+#include "UIInterface.h"
+#include "CheckPoints.h"
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/filesystem/convenience.hpp>
@@ -19,7 +19,7 @@
 #include "libdevcore/TrieDB.h"
 #include "libdevcore/Address.h"
 #include "process.h"
-#include "disk_block_locator.h"
+#include "DiskBlockLocator.h"
 #ifndef WIN32
 #include <signal.h>
 #endif

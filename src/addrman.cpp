@@ -1,5 +1,5 @@
 
-#include "addrman.h"
+#include "AddrMan.h"
 using namespace std;
 int CAddrInfo::GetTriedBucket(const std::vector<unsigned char> &nKey) const
 {

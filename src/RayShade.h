@@ -1,7 +1,7 @@
 #ifndef RAY_SHADE_H
 #define RAY_SHADE_H 
 
-#include "interface_crypt.h"
+#include "InterfaceCrypt.h"
 
 
 struct __pq__

@@ -3,7 +3,7 @@
 #include "db.h"
 #include "core/base58.h"
 
-#include "relay.h"
+#include "Relay.h"
 
 class CKeyPool;
 class CAccount;

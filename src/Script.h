@@ -9,8 +9,8 @@
 #include <boost/foreach.hpp>
 #include <boost/variant.hpp>
 
-#include "keystore.h"
-#include "bignum.h"
+#include "KeyStore.h"
+#include "BigNum.h"
 
 using namespace std;
 

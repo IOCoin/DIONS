@@ -1,10 +1,10 @@
 #ifndef _BITCOIN_ADDRMAN
 #define _BITCOIN_ADDRMAN 1
 
-#include "netbase.h"
-#include "protocol.h"
+#include "NetBase.h"
+#include "Protocol.h"
 #include "core/util.h"
-#include "sync.h"
+#include "Sync.h"
 
 
 #include <map>

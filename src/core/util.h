@@ -22,7 +22,7 @@
 #include <openssl/sha.h>
 #include <openssl/ripemd.h>
 
-#include "netbase.h"
+#include "NetBase.h"
 
 
 #define __STDC_FORMAT_MACROS 1
@@ -30,8 +30,8 @@
 #include <stdint.h>
 #include <inttypes.h>
 
-#include "constants.h"
-#include "relay.h"
+#include "Constants.h"
+#include "Relay.h"
 
 static const int64_t COIN = 100000000;
 static const int64_t CENT = 1000000;

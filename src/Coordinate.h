@@ -1,7 +1,7 @@
 #ifndef COORDINATE_H
 #define COORDINATE_H 
 
-#include "interface_crypt.h"
+#include "InterfaceCrypt.h"
 
 class CoordinateVector : InterfaceCrypt
 {

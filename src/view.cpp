@@ -1,6 +1,6 @@
 
-#include "view.h"
-#include "script.h"
+#include "View.h"
+#include "Script.h"
 bool CViewKeyStore::ak(const CKeyID& ckid)
 {
   {

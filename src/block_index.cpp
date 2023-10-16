@@ -1,4 +1,4 @@
-#include "block_index.h"
+#include "BlockIndex.h"
 
 
 uint256 CBlockIndex::GetBlockTrust() const

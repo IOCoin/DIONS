@@ -10,10 +10,10 @@
 #include <arpa/inet.h>
 #endif
 
-#include "mruset.h"
-#include "netbase.h"
-#include "protocol.h"
-#include "addrman.h"
+#include "MrUset.h"
+#include "NetBase.h"
+#include "Protocol.h"
+#include "AddrMan.h"
 
 class CRequestTracker;
 class CNode;

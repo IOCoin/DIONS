@@ -1,5 +1,5 @@
-#include"ext_tor.h"
-#include "twister.h"
+#include"ExtTor.h"
+#include "Twister.h"
 
 class Toroid : public ExtTor
 {

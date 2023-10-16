@@ -1,7 +1,7 @@
 
-#include "protocol.h"
+#include "Protocol.h"
 #include "core/util.h"
-#include "netbase.h"
+#include "NetBase.h"
 #ifndef WIN32
 # include <arpa/inet.h>
 #endif

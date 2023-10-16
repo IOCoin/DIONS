@@ -1,9 +1,9 @@
 #ifndef BITCOIN_BIGNUM_H
 #define BITCOIN_BIGNUM_H 
 
-#include "serialize.h"
+#include "Serialize.h"
 #include "core/uint256.h"
-#include "version.h"
+#include "Version.h"
 
 #include <openssl/bn.h>
 

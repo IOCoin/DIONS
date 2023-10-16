@@ -1,5 +1,5 @@
 
-#include "sync.h"
+#include "Sync.h"
 #include "core/util.h"
 #include <boost/foreach.hpp>
 #ifdef DEBUG_LOCKCONTENTION
@@ -10,7 +10,6 @@ void PrintLockContention(const char* pszName, const char* pszFile, int nLine)
 }
 #endif
 #ifdef DEBUG_LOCKORDER
-# 31 "sync.cpp"
 struct CLockLocation
 {
   CLockLocation(const char* pszName, const char* pszFile, int nLine)

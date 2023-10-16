@@ -1,10 +1,10 @@
 
 #include "db.h"
-#include "net.h"
+#include "Net.h"
 #include "wallet/wallet.h"
 #include "core/strlcpy.h"
-#include "addrman.h"
-#include "ui_interface.h"
+#include "AddrMan.h"
+#include "UIInterface.h"
 #ifdef WIN32
 #include <string.h>
 #endif

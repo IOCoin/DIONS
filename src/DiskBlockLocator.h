@@ -1,7 +1,7 @@
 #ifndef DISK_BLOCK_LOCATOR_H
 #define DISK_BLOCK_LOCATOR_H
 
-#include "block_index.h"
+#include "BlockIndex.h"
 
 class CBlockLocator
 {

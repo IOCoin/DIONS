@@ -4,8 +4,8 @@
 #include <string>
 #include <vector>
 
-#include "serialize.h"
-#include "compat.h"
+#include "Serialize.h"
+#include "Compat.h"
 
 extern int nConnectTimeout;
 extern bool fNameLookup;

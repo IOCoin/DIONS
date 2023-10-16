@@ -8,7 +8,7 @@
 
 #include <db_cxx.h>
 
-#include "txdb-leveldb.h"
+#include "TxDBLevelDB.h"
 #include "dions/dions.h"
 
 class CAddress;

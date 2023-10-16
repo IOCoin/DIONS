@@ -1,13 +1,13 @@
 #ifndef TX_MEMPOOL_H
 #define TX_MEMPOOL_H
 #include<cstdint>
-#include"serialize.h"
-#include "bignum.h"
-#include "sync.h"
-#include "net.h"
-#include "script.h"
-#include "input_point.h"
-#include "output_point.h"
+#include "Serialize.h"
+#include "BigNum.h"
+#include "Sync.h"
+#include "Net.h"
+#include "Script.h"
+#include "InputPoint.h"
+#include "OutputPoint.h"
 #include "ccoin/transaction.h"
 
 class CTxMemPool

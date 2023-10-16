@@ -1,5 +1,5 @@
 
-#include "twister.h"
+#include "Twister.h"
 const unsigned CYCLE = 0x100;
 const unsigned C_TRANS_ = 0xff;
 int block_units[][0x10] =

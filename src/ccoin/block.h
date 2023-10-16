@@ -1,10 +1,10 @@
 #ifndef DIONS_BLOCK_H
 #define DIONS_BLOCK_H
 
-#include "bignum.h"
-#include "sync.h"
-#include "net.h"
-#include "script.h"
+#include "BigNum.h"
+#include "Sync.h"
+#include "Net.h"
+#include "Script.h"
 #include "crypto/hashblock.h"
 #include "libdevcore/FixedHash.h"
 #include "libdevcore/TrieDB.h"

@@ -1,15 +1,14 @@
 
-#include "txdb.h"
+#include "TxDB.h"
 #include "wallet.h"
 #include "walletdb.h"
 #include "crypter.h"
-#include "ui_interface.h"
+#include "UIInterface.h"
 #include "core/base58.h"
-#include "kernel.h"
+#include "Kernel.h"
 #include "dions/reference.h"
-#include "coincontrol.h"
 #include <boost/algorithm/string/replace.hpp>
-#include "ray_shade.h"
+#include "RayShade.h"
 #include "ccoin/process.h"
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
@@ -25,7 +24,7 @@
 #include <fstream>
 #include "rpc/client.h"
 #include "wallet/wallet.h"
-#include "ui_interface.h"
+#include "coincontrol.h"
 #include "core/base58.h"
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/variant/get.hpp>

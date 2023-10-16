@@ -2,9 +2,9 @@
 #define IOCOIN_VIEW_H 
 
 #include "wallet/crypter.h"
-#include "sync.h"
+#include "Sync.h"
 #include <boost/signals2/signal.hpp>
-#include "keystore.h"
+#include "KeyStore.h"
 class CScript;
 class cba;
 

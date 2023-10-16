@@ -4,12 +4,12 @@
 #include <boost/tuple/tuple_comparison.hpp>
 using namespace std;
 using namespace boost;
-#include "script.h"
-#include "keystore.h"
-#include "bignum.h"
+#include "Script.h"
+#include "KeyStore.h"
+#include "BigNum.h"
 #include "crypto/key.h"
 #include "ccoin/process.h"
-#include "sync.h"
+#include "Sync.h"
 #include "core/util.h"
 #include "dions/dions.h"
 bool CheckSig(vector<unsigned char> vchSig, vector<unsigned char> vchPubKey, CScript scriptCode, const CTransaction& txTo, unsigned int nIn, int nHashType);

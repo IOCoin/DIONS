@@ -1,7 +1,7 @@
 #pragma once
 
 #include "wallet.h"
-#include "type_mapvalue.h"
+#include "TypeMapValue.h"
 class CCoinControl;
 class COutput;
 extern bool fWalletUnlockStakingOnly;

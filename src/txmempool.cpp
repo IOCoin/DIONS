@@ -1,5 +1,5 @@
-#include "txmempool.h"
-#include "txdb-leveldb.h"
+#include "TxMemPool.h"
+#include "TxDBLevelDB.h"
 #include "wallet/wallet.h"
 
 extern void RemoveFromMemoryPoolPost(const CTransaction&);

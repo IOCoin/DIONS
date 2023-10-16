@@ -2,12 +2,12 @@
 #define DIONS_TRANSACTION_H
 #include<cstdio>
 #include<cstdint>
-#include"serialize.h"
-#include "bignum.h"
-#include "sync.h"
-#include "net.h"
-#include "script.h"
-#include "output_point.h"
+#include "Serialize.h"
+#include "BigNum.h"
+#include "Sync.h"
+#include "Net.h"
+#include "Script.h"
+#include "OutputPoint.h"
 
 extern bool MoneyRange(int64_t nValue);
 extern FILE* OpenBlockFile(unsigned int nFile, unsigned int nBlockPos, const char* pszMode="rb");

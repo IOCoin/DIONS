@@ -7,9 +7,9 @@
 #include <leveldb/cache.h>
 #include <leveldb/filter_policy.h>
 #include <memenv/memenv.h>
-#include "kernel.h"
-#include "checkpoints.h"
-#include "txdb.h"
+#include "Kernel.h"
+#include "CheckPoints.h"
+#include "TxDB.h"
 #include "core/util.h"
 #include "ccoin/process.h"
 using namespace std;

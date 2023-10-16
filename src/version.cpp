@@ -1,6 +1,6 @@
 
 #include <string>
-#include "version.h"
+#include "Version.h"
 const std::string CLIENT_NAME("Satoshi");
 #define CLIENT_VERSION_SUFFIX ""
 #ifdef HAVE_BUILD_INFO

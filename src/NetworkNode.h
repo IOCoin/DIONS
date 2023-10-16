@@ -1,28 +1,27 @@
 #pragma once 
 
-#include "txdb.h"
+#include "TxDB.h"
 #include "wallet/walletdb.h"
 #include "rpc/client.h"
-#include "net.h"
+#include "Net.h"
 #include "core/util.h"
-#include "ui_interface.h"
-#include "checkpoints.h"
+#include "UIInterface.h"
+#include "CheckPoints.h"
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/filesystem/convenience.hpp>
 #include <boost/interprocess/sync/file_lock.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <openssl/crypto.h>
-#include "ptrie/DBFactory.h"
-#include "ptrie/OverlayDB.h"
-#include "ptrie/TrieDB.h"
-#include "ptrie/Address.h"
+#include "libdevcore/DBFactory.h"
+#include "libdevcore/OverlayDB.h"
+#include "libdevcore/TrieDB.h"
+#include "libdevcore/Address.h"
 #include "ccoin/process.h"
-#include "disk_block_locator.h"
+#include "DiskBlockLocator.h"
 #ifndef WIN32
 #include <signal.h>
 #endif
-#include "ptrie/OverlayDB.h"
 
 #include "rpc/network_face.h"
 #include "ccoin/client.h"

@@ -1,7 +1,7 @@
 
-#include "netbase.h"
+#include "NetBase.h"
 #include "core/util.h"
-#include "sync.h"
+#include "Sync.h"
 #ifndef WIN32
 #include <sys/fcntl.h>
 #endif

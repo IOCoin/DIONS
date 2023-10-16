@@ -1,9 +1,9 @@
 
 #include <boost/assign/list_of.hpp>
 #include <boost/foreach.hpp>
-#include "checkpoints.h"
-#include "block_index.h"
-#include "txdb.h"
+#include "CheckPoints.h"
+#include "BlockIndex.h"
+#include "TxDB.h"
 #include "ccoin/process.h"
 #include "core/uint256.h"
 static const int nCheckpointSpan = 10;

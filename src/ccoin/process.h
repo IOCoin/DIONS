@@ -1,18 +1,18 @@
 #ifndef BITCOIN_MAIN_H
 #define BITCOIN_MAIN_H
 
-#include "bignum.h"
-#include "sync.h"
-#include "net.h"
-#include "script.h"
+#include "BigNum.h"
+#include "Sync.h"
+#include "Net.h"
+#include "Script.h"
 #include "crypto/hashblock.h"
 #include "ccoin/block.h"
 #include "libdevcore/FixedHash.h"
 #include "libdevcore/TrieDB.h"
 #include "libdevcore/OverlayDB.h"
 #include "libdevcore/Address.h"
-#include "txmempool.h"
-#include "disk_block_locator.h"
+#include "TxMemPool.h"
+#include "DiskBlockLocator.h"
 
 #include <list>
 
@@ -28,8 +28,8 @@ class CInv;
 class CRequestTracker;
 class CNode;
 class CTxMemPool;
-#include "constants.h"
-#include "configuration_state.h"
+#include "Constants.h"
+#include "ConfigurationState.h"
 extern bool fReindex;
 
 #define LR_R 0x32

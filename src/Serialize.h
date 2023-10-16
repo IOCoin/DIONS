@@ -15,8 +15,8 @@
 #include <boost/type_traits/is_fundamental.hpp>
 #include <boost/tuple/tuple.hpp>
 
-#include "allocators.h"
-#include "version.h"
+#include "Allocators.h"
+#include "Version.h"
 
 class CAutoFile;
 class CDataStream;
