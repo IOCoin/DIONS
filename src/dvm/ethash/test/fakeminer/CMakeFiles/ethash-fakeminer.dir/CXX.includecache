@@ -6,7 +6,7 @@
 
 #IncludeRegexTransform: 
 
-/home/argon/rem/CC-net/src/dvm/ethash/test/fakeminer/fakeminer.cpp
+/home/ioc/DIONS/src/dvm/ethash/test/fakeminer/fakeminer.cpp
 ethash/ethash.hpp
 -
 ethash/global_context.hpp

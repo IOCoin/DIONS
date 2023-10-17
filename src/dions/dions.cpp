@@ -1,11 +1,11 @@
 #include "db.h"
-#include "txdb-leveldb.h"
-#include "keystore.h"
+#include "TxDBLevelDB.h"
+#include "KeyStore.h"
 #include "wallet/wallet.h"
 #include "dions.h"
 #include "rpc/client.h"
 #include "ccoin/process.h"
-#include "state.h"
+#include "State.h"
 #include <boost/xpressive/xpressive_dynamic.hpp>
 #include <boost/filesystem.hpp>
 #include <stdlib.h>

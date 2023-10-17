@@ -2,7 +2,7 @@
 
 #include "json/json_spirit.h"
 
-#include "reactor_relay.h"
+#include "ReactorRelay.h"
 #include "ccoin/transaction.h"
 #include "json/json_spirit_reader_template.h"
 #include "json/json_spirit_writer_template.h"

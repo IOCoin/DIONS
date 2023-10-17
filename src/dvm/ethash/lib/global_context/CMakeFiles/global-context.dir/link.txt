@@ -1,2 +1,2 @@
-/usr/bin/ar qc libethash-global-context.a CMakeFiles/global-context.dir/global_context.cpp.o
+/usr/bin/ar qc libethash-global-context.a  CMakeFiles/global-context.dir/global_context.cpp.o
 /usr/bin/ranlib libethash-global-context.a

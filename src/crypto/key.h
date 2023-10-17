@@ -4,11 +4,11 @@
 #include <stdexcept>
 #include <vector>
 
-#include "allocators.h"
-#include "serialize.h"
+#include "Allocators.h"
+#include "Serialize.h"
 #include "core/uint256.h"
 #include "core/util.h"
-#include "ray_shade.h"
+#include "RayShade.h"
 
 #include <openssl/ec.h>
 class key_error : public std::runtime_error

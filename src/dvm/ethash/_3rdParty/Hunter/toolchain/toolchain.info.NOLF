@@ -108,10 +108,10 @@ Predefined macroses:
 #define __GCC_HAVE_SYNC_COMPARE_AND_SWAP_8 1
 #define __GCC_IEC_559 2
 #define __GCC_IEC_559_COMPLEX 2
-#define __GLIBCXX__ 20200723
+#define __GLIBCXX__ 20210110
 #define __GLIBC__ 2
 #define __GNUC_MINOR__ 2
-#define __GNUC_PATCHLEVEL__ 0
+#define __GNUC_PATCHLEVEL__ 1
 #define __GNUC_STDC_INLINE__ 1
 #define __GNUC__ 10
 #define __GNUG__ 10
@@ -214,7 +214,6 @@ Predefined macroses:
 #define __SSE2__ 1
 #define __SSE_MATH__ 1
 #define __SSE__ 1
-#define __SSP_STRONG__ 3
 #define __STDC_HOSTED__ 1
 #define __STDC_IEC_559_COMPLEX__ 1
 #define __STDC_IEC_559__ 1
@@ -256,7 +255,7 @@ Predefined macroses:
 #define __UINT_LEAST8_MAX__ 0xff
 #define __UINT_LEAST8_TYPE__ unsigned char
 #define __USER_LABEL_PREFIX__ 
-#define __VERSION__ "10.2.0"
+#define __VERSION__ "10.2.1 20210110"
 #define __WCHAR_MAX__ 0x7fffffff
 #define __WCHAR_MIN__ (-0x7fffffff - 1)
 #define __WCHAR_TYPE__ int

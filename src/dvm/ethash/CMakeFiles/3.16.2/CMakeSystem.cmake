@@ -1,13 +1,13 @@
-set(CMAKE_HOST_SYSTEM "Linux-5.10.0-13-amd64")
+set(CMAKE_HOST_SYSTEM "Linux-5.10.0-20-amd64")
 set(CMAKE_HOST_SYSTEM_NAME "Linux")
-set(CMAKE_HOST_SYSTEM_VERSION "5.10.0-13-amd64")
+set(CMAKE_HOST_SYSTEM_VERSION "5.10.0-20-amd64")
 set(CMAKE_HOST_SYSTEM_PROCESSOR "x86_64")
 
-include("/home/ioc/rem/CC/src/dvm/ethash/cmake/cable/toolchains/cxx14.cmake")
+include("/home/ioc/DIONS/src/dvm/ethash/cmake/cable/toolchains/cxx14.cmake")
 
-set(CMAKE_SYSTEM "Linux-5.10.0-13-amd64")
+set(CMAKE_SYSTEM "Linux-5.10.0-20-amd64")
 set(CMAKE_SYSTEM_NAME "Linux")
-set(CMAKE_SYSTEM_VERSION "5.10.0-13-amd64")
+set(CMAKE_SYSTEM_VERSION "5.10.0-20-amd64")
 set(CMAKE_SYSTEM_PROCESSOR "x86_64")
 
 set(CMAKE_CROSSCOMPILING "FALSE")

@@ -1,1 +1,1 @@
-/usr/bin/c++ -O3 -DNDEBUG CMakeFiles/ethash-fakeminer.dir/fakeminer.cpp.o -o ../../bin/ethash-fakeminer  ../../lib/global_context/libethash-global-context.a ../../lib/ethash/libethash.a ../../lib/keccak/libkeccak.a -lpthread 
+/usr/bin/c++  -O3 -DNDEBUG   CMakeFiles/ethash-fakeminer.dir/fakeminer.cpp.o  -o ../../bin/ethash-fakeminer  ../../lib/global_context/libethash-global-context.a ../../lib/ethash/libethash.a ../../lib/keccak/libkeccak.a -lpthread 

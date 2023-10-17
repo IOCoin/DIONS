@@ -1,2 +1,2 @@
-/usr/bin/ar qc libtest-compile-c0.a CMakeFiles/test-compile-c0.dir/ethash_header_test.c.o CMakeFiles/test-compile-c0.dir/__/__/__/lib/ethash/primes.c.o
+/usr/bin/ar qc libtest-compile-c0.a  CMakeFiles/test-compile-c0.dir/ethash_header_test.c.o CMakeFiles/test-compile-c0.dir/__/__/__/lib/ethash/primes.c.o
 /usr/bin/ranlib libtest-compile-c0.a
