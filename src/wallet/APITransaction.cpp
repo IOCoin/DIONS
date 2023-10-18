@@ -1,5 +1,5 @@
-#include "api_transaction.h"
-#include "txdb-leveldb.h"
+#include "APITransaction.h"
+#include "TxDBLevelDB.h"
 
 extern CCriticalSection cs_main;
 int CMerkleTx::SetMerkleBranch(const CBlock* pblock)

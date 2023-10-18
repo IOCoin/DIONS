@@ -4,9 +4,9 @@
 #include <string>
 #include <vector>
 #include "BigNum.h"
-#include "crypto/key.h"
+#include "crypto/Key.h"
 #include "Script.h"
-#include "ccoin/process.h"
+#include "ccoin/Process.h"
 #include "dions/dions.h"
 static const char* pszBase58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 

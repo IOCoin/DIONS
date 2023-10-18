@@ -4,7 +4,7 @@
 #include "CheckPoints.h"
 #include "BlockIndex.h"
 #include "TxDB.h"
-#include "ccoin/process.h"
+#include "ccoin/Process.h"
 #include "core/uint256.h"
 static const int nCheckpointSpan = 10;
 namespace Checkpoints

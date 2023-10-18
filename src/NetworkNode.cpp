@@ -2,9 +2,9 @@
 #include "Net.h"
 #include "rpc/client.h"
 #include "Alert.h"
-#include "wallet/wallet.h"
-#include "wallet/db.h"
-#include "wallet/walletdb.h"
+#include "wallet/Wallet.h"
+#include "wallet/DB.h"
+#include "wallet/WalletDB.h"
 using namespace std;
 using namespace boost;
 using namespace json_spirit;

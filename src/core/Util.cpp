@@ -1,9 +1,9 @@
 
-#include "util.h"
-#include "sync.h"
+#include "Util.h"
+#include "Sync.h"
 #include "strlcpy.h"
-#include "version.h"
-#include "ui_interface.h"
+#include "Version.h"
+#include "UIInterface.h"
 #include <boost/algorithm/string/join.hpp>
 #include <stdio.h>
 #include <string.h>
@@ -15,9 +15,9 @@
 #include <openssl/evp.h>
 #include <openssl/pem.h>
 #include <openssl/conf.h>
-#include "wallet/wallet.h"
-#include "constants.h"
-#include "base58.h"
+#include "wallet/Wallet.h"
+#include "Constants.h"
+#include "Base58.h"
 #include "db.h"
 namespace boost
 {

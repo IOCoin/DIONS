@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ccoin/process.h"
+#include "ccoin/Process.h"
 
 #include <map>
 #include <string>

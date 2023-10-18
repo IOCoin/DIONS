@@ -1,7 +1,7 @@
 #ifndef BITCOIN_KEYSTORE_H
 #define BITCOIN_KEYSTORE_H 
 
-#include "wallet/crypter.h"
+#include "wallet/Crypter.h"
 #include "Sync.h"
 #include <boost/signals2/signal.hpp>
 

@@ -5,7 +5,7 @@
 #include <boost/foreach.hpp>
 #include <map>
 #include "Alert.h"
-#include "crypto/key.h"
+#include "crypto/Key.h"
 #include "Net.h"
 #include "Sync.h"
 #include "UIInterface.h"

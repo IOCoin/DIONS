@@ -1,7 +1,7 @@
 #pragma once
 
-#include "db.h"
-#include "core/base58.h"
+#include "DB.h"
+#include "core/Base58.h"
 
 #include "Relay.h"
 

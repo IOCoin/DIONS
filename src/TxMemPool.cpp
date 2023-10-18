@@ -1,6 +1,6 @@
 #include "TxMemPool.h"
 #include "TxDBLevelDB.h"
-#include "wallet/wallet.h"
+#include "wallet/Wallet.h"
 
 extern void RemoveFromMemoryPoolPost(const CTransaction&);
 extern inline bool V3(int nHeight);

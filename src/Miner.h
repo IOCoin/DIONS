@@ -1,8 +1,8 @@
 #ifndef NOVACOIN_MINER_H
 #define NOVACOIN_MINER_H 
 
-#include "ccoin/process.h"
-#include "wallet/wallet.h"
+#include "ccoin/Process.h"
+#include "wallet/Wallet.h"
 
 
 CBlock* CreateNewBlock(__wx__* pwallet, bool fProofOfStake=false, int64_t* pFees = 0);

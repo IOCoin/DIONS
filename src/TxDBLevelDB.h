@@ -1,7 +1,7 @@
 #ifndef BITCOIN_LEVELDB_H
 #define BITCOIN_LEVELDB_H 
 
-#include "ccoin/process.h"
+#include "ccoin/Process.h"
 
 #include <map>
 #include <string>

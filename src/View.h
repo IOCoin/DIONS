@@ -1,7 +1,7 @@
 #ifndef IOCOIN_VIEW_H
 #define IOCOIN_VIEW_H 
 
-#include "wallet/crypter.h"
+#include "wallet/Crypter.h"
 #include "Sync.h"
 #include <boost/signals2/signal.hpp>
 #include "KeyStore.h"

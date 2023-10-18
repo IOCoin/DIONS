@@ -2,9 +2,9 @@
 #define CONFIGURATION_STATE_H
 
 #include <cstdint>
-#include "ccoin/block.h"
-#include "ccoin/transaction.h"
-#include "core/util.h"
+#include "ccoin/Block.h"
+#include "ccoin/Transaction.h"
+#include "core/Util.h"
 
 class ConfigurationState
 {

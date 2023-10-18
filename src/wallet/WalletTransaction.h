@@ -1,6 +1,6 @@
 #pragma once
 
-#include "wallet.h"
+#include "Wallet.h"
 #include "TypeMapValue.h"
 class CCoinControl;
 class COutput;

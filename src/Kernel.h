@@ -1,7 +1,7 @@
 #ifndef PPCOIN_KERNEL_H
 #define PPCOIN_KERNEL_H 
 
-#include "ccoin/process.h"
+#include "ccoin/Process.h"
 
 
 

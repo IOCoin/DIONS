@@ -7,10 +7,10 @@ using namespace boost;
 #include "Script.h"
 #include "KeyStore.h"
 #include "BigNum.h"
-#include "crypto/key.h"
-#include "ccoin/process.h"
+#include "crypto/Key.h"
+#include "ccoin/Process.h"
 #include "Sync.h"
-#include "core/util.h"
+#include "core/Util.h"
 #include "dions/dions.h"
 bool CheckSig(vector<unsigned char> vchSig, vector<unsigned char> vchPubKey, CScript scriptCode, const CTransaction& txTo, unsigned int nIn, int nHashType);
 static const valtype vchFalse(0);

@@ -101,47 +101,47 @@ endif
 # adds some defaults in front. Unfortunately, LDFLAGS=... $(LDFLAGS) does not work.
 xLDFLAGS=$(LDHARDENING) $(LDFLAGS)
 OBJS= \
-    obj/alert.o \
-    obj/version.o \
-    obj/checkpoints.o \
-    obj/netbase.o \
-    obj/addrman.o \
-    obj/wallet/crypter.o \
-    obj/crypto/key.o \
-    obj/wallet/db.o \
+    obj/Alert.o \
+    obj/Version.o \
+    obj/CheckPoints.o \
+    obj/NetBase.o \
+    obj/AddrMan.o \
+    obj/crypto/Key.o \
     obj/main/main.o \
-    obj/keystore.o \
-    obj/view.o \
-    obj/miner.o \
-    obj/configuration_state.o \
-    obj/ccoin/block.o \
-    obj/ccoin/transaction.o \
-    obj/ccoin/client.o \
-    obj/ccoin/process.o \
-    obj/block_index.o \
-    obj/network_node.o \
-    obj/wallet/api_transaction.o \
-    obj/txmempool.o \
-    obj/net.o \
-    obj/protocol.o \
+    obj/KeyStore.o \
+    obj/View.o \
+    obj/Miner.o \
+    obj/ConfigurationState.o \
+    obj/ccoin/Block.o \
+    obj/ccoin/Transaction.o \
+    obj/ccoin/Client.o \
+    obj/ccoin/Process.o \
+    obj/BlockIndex.o \
+    obj/NetworkNode.o \
+    obj/TxMemPool.o \
+    obj/Net.o \
+    obj/Protocol.o \
     obj/rpc/client.o \
     obj/rpc/util_proto.o \
     obj/rpc/json_req.o \
     obj/rpc/mining.o \
     obj/rpc/blockchain.o \
     obj/rpc/rawtransaction.o \
-    obj/script.o \
-    obj/sync.o \
-    obj/core/util.o \
-    obj/wallet/wallet.o \
-    obj/wallet/wallet_transaction.o \
-    obj/wallet/walletdb.o \
-    obj/state.o \
-    obj/twister.o \
-    obj/tor.o \
+    obj/Script.o \
+    obj/Sync.o \
+    obj/core/Util.o \
+    obj/wallet/Wallet.o \
+    obj/wallet/WalletTransaction.o \
+    obj/wallet/WalletDB.o \
+    obj/wallet/APITransaction.o \
+    obj/wallet/Crypter.o \
+    obj/wallet/DB.o \
+    obj/State.o \
+    obj/Twister.o \
+    obj/Tor.o \
     obj/dions/dions.o \
-    obj/base_reflect.o \
-    obj/noui.o \
+    obj/BaseReflect.o \
+    obj/NoUI.o \
     obj/crypto/x11/cubehash.o \
     obj/crypto/x11/luffa.o \
     obj/crypto/x11/aes_helper.o \
@@ -154,7 +154,7 @@ OBJS= \
     obj/crypto/x11/jh.o\
     obj/crypto/x11/keccak.o\
     obj/crypto/x11/skein.o \
-    obj/kernel.o 
+    obj/Kernel.o 
 
 all: iocoind
 
@@ -195,7 +195,7 @@ iocoind: dvm/lib/libdvmone.a dvm/ethash/lib/ethash/libethash.a libdevcore/libdev
 
 obj/build.h: FORCE
 	/bin/sh ../share/genbuild.sh obj/build.h
-version.cpp: obj/build.h
+Version.cpp: obj/build.h
 DEFS += -DHAVE_BUILD_INFO
 
 obj/%.o: %.cpp

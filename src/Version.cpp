@@ -9,7 +9,7 @@ const std::string CLIENT_NAME("Satoshi");
 #define BUILD_DATE __DATE__ ", " __TIME__
 const std::string CLIENT_DATE(BUILD_DATE);
 #ifdef GIT_ARCHIVE
-#define GIT_COMMIT_ID         "$Id$"
+#define GIT_COMMIT_ID         "$Id: dac21d94001b2763123a70cc2731642f8f276874 $"
 #define GIT_COMMIT_HASH       "$Format:%H$"
 #define GIT_COMMIT_ABREV_HASH "$Format:%h$"
 #define GIT_COMMITTER_DATE    "$Format:%cD$"

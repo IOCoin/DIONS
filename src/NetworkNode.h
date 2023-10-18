@@ -1,10 +1,10 @@
 #pragma once 
 
 #include "TxDB.h"
-#include "wallet/walletdb.h"
+#include "wallet/WalletDB.h"
 #include "rpc/client.h"
 #include "Net.h"
-#include "core/util.h"
+#include "core/Util.h"
 #include "UIInterface.h"
 #include "CheckPoints.h"
 #include <boost/filesystem.hpp>
@@ -17,14 +17,14 @@
 #include "libdevcore/OverlayDB.h"
 #include "libdevcore/TrieDB.h"
 #include "libdevcore/Address.h"
-#include "ccoin/process.h"
+#include "ccoin/Process.h"
 #include "DiskBlockLocator.h"
 #ifndef WIN32
 #include <signal.h>
 #endif
 
 #include "rpc/network_face.h"
-#include "ccoin/client.h"
+#include "ccoin/Client.h"
 
 class NetworkNode : public NetworkFace
 {

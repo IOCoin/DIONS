@@ -1,7 +1,7 @@
 
 #include "db.h"
 #include "Net.h"
-#include "wallet/wallet.h"
+#include "wallet/Wallet.h"
 #include "core/strlcpy.h"
 #include "AddrMan.h"
 #include "UIInterface.h"

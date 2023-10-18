@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ccoin/block.h"
+#include "ccoin/Block.h"
 
 class CMerkleTx : public CTransaction
 {

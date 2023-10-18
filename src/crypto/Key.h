@@ -7,7 +7,7 @@
 #include "Allocators.h"
 #include "Serialize.h"
 #include "core/uint256.h"
-#include "core/util.h"
+#include "core/Util.h"
 #include "RayShade.h"
 
 #include <openssl/ec.h>

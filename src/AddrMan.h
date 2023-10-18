@@ -3,7 +3,7 @@
 
 #include "NetBase.h"
 #include "Protocol.h"
-#include "core/util.h"
+#include "core/Util.h"
 #include "Sync.h"
 
 

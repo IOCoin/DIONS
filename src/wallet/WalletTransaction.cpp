@@ -1,4 +1,4 @@
-#include "wallet_transaction.h"
+#include "WalletTransaction.h"
 
     int64_t __wx__Tx::GetDebit() const
     {

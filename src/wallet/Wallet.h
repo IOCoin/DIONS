@@ -5,15 +5,15 @@
 
 #include <stdlib.h>
 
-#include "ccoin/process.h"
-#include "crypto/key.h"
+#include "ccoin/Process.h"
+#include "crypto/Key.h"
 #include "KeyStore.h"
 #include "Script.h"
 #include "UIInterface.h"
-#include "core/util.h"
-#include "walletdb.h"
-#include "api_transaction.h"
-#include "wallet_transaction.h"
+#include "core/Util.h"
+#include "WalletDB.h"
+#include "APITransaction.h"
+#include "WalletTransaction.h"
 
 #include "RayShade.h"
 #include "rpc/wallet_face.h"

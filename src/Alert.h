@@ -5,7 +5,7 @@
 #include <string>
 
 #include "core/uint256.h"
-#include "core/util.h"
+#include "core/Util.h"
 
 class CNode;
 

@@ -8,7 +8,7 @@
 #include "Script.h"
 #include "InputPoint.h"
 #include "OutputPoint.h"
-#include "ccoin/transaction.h"
+#include "ccoin/Transaction.h"
 
 class CTxMemPool
 {
