@@ -16,7 +16,7 @@
 #include <dvmc/hex.hpp>
 #include <dvmc/loader.h>
 #include <dvmc/tooling.hpp>
-#include "rpc/client.h"
+#include "rpc/Client.h"
 using namespace std;
 extern __wx__* pwalletMainId;
 extern unsigned int nMinerSleep;

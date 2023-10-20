@@ -121,12 +121,12 @@ OBJS= \
     obj/TxMemPool.o \
     obj/Net.o \
     obj/Protocol.o \
-    obj/rpc/client.o \
-    obj/rpc/util_proto.o \
-    obj/rpc/json_req.o \
-    obj/rpc/mining.o \
-    obj/rpc/blockchain.o \
-    obj/rpc/rawtransaction.o \
+    obj/rpc/Client.o \
+    obj/rpc/UtilProto.o \
+    obj/rpc/JsonReq.o \
+    obj/rpc/Mining.o \
+    obj/rpc/BlockChain.o \
+    obj/rpc/RawTransaction.o \
     obj/Script.o \
     obj/Sync.o \
     obj/core/Util.o \

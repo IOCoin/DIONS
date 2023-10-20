@@ -3,7 +3,7 @@
 #include "KeyStore.h"
 #include "wallet/Wallet.h"
 #include "dions.h"
-#include "rpc/client.h"
+#include "rpc/Client.h"
 #include "ccoin/Process.h"
 #include "State.h"
 #include <boost/xpressive/xpressive_dynamic.hpp>

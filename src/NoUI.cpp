@@ -1,6 +1,6 @@
 
 #include "UIInterface.h"
-#include "rpc/client.h"
+#include "rpc/Client.h"
 #include <string>
 static int noui_ThreadSafeMessageBox(const std::string& message, const std::string& caption, int style)
 {

@@ -7,8 +7,8 @@
 #include "json/json_spirit_reader_template.h"
 #include "json/json_spirit_writer_template.h"
 #include "json/json_spirit_utils.h"
-#include "rpc/client.h"
-#include "rpc/dions_face.h"
+#include "rpc/Client.h"
+#include "rpc/DionsFace.h"
 
 static const int64_t CTRL__ = 0;
 

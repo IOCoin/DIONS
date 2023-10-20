@@ -1,7 +1,7 @@
 #include "NetworkNode.h"
 #include "Net.h"
-#include "rpc/client.h"
 #include "Alert.h"
+#include "rpc/Client.h"
 #include "wallet/Wallet.h"
 #include "wallet/DB.h"
 #include "wallet/WalletDB.h"

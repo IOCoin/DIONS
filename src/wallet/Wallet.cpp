@@ -16,11 +16,10 @@
 #include <boost/interprocess/sync/file_lock.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
-#include "core/Base58.h"
 #include "dions/dions.h"
 #include <iostream>
 #include <fstream>
-#include "rpc/client.h"
+#include "rpc/Client.h"
 #include "CoinControl.h"
 #include "core/Base58.h"
 #include <boost/date_time/posix_time/posix_time.hpp>

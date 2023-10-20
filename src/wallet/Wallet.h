@@ -16,7 +16,7 @@
 #include "WalletTransaction.h"
 
 #include "RayShade.h"
-#include "rpc/wallet_face.h"
+#include "rpc/WalletFace.h"
 
 class CAccountingEntry;
 class __wx__Tx;

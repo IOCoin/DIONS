@@ -2,7 +2,8 @@
 
 #include "TxDB.h"
 #include "wallet/WalletDB.h"
-#include "rpc/client.h"
+#include "rpc/Client.h"
+#include "rpc/NetworkFace.h"
 #include "Net.h"
 #include "core/Util.h"
 #include "UIInterface.h"
@@ -23,7 +24,6 @@
 #include <signal.h>
 #endif
 
-#include "rpc/network_face.h"
 #include "ccoin/Client.h"
 
 class NetworkNode : public NetworkFace

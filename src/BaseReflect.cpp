@@ -4,7 +4,7 @@
 #include "wallet/Wallet.h"
 #include "BaseReflect.h"
 #include "core/uint256.h"
-#include "rpc/client.h"
+#include "rpc/Client.h"
 #include "ccoin/Process.h"
 #include "libdevcore/TrieDB.h"
 #include "libdevcore/StateCacheDB.h"
