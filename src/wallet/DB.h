@@ -9,7 +9,7 @@
 #include <db_cxx.h>
 
 #include "TxDBLevelDB.h"
-#include "dions/dions.h"
+#include "dions/Dions.h"
 
 class CAddress;
 class CAddrMan;

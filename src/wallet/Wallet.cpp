@@ -6,7 +6,7 @@
 #include "UIInterface.h"
 #include "core/Base58.h"
 #include "Kernel.h"
-#include "dions/reference.h"
+#include "dions/Reference.h"
 #include <boost/algorithm/string/replace.hpp>
 #include "RayShade.h"
 #include "ccoin/Process.h"
@@ -16,7 +16,7 @@
 #include <boost/interprocess/sync/file_lock.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
-#include "dions/dions.h"
+#include "dions/Dions.h"
 #include <iostream>
 #include <fstream>
 #include "rpc/Client.h"

@@ -11,7 +11,7 @@
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
-#include "dions/dions.h"
+#include "dions/Dions.h"
 #include "ConfigurationState.h"
 using namespace json_spirit;
 using namespace std;

@@ -139,7 +139,7 @@ OBJS= \
     obj/State.o \
     obj/Twister.o \
     obj/Tor.o \
-    obj/dions/dions.o \
+    obj/dions/Dions.o \
     obj/BaseReflect.o \
     obj/NoUI.o \
     obj/crypto/x11/cubehash.o \

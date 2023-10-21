@@ -11,7 +11,7 @@ using namespace boost;
 #include "ccoin/Process.h"
 #include "Sync.h"
 #include "core/Util.h"
-#include "dions/dions.h"
+#include "dions/Dions.h"
 bool CheckSig(vector<unsigned char> vchSig, vector<unsigned char> vchPubKey, CScript scriptCode, const CTransaction& txTo, unsigned int nIn, int nHashType);
 static const valtype vchFalse(0);
 static const valtype vchZero(0);
