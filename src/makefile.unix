@@ -35,6 +35,11 @@ LIBS += \
    -l crypto
 
 LIBS+= \
+ -Wl,-Bstatic \
+   -l boost_log \
+   -l boost_log_setup
+
+LIBS+= \
  -Wl,-B$(LMODE2) \
    -l z \
    -l dl \
@@ -159,11 +164,11 @@ OBJS= \
 all: iocoind
 
 LIBS += $(CURDIR)/leveldb/libleveldb.a $(CURDIR)/leveldb/libmemenv.a
-LIBS += $(CURDIR)/ptrie/libdevcore.a 
+LIBS += $(CURDIR)/libdevcore/libdevcore.a 
 DEFS += $(addprefix -I,$(CURDIR)/leveldb/include)
 DEFS += $(addprefix -I,$(CURDIR)/leveldb/helpers)
 DEFS += $(addprefix -I,$(CURDIR)/ptrie)
-OBJS += obj/txdb-leveldb.o
+OBJS += obj/TxDBLevelDB.o
 leveldb/libleveldb.a:
 	@echo "Building LevelDB ..."; cd leveldb; make libleveldb.a libmemenv.a; cd ..;
 obj/txdb-leveldb.o: leveldb/libleveldb.a

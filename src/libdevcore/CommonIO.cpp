@@ -3,7 +3,7 @@
 // Licensed under the GNU General Public License, Version 3.
 
 #include "CommonIO.h"
-#include <libdevcore/FileSystem.h>
+#include "FileSystem.h"
 #include <iostream>
 #include <cstdlib>
 #include <fstream>

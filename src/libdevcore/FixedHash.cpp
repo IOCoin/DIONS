@@ -1,7 +1,7 @@
 // Copyright 2014-2019 Aleth Authors.
 // Copyright 2022-2023 blastdoor7.
 // Licensed under the GNU General Public License, Version 3.
-#include "ptrie/FixedHash.h"
+#include "FixedHash.h"
 #include <boost/algorithm/string.hpp>
 
 namespace dev

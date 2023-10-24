@@ -10,13 +10,13 @@
 #include <windows.h>
 #endif
 
-#include <aleth/buildinfo.h>
+//XXXX #include "buildinfo.h"
 
 using namespace std;
 
 namespace dev
 {
-char const* Version = aleth_get_buildinfo()->project_version;
+//XXXX char const* Version = aleth_get_buildinfo()->project_version;
 bytes const NullBytes;
 std::string const EmptyString;
 
@@ -24,8 +24,8 @@ void InvariantChecker::checkInvariants(HasInvariants const* _this, char const* _
 {
     if (!_this->invariants())
     {
-        cwarn << (_pre ? "Pre" : "Post") << "invariant failed in" << _fn << "at" << _file << ":" << _line;
-        ::boost::exception_detail::throw_exception_(FailedInvariant(), _fn, _file, _line);
+      //XXXX   cwarn << (_pre ? "Pre" : "Post") << "invariant failed in" << _fn << "at" << _file << ":" << _line;
+        //XXXX ::boost::exception_detail::throw_exception_(FailedInvariant(), _fn, _file, _line);
     }
 }
 
