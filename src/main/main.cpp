@@ -1,10 +1,10 @@
-#include "txdb.h"
-#include "wallet/walletdb.h"
-#include "rpc/client.h"
-#include "net.h"
-#include "core/util.h"
-#include "ui_interface.h"
-#include "checkpoints.h"
+#include "TxDB.h"
+#include "wallet/WalletDB.h"
+#include "rpc/Client.h"
+#include "Net.h"
+#include "core/Util.h"
+#include "UIInterface.h"
+#include "CheckPoints.h"
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/filesystem/convenience.hpp>
@@ -15,8 +15,8 @@
 #include "ptrie/OverlayDB.h"
 #include "ptrie/TrieDB.h"
 #include "ptrie/Address.h"
-#include "disk_block_locator.h"
-#include "network_node.h"
+#include "DiskBlockLocator.h"
+#include "NetworkNode.h"
 #ifndef WIN32
 #include <signal.h>
 #endif

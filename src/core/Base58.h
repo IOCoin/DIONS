@@ -7,7 +7,7 @@
 #include "crypto/Key.h"
 #include "Script.h"
 #include "ccoin/Process.h"
-#include "dions/dions.h"
+#include "dions/Dions.h"
 static const char* pszBase58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 
 inline unsigned char GetAddressVersion()

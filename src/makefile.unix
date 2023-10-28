@@ -9,7 +9,7 @@ DEFS=-DBOOST_SPIRIT_THREADSAFE
 DEFS += -DBOOST_BIND_GLOBAL_PLACEHOLDERS
 
 DEFS += $(addprefix -I,$(CURDIR) $(CURDIR)/obj $(BOOST_INCLUDE_PATH) $(BDB_INCLUDE_PATH) $(OPENSSL_INCLUDE_PATH))
-LIBS = $(addprefix -L,$(BOOST_LIB_PATH) $(BDB_LIB_PATH) $(OPENSSL_LIB_PATH))
+LIBS = $(addprefix -L,$(BOOST_LIB_PATH) $(BDB_LIB_PATH) $(OPENSSL_LIB_PATH) libethereum libethcore) 
 
 LMODE = dynamic
 LMODE2 = dynamic
@@ -33,11 +33,6 @@ LIBS += \
    -l db_cxx$(BDB_LIB_SUFFIX) \
    -l ssl \
    -l crypto
-
-LIBS+= \
- -Wl,-Bstatic \
-   -l boost_log \
-   -l boost_log_setup
 
 LIBS+= \
  -Wl,-B$(LMODE2) \
@@ -164,7 +159,7 @@ OBJS= \
 all: iocoind
 
 LIBS += $(CURDIR)/leveldb/libleveldb.a $(CURDIR)/leveldb/libmemenv.a
-LIBS += $(CURDIR)/libdevcore/libdevcore.a 
+LIBS += $(CURDIR)/ptrie/libdevcore.a 
 DEFS += $(addprefix -I,$(CURDIR)/leveldb/include)
 DEFS += $(addprefix -I,$(CURDIR)/leveldb/helpers)
 DEFS += $(addprefix -I,$(CURDIR)/ptrie)
@@ -175,7 +170,6 @@ obj/txdb-leveldb.o: leveldb/libleveldb.a
 libdevcore/libdevcore.a:
 	@echo "Building libdevcore ..."; cd libdevcore; cmake CMakeLists.txt; make ; cd ..;
 
-LIBS += $(CURDIR)/dvma/libdvma.a
 LIBS += $(CURDIR)/dvm/lib/libdvmone.a
 LIBS += $(CURDIR)/dvm/ethash/lib/ethash/libethash.a
 LIBS += $(CURDIR)/dvm/ethash/lib/keccak/libkeccak.a
@@ -187,13 +181,11 @@ DEFS += $(addprefix -I,$(CURDIR)/dvmone/dvmc/include)
 DEFS += $(addprefix -I,$(CURDIR)/dvm/include)
 DEFS += $(addprefix -I,$(CURDIR)/dvm/dvmc/include)
 DEFS += $(addprefix -I,$(CURDIR)/evmc/include)
-dvma/libdvma.a:
-	@echo "Building dvma ..."; cd dvma; cmake CMakeLists.txt; make; cd ..;
 dvm/ethash/lib/ethash/libethash.a:
 	@echo "Building DVM ..."; cd dvm/ethash; cmake CMakeLists.txt; make; cd ..;
 dvm/lib/libdvmone.a:
 	@echo "Building DVM ..."; cd dvm; cmake CMakeLists.txt; make; cd ethash; cmake CMakeLists.txt; make; cd ..;
-iocoind: dvm/lib/libdvmone.a dvm/ethash/lib/ethash/libethash.a libdevcore/libdevcore.a
+iocoind: dvm/lib/libdvmone.a dvm/ethash/lib/ethash/libethash.a ptrie/libdevcore.a
 
 # auto-generated dependencies:
 -include obj/*.P

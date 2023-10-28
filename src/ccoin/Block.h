@@ -6,10 +6,10 @@
 #include "Net.h"
 #include "Script.h"
 #include "crypto/HashBlock.h"
-#include "libdevcore/FixedHash.h"
-#include "libdevcore/TrieDB.h"
-#include "libdevcore/OverlayDB.h"
-#include "libdevcore/Address.h"
+#include "ptrie/FixedHash.h"
+#include "ptrie/TrieDB.h"
+#include "ptrie/OverlayDB.h"
+#include "ptrie/Address.h"
 #include "Transaction.h"
 
 #include <list>
@@ -347,6 +347,8 @@ public:
   bool AcceptBlock();
   bool SignBlock(__wx__& keystore, int64_t nFees);
   bool CheckBlockSignature() const;
+
+
   dev::OverlayDB const* db() const { return (dev::OverlayDB const*)state__->db(); }
 
   dev::SecureTrieDB<dev::Address, dev::OverlayDB>* state__;
