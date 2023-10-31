@@ -1,5 +1,4 @@
-#ifndef BITCOIN_BIGNUM_H
-#define BITCOIN_BIGNUM_H 
+#pragma once
 
 #include "Serialize.h"
 #include "core/uint256.h"
@@ -966,4 +965,3 @@ inline std::ostream& operator<<(std::ostream &strm, const CBigNum &b)
 
 typedef CBigNum Bignum;
 
-#endif

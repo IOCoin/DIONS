@@ -1,9 +1,9 @@
 #ifndef COORDINATE_H
 #define COORDINATE_H 
+//XXXX PRAGMA
 
-#include "interface_crypt.h"
-
-#include "state.h"
+#include "InterfaceCrypt.h"
+#include "State.h"
 
 class CoordinatePatch : InterfaceCrypt
 {

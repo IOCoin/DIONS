@@ -1,5 +1,4 @@
-#ifndef BITCOIN_MRUSET_H
-#define BITCOIN_MRUSET_H 
+#pragma once
 
 #include <set>
 #include <deque>
@@ -96,4 +95,3 @@ public:
   }
 };
 
-#endif

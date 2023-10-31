@@ -1,5 +1,4 @@
-#ifndef BITCOIN_ALLOCATORS_H
-#define BITCOIN_ALLOCATORS_H 
+#pragma once
 
 #include <string.h>
 #include <string>
@@ -253,4 +252,3 @@ struct zero_after_free_allocator : public std::allocator<T>
 
 typedef std::basic_string<char, std::char_traits<char>, secure_allocator<char> > SecureString;
 
-#endif

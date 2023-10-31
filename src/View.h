@@ -1,5 +1,4 @@
-#ifndef IOCOIN_VIEW_H
-#define IOCOIN_VIEW_H 
+#pragma once
 
 #include "wallet/Crypter.h"
 #include "Sync.h"
@@ -67,4 +66,3 @@ public:
   virtual bool HaveCScript(const CScriptID &hash) const;
   virtual bool GetCScript(const CScriptID &hash, CScript& redeemScriptOut) const;
 };
-#endif

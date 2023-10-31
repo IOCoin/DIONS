@@ -1,5 +1,4 @@
-#ifndef BITCOIN_SYNC_H
-#define BITCOIN_SYNC_H 
+#pragma once
 
 #include "ThreadSafety.h"
 
@@ -236,4 +235,3 @@ public:
     return fHaveGrant;
   }
 };
-#endif

@@ -1,5 +1,4 @@
-#ifndef NOVACOIN_MINER_H
-#define NOVACOIN_MINER_H 
+#pragma once
 
 #include "ccoin/Process.h"
 #include "wallet/Wallet.h"
@@ -22,4 +21,3 @@ bool CheckStake(CBlock* pblock, __wx__& wallet);
 
 void SHA256Transform(void* pstate, void* pinput, const void* pinit);
 
-#endif

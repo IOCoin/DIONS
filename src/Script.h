@@ -1,5 +1,4 @@
-#ifndef H_BITCOIN_SCRIPT
-#define H_BITCOIN_SCRIPT 
+#pragma once
 
 #include <string>
 #include <vector>
@@ -1039,4 +1038,3 @@ CScript CombineSignatures(CScript scriptPubKey, const CTransaction& txTo, unsign
 bool ExtractPubKey(const CScript& scriptPubKey, const CKeyStore* pkeystore, std::vector<unsigned char>& vchPubKeyRet);
 bool ExtractHash160(const CScript& scriptPubKey, uint160& hash160Ret);
 
-#endif

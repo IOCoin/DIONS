@@ -1,5 +1,4 @@
-#ifndef _BITCOIN_ADDRMAN
-#define _BITCOIN_ADDRMAN 1
+#pragma once
 
 #include "NetBase.h"
 #include "Protocol.h"
@@ -470,4 +469,3 @@ public:
   }
 };
 
-#endif

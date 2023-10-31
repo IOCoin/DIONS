@@ -1,5 +1,4 @@
-#ifndef PPCOIN_KERNEL_H
-#define PPCOIN_KERNEL_H 
+#pragma once
 
 #include "ccoin/Process.h"
 
@@ -39,4 +38,3 @@ bool CheckStakeModifierCheckpoints(int nHeight, unsigned int nStakeModifierCheck
 
 int64_t GetWeight(int64_t nIntervalBeginning, int64_t nIntervalEnd);
 
-#endif

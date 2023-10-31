@@ -1,5 +1,4 @@
-#ifndef BITCOIN_UI_INTERFACE_H
-#define BITCOIN_UI_INTERFACE_H
+#pragma once
 
 #include <boost/signals2/last_value.hpp>
 #include <boost/signals2/signal.hpp>
@@ -112,4 +111,3 @@ inline std::string _(const char* psz)
   return rv ? (*rv) : psz;
 }
 
-#endif

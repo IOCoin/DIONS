@@ -1,5 +1,5 @@
-#ifndef TX_MEMPOOL_H
-#define TX_MEMPOOL_H
+#pragma once
+
 #include<cstdint>
 #include "Serialize.h"
 #include "BigNum.h"
@@ -54,4 +54,3 @@ public:
 };
 
 
-#endif

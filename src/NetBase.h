@@ -1,5 +1,4 @@
-#ifndef BITCOIN_NETBASE_H
-#define BITCOIN_NETBASE_H 
+#pragma once
 
 #include <string>
 #include <vector>
@@ -140,4 +139,3 @@ bool LookupNumeric(const char *pszName, CService& addr, int portDefault = 0);
 bool ConnectSocket(const CService &addr, SOCKET& hSocketRet, int nTimeout = nConnectTimeout);
 bool ConnectSocketByName(CService &addr, SOCKET& hSocketRet, const char *pszDest, int portDefault = 0, int nTimeout = nConnectTimeout);
 
-#endif

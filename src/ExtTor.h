@@ -1,5 +1,4 @@
-#ifndef EXT_TOR
-#define EXT_TOR 
+#pragma once
 
 #include<vector>
 
@@ -19,4 +18,3 @@ public:
 private:
 };
 
-#endif

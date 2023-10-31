@@ -1,5 +1,4 @@
-#ifndef NODE_EX
-#define NODE_EX 
+#pragma once 
 
 #include "Twister.h"
 #include <vector>
@@ -154,4 +153,3 @@ private:
   vector<unsigned char> buffer_;
 };
 
-#endif

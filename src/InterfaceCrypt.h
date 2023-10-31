@@ -1,5 +1,4 @@
-#ifndef INTERFACE_CRYPTH
-#define INTERFACE_CRYPTH 
+#pragma once
 
 using namespace::std;
 
@@ -14,4 +13,3 @@ public:
   virtual void ctrl(string& c) = 0;
 };
 
-#endif

@@ -1,5 +1,4 @@
-#ifndef CLIENTVERSION_H
-#define CLIENTVERSION_H 
+#pragma once
 
 
 
@@ -16,4 +15,3 @@
 #define STRINGIZE(X) DO_STRINGIZE(X)
 #define DO_STRINGIZE(X) #X
 
-#endif

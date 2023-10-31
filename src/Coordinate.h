@@ -1,6 +1,8 @@
 #ifndef COORDINATE_H
 #define COORDINATE_H 
 
+//XXXX PRAGMA
+
 #include "InterfaceCrypt.h"
 
 class CoordinateVector : InterfaceCrypt

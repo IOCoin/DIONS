@@ -1,5 +1,4 @@
-#ifndef BITCOIN_VERSION_H
-#define BITCOIN_VERSION_H 
+#pragma once
 
 #include "ClientVersion.h"
 #include <string>
@@ -53,4 +52,3 @@ static const int BIP0031_VERSION = 60000;
 
 static const int MEMPOOL_GD_VERSION = 60002;
 
-#endif

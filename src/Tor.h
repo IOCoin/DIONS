@@ -1,3 +1,5 @@
+#pragma once
+
 #include"ExtTor.h"
 #include "Twister.h"
 

@@ -1,9 +1,7 @@
-#ifndef CONSTANTS__
-#define CONSTANTS__ 
+#pragma once
 
 #include<stdlib.h>
 
 typedef std::vector<unsigned char> vchType;
 
 
-#endif

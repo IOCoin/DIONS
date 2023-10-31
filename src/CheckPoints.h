@@ -1,5 +1,4 @@
-#ifndef BITCOIN_CHECKPOINT_H
-#define BITCOIN_CHECKPOINT_H 
+#pragma once
 
 #include <map>
 #include "Net.h"
@@ -147,5 +146,3 @@ public:
   bool CheckSignature();
   bool ProcessSyncCheckpoint(CNode* pfrom);
 };
-
-#endif

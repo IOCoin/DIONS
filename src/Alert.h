@@ -1,5 +1,4 @@
-#ifndef _BITCOINALERT_H_
-#define _BITCOINALERT_H_ 1
+#pragma once
 
 #include <set>
 #include <string>
@@ -94,4 +93,3 @@ public:
   static CAlert getAlertByHash(const uint256 &hash);
 };
 
-#endif

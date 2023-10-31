@@ -1,5 +1,4 @@
-#ifndef CONFIGURATION_STATE_H
-#define CONFIGURATION_STATE_H
+#pragma once
 
 #include <cstdint>
 #include "ccoin/Block.h"
@@ -29,4 +28,3 @@ public:
   int64_t nTransactionFee = CTransaction::MIN_TX_FEE;
 };
 
-#endif

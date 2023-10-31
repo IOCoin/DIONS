@@ -1,5 +1,4 @@
-#ifndef OUTPUT_POINT_H
-#define OUTPUT_POINT_H
+#pragma once
 
 class COutPoint
 {
@@ -62,4 +61,3 @@ public:
   }
 };
 
-#endif

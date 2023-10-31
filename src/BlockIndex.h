@@ -1,5 +1,5 @@
-#ifndef BLOCK_INDEX_H
-#define BLOCK_INDEX_H
+#pragma once
+
 #include "ccoin/Block.h"
 
 class CBlockIndex
@@ -333,4 +333,3 @@ public:
   }
 };
 
-#endif

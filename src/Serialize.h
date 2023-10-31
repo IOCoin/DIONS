@@ -1,5 +1,4 @@
-#ifndef BITCOIN_SERIALIZE_H
-#define BITCOIN_SERIALIZE_H 
+#pragma once
 
 #include <string>
 #include <vector>
@@ -1430,4 +1429,3 @@ public:
   }
 };
 
-#endif

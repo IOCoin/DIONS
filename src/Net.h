@@ -1,5 +1,4 @@
-#ifndef BITCOIN_NET_H
-#define BITCOIN_NET_H 
+#pragma once
 
 #include <deque>
 #include <boost/array.hpp>
@@ -706,4 +705,3 @@ void RelayTransaction(const CTransaction& tx, const uint256& hash);
 void RelayTransaction(const CTransaction& tx, const uint256& hash, const CDataStream& ss);
 
 
-#endif

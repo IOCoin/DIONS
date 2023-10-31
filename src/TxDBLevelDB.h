@@ -1,5 +1,4 @@
-#ifndef BITCOIN_LEVELDB_H
-#define BITCOIN_LEVELDB_H 
+#pragma once
 
 #include "ccoin/Process.h"
 
@@ -210,4 +209,3 @@ private:
 };
 
 
-#endif

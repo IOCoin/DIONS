@@ -1,5 +1,4 @@
-#ifndef BITCOIN_KEYSTORE_H
-#define BITCOIN_KEYSTORE_H 
+#pragma once
 
 #include "wallet/Crypter.h"
 #include "Sync.h"
@@ -188,4 +187,3 @@ public:
   boost::signals2::signal<void (CCryptoKeyStore* wallet)> NotifyStatusChanged;
 };
 
-#endif

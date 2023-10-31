@@ -1,5 +1,4 @@
-#ifndef DISK_BLOCK_LOCATOR_H
-#define DISK_BLOCK_LOCATOR_H
+#pragma once
 
 #include "BlockIndex.h"
 
@@ -153,4 +152,3 @@ public:
   }
 };
 
-#endif

@@ -1,6 +1,4 @@
-#ifndef BITCOIN_TXDB_H
-#define BITCOIN_TXDB_H 
+#pragma once
 
 #include "TxDBLevelDB.h"
 
-#endif

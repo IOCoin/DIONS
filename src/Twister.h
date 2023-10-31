@@ -1,5 +1,4 @@
-#ifndef TWISTER
-#define TWISTER 
+#pragma once
 
 #include "boost/random/mersenne_twister.hpp"
 #include "boost/math/constants/constants.hpp"
@@ -152,4 +151,3 @@ int outer_sect(int (*s)(int), int (*t)(int), int, int);
 
 
 
-#endif

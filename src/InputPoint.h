@@ -1,5 +1,4 @@
-#ifndef DIONS_INPUTPOINT_H
-#define DIONS_INPUTPOINT_H
+#pragma once 
 
 class CInPoint
 {
@@ -27,4 +26,3 @@ public:
   }
 };
 
-#endif

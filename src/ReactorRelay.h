@@ -1,6 +1,4 @@
-#ifndef REACTOR_RELAY
-#define REACTOR_RELAY 
-
+#pragma once
 
 #define s_put(q,x) ((q)[(x)/64] |= (((uint64_t) 1) << (uint64_t) ((x)%64)))
 #define s_extract(q,x) (((q)[(x)/64] >> (uint64_t) ((x)%64)) & 1)
@@ -63,4 +61,3 @@ class ReactorRelay
   virtual void acceptor() = 0;
 };
 
-#endif

@@ -1,5 +1,4 @@
-#ifndef RAY_SHADE_H
-#define RAY_SHADE_H 
+#pragma once
 
 #include "InterfaceCrypt.h"
 
@@ -113,4 +112,3 @@ private:
   vector<unsigned char> stream_id;
 };
 
-#endif

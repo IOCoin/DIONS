@@ -1,6 +1,4 @@
-#ifndef COINCONTROL_H
-#define COINCONTROL_H 
-
+#pragma once
 
 class CCoinControl
 {
@@ -54,4 +52,3 @@ private:
 
 };
 
-#endif

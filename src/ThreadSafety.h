@@ -1,5 +1,4 @@
-#ifndef BITCOIN_THREADSAFETY_H
-#define BITCOIN_THREADSAFETY_H 
+#pragma once
 
 #ifdef __clang__
 
@@ -45,5 +44,4 @@
 #define EXCLUSIVE_LOCKS_REQUIRED(...) 
 #define SHARED_LOCKS_REQUIRED(...) 
 #define NO_THREAD_SAFETY_ANALYSIS 
-#endif
 #endif
