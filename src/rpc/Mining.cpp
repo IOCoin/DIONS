@@ -4,6 +4,7 @@
 #include "TxDB.h"
 #include "Miner.h"
 #include "Client.h"
+#include "Mining.h"
 using namespace json_spirit;
 using namespace std;
 extern __wx__* pwalletMainId;
@@ -327,7 +328,7 @@ Value getwork(const Array& params, bool fHelp)
     return CheckWork(pblock, *pwalletMainId, reservekey);
   }
 }
-Value tmpTest(const Array& params, bool fHelp)
+Value Mining::tmpTest(const Array& params, bool fHelp)
 {
   if (fHelp || params.size() > 1)
     throw runtime_error(

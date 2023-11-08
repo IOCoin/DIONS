@@ -2,6 +2,7 @@
 #include "Net.h"
 #include "Alert.h"
 #include "rpc/Client.h"
+#include "rpc/Mining.h"
 #include "wallet/Wallet.h"
 #include "wallet/DB.h"
 #include "wallet/WalletDB.h"
@@ -544,6 +545,8 @@ bool NetworkNode::init()
   BOOST_FOREACH(string strDest, mapMultiArgs["-seednode"])
   AddOneShot(strDest);
 
+  this->client_.init(GetDataDir());
+
   if (!bitdb.Open(GetDataDir()))
   {
     string msg = strprintf(_("Error initializing database environment %s!"
@@ -826,7 +829,8 @@ bool NetworkNode::init()
   if (fServer)
   {
     auto dionsPtr = new Dions();
-    this->rpcServer_.reset(new GenericServer<DionsFace,WalletFace,NetworkFace>(dionsPtr,this->pwalletMain_,this));
+    auto miningPtr = new Mining();
+    this->rpcServer_.reset(new GenericServer<DionsFace,WalletFace,MiningFace,NetworkFace>(dionsPtr,this->pwalletMain_,miningPtr,this));
     CClientUIInterface* uiFace = &this->uiFace_;
     this->rpcServer_->start(this->argsMap_,uiFace);
   }

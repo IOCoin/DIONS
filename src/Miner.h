@@ -21,3 +21,4 @@ bool CheckStake(CBlock* pblock, __wx__& wallet);
 
 void SHA256Transform(void* pstate, void* pinput, const void* pinit);
 
+
