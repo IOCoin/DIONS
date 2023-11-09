@@ -8,7 +8,7 @@
 using namespace json_spirit;
 using namespace std;
 extern __wx__* pwalletMainId;
-Value getnetworkmhashps(const Array& params, bool fHelp)
+Value Mining::getnetworkmhashps(const Array& params, bool fHelp)
 {
   if (fHelp || params.size() > 2)
     throw runtime_error(
@@ -19,7 +19,7 @@ Value getnetworkmhashps(const Array& params, bool fHelp)
 
   return GetPoWMHashPS(params.size() > 0 ? params[0].get_int() : 15, params.size() > 1 ? params[1].get_int() : -1);
 }
-Value getsubsidy(const Array& params, bool fHelp)
+Value Mining::getsubsidy(const Array& params, bool fHelp)
 {
   if (fHelp || params.size() > 1)
     throw runtime_error(
@@ -28,7 +28,7 @@ Value getsubsidy(const Array& params, bool fHelp)
 
   return (uint64_t)GetProofOfWorkReward((int)nBestHeight, 0);
 }
-Value getmininginfo(const Array& params, bool fHelp)
+Value Mining::getmininginfo(const Array& params, bool fHelp)
 {
   if (fHelp || params.size() != 0)
     throw runtime_error(
@@ -58,7 +58,7 @@ Value getmininginfo(const Array& params, bool fHelp)
   obj.push_back(Pair("testnet", fTestNet));
   return obj;
 }
-Value getstakinginfo(const Array& params, bool fHelp)
+Value Mining::getstakinginfo(const Array& params, bool fHelp)
 {
   if (fHelp || params.size() != 0)
     throw runtime_error(
@@ -84,7 +84,7 @@ Value getstakinginfo(const Array& params, bool fHelp)
   obj.push_back(Pair("expectedtime", nExpectedTime));
   return obj;
 }
-Value getworkex(const Array& params, bool fHelp)
+Value Mining::getworkex(const Array& params, bool fHelp)
 {
   if (fHelp || params.size() > 2)
     throw runtime_error(
@@ -215,7 +215,7 @@ Value getworkex(const Array& params, bool fHelp)
     return CheckWork(pblock, *pwalletMainId, reservekey);
   }
 }
-Value getwork(const Array& params, bool fHelp)
+Value Mining::getwork(const Array& params, bool fHelp)
 {
   if (fHelp || params.size() > 1)
     throw runtime_error(
@@ -455,7 +455,7 @@ Value Mining::tmpTest(const Array& params, bool fHelp)
 
   return found;
 }
-Value getblocktemplate(const Array& params, bool fHelp)
+Value Mining::getblocktemplate(const Array& params, bool fHelp)
 {
   if (fHelp || params.size() > 1)
     throw runtime_error(
@@ -622,7 +622,7 @@ Value getblocktemplate(const Array& params, bool fHelp)
   result.push_back(Pair("height", (int64_t)(pindexPrev->nHeight+1)));
   return result;
 }
-Value submitblock(const Array& params, bool fHelp)
+Value Mining::submitblock(const Array& params, bool fHelp)
 {
   if (fHelp || params.size() < 1 || params.size() > 2)
     throw runtime_error(

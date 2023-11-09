@@ -24,7 +24,7 @@
 #include <boost/asio/ssl/context.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/shared_ptr.hpp>
-#include "core/Base58.h"
+//#include "core/Base58.h"
 
 #include "rpc/JsonReq.h"
 #include "rpc/UtilProto.h"

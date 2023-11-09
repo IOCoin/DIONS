@@ -4,6 +4,7 @@
 #include "Kernel.h"
 #include "core/Util.h"
 #include "wallet/APITransaction.h"
+#include "BlockChain.h"
 #include <cmath>
 using namespace json_spirit;
 using namespace std;
@@ -167,7 +168,7 @@ Object blockToJSON(const CBlock& block, const CBlockIndex* blockindex, bool fPri
 
   return result;
 }
-Value getbestblockhash(const Array& params, bool fHelp)
+Value BlockChain::getbestblockhash(const Array& params, bool fHelp)
 {
   if (fHelp || params.size() != 0)
     throw runtime_error(
@@ -176,7 +177,7 @@ Value getbestblockhash(const Array& params, bool fHelp)
 
   return hashBestChain.GetHex();
 }
-Value getblockcount(const Array& params, bool fHelp)
+Value BlockChain::getblockcount(const Array& params, bool fHelp)
 {
   if (fHelp || params.size() != 0)
     throw runtime_error(
@@ -185,7 +186,7 @@ Value getblockcount(const Array& params, bool fHelp)
 
   return nBestHeight;
 }
-Value getpowblocks(const Array& params, bool fHelp)
+Value BlockChain::getpowblocks(const Array& params, bool fHelp)
 {
   if (fHelp || params.size() > 1)
     throw runtime_error(
@@ -202,7 +203,7 @@ Value getpowblocks(const Array& params, bool fHelp)
   CBlockIndex* block = FindBlockByHeight(nHeight);
   return GetPowHeight(block);
 }
-Value getpowblocksleft(const Array& params, bool fHelp)
+Value BlockChain::getpowblocksleft(const Array& params, bool fHelp)
 {
   if (fHelp || params.size() > 1)
     throw runtime_error(
@@ -246,7 +247,7 @@ double GetBlocktime(CBlockIndex * block, int blocks,
 
   return abs(static_cast<double>(block->nTime - end->nTime)) / static_cast<double>(blocks);
 }
-Value getpowtimeleft(const Array& params, bool fHelp)
+Value BlockChain::getpowtimeleft(const Array& params, bool fHelp)
 {
   if (fHelp || params.size() > 2)
     throw runtime_error(
@@ -295,7 +296,7 @@ Value getpowtimeleft(const Array& params, bool fHelp)
   double blocktime = GetBlocktime(block, 300, true, false);
   return (blocktime * powLeft) / divisor;
 }
-Value getdifficulty(const Array& params, bool fHelp)
+Value BlockChain::getdifficulty(const Array& params, bool fHelp)
 {
   if (fHelp || params.size() != 0)
     throw runtime_error(
@@ -308,7 +309,7 @@ Value getdifficulty(const Array& params, bool fHelp)
   obj.push_back(Pair("search-interval", (int)nLastCoinStakeSearchInterval));
   return obj;
 }
-Value settxfee(const Array& params, bool fHelp)
+Value BlockChain::settxfee(const Array& params, bool fHelp)
 {
   if (fHelp || params.size() < 1 || params.size() > 1 || AmountFromValue(params[0]) < CTransaction::MIN_TX_FEE)
     throw runtime_error(
@@ -319,7 +320,7 @@ Value settxfee(const Array& params, bool fHelp)
   globalState.nTransactionFee = (globalState.nTransactionFee / CENT) * CENT;
   return true;
 }
-Value getrawmempool(const Array& params, bool fHelp)
+Value BlockChain::getrawmempool(const Array& params, bool fHelp)
 {
   if (fHelp || params.size() != 0)
     throw runtime_error(
@@ -333,7 +334,7 @@ Value getrawmempool(const Array& params, bool fHelp)
   a.push_back(hash.ToString());
   return a;
 }
-Value getblockhash(const Array& params, bool fHelp)
+Value BlockChain::getblockhash(const Array& params, bool fHelp)
 {
   if (fHelp || params.size() != 1)
     throw runtime_error(
@@ -350,7 +351,7 @@ Value getblockhash(const Array& params, bool fHelp)
   CBlockIndex* pblockindex = FindBlockByHeight(nHeight);
   return pblockindex->phashBlock->GetHex();
 }
-Value getblock(const Array& params, bool fHelp)
+Value BlockChain::getblock(const Array& params, bool fHelp)
 {
   if (fHelp || params.size() < 1 || params.size() > 2)
     throw runtime_error(
@@ -371,7 +372,7 @@ Value getblock(const Array& params, bool fHelp)
   block.ReadFromDisk(pblockindex, true);
   return blockToJSON(block, pblockindex, params.size() > 1 ? params[1].get_bool() : false);
 }
-Value getblockbynumber(const Array& params, bool fHelp)
+Value BlockChain::getblockbynumber(const Array& params, bool fHelp)
 {
   if (fHelp || params.size() < 1 || params.size() > 2)
     throw runtime_error(
@@ -399,7 +400,7 @@ Value getblockbynumber(const Array& params, bool fHelp)
   block.ReadFromDisk(pblockindex, true);
   return blockToJSON(block, pblockindex, params.size() > 1 ? params[1].get_bool() : false);
 }
-Value getcheckpoint(const Array& params, bool fHelp)
+Value BlockChain::getcheckpoint(const Array& params, bool fHelp)
 {
   if (fHelp || params.size() != 0)
     throw runtime_error(
@@ -435,7 +436,7 @@ Value getcheckpoint(const Array& params, bool fHelp)
 
   return result;
 }
-Value gettxout(const Array& params, bool fHelp)
+Value BlockChain::gettxout(const Array& params, bool fHelp)
 {
   if (fHelp || params.size() < 2 || params.size() > 3)
     throw runtime_error(

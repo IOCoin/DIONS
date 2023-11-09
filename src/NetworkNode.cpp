@@ -3,6 +3,7 @@
 #include "Alert.h"
 #include "rpc/Client.h"
 #include "rpc/Mining.h"
+#include "rpc/BlockChain.h"
 #include "wallet/Wallet.h"
 #include "wallet/DB.h"
 #include "wallet/WalletDB.h"
@@ -830,7 +831,8 @@ bool NetworkNode::init()
   {
     auto dionsPtr = new Dions();
     auto miningPtr = new Mining();
-    this->rpcServer_.reset(new GenericServer<DionsFace,WalletFace,MiningFace,NetworkFace>(dionsPtr,this->pwalletMain_,miningPtr,this));
+    auto blockChainPtr = new BlockChain();
+    this->rpcServer_.reset(new GenericServer<DionsFace,WalletFace,MiningFace,BlockChainFace,NetworkFace>(dionsPtr,this->pwalletMain_,miningPtr,blockChainPtr,this));
     CClientUIInterface* uiFace = &this->uiFace_;
     this->rpcServer_->start(this->argsMap_,uiFace);
   }
