@@ -6,6 +6,7 @@
 #include "ccoin/Process.h"
 #include "Net.h"
 #include "wallet/Wallet.h"
+#include "RawTransaction.h"
 using namespace std;
 using namespace boost;
 using namespace boost::assign;
@@ -111,7 +112,7 @@ void TxToJSON(const CTransaction& tx, const uint256 hashBlock, Object& entry)
     }
   }
 }
-Value getrawtransaction(const Array& params, bool fHelp)
+Value RawTransaction::getrawtransaction(const Array& params, bool fHelp)
 {
   if (fHelp || params.size() < 1 || params.size() > 2)
     throw runtime_error(
@@ -221,7 +222,7 @@ Array listunspent__(double p, double& iR)
 
   return results;
 }
-Value listunspent(const Array& params, bool fHelp)
+Value RawTransaction::listunspent(const Array& params, bool fHelp)
 {
   if (fHelp || params.size() > 3)
     throw runtime_error(
@@ -319,7 +320,7 @@ Value listunspent(const Array& params, bool fHelp)
   }
   return results;
 }
-Value crawgen(const Array& params, bool fHelp)
+Value RawTransaction::crawgen(const Array& params, bool fHelp)
 {
   printf("crawgen %f\n", params[0].get_real());
   double p = (params[0]).get_real();
@@ -449,7 +450,7 @@ Value crawgen(const Array& params, bool fHelp)
   result.push_back(Pair("fee", f));
   return result;
 }
-Value createrawtransaction(const Array& params, bool fHelp)
+Value RawTransaction::createrawtransaction(const Array& params, bool fHelp)
 {
   if (fHelp || (params.size() < 2 || params.size() > 3))
     throw runtime_error(
@@ -570,7 +571,7 @@ Value createrawtransaction(const Array& params, bool fHelp)
   ss << rawTx;
   return HexStr(ss.begin(), ss.end());
 }
-Value decoderawtransaction(const Array& params, bool fHelp)
+Value RawTransaction::decoderawtransaction(const Array& params, bool fHelp)
 {
   if (fHelp || params.size() != 1)
     throw runtime_error(
@@ -595,7 +596,7 @@ Value decoderawtransaction(const Array& params, bool fHelp)
   TxToJSON(tx, 0, result);
   return result;
 }
-Value decodescript(const Array& params, bool fHelp)
+Value RawTransaction::decodescript(const Array& params, bool fHelp)
 {
   if (fHelp || params.size() != 1)
     throw runtime_error(
@@ -619,7 +620,7 @@ Value decodescript(const Array& params, bool fHelp)
   r.push_back(Pair("p2sh", cba(script.GetID()).ToString()));
   return r;
 }
-Value signrawtransaction(const Array& params, bool fHelp)
+Value RawTransaction::signrawtransaction(const Array& params, bool fHelp)
 {
   if (fHelp || params.size() < 1 || params.size() > 4)
     throw runtime_error(
@@ -833,7 +834,7 @@ Value signrawtransaction(const Array& params, bool fHelp)
   result.push_back(Pair("complete", fComplete));
   return result;
 }
-Value sendrawtransaction(const Array& params, bool fHelp)
+Value RawTransaction::sendrawtransaction(const Array& params, bool fHelp)
 {
   if (fHelp || params.size() < 1 || params.size() > 1)
     throw runtime_error(
