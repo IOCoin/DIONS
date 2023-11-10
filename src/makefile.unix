@@ -167,8 +167,8 @@ OBJS += obj/TxDBLevelDB.o
 leveldb/libleveldb.a:
 	@echo "Building LevelDB ..."; cd leveldb; make libleveldb.a libmemenv.a; cd ..;
 obj/txdb-leveldb.o: leveldb/libleveldb.a
-libdevcore/libdevcore.a:
-	@echo "Building libdevcore ..."; cd libdevcore; cmake CMakeLists.txt; make ; cd ..;
+ptrie/libdevcore.a:
+	@echo "Building libdevcore ..."; cd ptrie; cmake CMakeLists.txt; make ; cd ..;
 
 LIBS += $(CURDIR)/dvm/lib/libdvmone.a
 LIBS += $(CURDIR)/dvm/ethash/lib/ethash/libethash.a
