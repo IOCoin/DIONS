@@ -7,6 +7,7 @@ bool Client::init(boost::filesystem::path const& _dbPath)
 {
   try
   {
+    std::cout << "Opening state database..." << std::endl;
     printf("Opening state database...\n");
     std::unique_ptr<dev::db::DatabaseFace> db = dev::db::DBFactory::create(_dbPath / "state");
     this->overlayDB_ = dev::OverlayDB(std::move(db));

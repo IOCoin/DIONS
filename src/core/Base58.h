@@ -1,5 +1,4 @@
-#ifndef BITCOIN_BASE58_H
-#define BITCOIN_BASE58_H 
+#pragma once
 
 #include <string>
 #include <vector>
@@ -568,4 +567,3 @@ inline std::string Hash160ToAddress(uint160 hash160)
   vch.insert(vch.end(), UBEGIN(hash160), UEND(hash160));
   return EncodeBase58Check(vch);
 }
-#endif

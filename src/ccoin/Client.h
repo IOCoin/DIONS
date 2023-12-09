@@ -32,7 +32,7 @@ class Client
 
     ~Client() = default;
 
-    dev::OverlayDB const& stateDB() const { return overlayDB_; }
+    dev::OverlayDB* stateDB() { return &overlayDB_; }
     bool init(boost::filesystem::path const& _dbPath);
   private:
     CClientUIInterface* uiFace_;

@@ -4,9 +4,6 @@
 # error This header can only be compiled as C++.
 #endif
 
-//#ifndef __INCLUDED_PROTOCOL_H__
-//#define __INCLUDED_PROTOCOL_H__ 
-
 #include "Serialize.h"
 #include "NetBase.h"
 #include <string>

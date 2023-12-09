@@ -154,11 +154,6 @@ class GenericServer
 public:
   GenericServer() { }
 
-  GenericServer(CClientUIInterface* uiFace)
-  {
-    uiFace_=uiFace;
-  }
-
   virtual void handleMethodCall(std::string name,json_spirit::Array params, json_spirit::Value& res)
   {
     if (name == "rpc_modules")
@@ -355,9 +350,8 @@ public:
     }
   }
 
-  bool start(map<string,string> args,CClientUIInterface* uiFace)
+  bool start(map<string,string> args)
   {
-    this->uiFace_  = uiFace;
     this->argsMap_ = args;
 
     try
@@ -547,7 +541,6 @@ protected:
     StopRequests();
   }
   std::map<string,string> argsMap_;
-  CClientUIInterface* uiFace_;
 
   std::map<std::string, std::string> implementedModules_;
 };

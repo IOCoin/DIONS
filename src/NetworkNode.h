@@ -5,6 +5,7 @@
 #include "rpc/Client.h"
 #include "rpc/NetworkFace.h"
 #include "Net.h"
+#include "Miner.h"
 #include "core/Util.h"
 #include "UIInterface.h"
 #include "CheckPoints.h"
@@ -35,7 +36,6 @@ class NetworkNode : public NetworkFace
     }
 
     NetworkNode(std::map<string,string> argsMap) 
-	    : client_(&uiFace_)
     { 
 	    this->argsMap_ = argsMap;
 	    pwalletMain_ = new __wx__("wallet.dat");
@@ -60,11 +60,11 @@ class NetworkNode : public NetworkFace
     bool Bind_(const CService &addr, bool fError = true);
     bool InitSanityCheck_();
 
+    Miner miner_;
     std::map<string,string> argsMap_;
     __wx__* pwalletMain_;
     LocatorNodeDB* ln1Db_;
     VertexNodeDB* vertexDB_;
     Client client_;
     std::unique_ptr<GenericServer<>> rpcServer_;
-    CClientUIInterface uiFace_;
 };

@@ -135,7 +135,7 @@ Value Mining::getworkex(const Array& params, bool fHelp)
       nTransactionsUpdatedLast = CTxMemPool::nTransactionsUpdated;
       pindexPrev = pindexBest;
       nStart = GetTime();
-      pblock = CreateNewBlock(pwalletMainId);
+      pblock = CreateNewBlockBASE(pwalletMainId);
 
       if (!pblock)
       {
@@ -271,7 +271,7 @@ Value Mining::getwork(const Array& params, bool fHelp)
       nTransactionsUpdatedLast = CTxMemPool::nTransactionsUpdated;
       CBlockIndex* pindexPrevNew = pindexBest;
       nStart = GetTime();
-      pblock = CreateNewBlock(pwalletMainId);
+      pblock = CreateNewBlockBASE(pwalletMainId);
 
       if (!pblock)
       {
@@ -389,7 +389,7 @@ Value Mining::tmpTest(const Array& params, bool fHelp)
         nTransactionsUpdatedLast = CTxMemPool::nTransactionsUpdated;
         CBlockIndex* pindexPrevNew = pindexBest;
         nStart = GetTime();
-        pblock = CreateNewBlock(pwalletMainId);
+        pblock = CreateNewBlockBASE(pwalletMainId);
 
         if (!pblock)
         {
@@ -539,7 +539,7 @@ Value Mining::getblocktemplate(const Array& params, bool fHelp)
       pblock = NULL;
     }
 
-    pblock = CreateNewBlock(pwalletMainId);
+    pblock = CreateNewBlockBASE(pwalletMainId);
 
     if (!pblock)
     {

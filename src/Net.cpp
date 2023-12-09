@@ -1,6 +1,7 @@
 
 #include "db.h"
 #include "Net.h"
+#include "Miner.h"
 #include "wallet/Wallet.h"
 #include "core/strlcpy.h"
 #include "AddrMan.h"
@@ -1202,15 +1203,13 @@ void static ProcessOneShot()
     }
   }
 }
-void static ThreadStakeMiner(void* parg)
+void Miner::ThreadStakeMiner()
 {
-  printf("ThreadStakeMiner started\n");
-  __wx__* pwallet = (__wx__*)parg;
-
+  printf("MINER::ThreadStakeMiner started\n");
   try
   {
     vnThreadsRunning[THREAD_STAKE_MINER]++;
-    StakeMiner(pwallet);
+    this->StakeMiner();
     vnThreadsRunning[THREAD_STAKE_MINER]--;
   }
   catch (std::exception& e)
@@ -1823,19 +1822,6 @@ void StartNode(void* parg)
   if (!NewThread(ThreadDumpAddress, NULL))
   {
     printf("Error; NewThread(ThreadDumpAddress) failed\n");
-  }
-
-  if (!GetBoolArg("-staking", true))
-  {
-    printf("Staking disabled\n");
-  }
-  else if(fViewWallet)
-  {
-    printf("Staking disabled : view wallet only\n");
-  }
-  else if (!NewThread(ThreadStakeMiner, pwalletMainId))
-  {
-    printf("Error: NewThread(ThreadStakeMiner) failed\n");
   }
 }
 bool StopNode()

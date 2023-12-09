@@ -2693,6 +2693,8 @@ Value Dions::aliasList__(const Array& params, bool fHelp)
     }
     LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
   }
+          static const dev::h256 defaultRoot;
+	  std::cout << "TEST DEFAULT " << defaultRoot << std::endl;
   LEAVE_CRITICAL_SECTION(cs_main)
   BOOST_FOREACH(const PAIRTYPE(vector<unsigned char>, Object)& item, aliasMapVchObj)
   oRes.push_back(item.second);
@@ -5813,7 +5815,7 @@ Value Dions::updateAlias_executeContractPayload(const Array& params, bool fHelp)
     }
     else
     {
-      throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid I/OCoin address or unknown alias");
+      throw JSONRPCError(RPC_INVALID_ADDRESS_OR_KEY, "Invalid I/OCoin neither valid address nor alias");
     }
   }
 

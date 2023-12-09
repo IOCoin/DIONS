@@ -12,10 +12,10 @@ using namespace std;
 using namespace boost;
 using namespace json_spirit;
 
-unsigned int nMinerSleep_;
 enum Checkpoints::CPMode CheckpointsMode_;
 string strDNSSeedNode_;
 extern ConfigurationState globalState;
+extern CClientUIInterface uiInterface;
 extern void xsc(CBlockIndex*);
 static void HandleSIGTERM(int)
 {
@@ -28,12 +28,12 @@ static void HandleSIGHUP(int)
 
 bool NetworkNode::InitError_(const std::string &str)
 {
-  this->uiFace_.ThreadSafeMessageBox(str, _("I/OCoin"), CClientUIInterface::OK | CClientUIInterface::MODAL);
+  uiInterface.ThreadSafeMessageBox(str, _("I/OCoin"), CClientUIInterface::OK | CClientUIInterface::MODAL);
   return false;
 }
 bool NetworkNode::InitWarning_(const std::string &str)
 {
-  this->uiFace_.ThreadSafeMessageBox(str, _("I/OCoin"), CClientUIInterface::OK | CClientUIInterface::ICON_EXCLAMATION | CClientUIInterface::MODAL);
+  uiInterface.ThreadSafeMessageBox(str, _("I/OCoin"), CClientUIInterface::OK | CClientUIInterface::ICON_EXCLAMATION | CClientUIInterface::MODAL);
   return true;
 }
 
@@ -113,7 +113,6 @@ bool NetworkNode::init()
 #endif
   nNodeLifespan = GetArg("-addrlifespan", 7);
   fUseFastIndex = GetBoolArg("-fastindex", true);
-  nMinerSleep_ = GetArg("-minersleep", 500);
   CheckpointsMode_ = Checkpoints::STRICT;
   std::string strCpMode = GetArg("-cppolicy", "strict");
   strDNSSeedNode_ = GetArg("-dnsseednode", "default");
@@ -345,7 +344,7 @@ bool NetworkNode::init()
   }
 
   int64_t nStart;
-  this->uiFace_.InitMessage(_("Verifying database integrity..."));
+  uiInterface.InitMessage(_("Verifying database integrity..."));
 
   if (!bitdb.Open(GetDataDir()))
   {
@@ -373,7 +372,7 @@ bool NetworkNode::init()
                                " Original wallet.dat saved as wallet.{timestamp}.bak in %s; if"
                                " your balance or transactions are incorrect you should"
                                " restore from a backup."), strDataDir.c_str());
-      this->uiFace_.ThreadSafeMessageBox(msg, _("I/OCoin"), CClientUIInterface::OK | CClientUIInterface::ICON_EXCLAMATION | CClientUIInterface::MODAL);
+      uiInterface.ThreadSafeMessageBox(msg, _("I/OCoin"), CClientUIInterface::OK | CClientUIInterface::ICON_EXCLAMATION | CClientUIInterface::MODAL);
     }
 
     if (r == CDBEnv::RECOVER_FAIL)
@@ -565,7 +564,7 @@ bool NetworkNode::init()
     return false;
   }
 
-  this->uiFace_.InitMessage(_("Loading block index..."));
+  uiInterface.InitMessage(_("Loading block index..."));
   printf("Loading block index...\n");
   nStart = GetTimeMillis();
 
@@ -633,7 +632,7 @@ bool NetworkNode::init()
     pwalletMain = NULL;
   }
 
-  this->uiFace_.InitMessage(_("Loading wallet..."));
+  uiInterface.InitMessage(_("Loading wallet..."));
   printf("Loading wallet...\n");
   nStart = GetTimeMillis();
   bool fFirstRun = true;
@@ -649,7 +648,7 @@ bool NetworkNode::init()
     {
       string msg(_("Warning: error reading wallet.dat! All keys read correctly, but transaction data"
                    " or address book entries might be missing or incorrect."));
-      this->uiFace_.ThreadSafeMessageBox(msg, _("I/OCoin"), CClientUIInterface::OK | CClientUIInterface::ICON_EXCLAMATION | CClientUIInterface::MODAL);
+      uiInterface.ThreadSafeMessageBox(msg, _("I/OCoin"), CClientUIInterface::OK | CClientUIInterface::ICON_EXCLAMATION | CClientUIInterface::MODAL);
     }
     else if (nLoadWalletRet == DB_TOO_NEW)
     {
@@ -751,7 +750,7 @@ bool NetworkNode::init()
 
   if (pindexBest != pindexRescan && pindexBest && pindexRescan && pindexBest->nHeight > pindexRescan->nHeight)
   {
-    this->uiFace_.InitMessage(_("Rescanning..."));
+    uiInterface.InitMessage(_("Rescanning..."));
 
     if(GetBoolArg("-rescan"))
     {
@@ -769,7 +768,7 @@ bool NetworkNode::init()
 
   if (mapArgs.count("-loadblock"))
   {
-    this->uiFace_.InitMessage(_("Importing blockchain data file."));
+    uiInterface.InitMessage(_("Importing blockchain data file."));
     BOOST_FOREACH(string strFile, mapMultiArgs["-loadblock"])
     {
       FILE *file = fopen(strFile.c_str(), "rb");
@@ -786,7 +785,7 @@ bool NetworkNode::init()
 
   if (boost::filesystem::exists(pathBootstrap))
   {
-    this->uiFace_.InitMessage(_("Importing bootstrap blockchain data file."));
+    uiInterface.InitMessage(_("Importing bootstrap blockchain data file."));
     FILE *file = fopen(pathBootstrap.string().c_str(), "rb");
 
     if (file)
@@ -797,7 +796,7 @@ bool NetworkNode::init()
     }
   }
 
-  this->uiFace_.InitMessage(_("Loading addresses..."));
+  uiInterface.InitMessage(_("Loading addresses..."));
   printf("Loading addresses...\n");
   nStart = GetTimeMillis();
   {
@@ -835,12 +834,16 @@ bool NetworkNode::init()
     auto blockChainPtr = new BlockChain();
     auto rawTransactionPtr = new RawTransaction();
     this->rpcServer_.reset(new GenericServer<DionsFace,WalletFace,MiningFace,BlockChainFace,RawTransactionFace,NetworkFace>(dionsPtr,this->pwalletMain_,miningPtr,blockChainPtr,rawTransactionPtr,this));
-    CClientUIInterface* uiFace = &this->uiFace_;
-    this->rpcServer_->start(this->argsMap_,uiFace);
+    this->rpcServer_->start(this->argsMap_);
   }
 
-  this->uiFace_.InitMessage(_("Done loading"));
+  uiInterface.InitMessage(_("Done loading"));
   printf("Done loading\n");
+
+        this->miner_.sleep(GetArg("-minersleep", 500));
+        this->miner_.wallet(this->pwalletMain_);
+        this->miner_.client(&this->client_);
+	this->miner_.start();
 
   if (!strErrors.str().empty())
   {
