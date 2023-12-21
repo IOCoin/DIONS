@@ -61,7 +61,6 @@ class Miner : public Worker
 
     virtual void operate() override
     {
-      std::cout << "Miner::operate" << std::endl;
       ThreadStakeMiner();
     }
 

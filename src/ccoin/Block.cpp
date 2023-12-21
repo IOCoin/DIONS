@@ -575,7 +575,9 @@ bool CBlock::SetBestChainInner(CTxDB& txdb, CBlockIndex *pindexNew)
   pindexNew->pprev->pnext = pindexNew;
   BOOST_FOREACH(CTransaction& tx, vtx)
   mempool.remove(tx);
-  ln1Db->filter(pindexNew);
+  std::cout << "ln1DbLOCAL" << std::endl;
+  LocatorNodeDB ln1DbLOCAL("r+");
+  ln1DbLOCAL.filter(pindexNew);
   return true;
 }
 bool CBlock::SetBestChain(CTxDB& txdb, CBlockIndex* pindexNew)

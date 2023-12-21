@@ -2694,7 +2694,6 @@ Value Dions::aliasList__(const Array& params, bool fHelp)
     LEAVE_CRITICAL_SECTION(pwalletMainId->cs_wallet)
   }
           static const dev::h256 defaultRoot;
-	  std::cout << "TEST DEFAULT " << defaultRoot << std::endl;
   LEAVE_CRITICAL_SECTION(cs_main)
   BOOST_FOREACH(const PAIRTYPE(vector<unsigned char>, Object)& item, aliasMapVchObj)
   oRes.push_back(item.second);
@@ -9033,9 +9032,10 @@ static bool xs(string& s)
     vector<AliasIndex> vtxPos;
     vchType vchAlias = vchFromString(s);
 
-    if (ln1Db->lKey(vchAlias))
+    LocatorNodeDB ln1Db("r");
+    if (ln1Db.lKey(vchAlias))
     {
-      if (!ln1Db->lGet(vchAlias, vtxPos))
+      if (!ln1Db.lGet(vchAlias, vtxPos))
       {
         return error("aliasHeight() : failed to read from name DB");
       }

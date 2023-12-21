@@ -675,6 +675,7 @@ void LocatorNodeDB::filter(CBlockIndex* p__)
               txPos2.vAddress = s;
               txPos2.txPos = txPos;
 
+
               if(op == OP_ALIAS_SET && !lKey(vvchArgs[0]))
               {
                 vtxPos.push_back(txPos2);

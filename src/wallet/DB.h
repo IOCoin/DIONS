@@ -222,12 +222,15 @@ public:
   template<typename K>
   bool Exists(const K& key)
   {
+	    std::cout << "Exists 0" << std::endl;
     if (!pdb)
     {
+	    std::cout << "Exists 1" << std::endl;
       return false;
     }
 
 
+	    std::cout << "Exists 2" << std::endl;
     CDataStream ssKey(SER_DISK, CLIENT_VERSION);
     ssKey.reserve(1000);
     ssKey << key;
@@ -237,6 +240,7 @@ public:
     int ret = pdb->exists(activeTxn, &datKey, 0);
 
 
+	    std::cout << "Exists 3" << std::endl;
     memset(datKey.get_data(), 0, datKey.get_size());
     return (ret == 0);
   }
@@ -450,6 +454,8 @@ public:
 
   bool lKey(const vchType& alias)
   {
+	  std::cout << "LocatorNodeDB::lKey :" << stringFromVch(alias) << ":" << std::endl;
+	  std::cout << "---------" << std::endl;
     return Exists(make_pair(std::string("alias_"), alias));
   }
 

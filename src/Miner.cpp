@@ -205,7 +205,6 @@ CBlock* Miner::CreateNewBlock(__wx__* pwallet, bool fProofOfStake, int64_t* pFee
               }
 
               pblock->stateRoot = pindexPrev->stateRootIndex;
-              std::cout << "execution request - previous state root " << pblock->stateRoot << std::endl;
               dev::SecureTrieDB<dev::Address, dev::OverlayDB>* state;
               dev::h256 Empty;
 
@@ -220,8 +219,6 @@ CBlock* Miner::CreateNewBlock(__wx__* pwallet, bool fProofOfStake, int64_t* pFee
               }
               else
               {
-                std::cout << "state root is non zero creating securetriedb instance from existing ROOT" << std::endl;
-                std::cout << "state root is " << pblock->stateRoot << std::endl;
                 state = new dev::SecureTrieDB<dev::Address, dev::OverlayDB>(c_->stateDB(),pblock->stateRoot);
               }
 
@@ -248,6 +245,7 @@ CBlock* Miner::CreateNewBlock(__wx__* pwallet, bool fProofOfStake, int64_t* pFee
                   dvmc::VertexNode host;
                   dvmc::TransitionalNode created_account;
                   dvmc::TransitionalNode sender_account;
+                  sender_account.set_balance(3141);
                   dvmc_message msg{};
                   msg.track = std::numeric_limits<int64_t>::max();
                   dvmc::bytes_view exec_code = code;
@@ -265,12 +263,16 @@ CBlock* Miner::CreateNewBlock(__wx__* pwallet, bool fProofOfStake, int64_t* pFee
                     }
 
                     auto& created_account = host.accounts[create_address];
+                    created_account.set_balance(100000000000000);
                     created_account.code = dvmc::bytes(create_result.output_data, create_result.output_size);
                     msg.recipient = create_address;
                     exec_code = created_account.code;
                     dev::eth::Account tmpAcc(0,0);
                     {
+                      dev::u256 nonce = 12345678;
+                      dev::u256 balance = 1010101010101;
                       dev::RLPStream s(4);
+                      s << nonce << balance;
                       {
                         dev::SecureTrieDB<dev::h256, dev::StateCacheDB> storageDB(state->db(), tmpAcc.baseRoot());
 
@@ -303,7 +305,6 @@ CBlock* Miner::CreateNewBlock(__wx__* pwallet, bool fProofOfStake, int64_t* pFee
                       c_->stateDB()->commit();
                       std::ostringstream os;
                       state->debugStructure(os);
-                      std::cout << "integratedTest5 AFTER contract state insert : state root " << state->root() << std::endl;
                       pblock->stateRoot=state->root();
                     }
                   }

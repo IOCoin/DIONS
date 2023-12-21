@@ -822,6 +822,7 @@ bool NetworkNode::init()
   printf("mapWallet.size() = %" PRIszu "\n", this->pwalletMain_->mapWallet.size());
   printf("mapAddressBook.size() = %" PRIszu "\n", this->pwalletMain_->mapAddressBook.size());
 
+  //XXXX thread launced - routine StartNode -> multiple other threads launched from there
   if (!NewThread(StartNode, NULL))
   {
     InitError_(_("Error: could not start node"));
