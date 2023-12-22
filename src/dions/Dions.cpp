@@ -5784,16 +5784,17 @@ Value Dions::updateAlias_executeContractPayload(const Array& params, bool fHelp)
   vchType inputDataVch = vchFromValue(params[2].get_str());
   cba address(targetContractAliasStr);
 
+  LocatorNodeDB ln1DbL("r");
   if(!address.IsValid())
   {
     vector<AliasIndex> vtxPos;
     vchType vchAlias = vchFromString(targetContractAliasStr);
 
-    if (ln1Db->lKey (vchAlias))
+    if (ln1DbL.lKey (vchAlias))
     {
       printf("  name exists\n");
 
-      if (!ln1Db->lGet (vchAlias, vtxPos))
+      if (!ln1DbL.lGet (vchAlias, vtxPos))
       {
         return error("aliasHeight() : failed to read from name DB");
       }
@@ -5859,7 +5860,6 @@ Value Dions::updateAlias_executeContractPayload(const Array& params, bool fHelp)
   vchType vchValue;
   CScript scriptPubKey;
   scriptPubKey << OP_ALIAS_RELAY << vchAlias << hash_plus_payload << OP_2DROP << OP_DROP;
-  std::cout << "update_execute : vchAlias " << stringFromVch(vchAlias) << std::endl;
   ENTER_CRITICAL_SECTION(cs_main)
   {
     ENTER_CRITICAL_SECTION(pwalletMainId->cs_wallet)
