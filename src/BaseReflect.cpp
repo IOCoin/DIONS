@@ -1530,14 +1530,6 @@ Value integratedTest5(const Array& params, bool fHelp)
       }
     }
   }
-  {
-  }
-  {
-  }
-  {
-  }
-  {
-  }
   vector<Value> res;
   return res;
 }
@@ -1545,21 +1537,58 @@ Value integratedTest6(const Array& params, bool fHelp)
 {
   if(fHelp || params.size() > 0)
     throw runtime_error(
-      "integratedTest6 args"
+      "integratedTest6"
       + HelpRequiringPassphrase());
 
-  dev::h256 Empty;
-  std::cout << "empty hash " << Empty << std::endl; 
-  dev::OverlayDB* overlayDB__ = new dev::OverlayDB();
-  dev::SecureTrieDB<dev::Address, dev::OverlayDB> state(overlayDB__);
-  state.init();
-  std::cout << "state root after init " << state.root() << std::endl; 
-
-
-  VertexNodeDB vertexDB("rw+");
-  std::string hash1 = "1234567890123456789012345678901234567890123456789012345678901234";
-  std::string hash2 = "abcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcd";
-  vertexDB.lPut(vchFromString(hash1),vchFromString(hash2));
   vector<Value> res;
+  constexpr auto create_address = 0xc9ea7ed000000000000000000000000000000001_address;
+  constexpr auto test_sender_address = 0x5b38da6a701c568545dcfcb03fcb875f56beddc4_address;
+  constexpr auto test_recipient_address = 0x5b38da6a701c568545dcfcb03fcb875f56beddc4_address;
+  std::cout << "integratedTest6 : initialised create address " << dvmc::hex(create_address.bytes) << "\n";
+  std::cout << "integratedTest6 : initialised from address " << dvmc::hex(test_sender_address.bytes) << "\n";
+  std::cout << "integratedTest6 : initialised to address " << dvmc::hex(test_recipient_address.bytes) << "\n";
+  const auto code = dvmc::from_hex("608060405234801561000f575f80fd5b506101688061001d5f395ff3fe608060405234801561000f575f80fd5b5060043610610029575f3560e01c8063f15fad231461002d575b5f80fd5b61003561004b565b6040516100429190610112565b60405180910390f35b60606040518060400160405280600c81526020017f74657374206d6573736167650000000000000000000000000000000000000000815250905090565b5f81519050919050565b5f82825260208201905092915050565b5f5b838110156100bf5780820151818401526020810190506100a4565b5f8484015250505050565b5f601f19601f8301169050919050565b5f6100e482610088565b6100ee8185610092565b93506100fe8185602086016100a2565b610107816100ca565b840191505092915050565b5f6020820190508181035f83015261012a81846100da565b90509291505056fea2646970667358221220cee9f098a49d3f598151022772ef28043ee660e98650c9a6f89cfd00ff41761f64736f6c63430008160033");
+  dvmc::VertexNode host;
+  dvmc::TransitionalNode created_account;
+  dvmc::TransitionalNode sender_account;
+  sender_account.set_balance(3141);
+  dvmc_message msg{};
+  msg.track = std::numeric_limits<int64_t>::max();
+  dvmc::bytes_view exec_code = code;
+  {
+    dvmc_message create_msg{};
+    create_msg.kind = DVMC_CREATE;
+    create_msg.recipient = create_address;
+    create_msg.track = std::numeric_limits<int64_t>::max();
+    dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
+    dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
+    const auto create_result = vm.retrieve_desc_vx(host, rev, create_msg, code.data(), code.size());
+
+    if (create_result.status_code != DVMC_SUCCESS)
+    {
+      std::cout << "integratedTest6 : Contract creation failed: " << create_result.status_code << "\n";
+      return create_result.status_code;
+    }
+
+    auto& created_account = host.accounts[create_address];
+    created_account.set_balance(100000000000000);
+    created_account.code = dvmc::bytes(create_result.output_data, create_result.output_size);
+    msg.recipient = create_address;
+    exec_code = created_account.code;
+  }
+  {
+    std::cout << "\n";
+    const auto input = dvmc::from_hex("0xf15fad23");
+    msg.input_data = input.data();
+    msg.input_size = input.size();
+    dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
+    dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
+    const auto result = vm.retrieve_desc_vx(host, rev, msg, exec_code.data(), exec_code.size());
+    const auto track_used = msg.track - result.track_left;
+    std::cout << "integratedTest6 : Result: " << result.status_code << "\nGas used: " << track_used << "\n";
+
+    if (result.status_code == DVMC_SUCCESS)
+      std::cout << "Output:   " << dvmc::hex({result.output_data, result.output_size}) << "\n";
+  }
   return res;
 }
