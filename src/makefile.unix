@@ -140,7 +140,7 @@ OBJS= \
     obj/Twister.o \
     obj/Tor.o \
     obj/dions/Dions.o \
-    obj/BaseReflect.o \
+    obj/reflect/BaseReflect.o \
     obj/NoUI.o \
     obj/crypto/x11/cubehash.o \
     obj/crypto/x11/luffa.o \
@@ -235,6 +235,8 @@ clean:
 	-rm -f obj/core/*.P
 	-rm -f obj/dions/*.o
 	-rm -f obj/dions/*.P
+	-rm -f obj/reflect/*.o
+	-rm -f obj/reflect/*.P
 	-rm -f obj/build.h
 
 FORCE:

@@ -2,7 +2,7 @@
 #include "TxDBLevelDB.h"
 #include "KeyStore.h"
 #include "wallet/Wallet.h"
-#include "BaseReflect.h"
+#include "Base.h"
 #include "core/uint256.h"
 #include "rpc/Client.h"
 #include "ccoin/Process.h"
