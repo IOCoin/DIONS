@@ -8,6 +8,7 @@
 #include "wallet/Wallet.h"
 #include "wallet/DB.h"
 #include "wallet/WalletDB.h"
+#include "reflect/Base.h"
 using namespace std;
 using namespace boost;
 using namespace json_spirit;
@@ -822,7 +823,6 @@ bool NetworkNode::init()
   printf("mapWallet.size() = %" PRIszu "\n", this->pwalletMain_->mapWallet.size());
   printf("mapAddressBook.size() = %" PRIszu "\n", this->pwalletMain_->mapAddressBook.size());
 
-  //XXXX thread launced - routine StartNode -> multiple other threads launched from there
   if (!NewThread(StartNode, NULL))
   {
     InitError_(_("Error: could not start node"));
@@ -834,7 +834,8 @@ bool NetworkNode::init()
     auto miningPtr = new Mining();
     auto blockChainPtr = new BlockChain();
     auto rawTransactionPtr = new RawTransaction();
-    this->rpcServer_.reset(new GenericServer<DionsFace,WalletFace,MiningFace,BlockChainFace,RawTransactionFace,NetworkFace>(dionsPtr,this->pwalletMain_,miningPtr,blockChainPtr,rawTransactionPtr,this));
+    auto reflectPtr = new Reflect();
+    this->rpcServer_.reset(new GenericServer<DionsFace,WalletFace,MiningFace,BlockChainFace,RawTransactionFace,ReflectFace,NetworkFace>(dionsPtr,this->pwalletMain_,miningPtr,blockChainPtr,rawTransactionPtr,reflectPtr,this));
     this->rpcServer_->start(this->argsMap_);
   }
 
