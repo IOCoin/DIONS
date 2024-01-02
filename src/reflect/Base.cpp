@@ -1583,7 +1583,7 @@ Value Reflect::integratedTest6(const Array& params, bool fHelp)
     msg.recipient = create_address;
     exec_code = created_account.code;
   }
-  /*
+  
   {
     std::cout << "\n";
     const auto input = dvmc::from_hex("0xf15fad23");
@@ -1593,10 +1593,10 @@ Value Reflect::integratedTest6(const Array& params, bool fHelp)
     dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
     const auto result = vm.retrieve_desc_vx(host, rev, msg, exec_code.data(), exec_code.size());
     const auto track_used = msg.track - result.track_left;
-    std::cout << "integratedTest6 : Result: " << result.status_code << "\nGas used: " << track_used << "\n";
+    std::cout << "integratedTest6 : Result: " << result.status_code << "\nGas used - track : " << track_used << "\n";
 
     if (result.status_code == DVMC_SUCCESS)
       std::cout << "Output:   " << dvmc::hex({result.output_data, result.output_size}) << "\n";
-  } */
+  } 
   return res;
 }
