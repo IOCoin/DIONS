@@ -1591,6 +1591,7 @@ Value Reflect::integratedTest6(const Array& params, bool fHelp)
     msg.input_size = input.size();
     dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
     dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
+    std::cout << "execute - test -> code : verify " << dvmc::hex(host.accounts[create_address].code) << std::endl;
     const auto result = vm.retrieve_desc_vx(host, rev, msg, exec_code.data(), exec_code.size());
     const auto track_used = msg.track - result.track_left;
     std::cout << "integratedTest6 : Result: " << result.status_code << "\nGas used - track : " << track_used << "\n";
