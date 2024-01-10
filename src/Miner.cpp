@@ -17,6 +17,14 @@
 #include <dvmc/loader.h>
 #include <dvmc/tooling.hpp>
 #include "rpc/Client.h"
+
+#include "ptrie/TrieDB.h"
+#include "ptrie/StateCacheDB.h"
+#include "ptrie/OverlayDB.h"
+#include "ptrie/Address.h"
+#include "ptrie/Account.h"
+#include "ptrie/DBFactory.h"
+using dvmc::operator""_address;
 using namespace std;
 extern __wx__* pwalletMainId;
 extern bool sectionVertex(const string&, string&);
@@ -191,6 +199,8 @@ CBlock* Miner::CreateNewBlock(__wx__* pwallet, bool fProofOfStake, int64_t* pFee
             vector<unsigned char> hash_bytes(vvchArgs[1].begin(),vvchArgs[1].begin()+32);
             uint256 hash256_from_payload_bytes(hash_bytes);
             vector<unsigned char> data_bytes(vvchArgs[1].begin()+32,vvchArgs[1].end());
+            vector<unsigned char> data_relay_bytes(data_bytes.begin()+20,data_bytes.end());
+            std::cout << "Extracted payload relay data " << stringFromVch(data_relay_bytes) << std::endl;
             uint256 recon_hash256 = Hash(data_bytes.begin(), data_bytes.end());
 
             if(hash256_from_payload_bytes == recon_hash256)
@@ -201,7 +211,7 @@ CBlock* Miner::CreateNewBlock(__wx__* pwallet, bool fProofOfStake, int64_t* pFee
 
               if(sectionVertex(target20ByteAliasStr, contractCode))
               {
-                std::cout << "retrieved contract code " << contractCode << std::endl;
+                std::cout << ">>>> retrieved contract code " << contractCode << std::endl;
               }
 
               pblock->stateRoot = pindexPrev->stateRootIndex;
@@ -211,6 +221,7 @@ CBlock* Miner::CreateNewBlock(__wx__* pwallet, bool fProofOfStake, int64_t* pFee
               if(pblock->stateRoot == Empty)
               {
                 state = new dev::SecureTrieDB<dev::Address, dev::OverlayDB>(c_->stateDB());
+
                 if(state->isNull())
                 {
                   state->init();
@@ -241,72 +252,89 @@ CBlock* Miner::CreateNewBlock(__wx__* pwallet, bool fProofOfStake, int64_t* pFee
                     throw JSONRPCError(RPC_WALLET_KEYPOOL_RAN_OUT, "Error: Keypool ran out, please call keypoolrefill first");
                   }
 
+                  std::cout << "Retrieved contract code " << contractCode << std::endl;
                   const auto code = dvmc::from_hex(contractCode);
+                  vector<json_spirit::Value> res;
+                  const auto code__ = code;
                   dvmc::VertexNode host;
                   dvmc::TransitionalNode created_account;
                   dvmc::TransitionalNode sender_account;
-                  sender_account.set_balance(3141);
                   dvmc_message msg{};
                   msg.track = std::numeric_limits<int64_t>::max();
-                  dvmc::bytes_view exec_code = code;
+                  dvmc::bytes_view exec_code = code__;
                   {
                     dvmc_message create_msg{};
                     create_msg.kind = DVMC_CREATE;
-                    create_msg.recipient = create_address;
+                    create_msg.recipient = create_address__;
                     create_msg.track = std::numeric_limits<int64_t>::max();
                     dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
                     dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
+                    std::cout << "code.size " << code.size() << std::endl;
                     const auto create_result = vm.retrieve_desc_vx(host, rev, create_msg, code.data(), code.size());
 
                     if (create_result.status_code != DVMC_SUCCESS)
                     {
+                      std::cout << "Contract creation failed: " << create_result.status_code << "\n";
                     }
 
-                    auto& created_account = host.accounts[create_address];
+                    auto& created_account = host.accounts[create_address__];
                     created_account.set_balance(100000000000000);
                     created_account.code = dvmc::bytes(create_result.output_data, create_result.output_size);
-                    msg.recipient = create_address;
+                    msg.recipient = create_address__;
                     exec_code = created_account.code;
-                    dev::eth::Account tmpAcc(0,0);
+                  }
+
+                  {
+                    std::cout << "\n";
+                    const auto input = dvmc::from_hex(stringFromVch(data_relay_bytes));
+                    msg.input_data = input.data();
+                    msg.input_size = input.size();
+                    dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
+                    dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
+                    const auto result = vm.retrieve_desc_vx(host, rev, msg, exec_code.data(), exec_code.size());
+                    const auto track_used = msg.track - result.track_left;
+                    std::cout << "Result: " << result.status_code << "\nGas used - track : " << track_used << "\n";
+
+                    if (result.status_code == DVMC_SUCCESS)
+                      std::cout << "Output:   " << dvmc::hex({result.output_data, result.output_size}) << "\n";
+                  }
+                  dev::eth::Account tmpAcc(0,0);
+                  {
+                    dev::RLPStream s(4);
+                    s << nonce << balance;
                     {
-                      dev::u256 nonce = 12345678;
-                      dev::u256 balance = 1010101010101;
-                      dev::RLPStream s(4);
-                      s << nonce << balance;
+                      dev::SecureTrieDB<dev::h256, dev::StateCacheDB> storageDB(state->db(), tmpAcc.baseRoot());
+
+                      for(auto pair : created_account.storage)
                       {
-                        dev::SecureTrieDB<dev::h256, dev::StateCacheDB> storageDB(state->db(), tmpAcc.baseRoot());
+                        auto storage_key = pair.first.bytes;
+                        dev::bytes key;
 
-                        for(auto pair : created_account.storage)
+                        for(int i=0; i<32; i++)
                         {
-                          auto storage_key = pair.first.bytes;
-                          dev::bytes key;
-
-                          for(int i=0; i<32; i++)
-                          {
-                            key.push_back(storage_key[i]);
-                          }
-
-                          dev::h256 key256(key);
-                          auto storage_bytes = pair.second.value;
-                          dev::bytes val;
-
-                          for(int i=0; i<32; i++)
-                          {
-                            val.push_back(storage_bytes.bytes[i]);
-                          }
-
-                          storageDB.insert(key256, dev::rlp(val));
+                          key.push_back(storage_key[i]);
                         }
 
-                        s << storageDB.root();
+                        dev::h256 key256(key);
+                        auto storage_bytes = pair.second.value;
+                        dev::bytes val;
+
+                        for(int i=0; i<32; i++)
+                        {
+                          val.push_back(storage_bytes.bytes[i]);
+                        }
+
+                        storageDB.insert(key256, dev::rlp(val));
                       }
-                      s << tmpAcc.codeHash();
-                      state->insert(target_addr, &s.out());
-                      c_->stateDB()->commit();
-                      std::ostringstream os;
-                      state->debugStructure(os);
-                      pblock->stateRoot=state->root();
+
+                      s << storageDB.root();
                     }
+                    s << tmpAcc.codeHash();
+                    state->insert(target_addr, &s.out());
+                    c_->stateDB()->commit();
+                    std::ostringstream os;
+                    state->debugStructure(os);
+                    pblock->stateRoot=state->root();
                   }
                 }
               }
@@ -626,7 +654,6 @@ CBlock* CreateNewBlockBASE(__wx__* pwallet, bool fProofOfStake, int64_t* pFees)
               }
 
               pblock->stateRoot = pindexPrev->stateRootIndex;
-
               {
                 std::vector<CTransaction> testTxVector;
                 CPubKey newKey_contract_address;
@@ -925,7 +952,6 @@ void FormatHashBuffers(CBlock* pblock, char* pmidstate, char* pdata, char* phash
   tmp;
   memset(tmp.pchPadding0, 0, sizeof(tmp.pchPadding0));
   memset(tmp.pchPadding1, 0, sizeof(tmp.pchPadding1));
-  
   tmp.block.nVersion = pblock->nVersion;
   tmp.block.hashPrevBlock = pblock->hashPrevBlock;
   tmp.block.hashMerkleRoot = pblock->hashMerkleRoot;
