@@ -353,6 +353,7 @@ public:
 
   dev::SecureTrieDB<dev::Address, dev::OverlayDB>* state__;
 private:
+  bool forwardValidate(dev::h256 stateRoot);
   bool SetBestChainInner(CTxDB& txdb, CBlockIndex *pindexNew);
 };
 

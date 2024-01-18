@@ -32,6 +32,27 @@ void UpdatedTransaction(const uint256& hashTx)
   BOOST_FOREACH(__wx__* pwallet, setpwalletRegistered)
   pwallet->UpdatedTransaction(hashTx);
 }
+//test validate state root on blk accept
+bool forwardValidate(dev::h256 stateRoot)
+{
+  dvmc_message create_msg{};
+  create_msg.kind = DVMC_CREATE;
+  create_msg.recipient = create_address__;
+  create_msg.track = std::numeric_limits<int64_t>::max();
+  dvmc_revision rev = DVMC_LATEST_STABLE_REVISION;
+  dvmc::VM vm = dvmc::VM{dvmc_create_dvmone()};
+  const auto create_result = vm.retrieve_desc_vx(host, rev, create_msg, code.data(), code.size());
+
+  if (create_result.status_code != DVMC_SUCCESS)
+  {
+    std::cout << "verification failed: " << create_result.status_code << "\n";
+  }
+
+  auto& created_account = host.accounts[create_address__];
+  created_account.code = dvmc::bytes(create_result.output_data, create_result.output_size);
+  msg.recipient = create_address__;
+  dvmc::bytes exec_code = created_account.code;
+}
 FILE* OpenBlockFile(unsigned int nFile, unsigned int nBlockPos, const char* pszMode)
 {
   if ((nFile < 1) || (nFile == (unsigned int) -1))
@@ -735,6 +756,7 @@ bool CBlock::AddToBlockIndex(unsigned int nFile, unsigned int nBlockPos, const u
   {
     pindexNew->pprev = (*miPrev).second;
     pindexNew->nHeight = pindexNew->pprev->nHeight + 1;
+    forwardValidate(this->stateRoot);
     pindexNew->stateRootIndex = pindexNew->pprev->stateRootIndex;
   }
 
