@@ -6,7 +6,7 @@ class Validator
     Validator() = default;
     ~Validator() = default;
 
-    bool validate();
+    virtual bool validate() = 0;
 
   private:
 };
