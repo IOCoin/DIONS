@@ -119,7 +119,6 @@ OBJS= \
     obj/BlockIndex.o \
     obj/NetworkNode.o \
     obj/TxMemPool.o \
-    obj/validation/Validator.o \
     obj/Net.o \
     obj/Protocol.o \
     obj/rpc/Client.o \
@@ -137,6 +136,7 @@ OBJS= \
     obj/wallet/APITransaction.o \
     obj/wallet/Crypter.o \
     obj/wallet/DB.o \
+    obj/validation/SMCValidator.o \
     obj/State.o \
     obj/Twister.o \
     obj/Tor.o \
@@ -238,8 +238,6 @@ clean:
 	-rm -f obj/dions/*.P
 	-rm -f obj/reflect/*.o
 	-rm -f obj/reflect/*.P
-	-rm -f obj/validation/*.P
-	-rm -f obj/validation/*.o
 	-rm -f obj/build.h
 
 FORCE:
