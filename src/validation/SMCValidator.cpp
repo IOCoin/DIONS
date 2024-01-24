@@ -23,13 +23,6 @@
 #include <dvmc/tooling.hpp>
 #include "rpc/Client.h"
 
-#include "ptrie/TrieDB.h"
-#include "ptrie/StateCacheDB.h"
-#include "ptrie/OverlayDB.h"
-#include "ptrie/Address.h"
-#include "ptrie/Account.h"
-#include "ptrie/DBFactory.h"
-
 #include "Miner.h"
 
 using dvmc::operator""_address;
