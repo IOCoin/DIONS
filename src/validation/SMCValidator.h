@@ -6,7 +6,7 @@
 class SMCValidator : public Validator
 {
   public:
-    SMCValidator() = default;
+    SMCValidator() { };
     ~SMCValidator() = default;
 
     void init(CTransaction& tx)
@@ -17,5 +17,5 @@ class SMCValidator : public Validator
     bool validate() override;
 
   private:
-    CTransaction& tx_;
+    CTransaction tx_;
 };

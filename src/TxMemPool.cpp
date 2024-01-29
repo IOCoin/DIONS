@@ -1,6 +1,7 @@
 #include "TxMemPool.h"
 #include "TxDBLevelDB.h"
 #include "wallet/Wallet.h"
+#include "validation/SMCValidator.h"
 
 extern void RemoveFromMemoryPoolPost(const CTransaction&);
 extern inline bool V3(int nHeight);
@@ -265,7 +266,16 @@ bool CTxMemPool::accept(CTransaction &tx,
       return error("AcceptToMemoryPool : ConnectInputs failed %s", hash.ToString().substr(0,10).c_str());
     }
   }
-  AcceptToMemoryPoolPost(tx);
+
+  if(!AcceptToMemoryPoolPost(tx))
+  {
+    return error("AcceptToMemoryPool : Dions acceptance checks failed");
+  }
+
+  //Shift to polymorphic multi validation
+  SMCValidator validator;
+  validator.init(tx); 
+ 
   {
     LOCK(this->cs);
 
