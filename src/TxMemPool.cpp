@@ -272,9 +272,17 @@ bool CTxMemPool::accept(CTransaction &tx,
     return error("AcceptToMemoryPool : Dions acceptance checks failed");
   }
 
-  //Shift to polymorphic multi validation
   SMCValidator validator;
   validator.init(tx); 
+  bool isValid = validator.validate();
+  if(isValid)
+  {
+    printf("AcceptToMemoryPool : validator series : validated smart contract tx\n");
+  }
+  else
+  {
+    return error("AcceptToMemoryPool : validator series : smart contract tx invalid");
+  }
  
   {
     LOCK(this->cs);
