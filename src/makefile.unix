@@ -137,6 +137,7 @@ OBJS= \
     obj/wallet/Crypter.o \
     obj/wallet/DB.o \
     obj/validation/SMCValidator.o \
+    obj/validation/SMCTrap.o \
     obj/State.o \
     obj/Twister.o \
     obj/Tor.o \
