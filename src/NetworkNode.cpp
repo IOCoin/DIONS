@@ -547,8 +547,6 @@ bool NetworkNode::init()
   BOOST_FOREACH(string strDest, mapMultiArgs["-seednode"])
   AddOneShot(strDest);
 
-  this->client_.init(GetDataDir());
-
   if (!bitdb.Open(GetDataDir()))
   {
     string msg = strprintf(_("Error initializing database environment %s!"
