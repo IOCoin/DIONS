@@ -235,6 +235,8 @@ clean:
 	-rm -f obj/ccoin/*.P
 	-rm -f obj/core/*.o
 	-rm -f obj/core/*.P
+	-rm -f obj/validation/smc/*.P
+	-rm -f obj/validation/smc/*.o
 	-rm -f obj/dions/*.o
 	-rm -f obj/dions/*.P
 	-rm -f obj/reflect/*.o
