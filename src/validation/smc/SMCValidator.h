@@ -1,6 +1,6 @@
 #pragma once
 
-#include "base/Validator.h"
+#include "validation/base/Validator.h"
 #include "ccoin/Transaction.h"
 
 class SMCValidator : public Validator

@@ -1,7 +1,7 @@
 #include "TxMemPool.h"
 #include "TxDBLevelDB.h"
 #include "wallet/Wallet.h"
-#include "validation/SMCValidator.h"
+#include "validation/smc/SMCValidator.h"
 
 extern void RemoveFromMemoryPoolPost(const CTransaction&);
 extern inline bool V3(int nHeight);
