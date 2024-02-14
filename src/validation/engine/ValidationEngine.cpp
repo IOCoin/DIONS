@@ -1,7 +1,5 @@
 #pragma once
 
-#include<vector>
-
 #include "validation/base/Validator.h"
 
 class ValidationEngine 
@@ -10,5 +8,4 @@ class ValidationEngine
     ValidationEngine() { }
 
   private:
-    std::vector<Validator> validiators;
 };
