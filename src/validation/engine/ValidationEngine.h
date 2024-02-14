@@ -5,14 +5,14 @@
 
 #include "validation/base/Validator.h"
 
-template <typename Validator>
+template <typename T>
 class ValidationEngine 
 {
   public:
     ValidationEngine() { }
 
-    void addPlugin(Validator&);
+   void addPlugin(std::unique_ptr<T>& v);
 
   private:
-    std::vector<std::unique_ptr<Validator>> validators;
+    std::vector<std::unique_ptr<T>> validators;
 };

@@ -1,7 +1,7 @@
 #include "validation/engine/ValidationEngine.h"
 
-template <class Validator>
-void ValidationEngine<Validator>::addPlugin(Validator& v) 
+template <class T>
+void ValidationEngine<T>::addPlugin(std::unique_ptr<T>& v)
 { 
-  this->validators.push_back(std::make_unique<Validator>(v)); 
+  this->validators.emplace_back(std::move(v)); 
 }
