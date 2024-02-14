@@ -1,11 +1,7 @@
-#pragma once
+#include "validation/engine/ValidationEngine.h"
 
-#include "validation/base/Validator.h"
-
-class ValidationEngine 
-{
-  public:
-    ValidationEngine() { }
-
-  private:
-};
+template <class Validator>
+void ValidationEngine<Validator>::addPlugin(Validator& v) 
+{ 
+  this->validators.push_back(std::make_unique<Validator>(v)); 
+}
