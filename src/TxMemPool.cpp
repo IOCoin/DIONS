@@ -272,21 +272,6 @@ bool CTxMemPool::accept(CTransaction &tx,
     return error("AcceptToMemoryPool : Dions acceptance checks failed");
   }
 
-  //Plugin architecture - configurable 
-  //base type for smart contract validation
-  //multiple other types of interepreter for e.g. wasm,x86
-  SMCValidator validator;
-  validator.init(tx); 
-  bool isValid = validator.validate();
-  if(isValid)
-  {
-    printf("AcceptToMemoryPool : validator series : validated smart contract tx\n");
-  }
-  else
-  {
-    return error("AcceptToMemoryPool : validator series : smart contract tx invalid");
-  }
- 
   {
     LOCK(this->cs);
 
