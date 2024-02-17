@@ -11,7 +11,7 @@ class Validator
   public:
           Validator() { }
           ~Validator() { }
-    virtual bool validate() { return true; };
+    virtual bool validate() = 0;
 
   private:
 };
