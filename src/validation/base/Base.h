@@ -1,5 +1,5 @@
 #pragma once
-#include "validator/interface/Validator.h"
+#include "validation/interface/Validator.h"
 
 class Base
 {
@@ -7,7 +7,7 @@ class Base
     Base() = default;
     ~Base() = default;
 
-    virtual bool validate() { }
+    virtual bool validate();
 
   private:
 };

@@ -136,6 +136,7 @@ OBJS= \
     obj/wallet/APITransaction.o \
     obj/wallet/Crypter.o \
     obj/wallet/DB.o \
+    obj/validation/base/Base.o \
     obj/validation/engine/ValidationEngine.o \
     obj/validation/smc/SMCValidator.o \
     obj/validation/smc/SMCTrap.o \
@@ -240,6 +241,8 @@ clean:
 	-rm -f obj/validation/smc/*.o
 	-rm -f obj/validation/engine/*.P
 	-rm -f obj/validation/engine/*.o
+	-rm -f obj/validation/base/*.P
+	-rm -f obj/validation/base/*.o
 	-rm -f obj/dions/*.o
 	-rm -f obj/dions/*.P
 	-rm -f obj/reflect/*.o
