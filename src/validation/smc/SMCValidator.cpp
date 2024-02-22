@@ -121,10 +121,8 @@ bool SMCValidator::validate()
                     {
                       dev::SecureTrieDB<dev::h256, dev::StateCacheDB> storageDB(state->db(), tmpAcc.baseRoot());
 
-                      std::cout << "storage size " << created_account.storage.size() << std::endl;
                       for(auto pair : created_account.storage)
                       {
-                        std::cout << "iterate over storage..." << std::endl;
                         auto storage_key = pair.first.bytes;
                         dev::bytes key;
 
@@ -135,7 +133,6 @@ bool SMCValidator::validate()
 
                         dev::h256 key256(key);
                         auto storage_bytes = pair.second.value;
-                        std::cout << "DIRTY ? " << pair.second.dirty << std::endl;
 
                         dev::bytes val;
 
@@ -150,7 +147,7 @@ bool SMCValidator::validate()
                       s << storageDB.root();
                     }
                     s << tmpAcc.codeHash();
-                    std::cout << "tmpAcc.codeHash " << tmpAcc.codeHash() << std::endl;
+		    state->insert(target_addr,&s.out());
                     std::ostringstream os;
                     state->debugStructure(os);
                   }
