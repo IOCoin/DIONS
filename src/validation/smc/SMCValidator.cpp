@@ -23,6 +23,13 @@
 #include <dvmc/tooling.hpp>
 #include "rpc/Client.h"
 
+#include "ptrie/TrieDB.h"
+#include "ptrie/StateCacheDB.h"
+#include "ptrie/OverlayDB.h"
+#include "ptrie/Address.h"
+#include "ptrie/Account.h"
+#include "ptrie/DBFactory.h"
+
 #include "Miner.h"
 
 using dvmc::operator""_address;
@@ -30,8 +37,8 @@ extern bool sectionVertex(const string&, string&);
 
 bool SMCValidator::validate()
 {
+	std::cout << "SMCValidator::validate" << std::endl;
   int64_t nMinTxFee = CTransaction::MIN_TX_FEE;
-
   {
     {
       std::vector<vchType> vvchArgs;
@@ -44,6 +51,7 @@ bool SMCValidator::validate()
         {
           if(op == OP_ALIAS_RELAY && vvchArgs[1].size() > 32)
           {
+	std::cout << "SMCValidator::validate DETECTED OP_ALIAS_RELAY" << std::endl;
             vector<unsigned char> hash_bytes(vvchArgs[1].begin(),vvchArgs[1].begin()+32);
             uint256 hash256_from_payload_bytes(hash_bytes);
             vector<unsigned char> data_bytes(vvchArgs[1].begin()+32,vvchArgs[1].end());
@@ -53,6 +61,7 @@ bool SMCValidator::validate()
 
             if(hash256_from_payload_bytes == recon_hash256)
             {
+	std::cout << "SMCValidator::validate DETECTED EXECUTE INSTRUCTION" << std::endl;
               vector<unsigned char> str_bytes(vvchArgs[1].begin()+32,vvchArgs[1].begin()+52);
               const string target20ByteAliasStr = stringFromVch(str_bytes);
               string contractCode;
@@ -63,7 +72,6 @@ bool SMCValidator::validate()
               }
 
               dev::SecureTrieDB<dev::Address, dev::OverlayDB>* state;
-
               {
                 {
                   vector<json_spirit::Value> res;
@@ -96,7 +104,6 @@ bool SMCValidator::validate()
                     msg.recipient = create_address__;
                     exec_code = created_account.code;
                   }
-
                   {
                     std::cout << "\n";
                     const auto input = dvmc::from_hex(stringFromVch(data_relay_bytes));
@@ -120,9 +127,11 @@ bool SMCValidator::validate()
                     s << nonce << balance;
                     {
                       dev::SecureTrieDB<dev::h256, dev::StateCacheDB> storageDB(state->db(), tmpAcc.baseRoot());
+                      std::cout << "storage size " << created_account.storage.size() << std::endl;
 
                       for(auto pair : created_account.storage)
                       {
+                        std::cout << "iterate over storage..." << std::endl;
                         auto storage_key = pair.first.bytes;
                         dev::bytes key;
 
@@ -133,7 +142,7 @@ bool SMCValidator::validate()
 
                         dev::h256 key256(key);
                         auto storage_bytes = pair.second.value;
-
+                        std::cout << "DIRTY ? " << pair.second.dirty << std::endl;
                         dev::bytes val;
 
                         for(int i=0; i<32; i++)
@@ -147,7 +156,7 @@ bool SMCValidator::validate()
                       s << storageDB.root();
                     }
                     s << tmpAcc.codeHash();
-		    state->insert(target_addr,&s.out());
+                    std::cout << "tmpAcc.codeHash " << tmpAcc.codeHash() << std::endl;
                     std::ostringstream os;
                     state->debugStructure(os);
                   }

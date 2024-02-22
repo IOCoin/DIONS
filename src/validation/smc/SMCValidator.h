@@ -1,6 +1,6 @@
 #pragma once
 
-#include "validation/base/Validator.h"
+#include "validation/interface/Validator.h"
 #include "ccoin/Transaction.h"
 
 class SMCValidator : public Validator
@@ -11,6 +11,7 @@ class SMCValidator : public Validator
 
     void init(CTransaction& tx)
     {
+	    std::cout << "XXXX VALIDATOR::init" << std::endl;
       this->tx_ = tx;
     }
 
