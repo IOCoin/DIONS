@@ -43,7 +43,7 @@ class CTxIndex;
 class CBlock
 {
 public:
-
+  
   static const int CURRENT_VERSION = 8;
   static const unsigned int MAX_BLOCK_SIZE = 4.0 * 1024 * 1024;
   static const unsigned int MAX_BLOCK_SIZE_GEN = MAX_BLOCK_SIZE;
@@ -54,7 +54,8 @@ public:
   unsigned int nBits;
   unsigned int nNonce;
 
-
+  //local test only - live test transparent to legacy
+  //network header serialisation unchanged
   dev::h256 stateRoot;
 
 
