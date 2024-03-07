@@ -16,6 +16,7 @@ class SMCValidator : public Validator
     }
 
     bool validate() override;
+    bool trap() override;
 
   private:
     CTransaction tx_;

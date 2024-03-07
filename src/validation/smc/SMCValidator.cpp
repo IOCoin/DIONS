@@ -170,3 +170,10 @@ bool SMCValidator::validate()
   }
   return true;
 }
+
+//intercept payload override - delegation
+bool SMCValidator::trap()
+{
+  std::cout << "SMCValidator::trap" << std::endl;
+  return true;
+}
