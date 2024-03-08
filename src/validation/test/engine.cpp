@@ -32,6 +32,19 @@ class SMC : public Validator
     int id;
 };
 
+class Wasm : public Validator 
+{
+  public:
+	  Wasm(int i) { id = i; }
+          ~Wasm() { }
+    virtual bool validate() override 
+    { 
+      std::cout << "Wasm - id " << id << std::endl; 
+      return true; 
+    }
+
+    int id;
+};
 template <typename Validator_T>
 class ValidationEngine 
 {
@@ -74,5 +87,21 @@ int main()
     engine.addPlugin(v4);
     engine.addPlugin(v5);
     engine.addPlugin(v6);
+
+    //TEST add Wasm payload interpreter 
+    std::unique_ptr<Validator> wasm_v1 = std::make_unique<Wasm>(1);
+    std::unique_ptr<Validator> wasm_v2 = std::make_unique<Wasm>(2);
+    std::unique_ptr<Validator> wasm_v3 = std::make_unique<Wasm>(3);
+    std::unique_ptr<Validator> wasm_v4 = std::make_unique<Wasm>(4);
+    std::unique_ptr<Validator> wasm_v5 = std::make_unique<Wasm>(5);
+    std::unique_ptr<Validator> wasm_v6 = std::make_unique<Wasm>(6);
+    engine.addPlugin(wasm_v1);
+    engine.addPlugin(wasm_v2);
+    engine.addPlugin(wasm_v3);
+    engine.addPlugin(wasm_v4);
+    engine.addPlugin(wasm_v5);
+    engine.addPlugin(wasm_v6);
+
+    //Multi payload interpreter - process 
     engine.process();
 }
