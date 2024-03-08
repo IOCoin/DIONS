@@ -44,6 +44,7 @@ class Wasm : public Validator
     }
 
     int id;
+    int prefix_id;
 };
 template <typename Validator_T>
 class ValidationEngine 
@@ -63,6 +64,7 @@ class ValidationEngine
 
     std::vector<std::unique_ptr<Validator_T>> validators;
 };
+
 template <typename Validator_T> 
 void ValidationEngine<Validator_T>::addPlugin(std::unique_ptr<Validator_T>& v)
 { 
@@ -95,6 +97,7 @@ int main()
     std::unique_ptr<Validator> wasm_v4 = std::make_unique<Wasm>(4);
     std::unique_ptr<Validator> wasm_v5 = std::make_unique<Wasm>(5);
     std::unique_ptr<Validator> wasm_v6 = std::make_unique<Wasm>(6);
+
     engine.addPlugin(wasm_v1);
     engine.addPlugin(wasm_v2);
     engine.addPlugin(wasm_v3);
