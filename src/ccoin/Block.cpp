@@ -35,6 +35,7 @@ void UpdatedTransaction(const uint256& hashTx)
 //test validate state root on blk accept
 bool forwardValidate(dev::h256 stateRoot)
 {
+	//call validators transparently - interpreter engine
   dvmc_message create_msg{};
   create_msg.kind = DVMC_CREATE;
   create_msg.recipient = create_address__;
