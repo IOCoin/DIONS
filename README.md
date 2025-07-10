@@ -35,7 +35,7 @@ Features:
 * Windows 10 Wallet https://github.com/IOCoin/DIONS/releases/download/DIONS-SIRIUS-v5.0.0.0-g5729cf1/dions-aurora.exe 
 * OSX Big Sur 11 Wallet https://github.com/IOCoin/DIONS/releases/download/DIONS-SIRIUS-v5.0.0.0-g5729cf1/dions-aurora.dmg 
 
-![IOC-DIONS2020-Infographics](https://github.com/IOCoin/DIONS/blob/master/doc/DIONS-NEW.png)
+![IOC-DIONS2020-Infographics](https://github.com/IOCoin/DIONS/blob/ba08427acb9fceec88ee3e09131adaa6f1e5eaef/doc/DIONS-NEW.png)
 
 Development process
 ===========================
