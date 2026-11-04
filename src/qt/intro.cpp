@@ -29,7 +29,7 @@
 #include<boost/iostreams/filter/gzip.hpp>
 
 const char* BOOTSTRAP_URL =
-"https://iobootstrap.s3.amazonaws.com/bootstrap.zip";
+"https://iostrap.iocoin.io/bootstrap.zip";
 //"http://localhost/bootstrap/bootstrap.zip";
 
 std::string logoSVG1 = 
