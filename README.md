@@ -31,7 +31,7 @@ Features:
 * DVM (Dions Virtual Machine) Coming Soon with (Solidity Compatability)
 * Dions Pay "Shade" API added. (Shade based on Diffie Hellman key exchange)
 * Chameleon Graph Ledger to come in Dions 2.0 
-* Bootstrap Dev Sig: Bootstrap Dev Sig:989ee06c0c6a061a7646caa4c1b52899cf076b001338caaf942e46e723b47743  height=5893459  https://iostrap.iocoin.io/bootstrap.zip
+* Bootstrap Dev Sig: Bootstrap Dev Sig:7a504b59d8140a3b3066407f85aa560dfc3f5fea6714d9ebe6d6dda9325c16ba  height=5894763  https://iostrap.iocoin.io/bootstrap.zip
 * Windows 10 Wallet https://github.com/IOCoin/DIONS/releases/download/DIONS-SIRIUS-v5.0.0.0-g5729cf1/dions-aurora.exe 
 * OSX Big Sur 11 Wallet https://github.com/IOCoin/DIONS/releases/download/DIONS-SIRIUS-v5.0.0.0-g5729cf1/dions-aurora.dmg 
 
